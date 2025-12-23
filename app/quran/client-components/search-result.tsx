@@ -28,7 +28,6 @@ export default function SearchResult() {
     const [results, setResults] = useState<QueryResultSuccess | null>(null);
     const [searchTab, setSearchTab] = useState<"all" | "words">("all");
     const [searchWordByWordMatches, setSearchWordByWordMatches] = useState<SearchHitWordByWord[]>([]);
-    const [lastWordByWordQuery, setLastWordByWordQuery] = useState("");
 
     const [quranPreferences, setQuranPreferences] = useLocalStorage("quranPreferences", {
         text: true,
@@ -65,23 +64,6 @@ export default function SearchResult() {
             setLoading(false);
         }
     }, [searchQuery]);
-
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        runQuery();
-        if (forceTab) {
-            setSearchTab(forceTab as typeof searchTab);
-            if (forceTab === "words" && searchWordByWordMatches.length === 0) {
-                runWordByWordQuery("english")
-            }
-        }
-    }, [runQuery]);
-
-    const searchAllMatches = results?.type === "search" ? results.data : [];
-    const searchChapterMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "chapter") : [];
-    const searchSubtitleMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "subtitle") : [];
-    const searchTextMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "text") : [];
-    const searchFootnoteMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "footnote") : [];
 
     const runWordByWordQuery = async (field: "english" | "meanings") => {
 
@@ -121,8 +103,24 @@ export default function SearchResult() {
             toast.error(dbQuery?.status || `No results found for '${searchQuery}'`);
         }
         setLoadingWordByWord(false);
-        setLastWordByWordQuery(searchQuery);
     }
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        runQuery();
+        if (forceTab) {
+            setSearchTab(forceTab as typeof searchTab);
+            if (forceTab === "words" && searchWordByWordMatches.length === 0) {
+                runWordByWordQuery("english")
+            }
+        }
+    }, [runQuery]);
+
+    const searchAllMatches = results?.type === "search" ? results.data : [];
+    const searchChapterMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "chapter") : [];
+    const searchSubtitleMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "subtitle") : [];
+    const searchTextMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "text") : [];
+    const searchFootnoteMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "footnote") : [];
 
     return (
         <div>
@@ -222,7 +220,7 @@ export default function SearchResult() {
                                 <div>
                                     <section className="space-y-2">
                                         {searchAllMatches.filter((r) => {
-                                            let fields: ("text" | "subtitle" | "footnote")[] = [];
+                                            const fields: ("text" | "subtitle" | "footnote")[] = [];
 
                                             if (quranPreferences.text) fields.push("text");
                                             if (quranPreferences.subtitles) fields.push("subtitle");
