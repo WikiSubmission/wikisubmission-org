@@ -4,6 +4,8 @@ import { ws } from "@/lib/wikisubmission-sdk";
 import { PageSwitcher } from "@/components/page-switcher";
 import QuranSearchbar from "./client-components/searchbar";
 
+export const dynamic = "force-dynamic";
+
 export default async function QuranLayout({ children }: { children: React.ReactNode }) {
 
     const chaptersResult = await ws.supabase.from("ws_quran_chapters").select("*");
