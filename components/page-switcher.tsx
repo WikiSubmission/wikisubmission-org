@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Home, BookOpen, ChevronDown, type LucideIcon } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
