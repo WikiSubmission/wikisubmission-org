@@ -22,14 +22,6 @@ Launch the application ([http://localhost:3000](http://localhost:3000)):
 pnpm dev
 ```
 
-## Usage
-
-Import the package:
-
-```ts
-import { WikiSubmission } from "wikisubmission-sdk";
-```
-
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
