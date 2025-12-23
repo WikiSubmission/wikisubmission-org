@@ -106,15 +106,17 @@ export default function SearchResult() {
     }
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        runQuery();
+        if (searchQuery) {
+            setSearchTab("all");
+            runQuery();
+        }
         if (forceTab) {
             setSearchTab(forceTab as typeof searchTab);
             if (forceTab === "words" && searchWordByWordMatches.length === 0) {
                 runWordByWordQuery("english")
             }
         }
-    }, [runQuery]);
+    }, [searchQuery, runQuery]);
 
     const searchAllMatches = results?.type === "search" ? results.data : [];
     const searchChapterMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "chapter") : [];
