@@ -1,6 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "library.wikisubmission.org",
+      },
+      {
+        protocol: "https",
+        hostname: "www.masjidtucson.org",
+      },
+    ],
+  },
   async redirects() {
     return [
       {

@@ -22,6 +22,11 @@ const modes = {
     icon: "/graphics/book.png",
     href: "/quran",
   },
+  downloads: {
+    label: "Downloads",
+    icon: "/graphics/nineteen.png",
+    href: "/downloads",
+  }
 }
 
 type Mode = keyof typeof modes

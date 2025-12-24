@@ -1,7 +1,9 @@
+import { useQuranPreferences } from "@/hooks/use-quran-preferences";
 import { highlightMarkdown } from "@/lib/highlight-markdown";
 import { SearchHit, SearchHitFootnote, SearchHitSubtitle, SearchHitText } from "wikisubmission-sdk/lib/quran/v1/query-result";
 
 export function QuranSearchResultItem({ verse }: { verse: SearchHit | SearchHitText | SearchHitSubtitle | SearchHitFootnote }) {
+    const quranPreferences = useQuranPreferences()
 
     if (verse.hit === "text") {
         return (
@@ -12,6 +14,14 @@ export function QuranSearchResultItem({ verse }: { verse: SearchHit | SearchHitT
                         <strong>[{verse.verse_id}]</strong> {highlightMarkdown(verse.english)}
                     </p>
                 </section>
+
+                {quranPreferences.secondaryLanguage &&
+                    <section>
+                        <p>
+                            <strong>[{verse.verse_id}]</strong> {highlightMarkdown(verse[quranPreferences.secondaryLanguage])}
+                        </p>
+                    </section>
+                }
 
                 {'arabic' in verse &&
                     <section className="text-rtl text-right text-lg">

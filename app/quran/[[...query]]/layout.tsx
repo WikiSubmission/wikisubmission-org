@@ -1,8 +1,9 @@
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { QuranSidebar } from "./client-components/sidebar";
-import { ws } from "@/lib/wikisubmission-sdk";
 import { PageSwitcher } from "@/components/page-switcher";
+import { ws } from "@/lib/wikisubmission-sdk";
 import QuranSearchbar from "./client-components/searchbar";
+import QuranSettings from "./client-components/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default async function QuranLayout({ children }: { children: React.ReactN
                         <SidebarTrigger className="-ml-1 bg-secondary/50 rounded-full p-4 hover:bg-secondary/70 cursor-pointer lg:hidden" />
                         <PageSwitcher currentMode="quran" />
                         <QuranSearchbar />
+                        <QuranSettings />
                     </header>
                     {/* Main content */}
                     <div className="flex flex-1 flex-col gap-4 p-4">

@@ -29,7 +29,7 @@ export default function QuranSearchbar() {
     }, [searchQuery, searchParams, pathname, replace]);
 
     return (
-        <div className="relative w-8/12">
+        <div className="relative w-full">
             <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
             <Input
                 type="search"

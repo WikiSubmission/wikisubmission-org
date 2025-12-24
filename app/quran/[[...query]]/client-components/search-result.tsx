@@ -1,29 +1,42 @@
 'use client';
 
+import { ws } from "@/lib/wikisubmission-sdk";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { QueryResultSuccess } from "wikisubmission-sdk";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
-import { ArrowRightIcon, ChevronRightIcon, SearchIcon } from "lucide-react";
+import { ArrowRightIcon, SearchIcon } from "lucide-react";
 import { SearchHitWordByWord } from "wikisubmission-sdk/lib/quran/v1/query-result";
 import { QuranSearchResultItem } from "./verse-card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ws } from "@/lib/wikisubmission-sdk";
-import useLocalStorage from "@/hooks/use-local-storage";
-import ChapterCard from "./chapter-card";
 import { useRouter } from "next/navigation";
 import { QuranWordResultItem } from "./word-card";
+import { useQuranPreferences } from "@/hooks/use-quran-preferences";
+import ChapterCard from "./chapter-card";
 import ChapterResult from "./chapter-result";
+import Link from "next/link";
 
 export default function SearchResult({ props }: { props: { query: string } }) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const params = useParams();
     const searchQuery = props.query;
     const forceTab = searchParams.get("tab");
+
+    const quranPreferences = useQuranPreferences();
+
+    useEffect(() => {
+        const q = searchParams.get("q");
+        if (!q) return;
+
+        const pathname = window.location.pathname;
+
+        if (pathname !== "/quran") {
+            router.replace(`/quran?q=${encodeURIComponent(q)}`, { scroll: false });
+        }
+    }, [router, searchParams]);
 
     const [loading, setLoading] = useState(false);
     const [loadingWordByWord, setLoadingWordByWord] = useState(false);
@@ -32,12 +45,6 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     const [searchTab, setSearchTab] = useState<"all" | "words">("all");
     const [searchWordByWordMatches, setSearchWordByWordMatches] = useState<SearchHitWordByWord[]>([]);
 
-    const [quranPreferences, setQuranPreferences] = useLocalStorage("quranPreferences", {
-        text: true,
-        subtitles: true,
-        footnotes: true,
-    });
-
     const didInitRef = useRef(false);
     const lastQueryRef = useRef<string | null>(null);
 
@@ -45,37 +52,39 @@ export default function SearchResult({ props }: { props: { query: string } }) {
         setSearchTab("all");
         setSearchWordByWordMatches([]);
 
-        if (searchQuery) {
-            setLoading(true);
-            const query = await ws.Quran.query(searchQuery, {
-                language: "english",
-                strategy: "default",
-                highlight: true,
-                normalizeGodCasing: true,
-                adjustments: {
-                    index: true,
-                    chapters: true,
-                    subtitles: true,
-                    footnotes: true,
-                    wordByWord: false,
-                }
-            });
+        if (!searchQuery) return;
 
-            if (query.status === "success") {
-                setResults(query);
-            } else {
-                toast.error(query.error);
+        setLoading(true);
+
+        const query = await ws.Quran.query(searchQuery, {
+            language: "english",
+            strategy: "default",
+            highlight: true,
+            normalizeGodCasing: true,
+            adjustments: {
+                index: true,
+                chapters: true,
+                subtitles: true,
+                footnotes: true,
+                wordByWord: false,
             }
-            setLoading(false);
+        });
+
+        if (query.status === "success") {
+            if (query.type === "verse") {
+                router.replace(`/quran/${query.data[0].chapter_number}?verse=${query.data[0].verse_number}`, { scroll: false });
+            } else {
+                setResults(query);
+            }
+        } else {
+            toast.error(query.error);
         }
-    }, [searchQuery]);
 
-    const runWordByWordQuery = async (field: "english" | "meanings") => {
+        setLoading(false);
+    }, [searchQuery, router]);
 
-        if (searchWordByWordMatches.length > 0) {
-            return;
-        }
-
+    const runWordByWordQuery = useCallback(async (field: "english" | "meanings") => {
+        if (searchWordByWordMatches.length > 0) return;
         if (!searchQuery) {
             toast.error("No search query provided");
             return;
@@ -94,21 +103,18 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 chapters: false,
                 subtitles: false,
                 footnotes: false,
-                wordByWord: {
-                    field
-                },
-            }
+                wordByWord: { field },
+            },
         });
 
-        if (dbQuery.status === "success" && dbQuery.type === "search" && dbQuery.data && dbQuery.data.map((i) => i.hit === "word_by_word").length > 0) {
-            setSearchWordByWordMatches(
-                dbQuery.data.filter((i) => i.hit === "word_by_word")
-            );
+        if (dbQuery.status === "success" && dbQuery.type === "search" && dbQuery.data?.some(i => i.hit === "word_by_word")) {
+            setSearchWordByWordMatches(dbQuery.data.filter(i => i.hit === "word_by_word"));
         } else {
             toast.error(`No results found for '${searchQuery}'`);
         }
+
         setLoadingWordByWord(false);
-    }
+    }, [searchQuery, searchWordByWordMatches]);
 
     useEffect(() => {
         const isNewQuery = searchQuery !== lastQueryRef.current;
@@ -145,16 +151,11 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 <ChapterResult props={{ query: props.query, data: results }} />
             )}
 
-            {results && results.type === "search" && (searchQuery?.length ?? 0) > 0 && <div className="space-y-4">
+            {results && results.type === "search" && (searchQuery?.length ?? 0) > 0 && <div className="space-y-2">
                 <section>
                     <h2 className="text-xl font-bold">
                         {results.metadata.formattedQuery}
                     </h2>
-                    {results.type === "search" && (
-                        <p className="text-sm text-muted-foreground">
-                            {results.totalMatches} verses found
-                        </p>
-                    )}
                 </section>
                 {results.type === "search" && (
                     <div className="space-y-8">
@@ -183,7 +184,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                     value="words"
                                 >
                                     <SearchIcon />
-                                    Words{searchWordByWordMatches.length > 0 ? searchWordByWordMatches.length > 2999 ? " (3,000+)" : ` (${searchWordByWordMatches.length})` : ""}
+                                    Word Search{searchWordByWordMatches.length > 0 ? searchWordByWordMatches.length > 2999 ? " (3,000+)" : ` (${searchWordByWordMatches.length})` : ""}
                                 </TabsTrigger>
                             </TabsList>
 
@@ -192,7 +193,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                 <section className="flex items-center gap-4">
                                     {searchTextMatches.length > 0 && (
                                         <div className="flex items-center gap-2 [&>*]:text-xs">
-                                            <Checkbox checked={quranPreferences.text} onCheckedChange={(v) => setQuranPreferences({ ...quranPreferences, text: v ? true : false })} id="text" />
+                                            <Checkbox checked={quranPreferences.text} onCheckedChange={(v) => quranPreferences.setPreferences({ ...quranPreferences, text: v ? true : false })} id="text" />
                                             <Label htmlFor="text">
                                                 Text ({searchTextMatches.length})
                                             </Label>
@@ -201,7 +202,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
                                     {searchSubtitleMatches.length > 0 && (
                                         <div className="flex items-center gap-2 [&>*]:text-xs">
-                                            <Checkbox checked={quranPreferences.subtitles} onCheckedChange={(v) => setQuranPreferences({ ...quranPreferences, subtitles: v ? true : false })} id="subtitles" />
+                                            <Checkbox checked={quranPreferences.subtitles} onCheckedChange={(v) => quranPreferences.setPreferences({ ...quranPreferences, subtitles: v ? true : false })} id="subtitles" />
                                             <Label htmlFor="subtitles">
                                                 Subtitles ({searchSubtitleMatches.length})
                                             </Label>
@@ -210,7 +211,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
                                     {searchFootnoteMatches.length > 0 && (
                                         <div className="flex items-center gap-2 [&>*]:text-xs">
-                                            <Checkbox checked={quranPreferences.footnotes} onCheckedChange={(v) => setQuranPreferences({ ...quranPreferences, footnotes: v ? true : false })} id="footnotes" />
+                                            <Checkbox checked={quranPreferences.footnotes} onCheckedChange={(v) => quranPreferences.setPreferences({ ...quranPreferences, footnotes: v ? true : false })} id="footnotes" />
                                             <Label htmlFor="footnotes">
                                                 Footnotes ({searchFootnoteMatches.length})
                                             </Label>
@@ -284,17 +285,36 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                     )}
                                     {searchWordByWordMatches.length > 0 && (
                                         <div className="space-y-2">
-                                            <section className="bg-muted/50 p-4 rounded-2xl space-y-2">
-                                                <p className="px-1 text-4xl text-muted-foreground tracking-wider">
-                                                    {searchWordByWordMatches[0].transliterated} / {searchWordByWordMatches[0].arabic}
-                                                </p>
-                                                <p className="bg-orange-700/50 w-fit px-2 py-1 rounded-2xl">
-                                                    <strong>Root word:</strong> {searchWordByWordMatches[0].root_word}
-                                                </p>
-                                                <p className="bg-violet-700/50 w-fit px-2 py-1 rounded-2xl">
-                                                    <strong>Meanings:</strong> {searchWordByWordMatches[0].meanings}
-                                                </p>
-                                            </section>
+                                            {Array.from(new Map(
+                                                searchWordByWordMatches.map(item => [item.root_word, item])
+                                            ).values()).map((item) => (
+                                                <section key={item.root_word} className="bg-muted/50 p-4 rounded-2xl space-y-2">
+                                                    <p className="px-1 text-xl text-muted-foreground tracking-wider">
+                                                        {item.transliterated} / {item.arabic}
+                                                    </p>
+                                                    <p className="bg-orange-700/50 w-fit px-2 py-1 rounded-2xl">
+                                                        <strong>Root word:</strong> {item.root_word}
+                                                    </p>
+                                                    <p className="bg-green-700/50 w-fit px-2 py-1 rounded-2xl gap-1 flex flex-wrap">
+                                                        <strong>Verses:</strong> {searchWordByWordMatches
+                                                            .filter((r) => r.root_word === item.root_word)
+                                                            .map((r) => (
+                                                                <Link
+                                                                    key={`root:${r.verse_id}:${r.word_index}`}
+                                                                    href={`?q=${r.verse_id}&word=${r.word_index}`}
+                                                                    target="_blank"
+                                                                    className="hover:cursor-pointer underline text-violet-500"
+                                                                >
+                                                                    {r.verse_id}
+                                                                </Link>
+                                                            ))
+                                                        }
+                                                    </p>
+                                                    <p className="bg-blue-700/50 w-fit px-2 py-1 rounded-2xl">
+                                                        <strong>Meanings:</strong> {item.meanings}
+                                                    </p>
+                                                </section>
+                                            ))}
                                         </div>
                                     )}
                                     {searchWordByWordMatches.map((r) => (

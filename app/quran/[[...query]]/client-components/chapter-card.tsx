@@ -1,3 +1,5 @@
+'use client';
+
 import { highlightMarkdown } from "@/lib/highlight-markdown";
 import { SearchHitChapter } from "wikisubmission-sdk/lib/quran/v1/query-result";
 

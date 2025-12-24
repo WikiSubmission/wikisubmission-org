@@ -9,10 +9,12 @@ import { About } from "@/constants/about";
 import Image from "next/image";
 import Link from "next/link";
 import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub } from "react-icons/fa";
+import { PageSwitcher } from "@/components/page-switcher";
 
 export default function Home() {
   return (
     <main className="flex flex-col min-h-screen items-center justify-center text-center space-y-8 md:p-24 p-4">
+      <PageSwitcher currentMode="home" />
       <Image
         src="/brand-assets/logo-black.png"
         alt="WikiSubmission Logo"

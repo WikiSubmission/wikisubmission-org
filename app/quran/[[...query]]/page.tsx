@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import SearchResult from "./client-components/search-result";
-import ChapterResult from "./client-components/chapter-result";
-import { ws } from "@/lib/wikisubmission-sdk";
+import HomeScreenRandomVerse from "./client-components/home-screen-random-verse";
+import QuranUtilitiesRow from "./client-components/utilities-row";
 
 export const metadata: Metadata = {
     title: "Quran - WikiSubmission",
@@ -30,17 +30,22 @@ export default async function QuranPage({ params, searchParams }: { params: { qu
     const queryText = q || query?.join(" ");
 
     return (
-        <main className="space-y-4 whitespace-pre-line">
+        <main className="space-y-2 whitespace-pre-line">
+            <QuranUtilitiesRow />
             <section className="space-y-2">
-                <h2 className="text-2xl font-light text-muted-foreground tracking-widest">
-                    THE FINAL TESTAMENT
-                </h2>
+                {!queryText && (
+                    <div>
+                        <HomeScreenRandomVerse />
+                    </div>
+                )}
             </section>
-            <section>
-                <Suspense fallback={<Spinner />}>
-                    <SearchResult props={{ query: queryText }} />
-                </Suspense>
-            </section>
+            {queryText && (
+                <section>
+                    <Suspense fallback={<Spinner />}>
+                        <SearchResult props={{ query: queryText }} />
+                    </Suspense>
+                </section>
+            )}
         </main>
     );
 }
