@@ -1,3 +1,4 @@
+import { highlightMarkdown } from "@/lib/highlight-markdown";
 import { SearchHit, SearchHitFootnote, SearchHitSubtitle, SearchHitText } from "wikisubmission-sdk/lib/quran/v1/query-result";
 
 export function QuranSearchResultItem({ verse }: { verse: SearchHit | SearchHitText | SearchHitSubtitle | SearchHitFootnote }) {
@@ -8,7 +9,7 @@ export function QuranSearchResultItem({ verse }: { verse: SearchHit | SearchHitT
 
                 <section>
                     <p>
-                        <strong>[{verse.verse_id}]</strong> {verse.english}
+                        <strong>[{verse.verse_id}]</strong> {highlightMarkdown(verse.english)}
                     </p>
                 </section>
 
@@ -29,7 +30,7 @@ export function QuranSearchResultItem({ verse }: { verse: SearchHit | SearchHitT
                 </p>
                 <section>
                     <p className="text-violet-600">
-                        {verse.english}
+                        {highlightMarkdown(verse.english)}
                     </p>
                 </section>
             </div>
@@ -42,7 +43,7 @@ export function QuranSearchResultItem({ verse }: { verse: SearchHit | SearchHitT
                 </p>
                 <section>
                     <p className="italic">
-                        {verse.english}
+                        {highlightMarkdown(verse.english)}
                     </p>
                 </section>
             </div>

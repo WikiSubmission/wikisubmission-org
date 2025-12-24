@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { QueryResultSuccess } from "wikisubmission-sdk";
 import { Spinner } from "@/components/ui/spinner";
@@ -15,6 +15,7 @@ import { ws } from "@/lib/wikisubmission-sdk";
 import useLocalStorage from "@/hooks/use-local-storage";
 import ChapterCard from "./chapter-card";
 import { useRouter } from "next/navigation";
+import { QuranWordResultItem } from "./word-card";
 
 export default function SearchResult() {
     const router = useRouter();
@@ -35,9 +36,11 @@ export default function SearchResult() {
         footnotes: true,
     });
 
+    const didInitRef = useRef(false);
+    const lastQueryRef = useRef<string | null>(null);
+
     const runQuery = useCallback(async () => {
         setSearchTab("all");
-
         setSearchWordByWordMatches([]);
 
         if (searchQuery) {
@@ -95,28 +98,34 @@ export default function SearchResult() {
             }
         });
 
-        if (dbQuery.status === "success" && dbQuery.type === "search" && dbQuery.data && dbQuery.data.length > 0) {
+        if (dbQuery.status === "success" && dbQuery.type === "search" && dbQuery.data && dbQuery.data.map((i) => i.hit === "word_by_word").length > 0) {
             setSearchWordByWordMatches(
                 dbQuery.data.filter((i) => i.hit === "word_by_word")
             );
         } else {
-            toast.error(dbQuery?.status || `No results found for '${searchQuery}'`);
+            toast.error(`No results found for '${searchQuery}'`);
         }
         setLoadingWordByWord(false);
     }
 
     useEffect(() => {
-        if (searchQuery) {
-            setSearchTab("all");
-            runQuery();
+        const isNewQuery = searchQuery !== lastQueryRef.current;
+
+        if (isNewQuery) {
+            lastQueryRef.current = searchQuery;
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            if (searchQuery) runQuery();
+            return;
         }
-        if (forceTab) {
-            setSearchTab(forceTab as typeof searchTab);
-            if (forceTab === "words" && searchWordByWordMatches.length === 0) {
-                runWordByWordQuery("english")
+
+        if (!didInitRef.current) {
+            didInitRef.current = true;
+            if (forceTab === "words") {
+                setSearchTab("words");
+                runWordByWordQuery("english");
             }
         }
-    }, [searchQuery, runQuery]);
+    }, [searchQuery, forceTab, runQuery, runWordByWordQuery]);
 
     const searchAllMatches = results?.type === "search" ? results.data : [];
     const searchChapterMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "chapter") : [];
@@ -146,11 +155,14 @@ export default function SearchResult() {
                         <Tabs
                             value={searchTab}
                             onValueChange={(v) => {
-                                setSearchTab(v as typeof searchTab);
+                                const tab = v as typeof searchTab;
+                                setSearchTab(tab);
+
                                 const params = new URLSearchParams(searchParams.toString());
-                                params.set("tab", v);
+                                params.set("tab", tab);
                                 router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
-                                if (v === "words") runWordByWordQuery("english");
+
+                                if (tab === "words") runWordByWordQuery("english");
                             }}
                             className="space-y-2"
                         >
@@ -161,11 +173,6 @@ export default function SearchResult() {
                                 <TabsTrigger value="all">
                                     Results ({searchAllMatches.length})
                                 </TabsTrigger>
-                                {searchChapterMatches.length > 0 && (
-                                    <TabsTrigger value="chapters">
-                                        Chapters ({searchChapterMatches.length})
-                                    </TabsTrigger>
-                                )}
                                 <TabsTrigger
                                     value="words"
                                 >
@@ -238,13 +245,28 @@ export default function SearchResult() {
                                 </div>
                             </TabsContent>
                             <TabsContent value="words">
-                                <div>
+                                <div className="space-y-2">
                                     {loadingWordByWord && (
                                         <Spinner />
                                     )}
+                                    {searchWordByWordMatches.length > 0 && (
+                                        <div className="space-y-2">
+                                            <section className="bg-muted/50 p-4 rounded-2xl space-y-2">
+                                                <p className="text-4xl text-muted-foreground tracking-wider">
+                                                    {searchWordByWordMatches[0].transliterated} / {searchWordByWordMatches[0].arabic}
+                                                </p>
+                                                <p className="bg-violet-700/50 w-fit px-2 py-1 rounded-2xl">
+                                                    <strong>Meanings:</strong> {searchWordByWordMatches[0].meanings}
+                                                </p>
+                                                <p className="bg-orange-700/50 w-fit px-2 py-1 rounded-2xl">
+                                                    <strong>Root word:</strong> {searchWordByWordMatches[0].root_word}
+                                                </p>
+                                            </section>
+                                        </div>
+                                    )}
                                     {searchWordByWordMatches.map((r) => (
                                         <div key={`word_by_word:${r.index}`}>
-                                            <h2>[{r.verse_id}] {r.english}</h2>
+                                            <QuranWordResultItem verse={r} />
                                         </div>
                                     ))}
                                 </div>
