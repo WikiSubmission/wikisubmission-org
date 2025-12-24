@@ -7,9 +7,9 @@ import { useQuranPreferences } from "@/hooks/use-quran-preferences";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { isRtlLanguage } from "@/lib/is-rtl-language";
+import { useQuranMetrics } from "@/hooks/use-quran-metrics";
 
 export default function ChapterResult({ props }: { props: { query: string, data: QueryResultChapter } }) {
-
     const searchParams = useSearchParams();
     const verseSearchParam = searchParams.get("verse");
 
@@ -32,13 +32,25 @@ export default function ChapterResult({ props }: { props: { query: string, data:
         });
     }, [verseSearchParam, props.data.data]);
 
+    const quranMetrics = useQuranMetrics();
+
+    useEffect(() => {
+        quranMetrics.setMetrics({
+            ...quranMetrics,
+            lastChapter: props.data.data[0].chapter_number,
+            lastQueryType: props.data.type,
+            lastQueryMetadata: props.data.metadata,
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.data]);
+
     return (
         <div className="space-y-2">
             <section>
                 <div className="flex justify-between items-center bg-muted/30 p-4 rounded-2xl">
                     <div className="flex flex-col">
                         <h1 className="text-xl font-bold">
-                            {props.data.metadata.formattedChapterTitle}
+                            Sura {props.data.data[0].chapter_number}, {props.data.data[0].ws_quran_chapters[`title_${quranPreferences.primaryLanguage}`]}
                         </h1>
                         <p className="text-sm text-muted-foreground">
                             {props.data.metadata.allMatchesInSameChapter ? `${props.data.data[0].chapter_verses} verses` : ""}
@@ -89,10 +101,16 @@ export default function ChapterResult({ props }: { props: { query: string, data:
                                     {i.ws_quran_text.arabic}
                                 </p>
                             )}
+
+                            {quranPreferences.transliteration && (
+                                <p className="text-amber-800">
+                                    {i.ws_quran_text.transliterated}
+                                </p>
+                            )}
                         </div>
 
                         {i.ws_quran_footnotes && quranPreferences.footnotes && (
-                            <p className="text-sm text-muted-foreground text-left italic">
+                            <p className={`text-sm text-muted-foreground text-left italic ${isRtlLanguage(quranPreferences.primaryLanguage) ? "text-right" : ""}`}>
                                 {
                                     i.ws_quran_footnotes[
                                     quranPreferences.primaryLanguage in i.ws_quran_footnotes

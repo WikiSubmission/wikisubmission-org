@@ -1,24 +1,31 @@
 import { Language } from 'wikisubmission-sdk';
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { createJSONStorage } from 'zustand/middleware'
 
 export type QuranPreferences = {
-    text: boolean;
+    arabic: boolean;
     subtitles: boolean;
     footnotes: boolean;
-    arabic: boolean;
+    transliteration: boolean;
+    text: boolean;
     wordByWord: boolean;
     primaryLanguage: Language;
     secondaryLanguage?: Language;
     setPreferences: (preferences: QuranPreferences) => void;
 }
 
-export const useQuranPreferences = create<QuranPreferences>((set) => ({
-    text: true,
+export const useQuranPreferences = create(persist<QuranPreferences>((set) => ({
+    arabic: true,
     subtitles: true,
     footnotes: true,
-    arabic: true,
-    wordByWord: true,
+    transliteration: false,
+    text: true,
+    wordByWord: false,
     primaryLanguage: "english",
     secondaryLanguage: undefined,
     setPreferences: (preferences: QuranPreferences) => set(preferences),
+}), {
+    name: "quran-preferences",
+    storage: createJSONStorage(() => localStorage),
 }))

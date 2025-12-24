@@ -57,7 +57,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
         setLoading(true);
 
         const query = await ws.Quran.query(searchQuery, {
-            language: "english",
+            language: quranPreferences.primaryLanguage,
             strategy: "default",
             highlight: true,
             normalizeGodCasing: true,
@@ -72,7 +72,10 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
         if (query.status === "success") {
             if (query.type === "verse") {
-                router.replace(`/quran/${query.data[0].chapter_number}?verse=${query.data[0].verse_number}`, { scroll: false });
+                router.replace(
+                    `/quran/${query.data[0].chapter_number}?verse=${query.data[0].verse_number}`,
+                    { scroll: false }
+                );
             } else {
                 setResults(query);
             }
@@ -81,7 +84,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
         }
 
         setLoading(false);
-    }, [searchQuery, router]);
+    }, [searchQuery, router, quranPreferences.primaryLanguage]);
 
     const runWordByWordQuery = useCallback(async (field: "english" | "meanings") => {
         if (searchWordByWordMatches.length > 0) return;

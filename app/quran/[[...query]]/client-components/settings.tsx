@@ -17,7 +17,7 @@ export default function QuranSettings() {
                     <SettingsIcon />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40" align="end">
+            <DropdownMenuContent className="w-60" align="end">
                 <DropdownMenuSub>
                     <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
                         <LanguagesIcon className="size-4" />
@@ -151,7 +151,10 @@ export default function QuranSettings() {
                         <Label htmlFor="text">Footnotes</Label>
                         <Switch checked={quranPreferences.footnotes} onCheckedChange={(checked) => quranPreferences.setPreferences({ ...quranPreferences, footnotes: checked })} />
                     </section>
-
+                    <section className="flex justify-between items-center gap-2 px-2">
+                        <Label htmlFor="text">Transliteration</Label>
+                        <Switch checked={quranPreferences.transliteration} onCheckedChange={(checked) => quranPreferences.setPreferences({ ...quranPreferences, transliteration: checked })} />
+                    </section>
                     <section className="flex justify-between items-center gap-2 px-2">
                         <Label htmlFor="text">Word by Word</Label>
                         <Switch checked={quranPreferences.wordByWord} onCheckedChange={(checked) => quranPreferences.setPreferences({ ...quranPreferences, wordByWord: checked })} />

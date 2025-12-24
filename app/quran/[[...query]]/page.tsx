@@ -4,6 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import SearchResult from "./client-components/search-result";
 import HomeScreenRandomVerse from "./client-components/home-screen-random-verse";
 import QuranUtilitiesRow from "./client-components/utilities-row";
+import HomeScreenMetrics from "./client-components/home-screen-metrics";
 
 export const metadata: Metadata = {
     title: "Quran - WikiSubmission",
@@ -34,7 +35,8 @@ export default async function QuranPage({ params, searchParams }: { params: { qu
             <QuranUtilitiesRow />
             <section className="space-y-2">
                 {!queryText && (
-                    <div>
+                    <div className="space-y-2">
+                        <HomeScreenMetrics />
                         <HomeScreenRandomVerse />
                     </div>
                 )}
