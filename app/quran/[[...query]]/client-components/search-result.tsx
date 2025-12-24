@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { QueryResultSuccess } from "wikisubmission-sdk";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
-import { SearchIcon } from "lucide-react";
+import { ArrowRightIcon, ChevronRightIcon, SearchIcon } from "lucide-react";
 import { SearchHitWordByWord } from "wikisubmission-sdk/lib/quran/v1/query-result";
 import { QuranSearchResultItem } from "./verse-card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,11 +16,13 @@ import useLocalStorage from "@/hooks/use-local-storage";
 import ChapterCard from "./chapter-card";
 import { useRouter } from "next/navigation";
 import { QuranWordResultItem } from "./word-card";
+import ChapterResult from "./chapter-result";
 
-export default function SearchResult() {
+export default function SearchResult({ props }: { props: { query: string } }) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const searchQuery = searchParams.get("q");
+    const params = useParams();
+    const searchQuery = props.query;
     const forceTab = searchParams.get("tab");
 
     const [loading, setLoading] = useState(false);
@@ -135,18 +137,22 @@ export default function SearchResult() {
 
     return (
         <div>
-            {loading && <div>
+            {loading && <div className="p-4 flex justify-center items-center">
                 <Spinner />
             </div>}
 
-            {results && (searchQuery?.length ?? 0) > 0 && <div className="space-y-4">
+            {results && results.type === "chapter" && (
+                <ChapterResult props={{ query: props.query, data: results }} />
+            )}
+
+            {results && results.type === "search" && (searchQuery?.length ?? 0) > 0 && <div className="space-y-4">
                 <section>
                     <h2 className="text-xl font-bold">
                         {results.metadata.formattedQuery}
                     </h2>
                     {results.type === "search" && (
                         <p className="text-sm text-muted-foreground">
-                            {results.totalMatches} verses found with &apos;{searchQuery}&apos;
+                            {results.totalMatches} verses found
                         </p>
                     )}
                 </section>
@@ -249,17 +255,44 @@ export default function SearchResult() {
                                     {loadingWordByWord && (
                                         <Spinner />
                                     )}
+                                    {searchWordByWordMatches.length === 0 && !loadingWordByWord && (
+                                        <div className="space-y-2">
+                                            <p className="text-muted-foreground">
+                                                No matches
+                                            </p>
+                                            {props.query.split(" ").length > 1 && (
+                                                <div className="bg-muted/50 p-4 rounded-2xl space-y-2">
+                                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                                        <SearchIcon className="size-4" />
+                                                        <p>
+                                                            Try searching:
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        {props.query.split(" ").map((q) => (
+                                                            <div key={q} className="flex items-center gap-2 text-violet-600 hover:text-violet-700 hover:cursor-pointer">
+                                                                <a href={`?q=${q}&tab=words`}>
+                                                                    {q}
+                                                                </a>
+                                                                <ArrowRightIcon className="size-4" />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                     {searchWordByWordMatches.length > 0 && (
                                         <div className="space-y-2">
                                             <section className="bg-muted/50 p-4 rounded-2xl space-y-2">
-                                                <p className="text-4xl text-muted-foreground tracking-wider">
+                                                <p className="px-1 text-4xl text-muted-foreground tracking-wider">
                                                     {searchWordByWordMatches[0].transliterated} / {searchWordByWordMatches[0].arabic}
-                                                </p>
-                                                <p className="bg-violet-700/50 w-fit px-2 py-1 rounded-2xl">
-                                                    <strong>Meanings:</strong> {searchWordByWordMatches[0].meanings}
                                                 </p>
                                                 <p className="bg-orange-700/50 w-fit px-2 py-1 rounded-2xl">
                                                     <strong>Root word:</strong> {searchWordByWordMatches[0].root_word}
+                                                </p>
+                                                <p className="bg-violet-700/50 w-fit px-2 py-1 rounded-2xl">
+                                                    <strong>Meanings:</strong> {searchWordByWordMatches[0].meanings}
                                                 </p>
                                             </section>
                                         </div>
