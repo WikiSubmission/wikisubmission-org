@@ -23,7 +23,7 @@ export default function QuranSearchbar() {
                 params.delete('q');
             }
             replace(`${pathname}?${params.toString()}`);
-        }, 350);
+        }, 700);
 
         return () => clearTimeout(delayDebounceFn);
     }, [searchQuery, searchParams, pathname, replace]);

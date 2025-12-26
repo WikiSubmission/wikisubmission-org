@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { QuranWordResultItem } from "./word-card";
 import { useQuranPreferences } from "@/hooks/use-quran-preferences";
 import ChapterCard from "./chapter-card";
-import ChapterResult from "./chapter-result";
+import ChapterResult from "./general-result";
 import Link from "next/link";
 
 export default function SearchResult({ props }: { props: { query: string } }) {
@@ -150,7 +150,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 <Spinner />
             </div>}
 
-            {results && results.type === "chapter" && (
+            {results && (results.type === "chapter" || results.type === "verse" || results.type === "multiple_verses") && (
                 <ChapterResult props={{ query: props.query, data: results }} />
             )}
 
@@ -229,9 +229,11 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                     <div>
                                         <section className="space-y-2">
                                             {searchChapterMatches.map((r) => (
-                                                <div key={`chapter:${r.hit}:${r.chapter_number}`}>
-                                                    <ChapterCard chapter={r} />
-                                                </div>
+                                                <a href={`/quran/${r.chapter_number}`} key={`chapter:${r.hit}:${r.chapter_number}`}>
+                                                    <div key={`chapter:${r.hit}:${r.chapter_number}`}>
+                                                        <ChapterCard chapter={r} />
+                                                    </div>
+                                                </a>
                                             ))}
                                         </section>
                                     </div>

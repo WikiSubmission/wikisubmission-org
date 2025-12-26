@@ -1,6 +1,6 @@
 'use client';
 
-import { QueryResultChapter } from "wikisubmission-sdk/lib/quran/v1/query-result";
+import { QueryResultChapter, QueryResultMultipleVerses, QueryResultVerse } from "wikisubmission-sdk/lib/quran/v1/query-result";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useQuranPreferences } from "@/hooks/use-quran-preferences";
@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { isRtlLanguage } from "@/lib/is-rtl-language";
 import { useQuranMetrics } from "@/hooks/use-quran-metrics";
 
-export default function ChapterResult({ props }: { props: { query: string, data: QueryResultChapter } }) {
+export default function ChapterResult({ props }: { props: { query: string, data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
     const searchParams = useSearchParams();
     const verseSearchParam = searchParams.get("verse");
 
@@ -50,7 +50,7 @@ export default function ChapterResult({ props }: { props: { query: string, data:
                 <div className="flex justify-between items-center bg-muted/30 p-4 rounded-2xl">
                     <div className="flex flex-col">
                         <h1 className="text-xl font-bold">
-                            Sura {props.data.data[0].chapter_number}, {props.data.data[0].ws_quran_chapters[`title_${quranPreferences.primaryLanguage}`]}
+                            {props.data.metadata.allMatchesInSameChapter ? `Sura ${props.data.data[0].chapter_number}` : props.data.metadata.formattedChapterTitle}
                         </h1>
                         <p className="text-sm text-muted-foreground">
                             {props.data.metadata.allMatchesInSameChapter ? `${props.data.data[0].chapter_verses} verses` : ""}

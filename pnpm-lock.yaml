@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  wikisubmission-sdk: link:../../../../Library/pnpm/global/5/node_modules/wikisubmission-sdk
+
 importers:
 
   .:
