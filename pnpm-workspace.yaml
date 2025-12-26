@@ -1,9 +1,0 @@
-ignoredBuiltDependencies:
-  - '@parcel/watcher'
-  - '@swc/core'
-  - sharp
-  - supabase
-  - unrs-resolver
-
-overrides:
-  wikisubmission-sdk: link:../../../../Library/pnpm/global/5/node_modules/wikisubmission-sdk
