@@ -294,13 +294,13 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                                 searchWordByWordMatches.map(item => [item.root_word, item])
                                             ).values()).map((item) => (
                                                 <section key={item.root_word} className="bg-muted/50 p-4 rounded-2xl space-y-2">
-                                                    <p className="px-1 text-xl text-muted-foreground tracking-wider">
+                                                    <p className="text-xl text-muted-foreground tracking-wider">
                                                         {item.transliterated} / {item.arabic}
                                                     </p>
-                                                    <p className="bg-orange-700/50 w-fit px-2 py-1 rounded-2xl">
+                                                    <p className="w-fit rounded-2xl">
                                                         <strong>Root word:</strong> {item.root_word}
                                                     </p>
-                                                    <p className="bg-green-700/50 w-fit px-2 py-1 rounded-2xl gap-1 flex flex-wrap">
+                                                    <p className="w-fit rounded-2xl gap-1 flex flex-wrap">
                                                         <strong>Verses:</strong> {searchWordByWordMatches
                                                             .filter((r) => r.root_word === item.root_word)
                                                             .map((r) => (
@@ -315,9 +315,11 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                                             ))
                                                         }
                                                     </p>
-                                                    <p className="bg-blue-700/50 w-fit px-2 py-1 rounded-2xl">
-                                                        <strong>Meanings:</strong> {item.meanings}
-                                                    </p>
+                                                    {item.meanings && (
+                                                        <p className="w-fit rounded-2xl">
+                                                            <strong>Meanings:</strong> {item.meanings}
+                                                        </p>
+                                                    )}
                                                 </section>
                                             ))}
                                         </div>
