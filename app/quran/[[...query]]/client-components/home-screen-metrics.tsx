@@ -9,8 +9,8 @@ export default function HomeScreenMetrics() {
         <main>
             {quranMetrics.lastQueryMetadata && (
                 <a href={`/quran/${quranMetrics.lastChapter}`} className="hover:cursor-pointer text-xs">
-                    <div className="bg-muted/50 px-4 py-2 rounded-2xl space-y-2 w-fit [&>*]:hover:text-violet-500">
-                        <div className="flex items-center gap-2 ">
+                    <div className="rounded-2xl space-y-2 text-violet-500 [&>*]:hover:text-violet-600">
+                        <div className="flex items-center gap-1">
                             <HistoryIcon className="size-3" />
                             <p>
                                 {quranMetrics.lastQueryMetadata?.formattedQuery}

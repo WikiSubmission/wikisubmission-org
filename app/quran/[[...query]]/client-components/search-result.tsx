@@ -66,7 +66,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 chapters: true,
                 subtitles: true,
                 footnotes: true,
-                wordByWord: false,
+                wordByWord: true,
             }
         });
 

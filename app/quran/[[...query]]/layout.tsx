@@ -4,6 +4,9 @@ import { PageSwitcher } from "@/components/page-switcher";
 import { ws } from "@/lib/wikisubmission-sdk";
 import QuranSearchbar from "./client-components/searchbar";
 import QuranSettings from "./client-components/settings";
+import { Button } from "@/components/ui/button";
+import { ChevronLeftIcon } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +26,11 @@ export default async function QuranLayout({ children }: { children: React.ReactN
                     <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
                         <SidebarTrigger className="-ml-1 bg-secondary/50 rounded-full p-4 hover:bg-secondary/70 cursor-pointer lg:hidden" />
                         <PageSwitcher currentMode="quran" />
+                        <Link href="/quran">
+                            <Button size="icon-sm" variant="ghost">
+                                <ChevronLeftIcon />
+                            </Button>
+                        </Link>
                         <QuranSearchbar />
                         <QuranSettings />
                     </header>

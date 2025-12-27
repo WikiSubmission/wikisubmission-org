@@ -25,6 +25,7 @@ import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import useLocalStorage from "@/hooks/use-local-storage";
 import { Button } from "@/components/ui/button";
+import { useParams } from "next/navigation";
 
 type QuranSidebarProps = {
     chapters: Database['public']['Tables']['ws_quran_chapters']['Row'][];
@@ -37,6 +38,8 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
     const [chaptersOpen, setChaptersOpen] = useLocalStorage<boolean>("chaptersOpen", true);
     const [appendicesOpen, setAppendicesOpen] = useLocalStorage<boolean>("appendicesOpen", true);
     const [orderType, setOrderType] = useLocalStorage<"standard" | "revelation">("orderType", "standard");
+
+    const { query: currentChapter } = useParams();
 
     const filteredChapters = chapters
         .filter((chapter) => chapter != null) // Add null check
@@ -161,7 +164,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                                 <SidebarMenu className="gap-0.5">
                                     {filteredChapters.map((chapter) => (
                                         <SidebarMenuItem key={chapter.chapter_number}>
-                                            <SidebarMenuButton asChild className="h-auto py-2 px-2.5 hover:bg-accent/50">
+                                            <SidebarMenuButton asChild className={`h-auto py-2 px-2.5 hover:bg-accent/50 ${currentChapter == `${chapter.chapter_number}` ? 'bg-secondary/50' : 'hover:bg-accent/50'}`}>
                                                 <Link href={`/quran/${chapter.chapter_number}`}>
                                                     <div className="flex items-start gap-2.5 w-full min-w-0">
                                                         <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold mt-0.5">

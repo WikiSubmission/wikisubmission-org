@@ -47,25 +47,28 @@ export default function ChapterResult({ props }: { props: { query: string, data:
     return (
         <div className="space-y-2">
             <section>
-                <div className="flex justify-between items-center bg-muted/30 p-4 rounded-2xl">
+                <div className="flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
                     <div className="flex flex-col">
                         <h1 className="text-xl font-bold">
                             {props.data.metadata.allMatchesInSameChapter ? `Sura ${props.data.data[0].chapter_number}, ${props.data.data[0].ws_quran_chapters[`title_${quranPreferences.primaryLanguage}`]}` : props.data.metadata.formattedChapterTitle}
                         </h1>
-                        <p className="text-sm text-muted-foreground">
-                            {props.data.metadata.allMatchesInSameChapter ? `${props.data.data[0].chapter_verses} verses` : ""}
-                        </p>
                     </div>
 
                     <div className="flex flex-col text-right">
                         <h1 className="text-2xl font-bold">
                             {props.data.data[0].ws_quran_chapters.title_arabic}
                         </h1>
-                        <p className="text-sm text-muted-foreground">
-                            {props.data.data[0].ws_quran_chapters.title_transliterated}
-                        </p>
                     </div>
                 </div>
+            </section>
+
+            <section className="flex justify-between items-center px-4">
+                <p className="text-sm text-muted-foreground">
+                    {props.data.metadata.allMatchesInSameChapter ? `${props.data.data[0].chapter_verses} verses` : ""}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                    {props.data.data[0].ws_quran_chapters.title_transliterated}
+                </p>
             </section>
 
             <section className="space-y-2">
