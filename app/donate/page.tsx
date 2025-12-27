@@ -32,13 +32,15 @@ export const metadata: Metadata = {
 export default function DonatePage() {
     return (
         <main className="flex flex-col min-h-screen items-center justify-center text-center space-y-4 md:p-24 p-8">
-            <Image
-                src="/brand-assets/logo-black.png"
-                alt="WikiSubmission Logo"
-                width={72}
-                height={72}
-                className="rounded-full"
-            />
+            <Link href="/">
+                <Image
+                    src="/brand-assets/logo-black.png"
+                    alt="WikiSubmission Logo"
+                    width={72}
+                    height={72}
+                    className="rounded-full"
+                />
+            </Link>
 
             <section className="max-w-sm flex gap-4 max-w-md items-center">
                 <h1 className="text-3xl font-semibold">

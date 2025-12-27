@@ -1,9 +1,10 @@
 import "./globals.css";
 import { Fonts } from "@/constants/fonts";
 import { Metadata } from "@/constants/metadata";
+import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { Viewport } from "next";
-import { Toaster } from "@/components/ui/sonner";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 export const metadata = Metadata;
 
@@ -14,13 +15,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${Fonts.sora.className} antialiased`}>
+      <body
+        className={`${Fonts.sora.className} antialiased`}
+        suppressHydrationWarning
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           disableTransitionOnChange
         >
           {children}
+          <ScrollToTop />
           <Toaster />
         </ThemeProvider>
       </body>

@@ -25,7 +25,7 @@ import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import useLocalStorage from "@/hooks/use-local-storage";
 import { Button } from "@/components/ui/button";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
 type QuranSidebarProps = {
     chapters: Database['public']['Tables']['ws_quran_chapters']['Row'][];
@@ -40,6 +40,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
     const [orderType, setOrderType] = useLocalStorage<"standard" | "revelation">("orderType", "standard");
 
     const { query: currentChapter } = useParams();
+    const searchParams = useSearchParams();
 
     const filteredChapters = chapters
         .filter((chapter) => chapter != null) // Add null check
@@ -86,6 +87,17 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                 <SidebarGroup>
                     <SidebarGroupContent>
                         <SidebarMenu className="gap-0.5">
+                            {(currentChapter || searchParams.get("q")) && (
+                                <SidebarMenuItem>
+                                    <SidebarMenuButton asChild className="h-auto py-2 px-2.5 hover:bg-accent/50">
+                                        <Link href="/quran">
+                                            <p className="text-xs">
+                                                Main Page
+                                            </p>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            )}
                             <SidebarMenuItem>
                                 <SidebarMenuButton asChild className="h-auto py-2 px-2.5 hover:bg-accent/50">
                                     <Link href="/proclamation" target="_blank">
@@ -101,16 +113,6 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                                     <Link href="/introduction" target="_blank">
                                         <p className="text-xs">
                                             Introduction
-                                        </p>
-                                        <ChevronRight className="size-4 mr-2" />
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild className="h-auto py-2 px-2.5 hover:bg-accent/50">
-                                    <Link href="/index" target="_blank">
-                                        <p className="text-xs">
-                                            Index
                                         </p>
                                         <ChevronRight className="size-4 mr-2" />
                                     </Link>

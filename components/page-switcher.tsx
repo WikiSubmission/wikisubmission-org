@@ -14,7 +14,7 @@ import Image from "next/image"
 const modes = {
   home: {
     label: "Home",
-    icon: "/brand-assets/logo-transparent.png",
+    icon: "/brand-assets/logo-black.png",
     href: "/",
   },
   quran: {
@@ -32,11 +32,11 @@ const modes = {
 type Mode = keyof typeof modes
 
 interface ModeSwitcherProps {
-  currentMode: Mode
+  currentPage: Mode
 }
 
-export function PageSwitcher({ currentMode }: ModeSwitcherProps) {
-  const currentIcon = modes[currentMode].icon
+export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
+  const currentIcon = modes[currentPage].icon
   const isString = typeof currentIcon === "string"
 
   return (
@@ -47,14 +47,14 @@ export function PageSwitcher({ currentMode }: ModeSwitcherProps) {
         ) : (
           React.createElement(currentIcon, { className: "size-4 text-primary" })
         )}
-        <span className="text-base font-light">{modes[currentMode].label}</span>
+        <span className="text-base font-light">{modes[currentPage].label}</span>
         <ChevronDown className="size-4 text-muted-foreground" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-[160px]">
         {Object.entries(modes).map(([key, mode]) => {
           const modeIcon = mode.icon
           const isIconString = typeof modeIcon === "string"
-          const isActive = key === currentMode
+          const isActive = key === currentPage
 
           return (
             <DropdownMenuItem key={key} asChild>

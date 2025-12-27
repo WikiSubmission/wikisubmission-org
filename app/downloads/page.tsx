@@ -35,7 +35,7 @@ const LinkButton = ({ href, label }: { href: string; label: string }) => (
 export default function Resources() {
     return (
         <main className="space-y-6 p-8">
-            <PageSwitcher currentMode="downloads" />
+            <PageSwitcher currentPage="downloads" />
             <div className="flex flex-col items-center gap-4 mb-6">
                 <Image
                     src="/brand-assets/logo-black.png"

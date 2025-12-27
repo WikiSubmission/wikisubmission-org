@@ -14,7 +14,7 @@ import { PageSwitcher } from "@/components/page-switcher";
 export default function Home() {
   return (
     <main className="flex flex-col min-h-screen items-center justify-center text-center space-y-8 md:p-24 p-4">
-      <PageSwitcher currentMode="home" />
+      <PageSwitcher currentPage="home" />
       <Image
         src="/brand-assets/logo-black.png"
         alt="WikiSubmission Logo"
@@ -43,7 +43,7 @@ export default function Home() {
                 </ItemDescription>
               </ItemContent>
               <ItemActions>
-                <Image src="/graphics/book.png" className="size-8 rounded-full" alt="Quran" width={500} height={500} />
+                <Image src="/brand-assets/logo-transparent.png" className="size-6 rounded-full" alt="Quran" width={500} height={500} />
                 <FaChevronRight className="size-4" />
               </ItemActions>
             </Link>
