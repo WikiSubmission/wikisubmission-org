@@ -19,6 +19,7 @@ import { ExternalLink, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PageSwitcher } from "@/components/page-switcher";
+import { FaApple } from "react-icons/fa";
 
 const LinkButton = ({ href, label }: { href: string; label: string }) => (
     <a
@@ -51,6 +52,27 @@ export default function Resources() {
 
             {/* Main Resources */}
             <section className="flex flex-col gap-4">
+
+                <section className="flex flex-col">
+                    <Item asChild variant="outline">
+                        <Link href="https://apps.apple.com/us/app/submission-religion-of-god/id6444260632" target="_blank" rel="noopener noreferrer">
+                            <ItemContent>
+                                <ItemTitle>
+                                    iOS App
+                                </ItemTitle>
+                                <ItemDescription>
+                                    iPhone, iPad and Mac
+                                </ItemDescription>
+                            </ItemContent>
+                            <ItemActions>
+                                <FaApple className="size-8" />
+                                <ChevronRight className="size-4" />
+                            </ItemActions>
+                        </Link>
+                    </Item>
+                </section>
+
+
                 <Item asChild variant="outline">
                     <Link href="#quran-final-testament">
                         <ItemContent>
