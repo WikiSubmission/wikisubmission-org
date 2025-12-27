@@ -3,7 +3,7 @@
 import { QueryResultChapter, QueryResultMultipleVerses, QueryResultVerse } from "wikisubmission-sdk/lib/quran/v1/query-result";
 import { useQuranPreferences } from "@/hooks/use-quran-preferences";
 
-export default function StandardItemTitle({ props }: { props: { data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
+export function StandardItemTitle({ props }: { props: { data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
     const quranPreferences = useQuranPreferences();
     return (
         <main className="space-y-2">

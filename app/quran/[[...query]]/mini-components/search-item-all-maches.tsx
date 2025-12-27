@@ -1,85 +1,85 @@
+import { SearchHitText, SearchHitSubtitle, SearchHitFootnote, SearchHit } from "wikisubmission-sdk/lib/quran/v1/query-result";
 import { useQuranPreferences } from "@/hooks/use-quran-preferences";
 import { highlightMarkdown } from "@/lib/highlight-markdown";
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
-import { SearchHit, SearchHitFootnote, SearchHitSubtitle, SearchHitText } from "wikisubmission-sdk/lib/quran/v1/query-result";
 
-export function SearchItemVerse({ verse }: { verse: SearchHit | SearchHitText | SearchHitSubtitle | SearchHitFootnote }) {
+export function SearchItemAllMatches({ props }: { props: { results: SearchHit | SearchHitText | SearchHitSubtitle | SearchHitFootnote } }) {
     const quranPreferences = useQuranPreferences();
 
-    if (verse.hit === "text") {
+    if (props.results.hit === "text") {
         return (
             <div className="space-y-2 bg-muted/50 rounded-2xl p-4">
                 <Link
-                    href={`/quran/${verse.chapter_number}?verse=${verse.verse_number}`}
+                    href={`/quran/${props.results.chapter_number}?verse=${props.results.verse_number}`}
                     target="_blank"
                     className="flex items-center gap-1 w-fit text-xs text-muted-foreground tracking-wider text-violet-600 hover:cursor-pointer"
                 >
                     <p>
-                        TEXT - {verse.verse_id}
+                        TEXT - {props.results.verse_id}
                     </p>
                     <ArrowUpRightIcon className="size-4" />
                 </Link>
 
                 <section>
                     <p>
-                        <strong>[{verse.verse_id}]</strong> {highlightMarkdown(verse.english)}
+                        <strong>[{props.results.verse_id}]</strong> {highlightMarkdown(props.results.english)}
                     </p>
                 </section>
 
                 {quranPreferences.secondaryLanguage &&
                     <section>
                         <p>
-                            <strong>[{verse.verse_id}]</strong> {highlightMarkdown(verse[quranPreferences.secondaryLanguage])}
+                            <strong>[{props.results.verse_id}]</strong> {highlightMarkdown(props.results[quranPreferences.secondaryLanguage])}
                         </p>
                     </section>
                 }
 
-                {'arabic' in verse &&
+                {'arabic' in props.results &&
                     <section className="text-rtl text-right text-lg">
                         <p>
-                            {verse.arabic}
+                            {props.results.arabic}
                         </p>
                     </section>
                 }
             </div>
         )
-    } else if (verse.hit === "subtitle") {
+    } else if (props.results.hit === "subtitle") {
         return (
             <div className="space-y-2 bg-muted/50 rounded-2xl p-4">
                 <Link
-                    href={`/quran/${verse.chapter_number}?verse=${verse.verse_number}`}
+                    href={`/quran/${props.results.chapter_number}?verse=${props.results.verse_number}`}
                     target="_blank"
                     className="flex items-center gap-1 w-fit text-xs text-muted-foreground tracking-wider text-violet-600 hover:cursor-pointer"
                 >
                     <p>
-                        SUBTITLE - {verse.verse_id}
+                        SUBTITLE - {props.results.verse_id}
                     </p>
                     <ArrowUpRightIcon className="size-4" />
                 </Link>
                 <section>
                     <p>
-                        {highlightMarkdown(verse.english)}
+                        {highlightMarkdown(props.results.english)}
                     </p>
                 </section>
             </div>
         )
-    } else if (verse.hit === "footnote") {
+    } else if (props.results.hit === "footnote") {
         return (
             <div className="space-y-2 bg-muted/50 rounded-2xl p-4 text-muted-foreground">
                 <Link
-                    href={`/quran/${verse.chapter_number}?verse=${verse.verse_number}`}
+                    href={`/quran/${props.results.chapter_number}?verse=${props.results.verse_number}`}
                     target="_blank"
                     className="flex items-center gap-1 w-fit text-xs text-muted-foreground tracking-wider text-violet-600 hover:cursor-pointer"
                 >
                     <p>
-                        FOOTNOTE - {verse.verse_id}
+                        FOOTNOTE - {props.results.verse_id}
                     </p>
                     <ArrowUpRightIcon className="size-4" />
                 </Link>
                 <section>
                     <p className="italic">
-                        {highlightMarkdown(verse.english)}
+                        {highlightMarkdown(props.results.english)}
                     </p>
                 </section>
             </div>

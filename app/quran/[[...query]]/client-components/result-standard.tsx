@@ -3,10 +3,10 @@
 import { QueryResultChapter, QueryResultMultipleVerses, QueryResultVerse } from "wikisubmission-sdk/lib/quran/v1/query-result";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import StandardItemTitle from "../mini-components/standard-item-title";
-import StandardItemVerses from "../mini-components/standard-item-verses";
+import { StandardItemTitle } from "../mini-components/standard-item-title";
+import { StandardItemVerses } from "../mini-components/standard-item-verses";
 
-export default function StandardResult({ props }: { props: { query: string, data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
+export function StandardResult({ props }: { props: { query: string, data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
     return (
         <div className="space-y-8">
             <StandardItemTitle props={props} />

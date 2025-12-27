@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuranMetrics } from "@/hooks/use-quran-metrics";
-import { HistoryIcon, XIcon } from "lucide-react";
+import { HistoryIcon, SearchIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function HomeScreenMetrics() {
@@ -24,7 +24,7 @@ export default function HomeScreenMetrics() {
 
                     if (entry.type === 'query') {
                         url = `/quran/?q=${encodeURIComponent(entry.query)}`;
-                        displayText = `"${entry.query}"`;
+                        displayText = `${entry.query}`;
                     } else if (entry.type === 'verse') {
                         url = `/quran/${entry.chapter}?verse=${entry.verse}`;
                         displayText = `${entry.chapter}:${entry.verse}`;
@@ -41,8 +41,12 @@ export default function HomeScreenMetrics() {
                             className="hover:cursor-pointer w-fit"
                         >
                             <div className="flex rounded-lg px-2 py-1 hover:bg-muted/50 transition-colors">
-                                <div className="flex items-center gap-2 text-violet-500 hover:text-violet-600">
-                                    <HistoryIcon className="size-3" />
+                                <div className="flex items-center gap-1 text-violet-500 hover:text-violet-600">
+                                    {entry.type === 'query' ? (
+                                        <SearchIcon className="size-3" />
+                                    ) : (
+                                        <HistoryIcon className="size-3" />
+                                    )}
                                     <p className="text-xs">
                                         {displayText}
                                     </p>
