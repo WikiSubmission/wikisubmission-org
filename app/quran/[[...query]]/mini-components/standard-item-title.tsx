@@ -13,6 +13,17 @@ export function StandardItemTitle({ props }: { props: { data: QueryResultChapter
                         <h1 className="text-xl font-bold">
                             {props.data.metadata.allMatchesInSameChapter ? `Sura ${props.data.data[0].chapter_number}, ${props.data.data[0].ws_quran_chapters[`title_${quranPreferences.primaryLanguage}`]}` : props.data.metadata.formattedChapterTitle}
                         </h1>
+                        <section className="flex w-fit justify-end items-center bg-muted/50 rounded-lg text-sm text-muted-foreground space-x-2">
+                            <p>
+                                {props.data.data[0].ws_quran_chapters.title_transliterated}
+                            </p>
+                            <p>
+                                •
+                            </p>
+                            <p>
+                                {props.data.metadata.allMatchesInSameChapter ? `${props.data.data[0].chapter_verses} verses` : ""}
+                            </p>
+                        </section>
                     </div>
 
                     <div className="flex flex-col text-right">
@@ -21,18 +32,6 @@ export function StandardItemTitle({ props }: { props: { data: QueryResultChapter
                         </h1>
                     </div>
                 </div>
-            </section>
-
-            <section className="flex w-fit justify-end items-center bg-muted/50 rounded-2xl px-4 text-sm text-muted-foreground space-x-2">
-                <p>
-                    {props.data.data[0].ws_quran_chapters.title_transliterated}
-                </p>
-                <p>
-                    •
-                </p>
-                <p>
-                    {props.data.metadata.allMatchesInSameChapter ? `${props.data.data[0].chapter_verses} verses` : ""}
-                </p>
             </section>
         </main>
     )
