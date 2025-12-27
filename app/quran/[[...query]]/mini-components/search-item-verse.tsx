@@ -4,7 +4,7 @@ import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
 import { SearchHit, SearchHitFootnote, SearchHitSubtitle, SearchHitText } from "wikisubmission-sdk/lib/quran/v1/query-result";
 
-export function QuranSearchResultItem({ verse }: { verse: SearchHit | SearchHitText | SearchHitSubtitle | SearchHitFootnote }) {
+export function SearchItemVerse({ verse }: { verse: SearchHit | SearchHitText | SearchHitSubtitle | SearchHitFootnote }) {
     const quranPreferences = useQuranPreferences();
 
     if (verse.hit === "text") {

@@ -3,7 +3,7 @@ import { ArrowRightIcon } from "lucide-react";
 import { SearchHitWordByWord } from "wikisubmission-sdk/lib/quran/v1/query-result";
 import Link from "next/link";
 
-export function QuranWordResultItem({ verse }: { verse: SearchHitWordByWord }) {
+export function SearchItemWord({ verse }: { verse: SearchHitWordByWord }) {
     return (
         <div className="space-y-2 bg-muted/50 rounded-2xl p-4">
             <div className="flex justify-between items-center">

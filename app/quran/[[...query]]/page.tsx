@@ -4,7 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import SearchResult from "./client-components/result-search";
 import HomeScreenRandomVerse from "./mini-components/home-random-verse";
 import HomeScreenMetrics from "./mini-components/home-metrics";
-import QuranUtilitiesRow from "./mini-components/utilities-row";
+import QuranUtilitiesRow from "./mini-components/home-utilities";
 
 export const metadata: Metadata = {
     title: "Quran - WikiSubmission",

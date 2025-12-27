@@ -3,14 +3,14 @@
 import { QueryResultChapter, QueryResultMultipleVerses, QueryResultVerse } from "wikisubmission-sdk/lib/quran/v1/query-result";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import CardTitle from "../mini-components/card-title";
-import CardVerses from "../mini-components/card-verses";
+import StandardItemTitle from "../mini-components/standard-item-title";
+import StandardItemVerses from "../mini-components/standard-item-verses";
 
 export default function StandardResult({ props }: { props: { query: string, data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
     return (
         <div className="space-y-8">
-            <CardTitle props={props} />
-            <CardVerses props={props} />
+            <StandardItemTitle props={props} />
+            <StandardItemVerses props={props} />
 
             {/* Navigation */}
             <section className="bg-muted/50 p-4 rounded-2xl">

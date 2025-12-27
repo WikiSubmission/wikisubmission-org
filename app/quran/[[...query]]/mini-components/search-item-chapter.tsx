@@ -5,7 +5,7 @@ import { highlightMarkdown } from "@/lib/highlight-markdown";
 import { ChevronRight } from "lucide-react";
 import { SearchHitChapter } from "wikisubmission-sdk/lib/quran/v1/query-result";
 
-export default function HitChapter({ chapter }: { chapter: SearchHitChapter }) {
+export default function SearchItemChapter({ chapter }: { chapter: SearchHitChapter }) {
     const quranPreferences = useQuranPreferences();
     return (
         <a href={`/quran/${chapter.chapter_number}`}>

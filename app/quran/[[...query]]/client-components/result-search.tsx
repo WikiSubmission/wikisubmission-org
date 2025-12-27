@@ -8,14 +8,14 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsTrigger, TabsContent, TabsList } from "@/components/ui/tabs";
 import { ArrowRightIcon, SearchIcon } from "lucide-react";
 import { SearchHitWordByWord } from "wikisubmission-sdk/lib/quran/v1/query-result";
-import { QuranSearchResultItem } from "../mini-components/hit-verse";
+import { SearchItemVerse } from "../mini-components/search-item-verse";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { QuranWordResultItem } from "../mini-components/hit-word";
+import { SearchItemWord } from "../mini-components/search-item-word";
 import { useQuranPreferences } from "@/hooks/use-quran-preferences";
-import HitChapter from "../mini-components/hit-chapter";
+import SearchItemChapter from "../mini-components/search-item-chapter";
 import StandardResult from "./result-standard";
 import Link from "next/link";
 
@@ -169,7 +169,6 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                         >
 
                             {/* Tab Selection */}
-
                             <TabsList className="flex [&>*]:text-xs">
                                 <TabsTrigger value="all">
                                     Results ({searchAllMatches.length})
@@ -220,7 +219,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                     <section className="space-y-2">
                                         {searchChapterMatches.map((r) => (
                                             <div key={`chapter:${r.hit}:${r.chapter_number}`}>
-                                                <HitChapter chapter={r} />
+                                                <SearchItemChapter chapter={r} />
                                             </div>
                                         ))}
                                     </section>
@@ -237,7 +236,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                             return fields.some((f) => r.hit.includes(f));
                                         }).map((r) => (
                                             <div key={`all:${r.hit}:${'verse_id' in r ? r.verse_id : ''}`}>
-                                                <QuranSearchResultItem verse={r} />
+                                                <SearchItemVerse verse={r} />
                                             </div>
                                         ))}
                                     </section>
@@ -313,7 +312,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                     )}
                                     {searchWordByWordMatches.map((r) => (
                                         <div key={`word_by_word:${r.index}`}>
-                                            <QuranWordResultItem verse={r} />
+                                            <SearchItemWord verse={r} />
                                         </div>
                                     ))}
                                 </div>

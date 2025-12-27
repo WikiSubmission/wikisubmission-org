@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { isRtlLanguage } from "@/lib/is-rtl-language";
 import { useEffect, useState } from "react";
 
-export default function CardVerses({ props }: { props: { data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
+export default function StandardItemVerses({ props }: { props: { data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
     const quranPreferences = useQuranPreferences();
     const verseSearchParam = useSearchParams().get("verse");
     const [isHighlighted, setIsHighlighted] = useState(false);

@@ -2,8 +2,8 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { QuranSidebar } from "./client-components/sidebar";
 import { PageSwitcher } from "@/components/page-switcher";
 import { ws } from "@/lib/wikisubmission-sdk";
-import QuranSearchbar from "./mini-components/searchbar";
-import QuranSettings from "./mini-components/settings";
+import QuranSearchbar from "./client-components/searchbar";
+import QuranSettings from "./client-components/settings";
 import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon } from "lucide-react";
 import Link from "next/link";
