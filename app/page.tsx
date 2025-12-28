@@ -9,7 +9,7 @@ import { About } from "@/constants/about";
 import Image from "next/image";
 import Link from "next/link";
 import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub } from "react-icons/fa";
-import { HeartIcon } from "lucide-react";
+import { HeartIcon, Music2Icon } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
 import { GeometryDots } from "@/components/geometry-dots";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
@@ -17,10 +17,6 @@ import { ThemeToggle } from "@/components/toggles/theme-toggle";
 export default function Home() {
   return (
     <main className="flex flex-col min-h-screen items-center justify-center text-center space-y-8 md:p-24 p-4">
-      <div className="flex justify-between items-center gap-2">
-        <PageSwitcher currentPage="home" />
-        <ThemeToggle />
-      </div>
       <GeometryDots />
       <Image
         src="/brand-assets/logo-transparent.png"
@@ -36,6 +32,10 @@ export default function Home() {
       </section>
 
       <section className="space-y-2 w-full max-w-xs">
+        <div className="flex justify-between items-center gap-2">
+          <PageSwitcher currentPage="home" />
+          <ThemeToggle />
+        </div>
         <section className="flex flex-col">
           <Item asChild variant="outline">
             <Link href="/quran">
@@ -49,6 +49,25 @@ export default function Home() {
               </ItemContent>
               <ItemActions>
                 <Image src="/brand-assets/logo-transparent.png" className="size-6 rounded-full" alt="Quran: The Final Testament" width={500} height={500} />
+                <FaChevronRight className="size-4" />
+              </ItemActions>
+            </Link>
+          </Item>
+        </section>
+
+        <section className="flex flex-col">
+          <Item asChild variant="outline">
+            <Link href="/music">
+              <ItemContent>
+                <ItemTitle>
+                  Music
+                </ItemTitle>
+                <ItemDescription>
+                  Glorification and melodies
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <Music2Icon className="size-6" />
                 <FaChevronRight className="size-4" />
               </ItemActions>
             </Link>
