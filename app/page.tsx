@@ -17,6 +17,10 @@ import { ThemeToggle } from "@/components/toggles/theme-toggle";
 export default function Home() {
   return (
     <main className="flex flex-col min-h-screen items-center justify-center text-center space-y-8 md:p-24 p-4">
+      <div className="flex justify-between items-center gap-2">
+        <PageSwitcher currentPage="home" />
+        <ThemeToggle />
+      </div>
       <GeometryDots />
       <Image
         src="/brand-assets/logo-transparent.png"
@@ -32,10 +36,6 @@ export default function Home() {
       </section>
 
       <section className="space-y-2 w-full max-w-xs">
-        <div className="flex justify-between items-center gap-2">
-          <PageSwitcher currentPage="home" />
-          <ThemeToggle />
-        </div>
         <section className="flex flex-col">
           <Item asChild variant="outline">
             <Link href="/quran">
