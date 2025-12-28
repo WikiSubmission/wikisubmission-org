@@ -7,7 +7,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { RootWordOccurrences } from "./root-word-occurrences";
 import { useSearchParams } from "next/navigation";
-import { Fonts } from "@/constants/fonts";
 
 export function ArabicDetailed({ props }: { props: { data: IndexResult } }) {
     const quranPreferences = useQuranPreferences();
@@ -16,7 +15,7 @@ export function ArabicDetailed({ props }: { props: { data: IndexResult } }) {
     const wordSearchParam = useSearchParams().get("word");
 
     return (
-        <main className={`text-right text-lg ${Fonts.geistMono.className}`}>
+        <main className={"text-right text-lg"}>
             {quranPreferences.wordByWord ? (
                 <div>
                     <div dir="rtl" className="flex flex-wrap justify-start">
