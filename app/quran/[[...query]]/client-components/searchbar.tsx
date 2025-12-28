@@ -27,13 +27,16 @@ export default function QuranSearchbar() {
             const currentQ = searchParams.get('q')?.toString() || "";
             if (searchQuery === currentQ) return;
 
-            const params = new URLSearchParams(searchParams);
             if (searchQuery) {
-                params.set('q', searchQuery);
+                // If there's a search query, reset to root /quran and only include the 'q' param
+                replace(`/quran?q=${decodeURIComponent(searchQuery)}`);
             } else {
+                // If cleared, just remove 'q' from existing params and stay on current pathname
+                const params = new URLSearchParams(searchParams);
                 params.delete('q');
+                const queryString = params.toString();
+                replace(`${pathname}${queryString ? `?${decodeURIComponent(queryString)}` : ""}`);
             }
-            replace(`${pathname}?${params.toString()}`);
         }, 700);
 
         return () => clearTimeout(delayDebounceFn);
