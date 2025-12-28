@@ -51,16 +51,16 @@ export default async function QuranPage({ params, searchParams }: { params: Prom
 export async function generateMetadata({ params, searchParams }: { params: Promise<{ query?: string[] }>, searchParams: Promise<{ q?: string }> }): Promise<Metadata> {
     const { q } = await searchParams;
     const { query } = await params;
-    const queryText = q || query?.join(" ");
+    const queryText = decodeURIComponent(q || query?.join(" ") || "");
 
     let title = `Quran | The Final Testament | WikiSubmission`;
     let description = `Access the Final Testament at WikiSubmission, a free and open-source platform for Submission.`;
     const openGraph = {
         images: [
             {
-                url: "/brand-assets/logo-transparent.png",
-                width: 125,
-                height: 125,
+                url: "/brand-assets/logo-black.png",
+                width: 64,
+                height: 64,
             },
         ],
     };
@@ -80,13 +80,19 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
     const parsedQuery = ws.Quran.Methods.parseQuery(queryText);
 
     if (parsedQuery.valid) {
-        title = `${parsedQuery.metadata.title} | WikiSubmission`;
+        title = `${parsedQuery.metadata.title} | Quran | WikiSubmission`;
 
         description = (() => {
-            if (parsedQuery.type === "chapter") {
-                return `Read and study chapter ${parsedQuery.query} at WikiSubmission`
+            switch (parsedQuery.type) {
+                case "chapter":
+                    return `Read and study Chapter ${parsedQuery.query} of the Final Testament`;
+                case "verse":
+                case "multiple_verses":
+                    return `Verse ${parsedQuery.query} of the Final Testament`;
+                case "search":
+                    return `Search results for "${queryText}" in the Final Testament`;
             }
-            return `Explore Quran (The Final Testament) at WikiSubmission.`;
+            return `Access the Final Testament at WikiSubmission – a free and open source platform for Submission.`;
         })();
 
         return {
