@@ -233,7 +233,7 @@ export function MusicPlayer() {
                                 <TrackRow
                                     key={`${track.id}-${i}`}
                                     track={track}
-                                    context={null} // Don't reset queue when clicking from queue
+                                    context={undefined} // Don't reset queue when clicking from queue
                                 />
                             ))}
                         </div>

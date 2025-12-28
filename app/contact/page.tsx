@@ -7,27 +7,8 @@ import {
 } from "@/components/ui/item";
 import { About } from "@/constants/about";
 import { ChevronRight, Mail, Github, MessageSquare, ChevronLeft } from "lucide-react";
-import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-
-export const metadata: Metadata = {
-  title: "Contact Us - WikiSubmission",
-  description: "Contact us for any questions, suggestions, or support",
-  openGraph: {
-    title: "Contact Us - WikiSubmission",
-    description: "Contact us for any questions, suggestions, or support",
-    url: "/contact",
-    images: [
-      {
-        url: "/brand-assets/logo-black.png",
-        width: 125,
-        height: 125,
-        alt: "WikiSubmission Logo",
-      },
-    ],
-  },
-}
 
 export default function ContactPage() {
   return (

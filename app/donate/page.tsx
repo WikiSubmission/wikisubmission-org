@@ -8,26 +8,7 @@ import {
 import { ChevronRight, Heart, Calendar, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Metadata } from "next";
 import { About } from "@/constants/about";
-
-export const metadata: Metadata = {
-    title: "Donate - WikiSubmission",
-    description: "Support WikiSubmission, a 501(c)(3) nonprofit organization providing free and open-source technology, educational resources, and creative media in the cause of God.",
-    openGraph: {
-        title: "Donate - WikiSubmission",
-        description: "Support WikiSubmission, a 501(c)(3) nonprofit organization providing free and open-source technology, educational resources, and creative media in the cause of God.",
-        url: "/donate",
-        images: [
-            {
-                url: "/brand-assets/logo-black.png",
-                width: 125,
-                height: 125,
-                alt: "WikiSubmission Logo",
-            },
-        ],
-    },
-}
 
 export default function DonatePage() {
     return (
