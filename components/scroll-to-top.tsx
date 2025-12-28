@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronUpIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
 
 interface ScrollToTopProps {
   className?: string;
@@ -11,6 +12,14 @@ interface ScrollToTopProps {
 }
 
 export function ScrollToTop({ className, showAfter = 300 }: ScrollToTopProps) {
+
+  const pathname = usePathname();
+
+  // Don't show on music page (overlays now playing bar)
+  if (pathname.includes("/music")) {
+    return null;
+  }
+
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
