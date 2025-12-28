@@ -11,6 +11,8 @@ import { TrackRow } from '@/components/music/track-row';
 import { MusicPlayer } from '@/components/music/music-player';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Info, Heart, Music2, Search, Clock, Repeat } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function ZikrPage() {
     const { allTracks, categories, isLoading, favorites, loopMode, currentTrack, playbackContext } = useMusic();
@@ -36,8 +38,17 @@ export default function ZikrPage() {
                 <ThemeToggle />
             </div>
 
+            <Link href="/">
+                <Image src="/brand-assets/logo-transparent.png"
+                    alt="Logo"
+                    width={125}
+                    height={125}
+                    className="rounded-full justify-left"
+                />
+            </Link>
+
             {/* Hero Section */}
-            <div className="w-full max-w-5xl px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-8 z-10">
+            <div className="w-full max-w-5xl px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-8 z-10">
                 <div className="flex-grow space-y-4 text-center md:text-left">
                     <h1 className="text-5xl md:text-7xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic">
                         ZIKR
