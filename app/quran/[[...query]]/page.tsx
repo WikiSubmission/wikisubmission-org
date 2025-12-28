@@ -25,8 +25,8 @@ export default async function QuranPage({ params, searchParams }: { params: Prom
                         <Image
                             src="/brand-assets/logo-transparent.png"
                             alt="WikiSubmission Logo"
-                            width={125}
-                            height={125}
+                            width={64}
+                            height={64}
                             className="mx-auto"
                         />
                         <hr className="my-6 w-xs mx-auto" />

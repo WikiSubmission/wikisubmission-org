@@ -13,8 +13,8 @@ export const metadata = {
     images: [
       {
         url: "/brand-assets/logo-black.png",
-        width: 125,
-        height: 125,
+        width: 64,
+        height: 64,
         alt: "WikiSubmission Logo",
       },
     ],

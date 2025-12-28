@@ -41,8 +41,8 @@ export default function ZikrPage() {
             <Link href="/">
                 <Image src="/brand-assets/logo-transparent.png"
                     alt="Logo"
-                    width={125}
-                    height={125}
+                    width={64}
+                    height={64}
                     className="rounded-full justify-left"
                 />
             </Link>

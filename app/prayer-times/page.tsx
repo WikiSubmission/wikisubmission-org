@@ -32,8 +32,8 @@ export default function PrayerTimesPage() {
             <div className="w-full max-w-2xl px-4 py-12 md:py-24 z-10">
                 <Link href="/">
                     <Image src="/brand-assets/logo-transparent.png" alt="WikiSubmission Logo"
-                        width={125}
-                        height={125}
+                        width={64}
+                        height={64}
                         className="justify-center items-center mx-auto rounded-full my-4"
                     />
                 </Link>

@@ -11,8 +11,8 @@ export const Metadata: _Metadata = {
     images: [
       {
         url: "/brand-assets/logo-black.png",
-        width: 125,
-        height: 125,
+        width: 64,
+        height: 64,
       },
     ],
     locale: "en_US",
