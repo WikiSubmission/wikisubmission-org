@@ -34,7 +34,7 @@ export function MusicPlayer() {
                     className="bg-background/80 backdrop-blur-xl border border-border shadow-2xl rounded-2xl overflow-hidden transition-all duration-300 md:h-20"
                 >
                     <div className="flex flex-col md:flex-row h-full">
-                        {/* Upper Section: Info & Main Controls (Mobile) / Left Section (Desktop) */}
+                        {/* Upper Section: Info (Mobile & Desktop) / Main controls (Desktop) */}
                         <div className="flex items-center gap-4 p-2 pl-3 flex-grow min-w-0">
                             {/* Track Info */}
                             <div className="flex items-center gap-3 flex-shrink-0 min-w-0 md:w-1/3">
@@ -88,7 +88,7 @@ export function MusicPlayer() {
                                     <Button
                                         variant="default"
                                         size="icon"
-                                        className="h-11 w-11 bg-accent text-accent-foreground rounded-full shadow-lg shadow-accent/20 hover:scale-105 transition-transform"
+                                        className="h-11 w-11 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-500/20 hover:scale-105 transition-transform"
                                         onClick={togglePlayPause}
                                     >
                                         {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 ml-0.5 fill-current" />}
@@ -119,8 +119,8 @@ export function MusicPlayer() {
                                 </div>
                             </div>
 
-                            {/* Mobile Play/Pause & Next */}
-                            <div className="flex md:hidden items-center gap-1 pr-2 ml-auto">
+                            {/* Mobile Play/Pause & Next - HIDDEN (Moved to bottom) */}
+                            <div className="hidden items-center gap-1 pr-2 ml-auto">
                                 <Button
                                     variant="default"
                                     size="icon"
@@ -174,40 +174,60 @@ export function MusicPlayer() {
                                 />
                                 <span className="text-[10px] tabular-nums text-muted-foreground">{formatTime(duration)}</span>
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between px-1">
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className={cn("h-8 w-8 text-muted-foreground", loopMode !== 'off' && "text-accent")}
+                                    className={cn(
+                                        "h-10 w-10 transition-all",
+                                        loopMode === 'context' ? "text-indigo-500 bg-indigo-500/10" :
+                                            loopMode === 'repeatOne' ? "text-violet-500 bg-violet-500/10" :
+                                                "text-foreground/60"
+                                    )}
                                     onClick={() => {
                                         if (loopMode === 'off') setLoopMode('context');
                                         else if (loopMode === 'context') setLoopMode('repeatOne');
                                         else setLoopMode('off');
                                     }}
                                 >
-                                    {loopMode === 'repeatOne' ? <Repeat1 className="w-4 h-4" /> : <Repeat className="w-4 h-4" />}
+                                    {loopMode === 'repeatOne' ? <Repeat1 className="w-5 h-5" /> : <Repeat className="w-5 h-5" />}
                                 </Button>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={skipPrevious}>
-                                    <SkipBack className="w-4 h-4" />
+                                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={skipPrevious}>
+                                    <SkipBack className="w-5 h-5" />
+                                </Button>
+                                <Button
+                                    variant="default"
+                                    size="icon"
+                                    className="h-12 w-12 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-500/20"
+                                    onClick={togglePlayPause}
+                                >
+                                    {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />}
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={skipNext}>
+                                    <SkipForward className="w-5 h-5" />
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className={cn("h-8 w-8 text-muted-foreground", isFav && "text-red-500")}
+                                    className={cn("h-10 w-10 text-muted-foreground", isFav && "text-red-500")}
                                     onClick={() => toggleFavorite(currentTrack.url)}
                                 >
-                                    <Heart className={cn("w-4 h-4", isFav && "fill-current")} />
+                                    <Heart className={cn("w-5 h-5", isFav && "fill-current")} />
                                 </Button>
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                    <Volume2 className="w-4 h-4" />
-                                    <Slider
-                                        value={[volume * 100]}
-                                        min={0}
-                                        max={100}
-                                        onValueChange={(val) => setVolume(val[0] / 100)}
-                                        className="w-20"
-                                    />
-                                </div>
+                                <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground" onClick={() => setIsQueueOpen(true)}>
+                                    <ListMusic className="w-5 h-5" />
+                                </Button>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-muted-foreground px-2 pb-1">
+                                <Volume2 className="w-4 h-4" />
+                                <Slider
+                                    value={[volume * 100]}
+                                    min={0}
+                                    max={100}
+                                    onValueChange={(val) => setVolume(val[0] / 100)}
+                                    className="flex-grow"
+                                />
                             </div>
                         </div>
                     </div>
