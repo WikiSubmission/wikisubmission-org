@@ -15,11 +15,6 @@ export function ScrollToTop({ className, showAfter = 300 }: ScrollToTopProps) {
 
   const pathname = usePathname();
 
-  // Don't show on music page (overlays now playing bar)
-  if (pathname.includes("/music")) {
-    return null;
-  }
-
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -32,6 +27,11 @@ export function ScrollToTop({ className, showAfter = 300 }: ScrollToTopProps) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [showAfter]);
+
+  // Don't show on music page (overlays now playing bar)
+  if (pathname.includes("/music")) {
+    return null;
+  }
 
   const scrollToTop = () => {
     window.scrollTo({
