@@ -1,7 +1,6 @@
 "use client"
 
-import * as React from "react"
-import { ChevronDown } from "lucide-react"
+import { BookIcon, ChevronDown, DownloadIcon, HeartIcon, Home, HomeIcon } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,22 +13,22 @@ import Image from "next/image"
 const modes = {
   home: {
     label: "Home",
-    icon: "/brand-assets/logo-black.png",
+    icon: "/brand-assets/logo-transparent.png",
     href: "/",
   },
   quran: {
     label: "Quran",
-    icon: "/graphics/book.png",
+    icon: <BookIcon className="size-4" />,
     href: "/quran",
   },
   prayertimes: {
     label: "Prayer Times",
-    icon: "/graphics/heart.png",
+    icon: <HeartIcon className="size-4" />,
     href: "/prayer-times",
   },
   downloads: {
     label: "Downloads",
-    icon: "/graphics/nineteen.png",
+    icon: <DownloadIcon className="size-4" />,
     href: "/downloads",
   }
 }
@@ -50,7 +49,7 @@ export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
         {isString ? (
           <Image src={currentIcon} alt="" width={500} height={500} className="size-6 rounded-full" />
         ) : (
-          React.createElement(currentIcon, { className: "size-4 text-primary" })
+          currentIcon
         )}
         <span className="text-base font-light">{modes[currentPage].label}</span>
         <ChevronDown className="size-4 text-muted-foreground" />
@@ -77,9 +76,7 @@ export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
                     className={`size-4 rounded-full ${isActive ? "opacity-100" : "opacity-100"}`}
                   />
                 ) : (
-                  React.createElement(modeIcon, {
-                    className: `size-4 ${isActive ? "text-primary" : "text-muted-foreground"}`
-                  })
+                  modeIcon
                 )}
                 <span className={`text-xs ${isActive ? "text-violet-600" : "text-primary"}`}>{mode.label}</span>
               </Link>
