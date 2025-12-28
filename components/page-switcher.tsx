@@ -1,6 +1,6 @@
 "use client"
 
-import { BookIcon, ChevronDown, DownloadIcon, HeartIcon } from "lucide-react"
+import { BookIcon, ChevronDown, DownloadIcon, HeartIcon, Music2Icon } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,11 @@ const modes = {
     icon: <HeartIcon className="size-4" />,
     href: "/prayer-times",
   },
+  music: {
+    label: "Music",
+    icon: <Music2Icon className="size-4" />,
+    href: "/music",
+  },
   downloads: {
     label: "Downloads",
     icon: <DownloadIcon className="size-4" />,
@@ -45,7 +50,7 @@ export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 px-3 h-8 rounded-md bg-secondary/30 hover:bg-secondary/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border/40">
+      <DropdownMenuTrigger className="z-10 flex items-center gap-2 px-3 h-8 rounded-md bg-secondary/30 hover:bg-secondary/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border/40">
         {isString ? (
           <Image src={currentIcon} alt="" width={500} height={500} className="size-6 rounded-full" />
         ) : (
