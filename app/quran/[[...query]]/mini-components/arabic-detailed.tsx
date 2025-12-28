@@ -25,6 +25,9 @@ export function ArabicDetailed({ props }: { props: { data: IndexResult } }) {
                                     <p className="text-right text-xl">
                                         {w.arabic}
                                     </p>
+                                    <p dir="ltr" className="text-violet-600 w-8/12">
+                                        {w.transliterated}
+                                    </p>
                                     <p dir="ltr" className="text-muted-foreground w-8/12">
                                         {w.english}
                                     </p>
