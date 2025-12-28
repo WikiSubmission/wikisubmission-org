@@ -4,9 +4,6 @@ import { PageSwitcher } from "@/components/page-switcher";
 import { ws } from "@/lib/wikisubmission-sdk";
 import QuranSearchbar from "./client-components/searchbar";
 import QuranSettings from "./client-components/settings";
-import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon } from "lucide-react";
-import Link from "next/link";
 import MetricsCollector from "./mini-components/metrics-collector";
 
 export default async function QuranLayout({ children }: { children: React.ReactNode }) {

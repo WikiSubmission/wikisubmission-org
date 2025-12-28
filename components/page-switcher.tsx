@@ -1,6 +1,6 @@
 "use client"
 
-import { BookIcon, ChevronDown, DownloadIcon, HeartIcon, Home, HomeIcon } from "lucide-react"
+import { BookIcon, ChevronDown, DownloadIcon, HeartIcon } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
