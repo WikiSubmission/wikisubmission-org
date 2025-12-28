@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 export default function MetricsCollector() {
-    const quranMetrics = useQuranMetrics();
+    const addNavigation = useQuranMetrics(state => state.addNavigation);
     const params = useParams();
     const searchParams = useSearchParams();
 
@@ -17,7 +17,7 @@ export default function MetricsCollector() {
             // This prevents duplicates when searching for verse references like "2:255"
             const hasNonNumeric = /[^\d:\s-]/.test(searchQuery.trim());
             if (hasNonNumeric) {
-                quranMetrics.addNavigation({
+                addNavigation({
                     type: 'query',
                     query: searchQuery.trim()
                 });
@@ -39,7 +39,7 @@ export default function MetricsCollector() {
             const verseNumber = parseInt(verseParam);
             if (!isNaN(verseNumber)) {
                 // Add as verse navigation (includes both chapter and verse)
-                quranMetrics.addNavigation({
+                addNavigation({
                     type: 'verse',
                     chapter: chapterNumber,
                     verse: verseNumber
@@ -49,11 +49,11 @@ export default function MetricsCollector() {
         }
 
         // Add as chapter-only navigation
-        quranMetrics.addNavigation({
+        addNavigation({
             type: 'chapter',
             chapter: chapterNumber
         });
-    }, [params, searchParams, quranMetrics]);
+    }, [params, searchParams, addNavigation]);
 
     return null;
 }

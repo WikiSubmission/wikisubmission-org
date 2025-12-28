@@ -5,6 +5,7 @@ import { useQuranPreferences } from "@/hooks/use-quran-preferences";
 import { useSearchParams } from "next/navigation";
 import { isRtlLanguage } from "@/lib/is-rtl-language";
 import { useEffect, useState } from "react";
+import { ArabicDetailed } from "./arabic-detailed";
 
 export function StandardItemVerses({ props }: { props: { data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
     const quranPreferences = useQuranPreferences();
@@ -44,7 +45,7 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                                 </p>
                             )}
 
-                            <div className={`space-y-2 ${isRtlLanguage(quranPreferences.primaryLanguage) ? "text-right" : ""}`}>
+                            <div className={`space-y-4 ${isRtlLanguage(quranPreferences.primaryLanguage) ? "text-right" : ""}`}>
                                 <p>
                                     <strong>[{i.verse_id}]</strong> {i.ws_quran_text[quranPreferences.primaryLanguage]}
                                 </p>
@@ -56,9 +57,7 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                                 )}
 
                                 {quranPreferences.arabic && (
-                                    <p className="text-right text-lg">
-                                        {i.ws_quran_text.arabic}
-                                    </p>
+                                    <ArabicDetailed props={{ data: i }} />
                                 )}
 
                                 {quranPreferences.transliteration && (

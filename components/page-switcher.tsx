@@ -22,6 +22,11 @@ const modes = {
     icon: "/graphics/book.png",
     href: "/quran",
   },
+  prayertimes: {
+    label: "Prayer Times",
+    icon: "/graphics/heart.png",
+    href: "/prayer-times",
+  },
   downloads: {
     label: "Downloads",
     icon: "/graphics/nineteen.png",

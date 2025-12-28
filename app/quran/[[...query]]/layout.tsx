@@ -9,8 +9,6 @@ import { ChevronLeftIcon } from "lucide-react";
 import Link from "next/link";
 import MetricsCollector from "./mini-components/metrics-collector";
 
-export const dynamic = "force-dynamic";
-
 export default async function QuranLayout({ children }: { children: React.ReactNode }) {
 
     const chaptersResult = await ws.supabase.from("ws_quran_chapters").select("*");
@@ -25,8 +23,12 @@ export default async function QuranLayout({ children }: { children: React.ReactN
                 <SidebarInset>
                     {/* Header */}
                     <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-                        <SidebarTrigger className="-ml-1 bg-secondary/50 rounded-full p-4 hover:bg-secondary/70 cursor-pointer lg:hidden" />
-                        <PageSwitcher currentPage="quran" />
+                        <SidebarTrigger
+                            className="-ml-1 bg-secondary/50 rounded-full p-4 hover:bg-secondary/70 cursor-pointer lg:hidden"
+                        />
+                        <PageSwitcher
+                            currentPage="quran"
+                        />
                         <Link href="/quran">
                             <Button size="icon-sm" variant="ghost">
                                 <ChevronLeftIcon />

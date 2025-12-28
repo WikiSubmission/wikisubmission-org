@@ -35,13 +35,11 @@ export function SearchItemAllMatches({ props }: { props: { results: SearchHit | 
                     </section>
                 }
 
-                {'arabic' in props.results &&
-                    <section className="text-rtl text-right text-lg">
-                        <p>
-                            {props.results.arabic}
-                        </p>
-                    </section>
-                }
+                <section dir="rtl">
+                    <p className="text-right text-xl tracking-widest">
+                        {props.results.arabic}
+                    </p>
+                </section>
             </div>
         )
     } else if (props.results.hit === "subtitle") {

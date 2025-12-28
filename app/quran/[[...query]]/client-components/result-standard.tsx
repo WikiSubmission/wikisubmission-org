@@ -8,7 +8,7 @@ import { StandardItemVerses } from "../mini-components/standard-item-verses";
 
 export function StandardResult({ props }: { props: { query: string, data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
     return (
-        <div className="space-y-8">
+        <div className="space-y-4">
             <StandardItemTitle props={props} />
             <StandardItemVerses props={props} />
 

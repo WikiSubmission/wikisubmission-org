@@ -9,14 +9,21 @@ import { About } from "@/constants/about";
 import Image from "next/image";
 import Link from "next/link";
 import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub } from "react-icons/fa";
+import { ClockIcon } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
+import { GeometryDots } from "@/components/geometry-dots";
+import { ThemeToggle } from "@/components/toggles/theme-toggle";
 
 export default function Home() {
   return (
     <main className="flex flex-col min-h-screen items-center justify-center text-center space-y-8 md:p-24 p-4">
-      <PageSwitcher currentPage="home" />
+      <div className="flex justify-between items-center gap-2">
+        <PageSwitcher currentPage="home" />
+        <ThemeToggle />
+      </div>
+      <GeometryDots />
       <Image
-        src="/brand-assets/logo-black.png"
+        src="/brand-assets/logo-transparent.png"
         alt="WikiSubmission Logo"
         width={72}
         height={72}
@@ -27,8 +34,6 @@ export default function Home() {
           WikiSubmission
         </h1>
       </section>
-
-      <hr className="w-xs" />
 
       <section className="space-y-2 w-full max-w-xs">
         <section className="flex flex-col">
@@ -43,7 +48,7 @@ export default function Home() {
                 </ItemDescription>
               </ItemContent>
               <ItemActions>
-                <Image src="/brand-assets/logo-transparent.png" className="size-6 rounded-full" alt="Quran" width={500} height={500} />
+                <Image src="/brand-assets/logo-transparent.png" className="size-6 rounded-full" alt="Quran: The Final Testament" width={500} height={500} />
                 <FaChevronRight className="size-4" />
               </ItemActions>
             </Link>
@@ -52,7 +57,26 @@ export default function Home() {
 
         <section className="flex flex-col">
           <Item asChild variant="outline">
-            <Link href="https://apps.apple.com/us/app/submission-religion-of-god/id6444260632" target="_blank" rel="noopener noreferrer">
+            <Link href="/prayer-times">
+              <ItemContent>
+                <ItemTitle>
+                  Prayer Times
+                </ItemTitle>
+                <ItemDescription>
+                  Accurate Daily Timings
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <ClockIcon className="size-6 text-violet-600" />
+                <FaChevronRight className="size-4" />
+              </ItemActions>
+            </Link>
+          </Item>
+        </section>
+
+        <section className="flex flex-col">
+          <Item asChild variant="outline">
+            <Link href="https://apps.apple.com/app/id6444260632" target="_blank" rel="noopener noreferrer">
               <ItemContent>
                 <ItemTitle>
                   iOS App

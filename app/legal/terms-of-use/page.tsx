@@ -26,7 +26,7 @@ export default function TermsOfService() {
     <main className="flex flex-col min-h-screen items-center justify-center text-center space-y-8 md:p-24 p-4">
       <Link href="/">
         <Image
-          src="/brand-assets/logo-black.png"
+          src="/brand-assets/logo-transparent.png"
           alt="WikiSubmission Logo"
           width={72}
           height={72}

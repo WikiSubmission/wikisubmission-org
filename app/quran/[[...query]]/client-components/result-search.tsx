@@ -212,6 +212,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                         )}
 
                         {/* Content */}
+                        {/* Main Results */}
                         <TabsContent value="all" className="space-y-2">
                             {searchChapterMatches.length > 0 && (
                                 <section className="space-y-2">
@@ -222,24 +223,13 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                     ))}
                                 </section>
                             )}
-                            <div>
-                                <section className="space-y-2">
-                                    {searchAllMatches.filter((r) => {
-                                        const fields: ("text" | "subtitle" | "footnote")[] = [];
-
-                                        if (quranPreferences.text) fields.push("text");
-                                        if (quranPreferences.subtitles) fields.push("subtitle");
-                                        if (quranPreferences.footnotes) fields.push("footnote");
-
-                                        return fields.some((f) => r.hit.includes(f));
-                                    }).map((r) => (
-                                        <div key={`all:${r.hit}:${'verse_id' in r ? r.verse_id : ''}`}>
-                                            <SearchItemAllMatches props={{ results: r }} />
-                                        </div>
-                                    ))}
-                                </section>
-                            </div>
+                            {searchAllMatches.map((r) => (
+                                <div key={`all:${r.hit}:${'verse_id' in r ? r.verse_id : ''}:${'word_index' in r ? r.word_index : ''}`}>
+                                    <SearchItemAllMatches props={{ results: r }} />
+                                </div>
+                            ))}
                         </TabsContent>
+                        {/* Word Search Results */}
                         <TabsContent value="words">
                             <div className="space-y-2">
                                 {loadingWordByWord && (

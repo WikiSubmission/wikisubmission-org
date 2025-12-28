@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { About } from "@/constants/about";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Page() {
   const router = useRouter();
@@ -11,13 +12,15 @@ export default function Page() {
     <div>
       <main className="flex flex-col min-h-screen items-center justify-center space-y-8">
         <div className="flex gap-4">
-          <Image
-            src="/brand-assets/logo-black.png"
-            alt="WikiSubmission Logo"
-            width={72}
-            height={72}
-            className="rounded-full"
-          />
+          <Link href="/">
+            <Image
+              src="/brand-assets/logo-transparent.png"
+              alt="WikiSubmission Logo"
+              width={72}
+              height={72}
+              className="rounded-full"
+            />
+          </Link>
         </div>
         <p className="w-xs text-center">
           Sorry, we couldn&apos;t find what you were looking for.
