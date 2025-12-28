@@ -10,9 +10,10 @@ import { FeaturedCard } from '@/components/music/featured-card';
 import { TrackRow } from '@/components/music/track-row';
 import { MusicPlayer } from '@/components/music/music-player';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Info, Heart, Music2, Search, Clock, Repeat } from 'lucide-react';
+import { Info, Heart, Music2, Search, Clock, Repeat, PlusSquare } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function ZikrPage() {
     const { allTracks, categories, isLoading, favorites, loopMode, currentTrack, playbackContext } = useMusic();
@@ -35,7 +36,15 @@ export default function ZikrPage() {
             {/* Nav Header */}
             <div className="w-full max-w-5xl px-4 h-16 flex items-center justify-between z-10 top-0 bg-background/50 backdrop-blur-md">
                 <PageSwitcher currentPage="music" />
-                <ThemeToggle />
+                <div className="flex items-center gap-2">
+                    <Link href={`mailto:contact@wikisubmission.org?subject=Music/Zikr Track Submission&body=Please provide track and artist information here.`}>
+                        <Button variant="outline" size="sm">
+                            <PlusSquare />
+                            Submit Track
+                        </Button>
+                    </Link>
+                    <ThemeToggle />
+                </div>
             </div>
 
             <Link href="/">
