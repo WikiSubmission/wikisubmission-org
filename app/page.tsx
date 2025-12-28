@@ -9,7 +9,7 @@ import { About } from "@/constants/about";
 import Image from "next/image";
 import Link from "next/link";
 import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub } from "react-icons/fa";
-import { ClockIcon } from "lucide-react";
+import { HeartIcon } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
 import { GeometryDots } from "@/components/geometry-dots";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
@@ -63,11 +63,11 @@ export default function Home() {
                   Prayer Times
                 </ItemTitle>
                 <ItemDescription>
-                  Accurate Daily Timings
+                  Accurate daily timings
                 </ItemDescription>
               </ItemContent>
               <ItemActions>
-                <ClockIcon className="size-6 text-violet-600" />
+                <HeartIcon className="size-6" />
                 <FaChevronRight className="size-4" />
               </ItemActions>
             </Link>
@@ -116,8 +116,6 @@ export default function Home() {
           More coming soon.
         </p>
       </section>
-
-      <hr className="w-xs" />
 
       <section className="max-w-md flex flex-wrap gap-4 [&>a]:hover:text-violet-600">
         <Link href={About.social.github}>

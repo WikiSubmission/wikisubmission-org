@@ -5,7 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
 import { GeometryDots } from "@/components/geometry-dots";
-import { SearchIcon, MapPinIcon, ClockIcon, AlertCircleIcon, ChevronRight } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { SearchIcon, MapPinIcon, ClockIcon, AlertCircleIcon, ChevronRight, InfoIcon, ShareIcon } from "lucide-react";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -13,6 +16,7 @@ import Image from "next/image";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
 import Link from "next/link";
 import { FaApple } from "react-icons/fa";
+import { toast } from "sonner";
 
 export default function PrayerTimesPage() {
     return (
@@ -42,13 +46,14 @@ function PrayerTimesContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const initialQuery = searchParams.get('q') || '';
+    const asrAdjustment = searchParams.get('asr_adjustment') === 'true';
 
     const [searchQuery, setSearchQuery] = useState(initialQuery);
     const [data, setData] = useState<PrayerTimesResponse | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchPrayerTimes = useCallback(async (location: string) => {
+    const fetchPrayerTimes = useCallback(async (location: string, adjustment: boolean) => {
         if (!location) {
             setData(null);
             return;
@@ -57,7 +62,8 @@ function PrayerTimesContent() {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`https://practices.wikisubmission.org/prayer-times/${encodeURIComponent(location)}`);
+            const url = `https://practices.wikisubmission.org/prayer-times/${encodeURIComponent(location)}${adjustment ? '?asr_adjustment=true' : ''}`;
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Location not found');
             }
@@ -73,18 +79,37 @@ function PrayerTimesContent() {
 
     useEffect(() => {
         if (initialQuery) {
-            fetchPrayerTimes(initialQuery);
+            fetchPrayerTimes(initialQuery, asrAdjustment);
         }
-    }, [initialQuery, fetchPrayerTimes]);
+    }, [initialQuery, asrAdjustment, fetchPrayerTimes]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         const trimmed = searchQuery.trim();
         if (trimmed) {
-            const params = new URLSearchParams(searchParams);
+            const params = new URLSearchParams(searchParams.toString());
             params.set('q', trimmed);
             router.push(`/prayer-times?${params.toString()}`);
         }
+    };
+
+    const toggleAsrAdjustment = (checked: boolean) => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (checked) {
+            params.set('asr_adjustment', 'true');
+        } else {
+            params.delete('asr_adjustment');
+        }
+        router.replace(`/prayer-times?${params.toString()}`, { scroll: false });
+    };
+
+    const handleShare = () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            toast.success("URL copied to clipboard");
+        }).catch(() => {
+            toast.error("Failed to copy URL");
+        });
     };
 
     const prayerOrder = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
@@ -93,18 +118,40 @@ function PrayerTimesContent() {
         <div className="w-full max-w-lg mx-auto space-y-8">
 
             {/* Search Section */}
-            <form onSubmit={handleSearch} className="w-full relative group">
-                <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
-                <Input
-                    type="search"
-                    placeholder="Search city..."
-                    className="pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
-                    value={searchQuery}
-                    onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                    }}
-                />
-            </form>
+            <div className="space-y-4">
+                <form onSubmit={handleSearch} className="w-full relative group">
+                    <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
+                    <Input
+                        type="search"
+                        placeholder="Search city..."
+                        className="pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </form>
+
+                <div className="flex items-center justify-end space-x-2 px-1 -mt-2">
+                    <div className="flex items-center gap-1.5">
+                        <Label htmlFor="asr-method" className="text-[10px] text-muted-foreground font-light cursor-pointer">
+                            Asr: use midpoint method
+                        </Label>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <InfoIcon className="size-3 text-muted-foreground/50 hover:text-muted-foreground cursor-help transition-colors" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[200px] text-center">
+                                Midpoint method refers to the exact mid-point between noon and sunset, which starts slightly earlier than traditional methods.
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+                    <Switch
+                        id="asr-method"
+                        checked={asrAdjustment}
+                        onCheckedChange={toggleAsrAdjustment}
+                        className="scale-75 origin-right"
+                    />
+                </div>
+            </div>
 
             {loading && (
                 <div className="space-y-4 pt-8">
@@ -205,7 +252,17 @@ function PrayerTimesContent() {
                         </Item>
                     </section>
 
-                    <footer className="flex items-center gap-2 text-[10px] text-muted-foreground justify-center uppercase tracking-widest pt-4">
+                    <footer className="flex flex-col items-center gap-2 text-[10px] text-muted-foreground justify-center uppercase tracking-widest pt-4">
+                        <button
+                            onClick={handleShare}
+                            className="flex items-center gap-2 text-violet-600 hover:text-violet-500 transition-colors cursor-pointer focus:outline-none"
+                        >
+                            <ShareIcon className="size-3" />
+                            <p>
+                                SHARE THIS PAGE
+                            </p>
+                        </button>
+                        <span>{`${data.coordinates.latitude}°N, ${data.coordinates.longitude}°E`}</span>
                         <span>{data.local_timezone}</span>
                     </footer>
                 </div>

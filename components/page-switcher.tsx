@@ -74,14 +74,14 @@ export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
                     alt=""
                     width={500}
                     height={500}
-                    className={`size-4 rounded-full ${isActive ? "opacity-100" : "opacity-60"}`}
+                    className={`size-4 rounded-full ${isActive ? "opacity-100" : "opacity-100"}`}
                   />
                 ) : (
                   React.createElement(modeIcon, {
                     className: `size-4 ${isActive ? "text-primary" : "text-muted-foreground"}`
                   })
                 )}
-                <span>{mode.label}</span>
+                <span className={`text-xs ${isActive ? "text-violet-600" : "text-primary"}`}>{mode.label}</span>
               </Link>
             </DropdownMenuItem>
           )

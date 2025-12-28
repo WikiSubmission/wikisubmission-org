@@ -29,11 +29,6 @@ export default async function QuranLayout({ children }: { children: React.ReactN
                         <PageSwitcher
                             currentPage="quran"
                         />
-                        <Link href="/quran">
-                            <Button size="icon-sm" variant="ghost">
-                                <ChevronLeftIcon />
-                            </Button>
-                        </Link>
                         <QuranSearchbar />
                         <QuranSettings />
                     </header>
