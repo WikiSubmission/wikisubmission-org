@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 export default function PrayerTimesPage() {
     return (
-        <main className="min-h-screen text-foreground flex flex-col items-center">
+        <main className="min-h-screen text-foreground flex flex-col items-center p-4 md:p-2">
             <GeometryDots />
 
             {/* Minimal Header */}
