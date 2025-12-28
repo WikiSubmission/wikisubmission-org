@@ -29,10 +29,10 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
 
     return (
         <main>
-            <section className="space-y-2 bg-muted/50 rounded-2xl">
+            <section className="bg-muted/50 rounded-2xl">
                 {props.data.data.map((i) => (
-                    <div id={i.verse_id} key={i.verse_id} >
-                        <div className={`p-4 rounded-2xl space-y-4 ${isHighlighted && i.verse_id === `${props.data.data[0].chapter_number}:${verseSearchParam}` ? "bg-muted/100 ease-in-out" : ""}`}>
+                    <div id={i.verse_id} key={i.verse_id} className={`${isHighlighted && i.verse_id === `${props.data.data[0].chapter_number}:${verseSearchParam}` ? "bg-muted/100 ease-in-out" : ""}`}>
+                        <div className={`p-4 rounded-2xl space-y-4`}>
                             {i.ws_quran_subtitles && quranPreferences.subtitles && (
                                 <p className="text-sm text-violet-600 text-center">
                                     {
