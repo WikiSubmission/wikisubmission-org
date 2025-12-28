@@ -7,7 +7,7 @@ import Link from "next/link";
 export function SearchItemAllMatches({ props }: { props: { results: SearchHit | SearchHitText | SearchHitSubtitle | SearchHitFootnote } }) {
     const quranPreferences = useQuranPreferences();
 
-    if (props.results.hit === "text") {
+    if (props.results.hit === "text" && quranPreferences.text) {
         return (
             <div className="space-y-2 bg-muted/50 rounded-2xl p-4">
                 <Link
@@ -42,7 +42,7 @@ export function SearchItemAllMatches({ props }: { props: { results: SearchHit | 
                 </section>
             </div>
         )
-    } else if (props.results.hit === "subtitle") {
+    } else if (props.results.hit === "subtitle" && quranPreferences.subtitles) {
         return (
             <div className="space-y-2 bg-muted/50 rounded-2xl p-4">
                 <Link
@@ -62,7 +62,7 @@ export function SearchItemAllMatches({ props }: { props: { results: SearchHit | 
                 </section>
             </div>
         )
-    } else if (props.results.hit === "footnote") {
+    } else if (props.results.hit === "footnote" && quranPreferences.footnotes) {
         return (
             <div className="space-y-2 bg-muted/50 rounded-2xl p-4 text-muted-foreground">
                 <Link
