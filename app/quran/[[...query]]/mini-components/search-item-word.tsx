@@ -8,7 +8,7 @@ export function SearchItemWord({ verse }: { verse: SearchHitWordByWord }) {
         <div className="space-y-2 bg-muted/50 rounded-2xl p-4">
             <div className="flex justify-between items-center">
                 <Link
-                    href={`/quran/${verse.chapter_number}?verse=${verse.verse_number}`}
+                    href={`/quran/${verse.chapter_number}?verse=${verse.verse_number}&word=${verse.word_index}`}
                     target="_blank"
                     className="flex items-center gap-1 w-fit text-xs text-muted-foreground tracking-wider text-violet-600 hover:cursor-pointer"
                 >
