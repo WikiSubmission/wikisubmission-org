@@ -10,10 +10,10 @@ import { FeaturedCard } from '@/components/music/featured-card';
 import { TrackRow } from '@/components/music/track-row';
 import { MusicPlayer } from '@/components/music/music-player';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Info, Heart, Music2, Search, Clock } from 'lucide-react';
+import { Info, Heart, Music2, Search, Clock, Repeat } from 'lucide-react';
 
 export default function ZikrPage() {
-    const { allTracks, categories, isLoading, favorites } = useMusic();
+    const { allTracks, categories, isLoading, favorites, loopMode, currentTrack, playbackContext } = useMusic();
     const [searchQuery, setSearchQuery] = useState('');
 
     const featuredTracks = allTracks.filter(t => t.featured);
@@ -64,7 +64,7 @@ export default function ZikrPage() {
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-24 space-y-4">
                         <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-                        <p className="text-muted-foreground animate-pulse font-medium">Preparing your spiritual journey...</p>
+                        <p className="text-muted-foreground animate-pulse font-medium">Loading tracks...</p>
                     </div>
                 ) : (
                     <>
@@ -116,10 +116,18 @@ export default function ZikrPage() {
                                     categories.map(category => {
                                         const tracksInCategory = allTracks.filter(t => t.category.id === category.id);
                                         if (tracksInCategory.length === 0) return null;
+                                        const isLoopingContext = loopMode === 'context' && playbackContext === 'category' && currentTrack?.category.id === category.id;
+
                                         return (
                                             <div key={category.id} className="space-y-4">
-                                                <h3 className="text-xl font-bold pl-2 border-l-4 border-accent">
+                                                <h3 className="text-xl font-bold flex items-center gap-3">
                                                     {category.name}
+                                                    {isLoopingContext && (
+                                                        <span className="flex items-center gap-1.5 text-xs font-medium text-accent bg-accent/20 px-2 py-0.5 rounded-full animate-pulse">
+                                                            <Repeat className="w-3 h-3" />
+                                                            Looping
+                                                        </span>
+                                                    )}
                                                 </h3>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                     {tracksInCategory.map(track => (

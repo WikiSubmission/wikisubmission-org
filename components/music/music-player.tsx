@@ -68,9 +68,9 @@ export function MusicPlayer() {
                                         variant="ghost"
                                         size="icon"
                                         className={cn(
-                                            "h-8 w-8 transition-colors",
-                                            loopMode === 'context' ? "text-accent" :
-                                                loopMode === 'repeatOne' ? "text-violet-400" :
+                                            "h-8 w-8 transition-all",
+                                            loopMode === 'context' ? "text-indigo-500 bg-indigo-500/10" :
+                                                loopMode === 'repeatOne' ? "text-violet-500 bg-violet-500/10" :
                                                     "text-muted-foreground"
                                         )}
                                         onClick={() => {
@@ -78,7 +78,7 @@ export function MusicPlayer() {
                                             else if (loopMode === 'context') setLoopMode('repeatOne');
                                             else setLoopMode('off');
                                         }}
-                                        title={loopMode === 'context' ? "Current Category" : loopMode === 'repeatOne' ? "Current Track" : "One-time"}
+                                        title={loopMode === 'context' ? "Loop Category" : loopMode === 'repeatOne' ? "Loop Track" : "Loop Off"}
                                     >
                                         {loopMode === 'repeatOne' ? <Repeat1 className="w-4 h-4" /> : <Repeat className="w-4 h-4" />}
                                     </Button>
@@ -86,12 +86,12 @@ export function MusicPlayer() {
                                         <SkipBack className="w-5 h-5" fill="currentColor" />
                                     </Button>
                                     <Button
-                                        variant="secondary"
+                                        variant="default"
                                         size="icon"
-                                        className="h-10 w-10 bg-violet-600/10 hover:bg-violet-600/20 text-violet-600 dark:text-violet-400 rounded-full border border-violet-500/20"
+                                        className="h-11 w-11 bg-accent text-accent-foreground rounded-full shadow-lg shadow-accent/20 hover:scale-105 transition-transform"
                                         onClick={togglePlayPause}
                                     >
-                                        {isPlaying ? <Pause className="w-5 h-5" fill="currentColor" /> : <Play className="w-5 h-5 ml-0.5" fill="currentColor" />}
+                                        {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 ml-0.5 fill-current" />}
                                     </Button>
                                     <Button variant="ghost" size="icon" className="h-9 w-9" onClick={skipNext}>
                                         <SkipForward className="w-5 h-5" fill="currentColor" />
@@ -122,12 +122,12 @@ export function MusicPlayer() {
                             {/* Mobile Play/Pause & Next */}
                             <div className="flex md:hidden items-center gap-1 pr-2 ml-auto">
                                 <Button
-                                    variant="secondary"
+                                    variant="default"
                                     size="icon"
-                                    className="h-10 w-10 bg-violet-600/10 hover:bg-violet-600/20 text-violet-600 dark:text-violet-400 rounded-full border border-violet-500/20"
+                                    className="h-10 w-10 bg-accent text-accent-foreground rounded-full shadow-lg shadow-accent/20"
                                     onClick={togglePlayPause}
                                 >
-                                    {isPlaying ? <Pause className="w-5 h-5" fill="currentColor" /> : <Play className="w-5 h-5" fill="currentColor" />}
+                                    {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
                                 </Button>
                                 <Button variant="ghost" size="icon" className="h-10 w-10" onClick={skipNext}>
                                     <SkipForward className="w-5 h-5" fill="currentColor" />
@@ -178,18 +178,12 @@ export function MusicPlayer() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className={cn(
-                                        "h-8 w-8 transition-colors",
-                                        loopMode === 'context' ? "text-accent" :
-                                            loopMode === 'repeatOne' ? "text-violet-400" :
-                                                "text-muted-foreground"
-                                    )}
+                                    className={cn("h-8 w-8 text-muted-foreground", loopMode !== 'off' && "text-accent")}
                                     onClick={() => {
                                         if (loopMode === 'off') setLoopMode('context');
                                         else if (loopMode === 'context') setLoopMode('repeatOne');
                                         else setLoopMode('off');
                                     }}
-                                    title={loopMode === 'context' ? "Current Category" : loopMode === 'repeatOne' ? "Current Track" : "One-time"}
                                 >
                                     {loopMode === 'repeatOne' ? <Repeat1 className="w-4 h-4" /> : <Repeat className="w-4 h-4" />}
                                 </Button>
@@ -239,7 +233,7 @@ export function MusicPlayer() {
                                 <TrackRow
                                     key={`${track.id}-${i}`}
                                     track={track}
-                                    context={undefined} // Don't reset queue when clicking from queue
+                                    context={null} // Don't reset queue when clicking from queue
                                 />
                             ))}
                         </div>

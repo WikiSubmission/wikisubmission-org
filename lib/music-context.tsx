@@ -90,7 +90,9 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
                         const track = formattedTracks.find(t => t.id === trackId);
                         if (track) {
                             setCurrentTrack(track);
-                            setQueue(formattedTracks);
+                            const categoryTracks = formattedTracks.filter(t => t.category.id === track.category.id);
+                            setQueue(categoryTracks);
+                            setPlaybackContext('category');
                         }
                     }
                 }
@@ -138,6 +140,17 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
         const audio = new Audio();
         audioRef.current = audio;
 
+        return () => {
+            audio.pause();
+            audio.src = '';
+            audioRef.current = null;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!audioRef.current) return;
+        const audio = audioRef.current;
+
         const handleTimeUpdate = () => {
             if (audio.duration) {
                 setCurrentTime(audio.currentTime);
@@ -166,9 +179,8 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
             audio.removeEventListener('timeupdate', handleTimeUpdate);
             audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
             audio.removeEventListener('ended', handleEnded);
-            audio.pause();
         };
-    }, [loopMode, handleSkipNext]); // Removed queue/currentTrack since handleSkipNext is stabilized
+    }, [loopMode, handleSkipNext]);
 
     useEffect(() => {
         if (!audioRef.current) return;
