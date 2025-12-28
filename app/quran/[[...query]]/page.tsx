@@ -55,7 +55,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
 
     let title = `Quran | The Final Testament | WikiSubmission`;
     let description = `Access the Final Testament at WikiSubmission, a free and open-source platform for Submission.`;
-    let openGraph = {
+    const openGraph = {
         images: [
             {
                 url: "/brand-assets/logo-transparent.png",
