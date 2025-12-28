@@ -9,17 +9,10 @@ export default function HomeScreenSuggestions() {
         { label: "Charity", query: "2:261" },
         { label: "Abraham's Religion", query: "2:124" },
         { label: "Jesus", query: "19:22" },
-        { label: "Mathematical Miracle", query: "74:0" },
-        { label: "Verse of the Throne", query: "2:255" },
-        { label: "Night of Destiny", query: "97:0" },
         { label: "Story of Joseph", query: "12:0" },
-        { label: "God Alone", query: "39:45" },
         { label: "No Compulsion", query: "2:256" },
         { label: "Creation", query: "21:30" },
-        { label: "Seven Pairs", query: "15:87" },
         { label: "Forbidden Food", query: "6:145" },
-        { label: "Fasting", query: "2:183" },
-        { label: "Iron", query: "57:25" }
     ];
 
     return (
