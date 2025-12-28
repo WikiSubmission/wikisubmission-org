@@ -18,7 +18,7 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
         const element = document.getElementById(`${props.data.data[0].chapter_number}:${verseSearchParam}`);
         if (!element) return;
 
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.scrollIntoView({ block: "center" });
 
         // Wrap state update in requestAnimationFrame
         requestAnimationFrame(() => {

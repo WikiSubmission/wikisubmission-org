@@ -37,13 +37,15 @@ export default function Resources() {
         <main className="space-y-6 p-8">
             <PageSwitcher currentPage="downloads" />
             <div className="flex flex-col items-center gap-4 mb-6">
-                <Image
-                    src="/brand-assets/logo-black.png"
-                    alt="WikiSubmission Logo"
-                    width={64}
-                    height={64}
-                    className="rounded-full"
-                />
+                <Link href="/">
+                    <Image
+                        src="/brand-assets/logo-transparent.png"
+                        alt="WikiSubmission Logo"
+                        width={64}
+                        height={64}
+                        className="rounded-full"
+                    />
+                </Link>
                 <div className="text-center">
                     <h1 className="text-2xl font-semibold">Downloads & Resources</h1>
                     <p className="text-sm text-muted-foreground">Free books and resources for Submission</p>
