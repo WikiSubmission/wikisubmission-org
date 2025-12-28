@@ -71,7 +71,7 @@ export default function ZikrPage() {
                 </div>
             </div>
 
-            <div className="w-full max-w-5xl px-4 z-10 space-y-12">
+            <div className="w-full max-w-5xl px-4 z-10 space-y-8">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-24 space-y-4">
                         <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin" />
@@ -81,7 +81,7 @@ export default function ZikrPage() {
                     <>
                         {/* Featured Section */}
                         {!searchQuery && featuredTracks.length > 0 && (
-                            <section className="space-y-6">
+                            <section>
                                 <div className="flex items-center justify-between px-2">
                                     <h2 className="text-2xl font-bold flex items-center gap-2">
                                         <Music2 className="text-accent" /> Featured
@@ -99,7 +99,7 @@ export default function ZikrPage() {
 
                         {/* Main Content Tabs */}
                         <Tabs defaultValue="all" className="w-full">
-                            <div className="flex items-center justify-between mb-8 overflow-x-auto custom-scrollbar">
+                            <div className="flex items-center justify-between mb-4 overflow-x-auto custom-scrollbar">
                                 <TabsList className="bg-muted/30 p-1 rounded-2xl">
                                     <TabsTrigger value="all" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm px-6">Explore</TabsTrigger>
                                     <TabsTrigger value="favorites" className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm px-6 flex items-center gap-2">
