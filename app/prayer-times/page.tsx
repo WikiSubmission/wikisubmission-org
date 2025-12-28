@@ -30,11 +30,13 @@ export default function PrayerTimesPage() {
             </div>
 
             <div className="w-full max-w-2xl px-4 py-12 md:py-24 z-10">
-                <Image src="/brand-assets/logo-transparent.png" alt="WikiSubmission Logo"
-                    width={125}
-                    height={125}
-                    className="justify-center items-center mx-auto rounded-full my-4"
-                />
+                <Link href="/">
+                    <Image src="/brand-assets/logo-transparent.png" alt="WikiSubmission Logo"
+                        width={125}
+                        height={125}
+                        className="justify-center items-center mx-auto rounded-full my-4"
+                    />
+                </Link>
                 <Suspense fallback={<div className="text-center opacity-20"><ClockIcon className="size-8 mx-auto animate-spin" /></div>}>
                     <PrayerTimesContent />
                 </Suspense>
