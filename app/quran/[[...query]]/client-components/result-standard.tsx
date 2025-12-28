@@ -2,14 +2,26 @@
 
 import { QueryResultChapter, QueryResultMultipleVerses, QueryResultVerse } from "wikisubmission-sdk/lib/quran/v1/query-result";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookIcon, ChevronRight } from "lucide-react";
 import { StandardItemTitle } from "../mini-components/standard-item-title";
 import { StandardItemVerses } from "../mini-components/standard-item-verses";
+import Link from "next/link";
 
 export function StandardResult({ props }: { props: { query: string, data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
     return (
         <div className="space-y-4">
             <StandardItemTitle props={props} />
+            <div>
+                {(props.data.data.length - 1) !== props.data.data[0].chapter_verses && (
+                    <Link href={`/quran/${props.data.data[0].chapter_number}?verse=${props.data.data[0].verse_number}`}>
+                        <Button variant="secondary" size="sm">
+                            <BookIcon />
+                            Load full chapter
+                            <ChevronRight />
+                        </Button>
+                    </Link>
+                )}
+            </div>
             <StandardItemVerses props={props} />
 
             {/* Navigation */}

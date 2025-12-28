@@ -10,7 +10,7 @@ import Image from "next/image";
 export default async function QuranUtilitiesRow() {
     const randomVerse = await ws.Quran.randomVerse();
     return (
-        <main className="p-2 flex items-center justify-between rounded-2xl space-x-4">
+        <main className="flex items-center justify-between rounded-2xl space-x-4 border border-muted/50 p-2">
             <div>
                 <Link href="/quran">
                     <div className={`flex items-center ${Fonts.geistMono.className} bg-muted/50 rounded-lg text-center`}>
@@ -21,7 +21,7 @@ export default async function QuranUtilitiesRow() {
                     </div>
                 </Link>
             </div>
-            <div className="flex justify-end space-y-2 space-x-1">
+            <div className="flex justify-end space-x-1">
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button variant="outline" size="icon-sm" asChild>

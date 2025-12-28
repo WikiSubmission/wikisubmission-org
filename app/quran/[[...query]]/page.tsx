@@ -5,6 +5,8 @@ import SearchResult from "./client-components/result-search";
 import HomeScreenRandomVerse from "./mini-components/home-random-verse";
 import HomeScreenMetrics from "./mini-components/home-metrics";
 import QuranUtilitiesRow from "./mini-components/home-utilities";
+import HomeScreenSuggestions from "./mini-components/home-suggestions";
+import Image from "next/image";
 
 export const metadata: Metadata = {
     title: "Quran - WikiSubmission",
@@ -37,7 +39,18 @@ export default async function QuranPage({ params, searchParams }: { params: { qu
                     <div className="space-y-2">
                         <QuranUtilitiesRow />
                         <HomeScreenMetrics />
+                        <Image
+                            src="/brand-assets/logo-transparent.png"
+                            alt="WikiSubmission Logo"
+                            width={125}
+                            height={125}
+                            className="mx-auto"
+                        />
+                        <hr className="my-6 w-xs mx-auto" />
+                        <HomeScreenSuggestions />
+                        <hr className="my-6 w-xs mx-auto" />
                         <HomeScreenRandomVerse />
+                        <hr className="my-6 w-xs mx-auto" />
                     </div>
                 )}
             </section>
