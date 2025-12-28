@@ -90,8 +90,8 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
       wikisubmission-sdk:
-        specifier: ^2.0.6
-        version: 2.0.6
+        specifier: ^2.0.7
+        version: 2.0.7
       zod:
         specifier: ^4.2.1
         version: 4.2.1
@@ -2889,8 +2889,8 @@ packages:
     engines: {node: '>= 8'}
     hasBin: true
 
-  wikisubmission-sdk@2.0.6:
-    resolution: {integrity: sha512-qe+rSq1IZ236OBwVgASnNr7JF354K3OUTMzpqnY2+Ka4x4Yg7sRL1JSMvePNO/JheVyxNyCd3WLrK9HmqgtcQg==}
+  wikisubmission-sdk@2.0.7:
+    resolution: {integrity: sha512-RT2f3KeaWJozwlJfkQYHBeUGL3Xbf2yNz+dcRHNtedjh11vO20gPzn9l+4t+oy3nMNHhjffIjkstJsfAzKgCRA==}
 
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
@@ -5910,7 +5910,7 @@ snapshots:
     dependencies:
       isexe: 2.0.0
 
-  wikisubmission-sdk@2.0.6:
+  wikisubmission-sdk@2.0.7:
     dependencies:
       '@supabase/supabase-js': 2.89.0
       zod: 3.25.76
