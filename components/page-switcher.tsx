@@ -21,6 +21,12 @@ const modes = {
     icon: <BookIcon className="size-4" />,
     href: "/quran",
   },
+  bible: {
+    label: "Bible",
+    icon: <BookIcon className="size-4" />,
+    href: "/bible",
+    comingSoon: true,
+  },
   prayertimes: {
     label: "Prayer Times",
     icon: <HeartIcon className="size-4" />,
@@ -66,11 +72,11 @@ export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
           const isActive = key === currentPage
 
           return (
-            <DropdownMenuItem key={key} asChild>
+            <DropdownMenuItem key={key} asChild disabled={'comingSoon' in mode}>
               <Link
                 href={mode.href}
                 className={`flex items-center gap-2 ${isActive ? "bg-accent" : ""
-                  }`}
+                  } ${'comingSoon' in mode ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 {isIconString ? (
                   <Image
@@ -83,7 +89,7 @@ export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
                 ) : (
                   modeIcon
                 )}
-                <span className={`text-xs ${isActive ? "text-violet-600" : "text-primary"}`}>{mode.label}</span>
+                <span className={`text-xs ${isActive ? "text-violet-600" : "text-primary"}`}>{mode.label}{'comingSoon' in mode ? " (coming soon)" : ""}</span>
               </Link>
             </DropdownMenuItem>
           )
