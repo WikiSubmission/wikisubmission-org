@@ -9,7 +9,7 @@ import { About } from "@/constants/about";
 import Image from "next/image";
 import Link from "next/link";
 import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub } from "react-icons/fa";
-import { HeartIcon, Music2Icon } from "lucide-react";
+import { DownloadIcon, HeartIcon, Music2Icon } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
 import { GeometryDots } from "@/components/geometry-dots";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
@@ -106,6 +106,25 @@ export default function Home() {
               </ItemContent>
               <ItemActions>
                 <FaApple className="size-6" />
+                <FaChevronRight className="size-4" />
+              </ItemActions>
+            </Link>
+          </Item>
+        </section>
+
+        <section className="flex flex-col">
+          <Item asChild variant="outline">
+            <Link href="/downloads">
+              <ItemContent>
+                <ItemTitle>
+                  Downloads
+                </ItemTitle>
+                <ItemDescription>
+                  Free resources & PDFs
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <DownloadIcon className="size-6" />
                 <FaChevronRight className="size-4" />
               </ItemActions>
             </Link>
