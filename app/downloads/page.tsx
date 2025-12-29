@@ -16,10 +16,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink, ChevronRight } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import { PageSwitcher } from "@/components/page-switcher";
 import { FaApple } from "react-icons/fa";
+import Image from "next/image";
+import Link from "next/link";
 
 const LinkButton = ({ href, label }: { href: string; label: string }) => (
     <a
@@ -32,24 +32,26 @@ const LinkButton = ({ href, label }: { href: string; label: string }) => (
     </a>
 );
 
-export default function Resources() {
+export default function Downloads() {
     return (
         <main className="space-y-6 p-8">
             <PageSwitcher currentPage="downloads" />
-            <div className="flex flex-col items-center gap-4 mb-6">
-                <Link href="/">
-                    <Image
-                        src="/brand-assets/logo-transparent.png"
-                        alt="WikiSubmission Logo"
-                        width={64}
-                        height={64}
-                        className="rounded-full"
-                    />
-                </Link>
-                <div className="text-center">
-                    <h1 className="text-2xl font-semibold">Downloads & Resources</h1>
-                    <p className="text-sm text-muted-foreground">Free books and resources for Submission</p>
-                </div>
+            <Link href="/">
+                <Image
+                    src="/brand-assets/logo-transparent.png"
+                    alt="WikiSubmission Logo"
+                    width={64}
+                    height={64}
+                    className="rounded-full mx-auto mb-6"
+                />
+            </Link>
+            <div className="flex-grow space-y-4 text-center md:text-left">
+                <h1 className="text-5xl md:text-7xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic">
+                    DOWNLOADS
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-md mx-auto md:mx-0">
+                    Free books, research papers, and resources for Submission.
+                </p>
             </div>
 
             {/* Main Resources */}
@@ -223,6 +225,7 @@ export default function Resources() {
                                     ["English", "quran-the-final-testament"],
                                     ["Turkish", "quran-the-final-testament-turkish"],
                                     ["French", "quran-the-final-testament-french"],
+                                    ["Spanish", "quran-the-final-testament-spanish"],
                                     ["Persian", "quran-the-final-testament-persian"],
                                     ["Tamil", "quran-the-final-testament-tamil"],
                                     ["Hindi", "quran-the-final-testament-hindi"],
