@@ -4,8 +4,16 @@
 import React, { useState } from 'react';
 import { useMusic } from '@/lib/music-context';
 import { generateColors, formatTime } from '@/lib/music-utils';
-import { Play, Pause, SkipBack, SkipForward, Repeat, Repeat1, ListMusic, Heart, Volume2 } from 'lucide-react';
+import {
+    Play, Pause, SkipBack, SkipForward, Repeat, Repeat1,
+    ListMusic, Heart, Volume2, Volume1, Volume, VolumeX
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
@@ -139,16 +147,26 @@ export function MusicPlayer() {
 
                             {/* Right Section (Desktop) */}
                             <div className="hidden md:flex items-center justify-end gap-2 md:w-1/3">
-                                <div className="flex items-center gap-2 px-3 text-muted-foreground">
-                                    <Volume2 className="w-4 h-4" />
-                                    <Slider
-                                        value={[volume * 100]}
-                                        min={0}
-                                        max={100}
-                                        onValueChange={(val) => setVolume(val[0] / 100)}
-                                        className="w-24"
-                                    />
-                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground">
+                                            {volume === 0 ? <VolumeX className="w-5 h-5" /> : volume < 0.33 ? <Volume className="w-5 h-5" /> : volume < 0.66 ? <Volume1 className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent side="top" align="center" className="w-12 py-4 flex flex-col items-center gap-3">
+                                        <div className="h-32">
+                                            <Slider
+                                                value={[volume * 100]}
+                                                min={0}
+                                                max={100}
+                                                orientation="vertical"
+                                                onValueChange={(val) => setVolume(val[0] / 100)}
+                                                className="h-full !min-h-0"
+                                            />
+                                        </div>
+                                        <span className="text-[10px] font-medium text-muted-foreground tabular-nums">{Math.round(volume * 100)}%</span>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -214,20 +232,29 @@ export function MusicPlayer() {
                                 >
                                     <Heart className={cn("w-5 h-5", isFav && "fill-current")} />
                                 </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground">
+                                            {volume === 0 ? <VolumeX className="w-5 h-5" /> : volume < 0.33 ? <Volume className="w-5 h-5" /> : volume < 0.66 ? <Volume1 className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent side="top" align="center" className="w-12 py-4 flex flex-col items-center gap-3">
+                                        <div className="h-32">
+                                            <Slider
+                                                value={[volume * 100]}
+                                                min={0}
+                                                max={100}
+                                                orientation="vertical"
+                                                onValueChange={(val) => setVolume(val[0] / 100)}
+                                                className="h-full !min-h-0"
+                                            />
+                                        </div>
+                                        <span className="text-[10px] font-medium text-muted-foreground tabular-nums">{Math.round(volume * 100)}%</span>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                                 <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground" onClick={() => setIsQueueOpen(true)}>
                                     <ListMusic className="w-5 h-5" />
                                 </Button>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-muted-foreground px-2 pb-1">
-                                <Volume2 className="w-4 h-4" />
-                                <Slider
-                                    value={[volume * 100]}
-                                    min={0}
-                                    max={100}
-                                    onValueChange={(val) => setVolume(val[0] / 100)}
-                                    className="flex-grow"
-                                />
                             </div>
                         </div>
                     </div>
