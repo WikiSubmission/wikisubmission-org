@@ -201,6 +201,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                         }
                                         router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
                                     }}
+                                    disabled={searchQuery.split(" ").length <= 1}
                                 />
                                 <Label htmlFor="strict-mode" className="text-xs text-muted-foreground select-none cursor-pointer">
                                     Strict Search
