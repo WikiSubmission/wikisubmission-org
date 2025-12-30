@@ -64,6 +64,18 @@ export default function SearchResult({ props }: { props: { query: string } }) {
             }
         });
 
+        if (strict) {
+            if (query.status !== "success") {
+                toast.error("No matches with strict search", {
+                    description: "Switching back to standard search",
+                });
+                const params = new URLSearchParams(searchParams.toString());
+                params.delete("strict");
+                router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
+                return;
+            }
+        }
+
         if (query.status === "success") {
             if (query.type === "verse") {
                 router.replace(
