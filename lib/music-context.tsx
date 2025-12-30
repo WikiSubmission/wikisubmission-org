@@ -34,7 +34,29 @@ interface MusicContextType {
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
 
-export function MusicProvider({ children }: { children: React.ReactNode }) {
+function formatTracks(data: DBTrackRow[]): UnifiedTrack[] {
+    return data.map((row: DBTrackRow) => ({
+        id: row.id,
+        title: row.name,
+        url: row.url,
+        artist: row.artistObj as DBArtist,
+        category: row.categoryObj as DBCategory,
+        releaseDate: new Date(row.release_date || '2025-01-01'),
+        featured: row.featured || false,
+    }));
+}
+
+export function MusicProvider({
+    children,
+    initialTracks = [],
+    initialCategories = [],
+    initialArtists = []
+}: {
+    children: React.ReactNode;
+    initialTracks?: DBTrackRow[];
+    initialCategories?: DBCategory[];
+    initialArtists?: DBArtist[];
+}) {
     const [currentTrack, setCurrentTrack] = useState<UnifiedTrack | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [loopMode, setLoopMode] = useLocalStorage<LoopMode>('zikr_loop_mode', 'context');
@@ -46,15 +68,34 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
 
-    const [allTracks, setAllTracks] = useState<UnifiedTrack[]>([]);
-    const [categories, setCategories] = useState<DBCategory[]>([]);
-    const [artists, setArtists] = useState<DBArtist[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    // Initialize with props if available
+    const [allTracks, setAllTracks] = useState<UnifiedTrack[]>(() => formatTracks(initialTracks));
+    const [categories, setCategories] = useState<DBCategory[]>(initialCategories);
+    const [artists, setArtists] = useState<DBArtist[]>(initialArtists);
+    const [isLoading, setIsLoading] = useState(initialTracks.length === 0);
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    // Initial Fetch
+    // Initial Fetch (only if no initial data)
     useEffect(() => {
+        if (initialTracks.length > 0) {
+            // If we have initial data, we still might need to check URL params for initial track
+            const params = new URLSearchParams(window.location.search);
+            const trackId = params.get('track');
+            if (trackId) {
+                const formatted = formatTracks(initialTracks);
+                const track = formatted.find(t => t.id === trackId);
+                if (track) {
+                    setCurrentTrack(track);
+                    const categoryTracks = formatted.filter(t => t.category.id === track.category.id);
+                    setQueue(categoryTracks);
+                    setPlaybackContext('category');
+                }
+            }
+            setIsLoading(false);
+            return;
+        }
+
         async function fetchData() {
             try {
                 const { data: tracksData } = await ws.supabase
@@ -73,15 +114,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
                     .order('display_priority', { ascending: false });
 
                 if (tracksData) {
-                    const formattedTracks: UnifiedTrack[] = tracksData.map((row: DBTrackRow) => ({
-                        id: row.id,
-                        title: row.name,
-                        url: row.url,
-                        artist: row.artistObj as DBArtist,
-                        category: row.categoryObj as DBCategory,
-                        releaseDate: new Date(row.release_date || '2025-01-01'),
-                        featured: row.featured || false,
-                    }));
+                    const formattedTracks = formatTracks(tracksData);
                     setAllTracks(formattedTracks);
 
                     const params = new URLSearchParams(window.location.search);
@@ -105,7 +138,7 @@ export function MusicProvider({ children }: { children: React.ReactNode }) {
             }
         }
         fetchData();
-    }, []);
+    }, [initialTracks]);
 
     const handleSkipNext = useCallback(() => {
         if (queue.length === 0) return;
