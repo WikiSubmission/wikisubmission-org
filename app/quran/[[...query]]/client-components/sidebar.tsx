@@ -92,7 +92,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                                     <SidebarMenuButton asChild className="h-auto py-2 px-2.5 hover:bg-accent/50">
                                         <Link href="/quran">
                                             <p className="text-xs">
-                                                Main Page
+                                                Quran
                                             </p>
                                         </Link>
                                     </SidebarMenuButton>
