@@ -10,14 +10,15 @@ import { ArrowRightIcon, SearchIcon } from "lucide-react";
 import { SearchHitWordByWord } from "wikisubmission-sdk/lib/quran/v1/query-result";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { useQuranPreferences } from "@/hooks/use-quran-preferences";
 import { SearchItemWord } from "../mini-components/search-item-word";
 import { SearchItemChapter } from "../mini-components/search-item-chapter-match";
 import { StandardResult } from "./result-standard";
 import { SearchItemTitle } from "../mini-components/search-item-title";
 import { SearchItemAllMatches } from "../mini-components/search-item-all-maches";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function SearchResult({ props }: { props: { query: string } }) {
@@ -173,17 +174,39 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                     >
 
                         {/* Tab Selection */}
-                        <TabsList className="flex [&>*]:text-xs">
-                            <TabsTrigger value="all">
-                                Results ({(searchTextMatches.length + searchChapterMatches.length + searchSubtitleMatches.length + searchFootnoteMatches.length).toString()})
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="words"
-                            >
-                                <SearchIcon />
-                                Word Search{searchWordByWordMatches.length > 0 ? searchWordByWordMatches.length > 2999 ? " (3,000+)" : ` (${searchWordByWordMatches.length})` : ""}
-                            </TabsTrigger>
-                        </TabsList>
+                        <div className="flex justify-between items-center">
+                            <TabsList className="flex [&>*]:text-xs">
+                                <TabsTrigger value="all">
+                                    Results ({(searchTextMatches.length + searchChapterMatches.length + searchSubtitleMatches.length + searchFootnoteMatches.length).toString()})
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="words"
+                                >
+                                    <SearchIcon />
+                                    Word Search{searchWordByWordMatches.length > 0 ? searchWordByWordMatches.length > 2999 ? " (3,000+)" : ` (${searchWordByWordMatches.length})` : ""}
+                                </TabsTrigger>
+                            </TabsList>
+
+                            {/* Strict Mode Toggle */}
+                            <div className="flex items-center gap-2">
+                                <Switch
+                                    id="strict-mode"
+                                    checked={searchParams.get("strict") === "true"}
+                                    onCheckedChange={(checked) => {
+                                        const params = new URLSearchParams(searchParams.toString());
+                                        if (checked) {
+                                            params.set("strict", "true");
+                                        } else {
+                                            params.delete("strict");
+                                        }
+                                        router.replace(`${window.location.pathname}?${params.toString()}`, { scroll: false });
+                                    }}
+                                />
+                                <Label htmlFor="strict-mode" className="text-xs text-muted-foreground select-none cursor-pointer">
+                                    Strict Search
+                                </Label>
+                            </div>
+                        </div>
 
                         {/* Tab Filters */}
                         {searchTab === "all" && (
