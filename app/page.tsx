@@ -187,7 +187,7 @@ export default function Home() {
 
       <section className="max-w-sm text-center text-xs text-muted-foreground space-y-2">
         <p>
-          WikiSubmission is a 501(c)(3) nonprofit organization.  We provide free and open-source technology, educational resources, and creative media.
+          WikiSubmission is a faith-based 501(c)(3) nonprofit organization providing free and open-source technology, educational resources, and creative media.
         </p>
       </section>
 
