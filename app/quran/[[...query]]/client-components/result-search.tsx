@@ -37,6 +37,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
     const didInitRef = useRef(false);
     const lastQueryRef = useRef<string | null>(null);
+    const lastStrictRef = useRef<string | null>(searchParams.get("strict"));
 
     const runQuery = useCallback(async () => {
         setSearchTab("all");
@@ -46,9 +47,11 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
         setLoading(true);
 
+        const strict = searchParams.get("strict") === "true";
+
         const query = await ws.Quran.query(decodeURIComponent(searchQuery), {
             language: quranPreferences.primaryLanguage,
-            strategy: "default",
+            strategy: strict ? "strict" : "default",
             highlight: true,
             normalizeGodCasing: true,
             adjustments: {
@@ -74,7 +77,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
         }
 
         setLoading(false);
-    }, [searchQuery, router, quranPreferences.primaryLanguage]);
+    }, [searchQuery, router, quranPreferences.primaryLanguage, searchParams]);
 
     const runWordByWordQuery = useCallback(async (field: "english" | "meanings") => {
         if (searchWordByWordMatches.length > 0) return;
@@ -112,10 +115,13 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     }, [searchQuery, searchWordByWordMatches]);
 
     useEffect(() => {
+        const currentStrict = searchParams.get("strict");
         const isNewQuery = searchQuery !== lastQueryRef.current;
+        const isNewStrict = currentStrict !== lastStrictRef.current;
 
-        if (isNewQuery) {
+        if (isNewQuery || isNewStrict) {
             lastQueryRef.current = searchQuery;
+            lastStrictRef.current = currentStrict;
             // eslint-disable-next-line react-hooks/set-state-in-effect
             if (searchQuery) runQuery();
             return;
@@ -128,7 +134,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 runWordByWordQuery("english");
             }
         }
-    }, [searchQuery, forceTab, runQuery, runWordByWordQuery]);
+    }, [searchQuery, forceTab, runQuery, runWordByWordQuery, searchParams]);
 
     const searchAllMatches = results?.type === "search" ? results.data : [];
     const searchChapterMatches = results?.type === "search" ? searchAllMatches.filter((r) => r.hit === "chapter") : [];
