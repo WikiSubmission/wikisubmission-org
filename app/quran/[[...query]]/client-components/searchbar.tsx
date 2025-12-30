@@ -22,6 +22,7 @@ export default function QuranSearchbar() {
     const formRef = useRef<HTMLFormElement>(null);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
 
