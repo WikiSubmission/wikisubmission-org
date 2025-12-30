@@ -169,7 +169,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                         {/* Tab Selection */}
                         <TabsList className="flex [&>*]:text-xs">
                             <TabsTrigger value="all">
-                                Results ({searchAllMatches.length})
+                                Results ({(searchTextMatches.length + searchChapterMatches.length + searchSubtitleMatches.length + searchFootnoteMatches.length).toString()})
                             </TabsTrigger>
                             <TabsTrigger
                                 value="words"
