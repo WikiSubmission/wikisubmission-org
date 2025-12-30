@@ -76,7 +76,7 @@ export function SearchItemAllMatches({ props }: { props: { results: SearchHit | 
                     <ArrowUpRightIcon className="size-4" />
                 </Link>
                 <section>
-                    <p className="italic">
+                    <p className="italic text-sm">
                         {highlightMarkdown(props.results.english)}
                     </p>
                 </section>
