@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function QuranSearchbar() {
     const searchParams = useSearchParams();
@@ -22,28 +22,38 @@ export default function QuranSearchbar() {
         }
     }, [searchParams]);
 
+    const performSearch = useCallback((queryToSearch: string) => {
+        if (queryToSearch) {
+            // If there's a search query, reset to root /quran and only include the 'q' param
+            replace(`/quran?q=${decodeURIComponent(queryToSearch)}`);
+        } else {
+            // If cleared, just remove 'q' from existing params and stay on current pathname
+            const params = new URLSearchParams(searchParams);
+            params.delete('q');
+            const queryString = params.toString();
+            replace(`${pathname}${queryString ? `?${decodeURIComponent(queryString)}` : ""}`);
+        }
+    }, [pathname, replace, searchParams]);
+
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
             const currentQ = searchParams.get('q')?.toString() || "";
             if (searchQuery === currentQ) return;
 
-            if (searchQuery) {
-                // If there's a search query, reset to root /quran and only include the 'q' param
-                replace(`/quran?q=${decodeURIComponent(searchQuery)}`);
-            } else {
-                // If cleared, just remove 'q' from existing params and stay on current pathname
-                const params = new URLSearchParams(searchParams);
-                params.delete('q');
-                const queryString = params.toString();
-                replace(`${pathname}${queryString ? `?${decodeURIComponent(queryString)}` : ""}`);
-            }
+            performSearch(searchQuery);
         }, 700);
 
         return () => clearTimeout(delayDebounceFn);
-    }, [searchQuery, searchParams, pathname, replace]);
+    }, [searchQuery, searchParams, performSearch]);
 
     return (
-        <div className="relative w-full">
+        <form
+            className="relative w-full"
+            onSubmit={(e) => {
+                e.preventDefault();
+                performSearch(searchQuery);
+            }}
+        >
             <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
             <Input
                 type="search"
@@ -54,6 +64,6 @@ export default function QuranSearchbar() {
                     setSearchQuery(e.target.value);
                 }}
             />
-        </div>
+        </form>
     );
 }
