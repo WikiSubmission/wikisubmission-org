@@ -8,7 +8,7 @@ import {
 import { About } from "@/constants/about";
 import Image from "next/image";
 import Link from "next/link";
-import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub } from "react-icons/fa";
+import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub, FaHeart, FaEnvelope } from "react-icons/fa";
 import { DownloadIcon, HeartIcon, Music2Icon } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
 import { GeometryDots } from "@/components/geometry-dots";
@@ -29,10 +29,20 @@ export default function Home() {
         height={72}
         className="rounded-full"
       />
-      <section className="max-w-sm flex gap-4 max-w-md items-center">
+      <section className="max-w-sm flex flex-col gap-4 max-w-md items-center">
         <h1 className="text-3xl font-semibold">
           WikiSubmission
         </h1>
+
+        <div className="bg-muted/50 p-2 rounded-md space-y-2">
+          <div className="text-sm font-light text-muted-foreground">
+            <b>Submission</b> is the religion whereby we recognize God&apos;s absolute authority, and reach an unshakeable conviction that God <i>alone</i> possesses all power; no other entity possesses any power that is independent of Him.
+
+          </div>
+          <p className="italic text-xs font-light text-muted-foreground">
+            (Deuteronomy 6:4-5, Luke 12:29-30, Quran 3:18)
+          </p>
+        </div>
       </section>
 
       <section className="space-y-2 w-full max-w-xs">
@@ -41,7 +51,7 @@ export default function Home() {
             <Link href="/quran">
               <ItemContent>
                 <ItemTitle>
-                  The Final Testament
+                  Final Testament
                 </ItemTitle>
                 <ItemDescription>
                   Read on the Web
@@ -53,6 +63,27 @@ export default function Home() {
               </ItemActions>
             </Link>
           </Item>
+        </section>
+
+        <section className="space-y-2 w-full max-w-xs">
+          <section className="flex flex-col">
+            <Item asChild variant="outline">
+              <Link href="/bible" className="opacity-50 cursor-not-allowed">
+                <ItemContent>
+                  <ItemTitle>
+                    The Bible
+                  </ItemTitle>
+                  <ItemDescription>
+                    Coming Soon
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <Image src="/brand-assets/logo-transparent.png" className="size-6 rounded-full" alt="Quran: The Final Testament" width={500} height={500} />
+                  <FaChevronRight className="size-4" />
+                </ItemActions>
+              </Link>
+            </Item>
+          </section>
         </section>
 
         <section className="flex flex-col">
@@ -149,10 +180,30 @@ export default function Home() {
             </Link>
           </Item>
         </section>
+      </section>
 
-        <p className="text-sm text-violet-600 tracking-widest" >
-          More coming soon.
-        </p>
+      <section className="max-w-sm text-center text-xs text-muted-foreground space-y-2">
+        <div className="bg-muted/50 p-2 rounded-md">
+          <p>
+            WikiSubmission is a faith-based 501(c)(3) nonprofit organization providing free and open-source technology, educational resources, and creative media.
+          </p>
+        </div>
+      </section>
+
+      <section className="flex flex-wrap items-center gap-4 [&>section]:text-center [&>section]:justify-center">
+        <section className="flex flex-wrap gap-2 text-xs text-muted-foreground [&>a]:hover:text-violet-600">
+          <Link href="/donate" className="flex items-center gap-2">
+            <FaHeart className="size-3" />
+            Donate
+          </Link>
+        </section>
+
+        <section className="flex flex-wrap gap-2 text-xs text-muted-foreground [&>a]:hover:text-violet-600">
+          <Link href="/contact" className="flex items-center gap-2">
+            <FaEnvelope className="size-3" />
+            Contact
+          </Link>
+        </section>
       </section>
 
       <section className="max-w-md flex flex-wrap gap-4 [&>a]:hover:text-violet-600">
@@ -170,25 +221,14 @@ export default function Home() {
         </Link>
       </section>
 
+
       <section className="flex flex-wrap gap-2 text-xs text-muted-foreground [&>a]:hover:text-violet-600">
-        <Link href="/contact">
-          Contact
-        </Link>
         <Link href="/legal/terms-of-use">
           Terms of Use
         </Link>
         <Link href="/legal/privacy-policy">
           Privacy Policy
         </Link>
-        <Link href="/donate">
-          Donate
-        </Link>
-      </section>
-
-      <section className="max-w-sm text-center text-xs text-muted-foreground space-y-2">
-        <p>
-          WikiSubmission is a faith-based 501(c)(3) nonprofit organization providing free and open-source technology, educational resources, and creative media.
-        </p>
       </section>
 
       <section className="max-w-sm text-center text-xs text-muted-foreground tracking-widest font-mono">
