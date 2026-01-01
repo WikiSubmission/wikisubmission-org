@@ -183,7 +183,7 @@ export default function Home() {
               We believe that all religions share a common foundation in the worship of God and the submission to God alone. By focusing on this central truth, we aim to promote universal unity and to bridge the gap between all world religions.
             </p>
             <p className="italic">
-              &quot;Anyone who submits to God and devotes the worship to God ALONE is a Submitter. One may be a Jewish Submitter, a Christian Submitter, a Buddhist Submitter, a Hindu Submitter, or a Muslim Submitter. &quot;
+              &quot;Anyone who submits to God and devotes the worship to God ALONE is a Submitter. One may be a Jewish Submitter, a Christian Submitter, a Buddhist Submitter, a Hindu Submitter, or a Muslim Submitter.&quot;
             </p>
 
             <p className="italic">
