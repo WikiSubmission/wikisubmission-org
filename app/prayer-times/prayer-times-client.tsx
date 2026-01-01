@@ -139,7 +139,7 @@ function PrayerTimesContent() {
                     <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
                     <Input
                         type="search"
-                        placeholder="Search city..."
+                        placeholder="Search location..."
                         className="pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
