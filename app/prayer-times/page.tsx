@@ -26,7 +26,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
         description: "Get live prayer times information and daily schedule for any location",
         openGraph: {
             title: "Prayer Times | WikiSubmission",
-            description: "Get live prayer times information and daily schedule for any location.",
+            description: "Get live prayer times information and daily schedule for any location",
         },
     };
 }
