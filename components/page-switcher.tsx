@@ -1,6 +1,6 @@
 "use client"
 
-import { BookIcon, ChevronDown, DownloadIcon, HeartIcon, Music2Icon } from "lucide-react"
+import { BookIcon, ChevronDown, DownloadIcon, HeartIcon, Music2Icon, MoonIcon } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,21 +27,26 @@ const modes = {
     href: "/bible",
     comingSoon: true,
   },
-  prayertimes: {
-    label: "Prayer Times",
-    icon: <HeartIcon className="size-4" />,
-    href: "/prayer-times",
-  },
   music: {
     label: "Music",
     icon: <Music2Icon className="size-4" />,
     href: "/music",
   },
+  prayertimes: {
+    label: "Prayer Times",
+    icon: <HeartIcon className="size-4" />,
+    href: "/prayer-times",
+  },
+  ramadan: {
+    label: "Ramadan",
+    icon: <MoonIcon className="size-4" />,
+    href: "/ramadan"
+  },
   downloads: {
     label: "Downloads",
     icon: <DownloadIcon className="size-4" />,
     href: "/downloads",
-  }
+  },
 }
 
 type Mode = keyof typeof modes

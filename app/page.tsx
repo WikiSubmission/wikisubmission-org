@@ -9,7 +9,7 @@ import { About } from "@/constants/about";
 import Image from "next/image";
 import Link from "next/link";
 import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub, FaHeart, FaEnvelope } from "react-icons/fa";
-import { DownloadIcon, HeartIcon, Music2Icon } from "lucide-react";
+import { DownloadIcon, HeartIcon, Music2Icon, MoonIcon } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
 import { GeometryDots } from "@/components/geometry-dots";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
@@ -108,6 +108,25 @@ export default function Home() {
               </ItemContent>
               <ItemActions>
                 <HeartIcon className="size-6" />
+                <FaChevronRight className="size-4" />
+              </ItemActions>
+            </Link>
+          </Item>
+        </section>
+
+        <section className="flex flex-col">
+          <Item asChild variant="outline">
+            <Link href="/ramadan">
+              <ItemContent>
+                <ItemTitle>
+                  Ramadan
+                </ItemTitle>
+                <ItemDescription>
+                  Fasting schedule
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <MoonIcon className="size-6" />
                 <FaChevronRight className="size-4" />
               </ItemActions>
             </Link>
