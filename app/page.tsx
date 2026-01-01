@@ -8,7 +8,7 @@ import {
 import { About } from "@/constants/about";
 import Image from "next/image";
 import Link from "next/link";
-import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub, FaHeart, FaEnvelope, FaInfo, FaInfoCircle } from "react-icons/fa";
+import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub, FaHeart, FaEnvelope } from "react-icons/fa";
 import { DownloadIcon, HeartIcon, Music2Icon } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
 import { GeometryDots } from "@/components/geometry-dots";
