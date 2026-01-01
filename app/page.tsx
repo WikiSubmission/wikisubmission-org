@@ -172,7 +172,7 @@ export default function Home() {
         </section>
       </section>
 
-      <section className="max-w-sm text-center text-xs text-muted-foreground space-y-2">
+      <section className="max-w-xs md:max-w-sm text-center text-xs text-muted-foreground space-y-2">
         <div className="bg-muted/50 p-2 rounded-md">
           <Image src="/brand-assets/logo-transparent.png" className="mx-auto mb-2 size-6 rounded-full" alt="Quran: The Final Testament" width={500} height={500} />
           <div className="flex flex-col space-y-2">
