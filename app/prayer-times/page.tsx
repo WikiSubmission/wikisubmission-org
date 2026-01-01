@@ -64,7 +64,10 @@ function PrayerTimesContent() {
         setLoading(true);
         setError(null);
         try {
-            const url = `https://practices.wikisubmission.org/prayer-times/${encodeURIComponent(location)}${adjustment ? '?asr_adjustment=true' : ''}`;
+            const params = new URLSearchParams();
+            if (adjustment) params.set('asr_adjustment', 'true');
+            params.set('include_schedule', 'true');
+            const url = `https://practices.wikisubmission.org/prayer-times/${encodeURIComponent(location)}?${params.toString()}`;
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Location not found');
@@ -183,56 +186,66 @@ function PrayerTimesContent() {
                         <h2 className="text-lg font-semibold">{data.status_string}</h2>
                     </header>
 
-                    <div className="divide-y divide-border/40">
-                        {prayerOrder.map((prayer) => {
-                            const isCurrent = data.current_prayer.toLowerCase() === prayer;
-                            const isUpcoming = data.upcoming_prayer.toLowerCase() === prayer;
-                            const timeLeft = data.times_left[prayer as keyof typeof data.times_left];
-                            const isUrgent = timeLeft && !timeLeft.includes('h');
+                    <div className="overflow-hidden rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-border/40 text-muted-foreground uppercase tracking-widest text-[10px]">
+                                    <th className="py-3 px-4 text-left font-medium">Prayer</th>
+                                    <th className="py-3 px-4 text-right font-medium">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border/20">
+                                {prayerOrder.map((prayer) => {
+                                    const isCurrent = data.current_prayer.toLowerCase() === prayer;
+                                    const isUpcoming = data.upcoming_prayer.toLowerCase() === prayer;
+                                    const timeLeft = data.times_left[prayer as keyof typeof data.times_left];
+                                    const isUrgent = timeLeft && !timeLeft.includes('h');
 
-                            return (
-                                <div
-                                    key={prayer}
-                                    className={cn(
-                                        "flex items-center justify-between py-4 px-2 hover:bg-muted/30 transition-colors",
-                                        isCurrent && "bg-violet-50 dark:bg-violet-900/10 rounded-lg -mx-4 px-6 border-l-2 border-violet-600"
-                                    )}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        {isCurrent && <ClockIcon className="size-3.5 text-violet-600 animate-pulse" />}
-                                        <div className="flex flex-col">
-                                            <div className="flex items-center gap-2">
-                                                <span className={cn(
-                                                    "capitalize text-sm font-medium",
-                                                    isCurrent ? "text-violet-600" : "text-muted-foreground"
-                                                )}>
-                                                    {prayer}
-                                                </span>
-                                                {isUpcoming && timeLeft && (
+                                    return (
+                                        <tr
+                                            key={prayer}
+                                            className={cn(
+                                                "transition-colors",
+                                                isCurrent ? "bg-violet-500/10" : "hover:bg-muted/30"
+                                            )}
+                                        >
+                                            <td className="py-4 px-4">
+                                                <div className="flex items-center gap-2">
+                                                    {isCurrent && <ClockIcon className="size-3.5 text-violet-600 animate-pulse flex-shrink-0" />}
                                                     <span className={cn(
-                                                        "text-[10px] normal-case",
-                                                        isUrgent ? "text-red-600 font-bold animate-pulse" : "text-muted-foreground font-light"
+                                                        "capitalize font-medium",
+                                                        isCurrent ? "text-violet-600" : "text-foreground"
                                                     )}>
-                                                        in {timeLeft}
+                                                        {prayer}
                                                     </span>
-                                                )}
-                                                {isCurrent && data.current_prayer_time_elapsed && (
-                                                    <span className="text-[10px] normal-case text-violet-600 font-light">
-                                                        started {data.current_prayer_time_elapsed} ago
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span className={cn(
-                                        "text-sm font-mono tabular-nums",
-                                        isCurrent ? "font-bold text-violet-600" : "text-foreground"
-                                    )}>
-                                        {data.times[prayer as keyof typeof data.times]}
-                                    </span>
-                                </div>
-                            );
-                        })}
+                                                    {isUpcoming && timeLeft && (
+                                                        <span className={cn(
+                                                            "text-[10px] normal-case leading-none mt-0.5",
+                                                            isUrgent ? "text-red-600 font-bold animate-pulse" : "text-muted-foreground font-light"
+                                                        )}>
+                                                            in {timeLeft}
+                                                        </span>
+                                                    )}
+                                                    {isCurrent && data.current_prayer_time_elapsed && (
+                                                        <span className="text-[10px] normal-case leading-none mt-0.5 text-violet-600 font-light">
+                                                            {data.current_prayer_time_elapsed} ago
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="py-4 px-4 text-right">
+                                                <span className={cn(
+                                                    "font-mono tabular-nums",
+                                                    isCurrent ? "font-bold text-violet-600" : "text-foreground"
+                                                )}>
+                                                    {data.times[prayer as keyof typeof data.times]}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     </div>
 
                     <section className="flex flex-col">
@@ -267,6 +280,57 @@ function PrayerTimesContent() {
                         <span>{`${data.coordinates.latitude}°N, ${data.coordinates.longitude}°E`}</span>
                         <span>{data.local_timezone}</span>
                     </footer>
+
+                    <hr />
+
+                    {data.schedule && (
+                        <div className="space-y-6">
+                            <div className="text-center space-y-1">
+                                <h3 className="text-sm font-semibold uppercase tracking-wider">Monthly Schedule</h3>
+                                <p className="text-[10px] text-muted-foreground">PREVIEWING THE NEXT 30 DAYS</p>
+                            </div>
+                            <div className="overflow-x-auto -mx-4 px-4 pb-4">
+                                <table className="w-full text-[10px] sm:text-xs">
+                                    <thead>
+                                        <tr className="border-b border-border/40 text-muted-foreground uppercase tracking-wider">
+                                            <th className="py-2 text-left font-medium">Date</th>
+                                            <th className="py-2 text-center font-medium">Fajr</th>
+                                            <th className="py-2 text-center font-medium">Sunrise</th>
+                                            <th className="py-2 text-center font-medium">Noon</th>
+                                            <th className="py-2 text-center font-medium">Asr</th>
+                                            <th className="py-2 text-center font-medium">Maghrib</th>
+                                            <th className="py-2 text-center font-medium">Isha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border/20">
+                                        {data.schedule.map((day, index) => {
+                                            const isToday = index === 0;
+                                            return (
+                                                <tr key={day.date} className={cn(
+                                                    "hover:bg-muted/30 transition-colors group relative",
+                                                    isToday && "bg-violet-600/10 dark:bg-violet-400/10"
+                                                )}>
+                                                    <td className="py-2.5 pr-4 whitespace-nowrap px-2 relative">
+                                                        {isToday && <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-600" />}
+                                                        <div className="flex flex-col ml-1">
+                                                            <span className={cn("font-semibold", isToday && "text-violet-600")}>{day.day.split(',')[0]}</span>
+                                                            <span className="text-muted-foreground/60">{day.day.split(',')[1]}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.fajr.replace(' AM', '').replace(' PM', '')}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.sunrise.replace(' AM', '').replace(' PM', '')}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.dhuhr.replace(' AM', '').replace(' PM', '')}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.asr.replace(' AM', '').replace(' PM', '')}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.maghrib.replace(' AM', '').replace(' PM', '')}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.isha.replace(' AM', '').replace(' PM', '')}</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
@@ -318,4 +382,17 @@ interface PrayerTimesResponse {
     upcoming_prayer: string;
     current_prayer_time_elapsed: string;
     upcoming_prayer_time_left: string;
+    schedule?: {
+        date: string;
+        day: string;
+        times: {
+            fajr: string;
+            sunrise: string;
+            dhuhr: string;
+            asr: string;
+            sunset: string;
+            maghrib: string;
+            isha: string;
+        };
+    }[];
 }
