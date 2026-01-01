@@ -6,8 +6,9 @@ import { useMusic } from '@/lib/music-context';
 import { generateColors, formatTime } from '@/lib/music-utils';
 import {
     Play, Pause, SkipBack, SkipForward, Repeat, Repeat1,
-    ListMusic, Heart, Volume2, Volume1, Volume, VolumeX
+    ListMusic, Heart, Volume2, Volume1, Volume, VolumeX, Download
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import {
     DropdownMenu,
@@ -28,6 +29,23 @@ export function MusicPlayer() {
     } = useMusic();
 
     const [isQueueOpen, setIsQueueOpen] = useState(false);
+
+    const handleDownload = () => {
+        if (!currentTrack) return;
+
+        const filename = `${currentTrack.artist.name} - ${currentTrack.title}.mp3`;
+        const downloadUrl = `/api/download?url=${encodeURIComponent(currentTrack.url)}&filename=${encodeURIComponent(filename)}`;
+
+        // Use a hidden link to trigger the download from our proxy API
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        toast.success("Download started");
+    };
 
     if (!currentTrack) return null;
 
@@ -171,6 +189,15 @@ export function MusicPlayer() {
                                     variant="ghost"
                                     size="icon"
                                     className="h-10 w-10 text-muted-foreground hover:text-foreground"
+                                    onClick={handleDownload}
+                                    title="Download Track"
+                                >
+                                    <Download className="w-5 h-5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 text-muted-foreground hover:text-foreground"
                                     onClick={() => setIsQueueOpen(true)}
                                 >
                                     <ListMusic className="w-5 h-5" />
@@ -232,6 +259,7 @@ export function MusicPlayer() {
                                 >
                                     <Heart className={cn("w-5 h-5", isFav && "fill-current")} />
                                 </Button>
+
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground">
@@ -252,6 +280,14 @@ export function MusicPlayer() {
                                         <span className="text-[10px] font-medium text-muted-foreground tabular-nums">{Math.round(volume * 100)}%</span>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 text-muted-foreground hover:text-foreground"
+                                    onClick={handleDownload}
+                                >
+                                    <Download className="w-5 h-5" />
+                                </Button>
                                 <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground" onClick={() => setIsQueueOpen(true)}>
                                     <ListMusic className="w-5 h-5" />
                                 </Button>
