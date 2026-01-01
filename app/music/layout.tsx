@@ -35,9 +35,9 @@ export default async function MusicLayout({ children }: { children: React.ReactN
                 .order('display_priority', { ascending: false })
         ]);
 
-        if (tracksRes.data) tracks = tracksRes.data as unknown as DBTrackRow[];
-        if (catsRes.data) categories = catsRes.data as DBCategory[];
-        if (artistsRes.data) artists = artistsRes.data as DBArtist[];
+        if (tracksRes.data) tracks = tracksRes.data;
+        if (catsRes.data) categories = catsRes.data;
+        if (artistsRes.data) artists = artistsRes.data;
     } catch (e) {
         console.error("Failed to fetch music data server-side:", e);
     }
