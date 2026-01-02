@@ -32,6 +32,11 @@ const modes = {
     icon: <Music2Icon className="size-4" />,
     href: "/music",
   },
+  search: {
+    label: "Search",
+    icon: <SearchIcon className="size-4" />,
+    href: "/search"
+  },
   prayertimes: {
     label: "Prayer Times",
     icon: <HeartIcon className="size-4" />,
@@ -41,11 +46,6 @@ const modes = {
     label: "Ramadan",
     icon: <MoonIcon className="size-4" />,
     href: "/ramadan"
-  },
-  search: {
-    label: "Search",
-    icon: <SearchIcon className="size-4" />,
-    href: "/search"
   },
   downloads: {
     label: "Downloads",
