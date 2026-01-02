@@ -67,6 +67,7 @@ function SearchContent() {
     const [mediaResults, setMediaResults] = useState<MediaRow[] | null>(null);
     const [newsletterResults, setNewsletterResults] = useState<NewsletterRow[] | null>(null);
     const [quranResults, setQuranResults] = useState<QueryResultSuccess | null>(null);
+    const [performedQuery, setPerformedQuery] = useState(initialQuery);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedCategories, setSelectedCategories] = useState<string[]>(['programs', 'sermons', 'audios']);
@@ -110,6 +111,8 @@ function SearchContent() {
                 setQuranResults(null);
             }
 
+            setPerformedQuery(q);
+
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred during search');
             setMediaResults(null);
@@ -142,6 +145,7 @@ function SearchContent() {
         if (initialQuery) {
             performSearch(initialQuery);
         }
+        setSearchQuery(initialQuery);
     }, [initialQuery, performSearch]);
 
     const handleSearch = (e: React.FormEvent) => {
@@ -198,7 +202,7 @@ function SearchContent() {
                             return (
                                 <div className="text-center py-20 text-muted-foreground font-light animate-in fade-in duration-700">
                                     <SearchIcon className="size-12 mx-auto mb-4 opacity-10" />
-                                    <p className="text-lg">No results found for &quot;{searchQuery}&quot;</p>
+                                    <p className="text-lg">No results found for &quot;{performedQuery}&quot;</p>
                                     <p className="text-sm opacity-60">Try different keywords or check for typos.</p>
                                 </div>
                             );
@@ -233,7 +237,7 @@ function SearchContent() {
 
                                 {qCount > 0 && quranResults && (
                                     <TabsContent value="quran">
-                                        <QuranSection results={quranResults} searchQuery={searchQuery} />
+                                        <QuranSection results={quranResults} searchQuery={performedQuery} />
                                     </TabsContent>
                                 )}
 
