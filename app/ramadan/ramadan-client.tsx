@@ -236,11 +236,11 @@ function RamadanContent() {
                                     >
                                         <td className="px-4 py-3 font-medium">{day.day_number}</td>
                                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{day.day}</td>
-                                        <td className="px-4 py-3 font-mono text-violet-600 font-semibold">{day.dawn}</td>
-                                        <td className="px-4 py-3 text-muted-foreground font-mono">{day.noon}</td>
-                                        <td className="px-4 py-3 text-muted-foreground font-mono text-center">{day.afternoon}</td>
-                                        <td className="px-4 py-3 font-mono text-red-600 font-semibold">{day.sunset}</td>
-                                        <td className="px-4 py-3 text-muted-foreground font-mono">{day.night}</td>
+                                        <td className="px-4 py-3 font-mono text-violet-600 font-semibold">{stripAmPm(day.dawn)}</td>
+                                        <td className="px-4 py-3 text-muted-foreground font-mono">{stripAmPm(day.noon)}</td>
+                                        <td className="px-4 py-3 text-muted-foreground font-mono text-center">{stripAmPm(day.afternoon)}</td>
+                                        <td className="px-4 py-3 font-mono text-red-600 font-semibold">{stripAmPm(day.sunset)}</td>
+                                        <td className="px-4 py-3 text-muted-foreground font-mono">{stripAmPm(day.night)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -273,6 +273,8 @@ function RamadanContent() {
         </div>
     );
 }
+
+const stripAmPm = (time: string) => time.replace(/\s?[AP]M/gi, '');
 
 function SummaryCard({ title, value, icon, description }: { title: string, value: string, icon: React.ReactNode, description?: string }) {
     return (
