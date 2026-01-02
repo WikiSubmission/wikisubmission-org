@@ -33,16 +33,7 @@ export default function QuranSearchbar() {
         replace(`${pathname}?${params.toString()}`);
     }, [pathname, replace, searchParams]);
 
-    useEffect(() => {
-        const delayDebounceFn = setTimeout(() => {
-            const currentQ = searchParams.get('q')?.toString() || "";
-            if (searchQuery === currentQ) return;
 
-            performSearch(searchQuery);
-        }, 700);
-
-        return () => clearTimeout(delayDebounceFn);
-    }, [searchQuery, searchParams, performSearch]);
 
     return (
         <form
