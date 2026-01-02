@@ -1,6 +1,6 @@
 "use client"
 
-import { BookIcon, ChevronDown, DownloadIcon, HeartIcon, Music2Icon, MoonIcon, PlayIcon } from "lucide-react"
+import { BookIcon, ChevronDown, DownloadIcon, HeartIcon, Music2Icon, MoonIcon, SearchIcon } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,10 +42,10 @@ const modes = {
     icon: <MoonIcon className="size-4" />,
     href: "/ramadan"
   },
-  media: {
-    label: "Media",
-    icon: <PlayIcon className="size-4" />,
-    href: "/media"
+  search: {
+    label: "Search",
+    icon: <SearchIcon className="size-4" />,
+    href: "/search"
   },
   downloads: {
     label: "Downloads",

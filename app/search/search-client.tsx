@@ -19,12 +19,12 @@ import Link from "next/link";
 type MediaRow = Database["public"]["Tables"]["ws_media"]["Row"];
 type NewsletterRow = Database["public"]["Tables"]["ws_newsletters"]["Row"];
 
-export default function MediaClient() {
+export default function SearchClient() {
     return (
         <main className="min-h-screen text-foreground flex flex-col items-center p-4 md:p-2">
             {/* Minimal Header */}
             <div className="w-full max-w-5xl px-4 h-16 flex items-center justify-between z-10">
-                <PageSwitcher currentPage="media" />
+                <PageSwitcher currentPage="search" />
                 <ThemeToggle />
             </div>
 
@@ -38,18 +38,18 @@ export default function MediaClient() {
                         />
                     </Link>
                     <h1 className="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic uppercase pr-2">
-                        Media
+                        Search
                     </h1>
                 </div>
                 <Suspense fallback={<div className="text-center opacity-20"><PlayIcon className="size-8 mx-auto animate-spin" /></div>}>
-                    <MediaContent />
+                    <SearchContent />
                 </Suspense>
             </div>
         </main>
     );
 }
 
-function MediaContent() {
+function SearchContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const initialQuery = searchParams.get('q') || '';
@@ -99,14 +99,14 @@ function MediaContent() {
         const trimmed = searchQuery.trim();
         const params = new URLSearchParams(searchParams.toString());
         params.set('q', trimmed);
-        router.push(`/media?${params.toString()}`);
+        router.push(`/search?${params.toString()}`);
     };
 
     const handleTabChange = (value: string) => {
         setActiveTab(value);
         const params = new URLSearchParams(searchParams.toString());
         params.set('tab', value);
-        router.push(`/media?${params.toString()}`, { scroll: false });
+        router.push(`/search?${params.toString()}`, { scroll: false });
     };
 
     return (
@@ -118,7 +118,7 @@ function MediaContent() {
                         <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
                         <Input
                             type="search"
-                            placeholder="Search transcripts..."
+                            placeholder="Keyword or phrase..."
                             className="pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
