@@ -332,7 +332,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                                     }
                                                 </p>
                                                 {item.meanings && (
-                                                    <p className="w-fit rounded-2xl">
+                                                    <p className="rounded-2xl">
                                                         <strong>Meanings:</strong> {item.meanings}
                                                     </p>
                                                 )}
