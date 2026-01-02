@@ -215,7 +215,7 @@ function MediaContent() {
                                     })}
                                 </div>
                             )}
-                            {mediaResults.length === 0 ? (
+                            {mediaResults.length > 0 ? (
                                 <p className="text-xs text-muted-foreground flex items-start gap-2">
                                     <InfoIcon className="text-violet-600 size-3.5" />
                                     Verify all information. Transcripts derived using AI transcription on the original content.
