@@ -6,18 +6,22 @@ export const highlightMarkdown = (text?: string | null) => {
 
   return lines.map((line, lineIndex) => (
     <span key={lineIndex}>
-      {line.split(/(\*\*.*?\*\*)/g).map((part, index) =>
-        part.startsWith("**") && part.endsWith("**") ? (
-          <span
-            key={index}
-            className="bg-yellow-300 dark:bg-yellow-800 rounded px-0"
-          >
-            {part.slice(2, -2)}
-          </span>
-        ) : (
-          part
-        ),
-      )}
+      {line.split(/(\*\*.*?\*\*|==.*?==)/g).map((part, index) => {
+        const isBold = part.startsWith("**") && part.endsWith("**");
+        const isHighlight = part.startsWith("==") && part.endsWith("==");
+
+        if (isBold || isHighlight) {
+          return (
+            <span
+              key={index}
+              className="bg-violet-600/10 text-violet-600 dark:text-violet-400 rounded-sm font-bold"
+            >
+              {part.slice(2, -2)}
+            </span>
+          );
+        }
+        return part;
+      })}
       {lineIndex < lines.length - 1 && <br />}
     </span>
   ));
