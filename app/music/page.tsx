@@ -56,7 +56,7 @@ export default function ZikrPage() {
             {/* Hero Section */}
             <div className="w-full max-w-5xl px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-8 z-10">
                 <div className="flex-grow space-y-4 text-center md:text-left">
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic">
+                    <h1 className="text-5xl md:text-7xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic pr-2">
                         ZIKR
                     </h1>
                     <p className="text-lg text-muted-foreground max-w-md mx-auto md:mx-0">

@@ -21,14 +21,19 @@ export default function RamadanClient() {
                 <ThemeToggle />
             </div>
 
-            <div className="w-full max-w-4xl px-4 py-12 md:py-24 z-10">
-                <Link href="/">
-                    <Image src="/brand-assets/logo-transparent.png" alt="WikiSubmission Logo"
-                        width={64}
-                        height={64}
-                        className="justify-center items-center mx-auto rounded-full my-4"
-                    />
-                </Link>
+            <div className="w-full max-w-4xl px-4 py-12 md:py-16 z-10">
+                <div className="flex flex-col items-center mb-12">
+                    <Link href="/">
+                        <Image src="/brand-assets/logo-transparent.png" alt="WikiSubmission Logo"
+                            width={48}
+                            height={48}
+                            className="rounded-full mb-4"
+                        />
+                    </Link>
+                    <h1 className="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic uppercase pr-2">
+                        Ramadan
+                    </h1>
+                </div>
                 <Suspense fallback={<div className="text-center opacity-20"><MoonIcon className="size-8 mx-auto animate-spin" /></div>}>
                     <RamadanContent />
                 </Suspense>
@@ -133,7 +138,7 @@ function RamadanContent() {
                         <Input
                             type="search"
                             placeholder="Search location..."
-                            className="pl-7 h-10 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
+                            className="pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -141,7 +146,7 @@ function RamadanContent() {
                     <select
                         value={year}
                         onChange={(e) => handleYearChange(e.target.value)}
-                        className="w-[100px] h-10 border-0 bg-secondary/50 focus:ring-0 rounded-xl px-3 text-sm appearance-none cursor-pointer"
+                        className="w-[100px] h-8 border-0 bg-secondary focus:ring-0 rounded-xl px-3 text-[10px] appearance-none cursor-pointer uppercase tracking-tight text-muted-foreground/80 font-medium"
                     >
                         {years.map((y) => (
                             <option key={y} value={y}>{y}</option>
