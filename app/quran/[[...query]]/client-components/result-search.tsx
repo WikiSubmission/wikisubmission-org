@@ -282,7 +282,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                         <p className="text-muted-foreground">
                                             No matches
                                         </p>
-                                        {props.query.split(" ").length > 1 && (
+                                        {decodeURIComponent(props.query).split(" ").length > 1 && (
                                             <div className="bg-muted/50 p-4 rounded-2xl space-y-2">
                                                 <div className="flex items-center gap-2 text-muted-foreground">
                                                     <SearchIcon className="size-4" />
@@ -291,7 +291,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    {props.query.split(" ").map((q) => (
+                                                    {decodeURIComponent(props.query).split(" ").map((q) => (
                                                         <div key={q} className="flex items-center gap-2 text-violet-600 hover:text-violet-700 hover:cursor-pointer">
                                                             <a href={`?q=${q}&tab=words`}>
                                                                 {q}
