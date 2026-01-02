@@ -156,22 +156,16 @@ function MediaContent() {
             )}
 
             {mediaResults && newsletterResults && (
-                <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                    <div className="flex justify-center mb-8">
+                <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-2">
+                    <div className="flex justify-center">
                         <TabsList className="bg-secondary/50 p-1">
-                            <TabsTrigger value="media" className="px-8 flex items-center gap-2">
+                            <TabsTrigger value="media" className="px-4 flex items-center gap-2">
                                 <PlayIcon className="size-3.5" />
-                                <span>Media</span>
-                                <span className="ml-1 text-[10px] opacity-60 bg-foreground/10 px-1.5 rounded-full">
-                                    {mediaResults.length}
-                                </span>
+                                <span>Media ({mediaResults.length})</span>
                             </TabsTrigger>
-                            <TabsTrigger value="newsletters" className="px-8 flex items-center gap-2">
+                            <TabsTrigger value="newsletters" className="px-4 flex items-center gap-2">
                                 <NewspaperIcon className="size-3.5" />
-                                <span>Newsletters</span>
-                                <span className="ml-1 text-[10px] opacity-60 bg-foreground/10 px-1.5 rounded-full">
-                                    {newsletterResults.length}
-                                </span>
+                                <span>Newsletters ({newsletterResults.length})</span>
                             </TabsTrigger>
                         </TabsList>
                     </div>
