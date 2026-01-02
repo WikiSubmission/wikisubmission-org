@@ -303,7 +303,7 @@ function QuranSection({ results, searchQuery }: { results: QueryResultSuccess, s
                         <SearchItemTitle props={{ results: results }} />
 
                         {/* Filters */}
-                        <section className="flex flex-wrap items-center gap-6 px-1 border-b border-border/40">
+                        <section className="flex flex-wrap items-center gap-2 px-1">
                             <div className="flex items-center gap-2 [&>*]:text-[10px] uppercase tracking-widest font-bold">
                                 <Checkbox
                                     checked={quranPreferences.text}
