@@ -376,7 +376,7 @@ function MediaSection({
     return (
         <div className="flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
             {hasCategorySupport && (
-                <div className="flex flex-wrap items-center gap-6 py-2 px-1 border-b border-border/40">
+                <div className="flex flex-wrap items-center gap-2 py-2 px-1">
                     {categories.map((cat) => {
                         const count = results.filter(item => item.category?.toLowerCase() === cat).length;
                         if (count === 0) return null;
@@ -399,8 +399,7 @@ function MediaSection({
                                     htmlFor={`cat-${cat}`}
                                     className="text-[10px] uppercase tracking-widest font-bold cursor-pointer group-hover:text-violet-600 transition-colors flex items-center gap-1.5 leading-none"
                                 >
-                                    <span className="leading-none">{cat}</span>
-                                    <span className="text-[9px] opacity-40 font-mono leading-none">({count})</span>
+                                    <span className="leading-none">{cat} ({count})</span>
                                 </Label>
                             </div>
                         );
@@ -482,22 +481,22 @@ function MediaSearchResult({ items }: { items: MediaRow[] }) {
                     <div className="space-y-3">
                         {items.map((item, idx) => (
                             <div key={idx} className="text-sm text-muted-foreground/80 group/match transition-colors">
-                                <span className="flex items-start gap-3">
+                                <div className="flex items-start gap-3">
                                     <Link
                                         href={`https://www.youtube.com/watch?v=${item.youtube_id}&t=${item.youtube_timestamp}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-violet-600 flex items-center gap-1.5 bg-violet-600/10 px-2 py-1 rounded-full hover:bg-violet-600/20 transition-all flex-shrink-0 mt-0.5"
+                                        className="text-violet-600 flex items-center justify-center gap-1.5 bg-violet-600/10 w-16 py-1 rounded-full hover:bg-violet-600/20 transition-all flex-shrink-0 mt-0.5"
                                     >
                                         <PlayIcon className="size-3 text-violet-600" />
                                         <span className="text-[10px] font-mono font-bold">
                                             {item.start_timestamp}
                                         </span>
                                     </Link>
-                                    <p className="leading-relaxed">
+                                    <p className="leading-relaxed flex-1 min-w-0">
                                         {highlightMarkdown(item.transcript || '')}
                                     </p>
-                                </span>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -543,14 +542,14 @@ function NewsletterSearchResult({ items }: { items: NewsletterRow[] }) {
                                         href={`https://masjidtucson.org/publications/books/sp/${item.year}/${item.month}/page${item.page}.html`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-violet-600 flex items-center gap-1.5 bg-violet-600/10 px-2 py-1 rounded-full hover:bg-violet-600/20 transition-all flex-shrink-0 mt-0.5"
+                                        className="text-violet-600 flex items-center justify-center gap-1.5 bg-violet-600/10 w-24 py-1 rounded-full hover:bg-violet-600/20 transition-all flex-shrink-0 mt-0.5"
                                     >
                                         <ArrowUpRight className="size-3" />
                                         <span className="text-[10px] font-mono font-bold uppercase tracking-wider">
                                             PAGE {item.page}
                                         </span>
                                     </Link>
-                                    <p className="leading-relaxed font-light">
+                                    <p className="leading-relaxed font-light flex-1 min-w-0">
                                         {highlightMarkdown(item.content || '')}
                                     </p>
                                 </div>
