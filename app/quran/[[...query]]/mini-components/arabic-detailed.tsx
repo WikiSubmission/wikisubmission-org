@@ -44,7 +44,7 @@ export function ArabicDetailed({ props }: { props: { data: IndexResult } }) {
                                 <Tooltip>
                                     <DialogTrigger asChild>
                                         <TooltipTrigger>
-                                            <p className={`text-xl hover:text-violet-600 cursor-pointer transition-colors ${verseSearchParam === w.verse_number.toString() && wordSearchParam === w.word_index.toString() ? "bg-amber-700 p-1 rounded-lg" : ""}`}>
+                                            <p className={`text-xl hover:text-violet-600 cursor-pointer transition-colors ${verseSearchParam === w.verse_number.toString() && wordSearchParam === w.word_index.toString() ? "bg-muted font-semibold p-1 rounded-lg" : ""}`}>
                                                 {w.arabic}
                                             </p>
                                         </TooltipTrigger>
