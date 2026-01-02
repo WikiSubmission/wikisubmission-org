@@ -316,7 +316,7 @@ function MediaSearchResult({ items }: { items: MediaRow[] }) {
                                             {item.start_timestamp}
                                         </span>
                                     </Link>
-                                    <p className="line-clamp-2 leading-relaxed">
+                                    <p className="leading-relaxed">
                                         {highlightMarkdown(item.transcript || '')}
                                     </p>
                                 </span>
@@ -336,21 +336,33 @@ function NewsletterSearchResult({ items }: { items: NewsletterRow[] }) {
     return (
         <div className="group animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="md:flex gap-6 items-start p-4 space-y-2 bg-muted/50 rounded-2xl transition-colors hover:bg-muted/70">
-                <div className="flex-shrink-0 size-12 rounded-xl bg-secondary flex items-center justify-center text-violet-600 transition-transform shadow-sm">
-                    <NewspaperIcon className="size-6" />
-                </div>
 
                 <div className="flex-1 min-w-0 space-y-3">
-                    <h3 className="text-lg font-black text-foreground leading-tight tracking-tight uppercase transition-colors">
-                        {highlightMarkdown(displayTitle)}
-                    </h3>
-
+                    <div className="flex items-center gap-2 justify-between">
+                        <div className="flex items-center gap-2">
+                            <NewspaperIcon className="size-4 text-violet-600" />
+                            <h3 className="text-lg font-black text-foreground leading-tight tracking-tight uppercase transition-colors">
+                                {highlightMarkdown(displayTitle)}
+                            </h3>
+                        </div>
+                        <Link
+                            href={`https://library.wikisubmission.org/file/sp/${items[0].year}_${items[0].month}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-600 w-fit flex items-center gap-1.5 bg-muted/100 px-2 py-1 rounded-full hover:bg-muted/80 transition-all flex-shrink-0 mt-0.5"
+                        >
+                            <ArrowUpRight className="size-3" />
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider">
+                                PDF
+                            </span>
+                        </Link>
+                    </div>
                     <div className="space-y-3">
                         {items.map((item, idx) => (
                             <div key={idx} className="text-sm text-muted-foreground/80 group/match transition-colors">
                                 <div className="flex items-start gap-3">
                                     <Link
-                                        href={`https://library.wikisubmission.org/file/sp/${item.year}_${item.month}`}
+                                        href={`https://masjidtucson.org/publications/books/sp/${item.year}/${item.month}/page${item.page}.html`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-violet-600 flex items-center gap-1.5 bg-violet-600/10 px-2 py-1 rounded-full hover:bg-violet-600/20 transition-all flex-shrink-0 mt-0.5"
@@ -360,7 +372,7 @@ function NewsletterSearchResult({ items }: { items: NewsletterRow[] }) {
                                             PAGE {item.page}
                                         </span>
                                     </Link>
-                                    <p className="line-clamp-2 leading-relaxed font-light">
+                                    <p className="leading-relaxed font-light">
                                         {highlightMarkdown(item.content || '')}
                                     </p>
                                 </div>
