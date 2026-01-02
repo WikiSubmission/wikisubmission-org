@@ -215,12 +215,12 @@ function MediaContent() {
                                     })}
                                 </div>
                             )}
-                            {mediaResults.length > 0 ? (
+                            {mediaResults.length > 0 && (
                                 <p className="text-xs text-muted-foreground flex items-start gap-2">
                                     <InfoIcon className="text-violet-600 size-3.5" />
                                     Verify all information. Transcripts derived using AI transcription on the original content.
                                 </p>
-                            ) : null}
+                            )}
                             {mediaResults.length > 0 ? (
                                 (() => {
                                     const categoryPriority: Record<string, number> = { 'programs': 1, 'sermons': 2, 'audios': 3 };
