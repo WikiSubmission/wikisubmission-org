@@ -5,17 +5,25 @@ export function proxy(request: NextRequest) {
     const { pathname, searchParams } = request.nextUrl;
 
     // Proxy for the Quran section
-    // Intercepts the URL and clears any prior param / search params
+    // Force rewrites the URL to avoid complications at client side
     if (pathname.startsWith('/quran') && searchParams.has('q')) {
         const query = searchParams.get('q');
+        const tab = searchParams.get('tab');
 
         if (query) {
-            // Create new URL with the query structured as a path segment
+            // Clone URL
             const url = request.nextUrl.clone();
+
+            // Set path
             url.pathname = `/quran/${query}`;
 
-            // Explicitly clear all search parameters as requested
+            // Clear search params
             url.search = '';
+
+            // Set search param, if provided: `tab`
+            if (tab) {
+                url.searchParams.set('tab', tab);
+            }
 
             return NextResponse.redirect(url);
         }
