@@ -95,25 +95,6 @@ export default function Home() {
 
         <section className="flex flex-col">
           <Item asChild variant="outline">
-            <Link href="/media">
-              <ItemContent>
-                <ItemTitle>
-                  Media
-                </ItemTitle>
-                <ItemDescription>
-                  Search video transcripts
-                </ItemDescription>
-              </ItemContent>
-              <ItemActions>
-                <PlayIcon className="size-6" />
-                <FaChevronRight className="size-4" />
-              </ItemActions>
-            </Link>
-          </Item>
-        </section>
-
-        <section className="flex flex-col">
-          <Item asChild variant="outline">
             <Link href="/prayer-times">
               <ItemContent>
                 <ItemTitle>
@@ -144,6 +125,25 @@ export default function Home() {
               </ItemContent>
               <ItemActions>
                 <MoonIcon className="size-6" />
+                <FaChevronRight className="size-4" />
+              </ItemActions>
+            </Link>
+          </Item>
+        </section>
+
+        <section className="flex flex-col">
+          <Item asChild variant="outline">
+            <Link href="/media">
+              <ItemContent>
+                <ItemTitle>
+                  Media
+                </ItemTitle>
+                <ItemDescription>
+                  Search video transcripts
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <PlayIcon className="size-6" />
                 <FaChevronRight className="size-4" />
               </ItemActions>
             </Link>
