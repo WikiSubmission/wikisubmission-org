@@ -318,6 +318,7 @@ function PrayerTimesContent() {
                                     <tbody className="divide-y divide-border/20">
                                         {data.schedule.map((day, index) => {
                                             const isToday = index === 0;
+                                            const stripAmPm = (time: string) => time.replace(/\s?[AP]M/gi, '');
                                             return (
                                                 <tr key={day.date} className={cn(
                                                     "hover:bg-muted/30 transition-colors group relative",
@@ -330,12 +331,12 @@ function PrayerTimesContent() {
                                                             <span className="text-muted-foreground/60">{day.day.split(',')[1]}</span>
                                                         </div>
                                                     </td>
-                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.fajr}</td>
-                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.sunrise}</td>
-                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.dhuhr}</td>
-                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.asr}</td>
-                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.maghrib}</td>
-                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{day.times.isha}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{stripAmPm(day.times.fajr)}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{stripAmPm(day.times.sunrise)}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{stripAmPm(day.times.dhuhr)}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{stripAmPm(day.times.asr)}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{stripAmPm(day.times.maghrib)}</td>
+                                                    <td className={cn("py-2.5 text-center font-mono tabular-nums transition-colors", isToday ? "text-violet-600 font-medium" : "text-muted-foreground group-hover:text-foreground")}>{stripAmPm(day.times.isha)}</td>
                                                 </tr>
                                             );
                                         })}
