@@ -6,13 +6,12 @@ import {
   ItemTitle,
 } from "@/components/ui/item"
 import { About } from "@/constants/about";
-import Image from "next/image";
-import Link from "next/link";
 import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub, FaHeart, FaEnvelope } from "react-icons/fa";
 import { DownloadIcon, HeartIcon, Music2Icon, MoonIcon } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
-import { GeometryDots } from "@/components/geometry-dots";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -21,7 +20,6 @@ export default function Home() {
         <PageSwitcher currentPage="home" />
         <ThemeToggle />
       </div>
-      <GeometryDots />
       <Image
         src="/brand-assets/logo-transparent.png"
         alt="WikiSubmission Logo"

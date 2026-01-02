@@ -4,7 +4,6 @@ import { PageSwitcher } from "@/components/page-switcher";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
-import { GeometryDots } from "@/components/geometry-dots";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -21,8 +20,6 @@ import { toast } from "sonner";
 export default function PrayerTimesClient() {
     return (
         <main className="min-h-screen text-foreground flex flex-col items-center p-4 md:p-2">
-            <GeometryDots />
-
             {/* Minimal Header */}
             <div className="w-full max-w-5xl px-4 h-16 flex items-center justify-between z-10">
                 <PageSwitcher currentPage="prayertimes" />

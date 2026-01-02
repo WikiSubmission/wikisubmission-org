@@ -4,7 +4,6 @@ import { PageSwitcher } from "@/components/page-switcher";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
-import { GeometryDots } from "@/components/geometry-dots";
 import { SearchIcon, MapPinIcon, AlertCircleIcon, ShareIcon, MoonIcon, CalendarIcon, StarsIcon } from "lucide-react";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -16,8 +15,6 @@ import { toast } from "sonner";
 export default function RamadanClient() {
     return (
         <main className="min-h-screen text-foreground flex flex-col items-center p-4 md:p-2">
-            <GeometryDots />
-
             {/* Minimal Header */}
             <div className="w-full max-w-5xl px-4 h-16 flex items-center justify-between z-10">
                 <PageSwitcher currentPage="ramadan" />
@@ -136,7 +133,7 @@ function RamadanContent() {
                         <Input
                             type="search"
                             placeholder="Search location..."
-                            className="pl-7 h-10 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none rounded-xl"
+                            className="pl-7 h-10 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -144,7 +141,7 @@ function RamadanContent() {
                     <select
                         value={year}
                         onChange={(e) => handleYearChange(e.target.value)}
-                        className="w-[100px] h-10 border-0 bg-secondary focus:ring-0 rounded-xl px-3 text-sm appearance-none cursor-pointer"
+                        className="w-[100px] h-10 border-0 bg-secondary/50 focus:ring-0 rounded-xl px-3 text-sm appearance-none cursor-pointer"
                     >
                         {years.map((y) => (
                             <option key={y} value={y}>{y}</option>

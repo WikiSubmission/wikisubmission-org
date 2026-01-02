@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { Viewport } from "next";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { GeometryDots } from "@/components/geometry-dots";
 
 export const metadata = Metadata;
 
@@ -24,6 +25,7 @@ export default function RootLayout({
           defaultTheme="system"
           disableTransitionOnChange
         >
+          <GeometryDots />
           {children}
           <ScrollToTop />
           <Toaster />

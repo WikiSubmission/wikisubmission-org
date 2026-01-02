@@ -3,7 +3,6 @@
 
 import { useState } from 'react';
 import { useMusic } from '@/lib/music-context';
-import { GeometryDots } from "@/components/geometry-dots";
 import { PageSwitcher } from "@/components/page-switcher";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
 import { FeaturedCard } from '@/components/music/featured-card';
@@ -31,8 +30,6 @@ export default function ZikrPage() {
 
     return (
         <main className="min-h-screen bg-background text-foreground flex flex-col items-center pb-32">
-            <GeometryDots />
-
             {/* Nav Header */}
             <div className="w-full max-w-5xl px-4 h-16 flex items-center justify-between z-10 top-0 bg-background/50 backdrop-blur-md">
                 <PageSwitcher currentPage="music" />
