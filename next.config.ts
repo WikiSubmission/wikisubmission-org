@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "www.masjidtucson.org",
       },
+      {
+        protocol: "https",
+        hostname: "img.youtube.com",
+      }
     ],
   },
   async redirects() {
