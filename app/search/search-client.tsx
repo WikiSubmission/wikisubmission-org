@@ -33,7 +33,7 @@ export default function SearchClient() {
                 <ThemeToggle />
             </div>
 
-            <div className="w-full max-w-4xl px-4 py-6 md:py-16 z-10">
+            <div className="w-full max-w-4xl py-6 md:py-16 z-10">
                 <div className="flex flex-col items-center mb-12">
                     <Link href="/">
                         <Image src="/brand-assets/logo-transparent.png" alt="WikiSubmission Logo"
@@ -207,7 +207,7 @@ function SearchContent() {
                         return (
                             <>
                                 <div className="flex justify-center">
-                                    <TabsList className="bg-secondary/50 p-1 w-full md:w-auto h-11 md:h-10 overflow-x-auto no-scrollbar">
+                                    <TabsList className="bg-secondary/50 p-1 overflow-x-auto no-scrollbar">
                                         {qCount > 0 && (
                                             <TabsTrigger value="quran" className="flex-1 md:flex-initial px-3 md:px-4 h-full flex items-center gap-1.5 md:gap-2 justify-center">
                                                 <BookIcon className="size-3.5" />
