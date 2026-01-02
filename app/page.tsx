@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/item"
 import { About } from "@/constants/about";
 import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub, FaHeart, FaEnvelope } from "react-icons/fa";
-import { DownloadIcon, HeartIcon, Music2Icon, MoonIcon } from "lucide-react";
+import { DownloadIcon, HeartIcon, Music2Icon, MoonIcon, PlayIcon } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
 import Image from "next/image";
@@ -87,6 +87,25 @@ export default function Home() {
               </ItemContent>
               <ItemActions>
                 <Music2Icon className="size-6" />
+                <FaChevronRight className="size-4" />
+              </ItemActions>
+            </Link>
+          </Item>
+        </section>
+
+        <section className="flex flex-col">
+          <Item asChild variant="outline">
+            <Link href="/media">
+              <ItemContent>
+                <ItemTitle>
+                  Media
+                </ItemTitle>
+                <ItemDescription>
+                  Search video transcripts
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <PlayIcon className="size-6" />
                 <FaChevronRight className="size-4" />
               </ItemActions>
             </Link>
