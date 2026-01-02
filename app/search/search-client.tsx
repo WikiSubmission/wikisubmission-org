@@ -63,7 +63,7 @@ function SearchContent() {
     const initialQuery = searchParams.get('q') || '';
 
     const [searchQuery, setSearchQuery] = useState(initialQuery);
-    const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'quran');
+    const [activeType, setActiveType] = useState(searchParams.get('type') || 'quran');
     const [mediaResults, setMediaResults] = useState<MediaRow[] | null>(null);
     const [newsletterResults, setNewsletterResults] = useState<NewsletterRow[] | null>(null);
     const [quranResults, setQuranResults] = useState<QueryResultSuccess | null>(null);
@@ -120,7 +120,7 @@ function SearchContent() {
         }
     }, [quranPreferences.primaryLanguage]);
 
-    // Auto-switch tab if current selection has no results
+    // Auto-switch type if current selection has no results
     useEffect(() => {
         if (loading || !mediaResults || !newsletterResults) return;
 
@@ -128,15 +128,15 @@ function SearchContent() {
         const mCount = mediaResults.length;
         const nCount = newsletterResults.length;
 
-        const currentTab = searchParams.get('tab') || activeTab;
-        const currentTabCount = currentTab === 'quran' ? qCount : currentTab === 'media' ? mCount : nCount;
+        const currentType = searchParams.get('type') || activeType;
+        const currentTypeCount = currentType === 'quran' ? qCount : currentType === 'media' ? mCount : nCount;
 
-        if (currentTabCount === 0 && (qCount + mCount + nCount) > 0) {
-            if (qCount > 0) setActiveTab('quran');
-            else if (mCount > 0) setActiveTab('media');
-            else if (nCount > 0) setActiveTab('newsletters');
+        if (currentTypeCount === 0 && (qCount + mCount + nCount) > 0) {
+            if (qCount > 0) setActiveType('quran');
+            else if (mCount > 0) setActiveType('media');
+            else if (nCount > 0) setActiveType('newsletters');
         }
-    }, [mediaResults, newsletterResults, quranResults, loading, searchParams, activeTab]);
+    }, [mediaResults, newsletterResults, quranResults, loading, searchParams, activeType]);
 
     useEffect(() => {
         if (initialQuery) {
@@ -152,10 +152,10 @@ function SearchContent() {
         router.push(`/search?${params.toString()}`);
     };
 
-    const handleTabChange = (value: string) => {
-        setActiveTab(value);
+    const handleTypeChange = (value: string) => {
+        setActiveType(value);
         const params = new URLSearchParams(searchParams.toString());
-        params.set('tab', value);
+        params.set('type', value);
         router.push(`/search?${params.toString()}`, { scroll: false });
     };
 
@@ -187,7 +187,7 @@ function SearchContent() {
             )}
 
             {mediaResults && newsletterResults && (
-                <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-2">
+                <Tabs value={activeType} onValueChange={handleTypeChange} className="space-y-2">
                     {(() => {
                         const qCount = quranResults?.type === 'search' ? (quranResults.data.filter(r => r.hit !== 'word_by_word').length) : (quranResults ? 1 : 0);
                         const mCount = mediaResults.length;
@@ -345,7 +345,8 @@ function QuranSection({ results, searchQuery }: { results: QueryResultSuccess, s
                             ))}
                             {results.data.filter(r => r.hit !== 'chapter' && r.hit !== 'word_by_word').map((r) => (
                                 <div className="space-y-4" key={`${r.hit}:${r.verse_index}:${'verse_id' in r ? r.verse_id : ''}`}>
-                                    <SearchItemAllMatches props={{ results: r }} />
+                                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                    <SearchItemAllMatches props={{ results: r as any }} />
                                 </div>
                             ))}
                         </div>
