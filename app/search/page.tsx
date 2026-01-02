@@ -2,15 +2,20 @@ import SearchClient from "./search-client";
 import { Metadata } from "next";
 
 type Props = {
-    searchParams: Promise<{ q?: string }>;
+    searchParams: Promise<{ q?: string; type?: string }>;
 };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-    const { q } = await searchParams;
+    const { q, type } = await searchParams;
+
+    let resolvedType = null;
+    if (type) {
+        resolvedType = type.charAt(0).toUpperCase() + type.slice(1);
+    }
 
     if (q) {
-        const title = `${q} | Search | WikiSubmission`;
-        const description = `Search and browse for "${q}" on WikiSubmission`;
+        const title = `${q} | ${resolvedType || 'Search'} | WikiSubmission`;
+        const description = `Search for "${q}" on WikiSubmission`;
         return {
             title,
             description,
@@ -22,11 +27,11 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     }
 
     return {
-        title: "Search | WikiSubmission",
-        description: "Search and browse for content on WikiSubmission",
+        title: `${resolvedType || 'Search'} | WikiSubmission`,
+        description: "Search for content on WikiSubmission",
         openGraph: {
-            title: "Search | WikiSubmission",
-            description: "Search and browse for content on WikiSubmission",
+            title: `${resolvedType || 'Search'} | WikiSubmission`,
+            description: "Search for content on WikiSubmission",
         },
     };
 }
