@@ -36,7 +36,7 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                         key={i.verse_id}
                         className={`transition-colors duration-500 ${isHighlighted && i.verse_id === `${props.data.data[0].chapter_number}:${verseSearchParam}` ? "bg-violet-600/10" : ""}`}
                     >
-                        <div className="p-6 sm:p-8 space-y-6">
+                        <div className="p-6 sm:p-8 space-y-2">
                             {i.ws_quran_subtitles && quranPreferences.subtitles && (
                                 <div className="flex justify-center">
                                     <p className="text-violet-600 text-xs font-bold text-center">
@@ -50,14 +50,20 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                                     </p>
                                 </div>
                             )}
+                            <div className="w-fit shrink-0 flex items-start space-x-0.5 border px-2 bg-muted/30 backdrop-blur-sm rounded-full">
+                                <span className="w-full text-lg font-semibold">
+                                    {i.verse_id.split(":")[0]}
+                                </span>
+                                <span>:</span>
+                                <span className="w-full text-lg font-semibold text-primary/80">
+                                    {i.verse_id.split(":")[1]}
+                                </span>
+                            </div>
+
 
                             <div className="flex gap-4 sm:gap-6">
                                 {/* Left Column: Verse ID */}
-                                <div className="w-14 sm:w-16 shrink-0 flex flex-col items-start pt-0.5">
-                                    <span className="w-full text-center py-1 bg-foreground/5 text-foreground/60 font-bold rounded-md border border-border/50">
-                                        {i.verse_id}
-                                    </span>
-                                </div>
+
 
                                 {/* Right Column: Verses & Translations */}
                                 <div className="flex-1 min-w-0 space-y-4">
@@ -86,7 +92,7 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                                     )}
 
                                     {i.ws_quran_footnotes && quranPreferences.footnotes && (
-                                        <div className="border-t border-border/40 pt-2">
+                                        <div className="border-t border-border/40 pt-4">
                                             <p className={`text-sm text-muted-foreground/80 leading-relaxed italic ${isRtlLanguage(quranPreferences.primaryLanguage) ? "text-right" : "text-left"}`}>
                                                 {
                                                     i.ws_quran_footnotes[
