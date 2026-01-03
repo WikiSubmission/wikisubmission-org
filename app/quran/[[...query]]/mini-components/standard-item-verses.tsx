@@ -23,7 +23,7 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
         // Wrap state update in requestAnimationFrame
         requestAnimationFrame(() => {
             setIsHighlighted(true);
-            setTimeout(() => setIsHighlighted(false), 750);
+            setTimeout(() => setIsHighlighted(false), 100);
         });
     }, [verseSearchParam, props.data.data]);
 
