@@ -50,6 +50,7 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                                     </p>
                                 </div>
                             )}
+
                             <div className="w-fit shrink-0 flex items-start space-x-0.5 border px-2 bg-muted/30 backdrop-blur-sm rounded-full">
                                 <span className="w-full text-lg font-semibold">
                                     {i.verse_id.split(":")[0]}
@@ -62,11 +63,8 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
 
 
                             <div className="flex gap-4 sm:gap-6">
-                                {/* Left Column: Verse ID */}
-
-
                                 {/* Right Column: Verses & Translations */}
-                                <div className="flex-1 min-w-0 space-y-4">
+                                <div className="flex-1 min-w-0 space-y-2">
                                     <div className={`${isRtlLanguage(quranPreferences.primaryLanguage) ? "text-right" : ""}`}>
                                         <p className="text-lg leading-relaxed text-foreground select-text font-medium">
                                             {i.ws_quran_text[quranPreferences.primaryLanguage]}
@@ -92,7 +90,7 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                                     )}
 
                                     {i.ws_quran_footnotes && quranPreferences.footnotes && (
-                                        <div className="border-t border-border/40 pt-4">
+                                        <div>
                                             <p className={`text-sm text-muted-foreground/80 leading-relaxed italic ${isRtlLanguage(quranPreferences.primaryLanguage) ? "text-right" : "text-left"}`}>
                                                 {
                                                     i.ws_quran_footnotes[
