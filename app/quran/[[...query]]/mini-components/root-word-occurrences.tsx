@@ -55,32 +55,39 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
     }
 
     return (
-        <div className="max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
+        <div className="max-h-[45vh] overflow-y-auto pr-4 custom-scrollbar">
             <div className="space-y-3">
                 {occurrences.length === 0 ? (
                     <p className="text-center text-muted-foreground py-10">No other occurrences found.</p>
                 ) : (
                     occurrences.map((occ, idx) => (
-                        <div key={idx} className="bg-muted/30 hover:bg-muted/50 transition-colors p-3 rounded-xl border border-border/40">
-                            <div className="flex justify-between items-start">
-                                <div className="space-y-1">
-                                    <Link
-                                        href={`/quran/${occ.chapter_number}?verse=${occ.verse_number}&word=${occ.word_index}`}
-                                        className="text-[10px] font-bold text-violet-600 hover:underline flex items-center gap-1 uppercase tracking-wider"
-                                        target="_blank"
-                                    >
-                                        {occ.verse_id}:{occ.word_index}
-                                        <ArrowUpRight className="size-2.5" />
-                                    </Link>
-                                    <p className="text-sm font-medium">{occ.english}</p>
-                                    <p className="text-[10px] text-muted-foreground italic">{occ.transliterated}</p>
+                        <div key={idx} className="group relative bg-muted/20 hover:bg-muted/40 transition-all p-4 rounded-2xl border border-border/50 hover:border-violet-600/30">
+                            <div className="flex justify-between items-center gap-4">
+                                <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <Link
+                                            href={`/quran/${occ.chapter_number}?verse=${occ.verse_number}&word=${occ.word_index}`}
+                                            className="text-[10px] font-bold text-violet-600/80 hover:text-violet-600 flex items-center gap-1 uppercase tracking-widest transition-colors"
+                                            target="_blank"
+                                        >
+                                            {occ.verse_id} - WORD #{occ.word_index}
+                                            <ArrowUpRight className="size-3" />
+                                        </Link>
+                                    </div>
+                                    <p className="text-sm font-semibold text-foreground leading-tight line-clamp-1 group-hover:text-violet-600 transition-colors">
+                                        {occ.english}
+                                    </p>
+                                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter italic">
+                                        {occ.transliterated}
+                                    </p>
                                 </div>
-                                <div className="text-xl font-arabic text-right">
+                                <div className="text-3xl font-arabic text-right text-foreground group-hover:text-violet-600 transition-colors shrink-0">
                                     {occ.arabic}
                                 </div>
                             </div>
                         </div>
                     ))
+
                 )}
             </div>
         </div>

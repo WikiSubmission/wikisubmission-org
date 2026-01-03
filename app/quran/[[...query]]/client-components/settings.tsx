@@ -6,6 +6,7 @@ import { BookIcon, CheckIcon, LanguagesIcon, SettingsIcon } from "lucide-react";
 import { useQuranPreferences } from "@/hooks/use-quran-preferences";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { ThemeToggle } from "@/components/toggles/theme-toggle";
 
 export default function QuranSettings() {
     const quranPreferences = useQuranPreferences()
@@ -18,6 +19,9 @@ export default function QuranSettings() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-60" align="end">
+                <div className="flex justify-end items-center gap-2 px-2 py-1">
+                    <ThemeToggle />
+                </div>
                 <DropdownMenuSub>
                     <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
                         <LanguagesIcon className="size-4" />

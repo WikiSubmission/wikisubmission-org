@@ -28,59 +28,84 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
     }, [verseSearchParam, props.data.data]);
 
     return (
-        <main>
-            <section className="bg-muted/50 rounded-2xl">
-                {props.data.data.map((i) => (
-                    <div id={i.verse_id} key={i.verse_id} className={`${isHighlighted && i.verse_id === `${props.data.data[0].chapter_number}:${verseSearchParam}` ? "bg-muted/100 ease-in-out" : ""}`}>
-                        <div className={`p-4 rounded-2xl space-y-4`}>
+        <main className="w-full">
+            <section className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden">
+                {props.data.data.map((i, index) => (
+                    <div
+                        id={i.verse_id}
+                        key={i.verse_id}
+                        className={`transition-colors duration-500 ${isHighlighted && i.verse_id === `${props.data.data[0].chapter_number}:${verseSearchParam}` ? "bg-violet-600/10" : ""}`}
+                    >
+                        <div className="p-6 sm:p-8 space-y-6">
                             {i.ws_quran_subtitles && quranPreferences.subtitles && (
-                                <p className="text-sm text-violet-600 text-center">
-                                    {
-                                        i.ws_quran_subtitles[
-                                        quranPreferences.primaryLanguage in i.ws_quran_subtitles
-                                            ? (quranPreferences.primaryLanguage as keyof typeof i.ws_quran_subtitles)
-                                            : "english"
-                                        ]
-                                    }
-                                </p>
+                                <div className="flex justify-center">
+                                    <p className="text-violet-600 text-xs font-bold text-center">
+                                        {
+                                            i.ws_quran_subtitles[
+                                            quranPreferences.primaryLanguage in i.ws_quran_subtitles
+                                                ? (quranPreferences.primaryLanguage as keyof typeof i.ws_quran_subtitles)
+                                                : "english"
+                                            ]
+                                        }
+                                    </p>
+                                </div>
                             )}
 
-                            <div className={`space-y-4 ${isRtlLanguage(quranPreferences.primaryLanguage) ? "text-right" : ""}`}>
-                                <p>
-                                    <strong>[{i.verse_id}]</strong> {i.ws_quran_text[quranPreferences.primaryLanguage]}
-                                </p>
+                            <div className="flex gap-4 sm:gap-6">
+                                {/* Left Column: Verse ID */}
+                                <div className="w-14 sm:w-16 shrink-0 flex flex-col items-start pt-0.5">
+                                    <span className="w-full text-center py-1 bg-foreground/5 text-foreground/60 font-bold rounded-md border border-border/50">
+                                        {i.verse_id}
+                                    </span>
+                                </div>
 
-                                {quranPreferences.secondaryLanguage && (
-                                    <p className={`text-muted-foreground ${isRtlLanguage(quranPreferences.secondaryLanguage) ? "text-right" : ""}`}>
-                                        {i.ws_quran_text[quranPreferences.secondaryLanguage]}
-                                    </p>
-                                )}
+                                {/* Right Column: Verses & Translations */}
+                                <div className="flex-1 min-w-0 space-y-4">
+                                    <div className={`${isRtlLanguage(quranPreferences.primaryLanguage) ? "text-right" : ""}`}>
+                                        <p className="text-lg leading-relaxed text-foreground select-text font-medium">
+                                            {i.ws_quran_text[quranPreferences.primaryLanguage]}
+                                        </p>
+                                    </div>
 
-                                {quranPreferences.arabic && (
-                                    <ArabicDetailed props={{ data: i }} />
-                                )}
+                                    {quranPreferences.secondaryLanguage && (
+                                        <p className={`text-muted-foreground leading-relaxed italic ${isRtlLanguage(quranPreferences.secondaryLanguage) ? "text-right" : ""}`}>
+                                            {i.ws_quran_text[quranPreferences.secondaryLanguage]}
+                                        </p>
+                                    )}
 
-                                {quranPreferences.transliteration && (
-                                    <p className="text-amber-800">
-                                        {i.ws_quran_text.transliterated}
-                                    </p>
-                                )}
+                                    {quranPreferences.arabic && (
+                                        <div className="py-2">
+                                            <ArabicDetailed props={{ data: i }} />
+                                        </div>
+                                    )}
+
+                                    {quranPreferences.transliteration && (
+                                        <p className="text-violet-600/80 font-medium italic text-sm">
+                                            {i.ws_quran_text.transliterated}
+                                        </p>
+                                    )}
+
+                                    {i.ws_quran_footnotes && quranPreferences.footnotes && (
+                                        <div className="border-t border-border/40 pt-2">
+                                            <p className={`text-sm text-muted-foreground/80 leading-relaxed italic ${isRtlLanguage(quranPreferences.primaryLanguage) ? "text-right" : "text-left"}`}>
+                                                {
+                                                    i.ws_quran_footnotes[
+                                                    quranPreferences.primaryLanguage in i.ws_quran_footnotes
+                                                        ? (quranPreferences.primaryLanguage as keyof typeof i.ws_quran_footnotes)
+                                                        : "english"
+                                                    ]
+                                                }
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            {i.ws_quran_footnotes && quranPreferences.footnotes && (
-                                <p className={`text-sm text-muted-foreground text-left italic ${isRtlLanguage(quranPreferences.primaryLanguage) ? "text-right" : ""}`}>
-                                    {
-                                        i.ws_quran_footnotes[
-                                        quranPreferences.primaryLanguage in i.ws_quran_footnotes
-                                            ? (quranPreferences.primaryLanguage as keyof typeof i.ws_quran_footnotes)
-                                            : "english"
-                                        ]
-                                    }
-                                </p>
-                            )}
                         </div>
-                        {i.verse_id !== props.data.data[props.data.data.length - 1].verse_id &&
-                            <hr className="w-full" />
+                        {index !== props.data.data.length - 1 &&
+                            <div className="px-8">
+                                <hr className="border-border/40" />
+                            </div>
                         }
                     </div>
                 ))}

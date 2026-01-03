@@ -3,6 +3,7 @@ import { useQuranPreferences } from "@/hooks/use-quran-preferences";
 import { highlightMarkdown } from "@/lib/highlight-markdown";
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
+import { ArabicDetailed } from "./arabic-detailed";
 
 export function SearchItemAllMatches({ props }: { props: { results: SearchHit | SearchHitText | SearchHitSubtitle | SearchHitFootnote } }) {
     const quranPreferences = useQuranPreferences();
@@ -36,9 +37,12 @@ export function SearchItemAllMatches({ props }: { props: { results: SearchHit | 
                 }
 
                 <section dir="rtl">
-                    <p className="text-right text-xl tracking-widest">
+                    <ArabicDetailed props={{
+                        data: props.results
+                    }} />
+                    {/* <p className="text-right text-xl tracking-widest">
                         {props.results.arabic}
-                    </p>
+                    </p> */}
                 </section>
             </div>
         )

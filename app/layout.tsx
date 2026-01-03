@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${Fonts.sora.className} antialiased break-words`}
+        className={`${Fonts.sora.className} ${Fonts.amiri.variable} antialiased break-words`}
         suppressHydrationWarning
       >
         <ThemeProvider
