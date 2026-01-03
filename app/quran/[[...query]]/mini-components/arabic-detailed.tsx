@@ -37,11 +37,11 @@ export function ArabicDetailed({ props }: { props: { data: IndexResult | SearchH
                                     <p className="font-arabic text-2xl leading-snug group-hover:text-violet-600 transition-colors">
                                         {w.arabic}
                                     </p>
-                                    <div className="flex flex-col items-center gap-0.5" dir="ltr">
-                                        <p className="text-[10px] text-violet-600/70 font-medium uppercase tracking-tighter">
+                                    <div className="flex flex-col items-center gap-0.5 pt-0.5" dir="ltr">
+                                        <p className="text-[10px] text-violet-600/90 font-medium uppercase tracking-tighter">
                                             {w.transliterated}
                                         </p>
-                                        <p className="text-[11px] text-muted-foreground font-medium text-center line-clamp-1 max-w-[80px]">
+                                        <p className="text-[11px] text-muted-foreground font-medium text-center break-words max-w-[100px] italic">
                                             {w.english}
                                         </p>
                                     </div>
