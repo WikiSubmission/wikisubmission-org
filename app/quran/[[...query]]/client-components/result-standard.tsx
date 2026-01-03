@@ -18,7 +18,7 @@ export function StandardResult({ props }: { props: { query: string, data: QueryR
                     if (!chapterData) return null;
 
                     const chapterVersesInResult = props.data.data.filter(i => i.chapter_number === chapterNum).length;
-                    const isFullChapter = chapterVersesInResult === chapterData.chapter_verses;
+                    const isFullChapter = chapterData.chapter_number === 1 || chapterData.chapter_number === 9 ? chapterVersesInResult === chapterData.chapter_verses : chapterVersesInResult === chapterData.chapter_verses + 1;
 
                     if (isFullChapter) return null;
 
