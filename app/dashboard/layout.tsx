@@ -1,4 +1,3 @@
-
 import { ThemeToggle } from '@/components/toggles/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -10,7 +9,6 @@ import {
     UserButton,
 } from '@clerk/nextjs'
 import { DashboardSidebar } from './sidebar';
-import { PageSwitcher } from '@/components/page-switcher';
 import { DashboardBreadcrumbs } from './breadcrumbs';
 import { Separator } from '@/components/ui/separator';
 
@@ -26,11 +24,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <SidebarTrigger
                             className="-ml-1 bg-secondary/50 rounded-full p-4 hover:bg-secondary/70 cursor-pointer"
                         />
-                        <div className="hidden lg:block">
-                            <PageSwitcher
-                                currentPage="home"
-                            />
-                        </div>
                         <Separator orientation="vertical" className="mr-2 h-4 hidden lg:block" />
                         <DashboardBreadcrumbs />
                     </div>
