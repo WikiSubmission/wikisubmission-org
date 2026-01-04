@@ -2,7 +2,7 @@
 
 import { Database } from "@/types/supabase-internal-types";
 import { supabaseInternal } from "@/lib/supabase";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { formatTimeAgo } from "@/lib/utils";
 import { FaApple, FaArrowRight } from "react-icons/fa";
 import { ArrowRight, BellIcon, BellMinusIcon, CheckIcon, CopyIcon, MapPinIcon, XIcon } from "lucide-react";
@@ -16,63 +16,26 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Fonts } from "@/constants/fonts";
 import Link from "next/link";
 import useLocalStorage from "@/hooks/use-local-storage";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function NotificationsPage() {
-
-    const [notifications, setNotifications] = useState<Database["internal"]["Tables"]["ws_notifications_ios"]["Row"][]>([]);
     const [sortBy, setSortBy] = useState<'last_delivery' | 'new'>('last_delivery');
     const [filterInactive, setFilterInactive] = useState(false);
 
-    useEffect(() => {
-        const fetchNotifications = async () => {
+    const { data: notifications = [], isLoading } = useQuery({
+        queryKey: ['notifications'],
+        queryFn: async () => {
             const { data, error } = await supabaseInternal()
                 .from("ws_notifications_ios")
                 .select("*")
                 .order("created_at", { ascending: false });
-            if (error) {
-                console.error("Error fetching notifications:", error);
-            } else {
-                setNotifications(data);
-            }
-        };
-        fetchNotifications();
-    }, []);
-
-    const sendNotification = async (
-        apiKey: string,
-        deviceToken: string,
-        type: "custom" | "random_verse" | "prayer_times" | "daily_verse" | "daily_chapter",
-        customMessage?: {
-            title?: string,
-            body?: string
-        },
-        force: boolean = false
-    ) => {
-        const req = await fetch(`https://push-notifications.wikisubmission.org/send-notification`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                device_token: deviceToken,
-                platform: 'ios',
-                force: force,
-                type: type,
-                ...customMessage?.title && { title: customMessage.title },
-                ...customMessage?.body && { message: customMessage.body },
-                api_key: apiKey
-            })
-        });
-
-        const res = await req.json();
-        if (req.ok) {
-            toast.success("Notification sent successfully");
-        } else {
-            toast.error("Failed to send notification");
+            if (error) throw error;
+            return data;
         }
-        return res;
-    }
+    });
 
+    // Subjective filter for "inactive" devices
     const isInactive = (notification: Database["internal"]["Tables"]["ws_notifications_ios"]["Row"]) => {
         const prayerTimesOff = !notification.prayer_times_notifications ||
             (typeof notification.prayer_times_notifications === 'object' &&
@@ -95,6 +58,14 @@ export default function NotificationsPage() {
                 return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
             }
         });
+
+    if (isLoading) {
+        return (
+            <div className="flex h-[400px] items-center justify-center">
+                <Spinner className="size-4 animate-spin text-violet-600" />
+            </div>
+        );
+    }
 
     return (
         <main className="space-y-4 max-w-full overflow-hidden">
@@ -182,7 +153,7 @@ export default function NotificationsPage() {
                             </div>
                             <div className="flex gap-2">
                                 <p className="text-muted-foreground" title={new Date(notification.created_at).toLocaleString()}>
-                                    Registered {formatTimeAgo(notification.created_at)}
+                                    Added {formatTimeAgo(notification.created_at)}
                                 </p>
                                 <button onClick={() => {
                                     navigator.clipboard.writeText(notification.device_token);
@@ -277,7 +248,6 @@ export default function NotificationsPage() {
                         <div>
                             <SendNotificationDialog
                                 deviceToken={notification.device_token}
-                                sendNotification={sendNotification}
                             />
                         </div>
                     </div>
@@ -288,25 +258,71 @@ export default function NotificationsPage() {
 }
 
 function SendNotificationDialog({
-    deviceToken,
-    sendNotification
+    deviceToken
 }: {
-    deviceToken: string,
-    sendNotification: (apiKey: string, deviceToken: string, type: "custom" | "random_verse" | "prayer_times" | "daily_verse" | "daily_chapter", message?: { title?: string, body?: string }, force?: boolean) => Promise<{ success: boolean, error?: string }>
+    deviceToken: string
 }) {
+    const queryClient = useQueryClient();
     const [apiKey, setApiKey] = useLocalStorage('notification_api_key', '');
     const [type, setType] = useState<"custom" | "random_verse" | "prayer_times" | "daily_verse" | "daily_chapter">("random_verse");
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [force, setForce] = useState(false);
-    const [isSending, setIsSending] = useState(false);
     const [apiResponse, setApiResponse] = useState<unknown>(null);
 
-    // Removed manual localStorage logic in favor of useLocalStorage hook
+    const sendMutation = useMutation({
+        mutationFn: async ({
+            apiKey,
+            deviceToken,
+            type,
+            message,
+            force
+        }: {
+            apiKey: string,
+            deviceToken: string,
+            type: string,
+            message?: { title?: string, body?: string },
+            force: boolean
+        }) => {
+            const req = await fetch(`https://push-notifications.wikisubmission.org/send-notification`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    device_token: deviceToken,
+                    platform: 'ios',
+                    force: force,
+                    type: type,
+                    ...message?.title && { title: message.title },
+                    ...message?.body && { message: message.body },
+                    api_key: apiKey
+                })
+            });
+
+            const res = await req.json();
+            if (!req.ok) {
+                throw new Error(res.error || "Failed to send notification");
+            }
+            return res;
+        },
+        onSuccess: (res) => {
+            toast.success("Notification sent successfully");
+            setApiResponse(res);
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        },
+        onError: (error: Error) => {
+            toast.error(error.message);
+            setApiResponse({ error: error.message });
+        }
+    });
 
     return (
         <Dialog onOpenChange={(open) => {
-            if (!open) setApiResponse(null);
+            if (!open) {
+                setApiResponse(null);
+                sendMutation.reset();
+            }
         }}>
             <DialogTrigger asChild>
                 <Button variant="secondary" size="sm" className="text-xs">
@@ -411,20 +427,22 @@ function SendNotificationDialog({
                     </DialogClose>
                     <Button
                         type="button"
-                        disabled={isSending || !apiKey}
+                        disabled={sendMutation.isPending || !apiKey}
                         className="bg-violet-600 hover:bg-violet-700 text-white"
-                        onClick={async () => {
-                            setIsSending(true);
-                            setApiResponse(null);
-                            const res = await sendNotification(apiKey, deviceToken, type, {
-                                ...title && { title },
-                                ...body && { body }
-                            }, force);
-                            setApiResponse(res);
-                            setIsSending(false);
+                        onClick={() => {
+                            sendMutation.mutate({
+                                apiKey,
+                                deviceToken,
+                                type,
+                                message: {
+                                    ...title && { title },
+                                    ...body && { body }
+                                },
+                                force
+                            });
                         }}
                     >
-                        {isSending ? "Sending..." : "Send Now"}
+                        {sendMutation.isPending ? "Sending..." : "Send Now"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

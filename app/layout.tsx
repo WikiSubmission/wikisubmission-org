@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { GeometryDots } from "@/components/geometry-dots";
+import Providers from "@/components/providers";
 import {
   ClerkProvider,
 } from '@clerk/nextjs'
@@ -29,10 +30,12 @@ export default function RootLayout({
             defaultTheme="system"
             disableTransitionOnChange
           >
-            <GeometryDots />
-            {children}
-            <ScrollToTop />
-            <Toaster />
+            <Providers>
+              <GeometryDots />
+              {children}
+              <ScrollToTop />
+              <Toaster />
+            </Providers>
           </ThemeProvider>
         </body>
       </html>

@@ -10,45 +10,55 @@ import { CalendarIcon, CopyIcon, Edit2Icon, MusicIcon, PlusIcon } from "lucide-r
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function MusicPage() {
 
-    const [tracks, setTracks] = useState<(Database["public"]["Tables"]["ws_music_tracks"]["Row"] & {
-        ws_music_artists: Database["public"]["Tables"]["ws_music_artists"]["Row"] | null;
-        ws_music_categories: Database["public"]["Tables"]["ws_music_categories"]["Row"] | null;
-    })[]>([]);
+    // Music data (joined query)
 
-    const [artists, setArtists] = useState<Database["public"]["Tables"]["ws_music_artists"]["Row"][]>([]);
-    const [categories, setCategories] = useState<Database["public"]["Tables"]["ws_music_categories"]["Row"][]>([]);
-
-    const fetchTracks = async () => {
-        const { data, error } = await supabase()
-            .from("ws_music_tracks")
-            .select("*, ws_music_artists(*), ws_music_categories(*)")
-            .order("release_date", { ascending: false });
-        if (error) {
-            toast.error(`${error.name}: ${error.message}`);
-        } else {
-            setTracks(data);
+    const { data: tracks = [], isLoading: isTracksLoading } = useQuery({
+        queryKey: ['music-tracks'],
+        queryFn: async () => {
+            const { data, error } = await supabase()
+                .from("ws_music_tracks")
+                .select("*, ws_music_artists(*), ws_music_categories(*)")
+                .order("release_date", { ascending: false });
+            if (error) throw error;
+            return data as (Database["public"]["Tables"]["ws_music_tracks"]["Row"] & {
+                ws_music_artists: Database["public"]["Tables"]["ws_music_artists"]["Row"] | null;
+                ws_music_categories: Database["public"]["Tables"]["ws_music_categories"]["Row"] | null;
+            })[];
         }
-    };
+    });
 
-    const fetchMetadata = async () => {
-        const [artistsRes, categoriesRes] = await Promise.all([
-            supabase().from("ws_music_artists").select("*").order("name"),
-            supabase().from("ws_music_categories").select("*").order("name")
-        ]);
+    // Fetch artists/categories tables separately for edit dialog
 
-        if (artistsRes.data) setArtists(artistsRes.data);
-        if (categoriesRes.data) setCategories(categoriesRes.data);
-    };
+    const { data: artists = [] } = useQuery({
+        queryKey: ['music-artists'],
+        queryFn: async () => {
+            const { data, error } = await supabase().from("ws_music_artists").select("*").order("name");
+            if (error) throw error;
+            return data;
+        }
+    });
 
-    useEffect(() => {
-        Promise.resolve().then(() => {
-            fetchTracks();
-            fetchMetadata();
-        });
-    }, []);
+    const { data: categories = [] } = useQuery({
+        queryKey: ['music-categories'],
+        queryFn: async () => {
+            const { data, error } = await supabase().from("ws_music_categories").select("*").order("name");
+            if (error) throw error;
+            return data;
+        }
+    });
+
+    if (isTracksLoading) {
+        return (
+            <div className="flex h-[400px] items-center justify-center">
+                <Spinner className="size-4 animate-spin text-violet-600" />
+            </div>
+        );
+    }
 
     return (
         <main className="space-y-4 max-w-full overflow-hidden">
@@ -63,7 +73,7 @@ export default function MusicPage() {
                             {tracks.length}
                         </p>
                         <p className="text-muted-foreground">
-                            music tracks
+                            total tracks
                         </p>
                     </section>
 
@@ -72,7 +82,7 @@ export default function MusicPage() {
                             {tracks.filter(i => i.release_date && new Date(i.release_date).getTime() > new Date().getTime() - 60 * 60 * 24 * 7 * 1000).length}
                         </p>
                         <p className="text-muted-foreground">
-                            releases this week
+                            release(s) this week
                         </p>
                     </section>
                 </div>
@@ -82,7 +92,6 @@ export default function MusicPage() {
                 <TrackDialog
                     artists={artists}
                     categories={categories}
-                    onSuccess={fetchTracks}
                 />
 
                 <div className="space-y-2">
@@ -125,7 +134,6 @@ export default function MusicPage() {
                                     track={track}
                                     artists={artists}
                                     categories={categories}
-                                    onSuccess={fetchTracks}
                                 />
                             </div>
                         </section>
@@ -139,23 +147,21 @@ export default function MusicPage() {
 function TrackDialog({
     track,
     artists,
-    categories,
-    onSuccess
+    categories
 }: {
     track?: Database["public"]["Tables"]["ws_music_tracks"]["Row"],
     artists: Database["public"]["Tables"]["ws_music_artists"]["Row"][],
-    categories: Database["public"]["Tables"]["ws_music_categories"]["Row"][],
-    onSuccess: () => void
+    categories: Database["public"]["Tables"]["ws_music_categories"]["Row"][]
 }) {
     const isEditing = !!track;
-    const [name, setName] = useState(track?.name || '');
-    const [artistId, setArtistId] = useState(track?.artist || '');
-    const [categoryId, setCategoryId] = useState(track?.category || '');
-    const [url, setUrl] = useState(track?.url || '');
-    const [album, setAlbum] = useState(track?.album || '');
-    const [featured, setFeatured] = useState(track?.featured || false);
-    const [releaseDate, setReleaseDate] = useState(track?.release_date || new Date().toISOString().split('T')[0]);
-    const [isSaving, setIsSaving] = useState(false);
+    const queryClient = useQueryClient();
+    const [name, setName] = useState('');
+    const [artistId, setArtistId] = useState('');
+    const [categoryId, setCategoryId] = useState('');
+    const [url, setUrl] = useState('');
+    const [album, setAlbum] = useState('');
+    const [featured, setFeatured] = useState(false);
+    const [releaseDate, setReleaseDate] = useState('');
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
@@ -171,14 +177,34 @@ function TrackDialog({
             });
         }
     }, [track, isOpen]);
-    const handleSave = async () => {
+
+    const saveMutation = useMutation({
+        mutationFn: async (trackData: Database["public"]["Tables"]["ws_music_tracks"]["Insert"] | Database["public"]["Tables"]["ws_music_tracks"]["Update"]) => {
+            const res = isEditing
+                ? await supabase().from("ws_music_tracks").update(trackData as Database["public"]["Tables"]["ws_music_tracks"]["Update"]).eq("id", track.id).select()
+                : await supabase().from("ws_music_tracks").insert(trackData as Database["public"]["Tables"]["ws_music_tracks"]["Insert"]).select();
+
+            if (res.error) throw res.error;
+            if (!res.data || res.data.length === 0) throw new Error("No rows were affected.");
+            return res.data;
+        },
+        onSuccess: () => {
+            toast.success(`Track ${isEditing ? 'updated' : 'added'} successfully`);
+            queryClient.invalidateQueries({ queryKey: ['music-tracks'] });
+            setIsOpen(false);
+        },
+        onError: (error: Error) => {
+            toast.error(error.message);
+        }
+    });
+
+    const handleSave = () => {
         if (!name || !artistId || !categoryId || !url) {
             toast.error("Please fill in all required fields");
             return;
         }
 
-        setIsSaving(true);
-        const trackData = {
+        saveMutation.mutate({
             name,
             artist: artistId,
             category: categoryId,
@@ -186,27 +212,7 @@ function TrackDialog({
             album: album || null,
             featured,
             release_date: releaseDate
-        };
-
-        console.log("Saving track data:", trackData);
-        if (isEditing) console.log("Updating track ID:", track.id);
-
-        const res = isEditing
-            ? await supabase().from("ws_music_tracks").update(trackData).eq("id", track.id).select()
-            : await supabase().from("ws_music_tracks").insert(trackData).select();
-
-        console.log("Supabase response:", res);
-
-        setIsSaving(false);
-        if (res.error) {
-            toast.error(res.error.message);
-        } else if (res.data && res.data.length > 0) {
-            toast.success(`Track ${isEditing ? 'updated' : 'added'} successfully`);
-            setIsOpen(false);
-            onSuccess();
-        } else {
-            toast.warning("Request completed but no rows were affected. Check permissions.");
-        }
+        });
     };
 
     return (
@@ -218,7 +224,7 @@ function TrackDialog({
                     </Button>
                 ) : (
                     <Button variant="outline" >
-                        <PlusIcon className="size-5" size="icon" />
+                        <PlusIcon className="size-5" />
                         New Track
                     </Button>
                 )}
@@ -277,10 +283,10 @@ function TrackDialog({
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant="secondary" disabled={isSaving}>Cancel</Button>
+                        <Button variant="secondary" disabled={saveMutation.isPending}>Cancel</Button>
                     </DialogClose>
-                    <Button onClick={handleSave} disabled={isSaving} className="bg-violet-600 hover:bg-violet-700 text-white">
-                        {isSaving ? "Saving..." : "Save Changes"}
+                    <Button onClick={handleSave} disabled={saveMutation.isPending} className="bg-violet-600 hover:bg-violet-700 text-white">
+                        {saveMutation.isPending ? "Saving..." : "Save Changes"}
                     </Button>
                 </DialogFooter>
             </DialogContent>
