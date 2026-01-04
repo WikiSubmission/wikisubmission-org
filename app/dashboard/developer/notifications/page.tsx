@@ -1,23 +1,23 @@
 'use client';
 
-import { Database } from "@/types/supabase-internal-types";
-import { supabaseInternal } from "@/lib/supabase";
-import { useState } from "react";
-import { formatTimeAgo } from "@/lib/utils";
-import { FaApple, FaArrowRight } from "react-icons/fa";
-import { ArrowRight, BellIcon, BellMinusIcon, CheckIcon, CopyIcon, MapPinIcon, XIcon } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { FaApple, FaCloud, FaDatabase, FaGithub } from "react-icons/fa";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowRight, ArrowUpRightFromCircleIcon, BellIcon, BellMinusIcon, CheckIcon, CopyIcon, MapPinIcon, XIcon } from "lucide-react";
+import { Database } from "@/types/supabase-internal-types";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Fonts } from "@/constants/fonts";
-import Link from "next/link";
-import useLocalStorage from "@/hooks/use-local-storage";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
+import { getNotifications, sendNotification } from "./queries";
+import { formatTimeAgo } from "@/lib/utils";
+import { toast } from "sonner";
+import Link from "next/link";
+import useLocalStorage from "@/hooks/use-local-storage";
 
 export default function NotificationsPage() {
     const [sortBy, setSortBy] = useState<'last_delivery' | 'new'>('last_delivery');
@@ -25,14 +25,7 @@ export default function NotificationsPage() {
 
     const { data: notifications = [], isLoading } = useQuery({
         queryKey: ['notifications'],
-        queryFn: async () => {
-            const { data, error } = await supabaseInternal()
-                .from("ws_notifications_ios")
-                .select("*")
-                .order("created_at", { ascending: false });
-            if (error) throw error;
-            return data;
-        }
+        queryFn: getNotifications
     });
 
     // Subjective filter for "inactive" devices
@@ -101,14 +94,37 @@ export default function NotificationsPage() {
                 </section>
             </section>
 
-            <section>
+            <section className="flex flex-col gap-3 items-left">
                 <Link
                     href={`https://supabase.com/dashboard/project/lbubcoodmaimkadoessn/editor/59408?schema=internal&sort=updated_at%3Adesc`}
                     target="_blank"
                     className="flex w-fit"
                 >
                     <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
-                        Database <FaArrowRight />
+                        <FaDatabase className="size-3" />
+                        ws_notifications_ios (DB / Supabase) <ArrowUpRightFromCircleIcon className="size-3" />
+                    </p>
+                </Link>
+
+                <Link
+                    href={`https://github.com/WikiSubmission/wikisubmission-push-notifications`}
+                    target="_blank"
+                    className="flex w-fit"
+                >
+                    <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
+                        <FaGithub className="size-3" />
+                        ws-push-notifications (Server / GitHub) <ArrowUpRightFromCircleIcon className="size-3" />
+                    </p>
+                </Link>
+
+                <Link
+                    href={`https://railway.com/project/c7a4935a-63c3-4746-8625-18a08494758a/service/e4209bfc-c0c8-495b-bea7-72a9c86c0225`}
+                    target="_blank"
+                    className="flex w-fit"
+                >
+                    <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
+                        <FaCloud className="size-3" />
+                        ws-push-notifications (Deployment / Railway) <ArrowUpRightFromCircleIcon className="size-3" />
                     </p>
                 </Link>
             </section>
@@ -271,41 +287,7 @@ function SendNotificationDialog({
     const [apiResponse, setApiResponse] = useState<unknown>(null);
 
     const sendMutation = useMutation({
-        mutationFn: async ({
-            apiKey,
-            deviceToken,
-            type,
-            message,
-            force
-        }: {
-            apiKey: string,
-            deviceToken: string,
-            type: string,
-            message?: { title?: string, body?: string },
-            force: boolean
-        }) => {
-            const req = await fetch(`https://push-notifications.wikisubmission.org/send-notification`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    device_token: deviceToken,
-                    platform: 'ios',
-                    force: force,
-                    type: type,
-                    ...message?.title && { title: message.title },
-                    ...message?.body && { message: message.body },
-                    api_key: apiKey
-                })
-            });
-
-            const res = await req.json();
-            if (!req.ok) {
-                throw new Error(res.error || "Failed to send notification");
-            }
-            return res;
-        },
+        mutationFn: sendNotification,
         onSuccess: (res) => {
             toast.success("Notification sent successfully");
             setApiResponse(res);
@@ -336,7 +318,16 @@ function SendNotificationDialog({
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="api-key">API Key</Label>
+                        <div className="space-y-1">
+                            <Label htmlFor="api-key">API Key</Label>
+                            <p className="text-xs text-muted-foreground">
+                                This key is required to send notifications. It is defined in the push-notifications server&apos;s <a
+                                    href="https://railway.com/project/c7a4935a-63c3-4746-8625-18a08494758a/service/e4209bfc-c0c8-495b-bea7-72a9c86c0225/variables?environmentId=0140eee1-e990-4596-a8aa-87ed8fdca859"
+                                    className="underline"
+                                    target="_blank"
+                                >deployment instance</a> as the <span className={`${Fonts.geistMono.className} bg-muted/50 px-1 rounded`}>API_KEY</span> environment variable.
+                            </p>
+                        </div>
                         <Input
                             id="api-key"
                             placeholder="Enter notification API key"

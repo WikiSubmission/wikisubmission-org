@@ -6,50 +6,30 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CalendarIcon, CopyIcon, Edit2Icon, MusicIcon, PlusIcon } from "lucide-react";
+import { ArrowUpRightFromCircleIcon, CalendarIcon, CopyIcon, Edit2Icon, MusicIcon, PlusIcon, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { getArtists, getCategories, getTracks, saveTrack, deleteTrack } from "./queries";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
+import Link from "next/link";
+import { FaDatabase } from "react-icons/fa";
 
 export default function MusicPage() {
 
-    // Music data (joined query)
-
     const { data: tracks = [], isLoading: isTracksLoading } = useQuery({
         queryKey: ['music-tracks'],
-        queryFn: async () => {
-            const { data, error } = await supabase()
-                .from("ws_music_tracks")
-                .select("*, ws_music_artists(*), ws_music_categories(*)")
-                .order("release_date", { ascending: false });
-            if (error) throw error;
-            return data as (Database["public"]["Tables"]["ws_music_tracks"]["Row"] & {
-                ws_music_artists: Database["public"]["Tables"]["ws_music_artists"]["Row"] | null;
-                ws_music_categories: Database["public"]["Tables"]["ws_music_categories"]["Row"] | null;
-            })[];
-        }
+        queryFn: getTracks
     });
-
-    // Fetch artists/categories tables separately for edit dialog
 
     const { data: artists = [] } = useQuery({
         queryKey: ['music-artists'],
-        queryFn: async () => {
-            const { data, error } = await supabase().from("ws_music_artists").select("*").order("name");
-            if (error) throw error;
-            return data;
-        }
+        queryFn: getArtists
     });
 
     const { data: categories = [] } = useQuery({
         queryKey: ['music-categories'],
-        queryFn: async () => {
-            const { data, error } = await supabase().from("ws_music_categories").select("*").order("name");
-            if (error) throw error;
-            return data;
-        }
+        queryFn: getCategories
     });
 
     if (isTracksLoading) {
@@ -88,6 +68,41 @@ export default function MusicPage() {
                 </div>
             </section>
 
+            <section className="flex flex-col gap-3 items-left">
+                <Link
+                    href={`https://supabase.com/dashboard/project/lbubcoodmaimkadoessn/editor/74913?schema=public&sort=release_date%3Adesc`}
+                    target="_blank"
+                    className="flex w-fit"
+                >
+                    <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
+                        <FaDatabase className="size-3" />
+                        ws_music_tracks (DB / Supabase) <ArrowUpRightFromCircleIcon className="size-3" />
+                    </p>
+                </Link>
+
+                <Link
+                    href={`https://supabase.com/dashboard/project/lbubcoodmaimkadoessn/editor/74876?schema=public`}
+                    target="_blank"
+                    className="flex w-fit"
+                >
+                    <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
+                        <FaDatabase className="size-3" />
+                        ws_music_artists (DB / Supabase) <ArrowUpRightFromCircleIcon className="size-3" />
+                    </p>
+                </Link>
+
+                <Link
+                    href={`https://supabase.com/dashboard/project/lbubcoodmaimkadoessn/editor/74888?schema=public`}
+                    target="_blank"
+                    className="flex w-fit"
+                >
+                    <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
+                        <FaDatabase className="size-3" />
+                        ws_music_categories (DB / Supabase) <ArrowUpRightFromCircleIcon className="size-3" />
+                    </p>
+                </Link>
+            </section>
+
             <section className="space-y-2">
                 <TrackDialog
                     artists={artists}
@@ -99,7 +114,8 @@ export default function MusicPage() {
                         <section key={track.id} className="p-4 bg-muted/50 rounded-2xl flex justify-between items-center">
                             <div className="space-y-2">
                                 <div className="space-y-1">
-                                    <p className="font-semibold">
+                                    <p className="font-semibold flex items-center gap-2">
+                                        <MusicIcon className="size-4" />
                                         {track.name}
                                     </p>
                                     <p className="text-muted-foreground text-xs">
@@ -180,16 +196,25 @@ function TrackDialog({
 
     const saveMutation = useMutation({
         mutationFn: async (trackData: Database["public"]["Tables"]["ws_music_tracks"]["Insert"] | Database["public"]["Tables"]["ws_music_tracks"]["Update"]) => {
-            const res = isEditing
-                ? await supabase().from("ws_music_tracks").update(trackData as Database["public"]["Tables"]["ws_music_tracks"]["Update"]).eq("id", track.id).select()
-                : await supabase().from("ws_music_tracks").insert(trackData as Database["public"]["Tables"]["ws_music_tracks"]["Insert"]).select();
-
-            if (res.error) throw res.error;
-            if (!res.data || res.data.length === 0) throw new Error("No rows were affected.");
-            return res.data;
+            return await saveTrack(trackData, track?.id);
         },
         onSuccess: () => {
             toast.success(`Track ${isEditing ? 'updated' : 'added'} successfully`);
+            queryClient.invalidateQueries({ queryKey: ['music-tracks'] });
+            setIsOpen(false);
+        },
+        onError: (error: Error) => {
+            toast.error(error.message);
+        }
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: async () => {
+            if (!track?.id) return;
+            return await deleteTrack(track.id);
+        },
+        onSuccess: () => {
+            toast.success("Track deleted successfully");
             queryClient.invalidateQueries({ queryKey: ['music-tracks'] });
             setIsOpen(false);
         },
@@ -281,13 +306,32 @@ function TrackDialog({
                         </Label>
                     </div>
                 </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button variant="secondary" disabled={saveMutation.isPending}>Cancel</Button>
-                    </DialogClose>
-                    <Button onClick={handleSave} disabled={saveMutation.isPending} className="bg-violet-600 hover:bg-violet-700 text-white">
-                        {saveMutation.isPending ? "Saving..." : "Save Changes"}
-                    </Button>
+                <DialogFooter className="flex justify-between items-center w-full">
+                    <div className="flex gap-2">
+                        {isEditing && (
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => {
+                                    if (confirm("Are you sure you want to delete this track?")) {
+                                        deleteMutation.mutate();
+                                    }
+                                }}
+                                disabled={deleteMutation.isPending || saveMutation.isPending}
+                            >
+                                <Trash2 className="size-4 mr-1" />
+                                Delete
+                            </Button>
+                        )}
+                    </div>
+                    <div className="flex gap-2">
+                        <DialogClose asChild>
+                            <Button variant="secondary" disabled={saveMutation.isPending || deleteMutation.isPending}>Cancel</Button>
+                        </DialogClose>
+                        <Button onClick={handleSave} disabled={saveMutation.isPending || deleteMutation.isPending} className="bg-violet-600 hover:bg-violet-700 text-white">
+                            {saveMutation.isPending ? "Saving..." : "Save Changes"}
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
