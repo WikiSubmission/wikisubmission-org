@@ -3,17 +3,17 @@
 import { Database } from "@/types/supabase-types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowRight, ArrowUpRightFromCircleIcon, CalendarIcon, CheckIcon, CopyIcon, Edit2Icon, MusicIcon, PlusIcon, Trash2, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowUpRightFromCircleIcon, CalendarIcon, CopyIcon, Edit2Icon, MusicIcon, PlusIcon, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getArtists, getCategories, getTracks, saveTrack, deleteTrack } from "./queries";
 import { toast } from "sonner";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
-import Link from "next/link";
 import { FaDatabase } from "react-icons/fa";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getArtists, getCategories, getTracks, saveTrack, deleteTrack, uploadTrackFile } from "./queries";
+import Link from "next/link";
 
 export default function MusicPage() {
 
@@ -175,19 +175,20 @@ function TrackDialog({
     const [artistId, setArtistId] = useState('');
     const [categoryId, setCategoryId] = useState('');
     const [url, setUrl] = useState('');
-    const [album, setAlbum] = useState('');
     const [featured, setFeatured] = useState(false);
     const [releaseDate, setReleaseDate] = useState('');
     const [isOpen, setIsOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [step, setStep] = useState<1 | 2>(1);
 
     useEffect(() => {
         if (isOpen) {
             Promise.resolve().then(() => {
+                setStep(1);
                 setName(track?.name || '');
                 setArtistId(track?.artist || '');
                 setCategoryId(track?.category || '');
                 setUrl(track?.url || '');
-                setAlbum(track?.album || '');
                 setFeatured(track?.featured || false);
                 setReleaseDate(track?.release_date || new Date().toISOString().split('T')[0]);
             });
@@ -202,6 +203,29 @@ function TrackDialog({
             toast.success(`Track ${isEditing ? 'updated' : 'added'} successfully`);
             queryClient.invalidateQueries({ queryKey: ['music-tracks'] });
             setIsOpen(false);
+        },
+        onError: (error: Error) => {
+            toast.error(error.message);
+        }
+    });
+
+    const uploadMutation = useMutation({
+        mutationFn: async () => {
+            if (!selectedFile || !name || !artistId) {
+                throw new Error("Missing name, artist, or file");
+            }
+            const artistName = artists.find(a => a.id === artistId)?.name || "Unknown";
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+            formData.append("artistName", artistName);
+            formData.append("trackTitle", name);
+            return await uploadTrackFile(formData);
+        },
+        onSuccess: (cdnUrl) => {
+            setUrl(cdnUrl);
+            toast.success("File uploaded and track saved!");
+            setSelectedFile(null);
+            handleSave(cdnUrl);
         },
         onError: (error: Error) => {
             toast.error(error.message);
@@ -223,8 +247,9 @@ function TrackDialog({
         }
     });
 
-    const handleSave = () => {
-        if (!name || !artistId || !categoryId || !url) {
+    const handleSave = (overrideUrl?: string) => {
+        const finalUrl = overrideUrl || url;
+        if (!name || !artistId || !categoryId || !finalUrl) {
             toast.error("Please fill in all required fields");
             return;
         }
@@ -233,8 +258,7 @@ function TrackDialog({
             name,
             artist: artistId,
             category: categoryId,
-            url,
-            album: album || null,
+            url: finalUrl,
             featured,
             release_date: releaseDate
         });
@@ -256,81 +280,155 @@ function TrackDialog({
             </DialogTrigger>
             <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
-                    <DialogTitle>{isEditing ? 'Edit' : 'New'} Track</DialogTitle>
+                    <DialogTitle>{isEditing ? 'Edit' : 'New'} Track • Step {step} of 2</DialogTitle>
                 </DialogHeader>
-                <div className="grid grid-cols-2 gap-4 py-4">
-                    <div className="space-y-2 col-span-2">
-                        <Label htmlFor="name">Track Name</Label>
-                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter track name" />
+
+                {step === 1 ? (
+                    <div className="grid grid-cols-2 gap-4 py-4">
+                        <div className="space-y-2 col-span-2">
+                            <Label htmlFor="name">Track Name</Label>
+                            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter track name" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="artist">Artist</Label>
+                            <select
+                                id="artist"
+                                value={artistId}
+                                onChange={(e) => setArtistId(e.target.value)}
+                                className="flex h-9 w-full rounded-md border border-input bg-muted/30 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            >
+                                <option value="">Select Artist</option>
+                                {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="category">Category</Label>
+                            <select
+                                id="category"
+                                value={categoryId}
+                                onChange={(e) => setCategoryId(e.target.value)}
+                                className="flex h-9 w-full rounded-md border border-input bg-muted/30 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            >
+                                <option value="">Select Category</option>
+                                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="release_date">Release Date</Label>
+                            <Input id="release_date" type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
+                        </div>
+                        <div className="flex items-center space-x-2 pt-4">
+                            <Checkbox id="featured" checked={featured} onCheckedChange={(checked) => setFeatured(!!checked)} />
+                            <Label htmlFor="featured" className="text-sm font-medium leading-none cursor-pointer">
+                                Featured Track?
+                            </Label>
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="artist">Artist</Label>
-                        <select
-                            id="artist"
-                            value={artistId}
-                            onChange={(e) => setArtistId(e.target.value)}
-                            className="flex h-9 w-full rounded-md border border-input bg-muted/30 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                            <option value="">Select Artist</option>
-                            {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                        </select>
+                ) : (
+                    <div className="space-y-6 py-4 overflow-hidden">
+                        {url ? (
+                            <div className="p-4 bg-emerald-500/10 border border-emerald-200 rounded-2xl space-y-3">
+                                <div className="flex items-center gap-2 text-emerald-600 font-medium">
+                                    <CheckIcon className="size-5" />
+                                    Track URL
+                                </div>
+                                <div className="flex items-center gap-2 bg-background p-2 rounded-lg border text-xs min-w-0">
+                                    <code className="flex-1 truncate text-muted-foreground">{url}</code>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="size-8"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(url);
+                                            toast.success("URL copied to clipboard");
+                                        }}
+                                    >
+                                        <CopyIcon className="size-3" />
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="p-4 bg-amber-500/10 border border-amber-200 rounded-2xl flex items-center gap-3 text-amber-700 font-medium">
+                                <Upload className="size-5 animate-bounce" />
+                                File upload required to proceed
+                            </div>
+                        )}
+
+                        <div className="space-y-3">
+                            <Label className="text-sm font-semibold">
+                                {url ? "Replace File (Optional)" : "Upload Track File"}
+                            </Label>
+                            <div className="flex gap-2 min-w-0">
+                                <Input
+                                    type="file"
+                                    accept="audio/*"
+                                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                                    className="flex-1 min-w-0 text-muted-foreground"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() => uploadMutation.mutate()}
+                                    disabled={!selectedFile || uploadMutation.isPending || !name || !artistId}
+                                >
+                                    {uploadMutation.isPending ? (
+                                        <Spinner className="size-4 animate-spin" />
+                                    ) : (
+                                        <Upload className="size-4 mr-1" />
+                                    )}
+                                    Upload
+                                </Button>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed break-words">
+                                Uploads will be stored at our S3 bucket (<code className="bg-muted px-1 rounded break-all">wikisubmission</code>) at path: <code className="bg-muted px-1 rounded break-all">media/zikr/&#123;Artist&#125;/&#123;Title&#125;</code>
+                            </p>
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="category">Category</Label>
-                        <select
-                            id="category"
-                            value={categoryId}
-                            onChange={(e) => setCategoryId(e.target.value)}
-                            className="flex h-9 w-full rounded-md border border-input bg-muted/30 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                            <option value="">Select Category</option>
-                            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </select>
-                    </div>
-                    <div className="space-y-2 col-span-2">
-                        <Label htmlFor="url">Stream URL</Label>
-                        <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="album">Album (Optional)</Label>
-                        <Input id="album" value={album} onChange={(e) => setAlbum(e.target.value)} placeholder="Album name" />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="release_date">Release Date</Label>
-                        <Input id="release_date" type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
-                    </div>
-                    <div className="flex items-center space-x-2 pt-4">
-                        <Checkbox id="featured" checked={featured} onCheckedChange={(checked) => setFeatured(!!checked)} />
-                        <Label htmlFor="featured" className="text-sm font-medium leading-none cursor-pointer">
-                            Featured Track
-                        </Label>
-                    </div>
-                </div>
+                )}
                 <DialogFooter className="flex justify-between items-center w-full">
                     <div className="flex gap-2">
-                        {isEditing && (
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => {
-                                    if (confirm("Are you sure you want to delete this track?")) {
-                                        deleteMutation.mutate();
-                                    }
-                                }}
-                                disabled={deleteMutation.isPending || saveMutation.isPending}
-                            >
-                                <Trash2 className="size-4 mr-1" />
-                                Delete
+                        {step === 1 ? (
+                            isEditing && (
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => {
+                                        if (confirm("Are you sure you want to delete this track?")) {
+                                            deleteMutation.mutate();
+                                        }
+                                    }}
+                                    disabled={deleteMutation.isPending || saveMutation.isPending}
+                                >
+                                    <Trash2 className="size-4 mr-1" />
+                                    Delete
+                                </Button>
+                            )
+                        ) : (
+                            <Button variant="secondary" onClick={() => setStep(1)} disabled={saveMutation.isPending}>
+                                Back
                             </Button>
                         )}
                     </div>
                     <div className="flex gap-2">
-                        <DialogClose asChild>
-                            <Button variant="secondary" disabled={saveMutation.isPending || deleteMutation.isPending}>Cancel</Button>
-                        </DialogClose>
-                        <Button onClick={handleSave} disabled={saveMutation.isPending || deleteMutation.isPending} className="bg-violet-600 hover:bg-violet-700 text-white">
-                            {saveMutation.isPending ? "Saving..." : "Save Changes"}
-                        </Button>
+                        {step === 1 ? (
+                            <Button size="sm" onClick={() => setStep(2)} disabled={!name || !artistId || !categoryId}>
+                                Next
+                                <ArrowRight className="size-4 ml-1" />
+                            </Button>
+                        ) : (
+                            <>
+                                <DialogClose asChild>
+                                    <Button variant="outline" disabled={saveMutation.isPending || deleteMutation.isPending}>Cancel</Button>
+                                </DialogClose>
+                                <Button
+                                    onClick={() => handleSave()}
+                                    disabled={saveMutation.isPending || deleteMutation.isPending || (step === 2 && !url)}
+                                    className="bg-violet-600 hover:bg-violet-700 text-white leading-none"
+                                >
+                                    {saveMutation.isPending ? "Saving..." : (isEditing ? "Save Changes" : "Create Track")}
+                                </Button>
+                            </>
+                        )}
                     </div>
                 </DialogFooter>
             </DialogContent>

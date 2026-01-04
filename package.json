@@ -11,6 +11,8 @@
     "update-internal-types": "npx supabase gen types typescript --project-id lbubcoodmaimkadoessn --schema internal > types/supabase-internal-types.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.962.0",
+    "@aws-sdk/lib-storage": "^3.962.0",
     "@clerk/nextjs": "^6.36.5",
     "@deemlol/next-icons": "^0.1.9",
     "@radix-ui/react-checkbox": "^1.3.3",
