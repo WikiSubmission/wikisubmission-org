@@ -136,7 +136,7 @@ export default function NotificationsPage() {
                         onClick={() => setSortBy('last_delivery')}
                         className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${sortBy === 'last_delivery' ? 'bg-background shadow-sm text-foreground' : 'hover:bg-muted/50 text-muted-foreground'}`}
                     >
-                        Last Delivery
+                        Recent deliveries
                     </button>
                     <button
                         onClick={() => setSortBy('new')}
