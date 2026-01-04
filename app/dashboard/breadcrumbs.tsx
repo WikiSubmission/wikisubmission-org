@@ -18,7 +18,7 @@ export function DashboardBreadcrumbs() {
 
     return (
         <Breadcrumb>
-            <BreadcrumbList className="text-[10px] md:text-[12px]">
+            <BreadcrumbList className="text-[10px] md:text-[12px] flex flex-wrap">
                 <BreadcrumbItem>
                     <BreadcrumbLink asChild>
                         <Link href="/">Dashboard</Link>
