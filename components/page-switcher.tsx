@@ -72,8 +72,8 @@ export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
         ) : (
           currentIcon
         )}
-        <span className="text-base font-light">{modes[currentPage].label}</span>
-        <ChevronDown className="size-4 text-muted-foreground" />
+        <span className="text-xs md:text-sm font-light">{modes[currentPage].label}</span>
+        <ChevronDown className="size-3.5 text-muted-foreground" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-[160px]">
         {Object.entries(modes).map(([key, mode]) => {
