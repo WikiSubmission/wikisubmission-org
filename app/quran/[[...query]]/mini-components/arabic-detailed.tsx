@@ -17,7 +17,7 @@ export function ArabicDetailed({ props }: { props: { data: IndexResult | SearchH
     if ('hit' in props.data && props.data.hit === 'text') {
         return (
             <main className="text-right py-2">
-                <p dir="rtl" className="font-arabic text-2xl leading-relaxed text-foreground/90 tracking-widest">
+                <p dir="rtl" className="font-arabic text-2xl leading-relaxed text-foreground/90">
                     {props.data.arabic}
                 </p>
             </main>
