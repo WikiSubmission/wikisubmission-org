@@ -15,14 +15,19 @@ import {
 import { usePathname } from "next/navigation";
 import { Bell, Home, Music, User } from "lucide-react"
 import Link from "next/link"
+import { useUser } from "@clerk/nextjs";
 
 // Menu items.
-const developerSection = [
+
+const globalSection = [
     {
-        title: "Overview",
-        url: "/dashboard/developer",
+        title: "Dashboard",
+        url: "/dashboard",
         icon: Home,
-    },
+    }
+]
+
+const developerSection = [
     {
         title: "Notifications",
         url: "/dashboard/developer/notifications",
@@ -45,6 +50,7 @@ const contributorSection = [
 
 export function DashboardSidebar() {
     const pathname = usePathname();
+    const { user, isLoaded } = useUser();
     return (
         <Sidebar>
             <SidebarHeader className="border-b p-4 space-y-1">
@@ -53,14 +59,10 @@ export function DashboardSidebar() {
                 </Link>
             </SidebarHeader>
             <SidebarContent>
-
                 <SidebarGroup>
-                    <SidebarGroupLabel>
-                        Contributor
-                    </SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {contributorSection.map((item) => (
+                            {globalSection.map((item) => (
                                 <SidebarMenuItem key={item.title} className={`rounded-lg ${pathname === item.url ? "bg-primary text-primary-foreground" : ""}`}>
                                     <SidebarMenuButton asChild>
                                         <a href={item.url}>
@@ -74,24 +76,54 @@ export function DashboardSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
+                {/* ROLE RESTRICTED AREA */}
+                {isLoaded && user && (
+                    <>
+                        {/* CONTRIBUTOR ROLE SIDEBAR SECTION */}
+                        {user.organizationMemberships.find((membership) => membership.organization.name === "Contributor") && (
+                            <SidebarGroup>
+                                <SidebarGroupLabel>
+                                    Contributer
+                                </SidebarGroupLabel>
+                                <SidebarGroupContent>
+                                    <SidebarMenu>
+                                        {contributorSection.map((item) => (
+                                            <SidebarMenuItem key={item.title} className={`rounded-lg ${pathname === item.url ? "bg-primary text-primary-foreground" : ""}`}>
+                                                <SidebarMenuButton asChild>
+                                                    <a href={item.url}>
+                                                        <item.icon />
+                                                        <span>{item.title}</span>
+                                                    </a>
+                                                </SidebarMenuButton>
+                                            </SidebarMenuItem>
+                                        ))}
+                                    </SidebarMenu>
+                                </SidebarGroupContent>
+                            </SidebarGroup>
+                        )}
 
-                <SidebarGroup>
-                    <SidebarGroupLabel>Developer</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            {developerSection.map((item) => (
-                                <SidebarMenuItem key={item.title} className={`rounded-lg ${pathname === item.url ? "bg-primary text-primary-foreground" : ""}`}>
-                                    <SidebarMenuButton asChild>
-                                        <a href={item.url}>
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </a>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                        {/* STAFF ROLE SIDEBAR SECTION */}
+                        {user.organizationMemberships.find((membership) => membership.organization.name === "Staff") && (
+                            <SidebarGroup>
+                                <SidebarGroupLabel>Developer</SidebarGroupLabel>
+                                <SidebarGroupContent>
+                                    <SidebarMenu>
+                                        {developerSection.map((item) => (
+                                            <SidebarMenuItem key={item.title} className={`rounded-lg ${pathname === item.url ? "bg-primary text-primary-foreground" : ""}`}>
+                                                <SidebarMenuButton asChild>
+                                                    <a href={item.url}>
+                                                        <item.icon />
+                                                        <span>{item.title}</span>
+                                                    </a>
+                                                </SidebarMenuButton>
+                                            </SidebarMenuItem>
+                                        ))}
+                                    </SidebarMenu>
+                                </SidebarGroupContent>
+                            </SidebarGroup>
+                        )}
+                    </>
+                )}
             </SidebarContent>
         </Sidebar>
     )
