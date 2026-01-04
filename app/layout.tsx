@@ -3,9 +3,12 @@ import { Fonts } from "@/constants/fonts";
 import { Metadata } from "@/constants/metadata";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
-import type { Viewport } from "next";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { GeometryDots } from "@/components/geometry-dots";
+import {
+  ClerkProvider,
+} from '@clerk/nextjs'
+import type { Viewport } from "next";
 
 export const metadata = Metadata;
 
@@ -15,23 +18,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${Fonts.sora.className} ${Fonts.amiri.variable} antialiased break-words`}
-        suppressHydrationWarning
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          disableTransitionOnChange
+    <ClerkProvider signInUrl="/auth/sign-in" signUpUrl="/auth/sign-up">
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={`${Fonts.sora.className} ${Fonts.amiri.variable} antialiased break-words`}
+          suppressHydrationWarning
         >
-          <GeometryDots />
-          {children}
-          <ScrollToTop />
-          <Toaster />
-        </ThemeProvider>
-      </body>
-    </html>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            disableTransitionOnChange
+          >
+            <GeometryDots />
+            {children}
+            <ScrollToTop />
+            <Toaster />
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
 

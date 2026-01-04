@@ -8,7 +8,6 @@ import { StandardItemVerses } from "../mini-components/standard-item-verses";
 import Link from "next/link";
 
 export function StandardResult({ props }: { props: { query: string, data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
-    const indexAdjustment = ((props.data.data[0].chapter_number === 1 || props.data.data[0].chapter_number === 9) ? 0 : 1);
     return (
         <div className="space-y-2">
             <StandardItemTitle props={props} />

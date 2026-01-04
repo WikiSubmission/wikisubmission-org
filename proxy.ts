@@ -1,7 +1,8 @@
+import { clerkMiddleware } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function proxy(request: NextRequest) {
+export default clerkMiddleware((auth, request: NextRequest) => {
     const { pathname, searchParams } = request.nextUrl;
 
     // Proxy for the Quran section
@@ -20,7 +21,7 @@ export function proxy(request: NextRequest) {
             // Clear search params
             url.search = '';
 
-            // Set search param, if provided: `tab`
+            // Set search param, if provided: tab
             if (tab) {
                 url.searchParams.set('tab', tab);
             }
@@ -30,10 +31,13 @@ export function proxy(request: NextRequest) {
     }
 
     return NextResponse.next();
-}
+});
 
 export const config = {
     matcher: [
-        '/quran/:path*',
+        // Skip Next.js internals and all static files, unless found in search params
+        '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+        // Always run for API routes
+        '/(api|trpc)(.*)',
     ],
 }

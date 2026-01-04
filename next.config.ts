@@ -93,11 +93,6 @@ const nextConfig: NextConfig = {
         destination: "/quran/:query*",
         permanent: true,
       },
-      {
-        source: "/dashboard/:query*",
-        destination: "/quran/:query*",
-        permanent: true,
-      },
     ];
   },
 };
