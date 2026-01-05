@@ -15,7 +15,7 @@ export default async function ManageDonationPage({
 
     if (email) {
         // Try to find customer by email
-        const customers = await stripe.customers.list({
+        const customers = await stripe().customers.list({
             email: email.trim().toLowerCase(),
             limit: 1,
         });
@@ -25,7 +25,7 @@ export default async function ManageDonationPage({
 
             try {
                 // Create billing portal session
-                const session = await stripe.billingPortal.sessions.create({
+                const session = await stripe().billingPortal.sessions.create({
                     customer: customerId,
                     return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://wikisubmission.org'}/donate`,
                 });
