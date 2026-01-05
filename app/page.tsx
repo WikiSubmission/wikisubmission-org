@@ -213,7 +213,7 @@ export default function Home() {
           <Image src="/brand-assets/logo-transparent.png" className="mx-auto mb-2 size-6 rounded-full" alt="Quran: The Final Testament" width={500} height={500} />
           <div className="flex flex-col space-y-2">
             <p>
-              WikiSubmission is a faith-based 501(c)(3) nonprofit organization providing free and open-source tools and technology, educational resources, and creative media.
+              WikiSubmission is a faith-based 501(c)(3) nonprofit organization providing free and open-source tools and technology, educational resources, and creative works in the cause of God.
             </p>
             <p>
               We believe that all religions share a common foundation in the worship of God and the submission to God alone. By focusing on this central truth, we aim to promote universal unity and to bridge the gap between all world religions.
