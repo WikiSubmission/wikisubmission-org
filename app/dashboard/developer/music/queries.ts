@@ -30,6 +30,24 @@ export const getCategories = async () => {
     return data;
 }
 
+export const createArtist = async (name: string) => {
+    const { data, error } = await supabase()
+        .from("ws_music_artists")
+        .insert({ name })
+        .select();
+    if (error) throw error;
+    return data[0];
+}
+
+export const createCategory = async (name: string) => {
+    const { data, error } = await supabase()
+        .from("ws_music_categories")
+        .insert({ name })
+        .select();
+    if (error) throw error;
+    return data[0];
+}
+
 export const saveTrack = async (
     trackData: Database["public"]["Tables"]["ws_music_tracks"]["Insert"] | Database["public"]["Tables"]["ws_music_tracks"]["Update"],
     id?: string
@@ -44,10 +62,20 @@ export const saveTrack = async (
 }
 
 import { Upload } from "@aws-sdk/lib-storage";
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { s3Client, BUCKET_NAME, CLOUDFRONT_URL } from "@/lib/s3";
 
 export const deleteTrack = async (id: string) => {
+    // 1. Get track info before deletion to know artist/category
+    const { data: trackInfo } = await supabase()
+        .from("ws_music_tracks")
+        .select("*, ws_music_artists(name)")
+        .eq("id", id)
+        .single();
+
+    if (!trackInfo) throw new Error("Track not found");
+
+    // 2. Delete the track
     const res = await supabase().from("ws_music_tracks").delete().eq("id", id).select();
 
     if (res.error) throw res.error;
@@ -55,7 +83,7 @@ export const deleteTrack = async (id: string) => {
 
     const deletedTrack = res.data[0];
 
-    // Try to delete it from S3 (low priority task)
+    // 3. Delete the specific file from S3 if it's our CDN URL
     if (deletedTrack.url?.startsWith(CLOUDFRONT_URL)) {
         try {
             const key = deletedTrack.url.replace(`${CLOUDFRONT_URL}/`, "");
@@ -66,6 +94,55 @@ export const deleteTrack = async (id: string) => {
         } catch (s3Error) {
             console.error("Failed to delete S3 object:", s3Error);
         }
+    }
+
+    // 4. Orphan Cleanup (Soft attempts)
+    try {
+        // Artist Cleanup
+        if (deletedTrack.artist) {
+            const { count: artistTrackCount } = await supabase()
+                .from("ws_music_tracks")
+                .select("*", { count: 'exact', head: true })
+                .eq("artist", deletedTrack.artist);
+
+            if (artistTrackCount === 0) {
+                // Delete Artist from DB
+                await supabase().from("ws_music_artists").delete().eq("id", deletedTrack.artist);
+
+                // Attempt to delete Artist folder from S3
+                const artist = trackInfo.ws_music_artists as unknown as { name: string } | null;
+                if (artist?.name) {
+                    const artistFolderPrefix = `media/zikr/${artist.name}/`;
+                    const listRes = await s3Client.send(new ListObjectsV2Command({
+                        Bucket: BUCKET_NAME,
+                        Prefix: artistFolderPrefix
+                    }));
+
+                    if (listRes.Contents && listRes.Contents.length > 0) {
+                        await s3Client.send(new DeleteObjectsCommand({
+                            Bucket: BUCKET_NAME,
+                            Delete: {
+                                Objects: listRes.Contents.map(obj => ({ Key: obj.Key! }))
+                            }
+                        }));
+                    }
+                }
+            }
+        }
+
+        // Category Cleanup
+        if (deletedTrack.category) {
+            const { count: categoryTrackCount } = await supabase()
+                .from("ws_music_tracks")
+                .select("*", { count: 'exact', head: true })
+                .eq("category", deletedTrack.category);
+
+            if (categoryTrackCount === 0) {
+                await supabase().from("ws_music_categories").delete().eq("id", deletedTrack.category);
+            }
+        }
+    } catch (cleanupError) {
+        console.error("Failed during orphan cleanup:", cleanupError);
     }
 
     return res.data;

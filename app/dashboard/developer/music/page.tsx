@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { FaDatabase } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getArtists, getCategories, getTracks, saveTrack, deleteTrack, uploadTrackFile } from "./queries";
+import { getArtists, getCategories, getTracks, saveTrack, deleteTrack, uploadTrackFile, createArtist, createCategory } from "./queries";
 import Link from "next/link";
 
 export default function MusicPage() {
@@ -180,6 +180,10 @@ function TrackDialog({
     const [isOpen, setIsOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [step, setStep] = useState<1 | 2>(1);
+    const [isAddingArtist, setIsAddingArtist] = useState(false);
+    const [newArtistName, setNewArtistName] = useState('');
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
 
     useEffect(() => {
         if (isOpen) {
@@ -247,6 +251,58 @@ function TrackDialog({
         }
     });
 
+    const artistMutation = useMutation({
+        mutationFn: createArtist,
+        onSuccess: (newArtist) => {
+            toast.success("Artist created successfully");
+            queryClient.invalidateQueries({ queryKey: ['music-artists'] });
+            setArtistId(newArtist.id);
+            setIsAddingArtist(false);
+            setNewArtistName('');
+        },
+        onError: (error: Error) => {
+            toast.error(error.message);
+        }
+    });
+
+    const categoryMutation = useMutation({
+        mutationFn: createCategory,
+        onSuccess: (newCategory) => {
+            toast.success("Category created successfully");
+            queryClient.invalidateQueries({ queryKey: ['music-categories'] });
+            setCategoryId(newCategory.id);
+            setIsAddingCategory(false);
+            setNewCategoryName('');
+        },
+        onError: (error: Error) => {
+            toast.error(error.message);
+        }
+    });
+
+    const handleNext = async () => {
+        let currentArtistId = artistId;
+        let currentCategoryId = categoryId;
+
+        try {
+            if (isAddingArtist && newArtistName) {
+                const added = await artistMutation.mutateAsync(newArtistName);
+                currentArtistId = added.id;
+            }
+            if (isAddingCategory && newCategoryName) {
+                const added = await categoryMutation.mutateAsync(newCategoryName);
+                currentCategoryId = added.id;
+            }
+
+            if (currentArtistId && currentCategoryId && name) {
+                setStep(2);
+            } else {
+                toast.error("Please ensure all fields are filled");
+            }
+        } catch {
+            // Errors are handled by mutation onError toasts
+        }
+    };
+
     const handleSave = (overrideUrl?: string) => {
         const finalUrl = overrideUrl || url;
         if (!name || !artistId || !categoryId || !finalUrl) {
@@ -290,28 +346,84 @@ function TrackDialog({
                             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter track name" />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="artist">Artist</Label>
-                            <select
-                                id="artist"
-                                value={artistId}
-                                onChange={(e) => setArtistId(e.target.value)}
-                                className="flex h-9 w-full rounded-md border border-input bg-muted/30 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                            >
-                                <option value="">Select Artist</option>
-                                {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                            </select>
+                            <Label htmlFor="artist" className="flex justify-between items-center">
+                                Artist
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-2 text-[10px]"
+                                    onClick={() => setIsAddingArtist(!isAddingArtist)}
+                                >
+                                    {isAddingArtist ? "Cancel" : "Add New"}
+                                </Button>
+                            </Label>
+                            {isAddingArtist ? (
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder="New Artist Name"
+                                        value={newArtistName}
+                                        onChange={(e) => setNewArtistName(e.target.value)}
+                                        className="h-9 text-xs"
+                                    />
+                                    <Button
+                                        size="sm"
+                                        onClick={() => artistMutation.mutate(newArtistName)}
+                                        disabled={!newArtistName || artistMutation.isPending}
+                                    >
+                                        {artistMutation.isPending ? <Spinner className="size-3" /> : <PlusIcon className="size-3" />}
+                                    </Button>
+                                </div>
+                            ) : (
+                                <select
+                                    id="artist"
+                                    value={artistId}
+                                    onChange={(e) => setArtistId(e.target.value)}
+                                    className="flex h-9 w-full rounded-md border border-input bg-muted/30 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                >
+                                    <option value="">Select Artist</option>
+                                    {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                                </select>
+                            )}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="category">Category</Label>
-                            <select
-                                id="category"
-                                value={categoryId}
-                                onChange={(e) => setCategoryId(e.target.value)}
-                                className="flex h-9 w-full rounded-md border border-input bg-muted/30 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                            >
-                                <option value="">Select Category</option>
-                                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                            </select>
+                            <Label htmlFor="category" className="flex justify-between items-center">
+                                Category
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-2 text-[10px]"
+                                    onClick={() => setIsAddingCategory(!isAddingCategory)}
+                                >
+                                    {isAddingCategory ? "Cancel" : "Add New"}
+                                </Button>
+                            </Label>
+                            {isAddingCategory ? (
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder="New Category Name"
+                                        value={newCategoryName}
+                                        onChange={(e) => setNewCategoryName(e.target.value)}
+                                        className="h-9 text-xs"
+                                    />
+                                    <Button
+                                        size="sm"
+                                        onClick={() => categoryMutation.mutate(newCategoryName)}
+                                        disabled={!newCategoryName || categoryMutation.isPending}
+                                    >
+                                        {categoryMutation.isPending ? <Spinner className="size-3" /> : <PlusIcon className="size-3" />}
+                                    </Button>
+                                </div>
+                            ) : (
+                                <select
+                                    id="category"
+                                    value={categoryId}
+                                    onChange={(e) => setCategoryId(e.target.value)}
+                                    className="flex h-9 w-full rounded-md border border-input bg-muted/30 px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                >
+                                    <option value="">Select Category</option>
+                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="release_date">Release Date</Label>
@@ -411,9 +523,23 @@ function TrackDialog({
                     </div>
                     <div className="flex gap-2">
                         {step === 1 ? (
-                            <Button size="sm" onClick={() => setStep(2)} disabled={!name || !artistId || !categoryId}>
+                            <Button
+                                size="sm"
+                                onClick={handleNext}
+                                disabled={
+                                    !name ||
+                                    (isAddingArtist ? !newArtistName : !artistId) ||
+                                    (isAddingCategory ? !newCategoryName : !categoryId) ||
+                                    artistMutation.isPending ||
+                                    categoryMutation.isPending
+                                }
+                            >
+                                {artistMutation.isPending || categoryMutation.isPending ? (
+                                    <Spinner className="size-4 animate-spin mr-2" />
+                                ) : (
+                                    <ArrowRight className="size-4 ml-1 order-last" />
+                                )}
                                 Next
-                                <ArrowRight className="size-4 ml-1" />
                             </Button>
                         ) : (
                             <>
