@@ -76,7 +76,7 @@ export default function MusicPage() {
                 >
                     <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
                         <FaDatabase className="size-3" />
-                        ws_music_tracks (DB / Supabase) <ArrowUpRightFromCircleIcon className="size-3" />
+                        ws_music_tracks (DB) <ArrowUpRightFromCircleIcon className="size-3" />
                     </p>
                 </Link>
 
@@ -87,7 +87,7 @@ export default function MusicPage() {
                 >
                     <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
                         <FaDatabase className="size-3" />
-                        ws_music_artists (DB / Supabase) <ArrowUpRightFromCircleIcon className="size-3" />
+                        ws_music_artists (DB) <ArrowUpRightFromCircleIcon className="size-3" />
                     </p>
                 </Link>
 
@@ -98,7 +98,7 @@ export default function MusicPage() {
                 >
                     <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
                         <FaDatabase className="size-3" />
-                        ws_music_categories (DB / Supabase) <ArrowUpRightFromCircleIcon className="size-3" />
+                        ws_music_categories (DB) <ArrowUpRightFromCircleIcon className="size-3" />
                     </p>
                 </Link>
             </section>
