@@ -1,7 +1,7 @@
 'use client';
 
 import { FaApple, FaCloud, FaDatabase, FaGithub } from "react-icons/fa";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ArrowRight, ArrowUpRightFromCircleIcon, BellIcon, BellMinusIcon, CheckIcon, CopyIcon, MapPinIcon, XIcon } from "lucide-react";
 import { Database } from "@/types/supabase-internal-types";
 import { Button } from "@/components/ui/button";
@@ -312,11 +312,25 @@ function SendNotificationDialog({
                     <ArrowRight className="size-4" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md space-y-1">
                 <DialogHeader>
                     <DialogTitle>Send notification</DialogTitle>
+                    <DialogDescription>
+                        <div className="flex gap-2 justify-between items-center bg-muted/50 p-2 rounded-full">
+                            <div className="flex gap-2 items-center">
+                                <FaApple className="size-4" />
+                                <p className={`font-semibold ${Fonts.geistMono.className}`}>
+                                    {deviceToken.slice(0, 5) + "..." + deviceToken.slice(-5)}
+                                </p>
+                            </div>
+                            <CopyIcon className="size-4 cursor-pointer" onClick={() => {
+                                navigator.clipboard.writeText(deviceToken);
+                                toast.success("Device token copied to clipboard");
+                            }} />
+                        </div>
+                    </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
+                <div className="space-y-4">
                     <div className="space-y-2">
                         <div className="space-y-1">
                             <Label htmlFor="api-key">API Key</Label>
