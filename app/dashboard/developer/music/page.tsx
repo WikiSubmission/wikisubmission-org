@@ -437,7 +437,7 @@ function TrackDialog({
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-6 py-4 overflow-hidden">
+                    <div className="space-y-6 py-4">
                         {url ? (
                             <div className="p-4 bg-emerald-500/10 border border-emerald-200 rounded-2xl space-y-3">
                                 <div className="flex items-center gap-2 text-emerald-600 font-medium">

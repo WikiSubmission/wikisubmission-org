@@ -416,7 +416,7 @@ function SendNotificationDialog({
                     {Boolean(apiResponse) && (
                         <div className="space-y-2 border-t pt-4 grid grid-cols-1 min-w-0">
                             <Label>API Response</Label>
-                            <div className="bg-muted p-3 rounded-lg overflow-x-auto max-h-[200px] min-w-0 w-full border">
+                            <div className="bg-muted p-3 rounded-lg overflow-auto max-h-[400px] min-w-0 w-full border">
                                 <pre className="text-[10px] font-mono whitespace-pre-wrap break-words">
                                     {JSON.stringify(apiResponse, null, 2)}
                                 </pre>
