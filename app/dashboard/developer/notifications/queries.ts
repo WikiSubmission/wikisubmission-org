@@ -30,13 +30,13 @@ export const sendNotification = async ({
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
+            api_key: apiKey,
             device_token: deviceToken,
             platform: 'ios',
-            force: force,
             type: type,
+            ...force && { force: "true" },
             ...message?.title && { title: message.title },
             ...message?.body && { message: message.body },
-            api_key: apiKey
         })
     });
 
