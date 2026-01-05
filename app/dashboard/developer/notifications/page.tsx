@@ -102,7 +102,7 @@ export default function NotificationsPage() {
                 >
                     <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
                         <FaDatabase className="size-3" />
-                        ws_notifications_ios (DB / Supabase) <ArrowUpRightFromCircleIcon className="size-3" />
+                        ws_notifications_ios (Supabase) <ArrowUpRightFromCircleIcon className="size-3" />
                     </p>
                 </Link>
 
@@ -113,7 +113,7 @@ export default function NotificationsPage() {
                 >
                     <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
                         <FaGithub className="size-3" />
-                        ws-push-notifications (Server / GitHub) <ArrowUpRightFromCircleIcon className="size-3" />
+                        ws-push-notifications (GitHub) <ArrowUpRightFromCircleIcon className="size-3" />
                     </p>
                 </Link>
 
@@ -124,7 +124,7 @@ export default function NotificationsPage() {
                 >
                     <p className="text-xs font-semibold text-primary tracking-wider flex items-center gap-1 text-violet-500 hover:text-violet-600 cursor-pointer">
                         <FaCloud className="size-3" />
-                        ws-push-notifications (Deployment / Railway) <ArrowUpRightFromCircleIcon className="size-3" />
+                        ws-push-notifications (Railway) <ArrowUpRightFromCircleIcon className="size-3" />
                     </p>
                 </Link>
             </section>
