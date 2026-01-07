@@ -264,6 +264,11 @@ export function MusicProvider({
     }, [currentTrack, isPlaying, skipNext, skipPrevious]);
 
     const playTrack = (track: UnifiedTrack, context?: PlaybackContextType, customQueue?: UnifiedTrack[]) => {
+        if (currentTrack?.id === track.id) {
+            setIsPlaying(!isPlaying);
+            return;
+        }
+
         if (context) {
             setPlaybackContext(context);
             let newQueue: UnifiedTrack[] = [];
@@ -281,9 +286,11 @@ export function MusicProvider({
 
         setCurrentTrack(track);
         setIsPlaying(true);
-        const url = new URL(window.location.href);
-        url.searchParams.set('track', track.id);
-        window.history.replaceState({}, '', url.toString());
+        if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('track', track.id);
+            window.history.replaceState({}, '', url.toString());
+        }
     };
 
     const togglePlayPause = () => setIsPlaying(!isPlaying);
