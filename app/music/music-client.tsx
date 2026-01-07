@@ -21,6 +21,30 @@ export default function MusicClient() {
     const searchParams = useSearchParams();
     const trackId = searchParams.get('track');
 
+    // Update document title and metadata when track changes
+    useEffect(() => {
+        if (currentTrack) {
+            const title = `${currentTrack.title} by ${currentTrack.artist.name} | Music (Zikr) | WikiSubmission`;
+            const description = `Listen to ${currentTrack.title} by ${currentTrack.artist.name} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`;
+
+            document.title = title;
+
+            const updateMeta = (name: string, content: string, isProperty = false) => {
+                const attr = isProperty ? 'property' : 'name';
+                const el = document.querySelector(`meta[${attr}="${name}"]`);
+                if (el) el.setAttribute('content', content);
+            };
+
+            updateMeta('description', description);
+            updateMeta('og:title', title, true);
+            updateMeta('og:description', description, true);
+            updateMeta('twitter:title', title);
+            updateMeta('twitter:description', description);
+        } else if (!isLoading) {
+            document.title = "Music (Zikr) | WikiSubmission";
+        }
+    }, [currentTrack, isLoading]);
+
     // Auto-play or scroll to track if track ID is provided
     useEffect(() => {
         if (trackId && allTracks.length > 0 && !currentTrack) {
