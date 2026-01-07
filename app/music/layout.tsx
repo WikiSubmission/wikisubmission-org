@@ -3,14 +3,6 @@ import { MusicProvider } from "@/lib/music-context";
 import { ws } from "@/lib/wikisubmission-sdk";
 import { DBTrackRow, DBArtist, DBCategory } from "@/types/music";
 
-export const metadata: Metadata = {
-    title: "Music (Zikr) | WikiSubmission",
-    description: "Glorification and commemoration of God through beautiful recitations and melodies.",
-    openGraph: {
-        title: "Music (Zikr) | WikiSubmission",
-        description: "Glorification and commemoration of God through beautiful recitations and melodies.",
-    },
-};
 
 export const dynamic = 'force-dynamic';
 
