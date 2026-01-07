@@ -239,7 +239,7 @@ export function MusicProvider({
     useEffect(() => {
         if (!('mediaSession' in navigator) || !currentTrack) return;
 
-        const artworkUrl = currentTrack.artist.image_url || '/android-chrome-512x512.png';
+        const artworkUrl = currentTrack.artist.image_url || '/brand-assets/logo-black.png';
 
         navigator.mediaSession.metadata = new MediaMetadata({
             title: currentTrack.title,
