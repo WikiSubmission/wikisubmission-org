@@ -10,13 +10,13 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
         try {
             const { data: track } = await ws.supabase
                 .from('ws_music_tracks')
-                .select('*, artistObj:ws_music_artists(*)')
+                .select('*, artist:ws_music_artists(*)')
                 .eq('id', trackId)
                 .single();
 
             if (track) {
-                const title = `${track.name} by ${track.artistObj?.name || 'Unknown Artist'} | Music (Zikr) | WikiSubmission`;
-                const description = `Listen to ${track.name} by ${track.artistObj?.name || 'Unknown Artist'} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`;
+                const title = `${track.name} | Music (Zikr) | WikiSubmission`;
+                const description = `Listen to ${track.name} by ${track.artist.name} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`;
 
                 return {
                     title,
