@@ -6,7 +6,7 @@ import { useMusic } from '@/lib/music-context';
 import { generateColors, formatTime } from '@/lib/music-utils';
 import {
     Play, Pause, SkipBack, SkipForward, Repeat, Repeat1,
-    ListMusic, Heart, Volume2, Volume1, Volume, VolumeX, Download, Loader2
+    ListMusic, Heart, Volume2, Volume1, Volume, VolumeX, Download, Loader2, Share2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -29,6 +29,63 @@ export function MusicPlayer() {
     } = useMusic();
 
     const [isQueueOpen, setIsQueueOpen] = useState(false);
+
+    const handleShare = async () => {
+        if (!currentTrack) return;
+        const shareUrl = `${window.location.origin}${window.location.pathname}?track=${currentTrack.id}`;
+
+        const copyToClipboard = async (text: string) => {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                }
+            } catch (err) {
+                console.error('Clipboard API failed:', err);
+            }
+
+            // Fallback for non-secure contexts (like localhost on mobile) or older browsers
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                textArea.style.top = "0";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const success = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                return success;
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                return false;
+            }
+        };
+
+        if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
+            try {
+                await navigator.share({
+                    title: currentTrack.title,
+                    text: `Listen to ${currentTrack.title} by ${currentTrack.artist.name} on WikiSubmission`,
+                    url: shareUrl,
+                });
+                return;
+            } catch (err) {
+                // If it's an AbortError (user cancelled), don't show clipboard toast
+                if ((err as Error).name === 'AbortError') return;
+                console.error('Share failed:', err);
+            }
+        }
+
+        // Fallback or Desktop behavior
+        const success = await copyToClipboard(shareUrl);
+        if (success) {
+            toast.success("Track link copied to clipboard");
+        } else {
+            toast.error("Failed to copy track link");
+        }
+    };
 
     const handleDownload = () => {
         if (!currentTrack) return;
@@ -202,6 +259,15 @@ export function MusicPlayer() {
                                     variant="ghost"
                                     size="icon"
                                     className="h-10 w-10 text-muted-foreground hover:text-foreground"
+                                    onClick={handleShare}
+                                    title="Share Track"
+                                >
+                                    <Share2 className="w-5 h-5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 text-muted-foreground hover:text-foreground"
                                     onClick={() => setIsQueueOpen(true)}
                                 >
                                     <ListMusic className="w-5 h-5" />
@@ -209,8 +275,9 @@ export function MusicPlayer() {
                             </div>
                         </div>
 
-                        {/* Mobile: Second Row for Progress/Extra Controls */}
-                        <div className="md:hidden px-4 pb-2 space-y-2">
+                        {/* Mobile: Progress & Reorganized Controls */}
+                        <div className="md:hidden px-4 pb-3 space-y-4">
+                            {/* Progress bar */}
                             <div className="flex items-center gap-3">
                                 <span className="text-[10px] tabular-nums text-muted-foreground">{formatTime(currentTime)}</span>
                                 <Slider
@@ -223,7 +290,9 @@ export function MusicPlayer() {
                                 />
                                 <span className="text-[10px] tabular-nums text-muted-foreground">{formatTime(duration)}</span>
                             </div>
-                            <div className="flex items-center justify-between px-1">
+
+                            {/* Primary Playback Row */}
+                            <div className="flex items-center justify-between px-2">
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -231,7 +300,7 @@ export function MusicPlayer() {
                                         "h-10 w-10 transition-all",
                                         loopMode === 'context' ? "text-indigo-500 bg-indigo-500/10" :
                                             loopMode === 'repeatOne' ? "text-violet-500 bg-violet-500/10" :
-                                                "text-foreground/60"
+                                                "text-foreground/40"
                                     )}
                                     onClick={() => {
                                         if (loopMode === 'off') setLoopMode('context');
@@ -241,24 +310,35 @@ export function MusicPlayer() {
                                 >
                                     {loopMode === 'repeatOne' ? <Repeat1 className="w-5 h-5" /> : <Repeat className="w-5 h-5" />}
                                 </Button>
+
                                 <Button variant="ghost" size="icon" className="h-10 w-10" onClick={skipPrevious}>
                                     <SkipBack className="w-5 h-5" />
                                 </Button>
+
                                 <Button
                                     variant="default"
                                     size="icon"
-                                    className="h-12 w-12 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-500/20"
+                                    className="h-14 w-14 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-500/20"
                                     onClick={togglePlayPause}
                                 >
                                     {isBuffering ? (
-                                        <Loader2 className="w-6 h-6 animate-spin" />
+                                        <Loader2 className="w-7 h-7 animate-spin" />
                                     ) : (
-                                        isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />
+                                        isPlaying ? <Pause className="w-7 h-7 fill-current" /> : <Play className="w-7 h-7 fill-current ml-0.5" />
                                     )}
                                 </Button>
+
                                 <Button variant="ghost" size="icon" className="h-10 w-10" onClick={skipNext}>
                                     <SkipForward className="w-5 h-5" />
                                 </Button>
+
+                                <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground" onClick={() => setIsQueueOpen(true)}>
+                                    <ListMusic className="w-5 h-5" />
+                                </Button>
+                            </div>
+
+                            {/* Secondary Utility Row */}
+                            <div className="flex items-center justify-around bg-muted/20 rounded-2xl py-1">
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -266,6 +346,24 @@ export function MusicPlayer() {
                                     onClick={() => toggleFavorite(currentTrack.url)}
                                 >
                                     <Heart className={cn("w-5 h-5", isFav && "fill-current")} />
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 text-muted-foreground"
+                                    onClick={handleShare}
+                                >
+                                    <Share2 className="w-5 h-5" />
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 text-muted-foreground"
+                                    onClick={handleDownload}
+                                >
+                                    <Download className="w-5 h-5" />
                                 </Button>
 
                                 <DropdownMenu>
@@ -288,17 +386,6 @@ export function MusicPlayer() {
                                         <span className="text-[10px] font-medium text-muted-foreground tabular-nums">{Math.round(volume * 100)}%</span>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-10 w-10 text-muted-foreground hover:text-foreground"
-                                    onClick={handleDownload}
-                                >
-                                    <Download className="w-5 h-5" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground" onClick={() => setIsQueueOpen(true)}>
-                                    <ListMusic className="w-5 h-5" />
-                                </Button>
                             </div>
                         </div>
                     </div>
