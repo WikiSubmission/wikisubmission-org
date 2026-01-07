@@ -6,7 +6,7 @@ import { useMusic } from '@/lib/music-context';
 import { generateColors, formatTime } from '@/lib/music-utils';
 import {
     Play, Pause, SkipBack, SkipForward, Repeat, Repeat1,
-    ListMusic, Heart, Volume2, Volume1, Volume, VolumeX, Download
+    ListMusic, Heart, Volume2, Volume1, Volume, VolumeX, Download, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -25,7 +25,7 @@ export function MusicPlayer() {
         currentTrack, isPlaying, togglePlayPause, skipNext, skipPrevious,
         progress, duration, currentTime, seek,
         loopMode, setLoopMode, favorites, toggleFavorite,
-        queue, volume, setVolume
+        queue, volume, setVolume, isBuffering
     } = useMusic();
 
     const [isQueueOpen, setIsQueueOpen] = useState(false);
@@ -117,7 +117,11 @@ export function MusicPlayer() {
                                         className="h-11 w-11 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-500/20 hover:scale-105 transition-transform"
                                         onClick={togglePlayPause}
                                     >
-                                        {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 ml-0.5 fill-current" />}
+                                        {isBuffering ? (
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                        ) : (
+                                            isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 ml-0.5 fill-current" />
+                                        )}
                                     </Button>
                                     <Button variant="ghost" size="icon" className="h-9 w-9" onClick={skipNext}>
                                         <SkipForward className="w-5 h-5" fill="currentColor" />
@@ -246,7 +250,11 @@ export function MusicPlayer() {
                                     className="h-12 w-12 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-500/20"
                                     onClick={togglePlayPause}
                                 >
-                                    {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />}
+                                    {isBuffering ? (
+                                        <Loader2 className="w-6 h-6 animate-spin" />
+                                    ) : (
+                                        isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />
+                                    )}
                                 </Button>
                                 <Button variant="ghost" size="icon" className="h-10 w-10" onClick={skipNext}>
                                     <SkipForward className="w-5 h-5" />

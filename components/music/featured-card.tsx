@@ -13,6 +13,7 @@ export function FeaturedCard({ track }: { track: UnifiedTrack }) {
 
     return (
         <div
+            id={`track-${track.id}`}
             onClick={() => playTrack(track, 'category')}
             className="relative flex-shrink-0 w-64 h-36 rounded-2xl p-4 cursor-pointer overflow-hidden transition-transform active:scale-95 group"
             style={{ background: colors.card }}

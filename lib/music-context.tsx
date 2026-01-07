@@ -17,6 +17,7 @@ interface MusicContextType {
     duration: number; // seconds
     currentTime: number; // seconds
     volume: number; // 0 to 1
+    isBuffering: boolean;
 
     playTrack: (track: UnifiedTrack, context?: PlaybackContextType, tracks?: UnifiedTrack[]) => void;
     togglePlayPause: () => void;
@@ -67,6 +68,7 @@ export function MusicProvider({
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
+    const [isBuffering, setIsBuffering] = useState(false);
 
     // Initialize with props if available
     const [allTracks, setAllTracks] = useState<UnifiedTrack[]>(() => formatTracks(initialTracks));
@@ -79,19 +81,6 @@ export function MusicProvider({
     // Initial Fetch (only if no initial data)
     useEffect(() => {
         if (initialTracks.length > 0) {
-            // If we have initial data, we still might need to check URL params for initial track
-            const params = new URLSearchParams(window.location.search);
-            const trackId = params.get('track');
-            if (trackId) {
-                const formatted = formatTracks(initialTracks);
-                const track = formatted.find(t => t.id === trackId);
-                if (track) {
-                    setCurrentTrack(track);
-                    const categoryTracks = formatted.filter(t => t.category.id === track.category.id);
-                    setQueue(categoryTracks);
-                    setPlaybackContext('category');
-                }
-            }
             setIsLoading(false);
             return;
         }
@@ -116,18 +105,6 @@ export function MusicProvider({
                 if (tracksData) {
                     const formattedTracks = formatTracks(tracksData);
                     setAllTracks(formattedTracks);
-
-                    const params = new URLSearchParams(window.location.search);
-                    const trackId = params.get('track');
-                    if (trackId) {
-                        const track = formattedTracks.find(t => t.id === trackId);
-                        if (track) {
-                            setCurrentTrack(track);
-                            const categoryTracks = formattedTracks.filter(t => t.category.id === track.category.id);
-                            setQueue(categoryTracks);
-                            setPlaybackContext('category');
-                        }
-                    }
                 }
                 if (catsData) setCategories(catsData);
                 if (artistsData) setArtists(artistsData);
@@ -195,6 +172,10 @@ export function MusicProvider({
             setDuration(audio.duration);
         };
 
+        const handleWaiting = () => setIsBuffering(true);
+        const handlePlaying = () => setIsBuffering(false);
+        const handleCanPlay = () => setIsBuffering(false);
+
         const handleEnded = () => {
             if (loopMode === 'repeatOne') {
                 audio.currentTime = 0;
@@ -207,11 +188,17 @@ export function MusicProvider({
         audio.addEventListener('timeupdate', handleTimeUpdate);
         audio.addEventListener('loadedmetadata', handleLoadedMetadata);
         audio.addEventListener('ended', handleEnded);
+        audio.addEventListener('waiting', handleWaiting);
+        audio.addEventListener('playing', handlePlaying);
+        audio.addEventListener('canplay', handleCanPlay);
 
         return () => {
             audio.removeEventListener('timeupdate', handleTimeUpdate);
             audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
             audio.removeEventListener('ended', handleEnded);
+            audio.removeEventListener('waiting', handleWaiting);
+            audio.removeEventListener('playing', handlePlaying);
+            audio.removeEventListener('canplay', handleCanPlay);
         };
     }, [loopMode, handleSkipNext]);
 
@@ -226,7 +213,12 @@ export function MusicProvider({
             const isNewSource = audioRef.current.src !== currentTrack.url;
             if (isNewSource) {
                 audioRef.current.src = currentTrack.url;
-                if (isPlaying) audioRef.current.play().catch(console.error);
+                if (isPlaying) {
+                    audioRef.current.play().catch(err => {
+                        console.warn('Autoplay prevented or interrupted:', err);
+                        setIsPlaying(false);
+                    });
+                }
             }
         }
     }, [currentTrack, isPlaying]);
@@ -234,7 +226,10 @@ export function MusicProvider({
     useEffect(() => {
         if (!audioRef.current) return;
         if (isPlaying) {
-            audioRef.current.play().catch(console.error);
+            audioRef.current.play().catch(err => {
+                console.warn('Playback failed:', err);
+                setIsPlaying(false);
+            });
         } else {
             audioRef.current.pause();
         }
@@ -314,7 +309,7 @@ export function MusicProvider({
     return (
         <MusicContext.Provider value={{
             currentTrack, isPlaying, loopMode, playbackContext, queue, favorites,
-            progress, duration, currentTime, volume,
+            progress, duration, currentTime, volume, isBuffering,
             playTrack, togglePlayPause, skipNext, skipPrevious, seek, setVolume, setLoopMode, toggleFavorite,
             allTracks, categories, artists, isLoading
         }}>

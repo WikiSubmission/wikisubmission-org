@@ -51,6 +51,13 @@ export default function MusicClient() {
             const track = allTracks.find(t => t.id === trackId);
             if (track) {
                 playTrack(track, 'allTracks');
+                // Scroll to the track after a short delay to ensure DOM is ready
+                setTimeout(() => {
+                    const el = document.getElementById(`track-${track.id}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 500);
             }
         }
     }, [trackId, allTracks, currentTrack, playTrack]);

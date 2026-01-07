@@ -21,6 +21,7 @@ export function TrackRow({ track, context }: TrackRowProps) {
 
     return (
         <div
+            id={`track-${track.id}`}
             className={cn(
                 "group flex bg-accent/10 items-center gap-4 p-2 rounded-xl transition-all hover:bg-muted/50",
                 isCurrent && "bg-violet-700/20"
