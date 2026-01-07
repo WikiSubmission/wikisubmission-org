@@ -1,7 +1,6 @@
-import type { Metadata } from "next";
 import { MusicProvider } from "@/lib/music-context";
-import { ws } from "@/lib/wikisubmission-sdk";
 import { DBTrackRow, DBArtist, DBCategory } from "@/types/music";
+import { ws } from "@/lib/wikisubmission-sdk";
 
 
 export const dynamic = 'force-dynamic';
