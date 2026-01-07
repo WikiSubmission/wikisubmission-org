@@ -130,7 +130,7 @@ export default function MusicClient() {
                                         <Music2 className="text-accent" /> Featured
                                     </h2>
                                 </div>
-                                <div className="w-full overflow-x-auto no-scrollbar shadow-inner rounded-3xl">
+                                <div className="w-full overflow-x-auto no-scrollbar">
                                     <div className="flex p-4 gap-4">
                                         {featuredTracks.map(track => (
                                             <FeaturedCard key={track.id} track={track} />
