@@ -1,6 +1,6 @@
 # wikisubmission-org
 
-Source code repository for [https://wikisubmission.org](wikisubmission.org).
+Source code repository for [https://wikisubmission.org](https://wikisubmission.org).
 
 ## Local Setup
 
