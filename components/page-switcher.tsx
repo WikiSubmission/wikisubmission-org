@@ -95,6 +95,7 @@ export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
                     width={500}
                     height={500}
                     className={`size-4 rounded-full ${isActive ? "opacity-100" : "opacity-100"}`}
+                    priority
                   />
                 ) : (
                   modeIcon

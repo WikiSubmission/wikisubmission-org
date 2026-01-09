@@ -26,6 +26,7 @@ export default function Home() {
         width={72}
         height={72}
         className="rounded-full"
+        priority
       />
       <section className="max-w-sm flex flex-col gap-4 max-w-md items-center">
         <h1 className="text-3xl font-semibold">
@@ -210,7 +211,7 @@ export default function Home() {
 
       <section className="max-w-xs md:max-w-sm text-center text-xs text-muted-foreground space-y-2">
         <div className="bg-muted/50 p-2 rounded-md">
-          <Image src="/brand-assets/logo-transparent.png" className="mx-auto mb-2 size-6 rounded-full" alt="Quran: The Final Testament" width={500} height={500} />
+          <Image src="/brand-assets/logo-transparent.png" className="mx-auto mb-2 size-6 rounded-full" alt="Quran: The Final Testament" width={500} height={500} priority />
           <div className="flex flex-col space-y-2">
             <p>
               WikiSubmission is a faith-based 501(c)(3) nonprofit organization providing free and open-source tools and technology, educational resources, and creative works in the cause of God.

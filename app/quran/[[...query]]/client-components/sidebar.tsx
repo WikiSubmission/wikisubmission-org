@@ -78,7 +78,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
         <Sidebar collapsible="offcanvas">
             <SidebarHeader className="border-b p-4 space-y-1">
                 <Link href="/" className="flex items-center gap-2">
-                    <Image src="/brand-assets/logo-transparent.png" alt="WikiSubmission Logo" className="size-12 rounded-full" width={500} height={500} />
+                    <Image src="/brand-assets/logo-transparent.png" alt="WikiSubmission Logo" className="size-12 rounded-full" width={500} height={500} priority />
                 </Link>
             </SidebarHeader>
 
