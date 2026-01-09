@@ -77,6 +77,7 @@ export function MusicProvider({
     const [isLoading, setIsLoading] = useState(initialTracks.length === 0);
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const lastTrackIdRef = useRef<string | null>(null);
 
     // Initial Fetch (only if no initial data)
     useEffect(() => {
@@ -210,9 +211,12 @@ export function MusicProvider({
     useEffect(() => {
         if (!audioRef.current) return;
         if (currentTrack) {
-            const isNewSource = audioRef.current.src !== currentTrack.url;
-            if (isNewSource) {
+            // Only update the source if the track ID has changed
+            // This prevents resetting the track when toggling play/pause
+            if (currentTrack.id !== lastTrackIdRef.current) {
                 audioRef.current.src = currentTrack.url;
+                lastTrackIdRef.current = currentTrack.id;
+
                 if (isPlaying) {
                     audioRef.current.play().catch(err => {
                         console.warn('Autoplay prevented or interrupted:', err);
