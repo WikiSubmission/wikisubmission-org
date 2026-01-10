@@ -20,10 +20,9 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
 
         element.scrollIntoView({ block: "center" });
 
-        // Wrap state update in requestAnimationFrame
         requestAnimationFrame(() => {
             setIsHighlighted(true);
-            setTimeout(() => setIsHighlighted(false), 100);
+            setTimeout(() => setIsHighlighted(false), 300);
         });
     }, [verseSearchParam, props.data.data]);
 
