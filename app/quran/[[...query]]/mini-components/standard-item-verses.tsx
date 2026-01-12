@@ -37,7 +37,11 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                     <div
                         id={i.verse_id}
                         key={i.verse_id}
-                        className={`transition-colors duration-500 ${isHighlighted && i.verse_id === `${props.data.data[0].chapter_number}:${verseSearchParam}` ? "bg-violet-600/10" : ""}`}
+                        className={`transition-colors duration-500 ${(isHighlighted && i.verse_id === `${props.data.data[0].chapter_number}:${verseSearchParam}`) ||
+                                (currentVerse?.verse_id === i.verse_id)
+                                ? "bg-violet-600/10 border-l-4 border-l-violet-600"
+                                : "border-l-4 border-l-transparent"
+                            }`}
                     >
                         <div className="p-6 sm:p-8 space-y-2">
                             {i.ws_quran_subtitles && quranPreferences.subtitles && (
