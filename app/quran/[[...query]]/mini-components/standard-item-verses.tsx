@@ -6,11 +6,15 @@ import { useSearchParams } from "next/navigation";
 import { isRtlLanguage } from "@/lib/is-rtl-language";
 import { useEffect, useState } from "react";
 import { ArabicDetailed } from "./arabic-detailed";
+import { useQuranPlayer, QuranVerse } from "@/lib/quran-audio-context";
+import { Play, Pause, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function StandardItemVerses({ props }: { props: { data: QueryResultChapter | QueryResultVerse | QueryResultMultipleVerses } }) {
     const quranPreferences = useQuranPreferences();
     const verseSearchParam = useSearchParams().get("verse");
     const [isHighlighted, setIsHighlighted] = useState(false);
+    const { playFromVerse, currentVerse, isPlaying, isBuffering } = useQuranPlayer();
 
     useEffect(() => {
         if (!verseSearchParam) return;
@@ -50,14 +54,28 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                                 </div>
                             )}
 
-                            <div className="w-fit shrink-0 flex items-start space-x-0.5 border px-2 bg-muted/30 backdrop-blur-sm rounded-full">
-                                <span className="w-full text-lg font-semibold">
-                                    {i.verse_id.split(":")[0]}
-                                </span>
-                                <span>:</span>
-                                <span className="w-full text-lg font-semibold text-primary/80">
-                                    {i.verse_id.split(":")[1]}
-                                </span>
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="w-fit shrink-0 flex items-start space-x-0.5 border px-2 bg-muted/30 backdrop-blur-sm rounded-full">
+                                    <span className="w-full text-lg font-semibold">
+                                        {i.verse_id.split(":")[0]}
+                                    </span>
+                                    <span>:</span>
+                                    <span className="w-full text-lg font-semibold text-primary/80">
+                                        {i.verse_id.split(":")[1]}
+                                    </span>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-full hover:bg-violet-600/10 hover:text-violet-600"
+                                    onClick={() => playFromVerse(i as unknown as QuranVerse, props.data.data as unknown as QuranVerse[])}
+                                >
+                                    {currentVerse?.verse_id === i.verse_id && isPlaying ? (
+                                        isBuffering ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pause className="w-4 h-4 fill-current" />
+                                    ) : (
+                                        <Play className="w-4 h-4 ml-0.5 fill-current" />
+                                    )}
+                                </Button>
                             </div>
 
 

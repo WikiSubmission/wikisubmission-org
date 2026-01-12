@@ -5,6 +5,8 @@ import { ws } from "@/lib/wikisubmission-sdk";
 import QuranSearchbar from "./client-components/searchbar";
 import QuranSettings from "./client-components/settings";
 import MetricsCollector from "./mini-components/metrics-collector";
+import { QuranPlayerProvider } from "@/lib/quran-audio-context";
+import { QuranPlayer } from "@/app/quran/[[...query]]/client-components/now-playing-bar";
 
 export default async function QuranLayout({ children }: { children: React.ReactNode }) {
 
@@ -13,29 +15,32 @@ export default async function QuranLayout({ children }: { children: React.ReactN
 
     if (chaptersResult.data && appendicesResult.data) {
         return (
-            <SidebarProvider>
-                {/* Sidebar (left space) */}
-                <QuranSidebar chapters={chaptersResult.data} appendices={appendicesResult.data} />
-                {/* Main content (right space) */}
-                <SidebarInset>
-                    {/* Header */}
-                    <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-                        <SidebarTrigger
-                            className="-ml-1 bg-secondary/50 rounded-full p-4 hover:bg-secondary/70 cursor-pointer lg:hidden"
-                        />
-                        <PageSwitcher
-                            currentPage="quran"
-                        />
-                        <QuranSearchbar />
-                        <QuranSettings />
-                    </header>
-                    {/* Main content */}
-                    <div className="flex flex-1 flex-col gap-4 p-4">
-                        {children}
-                    </div>
-                    <MetricsCollector />
-                </SidebarInset>
-            </SidebarProvider>
+            <QuranPlayerProvider>
+                <SidebarProvider>
+                    {/* Sidebar (left space) */}
+                    <QuranSidebar chapters={chaptersResult.data} appendices={appendicesResult.data} />
+                    {/* Main content (right space) */}
+                    <SidebarInset>
+                        {/* Header */}
+                        <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+                            <SidebarTrigger
+                                className="-ml-1 bg-secondary/50 rounded-full p-4 hover:bg-secondary/70 cursor-pointer lg:hidden"
+                            />
+                            <PageSwitcher
+                                currentPage="quran"
+                            />
+                            <QuranSearchbar />
+                            <QuranSettings />
+                        </header>
+                        {/* Main content */}
+                        <div className="flex flex-1 flex-col gap-4 p-4 pb-24">
+                            {children}
+                        </div>
+                        <MetricsCollector />
+                        <QuranPlayer />
+                    </SidebarInset>
+                </SidebarProvider>
+            </QuranPlayerProvider>
         );
     } else {
         return (
