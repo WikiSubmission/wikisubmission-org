@@ -14,7 +14,7 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
     const quranPreferences = useQuranPreferences();
     const verseSearchParam = useSearchParams().get("verse");
     const [isHighlighted, setIsHighlighted] = useState(false);
-    const { playFromVerse, currentVerse, isPlaying, isBuffering } = useQuranPlayer();
+    const { playFromVerse, currentVerse, isPlaying, isBuffering, togglePlayPause } = useQuranPlayer();
 
     useEffect(() => {
         if (!verseSearchParam) return;
@@ -38,9 +38,9 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                         id={i.verse_id}
                         key={i.verse_id}
                         className={`transition-colors duration-500 ${(isHighlighted && i.verse_id === `${props.data.data[0].chapter_number}:${verseSearchParam}`) ||
-                                (currentVerse?.verse_id === i.verse_id)
-                                ? "bg-violet-600/10 border-l-4 border-l-violet-600"
-                                : "border-l-4 border-l-transparent"
+                            (currentVerse?.verse_id === i.verse_id)
+                            ? "bg-violet-600/10 border-l-4 border-l-violet-600"
+                            : "border-l-4 border-l-transparent"
                             }`}
                     >
                         <div className="p-6 sm:p-8 space-y-2">
@@ -72,7 +72,13 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8 rounded-full hover:bg-violet-600/10 hover:text-violet-600"
-                                    onClick={() => playFromVerse(i as unknown as QuranVerse, props.data.data as unknown as QuranVerse[])}
+                                    onClick={() => {
+                                        if (currentVerse?.verse_id === i.verse_id) {
+                                            togglePlayPause();
+                                        } else {
+                                            playFromVerse(i as unknown as QuranVerse, props.data.data as unknown as QuranVerse[]);
+                                        }
+                                    }}
                                 >
                                     {currentVerse?.verse_id === i.verse_id && isPlaying ? (
                                         isBuffering ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pause className="w-4 h-4 fill-current" />
