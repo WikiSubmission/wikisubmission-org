@@ -149,22 +149,50 @@ export function QuranPlayer() {
                                     <SkipForward className="w-5 h-5" fill="currentColor" />
                                 </Button>
 
+                                {/* Mobile Reciter Dialog */}
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
+                                            <User className="w-5 h-5" />
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="w-[90%] max-w-[340px] rounded-2xl p-6">
+                                        <DialogHeader className="mb-4">
+                                            <DialogTitle className="text-left">Select Reciter</DialogTitle>
+                                        </DialogHeader>
+                                        <div className="grid gap-2">
+                                            {(Object.keys(RECITER_NAMES) as Reciter[]).map((r) => (
+                                                <Button
+                                                    key={r}
+                                                    variant={reciter === r ? "default" : "outline"}
+                                                    className={`justify-start h-12 px-4 rounded-xl text-sm transition-all ${reciter === r ? 'bg-violet-600 hover:bg-violet-700 shadow-lg shadow-violet-500/20' : ''
+                                                        }`}
+                                                    onClick={() => setReciter(r)}
+                                                >
+                                                    <User className={`w-4 h-4 mr-3 ${reciter === r ? 'text-white' : 'text-violet-600'}`} />
+                                                    {RECITER_NAMES[r]}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+
                                 {/* Mobile Volume Dialog */}
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground ml-1">
+                                        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
                                             {volume === 0 ? <VolumeX className="w-5 h-5" /> :
                                                 volume < 0.33 ? <Volume className="w-5 h-5" /> :
                                                     volume < 0.66 ? <Volume1 className="w-5 h-5" /> :
                                                         <Volume2 className="w-5 h-5" />}
                                         </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="w-[80%] rounded-2xl">
-                                        <DialogHeader>
-                                            <DialogTitle>Volume</DialogTitle>
+                                    <DialogContent className="w-[85%] max-w-[320px] rounded-2xl p-6">
+                                        <DialogHeader className="mb-4">
+                                            <DialogTitle className="text-left">Volume</DialogTitle>
                                         </DialogHeader>
-                                        <div className="flex items-center gap-4 py-4">
-                                            <VolumeX className="w-5 h-5 text-muted-foreground" />
+                                        <div className="flex items-center gap-4 bg-muted/30 p-4 rounded-xl border border-border/50">
+                                            <VolumeX className="w-5 h-5 text-muted-foreground shrink-0" />
                                             <Slider
                                                 value={[volume * 100]}
                                                 min={0}
@@ -173,7 +201,7 @@ export function QuranPlayer() {
                                                 onValueChange={(val) => setVolume(val[0] / 100)}
                                                 className="flex-grow"
                                             />
-                                            <Volume2 className="w-5 h-5 text-muted-foreground" />
+                                            <Volume2 className="w-5 h-5 text-muted-foreground shrink-0" />
                                         </div>
                                     </DialogContent>
                                 </Dialog>
@@ -228,19 +256,29 @@ export function QuranPlayer() {
                             </div>
                         </div>
 
-                        {/* Reciter & Volume (Desktop) */}
-                        <div className="hidden md:flex items-center justify-end gap-2 pr-4 min-w-[200px]">
+                        {/* Desktop Reciter & Volume (Separate) */}
+                        <div className="hidden md:flex items-center justify-end gap-1 pr-6 min-w-[220px]">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="gap-2 text-xs text-muted-foreground">
+                                    <Button variant="ghost" size="sm" className="gap-2 h-9 text-xs text-muted-foreground hover:text-foreground">
                                         <User className="w-4 h-4" />
-                                        {reciter.charAt(0).toUpperCase() + reciter.slice(1)}
+                                        <span className="max-w-[100px] truncate">
+                                            {reciter.charAt(0).toUpperCase() + reciter.slice(1)}
+                                        </span>
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
+                                <DropdownMenuContent align="end" side="top" className="w-56 p-2 bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
+                                    <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                        Reciters
+                                    </div>
                                     {(Object.keys(RECITER_NAMES) as Reciter[]).map((r) => (
-                                        <DropdownMenuItem key={r} onClick={() => setReciter(r)}>
-                                            Arabic - {RECITER_NAMES[r]}
+                                        <DropdownMenuItem
+                                            key={r}
+                                            onClick={() => setReciter(r)}
+                                            className={`rounded-lg mb-1 last:mb-0 cursor-pointer ${reciter === r ? 'bg-violet-600 text-white focus:bg-violet-700 focus:text-white' : 'focus:bg-violet-600/10'}`}
+                                        >
+                                            <User className={`w-3.5 h-3.5 mr-2 ${reciter === r ? 'text-white' : 'text-violet-600'}`} />
+                                            {RECITER_NAMES[r]}
                                         </DropdownMenuItem>
                                     ))}
                                 </DropdownMenuContent>
@@ -248,14 +286,14 @@ export function QuranPlayer() {
 
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground">
+                                    <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
                                         {volume === 0 ? <VolumeX className="w-5 h-5" /> :
                                             volume < 0.33 ? <Volume className="w-5 h-5" /> :
                                                 volume < 0.66 ? <Volume1 className="w-5 h-5" /> :
                                                     <Volume2 className="w-5 h-5" />}
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent side="top" align="center" className="w-12 py-4 flex flex-col items-center gap-3">
+                                <DropdownMenuContent side="top" align="center" className="w-12 py-4 flex flex-col items-center gap-3 bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
                                     <div className="h-24">
                                         <Slider
                                             value={[volume * 100]}
