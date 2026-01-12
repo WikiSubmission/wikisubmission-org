@@ -45,16 +45,13 @@ export function QuranPlayer() {
     const requestRef = React.useRef<number | undefined>(undefined);
     const previousTimeRef = React.useRef<number | undefined>(undefined);
 
-    // Sync with context progress when not dragging and if drifted significantly or paused
+    // Sync local progress with context progress when it changes
+    // This avoids the 'fighting' between RAF and context updates
     React.useEffect(() => {
         if (!isDragging) {
-            const diff = Math.abs(progress - localProgress);
-            // If paused, always sync. If playing, only sync if drift is > 1% to avoid seek jumps fighting RAF
-            if (!isPlaying || diff > 0.01) {
-                setLocalProgress(progress);
-            }
+            setLocalProgress(progress);
         }
-    }, [progress, isDragging, isPlaying, localProgress]);
+    }, [progress, isDragging]);
 
     React.useEffect(() => {
         if (!isPlaying || isDragging) {
@@ -96,7 +93,7 @@ export function QuranPlayer() {
                     {/* Progress Bar (Global for Mobile, inside Flex for Desktop) */}
                     <div className="md:hidden w-full px-0 pt-0 bg-background/50">
                         <Slider
-                            value={[localProgress * 100]}
+                            value={[(localProgress || 0) * 100]}
                             min={0}
                             max={100}
                             step={0.01}
@@ -104,7 +101,7 @@ export function QuranPlayer() {
                             onValueCommit={(val) => handleSeek(val[0] / 100)}
                             onPointerDown={() => setIsDragging(true)}
                             onPointerUp={() => setIsDragging(false)}
-                            className="w-full h-1.5"
+                            className="w-full h-full pt-4 px-4"
                         />
                     </div>
 
@@ -172,6 +169,7 @@ export function QuranPlayer() {
                                                 value={[volume * 100]}
                                                 min={0}
                                                 max={100}
+                                                step={1}
                                                 onValueChange={(val) => setVolume(val[0] / 100)}
                                                 className="flex-grow"
                                             />
@@ -214,7 +212,7 @@ export function QuranPlayer() {
                                     {formatTime(currentTime)}
                                 </span>
                                 <Slider
-                                    value={[localProgress * 100]}
+                                    value={[(localProgress || 0) * 100]}
                                     min={0}
                                     max={100}
                                     step={0.01}
@@ -263,9 +261,10 @@ export function QuranPlayer() {
                                             value={[volume * 100]}
                                             min={0}
                                             max={100}
-
+                                            step={1}
                                             orientation="vertical"
                                             onValueChange={(val) => setVolume(val[0] / 100)}
+                                            onPointerDown={(e) => e.stopPropagation()}
                                             className="h-full !min-h-0"
                                         />
                                     </div>
