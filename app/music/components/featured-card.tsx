@@ -1,7 +1,6 @@
 
 'use client';
 
-import React from 'react';
 import { UnifiedTrack } from '@/types/music';
 import { useMusic } from '@/lib/music-context';
 import { generateColors } from '@/lib/music-utils';

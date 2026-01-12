@@ -2,7 +2,6 @@ import { MusicProvider } from "@/lib/music-context";
 import { DBTrackRow, DBArtist, DBCategory } from "@/types/music";
 import { ws } from "@/lib/wikisubmission-sdk";
 
-
 export const dynamic = 'force-dynamic';
 
 export default async function MusicLayout({ children }: { children: React.ReactNode }) {
