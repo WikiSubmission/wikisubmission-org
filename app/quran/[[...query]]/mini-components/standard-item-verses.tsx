@@ -39,8 +39,7 @@ export function StandardItemVerses({ props }: { props: { data: QueryResultChapte
                         key={i.verse_id}
                         className={`transition-colors duration-500 ${(isHighlighted && i.verse_id === `${props.data.data[0].chapter_number}:${verseSearchParam}`) ||
                             (currentVerse?.verse_id === i.verse_id)
-                            ? "bg-violet-600/10 border-l-4 border-l-violet-600"
-                            : "border-l-4 border-l-transparent"
+                            ? "bg-violet-600/10" : ""
                             }`}
                     >
                         <div className="p-6 sm:p-8 space-y-2">
