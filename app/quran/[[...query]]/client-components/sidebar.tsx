@@ -236,7 +236,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                                     {filteredAppendices.map((appendix) => (
                                         <SidebarMenuItem key={appendix.appendix_number}>
                                             <SidebarMenuButton asChild className="h-auto py-2 px-2.5 hover:bg-accent/50">
-                                                <Link href={`/appendix/${appendix.appendix_number}`} target="_blank">
+                                                <Link href={`https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${appendix.appendix_number}`} target="_blank">
                                                     <div className="flex items-center gap-2.5 w-full min-w-0">
                                                         <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">
                                                             {appendix.appendix_number}
