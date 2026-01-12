@@ -74,6 +74,10 @@ export default function QuranSettings() {
                                 Urdu
                                 {quranPreferences.primaryLanguage === "urdu" && <CheckIcon className="size-4" />}
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => quranPreferences.setPreferences({ ...quranPreferences, primaryLanguage: "bengali" })}>
+                                Bengali
+                                {quranPreferences.primaryLanguage === "bengali" && <CheckIcon className="size-4" />}
+                            </DropdownMenuItem>
                         </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                 </DropdownMenuSub>
@@ -129,6 +133,10 @@ export default function QuranSettings() {
                             <DropdownMenuItem onClick={() => quranPreferences.setPreferences({ ...quranPreferences, secondaryLanguage: "urdu" })}>
                                 Urdu
                                 {quranPreferences.secondaryLanguage === "urdu" && <CheckIcon className="size-4" />}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => quranPreferences.setPreferences({ ...quranPreferences, secondaryLanguage: "bengali" })}>
+                                Bengali
+                                {quranPreferences.secondaryLanguage === "bengali" && <CheckIcon className="size-4" />}
                             </DropdownMenuItem>
                         </DropdownMenuSubContent>
                     </DropdownMenuPortal>
