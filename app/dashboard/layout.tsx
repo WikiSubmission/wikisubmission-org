@@ -2,7 +2,6 @@ import { ThemeToggle } from '@/components/toggles/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import {
-    ClerkProvider,
     SignInButton,
     SignUpButton,
     SignedIn,
