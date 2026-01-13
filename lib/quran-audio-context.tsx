@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import useLocalStorage from '@/hooks/use-local-storage';
 
 export interface QuranVerse {
     verse_id: string;
@@ -46,7 +47,7 @@ export function QuranPlayerProvider({ children }: { children: React.ReactNode })
     const [currentVerse, setCurrentVerse] = useState<QuranVerse | null>(null);
     const [queue, setQueue] = useState<QuranVerse[]>([]);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [reciter, setReciter] = useState<Reciter>('mishary'); // Default reciter
+    const [reciter, setReciter] = useLocalStorage<Reciter>('reciter', 'mishary'); // Default reciter
     const [volume, setVolume] = useState(1);
 
     const [progress, setProgress] = useState(0);
