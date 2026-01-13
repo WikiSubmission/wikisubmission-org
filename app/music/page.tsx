@@ -2,7 +2,7 @@ import MusicClient from './music-client';
 import { ws } from "@/lib/wikisubmission-sdk";
 import type { Metadata } from 'next';
 
-export default async function MusicPage({ searchParams }: { searchParams: Promise<{ track?: string }> }) {
+export default async function MusicPage() {
     return <MusicClient />;
 }
 
