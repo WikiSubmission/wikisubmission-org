@@ -24,12 +24,14 @@ export default function MusicClient() {
     // Update document title and metadata when track changes
     useEffect(() => {
         if (currentTrack) {
-            const title = `${currentTrack.title} by ${currentTrack.artist.name} | Music (Zikr) | WikiSubmission`;
-            const description = `Listen to ${currentTrack.title} by ${currentTrack.artist.name} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`;
+            const artistName = currentTrack.artist?.name || 'Unknown Artist';
+            const title = `${currentTrack.title} by ${artistName} | Music (Zikr) | WikiSubmission`;
+            const description = `Listen to ${currentTrack.title} by ${artistName} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`;
 
             document.title = title;
 
-            const updateMeta = (name: string, content: string, isProperty = false) => {
+            const updateMeta = (name: string, content: string | null | undefined, isProperty = false) => {
+                if (!content) return;
                 const attr = isProperty ? 'property' : 'name';
                 const el = document.querySelector(`meta[${attr}="${name}"]`);
                 if (el) el.setAttribute('content', content);
@@ -38,8 +40,10 @@ export default function MusicClient() {
             updateMeta('description', description);
             updateMeta('og:title', title, true);
             updateMeta('og:description', description, true);
+            updateMeta('og:image', currentTrack.artist?.image_url, true);
             updateMeta('twitter:title', title);
             updateMeta('twitter:description', description);
+            updateMeta('twitter:image', currentTrack.artist?.image_url);
         } else if (!isLoading) {
             document.title = "Music (Zikr) | WikiSubmission";
         }

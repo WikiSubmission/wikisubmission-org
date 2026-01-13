@@ -1,7 +1,10 @@
-
 import MusicClient from './music-client';
 import { ws } from "@/lib/wikisubmission-sdk";
 import type { Metadata } from 'next';
+
+export default async function MusicPage({ searchParams }: { searchParams: Promise<{ track?: string }> }) {
+    return <MusicClient />;
+}
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ track?: string }> }): Promise<Metadata> {
     const { track: trackId } = await searchParams;
@@ -10,13 +13,13 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
         try {
             const { data: track } = await ws.supabase
                 .from('ws_music_tracks')
-                .select('*, artist:ws_music_artists(*)')
+                .select('*, artistObj:ws_music_artists(*)')
                 .eq('id', trackId)
                 .single();
 
-            if (track) {
-                const title = `${track.name} | Music (Zikr) | WikiSubmission`;
-                const description = `Listen to ${track.name} by ${track.artist.name} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`;
+            if (track && track.artistObj) {
+                const title = `${track.name} by ${track.artistObj.name} | Music (Zikr) | WikiSubmission`;
+                const description = `Listen to ${track.name} by ${track.artistObj.name} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`;
 
                 return {
                     title,
@@ -25,11 +28,13 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
                         title,
                         description,
                         type: 'music.song',
+                        images: track.artistObj.image_url ? [track.artistObj.image_url] : [],
                     },
                     twitter: {
                         card: 'summary_large_image',
                         title,
                         description,
+                        images: track.artistObj.image_url ? [track.artistObj.image_url] : [],
                     }
                 };
             }
@@ -38,16 +43,20 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
         }
     }
 
-    return {
-        title: "Music (Zikr) | WikiSubmission",
-        description: "Glorification and commemoration of God through beautiful recitations and melodies.",
-        openGraph: {
-            title: "Music (Zikr) | WikiSubmission",
-            description: "Glorification and commemoration of God through beautiful recitations and melodies.",
-        },
-    };
-}
+    const defaultTitle = "Music (Zikr) | WikiSubmission";
+    const defaultDescription = "Glorification and commemoration of God through beautiful recitations and melodies.";
 
-export default function MusicPage() {
-    return <MusicClient />;
+    return {
+        title: defaultTitle,
+        description: defaultDescription,
+        openGraph: {
+            title: defaultTitle,
+            description: defaultDescription,
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: defaultTitle,
+            description: defaultDescription,
+        }
+    };
 }
