@@ -14,6 +14,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useSearchParams } from 'next/navigation';
+import { AppPrompt } from '@/app/music/components/app-prompt';
 
 export default function MusicClient() {
     const { allTracks, categories, isLoading, favorites, loopMode, currentTrack, playbackContext, playTrack } = useMusic();
@@ -92,7 +93,9 @@ export default function MusicClient() {
                 </div>
             </div>
 
-            <Link href="/">
+            <AppPrompt trackId={currentTrack?.id || trackId || undefined} />
+
+            <Link href="/" className="mt-4">
                 <Image src="/brand-assets/logo-transparent.png"
                     alt="Logo"
                     width={64}

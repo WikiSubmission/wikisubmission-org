@@ -24,6 +24,10 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
                 return {
                     title,
                     description,
+                    itunes: {
+                        appId: '6444260632',
+                        appArgument: `wikisubmission://music/track/${trackId}`,
+                    },
                     openGraph: {
                         title,
                         description,
