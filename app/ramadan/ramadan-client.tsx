@@ -72,10 +72,10 @@ function RamadanContent() {
             setData(result);
 
             // Update URL purely for browser navigation/sharing without triggering re-render
-            if (result.location.address) {
+            if (result.location_string) {
                 const currentParams = new URLSearchParams(window.location.search);
-                if (currentParams.get('q') !== result.location.address) {
-                    currentParams.set('q', result.location.address);
+                if (currentParams.get('q') !== result.location_string) {
+                    currentParams.set('q', result.location_string);
                     currentParams.set('year', result.year);
                     const newPath = `${window.location.pathname}?${currentParams.toString()}`;
                     window.history.replaceState(null, '', newPath);
@@ -179,7 +179,7 @@ function RamadanContent() {
                         <div className="flex flex-col items-center gap-2">
                             <div className="flex items-center gap-1.5 text-muted-foreground">
                                 <MapPinIcon className="size-3.5" />
-                                <span className="text-sm font-medium">{data.location.address}</span>
+                                <span className="text-sm font-medium">{data.location_string}</span>
                             </div>
                             <h2 className="text-2xl font-bold tracking-tight text-violet-600 drop-shadow-sm">{data.year} Ramadan Schedule</h2>
                             <p className="text-lg text-foreground/80 max-w-xl mx-auto font-medium">
@@ -192,23 +192,22 @@ function RamadanContent() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <SummaryCard
                             title="First Fasting Day"
-                            value={data.summary.first_fasting_day}
+                            value={data.first_fasting_day}
                             icon={<CalendarIcon className="size-4 text-violet-500" />}
                         />
                         <SummaryCard
                             title="Last Fasting Day"
-                            value={data.summary.last_fasting_day}
+                            value={data.last_fasting_day}
                             icon={<CalendarIcon className="size-4 text-violet-500" />}
                         />
                         <SummaryCard
                             title="Night of Destiny"
-                            value={data.summary.night_of_destiny}
+                            value={data.night_of_destiny}
                             icon={<StarsIcon className="size-4 text-amber-500" />}
-                            description="(Night 27)"
                         />
                         <SummaryCard
-                            title="Last 10 Nights Start"
-                            value={data.summary.begin_last_10_nights}
+                            title="Average Fasting Duration"
+                            value={data.average_fasting_duration}
                             icon={<MoonIcon className="size-4 text-blue-500" />}
                         />
                     </div>
@@ -265,10 +264,6 @@ function RamadanContent() {
                                 SHARE THIS SCHEDULE
                             </p>
                         </button>
-                        <div className="flex flex-col items-center gap-1 opacity-60">
-                            <span>{`${data.location.latitude}°N, ${data.location.longitude}°E`}</span>
-                            <span>{data.location.timezone}</span>
-                        </div>
                     </footer>
                 </div>
             )}
@@ -319,6 +314,12 @@ interface RamadanResponse {
     year: string;
     current_day: number;
     status_string: string;
+    location_string: string;
+    average_fasting_duration: string;
+    first_fasting_day: string;
+    last_fasting_day: string;
+    night_of_destiny: string;
+    begin_last_10_nights: string;
     location: {
         address: string;
         city: string;
@@ -326,12 +327,6 @@ interface RamadanResponse {
         latitude: number;
         longitude: number;
         timezone: string;
-    };
-    summary: {
-        first_fasting_day: string;
-        last_fasting_day: string;
-        night_of_destiny: string;
-        begin_last_10_nights: string;
     };
     moon_data: {
         start: {
