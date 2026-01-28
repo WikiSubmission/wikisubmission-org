@@ -119,7 +119,7 @@ export default function DonatePage() {
 
             <section className="max-w-sm text-center text-sm text-muted-foreground space-y-3 ">
                 <p>
-                    WikiSubmission is a registered 501(c)(3) public charity (EIN: 39-4876245). Donations are fully tax-deductible to the extent permitted by law. Please consult your tax advisor and the IRS for guidance.
+                    WikiSubmission is a registered 501(c)(3) public charity (EIN: 39-4876245). Donations are fully tax-deductible to the extent permitted by law.
                 </p>
             </section>
 
