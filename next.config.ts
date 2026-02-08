@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // turbopack: {
+  //   root: "./",
+  // },
   experimental: {
     serverActions: {
-      bodySizeLimit: '50mb',
+      bodySizeLimit: "50mb",
     },
   },
   images: {
@@ -19,7 +22,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "img.youtube.com",
-      }
+      },
     ],
   },
   async redirects() {
@@ -27,26 +30,29 @@ const nextConfig: NextConfig = {
       {
         source: "/privacy-policy",
         destination: "/legal/privacy",
-        permanent: true
+        permanent: true,
       },
       {
         source: "/terms-of-service",
         destination: "/legal/terms",
-        permanent: true
+        permanent: true,
       },
       {
         source: "/proclamation",
-        destination: "https://library.wikisubmission.org/file/quran-the-final-testament-proclamation",
+        destination:
+          "https://library.wikisubmission.org/file/quran-the-final-testament-proclamation",
         permanent: true,
       },
       {
         source: "/introduction",
-        destination: "https://library.wikisubmission.org/file/quran-the-final-testament-introduction",
+        destination:
+          "https://library.wikisubmission.org/file/quran-the-final-testament-introduction",
         permanent: true,
       },
       {
         source: "/index",
-        destination: "https://library.wikisubmission.org/file/quran-the-final-testament-index",
+        destination:
+          "https://library.wikisubmission.org/file/quran-the-final-testament-index",
         permanent: true,
       },
       {

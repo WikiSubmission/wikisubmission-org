@@ -42,4 +42,6 @@ next-env.d.ts
 
 # next-intl generated types
 messages/*.d.json.ts
+# clerk configuration (can include secrets)
+/.clerk/
 bun.lock
