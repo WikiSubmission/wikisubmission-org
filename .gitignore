@@ -42,3 +42,4 @@ next-env.d.ts
 
 # next-intl generated types
 messages/*.d.json.ts
+bun.lock
