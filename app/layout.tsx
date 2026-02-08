@@ -1,26 +1,26 @@
-import "./globals.css";
-import { Fonts } from "@/constants/fonts";
-import { Metadata } from "@/constants/metadata";
-import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/theme-provider";
-import { ScrollToTop } from "@/components/scroll-to-top";
-import { GeometryDots } from "@/components/geometry-dots";
-import Providers from "@/components/providers";
-import type { Viewport } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
+import './globals.css'
+import { Fonts } from '@/constants/fonts'
+import { Metadata } from '@/constants/metadata'
+import { Toaster } from '@/components/ui/sonner'
+import { ThemeProvider } from '@/components/theme-provider'
+import { ScrollToTop } from '@/components/scroll-to-top'
+import { GeometryDots } from '@/components/geometry-dots'
+import Providers from '@/components/providers'
+import type { Viewport } from 'next'
+import { ClerkProvider } from '@clerk/nextjs'
 
-export const metadata = Metadata;
+export const metadata = Metadata
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <ClerkProvider signInUrl="/auth/sign-in" signUpUrl="/auth/sign-up">
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${Fonts.sora.className} ${Fonts.amiri.variable} antialiased break-words`}
+          className={`${Fonts.sora.className} ${Fonts.amiri.variable} antialiased wrap-break-words`}
           suppressHydrationWarning
         >
           <ThemeProvider
@@ -38,13 +38,13 @@ export default function RootLayout({
         </body>
       </html>
     </ClerkProvider>
-  );
+  )
 }
 
 // Prevent mobile browser zoom on input focus.
 export const viewport: Viewport = {
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-};
+}
