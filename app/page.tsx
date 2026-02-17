@@ -6,7 +6,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item"
 import { About } from "@/constants/about";
-import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub, FaHeart, FaEnvelope } from "react-icons/fa";
+import { FaApple, FaDiscord, FaTwitter, FaYoutube, FaChevronRight, FaGithub, FaHeart, FaEnvelope, FaAndroid } from "react-icons/fa";
 import { DownloadIcon, HeartIcon, Music2Icon, MoonIcon, SearchIcon } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
 import { ThemeToggle } from "@/components/toggles/theme-toggle";
@@ -164,6 +164,25 @@ export default function Home() {
               </ItemContent>
               <ItemActions>
                 <FaApple className="size-6" />
+                <FaChevronRight className="size-4" />
+              </ItemActions>
+            </Link>
+          </Item>
+        </section>
+
+        <section className="flex flex-col">
+          <Item asChild variant="outline">
+            <Link href="https://play.google.com/store/apps/details?id=com.kuransonahit.app" target="_blank" rel="noopener noreferrer">
+              <ItemContent>
+                <ItemTitle>
+                  Android App
+                </ItemTitle>
+                <ItemDescription>
+                  By Karfeliston
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <FaAndroid className="size-6" />
                 <FaChevronRight className="size-4" />
               </ItemActions>
             </Link>

@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink, ChevronRight } from "lucide-react";
 import { PageSwitcher } from "@/components/page-switcher";
-import { FaApple } from "react-icons/fa";
+import { FaAndroid, FaApple } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -34,7 +34,7 @@ const LinkButton = ({ href, label }: { href: string; label: string }) => (
 
 export default function Downloads() {
     return (
-        <main className="space-y-6 p-8">
+        <main className="space-y-6 p-8 md:max-w-5xl mx-auto">
             <PageSwitcher currentPage="downloads" />
             <Link href="/">
                 <Image
@@ -70,6 +70,25 @@ export default function Downloads() {
                             </ItemContent>
                             <ItemActions>
                                 <FaApple className="size-8" />
+                                <ChevronRight className="size-4" />
+                            </ItemActions>
+                        </Link>
+                    </Item>
+                </section>
+
+                <section className="flex flex-col">
+                    <Item asChild variant="outline">
+                        <Link href="https://play.google.com/store/apps/details?id=com.kuransonahit.app" target="_blank" rel="noopener noreferrer">
+                            <ItemContent>
+                                <ItemTitle>
+                                    Android App
+                                </ItemTitle>
+                                <ItemDescription>
+                                    By Karfeliston
+                                </ItemDescription>
+                            </ItemContent>
+                            <ItemActions>
+                                <FaAndroid className="size-6" />
                                 <ChevronRight className="size-4" />
                             </ItemActions>
                         </Link>
