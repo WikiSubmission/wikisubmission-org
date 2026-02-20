@@ -210,6 +210,9 @@ export default function Home() {
             <Link href={About.social.twitter}>
               <FaTwitter className="size-5" />
             </Link>
+            <Link href={About.social.youtube}>
+              <FaYoutube className="size-5" />
+            </Link>
             <Link href={About.social.discord}>
               <FaDiscord className="size-5" />
             </Link>
