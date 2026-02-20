@@ -1,40 +1,28 @@
 'use client'
 
-import { Moon, Sun } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
-
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Sun, Moon } from 'lucide-react'
 
 export function ThemeToggle() {
   const { setTheme, theme } = useTheme()
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon-sm">
-          <Sun className="h-fit w-fit scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-          <Moon className="absolute h-fit w-fit scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <h1 className="text-sm font-semibold p-2">Theme</h1>
-        <DropdownMenuItem onClick={() => setTheme('light')}>
-          Light {theme === 'light' ? '(current)' : ''}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>
-          Dark {theme === 'dark' ? '(current)' : ''}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
-          System {theme === 'system' ? '(current)' : ''}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <button
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      className="relative h-9 w-9 flex items-center justify-center border rounded-md"
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={theme}
+          initial={{ y: -20, opacity: 0, rotate: -90 }}
+          animate={{ y: 0, opacity: 1, rotate: 0 }}
+          exit={{ y: 20, opacity: 0, rotate: 90 }}
+          transition={{ duration: 0.2, ease: 'easeInOut' }}
+        >
+          {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+        </motion.div>
+      </AnimatePresence>
+    </button>
   )
 }
