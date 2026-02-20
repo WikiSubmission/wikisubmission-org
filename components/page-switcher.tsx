@@ -1,56 +1,64 @@
-"use client"
+'use client'
 
-import { BookIcon, ChevronDown, DownloadIcon, HeartIcon, Music2Icon, MoonIcon, SearchIcon } from "lucide-react"
+import {
+  BookIcon,
+  ChevronDown,
+  DownloadIcon,
+  HeartIcon,
+  Music2Icon,
+  MoonIcon,
+  SearchIcon,
+} from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import Link from "next/link"
-import Image from "next/image"
+} from '@/components/ui/dropdown-menu'
+import Link from 'next/link'
+import Image from 'next/image'
 
 const modes = {
   home: {
-    label: "Home",
-    icon: "/brand-assets/logo-transparent.png",
-    href: "/",
+    label: 'Home',
+    icon: '/brand-assets/logo-transparent.png',
+    href: '/',
   },
   quran: {
-    label: "Quran",
+    label: 'Quran',
     icon: <BookIcon className="size-4" />,
-    href: "/quran",
+    href: '/quran',
   },
   bible: {
-    label: "Bible",
+    label: 'Bible',
     icon: <BookIcon className="size-4" />,
-    href: "/bible",
+    href: '/bible',
     comingSoon: true,
   },
   music: {
-    label: "Music",
+    label: 'Music',
     icon: <Music2Icon className="size-4" />,
-    href: "/music",
+    href: '/music',
   },
   search: {
-    label: "Search",
+    label: 'Search',
     icon: <SearchIcon className="size-4" />,
-    href: "/search"
+    href: '/search',
   },
   prayertimes: {
-    label: "Prayer Times",
+    label: 'Prayer Times',
     icon: <HeartIcon className="size-4" />,
-    href: "/prayer-times",
+    href: '/prayer-times',
   },
   ramadan: {
-    label: "Ramadan",
+    label: 'Ramadan',
     icon: <MoonIcon className="size-4" />,
-    href: "/ramadan"
+    href: '/ramadan',
   },
   downloads: {
-    label: "Downloads",
+    label: 'Downloads',
     icon: <DownloadIcon className="size-4" />,
-    href: "/downloads",
+    href: '/downloads',
   },
 }
 
@@ -62,31 +70,40 @@ interface ModeSwitcherProps {
 
 export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
   const currentIcon = modes[currentPage].icon
-  const isString = typeof currentIcon === "string"
+  const isString = typeof currentIcon === 'string'
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="z-10 flex items-center gap-2 px-3 h-8 rounded-md bg-secondary/30 hover:bg-secondary/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border border-border/40">
         {isString ? (
-          <Image src={currentIcon} alt="" width={500} height={500} className="size-6 rounded-full" />
+          <Image
+            src={currentIcon}
+            alt=""
+            width={500}
+            height={500}
+            className="size-6 rounded-full hidden lg:block"
+          />
         ) : (
           currentIcon
         )}
-        <span className="text-xs md:text-sm font-light">{modes[currentPage].label}</span>
+        <span className="text-xs md:text-sm font-light">
+          {modes[currentPage].label}
+        </span>
         <ChevronDown className="size-3.5 text-muted-foreground" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[160px]">
+      <DropdownMenuContent align="start" className="min-w-40">
         {Object.entries(modes).map(([key, mode]) => {
           const modeIcon = mode.icon
-          const isIconString = typeof modeIcon === "string"
+          const isIconString = typeof modeIcon === 'string'
           const isActive = key === currentPage
 
           return (
             <DropdownMenuItem key={key} asChild disabled={'comingSoon' in mode}>
               <Link
                 href={mode.href}
-                className={`flex items-center gap-2 ${isActive ? "bg-accent" : ""
-                  } ${'comingSoon' in mode ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={`flex items-center gap-2 ${
+                  isActive ? 'bg-accent' : ''
+                } ${'comingSoon' in mode ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isIconString ? (
                   <Image
@@ -94,13 +111,18 @@ export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
                     alt=""
                     width={500}
                     height={500}
-                    className={`size-4 rounded-full ${isActive ? "opacity-100" : "opacity-100"}`}
+                    className={`size-4 rounded-full ${isActive ? 'opacity-100' : 'opacity-100'}`}
                     priority
                   />
                 ) : (
                   modeIcon
                 )}
-                <span className={`text-xs ${isActive ? "text-violet-600" : "text-primary"}`}>{mode.label}{'comingSoon' in mode ? " (coming soon)" : ""}</span>
+                <span
+                  className={`text-xs ${isActive ? 'text-violet-600' : 'text-primary'}`}
+                >
+                  {mode.label}
+                  {'comingSoon' in mode ? ' (coming soon)' : ''}
+                </span>
               </Link>
             </DropdownMenuItem>
           )
@@ -109,4 +131,3 @@ export function PageSwitcher({ currentPage }: ModeSwitcherProps) {
     </DropdownMenu>
   )
 }
-

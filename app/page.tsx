@@ -28,7 +28,6 @@ import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import Image from 'next/image'
 import Link from 'next/link'
 
-// 1. Data Structure for easier management
 const SERVICES = [
   {
     title: 'Final Testament',
@@ -97,15 +96,17 @@ export default function Home() {
     <main className="flex flex-col h-screen max-w-5xl mx-auto md:p-10 p-4 space-y-12">
       {/* Header  */}
       <header className="flex justify-between items-center w-full">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 lg:gap-3">
           <Image
             src="/brand-assets/logo-transparent.png"
             alt="Logo"
             width={48}
             height={48}
-            className="rounded-full"
+            className="rounded-full size-6 lg:size-10"
           />
-          <h1 className="text-2xl font-bold tracking-tight">WikiSubmission</h1>
+          <h1 className="text-md lg:text-2xl font-bold tracking-tight">
+            WikiSubmission
+          </h1>
         </div>
         <div className="flex items-center gap-2">
           <PageSwitcher currentPage="home" />
