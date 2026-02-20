@@ -179,7 +179,7 @@ export default function Home() {
           <p>
             WikiSubmission is a faith-based 501(c)(3) nonprofit organization...
             <Link
-              href="https://library.wikisubmission.org/..."
+              href="https://library.wikisubmission.org/file/quran-the-final-testament"
               className="underline ml-1"
             >
               Learn more
