@@ -1,13 +1,13 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/ui/button";
-import { About } from "@/constants/about";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
+import { Button } from '@/components/ui/button'
+import { About } from '@/constants/about'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default function Page() {
-  const router = useRouter();
+  const router = useRouter()
   return (
     <div>
       <main className="flex flex-col min-h-screen items-center justify-center space-y-8">
@@ -26,7 +26,11 @@ export default function Page() {
           Sorry, we couldn&apos;t find what you were looking for.
         </p>
         <div className="flex gap-4 w-xs">
-          <Button variant="default" onClick={() => router.back()} className="cursor-pointer">
+          <Button
+            variant="default"
+            onClick={() => router.back()}
+            className="cursor-pointer"
+          >
             ← Return to previous page
           </Button>
           <a href={`mailto:${About.email}`}>
@@ -37,5 +41,5 @@ export default function Page() {
         </div>
       </main>
     </div>
-  );
+  )
 }

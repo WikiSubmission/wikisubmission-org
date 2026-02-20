@@ -1,5 +1,5 @@
-import { WikiSubmission } from "wikisubmission-sdk";
+import { WikiSubmission } from 'wikisubmission-sdk'
 
 export const ws = WikiSubmission.createClient({
-    enableLogging: true,
-});
+  enableLogging: true,
+})

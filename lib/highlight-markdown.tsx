@@ -1,14 +1,14 @@
 export const highlightMarkdown = (text?: string | null) => {
-  if (!text) return null;
+  if (!text) return null
 
   // Split by newlines first
-  const lines = text.split("\n");
+  const lines = text.split('\n')
 
   return lines.map((line, lineIndex) => (
     <span key={lineIndex}>
       {line.split(/(\*\*.*?\*\*|==.*?==)/g).map((part, index) => {
-        const isBold = part.startsWith("**") && part.endsWith("**");
-        const isHighlight = part.startsWith("==") && part.endsWith("==");
+        const isBold = part.startsWith('**') && part.endsWith('**')
+        const isHighlight = part.startsWith('==') && part.endsWith('==')
 
         if (isBold || isHighlight) {
           return (
@@ -18,11 +18,11 @@ export const highlightMarkdown = (text?: string | null) => {
             >
               {part.slice(2, -2)}
             </span>
-          );
+          )
         }
-        return part;
+        return part
       })}
       {lineIndex < lines.length - 1 && <br />}
     </span>
-  ));
-};
+  ))
+}

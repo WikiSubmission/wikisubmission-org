@@ -1,3 +1,3 @@
 export default function DeveloperSectionPage() {
-    return <div>Developer Section</div>;
+  return <div>Developer Section</div>
 }

@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   // turbopack: {
@@ -6,68 +6,68 @@ const nextConfig: NextConfig = {
   // },
   experimental: {
     serverActions: {
-      bodySizeLimit: "50mb",
+      bodySizeLimit: '50mb',
     },
   },
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "library.wikisubmission.org",
+        protocol: 'https',
+        hostname: 'library.wikisubmission.org',
       },
       {
-        protocol: "https",
-        hostname: "www.masjidtucson.org",
+        protocol: 'https',
+        hostname: 'www.masjidtucson.org',
       },
       {
-        protocol: "https",
-        hostname: "img.youtube.com",
+        protocol: 'https',
+        hostname: 'img.youtube.com',
       },
     ],
   },
   async redirects() {
     return [
       {
-        source: "/privacy-policy",
-        destination: "/legal/privacy",
+        source: '/privacy-policy',
+        destination: '/legal/privacy',
         permanent: true,
       },
       {
-        source: "/terms-of-service",
-        destination: "/legal/terms",
+        source: '/terms-of-service',
+        destination: '/legal/terms',
         permanent: true,
       },
       {
-        source: "/proclamation",
+        source: '/proclamation',
         destination:
-          "https://library.wikisubmission.org/file/quran-the-final-testament-proclamation",
+          'https://library.wikisubmission.org/file/quran-the-final-testament-proclamation',
         permanent: true,
       },
       {
-        source: "/introduction",
+        source: '/introduction',
         destination:
-          "https://library.wikisubmission.org/file/quran-the-final-testament-introduction",
+          'https://library.wikisubmission.org/file/quran-the-final-testament-introduction',
         permanent: true,
       },
       {
-        source: "/index",
+        source: '/index',
         destination:
-          "https://library.wikisubmission.org/file/quran-the-final-testament-index",
+          'https://library.wikisubmission.org/file/quran-the-final-testament-index',
         permanent: true,
       },
       {
-        source: "/library/:path*",
-        destination: "https://library.wikisubmission.org/:path*",
+        source: '/library/:path*',
+        destination: 'https://library.wikisubmission.org/:path*',
         permanent: true,
       },
       {
-        source: "/appendix/0",
+        source: '/appendix/0',
         destination:
-          "https://library.wikisubmission.org/file/quran-the-final-testament-introduction",
+          'https://library.wikisubmission.org/file/quran-the-final-testament-introduction',
         permanent: true,
       },
       ...Array.from({ length: 38 }, (_, i) => {
-        const n = i + 1;
+        const n = i + 1
         return [
           {
             source: `/appendix/${n}`,
@@ -79,33 +79,33 @@ const nextConfig: NextConfig = {
             destination: `https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${n}`,
             permanent: true,
           },
-        ];
+        ]
       }).flat(),
       // Fallback for invalid appendix numbers or /appendices
       {
-        source: "/appendix/:path*",
+        source: '/appendix/:path*',
         destination:
-          "https://library.wikisubmission.org/file/quran-the-final-testament-appendices",
+          'https://library.wikisubmission.org/file/quran-the-final-testament-appendices',
         permanent: true,
       },
       {
-        source: "/appendix-:path(.*)",
+        source: '/appendix-:path(.*)',
         destination:
-          "https://library.wikisubmission.org/file/quran-the-final-testament-appendices",
+          'https://library.wikisubmission.org/file/quran-the-final-testament-appendices',
         permanent: true,
       },
       {
-        source: "/dashboard/quran/search/:query*",
-        destination: "/quran/:query*",
+        source: '/dashboard/quran/search/:query*',
+        destination: '/quran/:query*',
         permanent: true,
       },
       {
-        source: "/dashboard/quran/:query*",
-        destination: "/quran/:query*",
+        source: '/dashboard/quran/:query*',
+        destination: '/quran/:query*',
         permanent: true,
       },
-    ];
+    ]
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

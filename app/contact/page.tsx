@@ -4,11 +4,17 @@ import {
   ItemContent,
   ItemDescription,
   ItemTitle,
-} from "@/components/ui/item";
-import { About } from "@/constants/about";
-import { ChevronRight, Mail, Github, MessageSquare, ChevronLeft } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+} from '@/components/ui/item'
+import { About } from '@/constants/about'
+import {
+  ChevronRight,
+  Mail,
+  Github,
+  MessageSquare,
+  ChevronLeft,
+} from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default function ContactPage() {
   return (
@@ -24,14 +30,13 @@ export default function ContactPage() {
       </Link>
 
       <section className="max-w-sm flex gap-4 max-w-md items-center">
-        <h1 className="text-3xl font-semibold">
-          Contact Us
-        </h1>
+        <h1 className="text-3xl font-semibold">Contact Us</h1>
       </section>
 
       <section className="max-w-sm text-center text-sm text-muted-foreground">
         <p>
-          We&apos;d love to hear from you. Whether you have questions, suggestions, or need support, we&apos;re here to help.
+          We&apos;d love to hear from you. Whether you have questions,
+          suggestions, or need support, we&apos;re here to help.
         </p>
       </section>
 
@@ -41,12 +46,8 @@ export default function ContactPage() {
         <Item asChild variant="outline">
           <a href={`mailto:${About.email}`}>
             <ItemContent>
-              <ItemTitle>
-                Email
-              </ItemTitle>
-              <ItemDescription>
-                General inquiries and support
-              </ItemDescription>
+              <ItemTitle>Email</ItemTitle>
+              <ItemDescription>General inquiries and support</ItemDescription>
             </ItemContent>
             <ItemActions>
               <Mail className="size-4" />
@@ -56,14 +57,14 @@ export default function ContactPage() {
         </Item>
 
         <Item asChild variant="outline">
-          <Link href={About.social.github} target="_blank" rel="noopener noreferrer">
+          <Link
+            href={About.social.github}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <ItemContent>
-              <ItemTitle>
-                GitHub
-              </ItemTitle>
-              <ItemDescription>
-                Bug reports and contributions
-              </ItemDescription>
+              <ItemTitle>GitHub</ItemTitle>
+              <ItemDescription>Bug reports and contributions</ItemDescription>
             </ItemContent>
             <ItemActions>
               <Github className="size-4" />
@@ -73,14 +74,14 @@ export default function ContactPage() {
         </Item>
 
         <Item asChild variant="outline">
-          <Link href={About.social.discord} target="_blank" rel="noopener noreferrer">
+          <Link
+            href={About.social.discord}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <ItemContent>
-              <ItemTitle>
-                Discord
-              </ItemTitle>
-              <ItemDescription>
-                Chat with us
-              </ItemDescription>
+              <ItemTitle>Discord</ItemTitle>
+              <ItemDescription>Chat with us</ItemDescription>
             </ItemContent>
             <ItemActions>
               <MessageSquare className="size-4" />
@@ -91,13 +92,14 @@ export default function ContactPage() {
       </section>
 
       <section>
-        <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-violet-600">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-muted-foreground hover:text-violet-600"
+        >
           <ChevronLeft className="size-4" />
-          <p className="text-sm">
-            Back to Home
-          </p>
+          <p className="text-sm">Back to Home</p>
         </Link>
       </section>
     </main>
-  );
+  )
 }

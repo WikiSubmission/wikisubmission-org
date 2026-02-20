@@ -1,15 +1,15 @@
-"use client"
+'use client'
 
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Moon, Sun } from 'lucide-react'
+import { useTheme } from 'next-themes'
 
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu'
 
 export function ThemeToggle() {
   const { setTheme, theme } = useTheme()
@@ -24,17 +24,15 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <h1 className="text-sm font-semibold p-2">
-          Theme
-        </h1>
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light {theme === "light" ? "(current)" : ""}
+        <h1 className="text-sm font-semibold p-2">Theme</h1>
+        <DropdownMenuItem onClick={() => setTheme('light')}>
+          Light {theme === 'light' ? '(current)' : ''}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark {theme === "dark" ? "(current)" : ""}
+        <DropdownMenuItem onClick={() => setTheme('dark')}>
+          Dark {theme === 'dark' ? '(current)' : ''}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System {theme === "system" ? "(current)" : ""}
+        <DropdownMenuItem onClick={() => setTheme('system')}>
+          System {theme === 'system' ? '(current)' : ''}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

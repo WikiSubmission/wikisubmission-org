@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: '13.0.5'
   }
   public: {
     Tables: {
@@ -71,11 +71,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ws_music_albums_artist_fkey"
-            columns: ["artist"]
+            foreignKeyName: 'ws_music_albums_artist_fkey'
+            columns: ['artist']
             isOneToOne: false
-            referencedRelation: "ws_music_artists"
-            referencedColumns: ["id"]
+            referencedRelation: 'ws_music_artists'
+            referencedColumns: ['id']
           },
         ]
       }
@@ -157,25 +157,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ws_music_tracks_album_fkey"
-            columns: ["album"]
+            foreignKeyName: 'ws_music_tracks_album_fkey'
+            columns: ['album']
             isOneToOne: false
-            referencedRelation: "ws_music_albums"
-            referencedColumns: ["id"]
+            referencedRelation: 'ws_music_albums'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ws_music_tracks_artist_fkey"
-            columns: ["artist"]
+            foreignKeyName: 'ws_music_tracks_artist_fkey'
+            columns: ['artist']
             isOneToOne: false
-            referencedRelation: "ws_music_artists"
-            referencedColumns: ["id"]
+            referencedRelation: 'ws_music_artists'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "ws_music_tracks_category_fkey"
-            columns: ["category"]
+            foreignKeyName: 'ws_music_tracks_category_fkey'
+            columns: ['category']
             isOneToOne: false
-            referencedRelation: "ws_music_categories"
-            referencedColumns: ["id"]
+            referencedRelation: 'ws_music_categories'
+            referencedColumns: ['id']
           },
         ]
       }
@@ -341,25 +341,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ws-quran-footnotes_chapter_number_fkey"
-            columns: ["chapter_number"]
+            foreignKeyName: 'ws-quran-footnotes_chapter_number_fkey'
+            columns: ['chapter_number']
             isOneToOne: false
-            referencedRelation: "ws_quran_chapters"
-            referencedColumns: ["chapter_number"]
+            referencedRelation: 'ws_quran_chapters'
+            referencedColumns: ['chapter_number']
           },
           {
-            foreignKeyName: "ws-quran-footnotes_verse_id_fkey"
-            columns: ["verse_id"]
+            foreignKeyName: 'ws-quran-footnotes_verse_id_fkey'
+            columns: ['verse_id']
             isOneToOne: true
-            referencedRelation: "ws_quran_index"
-            referencedColumns: ["verse_id"]
+            referencedRelation: 'ws_quran_index'
+            referencedColumns: ['verse_id']
           },
           {
-            foreignKeyName: "ws-quran-footnotes_verse_id_fkey1"
-            columns: ["verse_id"]
+            foreignKeyName: 'ws-quran-footnotes_verse_id_fkey1'
+            columns: ['verse_id']
             isOneToOne: true
-            referencedRelation: "ws_quran_text"
-            referencedColumns: ["verse_id"]
+            referencedRelation: 'ws_quran_text'
+            referencedColumns: ['verse_id']
           },
         ]
       }
@@ -390,11 +390,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ws-quran_chapter_number_fkey"
-            columns: ["chapter_number"]
+            foreignKeyName: 'ws-quran_chapter_number_fkey'
+            columns: ['chapter_number']
             isOneToOne: false
-            referencedRelation: "ws_quran_chapters"
-            referencedColumns: ["chapter_number"]
+            referencedRelation: 'ws_quran_chapters'
+            referencedColumns: ['chapter_number']
           },
         ]
       }
@@ -455,25 +455,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ws-quran-subtitles_chapter_number_fkey"
-            columns: ["chapter_number"]
+            foreignKeyName: 'ws-quran-subtitles_chapter_number_fkey'
+            columns: ['chapter_number']
             isOneToOne: false
-            referencedRelation: "ws_quran_chapters"
-            referencedColumns: ["chapter_number"]
+            referencedRelation: 'ws_quran_chapters'
+            referencedColumns: ['chapter_number']
           },
           {
-            foreignKeyName: "ws-quran-subtitles_verse_id_fkey"
-            columns: ["verse_id"]
+            foreignKeyName: 'ws-quran-subtitles_verse_id_fkey'
+            columns: ['verse_id']
             isOneToOne: true
-            referencedRelation: "ws_quran_index"
-            referencedColumns: ["verse_id"]
+            referencedRelation: 'ws_quran_index'
+            referencedColumns: ['verse_id']
           },
           {
-            foreignKeyName: "ws-quran-subtitles_verse_id_fkey1"
-            columns: ["verse_id"]
+            foreignKeyName: 'ws-quran-subtitles_verse_id_fkey1'
+            columns: ['verse_id']
             isOneToOne: true
-            referencedRelation: "ws_quran_text"
-            referencedColumns: ["verse_id"]
+            referencedRelation: 'ws_quran_text'
+            referencedColumns: ['verse_id']
           },
         ]
       }
@@ -546,18 +546,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ws-quran-text_chapter_number_fkey"
-            columns: ["chapter_number"]
+            foreignKeyName: 'ws-quran-text_chapter_number_fkey'
+            columns: ['chapter_number']
             isOneToOne: false
-            referencedRelation: "ws_quran_chapters"
-            referencedColumns: ["chapter_number"]
+            referencedRelation: 'ws_quran_chapters'
+            referencedColumns: ['chapter_number']
           },
           {
-            foreignKeyName: "ws-quran-text_verse_id_fkey"
-            columns: ["verse_id"]
+            foreignKeyName: 'ws-quran-text_verse_id_fkey'
+            columns: ['verse_id']
             isOneToOne: true
-            referencedRelation: "ws_quran_index"
-            referencedColumns: ["verse_id"]
+            referencedRelation: 'ws_quran_index'
+            referencedColumns: ['verse_id']
           },
         ]
       }
@@ -603,25 +603,25 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ws-quran-word-by-word_chapter_number_fkey"
-            columns: ["chapter_number"]
+            foreignKeyName: 'ws-quran-word-by-word_chapter_number_fkey'
+            columns: ['chapter_number']
             isOneToOne: false
-            referencedRelation: "ws_quran_chapters"
-            referencedColumns: ["chapter_number"]
+            referencedRelation: 'ws_quran_chapters'
+            referencedColumns: ['chapter_number']
           },
           {
-            foreignKeyName: "ws-quran-word-by-word_verse_id_fkey"
-            columns: ["verse_id"]
+            foreignKeyName: 'ws-quran-word-by-word_verse_id_fkey'
+            columns: ['verse_id']
             isOneToOne: false
-            referencedRelation: "ws_quran_index"
-            referencedColumns: ["verse_id"]
+            referencedRelation: 'ws_quran_index'
+            referencedColumns: ['verse_id']
           },
           {
-            foreignKeyName: "ws-quran-word-by-word_verse_id_fkey1"
-            columns: ["verse_id"]
+            foreignKeyName: 'ws-quran-word-by-word_verse_id_fkey1'
+            columns: ['verse_id']
             isOneToOne: false
-            referencedRelation: "ws_quran_text"
-            referencedColumns: ["verse_id"]
+            referencedRelation: 'ws_quran_text'
+            referencedColumns: ['verse_id']
           },
         ]
       }
@@ -642,122 +642,122 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-  : never = never,
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
       Row: infer R
     }
-  ? R
-  : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : never
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
+        DefaultSchema['Views'])
+    ? (DefaultSchema['Tables'] &
+        DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema['Tables']
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : never
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema['Tables']
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : never
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+    ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema["Enums"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema['Enums']
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-  : never
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+    ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema["CompositeTypes"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema['CompositeTypes']
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+    ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+    : never
 
 export const Constants = {
   public: {
