@@ -38,7 +38,7 @@ type State = {
   loading: boolean
   error: string | null
   lastVerseEnd: number
-  totalVerses: number | null
+  reachedEnd: boolean
   lastOpts: ChapterReaderOptions | null
 }
 
@@ -67,7 +67,7 @@ export function useChapterReader(
     loading: false,
     error: null,
     lastVerseEnd: initialVerseEnd,
-    totalVerses: null,
+    reachedEnd: initialVerses.length < PAGE_SIZE,
     lastOpts: null,
   })
 
@@ -93,10 +93,11 @@ export function useChapterReader(
       }
 
       const chapter = data.chapters?.[0]
+      const verses = chapter?.verses ?? []
       return {
-        verses: chapter?.verses ?? [],
+        verses,
         titles: chapter?.titles ?? {},
-        totalVerses: data.info?.verse_end,
+        reachedEnd: verses.length < PAGE_SIZE,
         error: null,
       }
     },
@@ -125,7 +126,7 @@ export function useChapterReader(
         loading: false,
         error: null,
         lastVerseEnd: PAGE_SIZE,
-        totalVerses: result.totalVerses ?? null,
+        reachedEnd: result.reachedEnd ?? false,
         lastOpts: opts,
       })
     },
@@ -158,16 +159,12 @@ export function useChapterReader(
       loading: false,
       error: null,
       lastVerseEnd: nextStart + PAGE_SIZE - 1,
-      totalVerses: result.totalVerses ?? prev.totalVerses,
+      reachedEnd: result.reachedEnd ?? false,
       lastOpts,
     }))
   }, [state, fetchVerses])
 
-  // hasMore: if we got a full page last time, assume there are more
-  const hasMore =
-    state.verses.length > 0 &&
-    state.verses.length % PAGE_SIZE === 0 &&
-    (state.totalVerses === null || state.lastVerseEnd < (state.totalVerses ?? 0))
+  const hasMore = state.verses.length > 0 && !state.reachedEnd
 
   return {
     verses: state.verses,
