@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import type { components } from '@/src/api/types.gen'
+import { QuranRefText } from '@/components/quran-ref-text'
 
 type VerseData = components['schemas']['VerseData']
 type WordData = components['schemas']['WordData']
@@ -181,7 +182,7 @@ export function VerseCard({
   const { playFromVerse, currentVerse, isPlaying, isBuffering, togglePlayPause } =
     useQuranPlayer()
 
-  const primaryCode = prefs.primaryLang !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const tr = verse.tr?.[primaryCode]
   const arTr = verse.tr?.['ar']
   const secondaryTr =
@@ -209,7 +210,9 @@ export function VerseCard({
         {/* Subtitle */}
         {prefs.subtitles && tr?.s && (
           <div className="flex justify-center">
-            <p className="text-violet-600 text-xs font-bold text-center">{tr.s}</p>
+            <p className="text-violet-600 text-xs font-bold text-center">
+              <QuranRefText text={tr.s} from={`subtitle of ${verse.vk}`} />
+            </p>
           </div>
         )}
 
@@ -293,7 +296,7 @@ export function VerseCard({
                   isRtl(prefs.primaryLanguage) ? 'text-right' : 'text-left'
                 }`}
               >
-                {tr.f}
+                <QuranRefText text={tr.f} from={`footnote of ${verse.vk}`} />
               </p>
             )}
           </div>

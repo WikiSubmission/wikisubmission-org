@@ -16,21 +16,23 @@ import {
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Database, QueryResultSuccess } from 'wikisubmission-sdk'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { SearchItemTitle } from '../quran/[[...query]]/mini-components/search-item-title'
-import { SearchItemChapter } from '../quran/[[...query]]/mini-components/search-item-chapter-match'
-import { SearchItemAllMatches } from '../quran/[[...query]]/mini-components/search-item-all-maches'
-import { StandardResult } from '../quran/[[...query]]/client-components/result-standard'
 import { ws } from '@/lib/wikisubmission-sdk'
+import { wsApi } from '@/src/api/client'
 import { highlightMarkdown } from '@/lib/highlight-markdown'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { QuranRef } from '@/components/quran-ref'
 import Image from 'next/image'
 import Link from 'next/link'
+import type { components } from '@/src/api/types.gen'
+import type { Database } from 'wikisubmission-sdk'
 
 type MediaRow = Database['public']['Tables']['ws_media']['Row']
 type NewsletterRow = Database['public']['Tables']['ws_newsletters']['Row']
+type QuranResponse = components['schemas']['QuranResponse']
+type ChapterData = components['schemas']['ChapterData']
+type VerseData = components['schemas']['VerseData']
 
 export default function SearchClient() {
   return (
@@ -84,9 +86,7 @@ function SearchContent() {
   const [newsletterResults, setNewsletterResults] = useState<
     NewsletterRow[] | null
   >(null)
-  const [quranResults, setQuranResults] = useState<QueryResultSuccess | null>(
-    null
-  )
+  const [quranResults, setQuranResults] = useState<QuranResponse | null>(null)
   const [performedQuery, setPerformedQuery] = useState(initialQuery)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -109,21 +109,23 @@ function SearchContent() {
       setLoading(true)
       setError(null)
       try {
+        const primaryCode =
+          quranPreferences.primaryLanguage !== 'xl'
+            ? quranPreferences.primaryLanguage
+            : 'en'
+
         const [mediaResponse, newsletterResponse, quranResponse] =
           await Promise.all([
             ws.Media.query(q, { highlight: true }),
             ws.Newsletters.query(q, { highlight: true }),
-            ws.Quran.query(q, {
-              language: quranPreferences.primaryLanguage,
-              strategy: 'default',
-              highlight: true,
-              normalizeGodCasing: true,
-              adjustments: {
-                index: true,
-                chapters: true,
-                subtitles: true,
-                footnotes: true,
-                wordByWord: false,
+            wsApi.GET('/search', {
+              params: {
+                query: {
+                  q,
+                  langs: [primaryCode],
+                  limit: 20,
+                  offset: 0,
+                },
               },
             }),
           ])
@@ -136,12 +138,7 @@ function SearchContent() {
           newsletterResponse?.data ||
             (Array.isArray(newsletterResponse) ? newsletterResponse : [])
         )
-
-        if (quranResponse.status === 'success') {
-          setQuranResults(quranResponse)
-        } else {
-          setQuranResults(null)
-        }
+        setQuranResults(quranResponse.data ?? null)
 
         setPerformedQuery(q)
       } catch (err) {
@@ -162,12 +159,7 @@ function SearchContent() {
   useEffect(() => {
     if (loading || !mediaResults || !newsletterResults) return
 
-    const qCount =
-      quranResults?.type === 'search'
-        ? quranResults.data.filter((r) => r.hit !== 'word_by_word').length
-        : quranResults
-          ? 1
-          : 0
+    const qCount = quranResults?.info?.result_count ?? 0
     const mCount = mediaResults.length
     const nCount = newsletterResults.length
 
@@ -249,13 +241,7 @@ function SearchContent() {
           className="space-y-2"
         >
           {(() => {
-            const qCount =
-              quranResults?.type === 'search'
-                ? quranResults.data.filter((r) => r.hit !== 'word_by_word')
-                    .length
-                : quranResults
-                  ? 1
-                  : 0
+            const qCount = quranResults?.info?.result_count ?? 0
             const mCount = mediaResults.length
             const nCount = newsletterResults.length
             const totalCount = qCount + mCount + nCount
@@ -318,7 +304,6 @@ function SearchContent() {
                   <TabsContent value="quran">
                     <QuranSection
                       results={quranResults}
-                      searchQuery={performedQuery}
                     />
                   </TabsContent>
                 )}
@@ -373,119 +358,128 @@ function SearchLoadingSkeleton() {
   )
 }
 
-function QuranSection({
-  results,
-  searchQuery,
+/** Parses backend <b>…</b> highlight tags into styled spans */
+function HighlightText({ text }: { text?: string | null }) {
+  if (!text) return null
+  return (
+    <>
+      {text.split(/(<b>.*?<\/b>)/g).map((part, i) =>
+        part.startsWith('<b>') && part.endsWith('</b>') ? (
+          <span
+            key={i}
+            className="bg-violet-600/10 text-violet-600 dark:text-violet-400 rounded-sm font-bold"
+          >
+            {part.slice(3, -4)}
+          </span>
+        ) : (
+          part || null
+        )
+      )}
+    </>
+  )
+}
+
+function QuranChapterResult({ chapter, primaryCode }: { chapter: ChapterData; primaryCode: string }) {
+  const title = chapter.titles?.[primaryCode] ?? chapter.titles?.['en'] ?? `Sura ${chapter.cn}`
+  return (
+    <Link href={`/quran/${chapter.cn}`}>
+      <div className="flex items-center gap-2 bg-muted/50 p-3 rounded-xl hover:bg-muted/80 transition-colors w-fit">
+        <BookIcon className="size-4 text-violet-600" />
+        <span className="font-medium">Sura {chapter.cn}: {title}</span>
+      </div>
+    </Link>
+  )
+}
+
+function QuranVerseResult({
+  verse,
+  primaryCode,
+  showText,
+  showSubtitles,
+  showFootnotes,
 }: {
-  results: QueryResultSuccess
-  searchQuery: string
+  verse: VerseData
+  primaryCode: string
+  showText: boolean
+  showSubtitles: boolean
+  showFootnotes: boolean
 }) {
-  const quranPreferences = useQuranPreferences()
+  const tr = verse.tr?.[primaryCode]
+  const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
 
   return (
-    <div className="flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="space-y-6">
-        {(results.type === 'chapter' ||
-          results.type === 'verse' ||
-          results.type === 'multiple_verses') && (
-          <StandardResult props={{ query: searchQuery, data: results }} />
-        )}
+    <div className="space-y-1.5 bg-muted/50 rounded-xl p-3">
+      <QuranRef reference={verse.vk ?? `${chNum}:${vNum}`} />
+      {showSubtitles && tr?.s && (
+        <p className="text-xs text-violet-500 italic">{tr.s}</p>
+      )}
+      {showText && tr && (
+        <p className="text-sm leading-relaxed">
+          <strong>[{verse.vk}]</strong>{' '}
+          {tr.hl ? <HighlightText text={tr.hl} /> : tr.tx}
+        </p>
+      )}
+      {showFootnotes && tr?.f && (
+        <p className="text-xs text-muted-foreground italic">{tr.f}</p>
+      )}
+    </div>
+  )
+}
 
-        {results.type === 'search' && (
-          <div className="space-y-4">
-            <SearchItemTitle props={{ results: results }} />
+function QuranSection({
+  results,
+}: {
+  results: QuranResponse
+}) {
+  const prefs = useQuranPreferences()
+  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
 
-            {/* Filters */}
-            <section className="flex flex-wrap items-center gap-2 px-1">
-              <div className="flex items-center gap-2 [&>*]:text-[10px] uppercase tracking-widest font-bold">
-                <Checkbox
-                  checked={quranPreferences.text}
-                  onCheckedChange={(v) =>
-                    quranPreferences.setPreferences({
-                      ...quranPreferences,
-                      text: !!v,
-                    })
-                  }
-                  id="q-text"
-                  className="border-violet-600/30 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
-                />
-                <Label
-                  htmlFor="q-text"
-                  className="cursor-pointer group-hover:text-violet-600 transition-colors"
-                >
-                  Text ({results.data.filter((r) => r.hit === 'text').length})
-                </Label>
-              </div>
+  const titleMatches = results.chapters?.filter((ch) => ch.tm) ?? []
+  const allVerses = results.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
 
-              <div className="flex items-center gap-2 [&>*]:text-[10px] uppercase tracking-widest font-bold">
-                <Checkbox
-                  checked={quranPreferences.subtitles}
-                  onCheckedChange={(v) =>
-                    quranPreferences.setPreferences({
-                      ...quranPreferences,
-                      subtitles: !!v,
-                    })
-                  }
-                  id="q-subtitles"
-                  className="border-violet-600/30 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
-                />
-                <Label
-                  htmlFor="q-subtitles"
-                  className="cursor-pointer group-hover:text-violet-600 transition-colors"
-                >
-                  Subtitles (
-                  {results.data.filter((r) => r.hit === 'subtitle').length})
-                </Label>
-              </div>
-
-              <div className="flex items-center gap-2 [&>*]:text-[10px] uppercase tracking-widest font-bold">
-                <Checkbox
-                  checked={quranPreferences.footnotes}
-                  onCheckedChange={(v) =>
-                    quranPreferences.setPreferences({
-                      ...quranPreferences,
-                      footnotes: !!v,
-                    })
-                  }
-                  id="q-footnotes"
-                  className="border-violet-600/30 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
-                />
-                <Label
-                  htmlFor="q-footnotes"
-                  className="cursor-pointer group-hover:text-violet-600 transition-colors"
-                >
-                  Footnotes (
-                  {results.data.filter((r) => r.hit === 'footnote').length})
-                </Label>
-              </div>
-            </section>
-
-            <div className="space-y-2">
-              {results.data
-                .filter((r) => r.hit === 'chapter')
-                .map((r) => (
-                  <div
-                    key={`chapter:${r.chapter_number}`}
-                    className="space-y-4"
-                  >
-                    <SearchItemChapter chapter={r} />
-                  </div>
-                ))}
-              {results.data
-                .filter((r) => r.hit !== 'chapter' && r.hit !== 'word_by_word')
-                .map((r) => (
-                  <div
-                    className="space-y-4"
-                    key={`${r.hit}:${r.verse_index}:${'verse_id' in r ? r.verse_id : ''}`}
-                  >
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <SearchItemAllMatches props={{ results: r as any }} />
-                  </div>
-                ))}
-            </div>
+  return (
+    <div className="flex flex-col space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      {/* Display toggles */}
+      <section className="flex flex-wrap items-center gap-3 px-1">
+        {(['text', 'subtitles', 'footnotes'] as const).map((field) => (
+          <div key={field} className="flex items-center gap-2 *:text-[10px] uppercase tracking-widest font-bold">
+            <Checkbox
+              checked={prefs[field]}
+              onCheckedChange={(v) => prefs.setPreferences({ ...prefs, [field]: !!v })}
+              id={`qs-${field}`}
+              className="border-violet-600/30 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
+            />
+            <Label htmlFor={`qs-${field}`} className="cursor-pointer">
+              {field.charAt(0).toUpperCase() + field.slice(1)}
+            </Label>
           </div>
-        )}
+        ))}
+      </section>
+
+      {/* Chapter title matches */}
+      {titleMatches.map((ch) => (
+        <QuranChapterResult key={`tm:${ch.cn}`} chapter={ch} primaryCode={primaryCode} />
+      ))}
+
+      {/* Verse results */}
+      <div className="space-y-2">
+        {allVerses.map((verse, i) => (
+          <QuranVerseResult
+            key={verse.vk ?? i}
+            verse={verse}
+            primaryCode={primaryCode}
+            showText={prefs.text}
+            showSubtitles={prefs.subtitles}
+            showFootnotes={prefs.footnotes}
+          />
+        ))}
       </div>
+
+      {results.info && (
+        <p className="text-xs text-muted-foreground text-center py-1">
+          {results.info.result_count} of {results.info.total ?? results.info.result_count} results
+        </p>
+      )}
     </div>
   )
 }

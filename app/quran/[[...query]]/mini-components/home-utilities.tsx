@@ -1,3 +1,5 @@
+'use client'
+
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import { Button } from '@/components/ui/button'
 import {
@@ -5,14 +7,21 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { ws } from '@/lib/wikisubmission-sdk'
 import { DownloadIcon, SparkleIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Fonts } from '@/constants/fonts'
 import Image from 'next/image'
+import { randomQuranRef } from '@/constants/quran-chapters'
+import { useRouter } from 'next/navigation'
 
-export default async function QuranUtilitiesRow() {
-  const randomVerse = await ws.Quran.randomVerse()
+export default function QuranUtilitiesRow() {
+  const router = useRouter()
+
+  function goToRandomVerse() {
+    const { chapter, verse } = randomQuranRef()
+    router.push(`/quran/${chapter}?verse=${verse}`)
+  }
+
   return (
     <main className="flex items-center justify-between rounded-2xl space-x-4 border border-muted/50 p-2">
       <div>
@@ -34,12 +43,8 @@ export default async function QuranUtilitiesRow() {
       <div className="flex justify-end space-x-1">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="icon-sm" asChild>
-              <Link
-                href={`/quran/${randomVerse.data ? `${randomVerse.data.chapter_number}?verse=${randomVerse.data.verse_number}` : `/quran/1?verse=1`}`}
-              >
-                <SparkleIcon className="size-4" />
-              </Link>
+            <Button variant="outline" size="icon-sm" onClick={goToRandomVerse}>
+              <SparkleIcon className="size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

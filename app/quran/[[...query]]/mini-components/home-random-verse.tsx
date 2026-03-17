@@ -1,18 +1,56 @@
-import { Fonts } from '@/constants/fonts'
-import { ws } from '@/lib/wikisubmission-sdk'
+'use client'
+
+import { useEffect, useState } from 'react'
 import { ChevronRight } from 'lucide-react'
+import { Spinner } from '@/components/ui/spinner'
+import { wsApi } from '@/src/api/client'
+import { randomQuranRef } from '@/constants/quran-chapters'
+import type { components } from '@/src/api/types.gen'
 
-export default async function HomeScreenRandomVerse() {
-  const randomVerse = await ws.Quran.randomVerse()
+type VerseData = components['schemas']['VerseData']
 
-  if (!randomVerse.data) {
-    return null
+export default function HomeScreenRandomVerse() {
+  const [verse, setVerse] = useState<VerseData | null>(null)
+  const [ref, setRef] = useState<{ chapter: number; verse: number } | null>(null)
+
+  useEffect(() => {
+    const r = randomQuranRef()
+    setRef(r)
+
+    wsApi
+      .GET('/quran', {
+        params: {
+          query: {
+            chapter_number_start: r.chapter,
+            verse_start: r.verse,
+            verse_end: r.verse,
+            langs: ['en', 'ar'],
+          },
+        },
+      })
+      .then(({ data }) => {
+        const v = data?.chapters?.[0]?.verses?.[0]
+        if (v) setVerse(v)
+      })
+  }, [])
+
+  if (!verse || !ref) {
+    return (
+      <main className="max-w-lg mx-auto">
+        <div className="bg-muted/50 p-4 rounded-2xl flex justify-center py-8">
+          <Spinner />
+        </div>
+      </main>
+    )
   }
+
+  const enText = verse.tr?.['en']?.tx
+  const arText = verse.tr?.['ar']?.tx
 
   return (
     <main className="max-w-lg mx-auto">
       <a
-        href={`/quran/${randomVerse.data.chapter_number}?verse=${randomVerse.data.verse_number}`}
+        href={`/quran/${ref.chapter}?verse=${ref.verse}`}
         className="hover:cursor-pointer"
       >
         <div className="bg-muted/50 p-4 rounded-2xl space-y-4">
@@ -21,19 +59,19 @@ export default async function HomeScreenRandomVerse() {
               <p className="text-xs text-muted-foreground tracking-wider">
                 RANDOM VERSE
               </p>
-
               <ChevronRight className="size-4 text-muted-foreground" />
             </div>
-            <p>
-              <strong>[{randomVerse.data.verse_id}]</strong>{' '}
-              {randomVerse.data.ws_quran_text.english}
-            </p>
+            {enText && (
+              <p>
+                <strong>[{verse.vk}]</strong> {enText}
+              </p>
+            )}
           </div>
-          <p
-            className={`text-xl leading-relaxed space-y-2 text-right ${Fonts.amiri.className}`}
-          >
-            {randomVerse.data.ws_quran_text.arabic}
-          </p>
+          {arText && (
+            <p className="text-xl leading-relaxed text-right font-arabic">
+              {arText}
+            </p>
+          )}
         </div>
       </a>
     </main>

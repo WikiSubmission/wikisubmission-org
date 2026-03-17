@@ -7,7 +7,6 @@ import HomeScreenMetrics from './mini-components/home-metrics'
 import QuranUtilitiesRow from './mini-components/home-utilities'
 import HomeScreenSuggestions from './mini-components/home-suggestions'
 import Image from 'next/image'
-import { ws } from '@/lib/wikisubmission-sdk'
 import { wsApiServer } from '@/src/api/server-client'
 import { Metadata } from 'next'
 
@@ -179,11 +178,8 @@ export async function generateMetadata({
     title = `${queryText} | Quran | WikiSubmission`
     description = `Verse ${queryText} of the Final Testament`
   } else {
-    const sdkParsed = ws.Quran.Methods.parseQuery(queryText)
-    if (sdkParsed.valid) {
-      title = `${sdkParsed.metadata.title} | Quran | WikiSubmission`
-      description = `Search results for "${queryText}" in the Final Testament`
-    }
+    title = `Search: ${queryText} | Quran | WikiSubmission`
+    description = `Search results for "${queryText}" in the Final Testament`
   }
 
   return { title, description, openGraph: { title, description, ...openGraph } }

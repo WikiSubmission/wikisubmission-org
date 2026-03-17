@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
-import { Loader2, ArrowUpRight } from 'lucide-react'
-import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
+import { QuranRef } from '@/components/quran-ref'
 
 type WordData = components['schemas']['WordData']
 
@@ -127,14 +127,10 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
                 <div className="flex justify-between items-center gap-4">
                   <div className="flex flex-col gap-1.5 flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <Link
-                        href={`/quran/${occ.chapter_number}?verse=${occ.verse_number}&word=${occ.word_index}`}
-                        className="text-[10px] font-bold text-violet-600/80 hover:text-violet-600 flex items-center gap-1 uppercase tracking-widest transition-colors"
-                        target="_blank"
-                      >
-                        {occ.verse_key} - WORD #{occ.word_index}
-                        <ArrowUpRight className="size-3" />
-                      </Link>
+                      <QuranRef reference={occ.verse_key} />
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                        WORD #{occ.word_index}
+                      </span>
                     </div>
                     <p className="text-sm font-semibold text-foreground leading-tight line-clamp-1 group-hover:text-violet-600 transition-colors">
                       {occ.english}

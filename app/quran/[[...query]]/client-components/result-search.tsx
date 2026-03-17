@@ -24,6 +24,7 @@ import {
   type VerseResult,
 } from '@/hooks/use-verse-search'
 import Link from 'next/link'
+import { QuranRef } from '@/components/quran-ref'
 
 // ─── New API renderers ────────────────────────────────────────────────────────
 
@@ -454,14 +455,10 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                         {wordMatches
                           .filter((r) => r.root_word === item.root_word)
                           .map((r) => (
-                            <Link
+                            <QuranRef
                               key={`root:${r.verse_id}:${r.word_index}`}
-                              href={`/quran/${r.chapter_number}?verse=${r.verse_number}&word=${r.word_index}`}
-                              target="_blank"
-                              className="hover:cursor-pointer underline text-violet-500"
-                            >
-                              {r.verse_id}
-                            </Link>
+                              reference={r.verse_id}
+                            />
                           ))}
                       </p>
                       {item.meanings && (
