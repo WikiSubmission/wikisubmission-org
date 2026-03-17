@@ -11,6 +11,17 @@
 import createClient from 'openapi-fetch'
 import type { paths } from './types.gen'
 
-export const wsApiServer = createClient<paths>({
-  baseUrl: process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL,
+const baseUrl = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL
+
+export const wsApiServer = createClient<paths>({ baseUrl })
+
+wsApiServer.use({
+  async onRequest({ request }) {
+    console.log(`[wsApiServer] ${request.method} ${request.url}`)
+    return undefined
+  },
+  async onResponse({ response }) {
+    console.log(`[wsApiServer] ${response.status} ${response.url}`)
+    return undefined
+  },
 })

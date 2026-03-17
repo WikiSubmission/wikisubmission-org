@@ -167,7 +167,12 @@ export async function generateMetadata({
     images: [{ url: '/brand-assets/logo-black.png', width: 64, height: 64 }],
   }
 
-  if (!queryText) return { title, description, openGraph: { title, description, ...openGraph } }
+  if (!queryText)
+    return {
+      title,
+      description,
+      openGraph: { title, description, ...openGraph },
+    }
 
   const parsed = parseQueryType(queryText)
 
