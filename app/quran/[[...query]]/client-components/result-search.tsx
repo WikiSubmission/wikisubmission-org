@@ -3,8 +3,6 @@
 import { ws } from '@/lib/wikisubmission-sdk'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { QueryResultSuccess } from 'wikisubmission-sdk'
-import type { Language } from 'wikisubmission-sdk'
 import { SearchHitWordByWord } from 'wikisubmission-sdk/lib/quran/v1/query-result'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsTrigger, TabsContent, TabsList } from '@/components/ui/tabs'
@@ -25,27 +23,6 @@ import {
   type ChapterResult,
   type VerseResult,
 } from '@/hooks/use-verse-search'
-import type { LangCode } from '@/hooks/use-quran-preferences'
-
-// Maps ISO lang codes back to SDK language names for legacy ws.Quran.query() calls
-const CODE_TO_SDK_LANG: Record<LangCode, Language> = {
-  en: 'english',
-  ar: 'arabic',
-  fr: 'french',
-  de: 'german',
-  tr: 'turkish',
-  id: 'bahasa',
-  fa: 'persian',
-  ta: 'tamil',
-  sv: 'swedish',
-  ru: 'russian',
-  bn: 'bengali',
-  es: 'spanish',
-  ur: 'urdu',
-  xl: 'transliterated',
-}
-import { SearchItemWord } from '../mini-components/search-item-word'
-import { StandardResult } from './result-standard'
 import Link from 'next/link'
 
 // ─── New API renderers ────────────────────────────────────────────────────────
@@ -163,10 +140,6 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const prefs = useQuranPreferences()
   const verseSearch = useVerseSearch()
 
-  // SDK path: chapter / multiple_verses direct lookup
-  const [sdkResult, setSdkResult] = useState<QueryResultSuccess | null>(null)
-  const [sdkLoading, setSdkLoading] = useState(false)
-
   // Word search (still SDK — backend word scope is a different feature)
   const [searchTab, setSearchTab] = useState<'all' | 'words'>('all')
   const [wordMatches, setWordMatches] = useState<SearchHitWordByWord[]>([])
@@ -189,67 +162,24 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
     if (!searchQuery) return
 
-    setSdkResult(null)
     verseSearch.reset()
     setWordMatches([])
     setSearchTab('all')
 
-    const parsed = ws.Quran.Methods.parseQuery(searchQuery)
-
-    if (parsed.valid && parsed.type === 'verse') {
-      // Direct verse → redirect to reader
-      ws.Quran.query(searchQuery, {
-        language: CODE_TO_SDK_LANG[prefs.primaryLanguage],
-        strategy: 'default',
-        highlight: false,
-        normalizeGodCasing: true,
-        adjustments: {
-          index: true,
-          chapters: false,
-          subtitles: false,
-          footnotes: false,
-          wordByWord: false,
-        },
-      }).then((result) => {
-        if (result.status === 'success' && result.type === 'verse') {
-          router.replace(
-            `/quran/${result.data[0].chapter_number}?verse=${result.data[0].verse_number}`,
-            { scroll: false }
-          )
-        }
-      })
-    } else if (
-      parsed.valid &&
-      (parsed.type === 'chapter' || parsed.type === 'multiple_verses')
-    ) {
-      // Direct chapter/range → SDK
-      setSdkLoading(true)
-      ws.Quran.query(searchQuery, {
-        language: CODE_TO_SDK_LANG[prefs.primaryLanguage],
-        strategy: 'default',
-        highlight: false,
-        normalizeGodCasing: true,
-        adjustments: {
-          index: true,
-          chapters: true,
-          subtitles: true,
-          footnotes: true,
-          wordByWord: false,
-        },
-      }).then((result) => {
-        if (result.status === 'success') setSdkResult(result)
-        else toast.error(decodeURIComponent(result.error))
-        setSdkLoading(false)
-      })
-    } else {
-      // Text search → new API
-      verseSearch.search(searchQuery, {
-        primaryLang: prefs.primaryLanguage,
-        secondaryLang: prefs.secondaryLanguage,
-        includeArabic: prefs.arabic,
-        strict,
-      })
+    // Direct verse ref (e.g. "2:255") → redirect to chapter reader
+    if (/^\d+:\d+$/.test(searchQuery)) {
+      const [cn, vn] = searchQuery.split(':')
+      router.replace(`/quran/${cn}?verse=${vn}`, { scroll: false })
+      return
     }
+
+    // Text search → new API
+    verseSearch.search(searchQuery, {
+      primaryLang: prefs.primaryLanguage,
+      secondaryLang: prefs.secondaryLanguage,
+      includeArabic: prefs.arabic,
+      strict,
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, searchParams])
 
@@ -302,11 +232,11 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   }, [forceTab, runWordByWordQuery])
 
   // ── Derived ──────────────────────────────────────────────────────────────────
-  const primaryCode = LANG_TO_CODE[prefs.primaryLanguage] ?? 'en'
+  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const titleMatches = verseSearch.data?.chapters?.filter((ch) => ch.tm) ?? []
   const allVerses =
     verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
-  const isLoading = sdkLoading || (verseSearch.loading && !verseSearch.data)
+  const isLoading = verseSearch.loading && !verseSearch.data
 
   // ── Render ───────────────────────────────────────────────────────────────────
 
@@ -316,11 +246,6 @@ export default function SearchResult({ props }: { props: { query: string } }) {
         <Spinner />
       </div>
     )
-  }
-
-  // Chapter / verse direct lookup (SDK)
-  if (sdkResult) {
-    return <StandardResult props={{ query: searchQuery, data: sdkResult }} />
   }
 
   // Text search results (new API)
@@ -429,17 +354,20 @@ export default function SearchResult({ props }: { props: { query: string } }) {
               />
             ))}
 
-            {allVerses.map((verse, index) => (
-              <SearchResultVerse
-                key={`${index}-${verse.vk}`}
-                verse={verse}
-                primaryCode={primaryCode}
-                showText={prefs.text}
-                showSubtitles={prefs.subtitles}
-                showFootnotes={prefs.footnotes}
-                showArabic={prefs.arabic}
-              />
-            ))}
+            {/* Flat verse list — no virtualizer to avoid scroll glitching */}
+            <div className="space-y-2">
+              {allVerses.map((verse, index) => (
+                <SearchResultVerse
+                  key={verse.vk ?? index}
+                  verse={verse}
+                  primaryCode={primaryCode}
+                  showText={prefs.text}
+                  showSubtitles={prefs.subtitles}
+                  showFootnotes={prefs.footnotes}
+                  showArabic={prefs.arabic}
+                />
+              ))}
+            </div>
 
             {verseSearch.loading && (
               <div className="flex justify-center py-4">
@@ -546,11 +474,6 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 </div>
               )}
 
-              {wordMatches.map((r) => (
-                <div key={`word_by_word:${r.index}`}>
-                  <SearchItemWord verse={r} />
-                </div>
-              ))}
             </div>
           </TabsContent>
         </Tabs>

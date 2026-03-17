@@ -11,7 +11,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** fetches all supported languages with metadata (code, name, direction) */
+        /**
+         * List supported languages
+         * @description Returns all languages supported by the API, including code, name, and text direction.
+         */
         get: operations["getLanguages"];
         put?: never;
         post?: never;
@@ -312,11 +315,9 @@ export interface components {
             /** @description text/content */
             tx?: string;
         };
-        LanguageEntry: {
+        Language: {
             id?: number;
-            /** @description ISO 639-1 language code, e.g. "en", "ar" */
             code?: string;
-            /** @description Human-readable name, e.g. "English" */
             name?: string;
             /** @enum {string} */
             direction?: "ltr" | "rtl";
@@ -426,7 +427,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LanguageEntry"][];
+                    "application/json": components["schemas"]["Language"][];
                 };
             };
             500: components["responses"]["InternalServerErrror"];

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { components } from '@/src/api/types.gen'
 
-export type LanguageEntry = components['schemas']['LanguageEntry']
+export type LanguageEntry = components['schemas']['Language']
 
 type LanguagesStore = {
   languages: LanguageEntry[]

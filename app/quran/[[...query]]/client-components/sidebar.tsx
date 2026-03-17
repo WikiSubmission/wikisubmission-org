@@ -211,7 +211,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                         asChild
                         className={`h-auto py-2 px-2.5 hover:bg-accent/50 ${currentChapter == `${chapter.chapter_number}` ? 'bg-secondary/50' : 'hover:bg-accent/50'}`}
                       >
-                        <Link href={`/quran/${chapter.chapter_number}`}>
+                        <Link href={`/quran/${chapter.chapter_number}`} prefetch>
                           <div className="flex items-start gap-2.5 w-full min-w-0">
                             <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold mt-0.5">
                               {chapter.chapter_number}
