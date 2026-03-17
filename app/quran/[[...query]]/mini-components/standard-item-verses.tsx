@@ -6,13 +6,33 @@ import {
   QueryResultVerse,
 } from 'wikisubmission-sdk/lib/quran/v1/query-result'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import type { LangCode } from '@/hooks/use-quran-preferences'
+import { useLanguagesStore } from '@/hooks/use-languages-store'
 import { useSearchParams } from 'next/navigation'
-import { isRtlLanguage } from '@/lib/is-rtl-language'
 import { useEffect, useState } from 'react'
 import { ArabicDetailed } from './arabic-detailed'
 import { useQuranPlayer, QuranVerse } from '@/lib/quran-audio-context'
 import { Play, Pause, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+
+// Temporary: maps ISO lang codes to SDK language names for ws_quran_text / ws_quran_subtitles / ws_quran_footnotes keys.
+// Remove once result-standard.tsx is migrated to the ws-backend.
+const CODE_TO_SDK_LANG: Record<LangCode, string> = {
+  en: 'english',
+  ar: 'arabic',
+  fr: 'french',
+  de: 'german',
+  tr: 'turkish',
+  id: 'bahasa',
+  fa: 'persian',
+  ta: 'tamil',
+  sv: 'swedish',
+  ru: 'russian',
+  bn: 'bengali',
+  es: 'spanish',
+  ur: 'urdu',
+  xl: 'transliterated',
+}
 
 export function StandardItemVerses({
   props,
@@ -22,6 +42,7 @@ export function StandardItemVerses({
   }
 }) {
   const quranPreferences = useQuranPreferences()
+  const { isRtl } = useLanguagesStore()
   const verseSearchParam = useSearchParams().get('verse')
   const [isHighlighted, setIsHighlighted] = useState(false)
   const {
@@ -31,6 +52,11 @@ export function StandardItemVerses({
     isBuffering,
     togglePlayPause,
   } = useQuranPlayer()
+
+  const primarySdkLang = CODE_TO_SDK_LANG[quranPreferences.primaryLanguage]
+  const secondarySdkLang = quranPreferences.secondaryLanguage
+    ? CODE_TO_SDK_LANG[quranPreferences.secondaryLanguage]
+    : undefined
 
   useEffect(() => {
     if (!verseSearchParam) return
@@ -69,9 +95,9 @@ export function StandardItemVerses({
                 <div className="flex justify-center">
                   <p className="text-violet-600 text-xs font-bold text-center">
                     {
-                      i.ws_quran_subtitles[
-                        quranPreferences.primaryLanguage in i.ws_quran_subtitles
-                          ? (quranPreferences.primaryLanguage as keyof typeof i.ws_quran_subtitles)
+                      (i.ws_quran_subtitles as Record<string, string>)[
+                        primarySdkLang in i.ws_quran_subtitles
+                          ? primarySdkLang
                           : 'english'
                       ]
                     }
@@ -120,18 +146,18 @@ export function StandardItemVerses({
                 {/* Right Column: Verses & Translations */}
                 <div className="flex-1 min-w-0 space-y-2">
                   <div
-                    className={`${isRtlLanguage(quranPreferences.primaryLanguage) ? 'text-right' : ''}`}
+                    className={`${isRtl(quranPreferences.primaryLanguage) ? 'text-right' : ''}`}
                   >
                     <p className="text-lg leading-relaxed text-foreground select-text font-medium">
-                      {i.ws_quran_text[quranPreferences.primaryLanguage]}
+                      {(i.ws_quran_text as Record<string, string>)[primarySdkLang]}
                     </p>
                   </div>
 
-                  {quranPreferences.secondaryLanguage && (
+                  {secondarySdkLang && (
                     <p
-                      className={`text-muted-foreground leading-relaxed italic ${isRtlLanguage(quranPreferences.secondaryLanguage) ? 'text-right' : ''}`}
+                      className={`text-muted-foreground leading-relaxed italic ${isRtl(quranPreferences.secondaryLanguage ?? '') ? 'text-right' : ''}`}
                     >
-                      {i.ws_quran_text[quranPreferences.secondaryLanguage]}
+                      {(i.ws_quran_text as Record<string, string>)[secondarySdkLang]}
                     </p>
                   )}
 
@@ -143,20 +169,19 @@ export function StandardItemVerses({
 
                   {quranPreferences.transliteration && (
                     <p className="text-violet-600/80 font-medium italic text-sm">
-                      {i.ws_quran_text.transliterated}
+                      {(i.ws_quran_text as Record<string, string>)['transliterated']}
                     </p>
                   )}
 
                   {i.ws_quran_footnotes && quranPreferences.footnotes && (
                     <div>
                       <p
-                        className={`text-sm text-muted-foreground/80 leading-relaxed italic ${isRtlLanguage(quranPreferences.primaryLanguage) ? 'text-right' : 'text-left'}`}
+                        className={`text-sm text-muted-foreground/80 leading-relaxed italic ${isRtl(quranPreferences.primaryLanguage) ? 'text-right' : 'text-left'}`}
                       >
                         {
-                          i.ws_quran_footnotes[
-                            quranPreferences.primaryLanguage in
-                            i.ws_quran_footnotes
-                              ? (quranPreferences.primaryLanguage as keyof typeof i.ws_quran_footnotes)
+                          (i.ws_quran_footnotes as Record<string, string>)[
+                            primarySdkLang in i.ws_quran_footnotes
+                              ? primarySdkLang
                               : 'english'
                           ]
                         }

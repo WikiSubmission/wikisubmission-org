@@ -5,33 +5,35 @@ import {
 } from '@/components/ui/sidebar'
 import { QuranSidebar } from './client-components/sidebar'
 import { PageSwitcher } from '@/components/page-switcher'
-import { ws } from '@/lib/wikisubmission-sdk'
 import QuranSearchbar from './client-components/searchbar'
 import QuranSettings from './client-components/settings'
 import MetricsCollector from './mini-components/metrics-collector'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { QuranPlayer } from '@/app/quran/[[...query]]/client-components/now-playing-bar'
-// import { wsApi } from '@/src/api/client'
+import { wsApiServer } from '@/src/api/server-client'
+import { LanguagesInit } from '@/components/languages-init'
 
 export default async function QuranLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // const { data, error } = await wsApi.GET('')
-  const chaptersResult = await ws.supabase.from('ws_quran_chapters').select('*')
-  const appendicesResult = await ws.supabase
-    .from('ws_quran_appendices')
-    .select('*')
+  const [chaptersRes, appendicesRes, languagesRes] = await Promise.all([
+    wsApiServer.GET('/chapters', { params: { query: { lang: 'en' } } }),
+    wsApiServer.GET('/appendices', { params: { query: { lang: 'en' } } }),
+    wsApiServer.GET('/languages'),
+  ])
 
-  if (chaptersResult.data && appendicesResult.data) {
+  if (chaptersRes.data && appendicesRes.data) {
     return (
       <QuranPlayerProvider>
         <SidebarProvider>
+          {/* Seed language direction data into the client Zustand store */}
+          <LanguagesInit languages={languagesRes.data ?? []} />
           {/* Sidebar (left space) */}
           <QuranSidebar
-            chapters={chaptersResult.data}
-            appendices={appendicesResult.data}
+            chapters={chaptersRes.data}
+            appendices={appendicesRes.data}
           />
           {/* Main content (right space) */}
           <SidebarInset>

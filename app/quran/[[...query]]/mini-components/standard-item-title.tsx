@@ -6,6 +6,26 @@ import {
   QueryResultVerse,
 } from 'wikisubmission-sdk/lib/quran/v1/query-result'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import type { LangCode } from '@/hooks/use-quran-preferences'
+
+// Temporary: maps ISO lang codes to ws_quran_chapters Supabase column names.
+// Remove once result-standard.tsx is migrated to the ws-backend.
+const CODE_TO_TITLE_FIELD: Record<LangCode, string> = {
+  en: 'title_english',
+  ar: 'title_arabic',
+  fr: 'title_french',
+  de: 'title_german',
+  tr: 'title_turkish',
+  id: 'title_bahasa',
+  fa: 'title_persian',
+  ta: 'title_tamil',
+  sv: 'title_swedish',
+  ru: 'title_russian',
+  bn: 'title_bengali',
+  es: 'title_spanish',
+  ur: 'title_urdu',
+  xl: 'title_transliterated',
+}
 
 export function StandardItemTitle({
   props,
@@ -15,6 +35,8 @@ export function StandardItemTitle({
   }
 }) {
   const quranPreferences = useQuranPreferences()
+  const titleField = CODE_TO_TITLE_FIELD[quranPreferences.primaryLanguage] ?? 'title_english'
+
   return (
     <main className="space-y-2">
       <section>
@@ -22,7 +44,7 @@ export function StandardItemTitle({
           <div className="flex flex-col">
             <h1 className="text-xl font-bold pl-1">
               {props.data.metadata.allMatchesInSameChapter
-                ? `Sura ${props.data.data[0].chapter_number}, ${props.data.data[0].ws_quran_chapters[`title_${quranPreferences.primaryLanguage}`]}`
+                ? `Sura ${props.data.data[0].chapter_number}, ${(props.data.data[0].ws_quran_chapters as Record<string, string>)[titleField]}`
                 : props.data.metadata.formattedChapterTitle}
             </h1>
             {props.data.metadata.allMatchesInSameChapter ? (

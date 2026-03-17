@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Book, Search, ScrollText } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import type { Database } from '@/types/supabase-types'
+import type { components } from '@/src/api/types.gen'
 import {
   Collapsible,
   CollapsibleContent,
@@ -27,9 +27,12 @@ import useLocalStorage from '@/hooks/use-local-storage'
 import { Button } from '@/components/ui/button'
 import { useParams, useSearchParams } from 'next/navigation'
 
+type Chapter = components['schemas']['Chapter']
+type Appendix = components['schemas']['Appendix']
+
 type QuranSidebarProps = {
-  chapters: Database['public']['Tables']['ws_quran_chapters']['Row'][]
-  appendices: Database['public']['Tables']['ws_quran_appendices']['Row'][]
+  chapters: Chapter[]
+  appendices: Appendix[]
 }
 
 export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
@@ -52,15 +55,10 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
   const searchParams = useSearchParams()
 
   const filteredChapters = chapters
-    .filter((chapter) => chapter != null) // Add null check
+    .filter((chapter) => chapter != null)
     .filter(
       (chapter) =>
-        chapter.title_english
-          ?.toLowerCase()
-          .includes(chapterSearchQuery.toLowerCase()) ||
-        chapter.title_transliterated
-          ?.toLowerCase()
-          .includes(chapterSearchQuery.toLowerCase()) ||
+        chapter.title?.toLowerCase().includes(chapterSearchQuery.toLowerCase()) ||
         chapter.chapter_number?.toString().includes(chapterSearchQuery)
     )
     .sort((a, b) => {
@@ -71,28 +69,20 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
     })
 
   const filteredAppendices = appendices
-    .filter((appendix) => appendix != null) // Add null check
+    .filter((appendix) => appendix != null)
     .filter(
       (appendix) =>
-        appendix.appendix_number?.toString().includes(appendixSearchQuery) ||
-        appendix.appendix_title
-          ?.toLowerCase()
-          .includes(appendixSearchQuery.toLowerCase())
+        appendix.code?.toString().includes(appendixSearchQuery) ||
+        appendix.title?.toLowerCase().includes(appendixSearchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      const aNumberMatch = a.appendix_number
-        ?.toString()
-        .includes(appendixSearchQuery)
-      const bNumberMatch = b.appendix_number
-        ?.toString()
-        .includes(appendixSearchQuery)
+      const aNumberMatch = a.code?.toString().includes(appendixSearchQuery)
+      const bNumberMatch = b.code?.toString().includes(appendixSearchQuery)
 
-      // Prioritize number matches over title matches
       if (aNumberMatch && !bNumberMatch) return -1
       if (!aNumberMatch && bNumberMatch) return 1
 
-      // If both match the same way, maintain original order
-      return (a.appendix_number || 0) - (b.appendix_number || 0)
+      return (a.code || 0) - (b.code || 0)
     })
 
   return (
@@ -229,7 +219,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                             <div className="flex-1 min-w-0 flex flex-col">
                               <div className="flex justify-between items-center gap-1">
                                 <span className="text-xs font-medium break-words">
-                                  {chapter.title_english}
+                                  {chapter.title}
                                 </span>
                                 {orderType === 'revelation' && (
                                   <span className="text-xs font-bold flex-shrink-0">
@@ -238,11 +228,8 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                                 )}
                               </div>
                               <div className="flex justify-between items-center gap-1">
-                                <span className="text-xs text-muted-foreground break-words">
-                                  {chapter.title_transliterated}
-                                </span>
                                 <span className="text-xs text-muted-foreground/50 flex-shrink-0">
-                                  {chapter.chapter_verses}
+                                  {chapter.verse_count}
                                 </span>
                               </div>
                             </div>
@@ -304,22 +291,22 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
               <SidebarGroupContent>
                 <SidebarMenu className="gap-0.5">
                   {filteredAppendices.map((appendix) => (
-                    <SidebarMenuItem key={appendix.appendix_number}>
+                    <SidebarMenuItem key={appendix.code}>
                       <SidebarMenuButton
                         asChild
                         className="h-auto py-2 px-2.5 hover:bg-accent/50"
                       >
                         <Link
-                          href={`https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${appendix.appendix_number}`}
+                          href={`https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${appendix.code}`}
                           target="_blank"
                         >
                           <div className="flex items-center gap-2.5 w-full min-w-0">
                             <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">
-                              {appendix.appendix_number}
+                              {appendix.code}
                             </span>
                             <div className="flex-1 min-w-0">
                               <span className="text-xs break-words">
-                                {appendix.appendix_title}
+                                {appendix.title}
                               </span>
                             </div>
                           </div>

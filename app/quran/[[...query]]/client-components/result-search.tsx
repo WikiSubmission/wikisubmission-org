@@ -4,6 +4,7 @@ import { ws } from '@/lib/wikisubmission-sdk'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { QueryResultSuccess } from 'wikisubmission-sdk'
+import type { Language } from 'wikisubmission-sdk'
 import { SearchHitWordByWord } from 'wikisubmission-sdk/lib/quran/v1/query-result'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsTrigger, TabsContent, TabsList } from '@/components/ui/tabs'
@@ -21,10 +22,28 @@ import { toast } from 'sonner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import {
   useVerseSearch,
-  LANG_TO_CODE,
   type ChapterResult,
   type VerseResult,
 } from '@/hooks/use-verse-search'
+import type { LangCode } from '@/hooks/use-quran-preferences'
+
+// Maps ISO lang codes back to SDK language names for legacy ws.Quran.query() calls
+const CODE_TO_SDK_LANG: Record<LangCode, Language> = {
+  en: 'english',
+  ar: 'arabic',
+  fr: 'french',
+  de: 'german',
+  tr: 'turkish',
+  id: 'bahasa',
+  fa: 'persian',
+  ta: 'tamil',
+  sv: 'swedish',
+  ru: 'russian',
+  bn: 'bengali',
+  es: 'spanish',
+  ur: 'urdu',
+  xl: 'transliterated',
+}
 import { SearchItemWord } from '../mini-components/search-item-word'
 import { StandardResult } from './result-standard'
 import Link from 'next/link'
@@ -180,7 +199,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     if (parsed.valid && parsed.type === 'verse') {
       // Direct verse → redirect to reader
       ws.Quran.query(searchQuery, {
-        language: prefs.primaryLanguage,
+        language: CODE_TO_SDK_LANG[prefs.primaryLanguage],
         strategy: 'default',
         highlight: false,
         normalizeGodCasing: true,
@@ -206,7 +225,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       // Direct chapter/range → SDK
       setSdkLoading(true)
       ws.Quran.query(searchQuery, {
-        language: prefs.primaryLanguage,
+        language: CODE_TO_SDK_LANG[prefs.primaryLanguage],
         strategy: 'default',
         highlight: false,
         normalizeGodCasing: true,

@@ -1,19 +1,46 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ws } from '@/lib/wikisubmission-sdk'
+import { wsApi } from '@/src/api/client'
+import type { components } from '@/src/api/types.gen'
 import { Loader2, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 
+type WordData = components['schemas']['WordData']
+
 interface WordOccurrence {
-  verse_id: string
+  verse_key: string        // "1:7"
   chapter_number: number
   verse_number: number
   word_index: number
   arabic: string
   english: string
-  transliterated: string
-  root_word: string
+  root: string
+}
+
+/** Flattens a QuranResponse (chapters → verses → words) into a flat list of occurrences */
+function flattenWords(
+  data: components['schemas']['QuranResponse']
+): WordOccurrence[] {
+  const result: WordOccurrence[] = []
+  for (const chapter of data.chapters ?? []) {
+    for (const verse of chapter.verses ?? []) {
+      const [, verseNumStr] = (verse.vk ?? '').split(':')
+      const verseNumber = parseInt(verseNumStr ?? '0', 10)
+      for (const word of (verse.w ?? []) as WordData[]) {
+        result.push({
+          verse_key: verse.vk ?? '',
+          chapter_number: chapter.cn ?? 0,
+          verse_number: verseNumber,
+          word_index: word.wi ?? 0,
+          arabic: word.tx?.['ar'] ?? '',
+          english: word.m ?? word.tx?.['en'] ?? '',
+          root: word.r ?? '',
+        })
+      }
+    }
+  }
+  return result
 }
 
 export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
@@ -21,29 +48,29 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchOccurrences() {
-      setLoading(true)
-      try {
-        const { data, error } = await ws.supabase
-          .from('ws_quran_word_by_word')
-          .select('*')
-          .eq('root_word', rootWord)
-          .order('chapter_number', { ascending: true })
-          .order('verse_number', { ascending: true })
-          .order('word_index', { ascending: true })
+    if (!rootWord) return
 
-        if (error) throw error
-        setOccurrences(data || [])
-      } catch (err) {
-        console.error('Error fetching root word occurrences:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
+    setLoading(true)
 
-    if (rootWord) {
-      fetchOccurrences()
-    }
+    wsApi
+      .GET('/search', {
+        params: {
+          query: {
+            q: rootWord,
+            scope: 'words',
+            include_words: true,
+            include_root: true,
+            include_meaning: true,
+            word_langs: ['ar', 'en'],
+            limit: 100,
+          },
+        },
+      })
+      .then(({ data }) => {
+        setOccurrences(data ? flattenWords(data) : [])
+      })
+      .catch(() => setOccurrences([]))
+      .finally(() => setLoading(false))
   }, [rootWord])
 
   if (loading) {
@@ -75,7 +102,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
                       className="text-[10px] font-bold text-violet-600/80 hover:text-violet-600 flex items-center gap-1 uppercase tracking-widest transition-colors"
                       target="_blank"
                     >
-                      {occ.verse_id} - WORD #{occ.word_index}
+                      {occ.verse_key} - WORD #{occ.word_index}
                       <ArrowUpRight className="size-3" />
                     </Link>
                   </div>
@@ -83,7 +110,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
                     {occ.english}
                   </p>
                   <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter italic">
-                    {occ.transliterated}
+                    {occ.root}
                   </p>
                 </div>
                 <div className="text-3xl font-arabic text-right text-foreground group-hover:text-violet-600 transition-colors shrink-0">

@@ -4,6 +4,63 @@
  */
 
 export interface paths {
+    "/languages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** fetches all supported languages with metadata (code, name, direction) */
+        get: operations["getLanguages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chapters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * fetches chapter Metadata
+         * @description Fetches list of quranic chapter titles, with Metadata and multilingual support
+         */
+        get: operations["getChapters"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/appendices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * fetches appendix Metadata
+         * @description Fetches list of appendices, with Metadata and multilingual support
+         */
+        get: operations["getAppendices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/quran": {
         parameters: {
             query?: never;
@@ -255,6 +312,28 @@ export interface components {
             /** @description text/content */
             tx?: string;
         };
+        LanguageEntry: {
+            id?: number;
+            /** @description ISO 639-1 language code, e.g. "en", "ar" */
+            code?: string;
+            /** @description Human-readable name, e.g. "English" */
+            name?: string;
+            /** @enum {string} */
+            direction?: "ltr" | "rtl";
+        };
+        ChapterMetadata: components["schemas"]["Chapter"][];
+        Chapter: {
+            chapter_number?: number;
+            verse_count?: number;
+            revelation_order?: number;
+            title?: string;
+        };
+        AppendixMetadata: components["schemas"]["Appendix"][];
+        Appendix: {
+            code?: number;
+            title?: string;
+            snippet?: string;
+        };
     };
     responses: {
         /** @description The request could not be completed due to a conflict with the current state of the resource. Resolve the conflict and try again. */
@@ -332,6 +411,81 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getLanguages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LanguageEntry"][];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getChapters: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChapterMetadata"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalServerErrror"];
+            501: components["responses"]["NotImplementedError"];
+        };
+    };
+    getAppendices: {
+        parameters: {
+            query?: {
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppendixMetadata"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalServerErrror"];
+            501: components["responses"]["NotImplementedError"];
+        };
+    };
     getQuran: {
         parameters: {
             query: {

@@ -23,6 +23,83 @@ tags:
     description: Audit logs and version tracking
 
 paths:
+  /languages:
+    get:
+      tags: [Reader]
+      operationId: getLanguages
+      summary: List supported languages
+      description: Returns all languages supported by the API, including code, name, and text direction.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Language'
+        "500":
+          $ref: "#/components/responses/InternalServerErrror"
+
+  /chapters:
+    get:
+      tags: [Reader]
+      operationId: getChapters
+      summary: fetches chapter Metadata
+      description: Fetches list of quranic chapter titles, with Metadata and multilingual support
+      parameters:
+        - name: lang 
+          in: query
+          required: false 
+          schema: 
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterMetadata'
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerErrror"
+        '501':
+          $ref: '#/components/responses/NotImplementedError'
+  /appendices:
+    get:
+      tags: [Reader]
+      operationId: getAppendices
+      summary: fetches appendix Metadata
+      description: Fetches list of appendices, with Metadata and multilingual support
+      parameters:
+        - name: lang 
+          in: query
+          required: false 
+          schema: 
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppendixMetadata'
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerErrror"
+        '501':
+          $ref: '#/components/responses/NotImplementedError'
+        
   /quran:
     get:
       tags: [Reader]
@@ -521,6 +598,35 @@ components:
         vi: { type: integer, description: "verse_id" }
         li: { type: integer, description: "lang_id" }
         tx: { type: string, description: "text/content" }
+    Language:
+      type: object
+      properties:
+        id:        { type: integer }
+        code:      { type: string }
+        name:      { type: string }
+        direction: { type: string, enum: [ltr, rtl] }
+
+    ChapterMetadata:
+      type: array
+      items: 
+        $ref: '#/components/schemas/Chapter'
+    Chapter:
+      type: object
+      properties:
+        chapter_number: { type: integer}
+        verse_count: {type: integer}
+        revelation_order: {type: integer}
+        title: {type: string}
+        
+    AppendixMetadata:
+      type: array
+      items: 
+        $ref: '#/components/schemas/Appendix'
+    Appendix:
+      properties:
+        code: { type: integer }
+        title: { type: string }
+        snippet:  {type: string }
 
   responses:
     Conflict:

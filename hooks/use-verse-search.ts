@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react'
 import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
-import type { Language } from 'wikisubmission-sdk'
+import type { LangCode } from '@/hooks/use-quran-preferences'
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -13,8 +13,8 @@ export type VerseResult = components['schemas']['VerseData']
 export type TranslationResult = components['schemas']['TranslationContent']
 
 export type VerseSearchOptions = {
-  primaryLang: Language
-  secondaryLang?: Language
+  primaryLang: LangCode
+  secondaryLang?: LangCode
   includeArabic: boolean
   /** Wraps multi-word queries in quotes for phrase search */
   strict: boolean
@@ -32,26 +32,6 @@ export type UseVerseSearchReturn = {
   search: (query: string, opts: VerseSearchOptions) => Promise<void>
   loadMore: () => Promise<void>
   reset: () => void
-}
-
-// ─── Language mapping ─────────────────────────────────────────────────────────
-
-/** Maps SDK Language values to backend lang codes */
-export const LANG_TO_CODE: Partial<Record<Language, string>> = {
-  english: 'en',
-  arabic: 'ar',
-  french: 'fr',
-  german: 'de',
-  turkish: 'tr',
-  bahasa: 'id',
-  persian: 'fa',
-  tamil: 'ta',
-  swedish: 'sv',
-  russian: 'ru',
-  bengali: 'bn',
-  spanish: 'es',
-  urdu: 'ur',
-  // 'transliterated' has no backend lang code — omitted intentionally
 }
 
 export const SEARCH_LIMIT = 20
@@ -83,14 +63,13 @@ const INITIAL_STATE: State = {
 export function useVerseSearch(): UseVerseSearchReturn {
   const [state, setState] = useState<State>(INITIAL_STATE)
 
+  /** Builds the langs array for the API, filtering out xl (transliterated — no API equivalent) */
   function buildLangs(opts: VerseSearchOptions): string[] {
     const langs: string[] = []
-    const primary = LANG_TO_CODE[opts.primaryLang]
-    if (primary) langs.push(primary)
+    if (opts.primaryLang !== 'xl') langs.push(opts.primaryLang)
     if (opts.includeArabic && !langs.includes('ar')) langs.push('ar')
-    if (opts.secondaryLang) {
-      const secondary = LANG_TO_CODE[opts.secondaryLang]
-      if (secondary && !langs.includes(secondary)) langs.push(secondary)
+    if (opts.secondaryLang && opts.secondaryLang !== 'xl') {
+      if (!langs.includes(opts.secondaryLang)) langs.push(opts.secondaryLang)
     }
     return langs.length > 0 ? langs : ['en']
   }
