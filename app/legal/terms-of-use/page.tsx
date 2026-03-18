@@ -3,7 +3,7 @@ import Link from 'next/link'
 import fs from 'fs'
 import path from 'path'
 import { About } from '@/constants/about'
-import ReactMarkdown from 'react-markdown'
+import { LegalMarkdown } from '@/components/legal-markdown'
 
 export const metadata = {
   title: 'Terms of Use - WikiSubmission',
@@ -50,13 +50,13 @@ export default function TermsOfService() {
         <h1 className="text-3xl font-semibold">Terms of Use</h1>
       </section>
 
-      <section className="max-w-2xl text-left prose prose-sm dark:prose-invert">
-        <ReactMarkdown>{content}</ReactMarkdown>
+      <section className="max-w-2xl text-left space-y-4">
+        <LegalMarkdown content={content} />
 
-        <h2>Questions &amp; Contact Information</h2>
-        <p>
+        <h2 className="text-lg font-semibold mb-2 mt-6">Questions &amp; Contact Information</h2>
+        <p className="text-sm text-muted-foreground">
           Questions or comments about the Service may be directed to us at{' '}
-          <a href={`mailto:${About.email}`}>
+          <a href={`mailto:${About.email}`} className="text-primary hover:underline">
             <strong>{About.email}</strong>
           </a>
           .
