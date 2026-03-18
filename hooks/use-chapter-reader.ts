@@ -108,7 +108,7 @@ export function useChapterReader(
     async (opts: ChapterReaderOptions) => {
       setState((prev) => ({ ...prev, loading: true, error: null }))
 
-      const result = await fetchVerses(1, opts)
+      const result = await fetchVerses(0, opts)
 
       if (result.error || !result.verses) {
         setState((prev) => ({
@@ -125,7 +125,7 @@ export function useChapterReader(
         verseCount: result.verses.length,
         loading: false,
         error: null,
-        lastVerseEnd: PAGE_SIZE,
+        lastVerseEnd: PAGE_SIZE - 1,
         reachedEnd: result.reachedEnd ?? false,
         lastOpts: opts,
       })
