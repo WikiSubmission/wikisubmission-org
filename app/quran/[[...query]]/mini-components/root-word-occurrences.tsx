@@ -52,8 +52,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
 
   useEffect(() => {
     if (!rootWord) return
-    setLoading(true)
-    setOccurrences([])
+
     wsApi
       .GET('/search', {
         params: {
@@ -72,9 +71,12 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
       .then(({ data }) => {
         setOccurrences(data ? flattenWords(data) : [])
         setTotal(data?.info?.total ?? 0)
+        setLoading(false)
       })
-      .catch(() => setOccurrences([]))
-      .finally(() => setLoading(false))
+      .catch(() => {
+        setOccurrences([])
+        setLoading(false)
+      })
   }, [rootWord])
 
   const loadMore = () => {
