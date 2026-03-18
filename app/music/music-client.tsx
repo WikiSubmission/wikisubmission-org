@@ -22,8 +22,10 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useSearchParams } from 'next/navigation'
 import { AppPrompt } from '@/app/music/components/app-prompt'
+import { useTranslations } from 'next-intl'
 
 export default function MusicClient() {
+  const t = useTranslations('music')
   const {
     allTracks,
     categories,
@@ -109,7 +111,7 @@ export default function MusicClient() {
           >
             <Button variant="outline" size="sm">
               <PlusSquare />
-              Submit Track
+              {t('submitTrack')}
             </Button>
           </Link>
           <ThemeToggle />
@@ -132,11 +134,10 @@ export default function MusicClient() {
       <div className="w-full max-w-5xl px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-8 z-10">
         <div className="flex-grow space-y-4 text-center md:text-left">
           <h1 className="text-5xl md:text-7xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic pr-2">
-            ZIKR
+            {t('heading')}
           </h1>
           <p className="text-lg text-muted-foreground max-w-md mx-auto md:mx-0">
-            Glorification and commemoration of God through beautiful recitations
-            and melodies.
+            {t('description')}
           </p>
         </div>
 
@@ -145,7 +146,7 @@ export default function MusicClient() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search tracks or artists..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-3 rounded-2xl bg-muted/50 border border-border/50 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all shadow-sm"
@@ -158,7 +159,7 @@ export default function MusicClient() {
           <div className="flex flex-col items-center justify-center py-24 space-y-4">
             <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin" />
             <p className="text-muted-foreground animate-pulse font-medium">
-              Loading tracks...
+              {t('loading')}
             </p>
           </div>
         ) : (
@@ -168,7 +169,7 @@ export default function MusicClient() {
               <section>
                 <div className="flex items-center justify-between px-2">
                   <h2 className="text-2xl font-bold flex items-center gap-2">
-                    <Music2 className="text-accent" /> Featured
+                    <Music2 className="text-accent" /> {t('featured')}
                   </h2>
                 </div>
                 <div className="w-full overflow-x-auto no-scrollbar">
@@ -189,19 +190,19 @@ export default function MusicClient() {
                     value="all"
                     className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm px-6"
                   >
-                    Explore
+                    {t('tabExplore')}
                   </TabsTrigger>
                   <TabsTrigger
                     value="favorites"
                     className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm px-6 flex items-center gap-2"
                   >
-                    <Heart className="w-4 h-4" /> Favorites
+                    <Heart className="w-4 h-4" /> {t('tabFavorites')}
                   </TabsTrigger>
                   <TabsTrigger
                     value="recent"
                     className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm px-6 flex items-center gap-2"
                   >
-                    <Clock className="w-4 h-4" /> New
+                    <Clock className="w-4 h-4" /> {t('tabNew')}
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -221,7 +222,7 @@ export default function MusicClient() {
                     ))}
                     {filteredTracks.length === 0 && (
                       <div className="col-span-full py-12 text-center text-muted-foreground italic">
-                        No results found for &apos;{searchQuery}&apos;
+                        {t('noResults', { query: searchQuery })}
                       </div>
                     )}
                   </div>
@@ -243,7 +244,7 @@ export default function MusicClient() {
                           {isLoopingContext && (
                             <span className="flex items-center gap-1.5 text-xs font-medium text-accent bg-accent/20 px-2 py-0.5 rounded-full animate-pulse">
                               <Repeat className="w-3 h-3" />
-                              Looping
+                              {t('looping')}
                             </span>
                           )}
                         </h3>
@@ -279,7 +280,7 @@ export default function MusicClient() {
                     <div className="col-span-full py-24 text-center space-y-4">
                       <Heart className="w-12 h-12 text-muted-foreground/20 mx-auto" />
                       <p className="text-muted-foreground italic">
-                        You haven&apos;t favorited any tracks yet.
+                        {t('noFavorites')}
                       </p>
                     </div>
                   )}
@@ -312,9 +313,7 @@ export default function MusicClient() {
             <div className="flex items-start gap-3 p-4 rounded-2xl bg-accent/5 border border-accent/10">
               <Info className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground leading-relaxed">
-                This collection is frequently updated. All materials are
-                copyrighted by their respective holders. WikiSubmission provides
-                this as a service for the community.
+                {t('disclaimer')}
               </p>
             </div>
           </>

@@ -15,8 +15,12 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const t = await getTranslations('contact')
+  const tCommon = await getTranslations('common')
+
   return (
     <main className="flex flex-col min-h-screen items-center justify-center text-center space-y-8 md:p-24 p-4">
       <Link href="/">
@@ -30,14 +34,11 @@ export default function ContactPage() {
       </Link>
 
       <section className="max-w-sm flex gap-4 max-w-md items-center">
-        <h1 className="text-3xl font-semibold">Contact Us</h1>
+        <h1 className="text-3xl font-semibold">{t('heading')}</h1>
       </section>
 
       <section className="max-w-sm text-center text-sm text-muted-foreground">
-        <p>
-          We&apos;d love to hear from you. Whether you have questions,
-          suggestions, or need support, we&apos;re here to help.
-        </p>
+        <p>{t('description')}</p>
       </section>
 
       <hr className="w-xs" />
@@ -46,8 +47,8 @@ export default function ContactPage() {
         <Item asChild variant="outline">
           <a href={`mailto:${About.email}`}>
             <ItemContent>
-              <ItemTitle>Email</ItemTitle>
-              <ItemDescription>General inquiries and support</ItemDescription>
+              <ItemTitle>{t('email')}</ItemTitle>
+              <ItemDescription>{t('emailDesc')}</ItemDescription>
             </ItemContent>
             <ItemActions>
               <Mail className="size-4" />
@@ -63,8 +64,8 @@ export default function ContactPage() {
             rel="noopener noreferrer"
           >
             <ItemContent>
-              <ItemTitle>GitHub</ItemTitle>
-              <ItemDescription>Bug reports and contributions</ItemDescription>
+              <ItemTitle>{t('github')}</ItemTitle>
+              <ItemDescription>{t('githubDesc')}</ItemDescription>
             </ItemContent>
             <ItemActions>
               <Github className="size-4" />
@@ -80,8 +81,8 @@ export default function ContactPage() {
             rel="noopener noreferrer"
           >
             <ItemContent>
-              <ItemTitle>Discord</ItemTitle>
-              <ItemDescription>Chat with us</ItemDescription>
+              <ItemTitle>{t('discord')}</ItemTitle>
+              <ItemDescription>{t('discordDesc')}</ItemDescription>
             </ItemContent>
             <ItemActions>
               <MessageSquare className="size-4" />
@@ -97,7 +98,7 @@ export default function ContactPage() {
           className="flex items-center gap-2 text-muted-foreground hover:text-violet-600"
         >
           <ChevronLeft className="size-4" />
-          <p className="text-sm">Back to Home</p>
+          <p className="text-sm">{tCommon('backToHome')}</p>
         </Link>
       </section>
     </main>

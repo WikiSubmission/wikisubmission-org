@@ -12,6 +12,7 @@ import {
   type ChapterReaderOptions,
 } from '@/hooks/use-chapter-reader'
 import { VerseCard } from '../mini-components/verse-card'
+import { useTranslations } from 'next-intl'
 
 export function ChapterReader({
   chapterNumber,
@@ -22,6 +23,8 @@ export function ChapterReader({
 }) {
   const prefs = useQuranPreferences()
   const reader = useChapterReader(chapterNumber, initialData)
+  const t = useTranslations('quran')
+  const tCommon = useTranslations('common')
 
   const opts: ChapterReaderOptions = {
     primaryLang: prefs.primaryLanguage,
@@ -77,7 +80,7 @@ export function ChapterReader({
   const chapterTitle =
     reader.chapterTitles?.['en'] ??
     reader.chapterTitles?.[prefs.primaryLanguage] ??
-    `Sura ${chapterNumber}`
+    t('sura', { number: chapterNumber })
 
   return (
     <div className="space-y-2 pb-8">
@@ -85,12 +88,12 @@ export function ChapterReader({
       <div className="flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
         <div className="flex flex-col">
           <h1 className="text-xl font-bold pl-1">
-            Sura {chapterNumber}: {chapterTitle}
+            {t('chapter', { number: chapterNumber, title: chapterTitle })}
           </h1>
           {reader.loading && reader.verses.length > 0 && (
             <p className="text-xs text-muted-foreground pl-1 flex items-center gap-1">
               <Spinner className="size-3" />
-              Loading…
+              {tCommon('loading')}
             </p>
           )}
         </div>
@@ -138,7 +141,7 @@ export function ChapterReader({
               <Button variant="secondary" size="lg" className="flex items-center gap-2">
                 <ArrowLeft className="size-4 shrink-0" />
                 <span>
-                  <span className="hidden sm:inline">Chapter </span>
+                  <span className="hidden sm:inline">{tCommon('chapter')} </span>
                   {chapterNumber - 1}
                 </span>
               </Button>
@@ -151,7 +154,7 @@ export function ChapterReader({
             <Link href={`/quran/${chapterNumber + 1}`} prefetch className="ml-auto">
               <Button variant="secondary" size="lg" className="flex items-center gap-2">
                 <span>
-                  <span className="hidden sm:inline">Chapter </span>
+                  <span className="hidden sm:inline">{tCommon('chapter')} </span>
                   {chapterNumber + 1}
                 </span>
                 <ArrowRight className="size-4 shrink-0" />

@@ -20,6 +20,7 @@ import { PageSwitcher } from '@/components/page-switcher'
 import { FaAndroid, FaApple } from 'react-icons/fa'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
 const LinkButton = ({ href, label }: { href: string; label: string }) => (
   <a
@@ -32,7 +33,8 @@ const LinkButton = ({ href, label }: { href: string; label: string }) => (
   </a>
 )
 
-export default function Downloads() {
+export default async function Downloads() {
+  const t = await getTranslations('downloads')
   return (
     <main className="space-y-6 p-8 md:max-w-5xl mx-auto">
       <PageSwitcher currentPage="downloads" />
@@ -47,10 +49,10 @@ export default function Downloads() {
       </Link>
       <div className="flex-grow space-y-4 text-center md:text-left">
         <h1 className="text-5xl md:text-7xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic">
-          DOWNLOADS
+          {t('heading')}
         </h1>
         <p className="text-lg text-muted-foreground max-w-md mx-auto md:mx-0">
-          Free books, research papers, and resources for Submission.
+          {t('description')}
         </p>
       </div>
 
@@ -219,15 +221,15 @@ export default function Downloads() {
         </div>
         <Tabs defaultValue="full-pdf">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="full-pdf">Full PDF</TabsTrigger>
-            <TabsTrigger value="appendices">Appendices</TabsTrigger>
-            <TabsTrigger value="physical-copies">Physical Copies</TabsTrigger>
+            <TabsTrigger value="full-pdf">{t('tabFullPdf')}</TabsTrigger>
+            <TabsTrigger value="appendices">{t('tabAppendices')}</TabsTrigger>
+            <TabsTrigger value="physical-copies">{t('tabPhysicalCopies')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="full-pdf">
             <Card>
               <CardHeader>
-                <CardTitle>Full PDF</CardTitle>
+                <CardTitle>{t('tabFullPdf')}</CardTitle>
                 <CardDescription>
                   Original English Edition by{' '}
                   <a href="/submission/rashad-khalifa">Dr. Rashad Khalifa</a>
@@ -260,7 +262,7 @@ export default function Downloads() {
           <TabsContent value="appendices">
             <Card>
               <CardHeader>
-                <CardTitle>Appendices</CardTitle>
+                <CardTitle>{t('tabAppendices')}</CardTitle>
                 <CardDescription>
                   From the original translation. See all{' '}
                   <a href="/submission/appendices">38 appendices</a>.
@@ -288,7 +290,7 @@ export default function Downloads() {
           <TabsContent value="physical-copies">
             <Card>
               <CardHeader>
-                <CardTitle>Physical Copies</CardTitle>
+                <CardTitle>{t('tabPhysicalCopies')}</CardTitle>
                 <CardDescription>Order from online retailers.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -330,7 +332,7 @@ export default function Downloads() {
           href="https://library.wikisubmission.org/file/visual-presentation-of-the-miracle"
           target="_blank"
         >
-          <Button variant="outline">Download PDF</Button>
+          <Button variant="outline">{t('downloadPdf')}</Button>
         </a>
       </section>
 

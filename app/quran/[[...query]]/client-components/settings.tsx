@@ -20,12 +20,13 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import { setLocale } from '@/app/actions/locale'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 export default function QuranSettings() {
   const quranPreferences = useQuranPreferences()
   const languages = useLanguagesStore((s) => s.languages)
   const uiLocale = useLocale()
+  const t = useTranslations('settings')
 
   return (
     <DropdownMenu modal={false}>
@@ -40,11 +41,11 @@ export default function QuranSettings() {
         </div>
         <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
           <LanguagesIcon className="size-4" />
-          <strong>Language</strong>
+          <strong>{t('language')}</strong>
         </DropdownMenuLabel>
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <strong>Interface Language</strong>
+            <strong>{t('interfaceLanguage')}</strong>
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
@@ -63,7 +64,7 @@ export default function QuranSettings() {
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <strong>Quran Translation</strong>
+            <strong>{t('quranTranslation')}</strong>
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
@@ -89,7 +90,7 @@ export default function QuranSettings() {
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <strong>Secondary Translation</strong>
+            <strong>{t('secondaryTranslation')}</strong>
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
@@ -101,7 +102,7 @@ export default function QuranSettings() {
                   })
                 }
               >
-                <strong>None</strong>
+                <strong>{t('none')}</strong>
                 {quranPreferences.secondaryLanguage === undefined && (
                   <CheckIcon className="size-4" />
                 )}
@@ -128,11 +129,11 @@ export default function QuranSettings() {
 
         <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
           <BookIcon className="size-4" />
-          <strong>Reading</strong>
+          <strong>{t('reading')}</strong>
         </DropdownMenuLabel>
         <div className="space-y-2">
           <section className="flex justify-between items-center gap-2 px-2">
-            <Label htmlFor="text">Arabic</Label>
+            <Label htmlFor="text">{t('arabic')}</Label>
             <Switch
               checked={quranPreferences.arabic}
               onCheckedChange={(checked) =>
@@ -145,7 +146,7 @@ export default function QuranSettings() {
           </section>
 
           <section className="flex justify-between items-center gap-2 px-2">
-            <Label htmlFor="text">Subtitles</Label>
+            <Label htmlFor="text">{t('subtitles')}</Label>
             <Switch
               checked={quranPreferences.subtitles}
               onCheckedChange={(checked) =>
@@ -158,7 +159,7 @@ export default function QuranSettings() {
           </section>
 
           <section className="flex justify-between items-center gap-2 px-2">
-            <Label htmlFor="text">Footnotes</Label>
+            <Label htmlFor="text">{t('footnotes')}</Label>
             <Switch
               checked={quranPreferences.footnotes}
               onCheckedChange={(checked) =>
@@ -170,7 +171,7 @@ export default function QuranSettings() {
             />
           </section>
           <section className="flex justify-between items-center gap-2 px-2">
-            <Label htmlFor="text">Transliteration</Label>
+            <Label htmlFor="text">{t('transliteration')}</Label>
             <Switch
               checked={quranPreferences.transliteration}
               onCheckedChange={(checked) =>
@@ -182,7 +183,7 @@ export default function QuranSettings() {
             />
           </section>
           <section className="flex justify-between items-center gap-2 px-2">
-            <Label htmlFor="text">Word by Word</Label>
+            <Label htmlFor="text">{t('wordByWord')}</Label>
             <Switch
               checked={quranPreferences.wordByWord}
               onCheckedChange={(checked) =>

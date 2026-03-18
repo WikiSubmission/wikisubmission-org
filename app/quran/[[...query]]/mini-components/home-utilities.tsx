@@ -13,9 +13,12 @@ import { Fonts } from '@/constants/fonts'
 import Image from 'next/image'
 import { randomQuranRef } from '@/constants/quran-chapters'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 export default function QuranUtilitiesRow() {
   const router = useRouter()
+  const t = useTranslations('common')
+  const tNav = useTranslations('nav')
 
   function goToRandomVerse() {
     const { chapter, verse } = randomQuranRef()
@@ -36,7 +39,7 @@ export default function QuranUtilitiesRow() {
               height={24}
               className="pb-0.5 pl-1"
             />
-            <p className="p-2 text-xs">THE FINAL TESTAMENT</p>
+            <p className="p-2 text-xs">{t('finalTestament').toUpperCase()}</p>
           </div>
         </Link>
       </div>
@@ -48,7 +51,7 @@ export default function QuranUtilitiesRow() {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Random Verse</p>
+            <p>{t('randomVerse')}</p>
           </TooltipContent>
         </Tooltip>
         <Tooltip>
@@ -60,7 +63,7 @@ export default function QuranUtilitiesRow() {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Downloads</p>
+            <p>{tNav('downloads')}</p>
           </TooltipContent>
         </Tooltip>
         <ThemeToggle />

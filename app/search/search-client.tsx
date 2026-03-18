@@ -27,6 +27,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { components } from '@/src/api/types.gen'
 import type { Database } from 'wikisubmission-sdk'
+import { useTranslations } from 'next-intl'
 
 type MediaRow = Database['public']['Tables']['ws_media']['Row']
 type NewsletterRow = Database['public']['Tables']['ws_newsletters']['Row']
@@ -35,6 +36,8 @@ type ChapterData = components['schemas']['ChapterData']
 type VerseData = components['schemas']['VerseData']
 
 export default function SearchClient() {
+  const t = useTranslations('search')
+  const tNav = useTranslations('nav')
   return (
     <main className="min-h-screen text-foreground flex flex-col items-center p-4 md:p-2">
       {/* Minimal Header */}
@@ -55,9 +58,9 @@ export default function SearchClient() {
             />
           </Link>
           <h1 className="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic uppercase pr-2">
-            Search
+            {tNav('search').toUpperCase()}
           </h1>
-          <p className="text-muted-foreground">For anything.</p>
+          <p className="text-muted-foreground">{t('tagline')}</p>
         </div>
         <Suspense
           fallback={
@@ -74,6 +77,8 @@ export default function SearchClient() {
 }
 
 function SearchContent() {
+  const t = useTranslations('search')
+  const tCommon = useTranslations('common')
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialQuery = searchParams.get('q') || ''
@@ -143,7 +148,7 @@ function SearchContent() {
         setPerformedQuery(q)
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : 'An error occurred during search'
+          err instanceof Error ? err.message : tCommon('error')
         )
         setMediaResults(null)
         setNewsletterResults(null)
@@ -216,7 +221,7 @@ function SearchContent() {
             <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
             <Input
               type="search"
-              placeholder="Keyword or phrase..."
+              placeholder={t('keywordPlaceholder')}
               className="pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -251,10 +256,10 @@ function SearchContent() {
                 <div className="text-center py-20 text-muted-foreground font-light animate-in fade-in duration-700">
                   <SearchIcon className="size-12 mx-auto mb-4 opacity-10" />
                   <p className="text-lg">
-                    No results found for &quot;{performedQuery}&quot;
+                    {t('noResults', { query: performedQuery })}
                   </p>
                   <p className="text-sm opacity-60">
-                    Try different keywords or check for typos.
+                    {t('noResultsHelp')}
                   </p>
                 </div>
               )
@@ -271,7 +276,7 @@ function SearchContent() {
                       >
                         <BookIcon className="size-3.5" />
                         <span className="text-xs md:text-sm font-medium">
-                          Quran ({qCount})
+                          {t('tabs.quran')} ({qCount})
                         </span>
                       </TabsTrigger>
                     )}
@@ -282,7 +287,7 @@ function SearchContent() {
                       >
                         <PlayIcon className="size-3.5" />
                         <span className="text-xs md:text-sm font-medium">
-                          Media ({mCount})
+                          {t('tabs.media')} ({mCount})
                         </span>
                       </TabsTrigger>
                     )}
@@ -293,7 +298,7 @@ function SearchContent() {
                       >
                         <NewspaperIcon className="size-3.5" />
                         <span className="text-xs md:text-sm font-medium">
-                          Newsletters ({nCount})
+                          {t('tabs.newsletters')} ({nCount})
                         </span>
                       </TabsTrigger>
                     )}
@@ -380,12 +385,14 @@ function HighlightText({ text }: { text?: string | null }) {
 }
 
 function QuranChapterResult({ chapter, primaryCode }: { chapter: ChapterData; primaryCode: string }) {
-  const title = chapter.titles?.[primaryCode] ?? chapter.titles?.['en'] ?? `Sura ${chapter.cn}`
+  const tQuran = useTranslations('quran')
+  const sura = tQuran('sura', { number: chapter.cn ?? '' })
+  const title = chapter.titles?.[primaryCode] ?? chapter.titles?.['en'] ?? sura
   return (
     <Link href={`/quran/${chapter.cn}`}>
       <div className="flex items-center gap-2 bg-muted/50 p-3 rounded-xl hover:bg-muted/80 transition-colors w-fit">
         <BookIcon className="size-4 text-violet-600" />
-        <span className="font-medium">Sura {chapter.cn}: {title}</span>
+        <span className="font-medium">{sura}: {title}</span>
       </div>
     </Link>
   )
@@ -432,7 +439,14 @@ function QuranSection({
   results: QuranResponse
 }) {
   const prefs = useQuranPreferences()
+  const t = useTranslations('search')
+  const tSettings = useTranslations('settings')
   const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const fieldLabels: Record<string, string> = {
+    text: t('text'),
+    subtitles: tSettings('subtitles'),
+    footnotes: tSettings('footnotes'),
+  }
 
   const titleMatches = results.chapters?.filter((ch) => ch.tm) ?? []
   const allVerses = results.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
@@ -450,7 +464,7 @@ function QuranSection({
               className="border-violet-600/30 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
             />
             <Label htmlFor={`qs-${field}`} className="cursor-pointer">
-              {field.charAt(0).toUpperCase() + field.slice(1)}
+              {fieldLabels[field]}
             </Label>
           </div>
         ))}
@@ -477,7 +491,7 @@ function QuranSection({
 
       {results.info && (
         <p className="text-xs text-muted-foreground text-center py-1">
-          {results.info.result_count} of {results.info.total ?? results.info.result_count} results
+          {t('resultsSummary', { shown: results.info.result_count, total: results.info.total ?? results.info.result_count })}
         </p>
       )}
     </div>
@@ -493,6 +507,7 @@ function MediaSection({
   selectedCategories: string[]
   setSelectedCategories: (cats: string[]) => void
 }) {
+  const t = useTranslations('search')
   const categories = ['programs', 'sermons', 'audios']
   const hasCategorySupport = categories.some(
     (cat) =>
@@ -544,8 +559,7 @@ function MediaSection({
 
       <p className="text-xs text-muted-foreground flex items-start gap-2">
         <InfoIcon className="text-violet-600 size-3.5" />
-        Verify all information. Transcripts derived using AI transcription on
-        the original content.
+        {t('disclaimer')}
       </p>
 
       {(() => {
@@ -569,7 +583,7 @@ function MediaSection({
         if (filtered.length === 0)
           return (
             <div className="text-center py-12 text-muted-foreground font-light">
-              No results for selected categories
+              {t('noResultsForCategories')}
             </div>
           )
 

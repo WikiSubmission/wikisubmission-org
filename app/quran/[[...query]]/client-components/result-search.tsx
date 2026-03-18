@@ -25,6 +25,7 @@ import {
 } from '@/hooks/use-verse-search'
 import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
+import { useTranslations } from 'next-intl'
 
 // ─── New API renderers ────────────────────────────────────────────────────────
 
@@ -57,15 +58,16 @@ function SearchResultChapter({
   chapter: ChapterResult
   primaryCode: string
 }) {
+  const t = useTranslations('quran')
   const title =
     chapter.titles?.[primaryCode] ??
     chapter.titles?.['en'] ??
-    `Sura ${chapter.cn}`
+    t('sura', { number: chapter.cn ?? '' })
   return (
     <Link href={`/quran/${chapter.cn}`}>
       <div className="flex items-center gap-1 bg-muted/50 p-4 rounded-2xl w-fit hover:bg-muted/80">
         <p>
-          <strong>Sura {chapter.cn}:</strong> {title}
+          <strong>{t('sura', { number: chapter.cn ?? '' })}:</strong> {title}
         </p>
         <ChevronRight className="size-4" />
       </div>
@@ -140,6 +142,10 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
   const prefs = useQuranPreferences()
   const verseSearch = useVerseSearch()
+  const t = useTranslations('search')
+  const tQuran = useTranslations('quran')
+  const tSettings = useTranslations('settings')
+  const tCommon = useTranslations('common')
 
   // Word search (still SDK — backend word scope is a different feature)
   const [searchTab, setSearchTab] = useState<'all' | 'words'>('all')
@@ -273,14 +279,14 @@ export default function SearchResult({ props }: { props: { query: string } }) {
           <div className="flex justify-between items-center">
             <TabsList className="flex [&>*]:text-xs">
               <TabsTrigger value="all">
-                Results ({verseSearch.total})
+                {t('resultsTab', { count: verseSearch.total })}
               </TabsTrigger>
               <TabsTrigger value="words">
                 <SearchIcon className="size-3" />
-                Word Search
+                {t('wordSearch')}
                 {wordMatches.length > 0
                   ? wordMatches.length > 2999
-                    ? ' (3,000+)'
+                    ? ` ${t('moreThan3000')}`
                     : ` (${wordMatches.length})`
                   : ''}
               </TabsTrigger>
@@ -306,7 +312,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 htmlFor="strict-mode"
                 className="text-xs text-muted-foreground select-none cursor-pointer"
               >
-                Strict Search
+                {t('strictSearch')}
               </Label>
             </div>
           </div>
@@ -321,7 +327,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 }
                 id="filter-text"
               />
-              <Label htmlFor="filter-text">Text</Label>
+              <Label htmlFor="filter-text">{t('text')}</Label>
             </div>
             <div className="flex items-center gap-2 [&>*]:text-xs">
               <Checkbox
@@ -331,7 +337,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 }
                 id="filter-subtitles"
               />
-              <Label htmlFor="filter-subtitles">Subtitles</Label>
+              <Label htmlFor="filter-subtitles">{tSettings('subtitles')}</Label>
             </div>
             <div className="flex items-center gap-2 [&>*]:text-xs">
               <Checkbox
@@ -341,7 +347,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                 }
                 id="filter-footnotes"
               />
-              <Label htmlFor="filter-footnotes">Footnotes</Label>
+              <Label htmlFor="filter-footnotes">{tSettings('footnotes')}</Label>
             </div>
           </section>
 
@@ -383,14 +389,14 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                   size="sm"
                   onClick={() => verseSearch.loadMore()}
                 >
-                  Load more ({verseSearch.loadedCount} / {verseSearch.total})
+                  {tCommon('loadMore', { shown: verseSearch.loadedCount, total: verseSearch.total })}
                 </Button>
               </div>
             )}
 
             {!verseSearch.hasMore && allVerses.length > 0 && (
               <p className="text-center text-xs text-muted-foreground py-2">
-                All {verseSearch.total} results shown
+                {t('allResultsShown', { count: verseSearch.total })}
               </p>
             )}
           </TabsContent>
@@ -402,12 +408,12 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
               {wordMatches.length === 0 && !wordLoading && (
                 <div className="space-y-2">
-                  <p className="text-muted-foreground">No matches</p>
+                  <p className="text-muted-foreground">{t('noMatches')}</p>
                   {searchQuery.split(' ').length > 1 && (
                     <div className="bg-muted/50 p-4 rounded-2xl space-y-2">
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <SearchIcon className="size-4" />
-                        <p>Try searching:</p>
+                        <p>{t('trySearching')}</p>
                       </div>
                       <div>
                         {searchQuery.split(' ').map((q) => (
@@ -440,17 +446,15 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                         {item.transliterated} / {item.arabic}
                       </p>
                       <p className="w-fit rounded-2xl">
-                        <strong>Root word:</strong> {item.root_word}
+                        <strong>{tQuran('rootWord')}:</strong> {item.root_word}
                       </p>
                       <p className="w-fit rounded-2xl gap-1 flex flex-wrap">
                         <strong>
-                          Verses (
-                          {
-                            wordMatches.filter(
+                          {tQuran('occurrences', {
+                            count: wordMatches.filter(
                               (r) => r.root_word === item.root_word
-                            ).length
-                          }
-                          ):
+                            ).length,
+                          })}:
                         </strong>{' '}
                         {wordMatches
                           .filter((r) => r.root_word === item.root_word)
@@ -463,7 +467,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                       </p>
                       {item.meanings && (
                         <p className="rounded-2xl">
-                          <strong>Meanings:</strong> {item.meanings}
+                          <strong>{tQuran('meanings')}:</strong> {item.meanings}
                         </p>
                       )}
                     </section>

@@ -6,10 +6,12 @@ import { Spinner } from '@/components/ui/spinner'
 import { wsApi } from '@/src/api/client'
 import { randomQuranRef } from '@/constants/quran-chapters'
 import type { components } from '@/src/api/types.gen'
+import { useTranslations } from 'next-intl'
 
 type VerseData = components['schemas']['VerseData']
 
 export default function HomeScreenRandomVerse() {
+  const t = useTranslations('common')
   const [verse, setVerse] = useState<VerseData | null>(null)
   const [ref, setRef] = useState<{ chapter: number; verse: number } | null>(null)
 
@@ -57,7 +59,7 @@ export default function HomeScreenRandomVerse() {
           <div className="space-y-1">
             <div className="flex justify-between items-center">
               <p className="text-xs text-muted-foreground tracking-wider">
-                RANDOM VERSE
+                {t('randomVerse').toUpperCase()}
               </p>
               <ChevronRight className="size-4 text-muted-foreground" />
             </div>

@@ -26,6 +26,7 @@ import Image from 'next/image'
 import useLocalStorage from '@/hooks/use-local-storage'
 import { Button } from '@/components/ui/button'
 import { useParams, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 type Chapter = components['schemas']['Chapter']
 type Appendix = components['schemas']['Appendix']
@@ -36,6 +37,8 @@ type QuranSidebarProps = {
 }
 
 export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
+  const t = useTranslations('sidebar')
+  const tNav = useTranslations('nav')
   const [chapterSearchQuery, setChapterSearchQuery] = useState('')
   const [appendixSearchQuery, setAppendixSearchQuery] = useState('')
   const [chaptersOpen, setChaptersOpen] = useLocalStorage<boolean>(
@@ -112,7 +115,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                     className="h-auto py-2 px-2.5 hover:bg-accent/50"
                   >
                     <Link href="/quran">
-                      <p className="text-xs">Quran</p>
+                      <p className="text-xs">{tNav('quran')}</p>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -123,7 +126,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                   className="h-auto py-2 px-2.5 hover:bg-accent/50"
                 >
                   <Link href="/proclamation" target="_blank" prefetch={false}>
-                    <p className="text-xs">Proclamation</p>
+                    <p className="text-xs">{tNav('proclamation')}</p>
                     <ChevronRight className="size-4 mr-2" />
                   </Link>
                 </SidebarMenuButton>
@@ -134,7 +137,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                   className="h-auto py-2 px-2.5 hover:bg-accent/50"
                 >
                   <Link href="/introduction" target="_blank" prefetch={false}>
-                    <p className="text-xs">Introduction</p>
+                    <p className="text-xs">{tNav('introduction')}</p>
                     <ChevronRight className="size-4 mr-2" />
                   </Link>
                 </SidebarMenuButton>
@@ -160,10 +163,10 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                     <Book className="size-3 mr-1.5" />
                     {filteredChapters.length}{' '}
                     {filteredChapters.length > 1
-                      ? 'Chapters'
+                      ? t('chapters')
                       : filteredChapters.length === 0
-                        ? 'Results'
-                        : 'Chapter'}
+                        ? t('results')
+                        : t('chapter')}
                   </div>
                   <ChevronRight
                     className={`size-3 transition-transform ${chaptersOpen ? 'rotate-90' : ''}`}
@@ -176,7 +179,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
                 <Input
                   type="search"
-                  placeholder="Search chapter"
+                  placeholder={t('search')}
                   className="pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
                   value={chapterSearchQuery}
                   onChange={(e) => {
@@ -198,7 +201,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                   size="sm"
                   variant="ghost"
                 >
-                  Order: {orderType === 'standard' ? 'Standard' : 'Revelation'}
+                  {t('order', { type: t(orderType === 'standard' ? 'standard' : 'revelation') })}
                 </Button>
               )}
             </div>
@@ -223,7 +226,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                                 </span>
                                 {orderType === 'revelation' && (
                                   <span className="text-xs font-bold flex-shrink-0">
-                                    Rev. {chapter.revelation_order}
+                                    {t('revOrder', { number: chapter.revelation_order ?? '' })}
                                   </span>
                                 )}
                               </div>
@@ -261,10 +264,10 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
                     <ScrollText className="size-3 mr-1.5" />
                     {filteredAppendices.length}{' '}
                     {filteredAppendices.length > 1
-                      ? 'Appendices'
+                      ? t('appendices')
                       : filteredAppendices.length === 0
-                        ? 'Results'
-                        : 'Appendix'}
+                        ? t('results')
+                        : t('appendix')}
                   </div>
                   <ChevronRight
                     className={`size-3 transition-transform ${appendicesOpen ? 'rotate-90' : ''}`}
@@ -276,7 +279,7 @@ export function QuranSidebar({ chapters, appendices }: QuranSidebarProps) {
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
               <Input
                 type="search"
-                placeholder="Search..."
+                placeholder={t('searchAppendix')}
                 className="pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
                 value={appendixSearchQuery}
                 onChange={(e) => {
