@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import fs from 'fs'
 import path from 'path'
-import ReactMarkdown from 'react-markdown'
+import { LegalMarkdown } from '@/components/legal-markdown'
 import { About } from '@/constants/about'
 
 export const metadata = {
@@ -50,14 +50,14 @@ export default function PrivacyPolicy() {
         <h1 className="text-3xl font-semibold">Privacy Policy</h1>
       </section>
 
-      <section className="max-w-2xl text-left prose prose-sm dark:prose-invert">
-        <ReactMarkdown>{content}</ReactMarkdown>
+      <section className="max-w-2xl text-left space-y-4">
+        <LegalMarkdown content={content} />
 
-        <h2>Contact Information</h2>
-        <p>
+        <h2 className="text-lg font-semibold mb-2 mt-6">Contact Information</h2>
+        <p className="text-sm text-muted-foreground">
           For any questions or concerns regarding the privacy policy, please
           send us an email at{' '}
-          <a href={`mailto:${About.email}`}>{About.email}</a>.
+          <a href={`mailto:${About.email}`} className="text-primary hover:underline">{About.email}</a>.
         </p>
       </section>
 
