@@ -5,6 +5,7 @@ import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
 import { Loader2 } from 'lucide-react'
 import { QuranRef } from '@/components/quran-ref'
+import { useTranslations } from 'next-intl'
 
 type WordData = components['schemas']['WordData']
 
@@ -45,6 +46,8 @@ function flattenWords(
 const PAGE_LIMIT = 100
 
 export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
+  const t = useTranslations('common')
+  const tQuran = useTranslations('quran')
   const [occurrences, setOccurrences] = useState<WordOccurrence[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -114,7 +117,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
   if (occurrences.length === 0) {
     return (
       <p className="text-center text-muted-foreground py-10">
-        No other occurrences found.
+        {tQuran('noOccurrences')}
       </p>
     )
   }
@@ -132,7 +135,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
                 <div className="flex items-center gap-2">
                   <QuranRef reference={occ.verse_key} />
                   <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                    WORD #{occ.word_index}
+                    {t('word', { index: occ.word_index })}
                   </span>
                 </div>
                 <p className="text-sm font-semibold text-foreground leading-tight line-clamp-1 group-hover:text-violet-600 transition-colors">
@@ -158,8 +161,8 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
           >
             {loadingMore && <Loader2 className="animate-spin size-3" />}
             {loadingMore
-              ? 'Loading…'
-              : `Load more (${occurrences.length} of ${total})`}
+              ? t('loading')
+              : t('loadMore', { shown: occurrences.length, total })}
           </button>
         </div>
       )}

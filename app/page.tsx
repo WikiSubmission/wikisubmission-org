@@ -27,71 +27,75 @@ import { PageSwitcher } from '@/components/page-switcher'
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 
-const SERVICES = [
-  {
-    title: 'Final Testament',
-    desc: 'Read on the Web',
-    href: '/quran',
-    icon: '/brand-assets/logo-transparent.png',
-    isImage: true,
-  },
-  {
-    title: 'The Bible',
-    desc: 'Coming Soon',
-    href: '/bible',
-    icon: '/brand-assets/logo-transparent.png',
-    isImage: true,
-    disabled: true,
-  },
-  {
-    title: 'Music',
-    desc: 'Glorification and melodies',
-    href: '/music',
-    icon: <Music2Icon className="size-6" />,
-  },
-  {
-    title: 'Prayer Times',
-    desc: 'Accurate daily timings',
-    href: '/prayer-times',
-    icon: <HeartIcon className="size-6" />,
-  },
-  {
-    title: 'Ramadan',
-    desc: 'Fasting schedule',
-    href: '/ramadan',
-    icon: <MoonIcon className="size-6" />,
-  },
-  {
-    title: 'Search',
-    desc: 'Media, scripture, etc',
-    href: '/search',
-    icon: <SearchIcon className="size-6" />,
-  },
-]
+export default async function Home() {
+  const t = await getTranslations('home')
+  const tNav = await getTranslations('nav')
 
-const TOOLS = [
-  {
-    title: 'iOS App',
-    desc: 'iPhone, iPad and Mac',
-    href: 'https://apps.apple.com/app/id6444260632',
-    icon: <FaApple className="size-6" />,
-  },
-  {
-    title: 'Downloads',
-    desc: 'Free resources & PDFs',
-    href: '/downloads',
-    icon: <DownloadIcon className="size-6" />,
-  },
-  {
-    title: 'Discord Bot',
-    desc: 'Add to your server',
-    href: 'https://discord.com/...',
-    icon: <FaDiscord className="size-6" />,
-  },
-]
+  const SERVICES = [
+    {
+      title: t('services.finalTestament'),
+      desc: t('services.finalTestamentDesc'),
+      href: '/quran',
+      icon: '/brand-assets/logo-transparent.png',
+      isImage: true,
+    },
+    {
+      title: t('services.bible'),
+      desc: t('services.bibleDesc'),
+      href: '/bible',
+      icon: '/brand-assets/logo-transparent.png',
+      isImage: true,
+      disabled: true,
+    },
+    {
+      title: t('services.music'),
+      desc: t('services.musicDesc'),
+      href: '/music',
+      icon: <Music2Icon className="size-6" />,
+    },
+    {
+      title: t('services.prayerTimes'),
+      desc: t('services.prayerTimesDesc'),
+      href: '/prayer-times',
+      icon: <HeartIcon className="size-6" />,
+    },
+    {
+      title: t('services.ramadan'),
+      desc: t('services.ramadanDesc'),
+      href: '/ramadan',
+      icon: <MoonIcon className="size-6" />,
+    },
+    {
+      title: t('services.search'),
+      desc: t('services.searchDesc'),
+      href: '/search',
+      icon: <SearchIcon className="size-6" />,
+    },
+  ]
 
-export default function Home() {
+  const TOOLS = [
+    {
+      title: t('tools.iosApp'),
+      desc: t('tools.iosAppDesc'),
+      href: 'https://apps.apple.com/app/id6444260632',
+      icon: <FaApple className="size-6" />,
+    },
+    {
+      title: t('tools.downloads'),
+      desc: t('tools.downloadsDesc'),
+      href: '/downloads',
+      icon: <DownloadIcon className="size-6" />,
+    },
+    {
+      title: t('tools.discordBot'),
+      desc: t('tools.discordBotDesc'),
+      href: 'https://discord.com/...',
+      icon: <FaDiscord className="size-6" />,
+    },
+  ]
+
   return (
     <main className="flex flex-col h-screen max-w-5xl mx-auto md:p-10 p-4 space-y-12">
       {/* Header  */}
@@ -152,7 +156,7 @@ export default function Home() {
       {/* Tools  */}
       <section className="space-y-4">
         <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground text-center">
-          Platforms & Tools
+          {t('platformsAndTools')}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {TOOLS.map((tool) => (
@@ -178,12 +182,12 @@ export default function Home() {
       <footer className="pt-10 border-t space-y-8 flex flex-col items-center">
         <div className="max-w-2xl text-center text-sm text-muted-foreground space-y-4 text-ellipsis">
           <p>
-            WikiSubmission is a faith-based 501(c)(3) nonprofit organization...
+            {t('aboutText')}
             <Link
               href="https://library.wikisubmission.org/file/quran-the-final-testament"
               className="underline ml-1"
             >
-              Learn more
+              {t('learnMore')}
             </Link>
           </p>
         </div>
@@ -194,13 +198,13 @@ export default function Home() {
               href="/contact"
               className="hover:text-violet-600 flex items-center gap-1"
             >
-              <FaEnvelope /> Contact
+              <FaEnvelope /> {tNav('contact')}
             </Link>
             <Link
               href="/donate"
               className="hover:text-violet-600 flex items-center gap-1"
             >
-              <FaHeart /> Donate
+              <FaHeart /> {tNav('donate')}
             </Link>
           </div>
 
@@ -220,13 +224,13 @@ export default function Home() {
           </div>
 
           <div className="flex gap-4">
-            <Link href="/legal/terms-of-use">Terms</Link>
-            <Link href="/legal/privacy-policy">Privacy</Link>
+            <Link href="/legal/terms-of-use">{t('terms')}</Link>
+            <Link href="/legal/privacy-policy">{t('privacy')}</Link>
           </div>
         </div>
 
         <p className="font-mono tracking-widest text-[10px] opacity-50 uppercase cursor-pointer">
-          WIKISUBMISSION.ORG
+          {t('brandDomain')}
         </p>
       </footer>
     </main>

@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { FaApple } from 'react-icons/fa'
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface AppPromptProps {
   trackId?: string
 }
 
 export function AppPrompt({ trackId }: AppPromptProps) {
+  const t = useTranslations('music')
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
@@ -54,10 +56,10 @@ export function AppPrompt({ trackId }: AppPromptProps) {
           </div>
           <div>
             <h4 className="text-sm font-bold tracking-tight">
-              Open in WikiSubmission
+              {t('appPromptTitle')}
             </h4>
             <p className="text-xs text-muted-foreground">
-              Continue listening in the app
+              {t('appPromptSubtitle')}
             </p>
           </div>
         </div>
@@ -68,7 +70,7 @@ export function AppPrompt({ trackId }: AppPromptProps) {
             className="rounded-full px-6 h-9 text-xs font-bold bg-white text-black hover:bg-zinc-200 transition-colors shadow-sm"
             onClick={handleOpenInApp}
           >
-            OPEN
+            {t('appPromptOpen')}
           </Button>
           <button
             onClick={handleDismiss}

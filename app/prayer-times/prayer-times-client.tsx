@@ -34,8 +34,10 @@ import {
 import Link from 'next/link'
 import { FaApple } from 'react-icons/fa'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 export default function PrayerTimesClient() {
+  const t = useTranslations('prayertimes')
   return (
     <main className="min-h-screen text-foreground flex flex-col items-center p-4 md:p-2">
       {/* Minimal Header */}
@@ -56,7 +58,7 @@ export default function PrayerTimesClient() {
             />
           </Link>
           <h1 className="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic uppercase pr-2">
-            Prayer Times
+            {t('heading')}
           </h1>
         </div>
         <Suspense
@@ -74,6 +76,7 @@ export default function PrayerTimesClient() {
 }
 
 function PrayerTimesContent() {
+  const t = useTranslations('prayertimes')
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialQuery = searchParams.get('q') || ''
@@ -100,7 +103,7 @@ function PrayerTimesContent() {
         const url = `https://practices.wikisubmission.org/prayer-times/${encodeURIComponent(location)}?${params.toString()}`
         const response = await fetch(url)
         if (!response.ok) {
-          throw new Error('Location not found')
+          throw new Error(t('locationNotFound'))
         }
         const result: PrayerTimesResponse = await response.json()
         setData(result)
@@ -155,14 +158,21 @@ function PrayerTimesContent() {
     navigator.clipboard
       .writeText(url)
       .then(() => {
-        toast.success('URL copied to clipboard')
+        toast.success(t('urlCopied'))
       })
       .catch(() => {
-        toast.error('Failed to copy URL')
+        toast.error(t('failedToCopy'))
       })
   }
 
   const prayerOrder = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']
+  const prayerLabels: Record<string, string> = {
+    fajr: t('fajr'),
+    dhuhr: t('noon'),
+    asr: t('asr'),
+    maghrib: t('maghrib'),
+    isha: t('isha'),
+  }
 
   return (
     <div className="w-full max-w-lg mx-auto space-y-8">
@@ -172,7 +182,7 @@ function PrayerTimesContent() {
           <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
           <Input
             type="search"
-            placeholder="Search location..."
+            placeholder={t('searchLocation')}
             className="pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -185,15 +195,14 @@ function PrayerTimesContent() {
               htmlFor="asr-method"
               className="text-[10px] text-muted-foreground font-light cursor-pointer"
             >
-              Asr: use midpoint method
+              {t('asrMidpoint')}
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <InfoIcon className="size-3 text-muted-foreground/50 hover:text-muted-foreground cursor-help transition-colors" />
               </TooltipTrigger>
               <TooltipContent className="max-w-[200px] text-center">
-                Midpoint method refers to the exact mid-point between noon and
-                sunset, which starts slightly earlier than traditional methods.
+                {t('asrMidpointTooltip')}
               </TooltipContent>
             </Tooltip>
           </div>
@@ -240,8 +249,8 @@ function PrayerTimesContent() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/40 text-muted-foreground uppercase tracking-widest text-[10px]">
-                  <th className="py-3 px-4 text-left font-medium">Prayer</th>
-                  <th className="py-3 px-4 text-right font-medium">Time</th>
+                  <th className="py-3 px-4 text-left font-medium">{t('tablePrayer')}</th>
+                  <th className="py-3 px-4 text-right font-medium">{t('tableTime')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/20">
@@ -268,11 +277,11 @@ function PrayerTimesContent() {
                           )}
                           <span
                             className={cn(
-                              'capitalize font-medium',
+                              'font-medium',
                               isCurrent ? 'text-violet-600' : 'text-foreground'
                             )}
                           >
-                            {prayer}
+                            {prayerLabels[prayer]}
                           </span>
                           {isUpcoming && timeLeft && (
                             <span
@@ -283,12 +292,12 @@ function PrayerTimesContent() {
                                   : 'text-muted-foreground font-light'
                               )}
                             >
-                              in {timeLeft}
+                              {t('inTimeLeft', { timeLeft })}
                             </span>
                           )}
                           {isCurrent && data.current_prayer_time_elapsed && (
                             <span className="text-[10px] normal-case leading-none mt-0.5 text-violet-600 font-light">
-                              {data.current_prayer_time_elapsed} ago
+                              {t('timeElapsed', { elapsed: data.current_prayer_time_elapsed })}
                             </span>
                           )}
                         </div>
@@ -320,10 +329,8 @@ function PrayerTimesContent() {
                 rel="noopener noreferrer"
               >
                 <ItemContent>
-                  <ItemTitle>iOS App</ItemTitle>
-                  <ItemDescription>
-                    Get real-time prayer notifications
-                  </ItemDescription>
+                  <ItemTitle>{t('iosApp')}</ItemTitle>
+                  <ItemDescription>{t('iosAppDesc')}</ItemDescription>
                 </ItemContent>
                 <ItemActions>
                   <FaApple className="size-8" />
@@ -339,7 +346,7 @@ function PrayerTimesContent() {
               className="flex items-center gap-2 text-violet-600 hover:text-violet-500 transition-colors cursor-pointer focus:outline-none"
             >
               <ShareIcon className="size-3" />
-              <p>SHARE THIS PAGE</p>
+              <p>{t('sharePage').toUpperCase()}</p>
             </button>
             <span>{`${data.coordinates.latitude}°N, ${data.coordinates.longitude}°E`}</span>
             <span>{data.local_timezone}</span>
@@ -351,23 +358,23 @@ function PrayerTimesContent() {
             <div className="space-y-6">
               <div className="text-center space-y-1">
                 <h3 className="text-sm font-semibold uppercase tracking-wider">
-                  Monthly Schedule
+                  {t('monthlySchedule')}
                 </h3>
                 <p className="text-[10px] text-muted-foreground">
-                  PREVIEWING THE NEXT 30 DAYS
+                  {t('next30Days').toUpperCase()}
                 </p>
               </div>
               <div className="overflow-x-auto -mx-4 px-4 pb-4">
                 <table className="w-full text-[10px] sm:text-xs">
                   <thead>
                     <tr className="border-b border-border/40 text-muted-foreground uppercase tracking-wider">
-                      <th className="py-2 text-left font-medium">Date</th>
-                      <th className="py-2 text-center font-medium">Fajr</th>
-                      <th className="py-2 text-center font-medium">Sunrise</th>
-                      <th className="py-2 text-center font-medium">Noon</th>
-                      <th className="py-2 text-center font-medium">Asr</th>
-                      <th className="py-2 text-center font-medium">Maghrib</th>
-                      <th className="py-2 text-center font-medium">Isha</th>
+                      <th className="py-2 text-left font-medium">{t('tableDate')}</th>
+                      <th className="py-2 text-center font-medium">{t('fajr')}</th>
+                      <th className="py-2 text-center font-medium">{t('sunrise')}</th>
+                      <th className="py-2 text-center font-medium">{t('noon')}</th>
+                      <th className="py-2 text-center font-medium">{t('asr')}</th>
+                      <th className="py-2 text-center font-medium">{t('maghrib')}</th>
+                      <th className="py-2 text-center font-medium">{t('isha')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/20">

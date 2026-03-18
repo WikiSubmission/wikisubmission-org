@@ -5,8 +5,10 @@ import { SearchIcon } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 export default function QuranSearchbar() {
+  const t = useTranslations('search')
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const { replace } = useRouter()
@@ -49,7 +51,7 @@ export default function QuranSearchbar() {
       <SearchIcon className="absolute left-2 top-2.5 size-3.5 text-muted-foreground/60 z-10" />
       <Input
         type="search"
-        placeholder="Search Quran"
+        placeholder={t('placeholder')}
         className={cn(
           'pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none transition-all duration-200'
         )}

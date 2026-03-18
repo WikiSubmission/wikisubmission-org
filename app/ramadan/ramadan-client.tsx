@@ -19,8 +19,10 @@ import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 export default function RamadanClient() {
+  const t = useTranslations('ramadan')
   return (
     <main className="min-h-screen text-foreground flex flex-col items-center p-4 md:p-2">
       {/* Minimal Header */}
@@ -41,7 +43,7 @@ export default function RamadanClient() {
             />
           </Link>
           <h1 className="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic uppercase pr-2">
-            Ramadan
+            {t('heading')}
           </h1>
         </div>
         <Suspense
@@ -59,6 +61,7 @@ export default function RamadanClient() {
 }
 
 function RamadanContent() {
+  const t = useTranslations('ramadan')
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialQuery = searchParams.get('q') || ''
@@ -84,7 +87,7 @@ function RamadanContent() {
         const url = `https://practices.wikisubmission.org/ramadan/${encodeURIComponent(location)}?year=${year}`
         const response = await fetch(url)
         if (!response.ok) {
-          throw new Error('Location not found')
+          throw new Error(t('locationNotFound'))
         }
         const result: RamadanResponse = await response.json()
         setData(result)
@@ -141,10 +144,10 @@ function RamadanContent() {
     navigator.clipboard
       .writeText(url)
       .then(() => {
-        toast.success('URL copied to clipboard')
+        toast.success(t('urlCopied'))
       })
       .catch(() => {
-        toast.error('Failed to copy URL')
+        toast.error(t('failedToCopy'))
       })
   }
 
@@ -162,7 +165,7 @@ function RamadanContent() {
             <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60" />
             <Input
               type="search"
-              placeholder="Search location..."
+              placeholder={t('searchLocation')}
               className="pl-7 h-8 text-sm border-0 bg-secondary focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -211,7 +214,7 @@ function RamadanContent() {
                 </span>
               </div>
               <h2 className="text-2xl font-bold tracking-tight text-violet-600 drop-shadow-sm">
-                {data.year} Ramadan Schedule
+                {t('schedule', { year: data.year })}
               </h2>
               <p className="text-lg text-foreground/80 max-w-xl mx-auto font-medium">
                 {data.status_string}
@@ -222,22 +225,22 @@ function RamadanContent() {
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <SummaryCard
-              title="First Fasting Day"
+              title={t('firstFastingDay')}
               value={data.first_fasting_day}
               icon={<CalendarIcon className="size-4 text-violet-500" />}
             />
             <SummaryCard
-              title="Last Fasting Day"
+              title={t('lastFastingDay')}
               value={data.last_fasting_day}
               icon={<CalendarIcon className="size-4 text-violet-500" />}
             />
             <SummaryCard
-              title="Night of Destiny"
+              title={t('nightOfDestiny')}
               value={data.night_of_destiny}
               icon={<StarsIcon className="size-4 text-amber-500" />}
             />
             <SummaryCard
-              title="Average Fasting Duration"
+              title={t('averageFastingDuration')}
               value={data.average_fasting_duration}
               icon={<MoonIcon className="size-4 text-blue-500" />}
             />
@@ -249,25 +252,25 @@ function RamadanContent() {
               <thead>
                 <tr className="border-b border-border/40 bg-muted/30">
                   <th className="px-4 py-3 font-semibold text-muted-foreground">
-                    Day
+                    {t('tableDay')}
                   </th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">
-                    Date
+                    {t('tableDate')}
                   </th>
                   <th className="px-4 py-3 font-semibold text-violet-600/80">
-                    Dawn (Start)
+                    {t('tableDawn')}
                   </th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">
-                    Noon
+                    {t('tableNoon')}
                   </th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground text-center">
-                    Afternoon
+                    {t('tableAfternoon')}
                   </th>
                   <th className="px-4 py-3 font-semibold text-red-600/80">
-                    Sunset (End)
+                    {t('tableSunset')}
                   </th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">
-                    Night
+                    {t('tableNight')}
                   </th>
                 </tr>
               </thead>
@@ -308,11 +311,11 @@ function RamadanContent() {
           {/* Moon Data */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-8 px-6 rounded-2xl bg-secondary/20 border border-border/40">
             <MoonDataSection
-              title="Ramadan Start Moon"
+              title={t('startMoon')}
               moon={data.moon_data.start}
             />
             <MoonDataSection
-              title="Ramadan End Moon"
+              title={t('endMoon')}
               moon={data.moon_data.end}
             />
           </div>
@@ -323,7 +326,7 @@ function RamadanContent() {
               className="flex items-center gap-2 text-violet-600 hover:text-violet-500 transition-colors cursor-pointer focus:outline-none bg-violet-600/5 px-4 py-2 rounded-full"
             >
               <ShareIcon className="size-3" />
-              <p className="font-semibold">SHARE THIS SCHEDULE</p>
+              <p className="font-semibold">{t('shareSchedule').toUpperCase()}</p>
             </button>
           </footer>
         </div>
@@ -372,6 +375,7 @@ function MoonDataSection({
   title: string
   moon: RamadanResponse['moon_data']['start']
 }) {
+  const t = useTranslations('ramadan')
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-violet-600 uppercase tracking-widest">
@@ -379,15 +383,15 @@ function MoonDataSection({
       </h3>
       <div className="space-y-2">
         <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">New Moon (Local)</span>
+          <span className="text-muted-foreground">{t('newMoonLocal')}</span>
           <span className="font-mono">{moon.new_moon_local}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
-          <span className="text-muted-foreground">Sunset (Local)</span>
+          <span className="text-muted-foreground">{t('sunsetLocal')}</span>
           <span className="font-mono">{moon.sunset_local}</span>
         </div>
         <div className="pt-2 text-[10px] text-muted-foreground/60 border-t border-border/40 font-mono">
-          UTC: {moon.new_moon_utc}
+          {t('utcValue', { value: moon.new_moon_utc })}
         </div>
       </div>
     </div>
