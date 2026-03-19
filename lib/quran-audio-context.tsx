@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useRef,
   useCallback,
+  useMemo,
 } from 'react'
 import useLocalStorage from '@/hooks/use-local-storage'
 
@@ -301,25 +302,34 @@ export function QuranPlayerProvider({
     }
   }, [togglePlayPause, prevVerse, nextVerse, seek])
 
+  // Memoize context value so that audio timeupdate (setProgress) does not
+  // re-render every VerseCard that subscribes to QuranPlayerContext.
+  const playerContextValue = useMemo(
+    () => ({
+      currentVerse,
+      isPlaying,
+      queue,
+      reciter,
+      isBuffering,
+      volume,
+      playFromVerse,
+      setChapterQueue,
+      togglePlayPause,
+      nextVerse,
+      prevVerse,
+      seek,
+      setReciter,
+      setVolume,
+    }),
+    [
+      currentVerse, isPlaying, queue, reciter, isBuffering, volume,
+      playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse,
+      seek, setReciter, setVolume,
+    ]
+  )
+
   return (
-    <QuranPlayerContext.Provider
-      value={{
-        currentVerse,
-        isPlaying,
-        queue,
-        reciter,
-        isBuffering,
-        volume,
-        playFromVerse,
-        setChapterQueue,
-        togglePlayPause,
-        nextVerse,
-        prevVerse,
-        seek,
-        setReciter,
-        setVolume,
-      }}
-    >
+    <QuranPlayerContext.Provider value={playerContextValue}>
       <QuranProgressContext.Provider
         value={{ progress, duration, currentTime }}
       >

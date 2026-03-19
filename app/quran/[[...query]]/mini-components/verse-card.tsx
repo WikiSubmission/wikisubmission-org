@@ -32,15 +32,18 @@ export function toQuranVerse(verse: VerseData): QuranVerse {
 
 // ─── Word-by-word (Arabic) ────────────────────────────────────────────────────
 
-const WordByWordView = memo(function WordByWordView({
-  words,
-  verseKey,
-  compact,
-}: {
-  words: WordData[]
-  verseKey: string
-  compact: boolean
-}) {
+const WordByWordView = memo(
+  function WordByWordView({
+    words,
+    compact,
+  }: {
+    words: WordData[]
+    /** Used only in arePropsEqual — not needed in the render body. */
+    verseKey: string
+    compact: boolean
+    /** Forwarded from VerseCard — forces re-render on language reload. */
+    optsKey?: string
+  }) {
   // Sort once and memoize — words from the API are stable references
   const sorted = useMemo(
     () => [...words].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0)),
@@ -155,19 +158,28 @@ const WordByWordView = memo(function WordByWordView({
       })}
     </div>
   )
-})
+  },
+  (prev, next) =>
+    prev.verseKey === next.verseKey &&
+    prev.compact === next.compact &&
+    prev.optsKey === next.optsKey
+)
 
 // ─── Verse Card ───────────────────────────────────────────────────────────────
 
-export const VerseCard = memo(function VerseCard({
-  verse,
-  isLast,
-  isScrollTarget,
-}: {
-  verse: VerseData
-  isLast: boolean
-  isScrollTarget: boolean
-}) {
+export const VerseCard = memo(
+  function VerseCard({
+    verse,
+    isLast,
+    isScrollTarget,
+    optsKey,
+  }: {
+    verse: VerseData
+    isLast: boolean
+    isScrollTarget: boolean
+    /** Stable key derived from language prefs — forces re-render on reload. */
+    optsKey: string
+  }) {
   const prefs = useQuranPreferences()
   const { isRtl } = useLanguagesStore()
   const { playFromVerse, currentVerse, isPlaying, isBuffering, togglePlayPause } =
@@ -273,6 +285,7 @@ export const VerseCard = memo(function VerseCard({
                     words={verse.w}
                     verseKey={verseId}
                     compact={!prefs.wordByWord}
+                    optsKey={optsKey}
                   />
                 ) : arTr?.tx ? (
                   <p
@@ -306,4 +319,10 @@ export const VerseCard = memo(function VerseCard({
       )}
     </div>
   )
-})
+  },
+  (prev, next) =>
+    prev.verse.vk === next.verse.vk &&
+    prev.isLast === next.isLast &&
+    prev.isScrollTarget === next.isScrollTarget &&
+    prev.optsKey === next.optsKey
+)

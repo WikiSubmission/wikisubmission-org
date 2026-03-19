@@ -103,13 +103,42 @@ export function ChapterReader({
   const lastVirtualIndex = virtualItems[virtualItems.length - 1]?.index ?? -1
   const firstVirtualIndex = virtualItems[0]?.index ?? 0
 
-  // ── Minimap seek handler ──────────────────────────────────────────────────
-  // Uses smooth scroll (user intentionally navigated via minimap).
-  const handleSeek = useCallback((verseNumber: number) => {
-    seekBehaviorRef.current = 'smooth'
-    seekDoneRef.current = false
-    setSeekTarget(String(verseNumber))
-  }, [])
+  // ── Minimap handlers ──────────────────────────────────────────────────────
+
+  // Prefetch a verse window while the user is hovering over the minimap.
+  // The hook deduplicates concurrent requests via an internal promise cache.
+  const handlePreview = useCallback(
+    (verseNumber: number) => {
+      reader.prefetch(verseNumber, opts)
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [reader.prefetch]
+  )
+
+  // On release: if the verse is already in the loaded window, smooth-scroll to
+  // it. Otherwise do a direct seekToVerse jump (no incremental batch loading).
+  const handleSeek = useCallback(
+    (verseNumber: number) => {
+      const isLoaded = reader.verses.some(
+        (v) => v.vk?.split(':')[1] === String(verseNumber)
+      )
+
+      if (isLoaded) {
+        seekBehaviorRef.current = 'smooth'
+        seekDoneRef.current = false
+        setSeekTarget(String(verseNumber))
+      } else {
+        // Direct jump — replaces verse window, no scrolling through intermediates.
+        // seekToVerse consumes the prefetch cache if the user hovered long enough.
+        seekBehaviorRef.current = 'auto'
+        seekDoneRef.current = false
+        setSeekTarget(String(verseNumber))
+        reader.seekToVerse(verseNumber, opts)
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [reader.verses, reader.seekToVerse]
+  )
 
   // Scroll to seekTarget once the verse is in the loaded data
   useEffect(() => {
@@ -163,6 +192,10 @@ export function ChapterReader({
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstVirtualIndex, lastVirtualIndex, reader.verses.length])
+
+  // Stable key that changes when language prefs change — propagated to VerseCard
+  // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
+  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}`
 
   // Current verse number for minimap highlight
   const centerIndex = Math.floor((firstVirtualIndex + lastVirtualIndex) / 2)
@@ -256,6 +289,7 @@ export function ChapterReader({
                           seekTarget !== null &&
                           verse.vk?.split(':')[1] === seekTarget
                         }
+                        optsKey={optsKey}
                       />
                     </div>
                   )
@@ -326,6 +360,7 @@ export function ChapterReader({
           currentVerseNumber={currentVerseNumber}
           verses={reader.verses}
           onSeek={handleSeek}
+          onPreview={handlePreview}
         />
       </div>
 

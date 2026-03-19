@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
 import type { LangCode } from '@/hooks/use-quran-preferences'
@@ -29,6 +29,10 @@ export type UseChapterReaderReturn = {
   hasMore: boolean
   loadMore: (fallbackOpts?: ChapterReaderOptions) => Promise<void>
   reload: (opts: ChapterReaderOptions) => Promise<void>
+  /** Jump directly to a verse window — replaces state, no incremental loading. */
+  seekToVerse: (targetVerse: number, fallbackOpts?: ChapterReaderOptions) => Promise<void>
+  /** Fire-and-cache fetch around targetVerse so seekToVerse can resolve instantly. */
+  prefetch: (targetVerse: number, fallbackOpts?: ChapterReaderOptions) => void
 }
 
 type State = {
@@ -52,6 +56,13 @@ function buildLangs(opts: ChapterReaderOptions): string[] {
   return langs.length > 0 ? langs : ['en']
 }
 
+type FetchResult = {
+  verses: VerseData[] | null
+  titles: Record<string, string> | null
+  reachedEnd: boolean | undefined
+  error: string | null
+}
+
 export function useChapterReader(
   chapterNumber: number,
   initialData: QuranResponse | null
@@ -71,8 +82,11 @@ export function useChapterReader(
     lastOpts: null,
   })
 
+  // Cache for in-flight prefetch promises: cacheKey → Promise<FetchResult>
+  const prefetchCacheRef = useRef(new Map<string, Promise<FetchResult>>())
+
   const fetchVerses = useCallback(
-    async (verseStart: number, opts: ChapterReaderOptions) => {
+    async (verseStart: number, opts: ChapterReaderOptions): Promise<FetchResult> => {
       const langs = buildLangs(opts)
       const { data, error } = await wsApi.GET('/quran', {
         params: {
@@ -89,7 +103,7 @@ export function useChapterReader(
       })
 
       if (error || !data) {
-        return { verses: null, titles: null, error: 'Failed to load verses.' }
+        return { verses: null, titles: null, reachedEnd: undefined, error: 'Failed to load verses.' }
       }
 
       const chapter = data.chapters?.[0]
@@ -164,6 +178,74 @@ export function useChapterReader(
     }))
   }, [state, fetchVerses])
 
+  /**
+   * Fire-and-forget prefetch for the verse window around `targetVerse`.
+   * The promise is stored in `prefetchCacheRef` so `seekToVerse` can consume
+   * it immediately without waiting for a new network round-trip.
+   */
+  const prefetch = useCallback(
+    (targetVerse: number, fallbackOpts?: ChapterReaderOptions) => {
+      const opts = state.lastOpts ?? fallbackOpts
+      if (!opts || state.loading) return
+
+      const windowStart = Math.max(0, targetVerse - 5)
+      const cacheKey = `${chapterNumber}:${windowStart}`
+
+      if (prefetchCacheRef.current.has(cacheKey)) return // already in flight
+
+      const promise = fetchVerses(windowStart, opts)
+      prefetchCacheRef.current.set(cacheKey, promise)
+
+      // Evict after 30 s to avoid holding stale data
+      setTimeout(() => prefetchCacheRef.current.delete(cacheKey), 30_000)
+    },
+    [chapterNumber, state.lastOpts, state.loading, fetchVerses]
+  )
+
+  /**
+   * Replace the current verse window with a page centred on `targetVerse`.
+   * Uses a cached prefetch promise if available — making the seek instant
+   * if the user hovered over this verse long enough to trigger prefetch.
+   */
+  const seekToVerse = useCallback(
+    async (targetVerse: number, fallbackOpts?: ChapterReaderOptions) => {
+      const opts = state.lastOpts ?? fallbackOpts
+      if (!opts) return
+
+      const windowStart = Math.max(0, targetVerse - 5)
+      const cacheKey = `${chapterNumber}:${windowStart}`
+
+      setState((prev) => ({ ...prev, loading: true, error: null }))
+
+      const cached = prefetchCacheRef.current.get(cacheKey)
+      const result = await (cached ?? fetchVerses(windowStart, opts))
+
+      // Clean up the consumed cache entry
+      prefetchCacheRef.current.delete(cacheKey)
+
+      if (result.error || !result.verses) {
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error: result.error ?? 'Failed to seek to verse.',
+        }))
+        return
+      }
+
+      setState({
+        verses: result.verses,
+        chapterTitles: result.titles ?? {},
+        verseCount: result.verses.length,
+        loading: false,
+        error: null,
+        lastVerseEnd: windowStart + PAGE_SIZE - 1,
+        reachedEnd: result.reachedEnd ?? false,
+        lastOpts: opts,
+      })
+    },
+    [chapterNumber, state.lastOpts, fetchVerses]
+  )
+
   const hasMore = state.verses.length > 0 && !state.reachedEnd
 
   return {
@@ -175,5 +257,7 @@ export function useChapterReader(
     hasMore,
     loadMore,
     reload,
+    seekToVerse,
+    prefetch,
   }
 }
