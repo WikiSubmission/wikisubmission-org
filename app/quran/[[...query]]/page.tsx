@@ -50,9 +50,9 @@ export default async function QuranPage({
   searchParams,
 }: {
   params: Promise<{ query?: string[] }>
-  searchParams: Promise<{ q?: string }>
+  searchParams: Promise<{ q?: string; verse?: string }>
 }) {
-  const { q } = await searchParams
+  const { q, verse } = await searchParams
   const { query } = await params
 
   const queryText = q || query?.join(' ')
@@ -84,15 +84,19 @@ export default async function QuranPage({
 
   const parsed = parseQueryType(queryText)
 
-  // ── Chapter view: SSR first 50 verses via internal Railway network ───────────
+  // ── Chapter view: SSR first N verses via internal Railway network ───────────
+  // If ?verse=N is set, SSR up to that verse so it's immediately in the DOM.
   if (parsed.type === 'chapter' && parsed.chapterNumber) {
+    const targetVerse = verse ? parseInt(verse) : undefined
+    const ssrVerseEnd = targetVerse ? Math.max(50, targetVerse + 5) : 50
+
     const { data } = await wsApiServer.GET('/quran', {
       params: {
         query: {
           chapter_number_start: parsed.chapterNumber,
           langs: ['en', 'ar'],
           verse_start: 0,
-          verse_end: 50,
+          verse_end: ssrVerseEnd,
           include_words: true,
           include_root: true,
           include_meaning: true,

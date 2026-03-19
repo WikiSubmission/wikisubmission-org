@@ -26,7 +26,10 @@ export function ChapterReader({
   const reader = useChapterReader(chapterNumber, initialData)
   const t = useTranslations('quran')
   const tCommon = useTranslations('common')
-  const verseParam = useSearchParams().get('verse')
+  // Capture once at mount — must not react to later IntersectionObserver replaceState calls
+  const searchParams = useSearchParams()
+  const [initialVerseParam] = useState(() => searchParams.get('verse'))
+  const scrolledRef = useRef(false)
   const [scrolled, setScrolled] = useState(false)
 
   const opts: ChapterReaderOptions = {
@@ -58,27 +61,28 @@ export function ChapterReader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Scroll to ?verse=N once it's rendered.
-  // Re-runs every time a new batch of verses arrives, until the element exists.
+  // Scroll to ?verse=N once it's rendered. Uses a ref for the guard to avoid
+  // stale-closure double-fires when batches load in rapid succession.
   useEffect(() => {
-    if (!verseParam || scrolled) return
-    const el = document.getElementById(`${chapterNumber}:${verseParam}`)
+    if (!initialVerseParam || scrolledRef.current) return
+    const el = document.getElementById(`${chapterNumber}:${initialVerseParam}`)
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.scrollIntoView({ behavior: 'instant', block: 'center' })
+      scrolledRef.current = true
       setScrolled(true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reader.verses.length, verseParam, chapterNumber])
+  }, [reader.verses.length, initialVerseParam, chapterNumber])
 
   // Auto-preload: silently fetch next batch while user reads.
   // When seeking a specific verse, skip the delay so we reach it as fast as possible.
   useEffect(() => {
     if (!reader.hasMore || reader.loading) return
-    const isSeekingVerse = !!verseParam && !scrolled
+    const isSeekingVerse = !!initialVerseParam && !scrolled
     const timer = setTimeout(() => reader.loadMore(opts), isSeekingVerse ? 50 : 800)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reader.verses.length, reader.hasMore, reader.loading, verseParam, scrolled])
+  }, [reader.verses.length, reader.hasMore, reader.loading, initialVerseParam, scrolled])
 
   // Reveal the prev/next footer once the user reaches (or nearly reaches) the end.
   const [showNav, setShowNav] = useState(false)
