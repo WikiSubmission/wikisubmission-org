@@ -10,6 +10,7 @@ import type { Viewport } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale } from 'next-intl/server'
+import { ReactScanInit } from '@/components/react-scan-init'
 
 export const metadata = Metadata
 
@@ -41,6 +42,7 @@ export default async function RootLayout({
                 {children}
                 <ScrollToTop />
                 <Toaster />
+                {process.env.NODE_ENV === 'development' && <ReactScanInit />}
               </Providers>
             </ThemeProvider>
           </NextIntlClientProvider>

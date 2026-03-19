@@ -8,7 +8,6 @@ import React, {
   useRef,
   useCallback,
 } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import useLocalStorage from '@/hooks/use-local-storage'
 
 export interface QuranVerse {
@@ -26,7 +25,10 @@ interface QuranPlayerContextType {
   isBuffering: boolean
   volume: number
 
-  playFromVerse: (verse: QuranVerse, fullQueue: QuranVerse[]) => void
+  // Pass fullQueue on first call, or pre-set it with setChapterQueue so cards
+  // don't need to hold the entire verse list as a prop.
+  playFromVerse: (verse: QuranVerse, fullQueue?: QuranVerse[]) => void
+  setChapterQueue: (verses: QuranVerse[]) => void
   togglePlayPause: () => void
   nextVerse: () => void
   prevVerse: () => void
@@ -73,11 +75,6 @@ export function QuranPlayerProvider({
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const nextAudioRef = useRef<HTMLAudioElement | null>(null)
   const lastUrlRef = useRef<string | null>(null)
-
-  // Next.js Navigation
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
 
   // Use Refs for callbacks to avoid stale closures in event listeners
   const nextVerseRef = useRef<() => void>(() => {})
@@ -155,15 +152,6 @@ export function QuranPlayerProvider({
         })
       }
     }
-    // Update URL param for scrolling
-    const verseNum = currentVerse.verse_id.split(':')[1]
-    const params = new URLSearchParams(searchParams?.toString() || '')
-
-    if (params.get('verse') !== verseNum) {
-      params.set('verse', verseNum)
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-    }
-
     // Preload next verse
     const currentIdx = queue.findIndex(
       (v) => v.verse_id === currentVerse.verse_id
@@ -208,19 +196,24 @@ export function QuranPlayerProvider({
     }
   }, [isPlaying, currentVerse])
 
+  // Allow callers to pre-populate the queue (from ChapterReader) so individual
+  // VerseCards don't need to hold allVerses as a prop.
+  const setChapterQueue = useCallback((verses: QuranVerse[]) => {
+    setQueue(verses)
+  }, [])
+
   const playFromVerse = useCallback(
-    (verse: QuranVerse, fullQueue: QuranVerse[]) => {
-      // Find index of verse in fullQueue
-      const idx = fullQueue.findIndex((v) => v.verse_id === verse.verse_id)
+    (verse: QuranVerse, fullQueue?: QuranVerse[]) => {
+      // Use the provided queue or fall back to the already-stored queue
+      const q = fullQueue && fullQueue.length > 0 ? fullQueue : queue
+      const idx = q.findIndex((v) => v.verse_id === verse.verse_id)
       if (idx !== -1) {
-        // Slice queue from this verse onwards
-        const newQueue = fullQueue.slice(idx)
-        setQueue(newQueue)
+        setQueue(q.slice(idx))
         setCurrentVerse(verse)
         setIsPlaying(true)
       }
     },
-    []
+    [queue]
   )
 
   const togglePlayPause = useCallback(() => {
@@ -318,6 +311,7 @@ export function QuranPlayerProvider({
         isBuffering,
         volume,
         playFromVerse,
+        setChapterQueue,
         togglePlayPause,
         nextVerse,
         prevVerse,

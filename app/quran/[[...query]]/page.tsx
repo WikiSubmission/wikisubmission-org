@@ -110,6 +110,7 @@ export default async function QuranPage({
           <ChapterReader
             chapterNumber={parsed.chapterNumber}
             initialData={data ?? null}
+            initialVerse={verse}
           />
         </Suspense>
       </main>
@@ -138,6 +139,7 @@ export default async function QuranPage({
           <ChapterReader
             chapterNumber={parsed.chapterNumber}
             initialData={data ?? null}
+            initialVerse={verse}
           />
         </Suspense>
       </main>

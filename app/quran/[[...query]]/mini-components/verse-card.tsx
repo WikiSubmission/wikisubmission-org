@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { memo, useMemo, useCallback } from 'react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
 import { useQuranPlayer, type QuranVerse } from '@/lib/quran-audio-context'
@@ -26,14 +25,14 @@ import { QuranRefText } from '@/components/quran-ref-text'
 type VerseData = components['schemas']['VerseData']
 type WordData = components['schemas']['WordData']
 
-// Adapter: VerseData → QuranVerse (for the audio player — only verse_id is used for audio URL)
-function toQuranVerse(verse: VerseData): QuranVerse {
+// Adapter: VerseData → QuranVerse (for the audio player)
+export function toQuranVerse(verse: VerseData): QuranVerse {
   return { verse_id: verse.vk ?? '', ws_quran_text: {} }
 }
 
 // ─── Word-by-word (Arabic) ────────────────────────────────────────────────────
 
-function WordByWordView({
+const WordByWordView = memo(function WordByWordView({
   words,
   verseKey,
   compact,
@@ -42,14 +41,13 @@ function WordByWordView({
   verseKey: string
   compact: boolean
 }) {
-  const [, verseNumStr] = verseKey.split(':')
-  const verseNum = verseNumStr ?? ''
-  const wordParam = useSearchParams().get('word')
-
-  const sorted = [...words].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0))
+  // Sort once and memoize — words from the API are stable references
+  const sorted = useMemo(
+    () => [...words].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0)),
+    [words]
+  )
 
   if (compact) {
-    // Compact mode: just Arabic text, click opens root dialog
     return (
       <div dir="rtl" className="flex flex-wrap text-right justify-start gap-x-4 gap-y-6 py-2">
         {sorted.map((w) => {
@@ -57,8 +55,6 @@ function WordByWordView({
           const root = w.r
           const meaning = w.m ?? ''
           const wordIndex = w.wi ?? 0
-          const isHighlighted =
-            verseNum === verseNum && wordParam === String(wordIndex)
 
           return (
             <Dialog key={wordIndex}>
@@ -66,11 +62,7 @@ function WordByWordView({
                 <DialogTrigger asChild>
                   <TooltipTrigger asChild>
                     <p
-                      className={`font-arabic text-2xl leading-relaxed transition-all cursor-pointer hover:text-violet-600 hover:scale-105 active:scale-95 ${
-                        isHighlighted
-                          ? 'text-violet-600 bg-violet-600/5 ring-1 ring-violet-600/20 px-2 rounded-xl'
-                          : 'text-foreground/90'
-                      }`}
+                      className="font-arabic text-2xl leading-relaxed transition-all cursor-pointer hover:text-violet-600 hover:scale-105 active:scale-95 text-foreground/90"
                     >
                       {arabic}
                     </p>
@@ -114,7 +106,6 @@ function WordByWordView({
     )
   }
 
-  // Detailed mode: Arabic + transliteration + meaning stacked
   return (
     <div dir="rtl" className="flex flex-wrap justify-start gap-y-8 gap-x-2 py-4">
       {sorted.map((w) => {
@@ -164,22 +155,21 @@ function WordByWordView({
       })}
     </div>
   )
-}
+})
 
 // ─── Verse Card ───────────────────────────────────────────────────────────────
 
-export function VerseCard({
+export const VerseCard = memo(function VerseCard({
   verse,
-  allVerses,
   isLast,
+  isScrollTarget,
 }: {
   verse: VerseData
-  allVerses: VerseData[]
   isLast: boolean
+  isScrollTarget: boolean
 }) {
   const prefs = useQuranPreferences()
   const { isRtl } = useLanguagesStore()
-  const verseSearchParam = useSearchParams().get('verse')
   const { playFromVerse, currentVerse, isPlaying, isBuffering, togglePlayPause } =
     useQuranPlayer()
 
@@ -193,36 +183,26 @@ export function VerseCard({
 
   const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
   const verseId = verse.vk ?? ''
-  const isScrollTarget =
-    verseSearchParam !== null && String(vNum) === verseSearchParam
   const isCurrentAudio = currentVerse?.verse_id === verseId
 
-  const audioVerse = toQuranVerse(verse)
-  const audioQueue = allVerses.map(toQuranVerse)
+  const audioVerse = useMemo(
+    () => toQuranVerse(verse),
+    // verse reference is stable within a batch; vk is sufficient identity
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [verse.vk]
+  )
 
-  // Sync URL ?verse=N with the verse currently in the center of the viewport.
-  // Uses window.history.replaceState directly — no React re-render on scroll.
-  const containerRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return
-        const params = new URLSearchParams(window.location.search)
-        if (params.get('verse') === String(vNum)) return
-        params.set('verse', String(vNum))
-        window.history.replaceState(null, '', `${window.location.pathname}?${params}`)
-      },
-      { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [vNum])
+  const handlePlay = useCallback(() => {
+    if (isCurrentAudio) {
+      togglePlayPause()
+    } else {
+      // Queue was pre-set in ChapterReader via setChapterQueue; no need to pass it here
+      playFromVerse(audioVerse)
+    }
+  }, [isCurrentAudio, togglePlayPause, playFromVerse, audioVerse])
 
   return (
     <div
-      ref={containerRef}
       id={verseId}
       className={`transition-colors duration-500 ${
         isScrollTarget || isCurrentAudio ? 'bg-violet-600/10' : ''
@@ -249,13 +229,7 @@ export function VerseCard({
             variant="ghost"
             size="icon"
             className="h-8 w-8 rounded-full hover:bg-violet-600/10 hover:text-violet-600"
-            onClick={() => {
-              if (isCurrentAudio) {
-                togglePlayPause()
-              } else {
-                playFromVerse(audioVerse, audioQueue)
-              }
-            }}
+            onClick={handlePlay}
           >
             {isCurrentAudio && isPlaying ? (
               isBuffering ? (
@@ -332,4 +306,4 @@ export function VerseCard({
       )}
     </div>
   )
-}
+})
