@@ -59,7 +59,7 @@ export default async function QuranPage({
 
   if (!queryText) {
     return (
-      <main className="whitespace-pre-line">
+      <main className="whitespace-pre-line h-full">
         <section>
           <div className="space-y-2">
             <QuranUtilitiesRow />
@@ -105,7 +105,7 @@ export default async function QuranPage({
     })
 
     return (
-      <main className="whitespace-pre-line">
+      <main className="whitespace-pre-line h-full">
         <Suspense fallback={<Spinner />}>
           <ChapterReader
             chapterNumber={parsed.chapterNumber}
@@ -134,7 +134,7 @@ export default async function QuranPage({
     })
 
     return (
-      <main className="whitespace-pre-line">
+      <main className="whitespace-pre-line h-full">
         <Suspense fallback={<Spinner />}>
           <ChapterReader
             chapterNumber={parsed.chapterNumber}
@@ -148,7 +148,7 @@ export default async function QuranPage({
 
   // ── Verse ref & text search: client-side via SearchResult ────────────────────
   return (
-    <main className="whitespace-pre-line">
+    <main className="whitespace-pre-line h-full">
       <section>
         <Suspense fallback={<Spinner />}>
           <SearchResult props={{ query: queryText }} />

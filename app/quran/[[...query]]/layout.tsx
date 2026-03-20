@@ -26,7 +26,7 @@ export default async function QuranLayout({
     wsApiServer.GET('/languages'),
   ])
 
-if (chaptersRes.data && appendicesRes.data) {
+  if (chaptersRes.data && appendicesRes.data) {
     return (
       <QuranPlayerProvider>
         <SidebarProvider>
@@ -47,7 +47,7 @@ if (chaptersRes.data && appendicesRes.data) {
               <QuranSettings />
             </header>
             {/* Main content */}
-            <div className="flex flex-1 flex-col gap-4 p-4 pb-24">
+            <div className="flex flex-1 flex-col gap-4 p-4 pb-4">
               {children}
             </div>
             <MetricsCollector />

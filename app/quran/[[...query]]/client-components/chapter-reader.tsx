@@ -15,13 +15,17 @@ import { VerseCard, toQuranVerse } from '../mini-components/verse-card'
 import { VerseMinimap } from '../mini-components/verse-minimap'
 import { useTranslations } from 'next-intl'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useQuranPlayer, useQuranPlayerCallbacks } from '@/lib/quran-audio-context'
+import {
+  useQuranPlayer,
+  useQuranPlayerCallbacks,
+} from '@/lib/quran-audio-context'
 
 // Height of the verse viewport container.
-// Subtracts: sticky header (4rem) + layout padding-top (1rem) +
-//            layout padding-bottom/pb-24 (6rem) + chapter title bar (~4rem) +
-//            space-y-2 gap (0.5rem) + small buffer (0.5rem).
-const VIEWPORT_HEIGHT = 'calc(100svh - 16rem)'
+// Subtracts: sticky header (4rem) + layout padding (1rem top + 6rem bottom) +
+//            chapter title bar (~3rem) + space-y-2 gap (0.5rem).
+// Reduced from 16rem → 13rem so the reader extends closer to the screen edge
+// (the previous 16rem was overly conservative by ~3rem).
+const VIEWPORT_HEIGHT = 'calc(100svh - 13rem)'
 
 export function ChapterReader({
   chapterNumber,
@@ -127,7 +131,11 @@ export function ChapterReader({
   // Destructure stable callbacks so ESLint can track them as deps directly.
   // After the stateRef fix in use-chapter-reader, prefetch and seekToVerse are
   // stable references (only change if chapterNumber changes).
-  const { prefetch: readerPrefetch, seekToVerse: readerSeekToVerse, verses: readerVerses } = reader
+  const {
+    prefetch: readerPrefetch,
+    seekToVerse: readerSeekToVerse,
+    verses: readerVerses,
+  } = reader
 
   // Prefetch a verse window while the user is hovering over the minimap.
   // The hook deduplicates concurrent requests via an internal promise cache.
@@ -179,6 +187,17 @@ export function ChapterReader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reader.verses.length, seekTarget])
 
+  // Auto-scroll when the audio player advances to the next verse.
+  // Only triggers when verse_id actually changes (not on play/pause toggle).
+  // Skips if the verse isn't in the current loaded window (no jarring jump).
+  useEffect(() => {
+    if (!currentVerse || !isPlaying) return
+    const idx = reader.verses.findIndex((v) => v.vk === currentVerse.verse_id)
+    if (idx < 0) return
+    virtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentVerse?.verse_id])
+
   // Aggressively load more batches when seeking an unloaded verse,
   // or normally when the user is near the end of loaded content.
   useEffect(() => {
@@ -217,7 +236,11 @@ export function ChapterReader({
       const params = new URLSearchParams(window.location.search)
       if (params.get('verse') === vNum) return
       params.set('verse', vNum)
-      window.history.replaceState(null, '', `${window.location.pathname}?${params}`)
+      window.history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}?${params}`
+      )
     }, 200)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -234,8 +257,9 @@ export function ChapterReader({
   const clientH = parentRef.current?.clientHeight ?? 0
   const centerY = scrollTop + clientH / 2
   const centerVirtualItem =
-    virtualItems.find((v) => v.start <= centerY && v.start + v.size > centerY) ??
-    virtualItems[Math.floor(virtualItems.length / 2)]
+    virtualItems.find(
+      (v) => v.start <= centerY && v.start + v.size > centerY
+    ) ?? virtualItems[Math.floor(virtualItems.length / 2)]
   const centerVerse = reader.verses[centerVirtualItem?.index ?? 0]
   const currentVerseNumber = centerVerse
     ? parseInt(centerVerse.vk?.split(':')[1] ?? '1')
@@ -277,9 +301,11 @@ export function ChapterReader({
       </div>
 
       {/* Verse viewport + minimap. `relative` anchors the minimap's absolute
-          position on mobile; `items-stretch` lets the desktop sidebar fill height. */}
+          position on mobile; `items-stretch` lets the desktop sidebar fill height.
+          `overflow-hidden` clips minimap milestone labels/badges so they cannot
+          cause a page-level scrollbar when the minimap is active. */}
       <div
-        className="relative flex gap-2 items-stretch"
+        className="relative flex gap-2 items-stretch overflow-hidden"
         style={{ height: VIEWPORT_HEIGHT }}
       >
         {/* Fixed-height scrollable container — the document never scrolls */}
@@ -327,7 +353,9 @@ export function ChapterReader({
                           verse.vk?.split(':')[1] === seekTarget
                         }
                         optsKey={optsKey}
-                        isCurrentAudio={currentVerse?.verse_id === (verse.vk ?? '')}
+                        isCurrentAudio={
+                          currentVerse?.verse_id === (verse.vk ?? '')
+                        }
                         isPlaying={isPlaying}
                         isBuffering={isBuffering}
                       />
