@@ -38,7 +38,9 @@ export default async function QuranLayout({
             appendices={appendicesRes.data}
           />
           {/* Main content (right space) */}
-          <SidebarInset>
+          {/* h-svh + overflow-hidden: page never scrolls; content div handles
+              per-page scroll so home/search pages still scroll normally. */}
+          <SidebarInset className="h-svh overflow-hidden">
             {/* Header */}
             <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 px-4 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b">
               <SidebarTrigger className="-ml-1 bg-secondary/50 rounded-full p-4 hover:bg-secondary/70 cursor-pointer lg:hidden" />
@@ -46,8 +48,9 @@ export default async function QuranLayout({
               <QuranSearchbar />
               <QuranSettings />
             </header>
-            {/* Main content */}
-            <div className="flex flex-1 flex-col gap-4 p-4 pb-4">
+            {/* Main content — min-h-0 so flex-1 children can shrink;
+                overflow-y-auto handles scroll for pages with tall content. */}
+            <div className="flex flex-1 min-h-0 flex-col gap-4 p-4 pb-4 overflow-y-auto">
               {children}
             </div>
             <MetricsCollector />

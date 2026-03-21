@@ -105,7 +105,7 @@ export default async function QuranPage({
     })
 
     return (
-      <main className="whitespace-pre-line h-full">
+      <main className="flex-1 min-h-0 flex flex-col">
         <Suspense fallback={<Spinner />}>
           <ChapterReader
             chapterNumber={parsed.chapterNumber}
@@ -134,7 +134,7 @@ export default async function QuranPage({
     })
 
     return (
-      <main className="whitespace-pre-line h-full">
+      <main className="flex-1 min-h-0 flex flex-col">
         <Suspense fallback={<Spinner />}>
           <ChapterReader
             chapterNumber={parsed.chapterNumber}

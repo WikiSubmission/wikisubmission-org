@@ -20,12 +20,6 @@ import {
   useQuranPlayerCallbacks,
 } from '@/lib/quran-audio-context'
 
-// Height of the verse viewport container.
-// Subtracts: sticky header (4rem) + layout padding (1rem top + 6rem bottom) +
-//            chapter title bar (~3rem) + space-y-2 gap (0.5rem).
-// Reduced from 16rem → 13rem so the reader extends closer to the screen edge
-// (the previous 16rem was overly conservative by ~3rem).
-const VIEWPORT_HEIGHT = 'calc(100svh - 10rem)'
 
 export function ChapterReader({
   chapterNumber,
@@ -279,9 +273,9 @@ export function ChapterReader({
     t('sura', { number: chapterNumber })
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col flex-1 min-h-0 gap-2">
       {/* Chapter title */}
-      <div className="flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
+      <div className="shrink-0 flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
         <div className="flex flex-col">
           <h1 className="text-xl font-bold pl-1">
             {t('chapter', { number: chapterNumber, title: chapterTitle })}
@@ -304,7 +298,9 @@ export function ChapterReader({
           position on mobile; `items-stretch` lets the desktop sidebar fill height.
           `overflow-hidden` clips minimap milestone labels/badges so they cannot
           cause a page-level scrollbar when the minimap is active. */}
-      <div className="relative flex gap-2 items-stretch overflow-hidden h-full">
+      <div
+        className="relative flex flex-1 min-h-0 gap-2 items-stretch overflow-hidden"
+      >
         {/* Fixed-height scrollable container — the document never scrolls */}
         <div
           ref={parentRef}
