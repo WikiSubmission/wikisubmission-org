@@ -63,15 +63,16 @@ const INITIAL_STATE: State = {
 export function useVerseSearch(): UseVerseSearchReturn {
   const [state, setState] = useState<State>(INITIAL_STATE)
 
-  /** Builds the langs array for the API, filtering out xl (transliterated — no API equivalent) */
+  /** Builds the langs array for the API, filtering out xl (transliterated — no API equivalent).
+   *  Always includes 'en' so English queries work regardless of the user's display language. */
   function buildLangs(opts: VerseSearchOptions): string[] {
-    const langs: string[] = []
-    if (opts.primaryLang !== 'xl') langs.push(opts.primaryLang)
+    const langs: string[] = ['en']
+    if (opts.primaryLang !== 'xl' && !langs.includes(opts.primaryLang)) langs.push(opts.primaryLang)
     if (opts.includeArabic && !langs.includes('ar')) langs.push('ar')
     if (opts.secondaryLang && opts.secondaryLang !== 'xl') {
       if (!langs.includes(opts.secondaryLang)) langs.push(opts.secondaryLang)
     }
-    return langs.length > 0 ? langs : ['en']
+    return langs
   }
 
   const fetchPage = useCallback(

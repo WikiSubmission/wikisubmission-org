@@ -91,7 +91,7 @@ function SearchResultVerse({
   showText: boolean
 }) {
   const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
-  const tr = verse.tr?.[primaryCode]
+  const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
   const arTr = verse.tr?.['ar']
 
   return (
@@ -252,6 +252,14 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       <div className="p-4 flex justify-center items-center">
         <Spinner />
       </div>
+    )
+  }
+
+  if (verseSearch.error) {
+    return (
+      <p className="text-sm text-destructive text-center py-4">
+        {verseSearch.error}
+      </p>
     )
   }
 
