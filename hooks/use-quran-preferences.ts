@@ -21,6 +21,8 @@ export type LangCode =
   | 'ur' // Urdu
   | 'xl' // Transliterated (custom, not sent to API)
 
+export type DisplayMode = 'verse' | 'word' | 'reading'
+
 export type QuranPreferences = {
   arabic: boolean
   subtitles: boolean
@@ -28,6 +30,8 @@ export type QuranPreferences = {
   transliteration: boolean
   text: boolean
   wordByWord: boolean
+  displayMode: DisplayMode
+  showVerseNumbers: boolean
   primaryLanguage: LangCode
   secondaryLanguage?: LangCode
   setPreferences: (preferences: QuranPreferences) => void
@@ -49,6 +53,8 @@ export const useQuranPreferences = create(
       transliteration: false,
       text: true,
       wordByWord: false,
+      displayMode: 'verse' as DisplayMode,
+      showVerseNumbers: true,
       primaryLanguage: getLocaleCookie(),
       secondaryLanguage: undefined,
       setPreferences: (preferences: QuranPreferences) => set(preferences),

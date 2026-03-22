@@ -157,7 +157,8 @@
     "noon": "Noon",
     "asr": "Asr",
     "maghrib": "Maghrib",
-    "isha": "Isha"
+    "isha": "Isha",
+    "upcomingPrayer": "Next"
   },
   "music": {
     "heading": "ZIKR",
@@ -245,7 +246,9 @@
     "practices": "Practices",
     "search": "Search",
     "videos": "Videos",
+    "archive": "Archive",
     "music": "Music",
-    "home": "Home"
+    "home": "Home",
+    "blog": "Blog"
   }
 }

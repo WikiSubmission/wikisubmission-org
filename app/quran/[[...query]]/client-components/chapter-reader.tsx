@@ -13,6 +13,7 @@ import {
 } from '@/hooks/use-chapter-reader'
 import { VerseCard, toQuranVerse } from '../mini-components/verse-card'
 import { VerseMinimap } from '../mini-components/verse-minimap'
+import { ReadingView } from '../mini-components/reading-view'
 import { useTranslations } from 'next-intl'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import {
@@ -30,6 +31,7 @@ export function ChapterReader({
   initialVerse?: string
 }) {
   const prefs = useQuranPreferences()
+  const { displayMode } = prefs
   const reader = useChapterReader(chapterNumber, initialData)
   const t = useTranslations('quran')
   const tCommon = useTranslations('common')
@@ -55,18 +57,19 @@ export function ChapterReader({
   // Memoized so that callbacks listing `opts` as a dep remain stable across
   // renders where unrelated state changes (scroll position, seek target, etc.).
   // wordByWord implies we need Arabic + word data even if `arabic` is toggled off.
-  const needsArabic = prefs.arabic || prefs.wordByWord
+  // Reading mode needs Arabic text but NOT word-by-word data (saves bandwidth).
+  const needsArabic = prefs.arabic || prefs.wordByWord || displayMode === 'reading'
   const opts = useMemo<ChapterReaderOptions>(
     () => ({
       primaryLang: prefs.primaryLanguage,
-      secondaryLang: prefs.secondaryLanguage,
+      secondaryLang: displayMode === 'word' ? undefined : prefs.secondaryLanguage,
       includeArabic: needsArabic,
-      includeWords: needsArabic,
-      includeRoot: needsArabic,
-      includeMeaning: needsArabic,
+      includeWords: needsArabic && displayMode !== 'reading',
+      includeRoot: needsArabic && displayMode !== 'reading',
+      includeMeaning: needsArabic && displayMode !== 'reading',
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [prefs.primaryLanguage, prefs.secondaryLanguage, prefs.arabic, prefs.wordByWord]
+    [prefs.primaryLanguage, prefs.secondaryLanguage, prefs.arabic, prefs.wordByWord, displayMode]
   )
 
   // Keep the audio player queue in sync with loaded verses.
@@ -248,7 +251,7 @@ export function ChapterReader({
 
   // Stable key that changes when language prefs change — propagated to VerseCard
   // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
-  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}`
+  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}`
 
   // Current verse number for minimap highlight.
   // Same overscan bias fix: use scroll position to find the item at the viewport centre
@@ -273,19 +276,29 @@ export function ChapterReader({
     }
   }, [lastVirtualIndex, reader.hasMore, reader.verses.length])
 
-  const chapterTitle =
-    reader.chapterTitles?.['en'] ??
-    reader.chapterTitles?.[prefs.primaryLanguage] ??
-    t('sura', { number: chapterNumber })
+  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const arTitle = reader.chapterTitles?.['ar']
+  const primaryTitle =
+    reader.chapterTitles?.[primaryCode] ?? t('sura', { number: chapterNumber })
+  const secondaryTitle =
+    prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl'
+      ? reader.chapterTitles?.[prefs.secondaryLanguage]
+      : undefined
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 gap-2">
+    <div className="flex flex-col flex-1 min-h-0 gap-2 max-w-4xl mx-auto w-full">
       {/* Chapter title */}
       <div className="shrink-0 flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+          {arTitle && (
+            <p className="font-arabic text-2xl text-right text-foreground/90">{arTitle}</p>
+          )}
           <h1 className="text-xl font-bold pl-1">
-            {t('chapter', { number: chapterNumber, title: chapterTitle })}
+            {t('chapter', { number: chapterNumber, title: primaryTitle })}
           </h1>
+          {secondaryTitle && (
+            <p className="text-sm text-muted-foreground pl-1 italic">{secondaryTitle}</p>
+          )}
           {reader.loading && reader.verses.length > 0 && (
             <p className="text-xs text-muted-foreground pl-1 flex items-center gap-1">
               <Spinner className="size-3" />
@@ -295,10 +308,24 @@ export function ChapterReader({
         </div>
       </div>
 
-      {/* Verse viewport + minimap. `relative` anchors the minimap's absolute
+      {/* Reading mode — full prose view bypasses the virtual list */}
+      {displayMode === 'reading' && (
+        <div className="flex-1 min-h-0 overflow-y-auto bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40" style={{ scrollbarWidth: 'none' }}>
+          <ReadingView
+            verses={reader.verses}
+            hasMore={reader.hasMore}
+            loading={reader.loading}
+            loadMore={reader.loadMore}
+            opts={opts}
+          />
+        </div>
+      )}
+
+      {/* Verse/Word viewport + minimap. `relative` anchors the minimap's absolute
           position on mobile; `items-stretch` lets the desktop sidebar fill height.
           `overflow-hidden` clips minimap milestone labels/badges so they cannot
           cause a page-level scrollbar when the minimap is active. */}
+      {displayMode !== 'reading' && (
       <div className="relative flex flex-1 min-h-0 gap-2 items-stretch overflow-hidden">
         {/* Fixed-height scrollable container — the document never scrolls */}
         <div
@@ -423,6 +450,7 @@ export function ChapterReader({
           onPreview={handlePreview}
         />
       </div>
+      )}
 
       {reader.error && (
         <p className="text-sm text-destructive text-center py-2">

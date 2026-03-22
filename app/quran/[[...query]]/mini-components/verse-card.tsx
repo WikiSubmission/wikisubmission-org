@@ -115,6 +115,7 @@ const WordByWordView = memo(
         const arabic = (w.tx as Record<string, string>)?.['ar']
         const root = w.r
         const meaning = (w.tx as Record<string, string>)?.['en'] ?? ''
+        const transliteration = (w.tx as Record<string, string>)?.['tl'] ?? ''
         const wordIndex = w.wi ?? 0
 
         return (
@@ -125,6 +126,9 @@ const WordByWordView = memo(
                   {arabic}
                 </p>
                 <div className="flex flex-col items-center gap-0.5 pt-0.5" dir="ltr">
+                  {transliteration && (
+                    <p className="text-xs text-muted-foreground italic text-center">{transliteration}</p>
+                  )}
                   <p className="text-xs text-foreground/70 font-medium text-center break-words max-w-[100px]">
                     {meaning}
                   </p>
@@ -324,8 +328,12 @@ export const VerseCard = memo(
       </div>
 
       {!isLast && (
-        <div className="px-8">
-          <hr className="border-border/40" />
+        <div className="flex justify-center items-center py-2">
+          <div className="flex items-center gap-2">
+            <span className="size-1 rounded-full bg-border/60 block" />
+            <span className="size-1.5 rounded-full bg-border/80 block" />
+            <span className="size-1 rounded-full bg-border/60 block" />
+          </div>
         </div>
       )}
     </div>

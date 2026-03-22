@@ -6,6 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
+        disallow: ['/test', '/dashboard', '/api'],
       },
     ],
     sitemap: 'https://wikisubmission.org/sitemap.xml',

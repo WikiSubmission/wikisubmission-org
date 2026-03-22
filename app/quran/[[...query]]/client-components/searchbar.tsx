@@ -42,7 +42,7 @@ export default function QuranSearchbar() {
 
   return (
     <form
-      className="relative w-full"
+      className="relative flex-1 max-w-sm"
       onSubmit={(e) => {
         e.preventDefault()
         performSearch(searchQuery)

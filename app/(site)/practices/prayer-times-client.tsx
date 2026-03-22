@@ -1,9 +1,7 @@
 'use client'
 
-import { PageSwitcher } from '@/components/page-switcher'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
@@ -23,7 +21,6 @@ import {
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
 import {
   Item,
   ItemActions,
@@ -37,35 +34,16 @@ import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 
 export default function PrayerTimesClient() {
-  const t = useTranslations('prayertimes')
   return (
-    <main className="min-h-screen text-foreground flex flex-col items-center p-4 md:p-2">
-<div className="w-full max-w-2xl px-4 py-12 md:py-16 z-10">
-        <div className="flex flex-col items-center mb-12">
-          <Link href="/">
-            <Image
-              src="/brand-assets/logo-transparent.png"
-              alt="WikiSubmission Logo"
-              width={48}
-              height={48}
-              className="rounded-full mb-4"
-            />
-          </Link>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic uppercase pr-2">
-            {t('heading')}
-          </h1>
+    <Suspense
+      fallback={
+        <div className="text-center opacity-20 py-8">
+          <ClockIcon className="size-8 mx-auto animate-spin" />
         </div>
-        <Suspense
-          fallback={
-            <div className="text-center opacity-20">
-              <ClockIcon className="size-8 mx-auto animate-spin" />
-            </div>
-          }
-        >
-          <PrayerTimesContent />
-        </Suspense>
-      </div>
-    </main>
+      }
+    >
+      <PrayerTimesContent />
+    </Suspense>
   )
 }
 
@@ -76,7 +54,9 @@ function PrayerTimesContent() {
   const initialQuery = searchParams.get('q') || ''
   const asrAdjustment = searchParams.get('asr_adjustment') === 'true'
 
-  const [searchQuery, setSearchQuery] = useState(initialQuery)
+  const [searchQuery, setSearchQuery] = useState(
+    () => initialQuery || (typeof window !== 'undefined' ? (localStorage.getItem('pt_location') ?? '') : '')
+  )
   const [data, setData] = useState<PrayerTimesResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -94,13 +74,18 @@ function PrayerTimesContent() {
         const params = new URLSearchParams()
         if (adjustment) params.set('asr_adjustment', 'true')
         params.set('include_schedule', 'true')
-        const url = `https://practices.wikisubmission.org/prayer-times/${encodeURIComponent(location)}?${params.toString()}`
+        const url = `https://practices.wikisubmission.org/practices/${encodeURIComponent(location)}?${params.toString()}`
         const response = await fetch(url)
         if (!response.ok) {
           throw new Error(t('locationNotFound'))
         }
         const result: PrayerTimesResponse = await response.json()
         setData(result)
+
+        // Persist location so it auto-fills on next visit
+        if (result.location_string) {
+          localStorage.setItem('pt_location', result.location_string)
+        }
 
         // Update URL purely for browser navigation/sharing without triggering re-render
         if (result.location_string) {
@@ -122,10 +107,12 @@ function PrayerTimesContent() {
   )
 
   useEffect(() => {
-    if (initialQuery) {
-      fetchPrayerTimes(initialQuery, asrAdjustment)
+    const location = initialQuery || localStorage.getItem('pt_location') || ''
+    if (location) {
+      fetchPrayerTimes(location, asrAdjustment)
     }
-  }, [initialQuery, asrAdjustment, fetchPrayerTimes])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -133,7 +120,7 @@ function PrayerTimesContent() {
     if (trimmed) {
       const params = new URLSearchParams(searchParams.toString())
       params.set('q', trimmed)
-      router.push(`/prayer-times?${params.toString()}`)
+      router.push(`/practices?${params.toString()}`)
     }
   }
 
@@ -144,7 +131,7 @@ function PrayerTimesContent() {
     } else {
       params.delete('asr_adjustment')
     }
-    router.replace(`/prayer-times?${params.toString()}`, { scroll: false })
+    router.replace(`/practices?${params.toString()}`, { scroll: false })
   }
 
   const handleShare = () => {
@@ -239,12 +226,34 @@ function PrayerTimesContent() {
             <h2 className="text-lg font-semibold">{data.status_string}</h2>
           </header>
 
+          <SunArc data={data} prayerLabels={prayerLabels} />
+
+          {/* Next prayer banner */}
+          {data.upcoming_prayer && data.upcoming_prayer_time_left && (
+            <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-primary/5 border border-primary/20">
+              <div className="flex items-center gap-2 text-sm">
+                <ClockIcon className="size-3.5 text-primary" />
+                <span className="text-muted-foreground">{t('upcomingPrayer')}:</span>
+                <span className="font-semibold text-primary capitalize">
+                  {prayerLabels[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}
+                </span>
+              </div>
+              <span className="font-mono text-sm font-bold text-primary tabular-nums">
+                {data.upcoming_prayer_time_left}
+              </span>
+            </div>
+          )}
+
           <div className="overflow-hidden rounded-xl border border-border/40 bg-card/50 backdrop-blur-sm">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/40 text-muted-foreground uppercase tracking-widest text-[10px]">
-                  <th className="py-3 px-4 text-left font-medium">{t('tablePrayer')}</th>
-                  <th className="py-3 px-4 text-right font-medium">{t('tableTime')}</th>
+                  <th className="py-3 px-4 text-left font-medium">
+                    {t('tablePrayer')}
+                  </th>
+                  <th className="py-3 px-4 text-right font-medium">
+                    {t('tableTime')}
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/20">
@@ -291,7 +300,9 @@ function PrayerTimesContent() {
                           )}
                           {isCurrent && data.current_prayer_time_elapsed && (
                             <span className="text-[10px] normal-case leading-none mt-0.5 text-violet-600 font-light">
-                              {t('timeElapsed', { elapsed: data.current_prayer_time_elapsed })}
+                              {t('timeElapsed', {
+                                elapsed: data.current_prayer_time_elapsed,
+                              })}
                             </span>
                           )}
                         </div>
@@ -362,13 +373,27 @@ function PrayerTimesContent() {
                 <table className="w-full text-[10px] sm:text-xs">
                   <thead>
                     <tr className="border-b border-border/40 text-muted-foreground uppercase tracking-wider">
-                      <th className="py-2 text-left font-medium">{t('tableDate')}</th>
-                      <th className="py-2 text-center font-medium">{t('fajr')}</th>
-                      <th className="py-2 text-center font-medium">{t('sunrise')}</th>
-                      <th className="py-2 text-center font-medium">{t('noon')}</th>
-                      <th className="py-2 text-center font-medium">{t('asr')}</th>
-                      <th className="py-2 text-center font-medium">{t('maghrib')}</th>
-                      <th className="py-2 text-center font-medium">{t('isha')}</th>
+                      <th className="py-2 text-left font-medium">
+                        {t('tableDate')}
+                      </th>
+                      <th className="py-2 text-center font-medium">
+                        {t('fajr')}
+                      </th>
+                      <th className="py-2 text-center font-medium">
+                        {t('sunrise')}
+                      </th>
+                      <th className="py-2 text-center font-medium">
+                        {t('noon')}
+                      </th>
+                      <th className="py-2 text-center font-medium">
+                        {t('asr')}
+                      </th>
+                      <th className="py-2 text-center font-medium">
+                        {t('maghrib')}
+                      </th>
+                      <th className="py-2 text-center font-medium">
+                        {t('isha')}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/20">
@@ -472,6 +497,128 @@ function PrayerTimesContent() {
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+// ── Sun Arc SVG visualization ────────────────────────────────────────────────
+function parseTimeToMinutes(timeStr: string): number {
+  // Handles "6:12 AM", "12:30 PM", "18:45" formats
+  const clean = timeStr.trim()
+  const ampm = /([AP]M)/i.exec(clean)
+  const parts = clean.replace(/[AP]M/gi, '').trim().split(':')
+  let h = parseInt(parts[0], 10)
+  const m = parseInt(parts[1] ?? '0', 10)
+  if (ampm) {
+    if (ampm[1].toUpperCase() === 'PM' && h !== 12) h += 12
+    if (ampm[1].toUpperCase() === 'AM' && h === 12) h = 0
+  }
+  return h * 60 + m
+}
+
+function arcPoint(t: number, cx: number, cy: number, r: number): [number, number] {
+  // t=0 → left (180°), t=1 → right (0°), peak at t=0.5 → top (90°)
+  const angle = Math.PI - t * Math.PI
+  return [cx + r * Math.cos(angle), cy - r * Math.sin(angle)]
+}
+
+function SunArc({
+  data,
+  prayerLabels,
+}: {
+  data: PrayerTimesResponse
+  prayerLabels: Record<string, string>
+}) {
+  const cx = 150, cy = 140, r = 110
+  const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const
+  const times = prayers.map((p) => parseTimeToMinutes(data.times[p]))
+  const fajrMin = times[0], ishaMin = times[4]
+  const span = ishaMin - fajrMin || 1
+
+  const nowMin = (() => {
+    const now = new Date()
+    return now.getHours() * 60 + now.getMinutes()
+  })()
+
+  const toT = (min: number) => Math.max(0, Math.min(1, (min - fajrMin) / span))
+  const sunT = toT(nowMin)
+  const [sx, sy] = arcPoint(sunT, cx, cy, r)
+
+  const currentPrayer = data.current_prayer.toLowerCase()
+
+  return (
+    <div className="w-full py-2">
+      <svg viewBox="0 0 300 160" className="w-full max-w-sm mx-auto overflow-visible">
+        {/* Background arc */}
+        <path
+          d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-border/40"
+        />
+        {/* Progress arc (Fajr → now) */}
+        {sunT > 0 && sunT <= 1 && (() => {
+          const [ex, ey] = arcPoint(sunT, cx, cy, r)
+          const largeArc = sunT > 0.5 ? 1 : 0
+          return (
+            <path
+              d={`M ${cx - r} ${cy} A ${r} ${r} 0 ${largeArc} 1 ${ex} ${ey}`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className="text-primary/60"
+            />
+          )
+        })()}
+
+        {/* Prayer tick marks + labels */}
+        {prayers.map((prayer, i) => {
+          const t = toT(times[i])
+          const [px, py] = arcPoint(t, cx, cy, r)
+          const isPast = nowMin > times[i]
+          const isCurrent = currentPrayer === prayer
+          const tickLen = 6
+          // Outward normal direction from arc center
+          const nx = (px - cx) / r, ny = (py - cy) / r
+          return (
+            <g key={prayer}>
+              <line
+                x1={px - nx * tickLen / 2}
+                y1={py - ny * tickLen / 2}
+                x2={px + nx * tickLen / 2}
+                y2={py + ny * tickLen / 2}
+                strokeWidth={isCurrent ? 2.5 : 1.5}
+                stroke="currentColor"
+                className={isCurrent ? 'text-primary' : isPast ? 'text-muted-foreground/40' : 'text-muted-foreground/70'}
+              />
+              {/* Label: prayer name */}
+              <text
+                x={px + nx * 14}
+                y={py + ny * 14 + 1}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="8"
+                fill="currentColor"
+                className={isCurrent ? 'text-primary font-bold' : isPast ? 'text-muted-foreground/50' : 'text-muted-foreground'}
+              >
+                {prayerLabels[prayer] ?? prayer}
+              </text>
+            </g>
+          )
+        })}
+
+        {/* Sun dot */}
+        {nowMin >= fajrMin && nowMin <= ishaMin && (
+          <circle
+            cx={sx}
+            cy={sy}
+            r="6"
+            fill="currentColor"
+            className="text-primary"
+          />
+        )}
+      </svg>
     </div>
   )
 }

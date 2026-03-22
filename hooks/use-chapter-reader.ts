@@ -105,6 +105,7 @@ export function useChapterReader(
             include_words: opts.includeWords || undefined,
             include_root: opts.includeRoot || undefined,
             include_meaning: opts.includeMeaning || undefined,
+            word_langs: opts.includeWords ? ['ar', 'en', 'tl'] : undefined,
           },
         },
       })

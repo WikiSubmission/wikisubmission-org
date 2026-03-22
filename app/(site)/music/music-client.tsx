@@ -2,12 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useMusic } from '@/lib/music-context'
-import { PageSwitcher } from '@/components/page-switcher'
-import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import { FeaturedCard } from '@/app/(site)/music/components/featured-card'
 import { TrackRow } from '@/app/(site)/music/components/track-row'
 import { MusicPlayer } from '@/app/(site)/music/components/now-playing-bar'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Info,
   Heart,
@@ -15,14 +12,14 @@ import {
   Search,
   Clock,
   Repeat,
-  PlusSquare,
 } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { useSearchParams } from 'next/navigation'
 import { AppPrompt } from '@/app/(site)/music/components/app-prompt'
 import { useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
+
+type Tab = 'all' | 'favorites' | 'recent'
 
 export default function MusicClient() {
   const t = useTranslations('music')
@@ -37,6 +34,7 @@ export default function MusicClient() {
     playTrack,
   } = useMusic()
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeTab, setActiveTab] = useState<Tab>('all')
   const searchParams = useSearchParams()
   const trackId = searchParams.get('track')
 
@@ -78,12 +76,9 @@ export default function MusicClient() {
       const track = allTracks.find((t) => t.id === trackId)
       if (track) {
         playTrack(track, 'allTracks')
-        // Scroll to the track after a short delay to ensure DOM is ready
         setTimeout(() => {
           const el = document.getElementById(`track-${track.id}`)
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          }
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
         }, 500)
       }
     }
@@ -100,64 +95,61 @@ export default function MusicClient() {
       )
     : allTracks
 
+  const recentTracks = [...allTracks]
+    .sort((a, b) => b.releaseDate.getTime() - a.releaseDate.getTime())
+    .slice(0, 10)
+
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col items-center pb-32">
-<AppPrompt trackId={currentTrack?.id || trackId || undefined} />
+    <main className="min-h-screen pb-32">
+      <AppPrompt trackId={currentTrack?.id || trackId || undefined} />
 
-      <Link href="/" className="mt-4">
-        <Image
-          src="/brand-assets/logo-transparent.png"
-          alt="Logo"
-          width={64}
-          height={64}
-          className="rounded-full justify-left"
-        />
-      </Link>
+      {/* Hero */}
+      <section className="border-b border-border/40 bg-muted/30">
+        <div className="max-w-5xl mx-auto px-6 py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold mb-4">
+              Zikr
+            </span>
+            <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
+              {t('heading')}
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-md">{t('description')}</p>
+          </div>
 
-      {/* Hero Section */}
-      <div className="w-full max-w-5xl px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-8 z-10">
-        <div className="flex-grow space-y-4 text-center md:text-left">
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic pr-2">
-            {t('heading')}
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-md mx-auto md:mx-0">
-            {t('description')}
-          </p>
+          {/* Search */}
+          <div className="relative w-full max-w-xs shrink-0">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder={t('searchPlaceholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-12 pl-11 pr-4 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm placeholder:text-muted-foreground"
+            />
+          </div>
         </div>
+      </section>
 
-        {/* Search Bar */}
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder={t('searchPlaceholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-2xl bg-muted/50 border border-border/50 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all shadow-sm"
-          />
-        </div>
-      </div>
-
-      <div className="w-full max-w-5xl px-4 z-10 space-y-8">
+      <div className="max-w-5xl mx-auto px-6 py-8 space-y-10">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-4">
-            <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-            <p className="text-muted-foreground animate-pulse font-medium">
-              {t('loading')}
-            </p>
+            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-muted-foreground text-sm">{t('loading')}</p>
           </div>
         ) : (
           <>
-            {/* Featured Section */}
+            {/* Featured */}
             {!searchQuery && featuredTracks.length > 0 && (
               <section>
-                <div className="flex items-center justify-between px-2">
-                  <h2 className="text-2xl font-bold flex items-center gap-2">
-                    <Music2 className="text-accent" /> {t('featured')}
+                <div className="flex items-baseline gap-4 mb-4">
+                  <h2 className="font-headline text-xl font-bold flex items-center gap-2 shrink-0">
+                    <Music2 className="size-4 text-primary" />
+                    {t('featured')}
                   </h2>
+                  <div className="h-px grow bg-border/60" />
                 </div>
                 <div className="w-full overflow-x-auto no-scrollbar">
-                  <div className="flex p-4 gap-4">
+                  <div className="flex gap-4 pb-2">
                     {featuredTracks.map((track) => (
                       <FeaturedCard key={track.id} track={track} />
                     ))}
@@ -166,46 +158,39 @@ export default function MusicClient() {
               </section>
             )}
 
-            {/* Main Content Tabs */}
-            <Tabs defaultValue="all" className="w-full">
-              <div className="flex items-center justify-between mb-4 overflow-x-auto custom-scrollbar">
-                <TabsList className="bg-muted/30 p-1 rounded-2xl">
-                  <TabsTrigger
-                    value="all"
-                    className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm px-6"
-                  >
-                    {t('tabExplore')}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="favorites"
-                    className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm px-6 flex items-center gap-2"
-                  >
-                    <Heart className="w-4 h-4" /> {t('tabFavorites')}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="recent"
-                    className="rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-sm px-6 flex items-center gap-2"
-                  >
-                    <Clock className="w-4 h-4" /> {t('tabNew')}
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+            {/* Pill tabs */}
+            <div className="flex gap-2 border-b border-border/40 pb-4 overflow-x-auto no-scrollbar">
+              {([
+                { id: 'all', label: t('tabExplore'), icon: null },
+                { id: 'favorites', label: t('tabFavorites'), icon: <Heart className="size-3.5" /> },
+                { id: 'recent', label: t('tabNew'), icon: <Clock className="size-3.5" /> },
+              ] as { id: Tab; label: string; icon: React.ReactNode }[]).map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors',
+                    activeTab === tab.id
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  )}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-              <TabsContent
-                value="all"
-                className="space-y-8 mt-0 focus-visible:outline-none"
-              >
+            {/* Tab content */}
+            {activeTab === 'all' && (
+              <div className="space-y-8">
                 {searchQuery ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {filteredTracks.map((track) => (
-                      <TrackRow
-                        key={track.id}
-                        track={track}
-                        context="allTracks"
-                      />
+                      <TrackRow key={track.id} track={track} context="allTracks" />
                     ))}
                     {filteredTracks.length === 0 && (
-                      <div className="col-span-full py-12 text-center text-muted-foreground italic">
+                      <div className="col-span-full py-12 text-center text-muted-foreground">
                         {t('noResults', { query: searchQuery })}
                       </div>
                     )}
@@ -222,80 +207,57 @@ export default function MusicClient() {
                       currentTrack?.category.id === category.id
 
                     return (
-                      <div key={category.id} className="space-y-4">
-                        <h3 className="text-xl font-bold flex items-center gap-3">
-                          {category.name}
-                          {isLoopingContext && (
-                            <span className="flex items-center gap-1.5 text-xs font-medium text-accent bg-accent/20 px-2 py-0.5 rounded-full animate-pulse">
-                              <Repeat className="w-3 h-3" />
-                              {t('looping')}
-                            </span>
-                          )}
-                        </h3>
+                      <div key={category.id} className="space-y-3">
+                        <div className="flex items-baseline gap-4">
+                          <h3 className="font-headline font-bold text-base flex items-center gap-2 shrink-0">
+                            {category.name}
+                            {isLoopingContext && (
+                              <span className="flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full animate-pulse">
+                                <Repeat className="size-3" />
+                                {t('looping')}
+                              </span>
+                            )}
+                          </h3>
+                          <div className="h-px grow bg-border/40" />
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           {tracksInCategory.map((track) => (
-                            <TrackRow
-                              key={track.id}
-                              track={track}
-                              context="category"
-                            />
+                            <TrackRow key={track.id} track={track} context="category" />
                           ))}
                         </div>
                       </div>
                     )
                   })
                 )}
-              </TabsContent>
+              </div>
+            )}
 
-              <TabsContent
-                value="favorites"
-                className="mt-0 focus-visible:outline-none"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {favoriteTracks.length > 0 ? (
-                    favoriteTracks.map((track) => (
-                      <TrackRow
-                        key={track.id}
-                        track={track}
-                        context="favorites"
-                      />
-                    ))
-                  ) : (
-                    <div className="col-span-full py-24 text-center space-y-4">
-                      <Heart className="w-12 h-12 text-muted-foreground/20 mx-auto" />
-                      <p className="text-muted-foreground italic">
-                        {t('noFavorites')}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
+            {activeTab === 'favorites' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {favoriteTracks.length > 0 ? (
+                  favoriteTracks.map((track) => (
+                    <TrackRow key={track.id} track={track} context="favorites" />
+                  ))
+                ) : (
+                  <div className="col-span-full py-24 text-center space-y-3">
+                    <Heart className="size-12 text-muted-foreground/20 mx-auto" />
+                    <p className="text-muted-foreground">{t('noFavorites')}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
-              <TabsContent
-                value="recent"
-                className="mt-0 focus-visible:outline-none"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {[...allTracks]
-                    .sort(
-                      (a, b) =>
-                        b.releaseDate.getTime() - a.releaseDate.getTime()
-                    )
-                    .slice(0, 10)
-                    .map((track) => (
-                      <TrackRow
-                        key={track.id}
-                        track={track}
-                        context="allTracks"
-                      />
-                    ))}
-                </div>
-              </TabsContent>
-            </Tabs>
+            {activeTab === 'recent' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {recentTracks.map((track) => (
+                  <TrackRow key={track.id} track={track} context="allTracks" />
+                ))}
+              </div>
+            )}
 
-            {/* Info Footer */}
-            <div className="flex items-start gap-3 p-4 rounded-2xl bg-accent/5 border border-accent/10">
-              <Info className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+            {/* Disclaimer */}
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/40">
+              <Info className="size-4 text-primary shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {t('disclaimer')}
               </p>
@@ -304,7 +266,6 @@ export default function MusicClient() {
         )}
       </div>
 
-      {/* Global Music Player Bar */}
       <MusicPlayer />
     </main>
   )

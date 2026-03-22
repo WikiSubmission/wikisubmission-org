@@ -4,24 +4,27 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Search } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
+// import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs' // Phase 3
 import { cn } from '@/lib/utils'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 const NAV_LINKS = [
-  { label: 'home', href: '/' },
-  { label: 'scripture', href: '/quran' },
-  { label: 'practices', href: '/prayer-times' },
-  { label: 'videos', href: '/search' },
-  { label: 'music', href: '/music' },
+  { label: 'home',      href: '/'          },
+  { label: 'scripture', href: '/quran'     },
+  { label: 'practices', href: '/practices' },
+  { label: 'archive',   href: '/archive'   },
+  { label: 'music',     href: '/music'     },
+  { label: 'blog',      href: '/blog'      },
 ]
 
 export function SiteNav() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const pathname = usePathname()
   const t = useTranslations('navbar')
+  const locale = useLocale()
 
   return (
     <nav className="sticky top-0 z-50 w-full glass-nav bg-background/80 border-b border-border/40">
@@ -65,14 +68,9 @@ export function SiteNav() {
 
         {/* Right controls */}
         <div className="flex items-center gap-2">
-          <Link
-            href="/search"
-            className="h-9 w-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-            aria-label="Search"
-          >
-            <Search size={18} />
-          </Link>
+          <LocaleSwitcher currentLocale={locale} />
           <ThemeToggle />
+          {/* Phase 3: auth
           <SignedOut>
             <SignInButton mode="modal">
               <button className="hidden sm:flex h-9 items-center px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
@@ -83,6 +81,7 @@ export function SiteNav() {
           <SignedIn>
             <UserButton />
           </SignedIn>
+          */}
           {/* Mobile hamburger */}
           <button
             className="md:hidden h-9 w-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
@@ -110,16 +109,12 @@ export function SiteNav() {
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               )}
             >
-              {link.label}
+              {t(link.label)}
             </Link>
           ))}
-          <SignedOut>
-            <SignInButton mode="modal">
-              <button className="mt-2 h-10 flex items-center justify-center px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium">
-                Sign in
-              </button>
-            </SignInButton>
-          </SignedOut>
+          <div className="mt-2 pt-2 border-t border-border/40">
+            <LocaleSwitcher currentLocale={locale} />
+          </div>
         </div>
       )}
     </nav>

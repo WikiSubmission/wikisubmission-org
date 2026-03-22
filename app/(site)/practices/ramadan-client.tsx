@@ -1,9 +1,7 @@
 'use client'
 
-import { PageSwitcher } from '@/components/page-switcher'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import {
   SearchIcon,
   MapPinIcon,
@@ -16,41 +14,20 @@ import {
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
-import Link from 'next/link'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 
 export default function RamadanClient() {
-  const t = useTranslations('ramadan')
   return (
-    <main className="min-h-screen text-foreground flex flex-col items-center p-4 md:p-2">
-<div className="w-full max-w-4xl px-4 py-12 md:py-16 z-10">
-        <div className="flex flex-col items-center mb-12">
-          <Link href="/">
-            <Image
-              src="/brand-assets/logo-transparent.png"
-              alt="WikiSubmission Logo"
-              width={48}
-              height={48}
-              className="rounded-full mb-4"
-            />
-          </Link>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-br from-foreground to-foreground/40 bg-clip-text text-transparent italic uppercase pr-2">
-            {t('heading')}
-          </h1>
+    <Suspense
+      fallback={
+        <div className="text-center opacity-20 py-8">
+          <MoonIcon className="size-8 mx-auto animate-spin" />
         </div>
-        <Suspense
-          fallback={
-            <div className="text-center opacity-20">
-              <MoonIcon className="size-8 mx-auto animate-spin" />
-            </div>
-          }
-        >
-          <RamadanContent />
-        </Suspense>
-      </div>
-    </main>
+      }
+    >
+      <RamadanContent />
+    </Suspense>
   )
 }
 
