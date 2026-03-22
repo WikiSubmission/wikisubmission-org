@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { useLanguagesStore } from '@/hooks/use-languages-store'
 import {
   useChapterReader,
   type QuranResponse,
@@ -32,6 +33,7 @@ export function ChapterReader({
 }) {
   const prefs = useQuranPreferences()
   const { displayMode } = prefs
+  const { getDirection } = useLanguagesStore()
   const reader = useChapterReader(chapterNumber, initialData)
   const t = useTranslations('quran')
   const tCommon = useTranslations('common')
@@ -289,22 +291,40 @@ export function ChapterReader({
     <div className="flex flex-col flex-1 min-h-0 gap-2 max-w-4xl mx-auto w-full">
       {/* Chapter title */}
       <div className="shrink-0 flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
-        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-          {arTitle && (
-            <p className="font-arabic text-2xl text-right text-foreground/90">{arTitle}</p>
-          )}
-          <h1 className="text-xl font-bold pl-1">
-            {t('chapter', { number: chapterNumber, title: primaryTitle })}
-          </h1>
-          {secondaryTitle && (
-            <p className="text-sm text-muted-foreground pl-1 italic">{secondaryTitle}</p>
-          )}
-          {reader.loading && reader.verses.length > 0 && (
-            <p className="text-xs text-muted-foreground pl-1 flex items-center gap-1">
-              <Spinner className="size-3" />
-              {tCommon('loading')}
-            </p>
-          )}
+        <div className="flex flex-col gap-1 flex-1 min-w-0">
+          {/* Two-column row: LTR primary on the left, Arabic on the right */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <h1
+                className="text-xl font-bold"
+                dir={getDirection(primaryCode)}
+              >
+                {t('chapter', { number: chapterNumber, title: primaryTitle })}
+              </h1>
+              {secondaryTitle && (
+                <p
+                  className="text-sm text-muted-foreground italic"
+                  dir={prefs.secondaryLanguage ? getDirection(prefs.secondaryLanguage) : undefined}
+                >
+                  {secondaryTitle}
+                </p>
+              )}
+              {reader.loading && reader.verses.length > 0 && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Spinner className="size-3" />
+                  {tCommon('loading')}
+                </p>
+              )}
+            </div>
+            {arTitle && (
+              <p
+                className="font-arabic text-2xl text-right text-foreground/90 shrink-0"
+                dir="rtl"
+              >
+                {arTitle}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

@@ -4,12 +4,7 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -27,8 +22,8 @@ import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import type { LangCode } from '@/hooks/use-quran-preferences'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
 import { Switch } from '@/components/ui/switch'
-import { ThemeToggle } from '@/components/toggles/theme-toggle'
-import { useLocale, useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 function SettingTile({
   icon,
@@ -64,10 +59,62 @@ function SettingTile({
   )
 }
 
+function LangPicker({
+  label,
+  value,
+  nullable,
+  languages,
+  onChange,
+}: {
+  label: string
+  value: string | undefined
+  nullable?: boolean
+  languages: { code: string; name: string }[]
+  onChange: (code: string | undefined) => void
+}) {
+  return (
+    <div className="px-3 py-2 space-y-2">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {nullable && (
+          <button
+            onClick={() => onChange(undefined)}
+            className={cn(
+              'px-2.5 py-1 rounded-lg text-xs font-medium transition-all border',
+              value === undefined
+                ? 'bg-primary/10 text-primary border-primary/20'
+                : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-accent hover:text-foreground'
+            )}
+          >
+            None
+          </button>
+        )}
+        {languages.map(({ code, name }) => {
+          const isActive = value === code
+          return (
+            <button
+              key={code}
+              onClick={() => onChange(code)}
+              className={cn(
+                'px-2.5 py-1 rounded-lg text-xs font-medium transition-all border flex items-center gap-1',
+                isActive
+                  ? 'bg-primary/10 text-primary border-primary/20'
+                  : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-accent hover:text-foreground'
+              )}
+            >
+              {name}
+              {isActive && <CheckIcon className="size-3" />}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function QuranSettings() {
   const quranPreferences = useQuranPreferences()
   const languages = useLanguagesStore((s) => s.languages)
-  const uiLocale = useLocale()
   const t = useTranslations('settings')
 
   return (
@@ -78,80 +125,36 @@ export default function QuranSettings() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-72" align="end">
-        <div className="flex justify-end items-center gap-2 px-2 py-1">
-          <ThemeToggle />
-        </div>
-
         {/* Language */}
         <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
           <LanguagesIcon className="size-4" />
           <strong>{t('language')}</strong>
         </DropdownMenuLabel>
 
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <strong>{t('quranTranslation')}</strong>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent>
-              {languages.map(({ code, name }) => (
-                <DropdownMenuItem
-                  key={code}
-                  onClick={() =>
-                    quranPreferences.setPreferences({
-                      ...quranPreferences,
-                      primaryLanguage: code as LangCode,
-                    })
-                  }
-                >
-                  {name}
-                  {quranPreferences.primaryLanguage === code && (
-                    <CheckIcon className="size-4" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
+        <LangPicker
+          label={t('quranTranslation')}
+          value={quranPreferences.primaryLanguage}
+          languages={languages}
+          onChange={(code) =>
+            quranPreferences.setPreferences({
+              ...quranPreferences,
+              primaryLanguage: code as LangCode,
+            })
+          }
+        />
 
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <strong>{t('secondaryTranslation')}</strong>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent>
-              <DropdownMenuItem
-                onClick={() =>
-                  quranPreferences.setPreferences({
-                    ...quranPreferences,
-                    secondaryLanguage: undefined,
-                  })
-                }
-              >
-                <strong>{t('none')}</strong>
-                {quranPreferences.secondaryLanguage === undefined && (
-                  <CheckIcon className="size-4" />
-                )}
-              </DropdownMenuItem>
-              {languages.map(({ code, name }) => (
-                <DropdownMenuItem
-                  key={code}
-                  onClick={() =>
-                    quranPreferences.setPreferences({
-                      ...quranPreferences,
-                      secondaryLanguage: code as LangCode,
-                    })
-                  }
-                >
-                  {name}
-                  {quranPreferences.secondaryLanguage === code && (
-                    <CheckIcon className="size-4" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
+        <LangPicker
+          label={t('secondaryTranslation')}
+          value={quranPreferences.secondaryLanguage}
+          nullable
+          languages={languages}
+          onChange={(code) =>
+            quranPreferences.setPreferences({
+              ...quranPreferences,
+              secondaryLanguage: code as LangCode | undefined,
+            })
+          }
+        />
 
         {/* Reading */}
         <DropdownMenuLabel className="flex items-center gap-2 text-violet-500 mt-1">

@@ -260,7 +260,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   // Text search results (new API)
   if (verseSearch.data) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 max-w-4xl mx-auto w-full">
         <h2 className="text-xl font-bold">{searchQuery}</h2>
 
         <Tabs
