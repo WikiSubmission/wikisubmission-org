@@ -4,8 +4,18 @@ import { sanityServer } from '@/lib/sanity'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Metadata } from 'next'
+import { getLocale } from 'next-intl/server'
 import { BlogBrowser } from './blog-browser'
 import type { Post, Category } from './blog-browser'
+
+// Must match @sanity/document-internationalization supportedLanguages in studio
+const SANITY_LANGUAGES = ['en', 'fr', 'ar', 'tr'] as const
+type SanityLanguage = typeof SANITY_LANGUAGES[number]
+function toSanityLanguage(locale: string): SanityLanguage {
+  return (SANITY_LANGUAGES as readonly string[]).includes(locale)
+    ? (locale as SanityLanguage)
+    : 'en'
+}
 
 export const metadata: Metadata = {
   title: 'Blog | WikiSubmission',
@@ -17,7 +27,7 @@ export const metadata: Metadata = {
 }
 
 // Top 3 newest for the Featured strip
-const FEATURED_QUERY = `*[_type == "article"] | order(publishedAt desc) [0...3] {
+const FEATURED_QUERY = `*[_type == "article" && language == $language] | order(publishedAt desc) [0...3] {
   _id, title, slug, excerpt, publishedAt,
   "category": categories[0]->name,
   "categorySlug": categories[0]->slug.current,
@@ -26,7 +36,7 @@ const FEATURED_QUERY = `*[_type == "article"] | order(publishedAt desc) [0...3] 
 }`
 
 // All articles passed to the client browser for search / filtering
-const ALL_ARTICLES_QUERY = `*[_type == "article"] | order(publishedAt desc) {
+const ALL_ARTICLES_QUERY = `*[_type == "article" && language == $language] | order(publishedAt desc) {
   _id, title, slug, excerpt, publishedAt,
   "category": categories[0]->name,
   "categorySlug": categories[0]->slug.current,
@@ -34,11 +44,11 @@ const ALL_ARTICLES_QUERY = `*[_type == "article"] | order(publishedAt desc) {
   "authorName": author->name
 }`
 
-// Categories with counts for filter pills
+// Categories with counts for filter pills (counts scoped to current language)
 const CATEGORIES_QUERY = `*[_type == "category"] | order(name asc) {
   name,
   "slug": slug.current,
-  "count": count(*[_type == "article" && references(^._id)])
+  "count": count(*[_type == "article" && language == $language && references(^._id)])
 }`
 
 function formatDate(dateString?: string) {
@@ -55,11 +65,14 @@ export default async function BlogPage() {
   let allArticles: Post[] = []
   let categories: Category[] = []
 
+  const locale = await getLocale()
+  const language = toSanityLanguage(locale)
+
   try {
     ;[featured, allArticles, categories] = await Promise.all([
-      sanityServer.fetch<Post[]>(FEATURED_QUERY),
-      sanityServer.fetch<Post[]>(ALL_ARTICLES_QUERY),
-      sanityServer.fetch<Category[]>(CATEGORIES_QUERY),
+      sanityServer.fetch<Post[]>(FEATURED_QUERY, { language }),
+      sanityServer.fetch<Post[]>(ALL_ARTICLES_QUERY, { language }),
+      sanityServer.fetch<Category[]>(CATEGORIES_QUERY, { language }),
     ])
   } catch (err) {
     console.error('[blog] Sanity fetch failed:', err)

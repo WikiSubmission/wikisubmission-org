@@ -6,8 +6,18 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { ArrowLeftIcon } from 'lucide-react'
+import { getLocale } from 'next-intl/server'
 
-const POST_QUERY = `*[_type == "article" && slug.current == $slug][0] {
+// Must match @sanity/document-internationalization supportedLanguages in studio
+const SANITY_LANGUAGES = ['en', 'fr', 'ar', 'tr'] as const
+type SanityLanguage = typeof SANITY_LANGUAGES[number]
+function toSanityLanguage(locale: string): SanityLanguage {
+  return (SANITY_LANGUAGES as readonly string[]).includes(locale)
+    ? (locale as SanityLanguage)
+    : 'en'
+}
+
+const POST_QUERY = `*[_type == "article" && slug.current == $slug && language == $language][0] {
   _id,
   title,
   slug,
@@ -23,6 +33,7 @@ const POST_QUERY = `*[_type == "article" && slug.current == $slug][0] {
 
 const RELATED_QUERY = `*[
   _type == "article" &&
+  language == $language &&
   $categoryRef in categories[]._ref &&
   slug.current != $slug
 ] | order(publishedAt desc) [0...3] {
@@ -72,8 +83,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
+  const locale = await getLocale()
+  const language = toSanityLanguage(locale)
   try {
-    const post = await sanityServer.fetch<Post | null>(POST_QUERY, { slug })
+    let post = await sanityServer.fetch<Post | null>(POST_QUERY, { slug, language })
+    if (!post && language !== 'en') {
+      post = await sanityServer.fetch<Post | null>(POST_QUERY, { slug, language: 'en' })
+    }
     if (!post) return {}
     return {
       title: `${post.title} | WikiSubmission`,
@@ -95,10 +111,16 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+  const locale = await getLocale()
+  const language = toSanityLanguage(locale)
 
   let post: Post | null = null
   try {
-    post = await sanityServer.fetch<Post | null>(POST_QUERY, { slug })
+    post = await sanityServer.fetch<Post | null>(POST_QUERY, { slug, language })
+    // Fallback to English for untranslated articles (preserves deep links)
+    if (!post && language !== 'en') {
+      post = await sanityServer.fetch<Post | null>(POST_QUERY, { slug, language: 'en' })
+    }
   } catch (err) {
     console.error('[blog/slug] Sanity fetch failed:', err)
     notFound()
@@ -112,6 +134,7 @@ export default async function BlogPostPage({
       related = await sanityServer.fetch<RelatedPost[]>(RELATED_QUERY, {
         slug,
         categoryRef: post.categoryRef,
+        language,
       })
     } catch {
       // non-critical — page still renders without related posts
