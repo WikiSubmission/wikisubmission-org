@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { sanityServer } from '@/lib/sanity'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -100,7 +102,7 @@ function FeaturedCard({ post, large }: { post: Post; large?: boolean }) {
       className={`group relative bg-background rounded-xl editorial-shadow border border-border/40 overflow-hidden transition-all hover:-translate-y-1 ${large ? 'md:col-span-2' : ''}`}
     >
       {post.thumbnailUrl && (
-        <div className={`relative w-full overflow-hidden bg-muted ${large ? 'aspect-[16/9]' : 'aspect-video'}`}>
+        <div className={`relative w-full overflow-hidden bg-muted ${large ? 'aspect-video' : 'aspect-video'}`}>
           <Image
             src={post.thumbnailUrl}
             alt={post.title}
