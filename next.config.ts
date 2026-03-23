@@ -44,12 +44,6 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: '/proclamation',
-        destination:
-          'https://library.wikisubmission.org/file/quran-the-final-testament-proclamation',
-        permanent: true,
-      },
-      {
         source: '/introduction',
         destination:
           'https://library.wikisubmission.org/file/quran-the-final-testament-introduction',

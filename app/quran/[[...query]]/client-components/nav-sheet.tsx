@@ -100,8 +100,6 @@ function NavSheetContent({
         <SheetClose asChild>
           <Link
             href="/proclamation"
-            target="_blank"
-            prefetch={false}
             className="flex items-center justify-between gap-2 px-2 py-2 rounded-lg text-sm hover:bg-accent/50 transition-colors"
           >
             {tNav('proclamation')}
