@@ -220,7 +220,11 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     ) {
       setWordMatches(result.data.filter((i) => i.hit === 'word_by_word'))
     } else if (result.status === 'error') {
-      toast.error(decodeURIComponent(result.error))
+      const msg = decodeURIComponent(result.error ?? '')
+      // "Index lookup disabled" is an SDK limitation, not user-actionable
+      if (!msg.toLowerCase().includes('index') && !msg.toLowerCase().includes('disabled')) {
+        toast.error(msg)
+      }
     } else {
       toast.error(`No word matches for '${searchQuery}'`)
     }
@@ -484,6 +488,12 @@ export default function SearchResult({ props }: { props: { query: string } }) {
           </TabsContent>
         </Tabs>
       </div>
+    )
+  }
+
+  if (verseSearch.error) {
+    return (
+      <p className="text-sm text-muted-foreground p-4">{verseSearch.error}</p>
     )
   }
 

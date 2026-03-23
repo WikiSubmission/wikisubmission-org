@@ -10,14 +10,55 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, ChevronDown, ExternalLink } from 'lucide-react'
 import { RandomVerseTile } from './mini-components/random-verse-tile'
+import type { components } from '@/src/api/types.gen'
 
-// Detect if a query string is a chapter number (1–114)
+type VerseData = components['schemas']['VerseData']
+
+function VerseListCard({ verse }: { verse: VerseData & { cn?: number } }) {
+  const en = verse.tr?.['en']
+  const ar = verse.tr?.['ar']
+  return (
+    <div className="p-4 rounded-2xl bg-muted/40 space-y-2">
+      <p className="text-xs font-mono text-muted-foreground">{verse.vk}</p>
+      {en?.s && <p className="text-xs text-muted-foreground italic">{en.s}</p>}
+      {en?.tx && <p className="text-sm">{en.tx}</p>}
+      {ar?.tx && (
+        <p className="text-right text-lg tracking-widest" dir="rtl">
+          {ar.tx}
+        </p>
+      )}
+    </div>
+  )
+}
+
+type VerseRef =
+  | { type: 'verse'; cn: number; v: number }
+  | { type: 'range'; cn: number; vs: number; ve: number }
+
+// Detect query intent: chapter, verse, range, verse-list, or text search
 function parseQueryType(q: string): {
-  type: 'chapter' | 'verse' | 'range' | 'search'
+  type: 'chapter' | 'verse' | 'range' | 'search' | 'verse-list'
   chapterNumber?: number
   verseStart?: number
   verseEnd?: number
+  refs?: VerseRef[]
 } {
+  // Comma-separated verse refs: "1:4,1:1-5,2:45,2:12-133"
+  if (q.includes(',')) {
+    const parts = q.split(',').map((s) => s.trim())
+    const refs: VerseRef[] = []
+    let valid = true
+    for (const part of parts) {
+      const v = part.match(/^(\d+):(\d+)$/)
+      const r = part.match(/^(\d+):(\d+)-(\d+)$/)
+      if (v) { refs.push({ type: 'verse', cn: +v[1], v: +v[2] }); continue }
+      if (r) { refs.push({ type: 'range', cn: +r[1], vs: +r[2], ve: +r[3] }); continue }
+      valid = false
+      break
+    }
+    if (valid && refs.length > 0) return { type: 'verse-list', refs }
+  }
+
   // Pure chapter number: "1", "2", "114"
   if (/^\d{1,3}$/.test(q)) {
     const n = parseInt(q)
@@ -193,19 +234,25 @@ export default async function QuranPage({
     const targetVerse = verse ? parseInt(verse) : undefined
     const ssrVerseEnd = targetVerse ? Math.max(50, targetVerse + 5) : 50
 
-    const { data } = await wsApiServer.GET('/quran', {
-      params: {
-        query: {
-          chapter_number_start: parsed.chapterNumber,
-          langs: ['en', 'ar'],
-          verse_start: 0,
-          verse_end: ssrVerseEnd,
-          include_words: true,
-          include_root: true,
-          include_meaning: true,
+    let data = null
+    try {
+      const result = await wsApiServer.GET('/quran', {
+        params: {
+          query: {
+            chapter_number_start: parsed.chapterNumber,
+            langs: ['en', 'ar'],
+            verse_start: 0,
+            verse_end: ssrVerseEnd,
+            include_words: true,
+            include_root: true,
+            include_meaning: true,
+          },
         },
-      },
-    })
+      })
+      data = result.data ?? null
+    } catch {
+      // SSR fetch failed — ChapterReader will load verses client-side
+    }
 
     return (
       <main className="flex-1 min-h-0 flex flex-col">
@@ -213,7 +260,7 @@ export default async function QuranPage({
           <ChapterReader
             key={parsed.chapterNumber}
             chapterNumber={parsed.chapterNumber}
-            initialData={data ?? null}
+            initialData={data}
             initialVerse={verse}
           />
         </Suspense>
@@ -223,29 +270,72 @@ export default async function QuranPage({
 
   // ── Range view: SSR specific verse range ─────────────────────────────────────
   if (parsed.type === 'range' && parsed.chapterNumber) {
-    const { data } = await wsApiServer.GET('/quran', {
-      params: {
-        query: {
-          chapter_number_start: parsed.chapterNumber,
-          langs: ['en', 'ar'],
-          verse_start: parsed.verseStart,
-          verse_end: parsed.verseEnd,
-          include_words: true,
-          include_root: true,
-          include_meaning: true,
+    let data = null
+    try {
+      const result = await wsApiServer.GET('/quran', {
+        params: {
+          query: {
+            chapter_number_start: parsed.chapterNumber,
+            langs: ['en', 'ar'],
+            verse_start: parsed.verseStart,
+            verse_end: parsed.verseEnd,
+            include_words: true,
+            include_root: true,
+            include_meaning: true,
+          },
         },
-      },
-    })
+      })
+      data = result.data ?? null
+    } catch {
+      // SSR fetch failed — ChapterReader will load verses client-side
+    }
 
     return (
       <main className="flex-1 min-h-0 flex flex-col">
         <Suspense fallback={<Spinner />}>
           <ChapterReader
             chapterNumber={parsed.chapterNumber}
-            initialData={data ?? null}
+            initialData={data}
             initialVerse={verse}
           />
         </Suspense>
+      </main>
+    )
+  }
+
+  // ── Verse list: comma-separated refs like "1:4,1:1-5,2:45" ─────────────────
+  if (parsed.type === 'verse-list' && parsed.refs) {
+    const cappedRefs = parsed.refs.slice(0, 10)
+    const results = await Promise.all(
+      cappedRefs.map((ref) =>
+        wsApiServer.GET('/quran', {
+          params: {
+            query: {
+              chapter_number_start: ref.cn,
+              langs: ['en', 'ar'],
+              verse_start: ref.type === 'verse' ? ref.v : ref.vs,
+              verse_end: ref.type === 'verse' ? ref.v : ref.ve,
+              include_words: false,
+            },
+          },
+        })
+      )
+    )
+
+    const allVerses = results.flatMap((r) =>
+      r.data?.chapters?.flatMap(
+        (ch) => ch.verses?.map((v) => ({ ...v, cn: ch.cn })) ?? []
+      ) ?? []
+    )
+
+    return (
+      <main className="py-8 px-4">
+        <div className="max-w-3xl mx-auto space-y-3">
+          <p className="text-sm font-mono text-muted-foreground">{queryText}</p>
+          {allVerses.map((verse) => (
+            <VerseListCard key={verse.vk} verse={verse} />
+          ))}
+        </div>
       </main>
     )
   }

@@ -7,6 +7,7 @@ import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { QuranPlayer } from '@/app/quran/[[...query]]/client-components/now-playing-bar'
 import { wsApiServer } from '@/src/api/server-client'
 import { LanguagesInit } from '@/components/languages-init'
+import { QuranNavInit } from '@/components/quran-nav-init'
 import { SiteNav } from '@/components/site-nav'
 import { QuranNavSheet } from './client-components/nav-sheet'
 import { QuranModeSelector } from './client-components/mode-selector'
@@ -41,6 +42,8 @@ export default async function QuranLayout({
             <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
               {/* Seed language direction data into the client Zustand store */}
               <LanguagesInit languages={languagesRes.data ?? []} />
+              {/* Seed chapters + appendices for search autocomplete */}
+              <QuranNavInit chapters={chaptersRes.data ?? []} appendices={appendicesRes.data ?? []} />
               {/* Sub-header: nav trigger + mode selector + search + settings */}
               {query && (
                 <header className="sticky top-0 z-40 h-16 shrink-0 glass-nav bg-background/80 border-b border-border/40">

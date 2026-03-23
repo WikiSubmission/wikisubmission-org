@@ -7,13 +7,22 @@ import type { components } from '@/src/api/types.gen'
 type VerseData = components['schemas']['VerseData']
 
 // ── Astronomical Hijri calendar (Julian Day Number method) ──────────────────
-function gregorianToHijri(date: Date): { year: number; month: number; day: number } {
-  const Y = date.getFullYear(), M = date.getMonth() + 1, D = date.getDate()
+function gregorianToHijri(date: Date): {
+  year: number
+  month: number
+  day: number
+} {
+  const Y = date.getFullYear(),
+    M = date.getMonth() + 1,
+    D = date.getDate()
   const JD =
     Math.floor((1461 * (Y + 4800 + Math.floor((M - 14) / 12))) / 4) +
     Math.floor((367 * (M - 2 - 12 * Math.floor((M - 14) / 12))) / 12) -
-    Math.floor((3 * Math.floor((Y + 4900 + Math.floor((M - 14) / 12)) / 100)) / 4) +
-    D - 32075
+    Math.floor(
+      (3 * Math.floor((Y + 4900 + Math.floor((M - 14) / 12)) / 100)) / 4
+    ) +
+    D -
+    32075
   const Z = JD - 1948438 + 10632
   const N = Math.floor(Z / 10631)
   const AA = Z - 10631 * N + 354
@@ -65,7 +74,8 @@ const PLACEHOLDER_CARDS = [
   },
   {
     title: 'Hajj Overview',
-    description: 'The pilgrimage to Mecca — its rites and spiritual significance.',
+    description:
+      'The pilgrimage to Mecca — its rites and spiritual significance.',
     slug: 'hajj-overview',
   },
 ]
@@ -120,7 +130,7 @@ export default function PracticesClient({
             Practices
           </span>
           <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
-            Islamic Practices
+            Life as a submitter
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl">
             Prayer times, Ramadan schedule, and Zakat calculator — tools to
