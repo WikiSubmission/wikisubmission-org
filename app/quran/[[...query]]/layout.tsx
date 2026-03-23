@@ -31,15 +31,17 @@ export default async function QuranLayout({
             {/* Seed language direction data into the client Zustand store */}
             <LanguagesInit languages={languagesRes.data ?? []} />
             {/* Sub-header: nav trigger + mode selector + search + settings */}
-            <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-2 px-4 glass-nav bg-background/80 border-b border-border/40">
-              <QuranNavSheet
-                chapters={chaptersRes.data}
-                appendices={appendicesRes.data}
-              />
-              <QuranModeSelector />
-              <div className="flex-1" />
-              <QuranSearchDialog />
-              <QuranSettings />
+            <header className="sticky top-0 z-40 h-16 shrink-0 glass-nav bg-background/80 border-b border-border/40">
+              <div className="max-w-7xl mx-auto px-4 h-full flex items-center gap-2">
+                <QuranNavSheet
+                  chapters={chaptersRes.data}
+                  appendices={appendicesRes.data}
+                />
+                <QuranModeSelector />
+                <div className="flex-1" />
+                <QuranSearchDialog />
+                <QuranSettings />
+              </div>
             </header>
             {/* Main content */}
             <div className="flex flex-1 min-h-0 flex-col gap-4 p-4 pb-4 overflow-y-auto">
