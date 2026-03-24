@@ -490,10 +490,12 @@ export interface operations {
     getQuran: {
         parameters: {
             query: {
-                chapter_number_start: number;
+                chapter_number_start?: number;
                 chapter_number_end?: number;
                 verse_start?: number;
                 verse_end?: number;
+                /** @description Compact verse references. Single verse (1:1), range within a chapter (1:1-3), or comma-separated list (1:2,1:4-5,4:2). When present, takes priority over chapter_number_start/verse_start/verse_end. Max 300 verses. */
+                verses?: string;
                 /** @description Language codes to include (e.g. en, ar, fr). */
                 langs: string[];
                 /** @description Language codes for word-level text (subset of langs, e.g. only "ar"). */

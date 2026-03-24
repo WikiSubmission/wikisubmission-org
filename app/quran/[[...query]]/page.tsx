@@ -32,32 +32,24 @@ function VerseListCard({ verse }: { verse: VerseData & { cn?: number } }) {
   )
 }
 
-type VerseRef =
-  | { type: 'verse'; cn: number; v: number }
-  | { type: 'range'; cn: number; vs: number; ve: number }
-
 // Detect query intent: chapter, verse, range, verse-list, or text search
 function parseQueryType(q: string): {
   type: 'chapter' | 'verse' | 'range' | 'search' | 'verse-list'
   chapterNumber?: number
   verseStart?: number
   verseEnd?: number
-  refs?: VerseRef[]
 } {
   // Comma-separated verse refs: "1:4,1:1-5,2:45,2:12-133"
   if (q.includes(',')) {
     const parts = q.split(',').map((s) => s.trim())
-    const refs: VerseRef[] = []
     let valid = true
     for (const part of parts) {
-      const v = part.match(/^(\d+):(\d+)$/)
-      const r = part.match(/^(\d+):(\d+)-(\d+)$/)
-      if (v) { refs.push({ type: 'verse', cn: +v[1], v: +v[2] }); continue }
-      if (r) { refs.push({ type: 'range', cn: +r[1], vs: +r[2], ve: +r[3] }); continue }
-      valid = false
-      break
+      if (!/^(\d+):(\d+)$/.test(part) && !/^(\d+):(\d+)-(\d+)$/.test(part)) {
+        valid = false
+        break
+      }
     }
-    if (valid && refs.length > 0) return { type: 'verse-list', refs }
+    if (valid && parts.length > 0) return { type: 'verse-list' }
   }
 
   // Pure chapter number: "1", "2", "114"
@@ -312,37 +304,29 @@ export default async function QuranPage({
   }
 
   // ── Verse list: comma-separated refs like "1:4,1:1-5,2:45" ─────────────────
-  if (parsed.type === 'verse-list' && parsed.refs) {
-    const cappedRefs = parsed.refs.slice(0, 10)
-    const results = await Promise.all(
-      cappedRefs.map((ref) =>
-        wsApiServer.GET('/quran', {
-          params: {
-            query: {
-              chapter_number_start: ref.cn,
-              langs: ['en', 'ar'],
-              verse_start: ref.type === 'verse' ? ref.v : ref.vs,
-              verse_end: ref.type === 'verse' ? ref.v : ref.ve,
-              include_words: false,
-            },
-          },
-        })
-      )
-    )
+  if (parsed.type === 'verse-list') {
+    const { data, error } = await wsApiServer.GET('/quran', {
+      params: { query: { langs: ['en', 'ar'], verses: queryText } },
+    })
 
-    const allVerses = results.flatMap((r) =>
-      r.data?.chapters?.flatMap(
+    const allVerses =
+      data?.chapters?.flatMap(
         (ch) => ch.verses?.map((v) => ({ ...v, cn: ch.cn })) ?? []
       ) ?? []
-    )
 
     return (
       <main className="py-8 px-4">
         <div className="max-w-3xl mx-auto space-y-3">
           <p className="text-sm font-mono text-muted-foreground">{queryText}</p>
-          {allVerses.map((verse) => (
-            <VerseListCard key={verse.vk} verse={verse} />
-          ))}
+          {error || allVerses.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No verses found for &ldquo;{queryText}&rdquo;.
+            </p>
+          ) : (
+            allVerses.map((verse) => (
+              <VerseListCard key={verse.vk} verse={verse} />
+            ))
+          )}
         </div>
       </main>
     )
