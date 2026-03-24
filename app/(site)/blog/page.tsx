@@ -4,7 +4,7 @@ import { sanityServer } from '@/lib/sanity'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Metadata } from 'next'
-import { getLocale } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { BlogBrowser } from './blog-browser'
 import type { Post, Category } from './blog-browser'
 
@@ -65,7 +65,7 @@ export default async function BlogPage() {
   let allArticles: Post[] = []
   let categories: Category[] = []
 
-  const locale = await getLocale()
+  const [locale, t] = await Promise.all([getLocale(), getTranslations('blog')])
   const language = toSanityLanguage(locale)
 
   try {
@@ -78,9 +78,7 @@ export default async function BlogPage() {
     console.error('[blog] Sanity fetch failed:', err)
     return (
       <div className="min-h-screen max-w-7xl mx-auto px-6 py-16 text-center">
-        <p className="text-muted-foreground">
-          Blog posts are temporarily unavailable. Please try again later.
-        </p>
+        <p className="text-muted-foreground">{t('error')}</p>
       </div>
     )
   }
@@ -91,7 +89,7 @@ export default async function BlogPage() {
       {featured.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 pt-10 pb-2">
           <div className="flex items-baseline gap-6 mb-8">
-            <h2 className="font-headline text-2xl font-bold shrink-0">Featured</h2>
+            <h2 className="font-headline text-2xl font-bold shrink-0">{t('featured')}</h2>
             <div className="h-px grow bg-border/60" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

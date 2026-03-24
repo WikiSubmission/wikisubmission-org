@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import { FaYoutube } from 'react-icons/fa'
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = {
   title: 'The Mathematical Miracle | WikiSubmission',
@@ -9,60 +10,61 @@ export const metadata: Metadata = {
     'Discover Code 19 — the mathematical miracle of the Quran, a built-in divine authentication discovered by Dr. Rashad Khalifa in 1974.',
 }
 
-const FACTS = [
-  {
-    number: '19',
-    label: 'Letters in Bismillah',
-    detail:
-      'The opening statement of the Quran — Bismillah Al-Rahman Al-Raheem — consists of exactly 19 Arabic letters.',
-  },
-  {
-    number: '114',
-    label: 'Chapters (19 × 6)',
-    detail:
-      'The Quran contains 114 chapters, an exact multiple of 19.',
-  },
-  {
-    number: '19',
-    label: 'Words in first revelation',
-    detail:
-      'The first five verses ever revealed (96:1–5) contain exactly 19 words.',
-  },
-  {
-    number: '2,698',
-    label: 'Occurrences of "God" (19 × 142)',
-    detail:
-      'The word "God" (Allah) appears exactly 2,698 times throughout the Quran — a precise multiple of 19.',
-  },
-  {
-    number: '19',
-    label: 'Verses in first revealed chapter',
-    detail:
-      'Chapter 96 (Al-Alaq), the first chapter to be revealed, contains exactly 19 verses.',
-  },
-  {
-    number: '1974',
-    label: 'Year of discovery',
-    detail:
-      'Dr. Rashad Khalifa used a computer to analyze the Quran and discovered the mathematical code based on the number 19.',
-  },
-]
+export default async function MiraclePage() {
+  const t = await getTranslations('miracle')
 
-export default function MiraclePage() {
+  const FACTS = [
+    {
+      id: 'bismillah',
+      number: t('factBismillahNumber'),
+      label: t('factBismillahLabel'),
+      detail: t('factBismillahDetail'),
+    },
+    {
+      id: 'chapters',
+      number: t('factChaptersNumber'),
+      label: t('factChaptersLabel'),
+      detail: t('factChaptersDetail'),
+    },
+    {
+      id: 'revelation',
+      number: t('factRevelationNumber'),
+      label: t('factRevelationLabel'),
+      detail: t('factRevelationDetail'),
+    },
+    {
+      id: 'god',
+      number: t('factGodNumber'),
+      label: t('factGodLabel'),
+      detail: t('factGodDetail'),
+    },
+    {
+      id: 'chapter96',
+      number: t('factChapter96Number'),
+      label: t('factChapter96Label'),
+      detail: t('factChapter96Detail'),
+    },
+    {
+      id: 'discovery',
+      number: t('factDiscoveryNumber'),
+      label: t('factDiscoveryLabel'),
+      detail: t('factDiscoveryDetail'),
+    },
+  ]
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
       <section className="border-b border-border/40 bg-muted/30">
         <div className="max-w-5xl mx-auto px-6 py-12">
           <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold mb-4">
-            Miracle
+            {t('badge')}
           </span>
           <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
-            The Mathematical Miracle of the Quran
+            {t('heading')}
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl">
-            A built-in divine authentication — an interlocking numerical code woven throughout
-            the Quran, centered on the prime number 19.
+            {t('description')}
           </p>
         </div>
       </section>
@@ -72,27 +74,14 @@ export default function MiraclePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-4 text-base leading-relaxed text-foreground/90">
             <p>
-              In 1974, Dr. Rashad Khalifa — a biochemist and Muslim scholar — used a computer
-              to analyze the Arabic text of the Quran and discovered an extraordinary mathematical
-              structure built around the number 19, mentioned in{' '}
+              {t('intro1Before')}{' '}
               <Link href="/quran/74?verse=30" className="text-primary hover:underline">
                 74:30
               </Link>{' '}
-              as <em>&ldquo;Over it is nineteen.&rdquo;</em>
+              {t('intro1After')}
             </p>
-            <p>
-              The patterns are not superficial — they are deeply interlocked across the entire
-              text. The number of chapters, the letter counts of the opening statement, the word
-              frequencies of key divine names, and the structure of the earliest revelations all
-              converge on precise multiples of 19. The statistical probability of these patterns
-              occurring by chance is vanishingly small.
-            </p>
-            <p>
-              This mathematical code serves as a divine signature: it proves the Quran was
-              authored by God, confirms the integrity of the text that has been preserved to
-              this day, and provides a rational, verifiable proof of the scripture&apos;s authenticity
-              that anyone can examine.
-            </p>
+            <p>{t('intro2')}</p>
+            <p>{t('intro3')}</p>
           </div>
 
           {/* YouTube card */}
@@ -107,14 +96,14 @@ export default function MiraclePage() {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                Watch on YouTube
+                {t('youtubeLabel')}
               </p>
               <h3 className="font-headline font-bold text-base leading-snug">
-                Code 19: The Mathematical Miracle of the Quran
+                {t('youtubeTitle')}
               </h3>
             </div>
             <span className="mt-auto flex items-center gap-1 text-xs text-primary font-semibold">
-              Watch now <ExternalLink size={12} />
+              {t('youtubeWatch')} <ExternalLink size={12} />
             </span>
           </a>
         </div>
@@ -124,14 +113,14 @@ export default function MiraclePage() {
       <section className="border-t border-border/40 bg-muted/30">
         <div className="max-w-5xl mx-auto px-6 py-12">
           <div className="flex items-center gap-3 mb-8">
-            <h2 className="font-headline text-2xl font-bold">Key Facts</h2>
+            <h2 className="font-headline text-2xl font-bold">{t('keyFacts')}</h2>
             <div className="h-px flex-1 bg-border/60" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FACTS.map((fact) => (
               <div
-                key={fact.label}
+                key={fact.id}
                 className="bg-background rounded-2xl p-6 border border-border/40 editorial-shadow space-y-2"
               >
                 <span className="font-headline text-3xl font-extrabold text-primary">
@@ -149,10 +138,9 @@ export default function MiraclePage() {
       <section className="max-w-5xl mx-auto px-6 py-12">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-6 rounded-2xl border border-border/40 bg-muted/20">
           <div className="flex-1">
-            <p className="font-semibold mb-1">Read the Full Analysis</p>
+            <p className="font-semibold mb-1">{t('readFullAnalysis')}</p>
             <p className="text-sm text-muted-foreground">
-              Appendix 1 of the Final Testament provides a detailed, comprehensive treatment of
-              the mathematical miracle with hundreds of examples and proofs.
+              {t('appendixDesc')}
             </p>
           </div>
           <a
@@ -161,7 +149,7 @@ export default function MiraclePage() {
             rel="noopener noreferrer"
             className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors"
           >
-            Appendix 1 PDF <ArrowRight size={15} />
+            {t('appendixButton')} <ArrowRight size={15} />
           </a>
         </div>
       </section>

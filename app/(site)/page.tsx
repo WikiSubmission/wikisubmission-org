@@ -147,32 +147,25 @@ export default async function Home() {
       {/* ── Miracle ──────────────────────────────────────────────────────── */}
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
-          <SectionHeader title="Miracle" subtitle="Code 19" />
+          <SectionHeader title={t('miracle.title')} subtitle={t('miracle.subtitle')} />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Main description card (2 cols) */}
             <div className="md:col-span-2 bg-surface-container-low p-8 rounded-2xl editorial-shadow space-y-4">
               <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">
-                Mathematical Miracle
+                {t('miracle.badge')}
               </span>
               <h3 className="font-headline text-2xl font-extrabold">
-                The Quran&apos;s Mathematical Structure
+                {t('miracle.cardHeading')}
               </h3>
               <p className="text-on-surface-variant leading-relaxed">
-                The Quran is mathematically composed around the prime number 19. The opening
-                statement — <em>Bismillah Al-Rahman Al-Raheem</em> — consists of exactly 19
-                Arabic letters. The Quran contains 114 chapters (19&nbsp;×&nbsp;6). The first
-                revelation (96:1&ndash;5) has 19 words. The word &ldquo;God&rdquo; appears 2,698 times
-                (19&nbsp;×&nbsp;142). This interlocking numerical code, discovered by Dr.&nbsp;Rashad
-                Khalifa in 1974, provides a built-in authentication that no human could have
-                designed 14 centuries ago &mdash; a divine signature confirming the Quran&apos;s
-                authorship and protecting it from tampering.
+                {t('miracle.cardDescription')}
               </p>
               <Link
                 href="/miracle"
                 className="inline-flex items-center gap-2 text-primary font-semibold text-sm hover:gap-3 transition-all"
               >
-                Read more <ArrowRight size={16} />
+                {t('miracle.readMore')} <ArrowRight size={16} />
               </Link>
             </div>
 
@@ -187,13 +180,13 @@ export default async function Home() {
                 <FaYoutube size={24} />
               </div>
               <div>
-                <h3 className="font-headline font-bold text-lg mb-1">Watch: Code 19</h3>
+                <h3 className="font-headline font-bold text-lg mb-1">{t('miracle.youtubeTitle')}</h3>
                 <p className="text-on-surface-variant text-sm leading-relaxed">
-                  A visual introduction to the mathematical miracle of the Quran.
+                  {t('miracle.youtubeDesc')}
                 </p>
               </div>
               <span className="mt-auto text-xs font-mono text-muted-foreground uppercase tracking-widest">
-                YouTube ↗
+                {t('miracle.youtubeFooter')}
               </span>
             </a>
           </div>

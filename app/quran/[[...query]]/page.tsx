@@ -8,6 +8,7 @@ import QuranSearchBar from './client-components/search-bar'
 import { wsApiServer } from '@/src/api/server-client'
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { ArrowRight, BookOpen, ChevronDown, ExternalLink } from 'lucide-react'
 import { RandomVerseTile } from './mini-components/random-verse-tile'
 import type { components } from '@/src/api/types.gen'
@@ -108,6 +109,13 @@ export default async function QuranPage({
         next: { revalidate: 86400 },
       }),
     ])
+    const [tQuran, tNav, tSidebar, tCommon] = await Promise.all([
+      getTranslations('quran'),
+      getTranslations('nav'),
+      getTranslations('sidebar'),
+      getTranslations('common'),
+    ])
+
     const chapters = (chaptersRes.data ?? []).filter(Boolean).sort(
       (a, b) => (a.chapter_number ?? 0) - (b.chapter_number ?? 0)
     )
@@ -122,8 +130,8 @@ export default async function QuranPage({
           {/* ── Hero ──────────────────────────────────────────────────── */}
           <section className="space-y-6 text-center max-w-xl mx-auto">
             <div className="space-y-2">
-              <p className="text-xs font-bold uppercase tracking-widest text-primary/70">Quran</p>
-              <h1 className="text-4xl font-bold tracking-tight">The Final Testament</h1>
+              <p className="text-xs font-bold uppercase tracking-widest text-primary/70">{tQuran('title')}</p>
+              <h1 className="text-4xl font-bold tracking-tight">{tCommon('finalTestament')}</h1>
             </div>
             <QuranSearchBar large />
           </section>
@@ -137,12 +145,12 @@ export default async function QuranPage({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <BookOpen className="size-4 text-primary/70" />
-                  Proclamation
+                  {tNav('proclamation')}
                 </div>
                 <ArrowRight className="size-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Proclaiming One Unified Religion for All the People — Rashad Khalifa, 1989
+                {tQuran('proclamationDesc')}
               </p>
             </Link>
 
@@ -155,12 +163,12 @@ export default async function QuranPage({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <BookOpen className="size-4 text-primary/70" />
-                  Introduction
+                  {tNav('introduction')}
                 </div>
                 <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground transition-all" />
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                An introduction to the Final Testament and its mathematical miracle
+                {tQuran('introductionDesc')}
               </p>
             </a>
           </section>
@@ -169,7 +177,7 @@ export default async function QuranPage({
           <details open className="group/ch">
             <summary className="flex items-center justify-between cursor-pointer list-none py-2 border-b border-border/40">
               <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-                Chapters
+                {tSidebar('chapters')}
               </h2>
               <ChevronDown className="size-4 text-muted-foreground transition-transform group-open/ch:rotate-180" />
             </summary>
@@ -196,7 +204,7 @@ export default async function QuranPage({
           <details open className="group/ap">
             <summary className="flex items-center justify-between cursor-pointer list-none py-2 border-b border-border/40">
               <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-                Appendices
+                {tSidebar('appendices')}
               </h2>
               <ChevronDown className="size-4 text-muted-foreground transition-transform group-open/ap:rotate-180" />
             </summary>

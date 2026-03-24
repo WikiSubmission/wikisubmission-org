@@ -3,6 +3,7 @@ import RamadanClient from './ramadan-client'
 import { ZakatCalculator } from '@/components/zakat-calculator'
 import Link from 'next/link'
 import type { components } from '@/src/api/types.gen'
+import { getTranslations } from 'next-intl/server'
 
 type VerseData = components['schemas']['VerseData']
 
@@ -56,30 +57,6 @@ function daysUntilNextRamadan(): number {
 const DAYS_UNTIL_RAMADAN = daysUntilNextRamadan()
 const SHOW_RAMADAN_SECTION = DAYS_UNTIL_RAMADAN <= 15
 
-const PLACEHOLDER_CARDS = [
-  {
-    title: 'Understanding Salat',
-    description: 'The meaning, times, and postures of the five daily prayers.',
-    slug: 'understanding-salat',
-  },
-  {
-    title: 'Zakat Guide',
-    description: 'Who owes Zakat, how to calculate it, and who to give it to.',
-    slug: 'zakat-guide',
-  },
-  {
-    title: 'Ramadan & Fasting',
-    description: 'The purpose of fasting and how to observe Ramadan correctly.',
-    slug: 'ramadan-fasting',
-  },
-  {
-    title: 'Hajj Overview',
-    description:
-      'The pilgrimage to Mecca — its rites and spiritual significance.',
-    slug: 'hajj-overview',
-  },
-]
-
 // ── Stylish verse quote card ─────────────────────────────────────────────────
 function VerseQuoteCard({
   verseKey,
@@ -111,15 +88,24 @@ function VerseQuoteCard({
   )
 }
 
-export default function PracticesClient({
+export default async function PracticesClient({
   zakatVerse,
   prayerVerse,
 }: {
   zakatVerse: VerseData | null
   prayerVerse: VerseData | null
 }) {
+  const t = await getTranslations('practices')
+
   const zakatText = zakatVerse?.tr?.['en']?.tx
   const prayerText = prayerVerse?.tr?.['en']?.tx
+
+  const PLACEHOLDER_CARDS = [
+    { title: t('card1Title'), description: t('card1Desc'), slug: 'understanding-salat' },
+    { title: t('card2Title'), description: t('card2Desc'), slug: 'zakat-guide' },
+    { title: t('card3Title'), description: t('card3Desc'), slug: 'ramadan-fasting' },
+    { title: t('card4Title'), description: t('card4Desc'), slug: 'hajj-overview' },
+  ]
 
   return (
     <div className="min-h-screen">
@@ -127,14 +113,13 @@ export default function PracticesClient({
       <section className="border-b border-border/40 bg-muted/30">
         <div className="max-w-5xl mx-auto px-6 py-12">
           <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold mb-4">
-            Practices
+            {t('badge')}
           </span>
           <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
-            Life as a submitter
+            {t('heading')}
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl">
-            Prayer times, Ramadan schedule, and Zakat calculator — tools to
-            support your daily worship.
+            {t('description')}
           </p>
         </div>
       </section>
@@ -142,7 +127,7 @@ export default function PracticesClient({
       {/* Prayer Times */}
       <section className="max-w-5xl mx-auto px-6 py-10">
         <div className="flex items-center gap-3 mb-6">
-          <h2 className="font-headline text-2xl font-bold">Prayer Times</h2>
+          <h2 className="font-headline text-2xl font-bold">{t('prayerTimes')}</h2>
           <div className="h-px flex-1 bg-border/60" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
@@ -165,7 +150,7 @@ export default function PracticesClient({
       <section className="border-t border-border/40 bg-muted/20">
         <div className="max-w-5xl mx-auto px-6 py-10">
           <div className="flex items-center gap-3 mb-6">
-            <h2 className="font-headline text-2xl font-bold">Zakat</h2>
+            <h2 className="font-headline text-2xl font-bold">{t('zakat')}</h2>
             <div className="h-px flex-1 bg-border/60" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
@@ -192,7 +177,7 @@ export default function PracticesClient({
         <section className="border-t border-border/40">
           <div className="max-w-5xl mx-auto px-6 py-10">
             <div className="flex items-center gap-3 mb-6">
-              <h2 className="font-headline text-2xl font-bold">Ramadan</h2>
+              <h2 className="font-headline text-2xl font-bold">{t('ramadan')}</h2>
               {DAYS_UNTIL_RAMADAN > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary leading-none">
                   in {DAYS_UNTIL_RAMADAN}d
@@ -209,10 +194,10 @@ export default function PracticesClient({
       <section className="border-t border-border/40 bg-muted/30 py-16">
         <div className="max-w-5xl mx-auto px-6">
           <div className="flex items-baseline justify-between mb-8">
-            <h2 className="font-headline text-2xl font-bold">Learn More</h2>
+            <h2 className="font-headline text-2xl font-bold">{t('learnMore')}</h2>
             <div className="h-px grow mx-6 bg-border/60" />
             <span className="text-xs uppercase tracking-wider text-muted-foreground">
-              Coming Soon
+              {t('comingSoon')}
             </span>
           </div>
 
@@ -223,7 +208,7 @@ export default function PracticesClient({
                 className="group relative bg-background rounded-xl p-6 editorial-shadow border border-border/40 transition-all hover:-translate-y-0.5"
               >
                 <span className="inline-block px-2.5 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-bold mb-4">
-                  Coming Soon
+                  {t('comingSoon')}
                 </span>
                 <h3 className="font-headline font-bold text-base mb-2">
                   {card.title}

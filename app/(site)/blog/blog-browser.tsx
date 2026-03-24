@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { SearchIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 export type Post = {
   _id: string
@@ -76,6 +77,7 @@ export function BlogBrowser({
   articles: Post[]
   categories: Category[]
 }) {
+  const t = useTranslations('blog')
   const [query, setQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
@@ -110,7 +112,7 @@ export function BlogBrowser({
           <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/60 pointer-events-none" />
           <Input
             type="search"
-            placeholder="Search articles…"
+            placeholder={t('searchPlaceholder')}
             className="pl-8 h-9 bg-muted/50 border-border/40"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -127,7 +129,7 @@ export function BlogBrowser({
                 : 'bg-muted/60 text-muted-foreground border-border/40 hover:bg-primary/10 hover:text-primary hover:border-primary/20'
             )}
           >
-            All
+            {t('filterAll')}
           </button>
           {categories.map((cat) => (
             <button
@@ -158,8 +160,8 @@ export function BlogBrowser({
             </div>
           ) : (
             <div className="text-center py-20 text-muted-foreground">
-              <p className="font-headline font-bold">No articles found</p>
-              <p className="text-sm mt-1">Try a different search or category.</p>
+              <p className="font-headline font-bold">{t('noResults')}</p>
+              <p className="text-sm mt-1">{t('noResultsHelp')}</p>
             </div>
           )}
         </>
@@ -178,7 +180,7 @@ export function BlogBrowser({
                   onClick={() => setActiveCategory(group.slug)}
                   className="text-xs text-primary hover:text-primary/80 font-medium transition-colors shrink-0"
                 >
-                  View all
+                  {t('viewAll')}
                 </button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -192,7 +194,7 @@ export function BlogBrowser({
           {uncategorised.length > 0 && (
             <section>
               <div className="flex items-baseline gap-4 mb-6">
-                <h2 className="font-headline text-xl font-bold shrink-0 text-muted-foreground">Uncategorised</h2>
+                <h2 className="font-headline text-xl font-bold shrink-0 text-muted-foreground">{t('uncategorised')}</h2>
                 <div className="h-px flex-1 bg-border/60" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -205,8 +207,8 @@ export function BlogBrowser({
 
           {articles.length === 0 && (
             <div className="text-center py-20 text-muted-foreground">
-              <p className="font-headline font-bold">No posts yet</p>
-              <p className="text-sm mt-1">Check back soon.</p>
+              <p className="font-headline font-bold">{t('noPosts')}</p>
+              <p className="text-sm mt-1">{t('noPostsHelp')}</p>
             </div>
           )}
         </div>
