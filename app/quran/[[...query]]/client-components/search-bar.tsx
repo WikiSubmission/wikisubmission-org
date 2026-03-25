@@ -29,15 +29,26 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
 
   const performSearch = useCallback(
     (q: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (q) {
-        params.set('q', decodeURIComponent(q))
-      } else {
-        params.delete('q')
+      if (!q) {
+        replace(`${pathname}`)
+        return
       }
+      // Comma-separated verse refs (e.g. "1:1,2:255-257") — navigate directly
+      if (q.includes(',')) {
+        const parts = q.split(',').map((s) => s.trim())
+        const allValid = parts.every(
+          (p) => /^\d+:\d+$/.test(p) || /^\d+:\d+-\d+$/.test(p)
+        )
+        if (allValid) {
+          router.push(`/quran/${q}`)
+          return
+        }
+      }
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('q', decodeURIComponent(q))
       replace(`${pathname}?${params.toString()}`)
     },
-    [pathname, replace, searchParams]
+    [pathname, replace, router, searchParams]
   )
 
   // Autocomplete: skip verse-ref patterns
@@ -143,19 +154,24 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           )}
 
           {matchedAppendices.map((ap) => (
-            <a
+            <button
+              type="button"
               key={ap.code}
-              href={`https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${ap.code}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onMouseDown={() => setOpen(false)}
+              onMouseDown={() => {
+                setOpen(false)
+                window.open(
+                  `https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${ap.code}`,
+                  '_blank',
+                  'noopener,noreferrer'
+                )
+              }}
               className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-muted/60 text-left"
             >
               <span className="font-mono text-xs text-muted-foreground w-6 shrink-0 text-right">
                 {ap.code}
               </span>
               <span className="truncate text-muted-foreground">{ap.title}</span>
-            </a>
+            </button>
           ))}
         </div>
       )}

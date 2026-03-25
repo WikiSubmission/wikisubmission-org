@@ -11,26 +11,7 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { ArrowRight, BookOpen, ChevronDown, ExternalLink } from 'lucide-react'
 import { RandomVerseTile } from './mini-components/random-verse-tile'
-import type { components } from '@/src/api/types.gen'
-
-type VerseData = components['schemas']['VerseData']
-
-function VerseListCard({ verse }: { verse: VerseData & { cn?: number } }) {
-  const en = verse.tr?.['en']
-  const ar = verse.tr?.['ar']
-  return (
-    <div className="p-4 rounded-2xl bg-muted/40 space-y-2">
-      <p className="text-xs font-mono text-muted-foreground">{verse.vk}</p>
-      {en?.s && <p className="text-xs text-muted-foreground italic">{en.s}</p>}
-      {en?.tx && <p className="text-sm">{en.tx}</p>}
-      {ar?.tx && (
-        <p className="text-right text-lg tracking-widest" dir="rtl">
-          {ar.tx}
-        </p>
-      )}
-    </div>
-  )
-}
+import { VerseListResult } from './mini-components/verse-list-result'
 
 // Detect query intent: chapter, verse, range, verse-list, or text search
 function parseQueryType(q: string): {
@@ -58,10 +39,10 @@ function parseQueryType(q: string): {
     if (n >= 1 && n <= 114) return { type: 'chapter', chapterNumber: n }
   }
 
-  // Verse ref: "2:255"
+  // Verse ref: "2:255" — treat as a one-element verse list
   const verseMatch = q.match(/^(\d+):(\d+)$/)
   if (verseMatch) {
-    return { type: 'verse' }
+    return { type: 'verse-list' }
   }
 
   // Same-chapter range: "2:255-257"
@@ -88,7 +69,8 @@ export default async function QuranPage({
   const { q, verse } = await searchParams
   const { query } = await params
 
-  const queryText = q || query?.join(' ')
+  const rawQuery = q || query?.join(' ')
+  const queryText = rawQuery ? decodeURIComponent(rawQuery) : undefined
 
   if (!queryText) {
     const [chaptersRes, appendicesRes] = await Promise.all([
@@ -108,22 +90,25 @@ export default async function QuranPage({
       getTranslations('common'),
     ])
 
-    const chapters = (chaptersRes.data ?? []).filter(Boolean).sort(
-      (a, b) => (a.chapter_number ?? 0) - (b.chapter_number ?? 0)
-    )
-    const appendices = (appendicesRes.data ?? []).filter(Boolean).sort(
-      (a, b) => (a.code ?? 0) - (b.code ?? 0)
-    )
+    const chapters = (chaptersRes.data ?? [])
+      .filter(Boolean)
+      .sort((a, b) => (a.chapter_number ?? 0) - (b.chapter_number ?? 0))
+    const appendices = (appendicesRes.data ?? [])
+      .filter(Boolean)
+      .sort((a, b) => (a.code ?? 0) - (b.code ?? 0))
 
     return (
       <main className="py-12 px-4">
         <div className="max-w-4xl mx-auto space-y-12">
-
           {/* ── Hero ──────────────────────────────────────────────────── */}
           <section className="space-y-6 text-center max-w-xl mx-auto">
             <div className="space-y-2">
-              <p className="text-xs font-bold uppercase tracking-widest text-primary/70">{tQuran('title')}</p>
-              <h1 className="text-4xl font-bold tracking-tight">{tCommon('finalTestament')}</h1>
+              <p className="text-xs font-bold uppercase tracking-widest text-primary/70">
+                {tQuran('title')}
+              </p>
+              <h1 className="text-4xl font-bold tracking-tight">
+                {tCommon('finalTestament')}
+              </h1>
             </div>
             <QuranSearchBar large />
           </section>
@@ -220,13 +205,13 @@ export default async function QuranPage({
               ))}
             </div>
           </details>
-
         </div>
       </main>
     )
   }
 
   const parsed = parseQueryType(queryText)
+  console.log(`Parsed Query: ${parsed.type}, query text: ${queryText}`)
 
   // ── Chapter view: SSR first N verses via internal Railway network ───────────
   // If ?verse=N is set, SSR up to that verse so it's immediately in the DOM.
@@ -305,29 +290,31 @@ export default async function QuranPage({
 
   // ── Verse list: comma-separated refs like "1:4,1:1-5,2:45" ─────────────────
   if (parsed.type === 'verse-list') {
-    const { data, error } = await wsApiServer.GET('/quran', {
-      params: { query: { langs: ['en', 'ar'], verses: queryText } },
-    })
-
-    const allVerses =
-      data?.chapters?.flatMap(
-        (ch) => ch.verses?.map((v) => ({ ...v, cn: ch.cn })) ?? []
-      ) ?? []
-
+    let data = undefined
+    let apiError = false
+    try {
+      const result = await wsApiServer.GET('/quran', {
+        params: {
+          query: {
+            langs: ['en', 'ar'],
+            verses: queryText,
+            include_words: true,
+            word_langs: ['ar'],
+          },
+        },
+      })
+      data = result.data
+      apiError = !!result.error
+    } catch {
+      apiError = true
+    }
     return (
       <main className="py-8 px-4">
-        <div className="max-w-3xl mx-auto space-y-3">
-          <p className="text-sm font-mono text-muted-foreground">{queryText}</p>
-          {error || allVerses.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No verses found for &ldquo;{queryText}&rdquo;.
-            </p>
-          ) : (
-            allVerses.map((verse) => (
-              <VerseListCard key={verse.vk} verse={verse} />
-            ))
-          )}
-        </div>
+        <VerseListResult
+          queryText={queryText}
+          data={data}
+          apiError={apiError}
+        />
       </main>
     )
   }
@@ -373,7 +360,7 @@ export async function generateMetadata({
   if (parsed.type === 'chapter') {
     title = `Sura ${parsed.chapterNumber} | Quran | WikiSubmission`
     description = `Read and study Chapter ${parsed.chapterNumber} of the Final Testament`
-  } else if (parsed.type === 'verse' || parsed.type === 'range') {
+  } else if (parsed.type === 'verse-list' || parsed.type === 'range') {
     title = `${queryText} | Quran | WikiSubmission`
     description = `Verse ${queryText} of the Final Testament`
   } else {
