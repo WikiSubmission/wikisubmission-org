@@ -232,6 +232,8 @@ export default async function QuranPage({
             chapterNumber={parsed.chapterNumber}
             initialData={data}
             initialVerse={verse}
+            rangeStart={parsed.verseStart}
+            rangeEnd={parsed.verseEnd}
           />
         </Suspense>
       </main>

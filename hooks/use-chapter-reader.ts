@@ -65,11 +65,13 @@ type FetchResult = {
 
 export function useChapterReader(
   chapterNumber: number,
-  initialData: QuranResponse | null
+  initialData: QuranResponse | null,
+  rangeStart?: number,
+  rangeEnd?: number,
 ): UseChapterReaderReturn {
   const initialVerses = initialData?.chapters?.[0]?.verses ?? []
   const initialTitles = initialData?.chapters?.[0]?.titles ?? {}
-  const initialVerseEnd = initialData?.info?.verse_end ?? initialVerses.length
+  const initialVerseEnd = initialData?.info?.verse_end ?? (rangeStart ?? 0) + initialVerses.length - 1
 
   const [state, setState] = useState<State>({
     verses: initialVerses,
@@ -78,7 +80,8 @@ export function useChapterReader(
     loading: false,
     error: null,
     lastVerseEnd: initialVerseEnd,
-    reachedEnd: initialVerses.length < PAGE_SIZE,
+    // In range mode the SSR data is the complete set — never auto-load more.
+    reachedEnd: rangeEnd !== undefined ? true : initialVerses.length < PAGE_SIZE,
     lastOpts: null,
   })
 
@@ -104,13 +107,17 @@ export function useChapterReader(
   const fetchVerses = useCallback(
     async (verseStart: number, opts: ChapterReaderOptions): Promise<FetchResult> => {
       const langs = buildLangs(opts)
+      // In range mode, fetch up to rangeEnd so the full range is loaded in one request.
+      const verseEndParam = rangeEnd !== undefined
+        ? rangeEnd
+        : verseStart + PAGE_SIZE - 1
       const { data, error } = await wsApi.GET('/quran', {
         params: {
           query: {
             chapter_number_start: chapterNumber,
             langs,
             verse_start: verseStart,
-            verse_end: verseStart + PAGE_SIZE - 1,
+            verse_end: verseEndParam,
             include_words: opts.includeWords || undefined,
             include_root: opts.includeRoot || undefined,
             include_meaning: opts.includeMeaning || undefined,
@@ -132,7 +139,7 @@ export function useChapterReader(
         error: null,
       }
     },
-    [chapterNumber]
+    [chapterNumber, rangeEnd]
   )
 
   const reload = useCallback(
@@ -141,7 +148,9 @@ export function useChapterReader(
       loadMoreInFlightRef.current = false
       setState((prev) => ({ ...prev, loading: true, error: null }))
 
-      const result = await fetchVerses(0, opts)
+      // In range mode, reload from the range start so we never fall back to verse 0.
+      const start = rangeStart ?? 0
+      const result = await fetchVerses(start, opts)
 
       if (fetchGenerationRef.current !== generation) return
 
@@ -160,12 +169,12 @@ export function useChapterReader(
         verseCount: result.verses.length,
         loading: false,
         error: null,
-        lastVerseEnd: PAGE_SIZE,
-        reachedEnd: result.reachedEnd ?? false,
+        lastVerseEnd: rangeEnd ?? (start + PAGE_SIZE - 1),
+        reachedEnd: rangeEnd !== undefined ? true : (result.reachedEnd ?? false),
         lastOpts: opts,
       })
     },
-    [fetchVerses]
+    [fetchVerses, rangeStart, rangeEnd]
   )
 
   const loadMore = useCallback(async (fallbackOpts?: ChapterReaderOptions) => {

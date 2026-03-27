@@ -27,15 +27,20 @@ export function ChapterReader({
   chapterNumber,
   initialData,
   initialVerse,
+  rangeStart,
+  rangeEnd,
 }: {
   chapterNumber: number
   initialData: QuranResponse | null
   initialVerse?: string
+  rangeStart?: number
+  rangeEnd?: number
 }) {
+  const isRangeMode = rangeStart !== undefined && rangeEnd !== undefined
   const prefs = useQuranPreferences()
   const { displayMode } = prefs
   const { getDirection } = useLanguagesStore()
-  const reader = useChapterReader(chapterNumber, initialData)
+  const reader = useChapterReader(chapterNumber, initialData, rangeStart, rangeEnd)
   const t = useTranslations('quran')
   const tCommon = useTranslations('common')
   // State context: subscribe to currentVerse/isPlaying/isBuffering to compute
@@ -217,7 +222,9 @@ export function ChapterReader({
 
   // Aggressively load more batches when seeking an unloaded verse,
   // or normally when the user is near the end of loaded content.
+  // In range mode the initial data IS the full range — no further loading.
   useEffect(() => {
+    if (isRangeMode) return
     if (!reader.hasMore || reader.loading) return
     const isSeeking = !!seekTarget && !seekDoneRef.current
     const isNearEnd = lastVirtualIndex >= reader.verses.length - 15
@@ -238,6 +245,7 @@ export function ChapterReader({
   // overscan items below the fold, making the centre land on verse ~13 instead of 1.
   // Fix: use scroll position to find the item that actually straddles the viewport centre.
   useEffect(() => {
+    if (isRangeMode) return
     if (lastVirtualIndex < 0 || reader.verses.length === 0) return
     const timer = setTimeout(() => {
       const centerY = window.scrollY + window.innerHeight / 2
@@ -488,7 +496,7 @@ export function ChapterReader({
       )}
 
       {/* Verse number minimap — fixed right overlay (window-scroll compatible) */}
-      {displayMode !== 'reading' && (
+      {displayMode !== 'reading' && !isRangeMode && (
         <VerseMinimap
           chapterNumber={chapterNumber}
           currentVerseNumber={currentVerseNumber}
