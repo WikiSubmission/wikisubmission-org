@@ -32,7 +32,7 @@ const FEATURED_QUERY = `*[_type == "article" && language == $language] | order(p
   "category": categories[0]->name,
   "categorySlug": categories[0]->slug.current,
   "thumbnailUrl": thumbnail.asset->url,
-  "authorName": author->name
+  "authorName": author->firstName + " " + author->lastName
 }`
 
 // All articles passed to the client browser for search / filtering
@@ -41,7 +41,7 @@ const ALL_ARTICLES_QUERY = `*[_type == "article" && language == $language] | ord
   "category": categories[0]->name,
   "categorySlug": categories[0]->slug.current,
   "thumbnailUrl": thumbnail.asset->url,
-  "authorName": author->name
+  "authorName": author->firstName + " " + author->lastName
 }`
 
 // Categories with counts for filter pills (counts scoped to current language)

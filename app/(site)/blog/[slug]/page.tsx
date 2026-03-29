@@ -27,7 +27,7 @@ const POST_QUERY = `*[_type == "article" && slug.current == $slug && language ==
   "categoryRef": categories[0]._ref,
   body,
   "thumbnailUrl": thumbnail.asset->url,
-  "authorName": author->name,
+  "authorName": author->firstName + " " + author->lastName,
   "authorPhotoUrl": author->photo.asset->url
 }`
 
