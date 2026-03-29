@@ -274,10 +274,25 @@ const portableTextComponents = {
     h3: ({ children }: { children?: React.ReactNode }) => (
       <h3 className="font-headline">{children}</h3>
     ),
+    h4: ({ children }: { children?: React.ReactNode }) => (
+      <h4 className="font-headline">{children}</h4>
+    ),
     blockquote: ({ children }: { children?: React.ReactNode }) => (
       <blockquote className="border-l-4 border-primary/40 pl-4 italic">
         {children}
       </blockquote>
+    ),
+  },
+  marks: {
+    link: ({ children, value }: { children?: React.ReactNode; value?: { href?: string; blank?: boolean } }) => (
+      <a
+        href={value?.href}
+        target={value?.blank ? '_blank' : undefined}
+        rel={value?.blank ? 'noopener noreferrer' : undefined}
+        className="text-primary underline underline-offset-2 hover:opacity-80"
+      >
+        {children}
+      </a>
     ),
   },
   types: {
