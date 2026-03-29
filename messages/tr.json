@@ -210,6 +210,8 @@
     "tools": {
       "iosApp": "iOS Uygulaması",
       "iosAppDesc": "iPhone, iPad ve Mac",
+      "androidApp": "Android Uygulaması",
+      "androidAppDesc": "Google Play Store",
       "downloads": "İndirmeler",
       "downloadsDesc": "Ücretsiz kaynaklar ve PDF'ler",
       "discordBot": "Discord Botu",

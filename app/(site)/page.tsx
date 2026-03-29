@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { HeroCardDeck } from '@/components/hero-card-deck'
 import {
   FaApple,
+  FaAndroid,
   FaDiscord,
   FaTwitter,
   FaYoutube,
@@ -213,13 +214,19 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto">
           <SectionHeader title={t('platformsAndTools')} />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
                 title: t('tools.iosApp'),
                 desc: t('tools.iosAppDesc'),
                 href: 'https://apps.apple.com/app/id6444260632',
                 icon: <FaApple size={24} />,
+              },
+              {
+                title: t('tools.androidApp'),
+                desc: t('tools.androidAppDesc'),
+                href: 'https://play.google.com/store/apps/details?id=com.kuransonahit.app',
+                icon: <FaAndroid size={24} />,
               },
               {
                 title: t('tools.downloads'),

@@ -210,6 +210,8 @@
     "tools": {
       "iosApp": "تطبيق iOS",
       "iosAppDesc": "iPhone وiPad وMac",
+      "androidApp": "تطبيق Android",
+      "androidAppDesc": "متجر Google Play",
       "downloads": "تنزيلات",
       "downloadsDesc": "موارد وملفات PDF مجانية",
       "discordBot": "روبوت Discord",
