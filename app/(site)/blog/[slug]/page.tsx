@@ -1,4 +1,4 @@
-import { sanityServer } from '@/lib/sanity'
+import { sanityServer, urlFor } from '@/lib/sanity'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextBlock } from '@portabletext/types'
 import Link from 'next/link'
@@ -286,7 +286,7 @@ const portableTextComponents = {
     }: {
       value: { asset?: { url?: string }; alt?: string }
     }) => {
-      const url = value?.asset?.url
+      const url = urlFor(value)
       if (!url) return null
       return (
         <div className="my-8 rounded-xl overflow-hidden editorial-shadow">
