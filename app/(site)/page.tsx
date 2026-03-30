@@ -10,7 +10,6 @@ export const metadata = buildPageMetadata({
 })
 import { FaApple, FaAndroid, FaDiscord, FaYoutube } from 'react-icons/fa'
 import { DownloadIcon, ArrowRight } from 'lucide-react'
-import { About } from '@/constants/about'
 import { getTranslations } from 'next-intl/server'
 
 // ─── Section Header ────────────────────────────────────────────────────────────
