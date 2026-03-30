@@ -62,7 +62,8 @@ export function useChapterBorderLoader(
     prevLoading.current = loading
 
     return () => { tlRef.current?.kill() }
-  }, [loading]) // containerRef object is stable — omit from deps intentionally
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]) // containerRef is a stable ref object — intentionally omitted
 
   // Kill on unmount
   useEffect(() => () => { tlRef.current?.kill() }, [])

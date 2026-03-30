@@ -1,6 +1,5 @@
 import { About } from '@/constants/about'
 import { Mail, Github, MessageSquare, ExternalLink, ArrowRight } from 'lucide-react'
-import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
 

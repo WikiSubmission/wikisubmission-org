@@ -20,32 +20,12 @@ import Link from 'next/link'
 import { useState } from 'react'
 import type { components } from '@/src/api/types.gen'
 import useLocalStorage from '@/hooks/use-local-storage'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 type Chapter = components['schemas']['Chapter']
 type Appendix = components['schemas']['Appendix']
-
-// Isolated: useSearchParams() re-renders on every window.history.replaceState.
-// Keeping this in its own sub-component prevents the 114 chapter links from
-// re-rendering on every URL ?verse= sync while the user is reading.
-function BackToQuranLink({ alreadyShown }: { alreadyShown: boolean }) {
-  const t = useTranslations('nav')
-  const searchParams = useSearchParams()
-  if (alreadyShown || !searchParams.get('q')) return null
-  return (
-    <SheetClose asChild>
-      <Link
-        href="/quran"
-        onClick={() => { document.body.style.top = '0px' }}
-        className="flex items-center gap-2 px-2 py-2 rounded-lg text-sm hover:bg-accent/50 transition-colors"
-      >
-        {t('quran')}
-      </Link>
-    </SheetClose>
-  )
-}
 
 function NavSheetContent({
   chapters,

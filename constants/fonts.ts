@@ -1,4 +1,4 @@
-import { Sora, Geist_Mono, Amiri, Plus_Jakarta_Sans } from 'next/font/google'
+import { Geist_Mono, Amiri } from 'next/font/google'
 import localFont from "next/font/local";
 
 const glacial = localFont({

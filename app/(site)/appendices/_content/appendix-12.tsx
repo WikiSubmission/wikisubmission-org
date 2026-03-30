@@ -1,5 +1,4 @@
 import { QuranRef } from '@/components/quran-ref'
-import Link from 'next/link'
 import { YouTubeEmbed } from '@/components/youtube-embed'
 
 export function AppendixContent() {
