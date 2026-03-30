@@ -137,7 +137,30 @@ export function ChapterReader({
 
   const virtualizer = useWindowVirtualizer({
     count: reader.verses.length,
-    estimateSize: () => 400,
+    // Per-verse estimate: counts words (for word-by-word mode) and footnote length
+    // to get a close initial size before ResizeObserver fires and corrects positions.
+    // A flat value under-estimates long-footnote verses and over-estimates short ones.
+    estimateSize: (index) => {
+      const verse = reader.verses[index]
+      const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+      const footnoteLen = verse?.tr?.[primaryCode]?.f?.length ?? 0
+      const footnoteRows = Math.ceil(footnoteLen / 65)
+
+      if (prefs.wordByWord) {
+        const wordCount = verse?.w?.length ?? 8
+        // Responsive words-per-row: word cards are ~110px wide + 8px gap = ~118px each.
+        // Container = min(vw, 896px) minus outer px-4 (32px) and inner p-6/p-8 (48-64px).
+        const vw = typeof window !== 'undefined' ? window.innerWidth : 768
+        const innerPad = vw < 640 ? 48 : 64 // p-6 vs p-8 on each side × 2
+        const containerW = Math.min(vw - 32 - innerPad, 800)
+        const wordsPerRow = Math.max(2, Math.floor(containerW / 118))
+        const wordRows = Math.ceil(wordCount / wordsPerRow)
+        // Each row: ~109px item + 32px gap-y-8; py-4 wrapper adds 32px; card overhead ~160px
+        return Math.max(320, 160 + wordRows * 141 + footnoteRows * 22)
+      }
+      // Compact / verse mode: text + Arabic inline, footnotes can be very long
+      return Math.max(280, 280 + footnoteRows * 22)
+    },
     overscan: 12,
     scrollMargin,
     // scrollPaddingStart keeps scrollToIndex results below the fixed headers

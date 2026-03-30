@@ -1,6 +1,7 @@
 'use client'
 
-import { memo, useMemo, useCallback, useState } from 'react'
+import { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react'
+import gsap from 'gsap'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useIsTouch } from '@/hooks/use-is-touch'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -29,6 +30,77 @@ type WordData = components['schemas']['WordData']
 // Adapter: VerseData → QuranVerse (for the audio player)
 export function toQuranVerse(verse: VerseData): QuranVerse {
   return { verse_id: verse.vk ?? '', ws_quran_text: {} }
+}
+
+// ─── Verse divider ───────────────────────────────────────────────────────────
+
+function VerseDivider() {
+  const leftRef = useRef<HTMLDivElement>(null)
+  const rightRef = useRef<HTMLDivElement>(null)
+  const ornamentRef = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    if (!leftRef.current || !rightRef.current || !ornamentRef.current) return
+
+    // Shimmer radiates outward from the ornament on both sides simultaneously
+    const shimmerLeft = gsap.fromTo(
+      leftRef.current,
+      { xPercent: 100, opacity: 0.8 },
+      { xPercent: -100, opacity: 0, duration: 2, ease: 'power2.out', repeat: -1, repeatDelay: 2.5 }
+    )
+    const shimmerRight = gsap.fromTo(
+      rightRef.current,
+      { xPercent: -100, opacity: 0.8 },
+      { xPercent: 100, opacity: 0, duration: 2, ease: 'power2.out', repeat: -1, repeatDelay: 2.5 }
+    )
+    const pulse = gsap.to(ornamentRef.current, {
+      opacity: 0.25,
+      scale: 0.88,
+      duration: 2,
+      ease: 'sine.inOut',
+      yoyo: true,
+      repeat: -1,
+    })
+
+    return () => {
+      shimmerLeft.kill()
+      shimmerRight.kill()
+      pulse.kill()
+    }
+  }, [])
+
+  return (
+    <div className="flex items-center justify-center py-5 px-8">
+      <div className="flex items-center gap-4 w-full max-w-72">
+        {/* Left double lines + shimmer overlay */}
+        <div className="flex-1 relative h-3 flex flex-col justify-center gap-0.75 overflow-hidden">
+          <div className="h-px bg-gradient-to-l from-border/65 via-border/40 to-transparent" />
+          <div className="h-px bg-gradient-to-l from-border/28 via-border/15 to-transparent" />
+          <div
+            ref={leftRef}
+            className="absolute inset-0 bg-gradient-to-l from-violet-500/45 via-violet-500/20 to-transparent"
+          />
+        </div>
+        {/* Arabic calligraphic ornament — Rub el Hizb ۞ */}
+        <span
+          ref={ornamentRef}
+          className="text-violet-600/65 text-base shrink-0 select-none font-arabic leading-none"
+          aria-hidden="true"
+        >
+          ۞
+        </span>
+        {/* Right double lines + shimmer overlay */}
+        <div className="flex-1 relative h-3 flex flex-col justify-center gap-0.75 overflow-hidden">
+          <div className="h-px bg-gradient-to-r from-border/65 via-border/40 to-transparent" />
+          <div className="h-px bg-gradient-to-r from-border/28 via-border/15 to-transparent" />
+          <div
+            ref={rightRef}
+            className="absolute inset-0 bg-gradient-to-r from-violet-500/45 via-violet-500/20 to-transparent"
+          />
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // ─── Word-by-word (Arabic) ────────────────────────────────────────────────────
@@ -399,21 +471,7 @@ export const VerseCard = memo(
         </div>
       </div>
 
-      {!isLast && (
-        <div className="flex justify-center items-center py-3">
-          <svg
-            width="80" height="20" viewBox="0 0 80 20" fill="none"
-            className="text-border/70"
-            aria-hidden="true"
-          >
-            <line x1="0" y1="10" x2="28" y2="10" stroke="currentColor" strokeWidth="0.75" />
-            <circle cx="40" cy="10" r="7" stroke="currentColor" strokeWidth="0.75" />
-            <path d="M40 5 L44.3 10 L40 15 L35.7 10 Z" fill="currentColor" opacity="0.35" />
-            <circle cx="40" cy="10" r="1.8" fill="currentColor" opacity="0.55" />
-            <line x1="52" y1="10" x2="80" y2="10" stroke="currentColor" strokeWidth="0.75" />
-          </svg>
-        </div>
-      )}
+      {!isLast && <VerseDivider />}
     </div>
   )
   },

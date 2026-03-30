@@ -233,7 +233,7 @@ export default async function Home() {
               {
                 title: t('tools.discordBot'),
                 desc: t('tools.discordBotDesc'),
-                href: 'https://discord.com/...',
+                href: 'https://discord.com/oauth2/authorize?client_id=978658099474890793',
                 icon: <FaDiscord size={24} />,
               },
             ].map((tool) => (
