@@ -1,23 +1,14 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { buildPageMetadata } from '@/constants/metadata'
+import { HeroCardDeck } from '@/components/hero-card-deck'
 
 export const metadata = buildPageMetadata({
   title: 'WikiSubmission',
   description: 'WikiSubmission is a faith-based nonprofit providing free and open-source tools for the Final Testament (Quran), Bible, and religious education.',
   url: '/',
 })
-import { HeroCardDeck } from '@/components/hero-card-deck'
-import {
-  FaApple,
-  FaAndroid,
-  FaDiscord,
-  FaTwitter,
-  FaYoutube,
-  FaGithub,
-  FaHeart,
-  FaEnvelope,
-} from 'react-icons/fa'
+import { FaApple, FaAndroid, FaDiscord, FaYoutube } from 'react-icons/fa'
 import { DownloadIcon, ArrowRight } from 'lucide-react'
 import { About } from '@/constants/about'
 import { getTranslations } from 'next-intl/server'
@@ -48,7 +39,6 @@ function SectionHeader({
 
 export default async function Home() {
   const t = await getTranslations('home')
-  const tNav = await getTranslations('nav')
 
   return (
     <div className="min-h-screen">
@@ -268,85 +258,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-border/40 py-16 px-6">
-        <div className="max-w-7xl mx-auto space-y-10">
-          <div className="max-w-2xl">
-            <p className="text-sm text-on-surface-variant leading-relaxed">
-              {t('aboutText')}
-              <Link
-                href="https://library.wikisubmission.org/file/quran-the-final-testament"
-                className="text-primary hover:underline ml-1"
-              >
-                {t('learnMore')}
-              </Link>
-            </p>
-          </div>
-
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-sm text-muted-foreground">
-            <div className="flex gap-6">
-              <Link
-                href="/contact"
-                className="flex items-center gap-1.5 hover:text-primary transition-colors"
-              >
-                <FaEnvelope size={14} /> {tNav('contact')}
-              </Link>
-              <Link
-                href="/donate"
-                className="flex items-center gap-1.5 hover:text-primary transition-colors"
-              >
-                <FaHeart size={14} /> {tNav('donate')}
-              </Link>
-            </div>
-
-            <div className="flex gap-4 text-foreground/50">
-              <Link
-                href={About.social.github}
-                className="hover:text-foreground transition-colors"
-              >
-                <FaGithub size={18} />
-              </Link>
-              <Link
-                href={About.social.twitter}
-                className="hover:text-foreground transition-colors"
-              >
-                <FaTwitter size={18} />
-              </Link>
-              <Link
-                href={About.social.youtube}
-                className="hover:text-foreground transition-colors"
-              >
-                <FaYoutube size={18} />
-              </Link>
-              <Link
-                href={About.social.discord}
-                className="hover:text-foreground transition-colors"
-              >
-                <FaDiscord size={18} />
-              </Link>
-            </div>
-
-            <div className="flex gap-4">
-              <Link
-                href="/legal/terms-of-use"
-                className="hover:text-primary transition-colors"
-              >
-                {t('terms')}
-              </Link>
-              <Link
-                href="/legal/privacy-policy"
-                className="hover:text-primary transition-colors"
-              >
-                {t('privacy')}
-              </Link>
-            </div>
-          </div>
-
-          <p className="font-mono tracking-widest text-[10px] opacity-40 uppercase">
-            {t('brandDomain')}
-          </p>
-        </div>
-      </footer>
     </div>
   )
 }

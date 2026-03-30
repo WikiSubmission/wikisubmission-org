@@ -1,4 +1,5 @@
 import { SiteNav } from '@/components/site-nav'
+import { SiteFooter } from '@/components/site-footer'
 
 export default function SiteLayout({
   children,
@@ -9,6 +10,7 @@ export default function SiteLayout({
     <>
       <SiteNav />
       <main className="pt-0">{children}</main>
+      <SiteFooter />
     </>
   )
 }
