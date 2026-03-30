@@ -1,7 +1,8 @@
 'use client'
 
-import { memo, useMemo, useCallback } from 'react'
+import { memo, useMemo, useCallback, useState } from 'react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { useIsTouch } from '@/hooks/use-is-touch'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
 import { useQuranPlayerCallbacks, type QuranVerse } from '@/lib/quran-audio-context'
 import { RootWordOccurrences } from './root-word-occurrences'
@@ -50,6 +51,10 @@ const WordByWordView = memo(
     [words]
   )
 
+  const isTouch = useIsTouch()
+  const [activeWord, setActiveWord] = useState<{ arabic: string; root?: string; meaning: string } | null>(null)
+  const [dialogWord, setDialogWord] = useState<{ arabic: string; root: string; meaning: string } | null>(null)
+
   if (compact) {
     return (
       <div dir="rtl" className="flex flex-wrap text-right justify-start gap-x-4 gap-y-6 py-2">
@@ -58,6 +63,21 @@ const WordByWordView = memo(
           const root = w.r
           const meaning = (w.tx as Record<string, string>)?.['en'] ?? ''
           const wordIndex = w.wi ?? 0
+
+          if (isTouch) {
+            return (
+              <p
+                key={wordIndex}
+                className="font-arabic text-2xl leading-relaxed transition-all cursor-pointer active:scale-95 text-foreground/90"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setActiveWord({ arabic, root: root ?? undefined, meaning })
+                }}
+              >
+                {arabic}
+              </p>
+            )
+          }
 
           return (
             <Dialog key={wordIndex}>
@@ -105,6 +125,58 @@ const WordByWordView = memo(
             </Dialog>
           )
         })}
+
+        {/* Mobile: shared word popup */}
+        {isTouch && activeWord && (
+          <>
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setActiveWord(null)}
+            />
+            <div
+              className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-popover/90 backdrop-blur-sm border border-violet-600/20 rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-xl min-w-40"
+              onClick={() => {
+                if (activeWord.root) {
+                  setDialogWord({ arabic: activeWord.arabic, root: activeWord.root, meaning: activeWord.meaning })
+                  setActiveWord(null)
+                }
+              }}
+            >
+              <p className="font-arabic text-3xl text-violet-600">{activeWord.arabic}</p>
+              <p className="text-sm font-bold text-foreground">{activeWord.meaning}</p>
+              {activeWord.root && (
+                <p className="text-xs text-muted-foreground mt-1">Tap to see occurrences →</p>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Mobile: shared dialog */}
+        {isTouch && (
+          <Dialog open={!!dialogWord} onOpenChange={(open) => { if (!open) setDialogWord(null) }}>
+            <DialogContent className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl">
+              {dialogWord && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
+                      <span className="text-4xl font-arabic text-violet-600 mb-3">{dialogWord.arabic}</span>
+                      <span className="text-base font-semibold text-foreground">{dialogWord.meaning}</span>
+                      <div className="px-2.5 py-0.5 bg-violet-600/10 rounded-full">
+                        <span className="text-[10px] font-bold text-violet-600">Root: {dialogWord.root}</span>
+                      </div>
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-3">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-3 px-1">
+                      Other Occurrences
+                    </p>
+                    <RootWordOccurrences rootWord={dialogWord.root} />
+                  </div>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     )
   }
