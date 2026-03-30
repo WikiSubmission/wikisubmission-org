@@ -9,6 +9,7 @@ import { wsApiServer } from '@/src/api/server-client'
 import { LanguagesInit } from '@/components/languages-init'
 import { QuranNavInit } from '@/components/quran-nav-init'
 import { SiteNav } from '@/components/site-nav'
+import { SiteFooter } from '@/components/site-footer'
 import { QuranNavSheet } from './client-components/nav-sheet'
 import { QuranModeSelector } from './client-components/mode-selector'
 import { QuranScrollContainer } from './client-components/scroll-container'
@@ -69,6 +70,7 @@ export default async function QuranLayout({
           <QuranScrollContainer>
             {children}
           </QuranScrollContainer>
+          <SiteFooter />
           <MetricsCollector />
           <QuranPlayer />
         </div>
