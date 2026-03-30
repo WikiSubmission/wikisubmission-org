@@ -183,7 +183,9 @@ function mergePages(
   for (const newCh of next.chapters ?? []) {
     const existing = chapters.find((c) => c.cn === newCh.cn)
     if (existing) {
-      existing.verses = [...(existing.verses ?? []), ...(newCh.verses ?? [])]
+      const seen = new Set((existing.verses ?? []).map((v) => v.vk))
+      const deduped = (newCh.verses ?? []).filter((v) => !seen.has(v.vk))
+      existing.verses = [...(existing.verses ?? []), ...deduped]
     } else {
       chapters.push({ ...newCh })
     }
