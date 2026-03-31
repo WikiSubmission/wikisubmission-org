@@ -2,29 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { About } from '@/constants/about'
 import { FaGithub, FaDiscord, FaYoutube, FaTwitter, FaApple } from 'react-icons/fa'
-
-const LINKS = {
-  scripture: [
-    { label: 'Quran', href: '/quran' },
-    { label: 'Proclamation', href: '/proclamation' },
-    { label: 'Introduction', href: '/introduction' },
-    { label: 'Appendices', href: '/appendices/1' },
-    { label: 'Miracle of 19', href: '/miracle' },
-  ],
-  explore: [
-    { label: 'Practices', href: '/practices' },
-    { label: 'Archive', href: '/archive' },
-    { label: 'Music', href: '/music' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Downloads', href: '/downloads' },
-  ],
-  organization: [
-    { label: 'Contact', href: '/contact' },
-    { label: 'Donate', href: '/donate' },
-    { label: 'Privacy Policy', href: '/legal/privacy-policy' },
-    { label: 'Terms of Use', href: '/legal/terms-of-use' },
-  ],
-}
+import { getTranslations } from 'next-intl/server'
 
 const SOCIAL = [
   { icon: FaGithub, href: About.social.github, label: 'GitHub' },
@@ -33,7 +11,34 @@ const SOCIAL = [
   { icon: FaTwitter, href: About.social.twitter, label: 'Twitter / X' },
 ]
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const t = await getTranslations('footer')
+  const nav = await getTranslations('nav')
+  const navbar = await getTranslations('navbar')
+
+  const LINKS = {
+    scripture: [
+      { label: nav('quran'), href: '/quran' },
+      { label: nav('proclamation'), href: '/proclamation' },
+      { label: nav('introduction'), href: '/introduction' },
+      { label: t('linkAppendices'), href: '/appendices/1' },
+      { label: t('linkMiracle'), href: '/miracle' },
+    ],
+    explore: [
+      { label: navbar('practices'), href: '/practices' },
+      { label: navbar('archive'), href: '/archive' },
+      { label: navbar('music'), href: '/music' },
+      { label: navbar('blog'), href: '/blog' },
+      { label: nav('downloads'), href: '/downloads' },
+    ],
+    organization: [
+      { label: nav('contact'), href: '/contact' },
+      { label: nav('donate'), href: '/donate' },
+      { label: t('linkPrivacy'), href: '/legal/privacy-policy' },
+      { label: t('linkTerms'), href: '/legal/terms-of-use' },
+    ],
+  }
+
   return (
     <footer className="border-t border-border/40 bg-muted/20 mt-24">
       <div className="max-w-7xl mx-auto px-6 py-16">
@@ -55,24 +60,36 @@ export function SiteFooter() {
             </Link>
 
             <p className="text-muted-foreground leading-relaxed max-w-sm">
-              Faith-based 501(c)(3) nonprofit organization providing free and open-source technology, educational resources, and creative works in the cause of God.
+              {t('missionDesc')}
             </p>
 
             <div className="space-y-1.5">
               <p className="text-xs font-semibold uppercase tracking-widest">
-                POWERED BY YOUR CONTRIBUTIONS
+                {t('poweredHeading')}
               </p>
               <p className="text-xs text-muted-foreground">
-                We are committed to continue developing free and open-source tools & technology. No ads, no paywalls. To help us in this cause, you can <Link href="/donate" className='text-primary/70'>make a contribution.</Link> As a 501(c)(3) registered nonprofit (EIN: 39-4876245), your donations may be tax-deductible depending on your country.
+                {t.rich('poweredBody', {
+                  donateLink: (chunks) => (
+                    <Link href="/donate" className="text-primary/70">{chunks}</Link>
+                  ),
+                })}
               </p>
             </div>
 
             <div className="space-y-1.5">
               <p className="text-xs font-semibold uppercase tracking-widest">
-                CONNECT WITH US
+                {t('connectHeading')}
               </p>
               <p className="text-xs text-muted-foreground">
-                Our team is growing. If you&apos;d like to get involved, or have any questions, connect with us on <Link href={About.social.discord} className='text-primary/70'>Discord</Link> or email us at <Link href={`mailto:${About.email}`} className='text-primary/70'>{About.email}</Link>
+                {t.rich('connectBody', {
+                  email: About.email,
+                  discordLink: (chunks) => (
+                    <Link href={About.social.discord} className="text-primary/70">{chunks}</Link>
+                  ),
+                  emailLink: (chunks) => (
+                    <Link href={`mailto:${About.email}`} className="text-primary/70">{chunks}</Link>
+                  ),
+                })}
               </p>
             </div>
 
@@ -85,25 +102,21 @@ export function SiteFooter() {
             >
               <FaApple size={18} />
               <div className="flex flex-col leading-tight">
-                <span className="text-[10px] text-muted-foreground">Download on the</span>
-                <span className="text-xs font-semibold">App Store</span>
+                <span className="text-[10px] text-muted-foreground">{t('appStorePrefix')}</span>
+                <span className="text-xs font-semibold">{t('appStoreLabel')}</span>
               </div>
             </a>
-
           </div>
 
           {/* Scripture */}
           <div className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-widest">
-              Scripture
+              {t('sectionScripture')}
             </p>
             <ul className="space-y-2.5">
               {LINKS.scripture.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
+                  <Link href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -114,15 +127,12 @@ export function SiteFooter() {
           {/* Explore */}
           <div className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-widest">
-              Explore
+              {t('sectionExplore')}
             </p>
             <ul className="space-y-2.5">
               {LINKS.explore.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
+                  <Link href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -133,15 +143,12 @@ export function SiteFooter() {
           {/* Organization */}
           <div className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-widest">
-              Organization
+              {t('sectionOrganization')}
             </p>
             <ul className="space-y-2.5">
               {LINKS.organization.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
+                  <Link href={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -152,7 +159,7 @@ export function SiteFooter() {
 
         {/* Bottom bar */}
         <div className="mt-8 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} WikiSubmission. All rights reserved.</p>
+          <p>{t('copyright', { year: new Date().getFullYear() })}</p>
           <div className="flex items-center gap-3">
             {SOCIAL.map(({ icon: Icon, href, label }) => (
               <a

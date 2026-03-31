@@ -36,7 +36,7 @@
     "taxInfo": "WikiSubmission is a registered 501(c)(3) public charity (EIN: 39-4876245). Donations are fully tax-deductible to the extent permitted by law.",
     "fundInfoBold": "Your donations directly support our cause.",
     "fundInfoRest": "Funds are allocated on a priority basis, with a primary focus on maintaining existing infrastructure and operations, and any excess towards new technical and creative works in the cause of God.",
-    "noFeatures": "Donations do not purchase, unlock, or provide any in\u2011app features or content.",
+    "noFeatures": "Donations do not purchase, unlock, or provide any in‑app features or content.",
     "managePrefix": "To manage your monthly contribution, or to update your billing details, please click",
     "here": "here",
     "forQuestionsPrefix": "For any questions, please write to",
@@ -330,5 +330,22 @@
     "card3Desc": "The purpose of fasting and how to observe Ramadan correctly.",
     "card4Title": "Hajj Overview",
     "card4Desc": "The pilgrimage to Mecca — its rites and spiritual significance."
+  },
+  "footer": {
+    "missionDesc": "Faith-based nonprofit organization providing free and open-source technology, educational resources, and creative works in the cause of God.",
+    "poweredHeading": "Powered by your contributions",
+    "poweredBody": "We are committed to developing free and open-source tools & technology. No ads, no paywalls. To help us in this cause, you can <donateLink>make a contribution</donateLink>. As a 501(c)(3) registered nonprofit (EIN: 39-4876245), your donations may be tax-deductible depending on your country.",
+    "connectHeading": "Connect with us",
+    "connectBody": "Our team is growing. If you would like to get involved, or have any questions, connect with us on <discordLink>Discord</discordLink> or email us at <emailLink>{email}</emailLink>.",
+    "sectionScripture": "Scripture",
+    "sectionExplore": "Explore",
+    "sectionOrganization": "Organization",
+    "linkAppendices": "Appendices",
+    "linkMiracle": "Miracle of 19",
+    "linkPrivacy": "Privacy Policy",
+    "linkTerms": "Terms of Use",
+    "appStorePrefix": "Download on the",
+    "appStoreLabel": "App Store",
+    "copyright": "© {year} WikiSubmission. All rights reserved."
   }
 }

@@ -330,5 +330,22 @@
     "card3Desc": "Le but du jeûne et comment observer correctement le Ramadan.",
     "card4Title": "Aperçu du Hajj",
     "card4Desc": "Le pèlerinage à La Mecque — ses rites et sa signification spirituelle."
+  },
+  "footer": {
+    "missionDesc": "Faith-based nonprofit organization providing free and open-source technology, educational resources, and creative works in the cause of God.",
+    "poweredHeading": "Powered by your contributions",
+    "poweredBody": "We are committed to developing free and open-source tools & technology. No ads, no paywalls. To help us in this cause, you can <donateLink>make a contribution</donateLink>. As a 501(c)(3) registered nonprofit (EIN: 39-4876245), your donations may be tax-deductible depending on your country.",
+    "connectHeading": "Connect with us",
+    "connectBody": "Our team is growing. If you would like to get involved, or have any questions, connect with us on <discordLink>Discord</discordLink> or email us at <emailLink>{email}</emailLink>.",
+    "sectionScripture": "Scripture",
+    "sectionExplore": "Explore",
+    "sectionOrganization": "Organization",
+    "linkAppendices": "Appendices",
+    "linkMiracle": "Miracle of 19",
+    "linkPrivacy": "Privacy Policy",
+    "linkTerms": "Terms of Use",
+    "appStorePrefix": "Download on the",
+    "appStoreLabel": "App Store",
+    "copyright": "© {year} WikiSubmission. All rights reserved."
   }
 }
