@@ -58,6 +58,14 @@ export function ChapterReader({
     () => initialVerse ?? null
   )
   const seekDoneRef = useRef(false)
+  // Tracks which verse window was active at last seek — resets seekDoneRef when reload replaces it.
+  const prevFirstVerseRef = useRef('')
+  // Always holds the verse currently at the viewport centre — synced by the scroll
+  // listener so any reload (mode switch, language change) can anchor to it without
+  // causing the "verses climb to the top" effect.
+  const centerVerseRef = useRef(1)
+  const readingSeekDoneRef = useRef(false)
+  const readingPrevFirstVerseRef = useRef('')
 
   // Differentiate smooth (user minimap tap) from instant (programmatic/load) seeks.
   const seekBehaviorRef = useRef<'auto' | 'smooth'>('auto')
@@ -98,7 +106,17 @@ export function ChapterReader({
       isFirstMount.current = false
       return
     }
-    reader.reload(opts)
+    const anchor = centerVerseRef.current
+    // Anchor to the current viewport centre on mode/language switch so the reader
+    // doesn't jump back to verse 1 or the original seek target.
+    if (anchor > 1) {
+      seekDoneRef.current = false
+      readingSeekDoneRef.current = false
+      setSeekTarget(String(anchor))
+      reader.reload(opts, anchor)
+    } else {
+      reader.reload(opts, seekTarget ? parseInt(seekTarget) : undefined)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opts])
 
@@ -115,7 +133,7 @@ export function ChapterReader({
       reader.verses.length === 0 ||
       firstVerse?.tr?.[primaryCode] === undefined ||
       (secondaryCode !== null && firstVerse?.tr?.[secondaryCode] === undefined)
-    if (needsReload) reader.reload(opts)
+    if (needsReload) reader.reload(opts, seekTarget ? parseInt(seekTarget) : undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -223,9 +241,25 @@ export function ChapterReader({
     [readerVerses, readerSeekToVerse, opts]
   )
 
-  // Scroll to seekTarget once the verse is in the loaded data
+  // firstVerseKey changes when reload replaces the entire window (e.g. switching to
+  // word-by-word triggers opts change → reload from verse 0). It stays stable when
+  // loadMore appends verses. Used to detect window replacement and reset seekDoneRef.
+  const firstVerseKey = reader.verses[0]?.vk ?? ''
+
+  // Scroll to seekTarget once the verse is in the loaded data.
+  // Also handles post-reload re-seeks: if the verse window was replaced (firstVerseKey
+  // changed), seekDoneRef is reset so the seek fires again for the new window.
   useEffect(() => {
-    if (!seekTarget || seekDoneRef.current) return
+    if (!seekTarget) return
+
+    // Verse window replaced by a reload → allow re-seek in the new window
+    if (prevFirstVerseRef.current !== firstVerseKey) {
+      prevFirstVerseRef.current = firstVerseKey
+      seekDoneRef.current = false
+    }
+
+    if (seekDoneRef.current) return
+
     const targetIndex = reader.verses.findIndex(
       (v) => v.vk?.split(':')[1] === seekTarget
     )
@@ -234,11 +268,54 @@ export function ChapterReader({
         align: 'start',
         behavior: seekBehaviorRef.current,
       })
-      seekBehaviorRef.current = 'auto' // reset for next programmatic seek
+      seekBehaviorRef.current = 'auto'
       seekDoneRef.current = true
+
+      // Retry after two animation frames so ResizeObserver has corrected item
+      // heights (especially important in word-by-word mode where estimates can
+      // diverge from actual sizes and shift the viewport after the first scroll).
+      const rafId = requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          virtualizer.scrollToIndex(targetIndex, { align: 'start', behavior: 'auto' })
+        })
+      )
+      return () => cancelAnimationFrame(rafId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reader.verses.length, seekTarget])
+  }, [firstVerseKey, reader.verses.length, seekTarget])
+
+  // Reading mode: scroll to the target verse by ID once it appears in the DOM.
+  // ReadingView auto-loads all verses; this fires on each new batch until found.
+  useEffect(() => {
+    if (displayMode !== 'reading') return
+    if (!seekTarget) return
+
+    // Verse window replaced by reload → allow re-seek in the new window
+    if (readingPrevFirstVerseRef.current !== firstVerseKey) {
+      readingPrevFirstVerseRef.current = firstVerseKey
+      readingSeekDoneRef.current = false
+    }
+
+    if (readingSeekDoneRef.current) return
+    const el = document.getElementById(`${chapterNumber}:${seekTarget}`)
+    if (!el) return
+
+    // Two frames let the browser fully lay out the prose block.
+    // We then normalize scroll to 0 before measuring so that the inherited
+    // window.scrollY from a previous mode (virtualizer) doesn't corrupt the
+    // calculation. Both scrollTo calls are synchronous within the same frame,
+    // so the browser renders only once at the final position — no visible flash.
+    const rafId = requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0)
+        const top = el.getBoundingClientRect().top - 120
+        window.scrollTo({ top: Math.max(0, top), behavior: 'instant' })
+        readingSeekDoneRef.current = true
+      })
+    )
+    return () => cancelAnimationFrame(rafId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayMode, firstVerseKey, reader.verses.length, seekTarget])
 
   // Auto-scroll when the audio player advances to the next verse.
   // Only triggers when verse_id actually changes (not on play/pause toggle).
@@ -341,6 +418,7 @@ export function ChapterReader({
         vNum = centerVerse ? parseInt(centerVerse.vk?.split(':')[1] ?? '1') : 1
       }
       setCurrentVerseNumber(vNum)
+      centerVerseRef.current = vNum
     }
 
     window.addEventListener('scroll', computeCurrentVerse, { passive: true })

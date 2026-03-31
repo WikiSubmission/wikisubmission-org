@@ -28,7 +28,7 @@ export type UseChapterReaderReturn = {
   error: string | null
   hasMore: boolean
   loadMore: (fallbackOpts?: ChapterReaderOptions) => Promise<void>
-  reload: (opts: ChapterReaderOptions) => Promise<void>
+  reload: (opts: ChapterReaderOptions, seekVerse?: number) => Promise<void>
   /** Jump directly to a verse window — replaces state, no incremental loading. */
   seekToVerse: (targetVerse: number, fallbackOpts?: ChapterReaderOptions) => Promise<void>
   /** Fire-and-cache fetch around targetVerse so seekToVerse can resolve instantly. */
@@ -143,13 +143,17 @@ export function useChapterReader(
   )
 
   const reload = useCallback(
-    async (opts: ChapterReaderOptions) => {
+    async (opts: ChapterReaderOptions, seekVerse?: number) => {
       const generation = ++fetchGenerationRef.current
       loadMoreInFlightRef.current = false
       setState((prev) => ({ ...prev, loading: true, error: null }))
 
-      // In range mode, reload from the range start so we never fall back to verse 0.
-      const start = rangeStart ?? 0
+      // If a seek is active, reload centered on the target verse so the window
+      // contains the target immediately — avoids an intermediate state where we
+      // show the wrong position while waiting for load-more to reach the target.
+      const start = seekVerse !== undefined
+        ? Math.max(0, seekVerse - 5)
+        : (rangeStart ?? 0)
       const result = await fetchVerses(start, opts)
 
       if (fetchGenerationRef.current !== generation) return

@@ -246,7 +246,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
               const [, vNum] = (v.vk ?? '').split(':')
               const primaryTr = v.tr?.[primaryCode]
               return (
-                <span key={v.vk}>
+                <span key={v.vk} id={v.vk ?? undefined}>
                   {prefs.subtitles && primaryTr?.s && (
                     <span className="block text-center text-base font-sans text-primary font-semibold my-4 not-italic">
                       {primaryTr.s}
@@ -275,7 +275,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
               const [, vNum] = (v.vk ?? '').split(':')
               const fnIdx = footnoteIndex.findIndex((f) => f.verseKey === vNum)
               return (
-                <span key={v.vk}>
+                <span key={v.vk} id={v.vk ?? undefined}>
                   {prefs.subtitles && tr?.s && (
                     <span className="block text-center text-sm font-semibold text-primary my-4">
                       <QuranRefText text={tr.s} from={`subtitle of ${v.vk}`} />
