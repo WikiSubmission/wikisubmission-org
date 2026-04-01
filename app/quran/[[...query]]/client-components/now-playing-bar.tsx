@@ -36,6 +36,8 @@ import {
 
 import Image from 'next/image'
 import { formatTime } from '@/lib/music-utils'
+import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 
 const RECITER_NAMES: Record<Reciter, string> = {
   mishary: 'Mishary Rashid Alafasy',
@@ -104,11 +106,13 @@ export function QuranPlayer() {
     seek(val)
   }
 
+  const { zoomLevel } = useQuranPreferences()
+
   if (!currentVerse) return null
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 pointer-events-none mb-4">
-      <div className="max-w-4xl mx-auto pointer-events-auto">
+      <div className={`${ZOOM_WIDTH_CLASS[zoomLevel ?? 'comfortable']} mx-auto pointer-events-auto`}>
         <div className="bg-background/90 backdrop-blur-xl border border-border/30 shadow-2xl md:rounded-full rounded-2xl overflow-hidden md:h-14">
           {/* Progress Bar (Global for Mobile, inside Flex for Desktop) */}
           <div className="md:hidden w-full px-0 pt-0 bg-background/50">

@@ -104,6 +104,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/bible/books": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all Bible books
+         * @description Returns all 66 Bible books with testament, chapter count, and verse count.
+         */
+        get: operations["getBibleBooks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bible": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fetch Bible verses by range
+         * @description Returns verses for a specific book and chapter/verse range. Supports multiple languages simultaneously.
+         */
+        get: operations["getBible"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bible/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Full-text search across the Bible
+         * @description Full-text search over Bible verse content and footnotes. Returns results grouped by book and chapter, ordered by relevance.
+         */
+        get: operations["searchBible"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/editor/drafts/verse-text": {
         parameters: {
             query?: never;
@@ -334,6 +394,92 @@ export interface components {
             code?: number;
             title?: string;
             snippet?: string;
+        };
+        BibleResponse: {
+            info?: components["schemas"]["BibleResponseInfo"];
+            books?: components["schemas"]["BibleBookData"][];
+        };
+        /** @description Metadata envelope. Reader fields (book, chapter_start/end, verse_start/end) are populated by /bible; search fields (q, total, limit, offset) are populated by /bible/search. */
+        BibleResponseInfo: {
+            /** @description Number of matching verses in this response page. */
+            result_count?: number;
+            /** @description Requested book number (reader only). */
+            book?: number;
+            chapter_start?: number;
+            chapter_end?: number;
+            verse_start?: number;
+            verse_end?: number;
+            /** @description The search query as submitted (search only). */
+            q?: string;
+            /** @description Total matching results across all pages (search only). */
+            total?: number;
+            limit?: number;
+            offset?: number;
+        };
+        /** @description Summary metadata for one Bible book. */
+        BibleBook: {
+            /** @description book_number */
+            bn?: number;
+            /** @description book_name */
+            bk?: string;
+            /** @description testament (OT or NT) */
+            t?: string;
+            /** @description chapter_count */
+            cc?: number;
+            /** @description verse_count */
+            vc?: number;
+        };
+        /** @description A Bible book with nested chapters, returned by /bible and /bible/search. */
+        BibleBookData: {
+            /** @description book_number */
+            bn?: number;
+            /** @description book_name */
+            bk?: string;
+            /** @description testament (OT or NT) */
+            t?: string;
+            chapters?: components["schemas"]["BibleChapterData"][];
+        };
+        BibleChapterData: {
+            /** @description chapter_number (within the book) */
+            cn?: number;
+            /** @description Number of matching verses in this chapter (search only). */
+            hits?: number;
+            verses?: components["schemas"]["BibleVerseData"][];
+        };
+        BibleVerseData: {
+            /** @description verse_number */
+            vn?: number;
+            /**
+             * @description verse_key — book_number:chapter_number:verse_number
+             * @example 1:1:1
+             */
+            vk?: string;
+            /**
+             * Format: float
+             * @description Relevance score (search only).
+             */
+            sc?: number;
+            /** @description translations keyed by language code */
+            tr?: {
+                [key: string]: components["schemas"]["BibleTranslationContent"];
+            };
+        };
+        BibleTranslationContent: {
+            /** @description lang_id */
+            li?: number;
+            /** @description lang_code */
+            lc?: string;
+            /**
+             * @description direction
+             * @enum {string}
+             */
+            d?: "ltr" | "rtl";
+            /** @description text */
+            tx?: string;
+            /** @description footer/footnote */
+            f?: string | null;
+            /** @description highlight with <b> tags (search only) */
+            hl?: string | null;
         };
     };
     responses: {
@@ -569,6 +715,91 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             500: components["responses"]["InternalServerErrror"];
             501: components["responses"]["NotImplementedError"];
+        };
+    };
+    getBibleBooks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BibleBook"][];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getBible: {
+        parameters: {
+            query: {
+                /** @description Book number (1 = Genesis, 40 = Matthew, …, 66 = Revelation). */
+                book: number;
+                /** @description First chapter to include (1-based, within the book). */
+                chapter_start: number;
+                /** @description Last chapter to include. Defaults to chapter_start. */
+                chapter_end?: number;
+                /** @description First verse to include. Defaults to 1. */
+                verse_start?: number;
+                /** @description Last verse to include. Defaults to end of chapter. */
+                verse_end?: number;
+                /** @description Language codes to include (e.g. en). */
+                langs: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BibleResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    searchBible: {
+        parameters: {
+            query: {
+                /** @description Search query (2–200 characters). */
+                q: string;
+                /** @description Language codes to search in. Omit for all languages. */
+                langs?: string[];
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BibleResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
         };
     };
     listVerseDrafts: {

@@ -166,7 +166,7 @@ export function VerseListResult({
 }) {
   if (apiError || !data) {
     return (
-      <div className="max-w-3xl mx-auto py-12 text-center">
+      <div className="max-w-5xl mx-auto py-12 text-center">
         <p className="text-sm text-muted-foreground">
           No verses found for &ldquo;{queryText}&rdquo;.
         </p>
@@ -187,7 +187,7 @@ export function VerseListResult({
   const segments = parseSegments(queryText)
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
+    <div className="max-w-5xl mx-auto space-y-4">
       {segments.map((seg, i) => {
         const verses = getSegmentVerses(seg, byChapter)
         const title = chapterTitles.get(seg.cn) ?? `Chapter ${seg.cn}`

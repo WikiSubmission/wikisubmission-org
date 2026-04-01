@@ -50,7 +50,9 @@
     "contact": "Contact",
     "donate": "Donate",
     "proclamation": "Proclamation",
-    "introduction": "Introduction"
+    "introduction": "Introduction",
+    "tableOfContents": "Table of contents",
+    "finalTestament": "The Final Testament"
   },
   "quran": {
     "title": "Quran",
@@ -64,7 +66,10 @@
     "noOccurrences": "No other occurrences found",
     "meanings": "Meanings",
     "proclamationDesc": "Proclaiming One Unified Religion for All the People — Rashad Khalifa, 1989",
-    "introductionDesc": "An introduction to the Final Testament and its mathematical miracle"
+    "introductionDesc": "An introduction to the Final Testament and its mathematical miracle",
+    "modeVerse": "Verse",
+    "modeWordByWord": "Word by Word",
+    "modeReading": "Reading"
   },
   "search": {
     "placeholder": "Search the Quran…",
@@ -107,7 +112,13 @@
     "theme": "Theme",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "zoom": "Zoom",
+    "zoomCompact": "Compact",
+    "zoomNormal": "Normal",
+    "zoomComfortable": "Comfortable",
+    "zoomWide": "Wide",
+    "zoomFull": "Full"
   },
   "ramadan": {
     "heading": "Ramadan",

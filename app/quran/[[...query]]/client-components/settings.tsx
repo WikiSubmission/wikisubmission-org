@@ -17,9 +17,11 @@ import {
   SettingsIcon,
   TextIcon,
   TypeIcon,
+  ZoomInIcon,
 } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import type { LangCode, ReadingModeLang } from '@/hooks/use-quran-preferences'
+import { ZOOM_LEVELS, type ZoomLevel } from '@/lib/quran-zoom'
 import { LanguageEntry, useLanguagesStore } from '@/hooks/use-languages-store'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
@@ -129,8 +131,47 @@ export default function QuranSettings() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-72" align="end">
-        {/* Language */}
+        {/* Zoom */}
         <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
+          <ZoomInIcon className="size-4" />
+          <strong>{t('zoom')}</strong>
+        </DropdownMenuLabel>
+
+        <div className="px-3 py-2">
+          <div className="flex gap-1.5">
+            {ZOOM_LEVELS.map((level) => {
+              const labelKey = `zoom${level.charAt(0).toUpperCase()}${level.slice(1)}` as
+                | 'zoomCompact'
+                | 'zoomNormal'
+                | 'zoomComfortable'
+                | 'zoomWide'
+                | 'zoomFull'
+              const isActive = (quranPreferences.zoomLevel ?? 'comfortable') === level
+              return (
+                <button
+                  key={level}
+                  onClick={() =>
+                    quranPreferences.setPreferences({
+                      ...quranPreferences,
+                      zoomLevel: level as ZoomLevel,
+                    })
+                  }
+                  className={cn(
+                    'flex-1 px-1.5 py-1 rounded-lg text-xs font-medium transition-all border',
+                    isActive
+                      ? 'bg-primary/10 text-primary border-primary/20'
+                      : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-accent hover:text-foreground'
+                  )}
+                >
+                  {t(labelKey)}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Language */}
+        <DropdownMenuLabel className="flex items-center gap-2 text-violet-500 mt-1">
           <LanguagesIcon className="size-4" />
           <strong>{t('language')}</strong>
         </DropdownMenuLabel>
@@ -296,6 +337,7 @@ export default function QuranSettings() {
             />
           )}
         </div>
+
       </DropdownMenuContent>
     </DropdownMenu>
   )

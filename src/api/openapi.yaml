@@ -19,6 +19,8 @@ servers:
 tags:
   - name: Reader
     description: Public endpoints for the Quran
+  - name: Bible
+    description: Public endpoints for the Bible
   - name: Editor
     description: Content creation workflow
   - name: History
@@ -242,6 +244,145 @@ paths:
           $ref: "#/components/responses/InternalServerErrror"
         '501':
           $ref: '#/components/responses/NotImplementedError'
+
+  # --- BIBLE API ---
+
+  /bible/books:
+    get:
+      tags: [Bible]
+      operationId: getBibleBooks
+      summary: List all Bible books
+      description: Returns all 66 Bible books with testament, chapter count, and verse count.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BibleBook'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /bible:
+    get:
+      tags: [Bible]
+      operationId: getBible
+      summary: Fetch Bible verses by range
+      description: >
+        Returns verses for a specific book and chapter/verse range.
+        Supports multiple languages simultaneously.
+      parameters:
+        - name: book
+          in: query
+          required: true
+          description: Book number (1 = Genesis, 40 = Matthew, …, 66 = Revelation).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 66
+        - name: chapter_start
+          in: query
+          required: true
+          description: First chapter to include (1-based, within the book).
+          schema:
+            type: integer
+            minimum: 1
+        - name: chapter_end
+          in: query
+          required: false
+          description: Last chapter to include. Defaults to chapter_start.
+          schema:
+            type: integer
+            minimum: 1
+        - name: verse_start
+          in: query
+          required: false
+          description: First verse to include. Defaults to 1.
+          schema:
+            type: integer
+            minimum: 1
+        - name: verse_end
+          in: query
+          required: false
+          description: Last verse to include. Defaults to end of chapter.
+          schema:
+            type: integer
+            minimum: 1
+        - name: langs
+          in: query
+          required: true
+          explode: true
+          description: Language codes to include (e.g. en).
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BibleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /bible/search:
+    get:
+      tags: [Bible]
+      operationId: searchBible
+      summary: Full-text search across the Bible
+      description: >
+        Full-text search over Bible verse content and footnotes.
+        Returns results grouped by book and chapter, ordered by relevance.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query (2–200 characters).
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 200
+        - name: langs
+          in: query
+          required: false
+          explode: true
+          description: Language codes to search in. Omit for all languages.
+          schema:
+            type: array
+            items:
+              type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BibleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
 
   # --- EDITOR API ---
   /editor/drafts/verse-text:
@@ -649,6 +790,123 @@ components:
         code: { type: integer }
         title: { type: string }
         snippet:  {type: string }
+
+    # -----------------------------------------------------------------------
+    # Bible schemas
+    # -----------------------------------------------------------------------
+    BibleResponse:
+      type: object
+      properties:
+        info:
+          $ref: '#/components/schemas/BibleResponseInfo'
+        books:
+          type: array
+          items:
+            $ref: '#/components/schemas/BibleBookData'
+
+    BibleResponseInfo:
+      type: object
+      description: >
+        Metadata envelope. Reader fields (book, chapter_start/end, verse_start/end)
+        are populated by /bible; search fields (q, total, limit, offset) are
+        populated by /bible/search.
+      properties:
+        result_count:
+          type: integer
+          description: Number of matching verses in this response page.
+        book:
+          type: integer
+          description: Requested book number (reader only).
+        chapter_start:
+          type: integer
+        chapter_end:
+          type: integer
+        verse_start:
+          type: integer
+        verse_end:
+          type: integer
+        q:
+          type: string
+          description: The search query as submitted (search only).
+        total:
+          type: integer
+          description: Total matching results across all pages (search only).
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    BibleBook:
+      type: object
+      description: Summary metadata for one Bible book.
+      properties:
+        bn: { type: integer, description: "book_number" }
+        bk: { type: string,  description: "book_name" }
+        t:  { type: string,  description: "testament (OT or NT)" }
+        cc: { type: integer, description: "chapter_count" }
+        vc: { type: integer, description: "verse_count" }
+
+    BibleBookData:
+      type: object
+      description: A Bible book with nested chapters, returned by /bible and /bible/search.
+      properties:
+        bn:
+          type: integer
+          description: book_number
+        bk:
+          type: string
+          description: book_name
+        t:
+          type: string
+          description: testament (OT or NT)
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/BibleChapterData'
+
+    BibleChapterData:
+      type: object
+      properties:
+        cn:
+          type: integer
+          description: chapter_number (within the book)
+        hits:
+          type: integer
+          description: Number of matching verses in this chapter (search only).
+        verses:
+          type: array
+          items:
+            $ref: '#/components/schemas/BibleVerseData'
+
+    BibleVerseData:
+      type: object
+      properties:
+        vn:
+          type: integer
+          description: verse_number
+        vk:
+          type: string
+          example: "1:1:1"
+          description: verse_key — book_number:chapter_number:verse_number
+        sc:
+          type: number
+          format: float
+          description: Relevance score (search only).
+        tr:
+          type: object
+          description: translations keyed by language code
+          additionalProperties:
+            $ref: '#/components/schemas/BibleTranslationContent'
+
+    BibleTranslationContent:
+      type: object
+      properties:
+        li: { type: integer, description: "lang_id" }
+        lc: { type: string,  description: "lang_code" }
+        d:  { type: string,  enum: [ltr, rtl], description: "direction" }
+        tx: { type: string,  description: "text" }
+        f:  { type: string,  nullable: true, description: "footer/footnote" }
+        hl: { type: string,  nullable: true, description: "highlight with <b> tags (search only)" }
 
   responses:
     Conflict:

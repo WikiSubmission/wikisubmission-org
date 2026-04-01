@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { ZOOM_WIDTH_CLASS, ZOOM_FONT } from '@/lib/quran-zoom'
 import {
   useVerseSearch,
   type ChapterResult,
@@ -85,6 +86,8 @@ function SearchResultVerse({
   showFootnotes: boolean
   showText: boolean
 }) {
+  const { zoomLevel } = useQuranPreferences()
+  const zoomFont = ZOOM_FONT[zoomLevel ?? 'comfortable']
   const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
   const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
   const arTr = verse.tr?.['ar']
@@ -120,7 +123,7 @@ function SearchResultVerse({
       {/* Translation */}
       {showText && (tr?.tx || tr?.hl) && (
         <div className="space-y-2">
-          <p className="leading-relaxed text-foreground/90">
+          <p className={`${zoomFont.translation} leading-relaxed text-foreground/90`}>
             {hlIsFullText ? <HighlightText text={tr!.hl} /> : tr?.tx}
           </p>
           {tr?.hl && !hlIsFullText && (
@@ -140,7 +143,7 @@ function SearchResultVerse({
 
       {/* Arabic */}
       {showArabic && arTr?.tx && (
-        <p dir="rtl" className="font-arabic text-2xl leading-loose text-foreground/90 text-right border-t border-border/30 pt-3">
+        <p dir="rtl" className={`font-arabic ${zoomFont.arabic} leading-loose text-foreground/90 text-right border-t border-border/30 pt-3`}>
           {arTr.tx}
         </p>
       )}
@@ -273,7 +276,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-5 max-w-4xl mx-auto w-full">
+    <div className={`space-y-5 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}>
 
       {/* Header */}
       <div className="flex items-baseline gap-3">

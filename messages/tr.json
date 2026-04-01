@@ -50,7 +50,9 @@
     "contact": "İletişim",
     "donate": "Bağış Yap",
     "proclamation": "Bildiri",
-    "introduction": "Giriş"
+    "introduction": "Giriş",
+    "tableOfContents": "İçindekiler",
+    "finalTestament": "Son Ahit"
   },
   "quran": {
     "title": "Kuran",
@@ -64,7 +66,10 @@
     "noOccurrences": "Başka geçiş bulunamadı",
     "meanings": "Anlamlar",
     "proclamationDesc": "Tüm İnsanlar İçin Tek Birleşik Din İlanı — Rashad Khalifa, 1989",
-    "introductionDesc": "Son Ahit ve matematiksel mucizenin tanıtımı"
+    "introductionDesc": "Son Ahit ve matematiksel mucizenin tanıtımı",
+    "modeVerse": "Ayet",
+    "modeWordByWord": "Kelime kelime",
+    "modeReading": "Okuma"
   },
   "search": {
     "placeholder": "Kuran'da ara…",
@@ -107,7 +112,13 @@
     "theme": "Tema",
     "light": "Açık",
     "dark": "Koyu",
-    "system": "Sistem"
+    "system": "Sistem",
+    "zoom": "Yakınlaştırma",
+    "zoomCompact": "Kompakt",
+    "zoomNormal": "Normal",
+    "zoomComfortable": "Rahat",
+    "zoomWide": "Geniş",
+    "zoomFull": "Tam"
   },
   "ramadan": {
     "heading": "Ramazan",

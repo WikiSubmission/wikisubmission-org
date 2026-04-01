@@ -277,6 +277,7 @@ export function QuranNavSheet({
   chapters: Chapter[]
   appendices: Appendix[]
 }) {
+  const tNav = useTranslations('nav')
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -288,7 +289,7 @@ export function QuranNavSheet({
         >
           <MenuIcon className="size-4 shrink-0" />
           <span className="hidden sm:inline text-xs font-medium">
-            Table of content
+            {tNav('tableOfContents')}
           </span>
         </Button>
       </SheetTrigger>
@@ -296,7 +297,7 @@ export function QuranNavSheet({
         <SheetHeader className="px-4 py-3 border-b border-border/40">
           <SheetTitle className="flex items-center gap-2 text-sm font-semibold">
             <Book className="size-4 text-primary/70" />
-            The Final Testament
+            {tNav('finalTestament')}
           </SheetTitle>
         </SheetHeader>
         <NavSheetContent chapters={chapters} appendices={appendices} />

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { ZOOM_WIDTH_CLASS, ZOOM_FONT } from '@/lib/quran-zoom'
 import type { VerseData } from '@/hooks/use-chapter-reader'
 import type { ChapterReaderOptions } from '@/hooks/use-chapter-reader'
 import { QuranRefText } from '@/components/quran-ref-text'
@@ -235,12 +236,15 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
     )
   }
 
+  const zoomFont = ZOOM_FONT[prefs.zoomLevel ?? 'comfortable']
+  const widthClass = ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']
+
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-10">
+    <div className={`${widthClass} mx-auto px-4 py-8 space-y-10`}>
       {/* Arabic prose block */}
       {showArabic && (
         <div>
-          <p dir="rtl" className="font-arabic text-2xl leading-[2.2] text-right text-foreground/90">
+          <p dir="rtl" className={`font-arabic ${zoomFont.readingArabic} leading-[2.2] text-right text-foreground/90`}>
             {verses.map((v) => {
               const arTr = v.tr?.['ar']
               const [, vNum] = (v.vk ?? '').split(':')
@@ -269,7 +273,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
       {/* Translation prose block */}
       {showTranslation && (
         <div className={isRtl(primaryCode) ? 'text-right' : ''}>
-          <p className="text-base leading-[2] text-foreground">
+          <p className={`${zoomFont.reading} leading-[2] text-foreground`}>
             {verses.map((v) => {
               const tr = v.tr?.[primaryCode]
               const [, vNum] = (v.vk ?? '').split(':')

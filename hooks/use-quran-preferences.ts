@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import type { ZoomLevel } from '@/lib/quran-zoom'
 
 /**
  * ISO 639-1 lang codes used by the ws-backend API.
@@ -36,6 +37,7 @@ export type QuranPreferences = {
   readingModeLang: ReadingModeLang
   primaryLanguage: LangCode
   secondaryLanguage?: LangCode
+  zoomLevel: ZoomLevel
   setPreferences: (preferences: QuranPreferences) => void
 }
 
@@ -60,11 +62,20 @@ export const useQuranPreferences = create(
       readingModeLang: 'translation' as ReadingModeLang,
       primaryLanguage: getLocaleCookie(),
       secondaryLanguage: undefined,
+      zoomLevel: 'comfortable' as ZoomLevel,
       setPreferences: (preferences: QuranPreferences) => set(preferences),
     }),
     {
-      name: 'quran-preferences-v3',
+      name: 'quran-preferences-v4',
       storage: createJSONStorage(() => localStorage),
+      version: 4,
+      migrate: (state, version) => {
+        // Migrate from v3: preserve all existing prefs, add new zoomLevel default
+        if (version < 4) {
+          return { ...(state as QuranPreferences), zoomLevel: 'comfortable' as ZoomLevel }
+        }
+        return state as QuranPreferences
+      },
     }
   )
 )

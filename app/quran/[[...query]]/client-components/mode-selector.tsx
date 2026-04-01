@@ -9,15 +9,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-
-const MODES: { id: DisplayMode; label: string; icon: React.ReactNode }[] = [
-  { id: 'verse', label: 'Verse', icon: <List className="size-4" /> },
-  { id: 'word', label: 'Word by Word', icon: <ScanText className="size-4" /> },
-  { id: 'reading', label: 'Reading', icon: <BookOpen className="size-4" /> },
-]
+import { useTranslations } from 'next-intl'
 
 export function QuranModeSelector() {
   const prefs = useQuranPreferences()
+  const t = useTranslations('quran')
+
+  const MODES: { id: DisplayMode; label: string; icon: React.ReactNode }[] = [
+    { id: 'verse', label: t('modeVerse'), icon: <List className="size-4" /> },
+    { id: 'word', label: t('modeWordByWord'), icon: <ScanText className="size-4" /> },
+    { id: 'reading', label: t('modeReading'), icon: <BookOpen className="size-4" /> },
+  ]
 
   const handleModeChange = (mode: DisplayMode) => {
     prefs.setPreferences({

@@ -22,6 +22,7 @@ import {
   useQuranPlayerCallbacks,
 } from '@/lib/quran-audio-context'
 import { useChapterBorderLoader } from '@/hooks/use-chapter-border-loader'
+import { ZOOM_WIDTH_CLASS, ZOOM_WIDTH_PX } from '@/lib/quran-zoom'
 
 export function ChapterReader({
   chapterNumber,
@@ -39,6 +40,7 @@ export function ChapterReader({
   const isRangeMode = rangeStart !== undefined && rangeEnd !== undefined
   const prefs = useQuranPreferences()
   const { displayMode } = prefs
+  const zoomLevel = prefs.zoomLevel ?? 'comfortable'
   const { getDirection } = useLanguagesStore()
   const reader = useChapterReader(chapterNumber, initialData, rangeStart, rangeEnd)
   const t = useTranslations('quran')
@@ -170,7 +172,8 @@ export function ChapterReader({
         // Container = min(vw, 896px) minus outer px-4 (32px) and inner p-6/p-8 (48-64px).
         const vw = typeof window !== 'undefined' ? window.innerWidth : 768
         const innerPad = vw < 640 ? 48 : 64 // p-6 vs p-8 on each side × 2
-        const containerW = Math.min(vw - 32 - innerPad, 800)
+        const zoomMaxW = ZOOM_WIDTH_PX[prefs.zoomLevel ?? 'comfortable']
+        const containerW = Math.min(vw - 32 - innerPad, zoomMaxW - 32 - 64)
         const wordsPerRow = Math.max(2, Math.floor(containerW / 118))
         const wordRows = Math.ceil(wordCount / wordsPerRow)
         // Each row: ~109px item + 32px gap-y-8; py-4 wrapper adds 32px; card overhead ~160px
@@ -193,6 +196,18 @@ export function ChapterReader({
 
   // GSAP border-glow while loading; completion flash when verses arrive.
   useChapterBorderLoader(listRef, reader.loading)
+
+  // Invalidate all cached item heights when zoom changes — width and font size both
+  // change, so every measured height is stale. ResizeObserver corrects as items scroll in.
+  const isFirstZoomMount = useRef(true)
+  useEffect(() => {
+    if (isFirstZoomMount.current) {
+      isFirstZoomMount.current = false
+      return
+    }
+    virtualizer.measure()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoomLevel])
 
   const virtualItems = virtualizer.getVirtualItems()
   const lastVirtualIndex = virtualItems[virtualItems.length - 1]?.index ?? -1
@@ -379,7 +394,7 @@ export function ChapterReader({
 
   // Stable key that changes when language prefs change — propagated to VerseCard
   // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
-  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}`
+  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}-${zoomLevel}`
 
   // Current verse number for minimap highlight.
   // Computed in a dedicated scroll listener (not in the render body) so the
@@ -445,7 +460,7 @@ export function ChapterReader({
       : undefined
 
   return (
-    <div className="flex flex-col gap-2 max-w-4xl mx-auto w-full px-4 pb-32">
+    <div className={`flex flex-col gap-2 ${ZOOM_WIDTH_CLASS[zoomLevel]} mx-auto w-full px-4 pb-32`}>
       {/* Chapter title */}
       <div className="shrink-0 flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
         <div className="flex flex-col gap-1 flex-1 min-w-0">

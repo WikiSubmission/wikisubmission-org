@@ -50,7 +50,9 @@
     "contact": "تواصل",
     "donate": "تبرع",
     "proclamation": "الإعلان",
-    "introduction": "مقدمة"
+    "introduction": "مقدمة",
+    "tableOfContents": "جدول المحتويات",
+    "finalTestament": "العهد الأخير"
   },
   "quran": {
     "title": "القرآن",
@@ -64,7 +66,10 @@
     "noOccurrences": "لا توجد نتائج أخرى",
     "meanings": "المعاني",
     "proclamationDesc": "إعلان دين واحد موحد لجميع الناس — رشاد خليفة، 1989",
-    "introductionDesc": "مقدمة العهد الأخير ومعجزته الرياضية"
+    "introductionDesc": "مقدمة العهد الأخير ومعجزته الرياضية",
+    "modeVerse": "آية",
+    "modeWordByWord": "كلمة بكلمة",
+    "modeReading": "قراءة"
   },
   "search": {
     "placeholder": "ابحث في القرآن…",
@@ -107,7 +112,13 @@
     "theme": "المظهر",
     "light": "فاتح",
     "dark": "داكن",
-    "system": "النظام"
+    "system": "النظام",
+    "zoom": "تكبير",
+    "zoomCompact": "مضغوط",
+    "zoomNormal": "عادي",
+    "zoomComfortable": "مريح",
+    "zoomWide": "واسع",
+    "zoomFull": "كامل"
   },
   "ramadan": {
     "heading": "رمضان",

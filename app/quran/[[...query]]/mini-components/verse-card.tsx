@@ -1,8 +1,8 @@
 'use client'
 
 import { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react'
-import gsap from 'gsap'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useIsTouch } from '@/hooks/use-is-touch'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
 import { useQuranPlayerCallbacks, type QuranVerse } from '@/lib/quran-audio-context'
@@ -32,76 +32,6 @@ export function toQuranVerse(verse: VerseData): QuranVerse {
   return { verse_id: verse.vk ?? '', ws_quran_text: {} }
 }
 
-// ─── Verse divider ───────────────────────────────────────────────────────────
-
-function VerseDivider() {
-  const leftRef = useRef<HTMLDivElement>(null)
-  const rightRef = useRef<HTMLDivElement>(null)
-  const ornamentRef = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    if (!leftRef.current || !rightRef.current || !ornamentRef.current) return
-
-    // Shimmer radiates outward from the ornament on both sides simultaneously
-    const shimmerLeft = gsap.fromTo(
-      leftRef.current,
-      { xPercent: 100, opacity: 0.8 },
-      { xPercent: -100, opacity: 0, duration: 2, ease: 'power2.out', repeat: -1, repeatDelay: 2.5 }
-    )
-    const shimmerRight = gsap.fromTo(
-      rightRef.current,
-      { xPercent: -100, opacity: 0.8 },
-      { xPercent: 100, opacity: 0, duration: 2, ease: 'power2.out', repeat: -1, repeatDelay: 2.5 }
-    )
-    const pulse = gsap.to(ornamentRef.current, {
-      opacity: 0.25,
-      scale: 0.88,
-      duration: 2,
-      ease: 'sine.inOut',
-      yoyo: true,
-      repeat: -1,
-    })
-
-    return () => {
-      shimmerLeft.kill()
-      shimmerRight.kill()
-      pulse.kill()
-    }
-  }, [])
-
-  return (
-    <div className="flex items-center justify-center py-5 px-8">
-      <div className="flex items-center gap-4 w-full max-w-72">
-        {/* Left double lines + shimmer overlay */}
-        <div className="flex-1 relative h-3 flex flex-col justify-center gap-0.75 overflow-hidden">
-          <div className="h-px bg-gradient-to-l from-border/65 via-border/40 to-transparent" />
-          <div className="h-px bg-gradient-to-l from-border/28 via-border/15 to-transparent" />
-          <div
-            ref={leftRef}
-            className="absolute inset-0 bg-gradient-to-l from-violet-500/45 via-violet-500/20 to-transparent"
-          />
-        </div>
-        {/* Arabic calligraphic ornament — Rub el Hizb ۞ */}
-        <span
-          ref={ornamentRef}
-          className="text-violet-600/65 text-base shrink-0 select-none font-arabic leading-none"
-          aria-hidden="true"
-        >
-          ۞
-        </span>
-        {/* Right double lines + shimmer overlay */}
-        <div className="flex-1 relative h-3 flex flex-col justify-center gap-0.75 overflow-hidden">
-          <div className="h-px bg-gradient-to-r from-border/65 via-border/40 to-transparent" />
-          <div className="h-px bg-gradient-to-r from-border/28 via-border/15 to-transparent" />
-          <div
-            ref={rightRef}
-            className="absolute inset-0 bg-gradient-to-r from-violet-500/45 via-violet-500/20 to-transparent"
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ─── Word-by-word (Arabic) ────────────────────────────────────────────────────
 
@@ -123,6 +53,8 @@ const WordByWordView = memo(
     [words]
   )
 
+  const { zoomLevel } = useQuranPreferences()
+  const arabicClass = ZOOM_FONT[zoomLevel ?? 'comfortable'].arabic
   const isTouch = useIsTouch()
   const [activeWord, setActiveWord] = useState<{ arabic: string; root?: string; meaning: string } | null>(null)
   const [dialogWord, setDialogWord] = useState<{ arabic: string; root: string; meaning: string } | null>(null)
@@ -140,7 +72,7 @@ const WordByWordView = memo(
             return (
               <p
                 key={wordIndex}
-                className="font-arabic text-2xl leading-relaxed transition-all cursor-pointer active:scale-95 text-foreground/90"
+                className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer active:scale-95 text-foreground/90`}
                 onClick={(e) => {
                   e.stopPropagation()
                   setActiveWord({ arabic, root: root ?? undefined, meaning })
@@ -157,7 +89,7 @@ const WordByWordView = memo(
                 <DialogTrigger asChild>
                   <TooltipTrigger asChild>
                     <p
-                      className="font-arabic text-2xl leading-relaxed transition-all cursor-pointer hover:text-violet-600 hover:scale-105 active:scale-95 text-foreground/90"
+                      className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer hover:text-violet-600 hover:scale-105 active:scale-95 text-foreground/90`}
                     >
                       {arabic}
                     </p>
@@ -266,7 +198,7 @@ const WordByWordView = memo(
           <Dialog key={wordIndex}>
             <DialogTrigger asChild>
               <div className="group flex flex-col items-center gap-2 px-3 py-2 cursor-pointer transition-all hover:bg-muted/50 rounded-2xl border border-transparent hover:border-violet-600/20">
-                <p className="font-arabic text-2xl leading-snug group-hover:text-violet-600 transition-colors">
+                <p className={`font-arabic ${arabicClass} leading-snug group-hover:text-violet-600 transition-colors`}>
                   {arabic}
                 </p>
                 <div className="flex flex-col items-center gap-0.5 pt-0.5" dir="ltr">
@@ -379,7 +311,7 @@ export const VerseCard = memo(
         isScrollTarget || isCurrentAudio ? 'bg-violet-600/10' : ''
       }`}
     >
-      <div className="p-6 sm:p-8 space-y-2">
+      <div className="px-6 py-4 sm:px-8 sm:py-5 space-y-2">
         {/* Subtitle */}
         {prefs.subtitles && tr?.s && (
           <div className="flex justify-center">
@@ -419,7 +351,7 @@ export const VerseCard = memo(
             {/* Primary translation */}
             {prefs.text && tr?.tx && (
               <div className={isRtl(prefs.primaryLanguage) ? 'text-right' : ''}>
-                <p className="text-lg leading-relaxed text-foreground select-text font-medium">
+                <p className={`${ZOOM_FONT[prefs.zoomLevel ?? 'comfortable'].translation} leading-relaxed text-foreground select-text font-medium`}>
                   {tr.tx}
                 </p>
               </div>
@@ -449,7 +381,7 @@ export const VerseCard = memo(
                 ) : arTr?.tx ? (
                   <p
                     dir="rtl"
-                    className="font-arabic text-2xl leading-relaxed text-foreground/90 text-right py-2"
+                    className={`font-arabic ${ZOOM_FONT[prefs.zoomLevel ?? 'comfortable'].arabic} leading-relaxed text-foreground/90 text-right py-2`}
                   >
                     {arTr.tx}
                   </p>
@@ -471,7 +403,7 @@ export const VerseCard = memo(
         </div>
       </div>
 
-      {!isLast && <VerseDivider />}
+      {!isLast && <hr className="border-border/20 mx-6 sm:mx-8" />}
     </div>
   )
   },

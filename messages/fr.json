@@ -50,7 +50,9 @@
     "contact": "Contact",
     "donate": "Faire un don",
     "proclamation": "Proclamation",
-    "introduction": "Introduction"
+    "introduction": "Introduction",
+    "tableOfContents": "Table des matières",
+    "finalTestament": "Le Testament Final"
   },
   "quran": {
     "title": "Coran",
@@ -64,7 +66,10 @@
     "noOccurrences": "Aucune autre occurrence trouvée",
     "meanings": "Significations",
     "proclamationDesc": "Proclamer une religion unifiée pour tous les peuples — Rashad Khalifa, 1989",
-    "introductionDesc": "Une introduction au Testament Final et à son miracle mathématique"
+    "introductionDesc": "Une introduction au Testament Final et à son miracle mathématique",
+    "modeVerse": "Verset",
+    "modeWordByWord": "Mot par mot",
+    "modeReading": "Lecture"
   },
   "search": {
     "placeholder": "Rechercher dans le Coran…",
@@ -107,7 +112,13 @@
     "theme": "Thème",
     "light": "Clair",
     "dark": "Sombre",
-    "system": "Système"
+    "system": "Système",
+    "zoom": "Zoom",
+    "zoomCompact": "Compact",
+    "zoomNormal": "Normal",
+    "zoomComfortable": "Confortable",
+    "zoomWide": "Large",
+    "zoomFull": "Plein"
   },
   "ramadan": {
     "heading": "Ramadan",
