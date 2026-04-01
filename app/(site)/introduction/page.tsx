@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, FileText, Download } from 'lucide-react'
 import { QuranRef } from '@/components/quran-ref'
 import { ArticleAnimations } from '@/components/article-animations'
 import { buildPageMetadata } from '@/constants/metadata'
@@ -53,6 +53,26 @@ export default function IntroductionPage() {
             <p className="text-sm italic text-muted-foreground">
               In the name of God, Most Gracious, Most Merciful
             </p>
+            <div className="flex items-center justify-center gap-3">
+              <a
+                href="https://library.wikisubmission.org/file/quran-the-final-testament-introduction.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+              >
+                <FileText className="size-3.5" />
+                Read
+              </a>
+              <span className="text-border/60 text-xs">·</span>
+              <a
+                href="https://library.wikisubmission.org/file/quran-the-final-testament-introduction.pdf"
+                download
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+              >
+                <Download className="size-3.5" />
+                Download
+              </a>
+            </div>
           </header>
 
           {/* ── Opening ────────────────────────────────────────────────────── */}
