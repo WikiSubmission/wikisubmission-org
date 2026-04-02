@@ -2,6 +2,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { buildPageMetadata } from '@/constants/metadata'
 import { HeroCardDeck } from '@/components/hero-card-deck'
+import { sanityServer } from '@/lib/sanity'
+import { getLocale } from 'next-intl/server'
 
 export const metadata = buildPageMetadata({
   title: 'WikiSubmission',
@@ -34,10 +36,35 @@ function SectionHeader({
   )
 }
 
+const LATEST_ARTICLES_QUERY = `*[_type == "article" && language == $language] | order(publishedAt desc) [0...3] {
+  _id, title, slug, excerpt, publishedAt,
+  "category": categories[0]->name,
+  "thumbnailUrl": thumbnail.asset->url
+}`
+
+type LatestArticle = {
+  _id: string
+  title: string
+  slug: { current: string }
+  excerpt?: string
+  publishedAt?: string
+  category?: string
+  thumbnailUrl?: string
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function Home() {
   const t = await getTranslations('home')
+  const locale = await getLocale()
+  const language = ['en', 'fr', 'ar', 'tr'].includes(locale) ? locale : 'en'
+
+  let latestArticles: LatestArticle[] = []
+  try {
+    latestArticles = await sanityServer.fetch<LatestArticle[]>(LATEST_ARTICLES_QUERY, { language })
+  } catch {
+    // non-critical — page renders without blog section
+  }
 
   return (
     <div className="min-h-screen">
@@ -204,6 +231,56 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── Blog ─────────────────────────────────────────────────────────── */}
+      {latestArticles.length > 0 && (
+        <section className="bg-surface-container-low py-24 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-baseline gap-6 mb-12">
+              <h2 className="font-headline text-3xl font-bold shrink-0">Blog</h2>
+              <div className="h-px flex-1 bg-border/40" />
+              <Link href="/blog" className="text-sm text-primary font-semibold hover:text-primary/80 transition-colors shrink-0 flex items-center gap-1">
+                View all <ArrowRight size={14} />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {latestArticles.map((post) => (
+                <Link
+                  key={post._id}
+                  href={`/blog/${post.slug?.current}`}
+                  className="group flex flex-col bg-background rounded-2xl editorial-shadow overflow-hidden transition-all hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(99,14,212,0.08)]"
+                >
+                  {post.thumbnailUrl && (
+                    <div className="relative w-full aspect-video overflow-hidden bg-muted shrink-0">
+                      <Image
+                        src={post.thumbnailUrl}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <div className="flex flex-col flex-1 p-6 gap-2">
+                    {post.category && (
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">
+                        {post.category}
+                      </span>
+                    )}
+                    <h3 className="font-headline font-bold text-base leading-snug">{post.title}</h3>
+                    {post.excerpt && (
+                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{post.excerpt}</p>
+                    )}
+                    <span className="mt-auto pt-2 text-xs text-muted-foreground">
+                      {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Platforms & Tools ────────────────────────────────────────────── */}
       <section className="py-24 px-6">
