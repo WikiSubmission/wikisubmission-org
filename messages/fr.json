@@ -314,6 +314,8 @@
     "appendixButton": "PDF Annexe 1"
   },
   "blog": {
+    "heading": "Blog",
+    "description": "Articles, réflexions et recherches de la communauté WikiSubmission.",
     "featured": "En vedette",
     "error": "Les articles de blog sont temporairement indisponibles. Veuillez réessayer plus tard.",
     "searchPlaceholder": "Rechercher des articles…",

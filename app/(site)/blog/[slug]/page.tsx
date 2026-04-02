@@ -78,6 +78,17 @@ function formatDate(dateString?: string) {
   })
 }
 
+function readingTime(body?: PortableTextBlock[]): string {
+  if (!body) return ''
+  const text = body
+    .flatMap((b) => (b as { children?: { text?: string }[] }).children ?? [])
+    .map((c) => c.text ?? '')
+    .join(' ')
+  const words = text.trim().split(/\s+/).filter(Boolean).length
+  const mins = Math.max(1, Math.round(words / 200))
+  return `${mins} min read`
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -150,70 +161,74 @@ export default async function BlogPostPage({
 
   return (
     <div className="min-h-screen">
-      {/* Hero image */}
-      {post.thumbnailUrl && (
-        <div className="relative w-full h-64 md:h-96 bg-muted overflow-hidden">
-          <Image
-            src={post.thumbnailUrl}
-            alt={post.title}
-            fill
-            sizes="100vw"
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-background/60 to-transparent" />
-        </div>
-      )}
+      {/* ── Post header ───────────────────────────────────────────────────── */}
+      <section className="border-b border-border/40 bg-muted/30">
+        <div className="max-w-3xl mx-auto px-6 pt-8 pb-10 space-y-5">
 
-      <div className="max-w-3xl mx-auto px-6 py-12">
-        {/* Back link */}
-        <Link
-          href="/blog"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
-        >
-          <ArrowLeftIcon className="size-4" />
-          Back to Blog
-        </Link>
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeftIcon className="size-4" />
+            Blog
+          </Link>
 
-        {/* Header */}
-        <header className="space-y-4 mb-10">
-          {post.category && (
-            <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold">
-              {post.category}
-            </span>
-          )}
-          <h1 className="font-headline text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
-            {post.title}
-          </h1>
-          {post.excerpt && (
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              {post.excerpt}
-            </p>
-          )}
-          <div className="flex items-center gap-3 pt-2">
+          <div className="space-y-3">
+            {post.category && (
+              <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+                {post.category}
+              </span>
+            )}
+            <h1 className="font-headline text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+              {post.title}
+            </h1>
+            {post.excerpt && (
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
+                {post.excerpt}
+              </p>
+            )}
+          </div>
+
+          {/* Metadata bar */}
+          <div className="flex items-center gap-3 pt-1 border-t border-border/40 pt-5">
             {post.authorPhotoUrl && (
               <Image
                 src={post.authorPhotoUrl}
                 alt={post.authorName ?? ''}
-                width={36}
-                height={36}
-                className="rounded-full"
+                width={40}
+                height={40}
+                className="rounded-full shrink-0"
               />
             )}
-            <div className="text-sm text-muted-foreground">
+            <div className="flex flex-col gap-0.5">
               {post.authorName && (
-                <span className="font-medium text-foreground">
-                  {post.authorName}
-                </span>
+                <span className="text-sm font-semibold">{post.authorName}</span>
               )}
-              {post.publishedAt && (
-                <span className="ml-2">{formatDate(post.publishedAt)}</span>
-              )}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                {post.publishedAt && <span>{formatDate(post.publishedAt)}</span>}
+                {post.publishedAt && post.body && <span>·</span>}
+                {post.body && <span>{readingTime(post.body)}</span>}
+              </div>
             </div>
           </div>
-        </header>
 
-        {/* Body */}
+          {post.thumbnailUrl && (
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-muted">
+              <Image
+                src={post.thumbnailUrl}
+                alt={post.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── Body ──────────────────────────────────────────────────────────── */}
+      <div className="max-w-3xl mx-auto px-6 py-12">
         {post.body && (
           <article className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-primary">
             <PortableText
@@ -239,7 +254,7 @@ export default async function BlogPostPage({
                 <Link
                   key={p._id}
                   href={`/blog/${p.slug?.current}`}
-                  className="group bg-background rounded-xl editorial-shadow border border-border/40 overflow-hidden transition-all hover:-translate-y-0.5"
+                  className="group bg-background rounded-xl border border-border/40 overflow-hidden transition-colors hover:border-border/80"
                 >
                   {p.thumbnailUrl && (
                     <div className="relative w-full aspect-video overflow-hidden bg-muted">
@@ -248,7 +263,7 @@ export default async function BlogPostPage({
                         alt={p.title}
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="object-cover"
                       />
                     </div>
                   )}

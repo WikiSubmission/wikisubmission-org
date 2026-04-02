@@ -314,6 +314,8 @@
     "appendixButton": "Ek 1 PDF"
   },
   "blog": {
+    "heading": "Blog",
+    "description": "WikiSubmission topluluğundan makaleler, düşünceler ve araştırmalar.",
     "featured": "Öne Çıkan",
     "error": "Blog yazıları geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
     "searchPlaceholder": "Makalelerde ara…",
