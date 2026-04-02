@@ -362,19 +362,20 @@ function NewsletterSection({ results }: { results: NewsletterRow[] }) {
 function MediaCard({ items }: { items: MediaRow[] }) {
   return (
     <div className="group bg-background rounded-xl editorial-shadow border border-border/40 overflow-hidden transition-all">
-      <div className="md:flex md:gap-3 md:p-3">
+      <div className="md:flex md:gap-3 md:px-3 md:pt-3 md:pb-4">
         {/* Thumbnail */}
-        <div className="relative shrink-0 w-full md:w-44 aspect-video overflow-hidden bg-muted md:rounded-lg">
+        <div className="shrink-0 self-start w-full md:w-44 md:h-[99px] overflow-hidden md:rounded-lg">
           <Image
             src={`https://img.youtube.com/vi/${items[0].youtube_id}/mqdefault.jpg`}
             alt={items[0].title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            width={352}
+            height={198}
+            className="object-cover mt-6 rounded-xl w-full h-full aspect-video transition-transform duration-500 group-hover:scale-105"
           />
         </div>
 
         {/* Content */}
-        <div className="flex-1 p-5 md:pl-0 space-y-3 min-w-0">
+        <div className="flex-1 p-5 md:pt-0 md:pl-0 space-y-3 min-w-0">
           <h3 className="font-headline font-bold text-base leading-snug">
             {items[0].title}
           </h3>
