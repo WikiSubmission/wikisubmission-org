@@ -107,7 +107,6 @@ export async function generateMetadata({
       title: `${post.title} | WikiSubmission`,
       description: post.excerpt ?? '',
       url: `https://wikisubmission.org/blog/${slug}`,
-      image: post.thumbnailUrl,
     })
     return {
       ...base,

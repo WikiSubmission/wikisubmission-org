@@ -1,10 +1,9 @@
 import type { Metadata as _Metadata } from 'next'
 
-const DEFAULT_IMAGE = '/opengraph-image'
-
 /**
  * Builds a complete Metadata object with consistent OG + Twitter cards.
- * Use this on every page instead of manually constructing openGraph/twitter.
+ * The OG image is always the dynamic /og route keyed by title — ensuring
+ * a consistent branded template across every page.
  */
 export function buildPageMetadata({
   title,
@@ -17,7 +16,7 @@ export function buildPageMetadata({
   url?: string
   image?: string
 }): _Metadata {
-  const img = image ?? DEFAULT_IMAGE
+  const img = image ?? `/og?title=${encodeURIComponent(title)}`
   return {
     title,
     description,
@@ -75,7 +74,7 @@ export const Metadata: _Metadata = {
       'Access the Final Testament at WikiSubmission – a free and open source platform for Submission.',
     url: 'https://wikisubmission.org',
     siteName: 'WikiSubmission',
-    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'WikiSubmission' }],
+    images: [{ url: '/og?title=WikiSubmission', width: 1200, height: 630, alt: 'WikiSubmission' }],
     locale: 'en_US',
     type: 'website',
   },
@@ -84,6 +83,6 @@ export const Metadata: _Metadata = {
     title: 'WikiSubmission',
     description:
       'Access the Final Testament at WikiSubmission – a free and open source platform for Submission.',
-    images: ['/brand-assets/logo-transparent.png'],
+    images: [{ url: '/og?title=WikiSubmission', width: 1200, height: 630 }],
   },
 }
