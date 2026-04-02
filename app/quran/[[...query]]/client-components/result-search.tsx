@@ -279,7 +279,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     <div className={`space-y-5 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}>
 
       {/* Header */}
-      <div className="flex items-baseline gap-3">
+      <div className="flex items-baseline gap-3 bg-muted/30 border border-border/40 rounded-2xl px-5 py-4">
         <h2 className="text-xl font-semibold">{searchQuery}</h2>
         <span className="text-sm text-muted-foreground">{verseSearch.total} results</span>
       </div>
