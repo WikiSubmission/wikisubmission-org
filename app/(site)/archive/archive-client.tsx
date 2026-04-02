@@ -361,10 +361,10 @@ function NewsletterSection({ results }: { results: NewsletterRow[] }) {
 
 function MediaCard({ items }: { items: MediaRow[] }) {
   return (
-    <div className="group bg-background rounded-xl editorial-shadow border border-border/40 overflow-hidden transition-all hover:-translate-y-0.5">
-      <div className="md:flex gap-0">
+    <div className="group bg-background rounded-xl editorial-shadow border border-border/40 overflow-hidden transition-all">
+      <div className="md:flex md:gap-3 md:p-3">
         {/* Thumbnail */}
-        <div className="relative shrink-0 w-full md:w-48 aspect-video md:aspect-auto overflow-hidden bg-muted">
+        <div className="relative shrink-0 w-full md:w-44 aspect-video overflow-hidden bg-muted md:rounded-lg">
           <Image
             src={`https://img.youtube.com/vi/${items[0].youtube_id}/mqdefault.jpg`}
             alt={items[0].title}
@@ -374,7 +374,7 @@ function MediaCard({ items }: { items: MediaRow[] }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 p-5 space-y-3 min-w-0">
+        <div className="flex-1 p-5 md:pl-0 space-y-3 min-w-0">
           <h3 className="font-headline font-bold text-base leading-snug">
             {items[0].title}
           </h3>
@@ -405,12 +405,12 @@ function MediaCard({ items }: { items: MediaRow[] }) {
 function NewsletterCard({ items }: { items: NewsletterRow[] }) {
   const firstItem = items[0]
   return (
-    <div className="group bg-background rounded-xl editorial-shadow border border-border/40 p-6 transition-all hover:-translate-y-0.5">
+    <div className="group bg-background rounded-xl editorial-shadow border border-border/40 p-6 transition-all">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-2">
           <NewspaperIcon className="size-4 text-primary" />
           <h3 className="font-headline font-bold">
-            {firstItem.month} {firstItem.year}
+            <span className="capitalize">{firstItem.month}</span> {firstItem.year}
           </h3>
         </div>
         <Link
