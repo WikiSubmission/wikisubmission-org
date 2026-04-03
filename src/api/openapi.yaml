@@ -21,10 +21,6 @@ tags:
     description: Public endpoints for the Quran
   - name: Bible
     description: Public endpoints for the Bible
-  - name: Editor
-    description: Content creation workflow
-  - name: History
-    description: Audit logs and version tracking
 
 paths:
   /languages:
@@ -384,193 +380,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
-  # --- EDITOR API ---
-  /editor/drafts/verse-text:
-    get:
-      tags: [Editor]
-      operationId: listVerseDrafts
-      summary: List all verse drafts
-      description: Retrieve a list of drafts filtered by status.
-      parameters:
-        - name: status
-          in: query
-          schema:
-            $ref: '#/components/schemas/TranslationStatus'
-      responses:
-        '200':
-          description: OK
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
-        '501':
-          $ref: '#/components/responses/NotImplementedError'
-    post:
-      tags: [Editor]
-      operationId: createVerseDraft
-      summary: Create a new translation draft
-      description: Initial creation of a draft for a specific verse and language.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VerseTextDraft'
-      responses:
-        '201':
-          description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
-        '501':
-          $ref: '#/components/responses/NotImplementedError'
-
-  /editor/drafts/verse-text/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: The ID of the draft
-        schema:
-          type: integer
-    get:
-      tags: [Editor]
-      operationId: getVerseDraft
-      summary: Get a specific draft
-      description: Retrieve the full details of a single draft by its ID.
-      responses:
-        '200':
-          description: OK
-        '201':
-          description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
-        '501':
-          $ref: '#/components/responses/NotImplementedError'
-
-    patch:
-      tags: [Editor]
-      operationId: updateVerseDraft
-      summary: Update a draft
-      description: Iteratively update draft content.
-      responses:
-        '200':
-          description: Updated
-        '201':
-          description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
-        '501':
-          $ref: '#/components/responses/NotImplementedError'
-    delete:
-      tags: [Editor]
-      operationId: deleteVerseDraft
-      summary: Discard a draft
-      description: Permanent removal of a draft.
-      responses:
-        '204':
-          description: Deleted
-        '201':
-          description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
-        '501':
-          $ref: '#/components/responses/NotImplementedError'
-
-  /editor/publish/verse-text/{id}:
-    post:
-      tags: [Editor]
-      operationId: publishVerseText
-      summary: Publish a draft
-      description: Archives current live text and promotes draft to live status.
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Successfully published.
-        '201':
-          description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
-        '501':
-          $ref: '#/components/responses/NotImplementedError'
-
-  # --- HISTORY API ---
-  /editor/history/verse-text:
-    get:
-      tags: [History]
-      operationId: getVerseHistory
-      summary: View audit logs
-      description: Chronological list of previous versions for a specific verse.
-      parameters:
-        - name: verse_id
-          in: query
-          required: true
-          schema:
-            type: integer
-        - name: lang_id
-          in: query
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/VerseTextHistory'
-        '201':
-          description: Created
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/InternalServerErrror"
-        '501':
-          $ref: '#/components/responses/NotImplementedError'
 
 components:
   # -----------------------------------------------------------------------
@@ -741,26 +550,6 @@ components:
         m: { type: string, nullable: true, description: "meaning" }
         meta: { type: object, nullable: true, description: "metadata" }
 
-    # -----------------------------------------------------------------------
-    # Editor / History schemas
-    # -----------------------------------------------------------------------
-    TranslationStatus:
-      type: string
-      enum: [draft, published, archived]
-
-    VerseTextHistory:
-      type: object
-      properties:
-        id: { type: integer }
-        at: { type: string, format: date-time, description: "archived_at" }
-        tx: { type: string, description: "text/content" }
-
-    VerseTextDraft:
-      type: object
-      properties:
-        vi: { type: integer, description: "verse_id" }
-        li: { type: integer, description: "lang_id" }
-        tx: { type: string, description: "text/content" }
     Language:
       type: object
       properties:
@@ -906,6 +695,7 @@ components:
         d:  { type: string,  enum: [ltr, rtl], description: "direction" }
         tx: { type: string,  description: "text" }
         f:  { type: string,  nullable: true, description: "footer/footnote" }
+        fn: { type: array, items: { type: string }, nullable: true, description: "theological footnotes" }
         hl: { type: string,  nullable: true, description: "highlight with <b> tags (search only)" }
 
   responses:
