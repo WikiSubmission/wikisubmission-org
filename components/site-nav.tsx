@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Sparkles } from 'lucide-react'
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
 // import { SignInButton, SignedIn, SignedOut, UserButton } from '' // Phase 3, but using supabase auth
@@ -70,6 +70,18 @@ export function SiteNav() {
 
         {/* Right controls */}
         <div className="flex items-center gap-2">
+          <Link
+            href="/ask"
+            className={cn(
+              'h-9 w-9 flex items-center justify-center rounded-md transition-colors',
+              pathname?.startsWith('/ask')
+                ? 'text-primary bg-primary/10'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+            )}
+            aria-label="Ask AI"
+          >
+            <Sparkles size={18} />
+          </Link>
           <LocaleSwitcher currentLocale={locale} />
           <ThemeToggle />
           {/* Phase 3: auth
