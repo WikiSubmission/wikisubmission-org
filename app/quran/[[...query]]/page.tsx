@@ -443,34 +443,32 @@ export async function generateMetadata({
   }
 
   if (parsed.type === 'verse-list') {
-    const title = `${queryText} | Quran | WikiSubmission`
-    let verseText = ''
-    const firstPart = queryText.split(',')[0].trim()
-    const singleVerseMatch = firstPart.match(/^(\d+):(\d+)$/)
-    if (singleVerseMatch) {
-      try {
-        const result = await wsApiServer.GET('/quran', {
-          params: {
-            query: {
-              chapter_number_start: parseInt(singleVerseMatch[1]),
-              langs: ['en'],
-              verse_start: parseInt(singleVerseMatch[2]),
-              verse_end: parseInt(singleVerseMatch[2]),
-            },
+    // Normalise: add space after each comma for display
+    const displayQuery = queryText.split(',').map((s) => s.trim()).join(', ')
+    const title = `${displayQuery} | Quran | WikiSubmission`
+    let description = `Read ${displayQuery} from the Final Testament (Quran)`
+    try {
+      const result = await wsApiServer.GET('/quran', {
+        params: {
+          query: {
+            langs: ['en'],
+            verses: queryText,
           },
-        })
-        const tx = result.data?.chapters?.[0]?.verses?.[0]?.tr?.['en']?.tx ?? ''
-        verseText = tx.length > 220 ? tx.slice(0, 217) + '...' : tx
-      } catch {}
-    }
-    const description = verseText
-      ? verseText
-      : `Read ${queryText} from the Final Testament (Quran)`
+        },
+      })
+      const allVerses = (result.data?.chapters ?? []).flatMap((c) => c.verses ?? [])
+      const joined = allVerses
+        .map((v) => `[${v.vk}] ${v.tr?.['en']?.tx ?? ''}`)
+        .join(' ')
+        .trim()
+      if (joined) description = joined.length > 220 ? joined.slice(0, 217) + '...' : joined
+    } catch {}
+    const image = `/og?title=${encodeURIComponent(title)}&small=1`
     return buildPageMetadata({
       title,
       description,
-      image: LOGO,
-      twitterCard: 'summary',
+      image,
+      imageSize: { width: 600, height: 240 },
     })
   }
 
