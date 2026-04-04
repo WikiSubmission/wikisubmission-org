@@ -11,7 +11,8 @@
     "finalTestament": "The Final Testament",
     "backToHome": "Back to Home",
     "notFound": "Sorry, we couldn't find what you were looking for.",
-    "returnToPrevious": "← Return to previous page"
+    "returnToPrevious": "← Return to previous page",
+    "viewFullChapter": "View full chapter"
   },
   "contact": {
     "heading": "Contact Us",
@@ -70,7 +71,8 @@
     "introductionDesc": "An introduction to the Final Testament and its mathematical miracle",
     "modeVerse": "Verse",
     "modeWordByWord": "Word by Word",
-    "modeReading": "Reading"
+    "modeReading": "Reading",
+    "versesRange": "Verses {start}–{end}"
   },
   "search": {
     "placeholder": "Search the Quran…",

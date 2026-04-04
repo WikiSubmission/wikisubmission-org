@@ -497,6 +497,22 @@ export function ChapterReader({
               </p>
             )}
           </div>
+
+          {/* Range mode: show verse range + link to full chapter */}
+          {isRangeMode && rangeStart !== undefined && rangeEnd !== undefined && (
+            <div className="mt-2 pt-2 border-t border-border/30 flex items-center justify-between gap-2">
+              <span className="text-xs text-muted-foreground">
+                {t('versesRange', { start: rangeStart, end: rangeEnd })}
+              </span>
+              <Link
+                href={`/quran/${chapterNumber}`}
+                className="text-xs text-primary hover:underline flex items-center gap-1 shrink-0"
+              >
+                {tCommon('viewFullChapter')}
+                <ArrowRight className="size-3" />
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 

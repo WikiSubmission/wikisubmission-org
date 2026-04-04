@@ -11,7 +11,8 @@
     "finalTestament": "Son Ahit",
     "backToHome": "Ana Sayfaya Dön",
     "notFound": "Üzgünüz, aradığınızı bulamadık.",
-    "returnToPrevious": "← Önceki sayfaya dön"
+    "returnToPrevious": "← Önceki sayfaya dön",
+    "viewFullChapter": "Tam bölümü görüntüle"
   },
   "contact": {
     "heading": "Bize Ulaşın",
@@ -70,7 +71,8 @@
     "introductionDesc": "Son Ahit ve matematiksel mucizenin tanıtımı",
     "modeVerse": "Ayet",
     "modeWordByWord": "Kelime kelime",
-    "modeReading": "Okuma"
+    "modeReading": "Okuma",
+    "versesRange": "Ayetler {start}–{end}"
   },
   "search": {
     "placeholder": "Kuran'da ara…",

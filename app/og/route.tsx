@@ -5,9 +5,6 @@ import path from 'path'
 
 export const runtime = 'nodejs'
 
-const WIDTH = 1200
-const HEIGHT = 630
-
 function loadFile(relativePath: string): Buffer {
   return fs.readFileSync(path.join(process.cwd(), relativePath))
 }
@@ -21,15 +18,30 @@ function toArrayBuffer(buf: Buffer): ArrayBuffer {
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const rawTitle = searchParams.get('title') ?? 'WikiSubmission'
+  const rawSubtitle = searchParams.get('subtitle') ?? ''
+  const small = searchParams.get('small') === '1'
 
   // Strip trailing " | WikiSubmission" so it's not redundant
   const title = rawTitle.replace(/\s*\|\s*WikiSubmission\s*$/i, '').trim() || 'WikiSubmission'
+  const subtitle = rawSubtitle.slice(0, 200).trim()
+
+  const WIDTH = small ? 600 : 1200
+  const HEIGHT = small ? 315 : 630
 
   const fontData = toArrayBuffer(loadFile('public/font/GlacialIndifference-Regular.ttf'))
   const logoData = loadFile('public/brand-assets/logo-transparent.png')
   const logoSrc = `data:image/png;base64,${logoData.toString('base64')}`
 
-  const fontSize = title.length > 60 ? 52 : title.length > 40 ? 60 : 68
+  const scale = small ? 0.5 : 1
+  const logoSize = Math.round(128 * scale)
+  const fontSize = Math.round(
+    (subtitle
+      ? (title.length > 20 ? 48 : 60)
+      : (title.length > 60 ? 52 : title.length > 40 ? 60 : 68)) * scale
+  )
+  const subtitleSize = Math.round(30 * scale)
+  const gap = Math.round((subtitle ? 28 : 48) * scale)
+  const padding = Math.round(120 * scale)
 
   const imageResponse = new ImageResponse(
     (
@@ -42,12 +54,12 @@ export async function GET(request: NextRequest) {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 48,
-          padding: '0 120px',
+          gap,
+          padding: `0 ${padding}px`,
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={logoSrc} width={128} height={128} alt="" />
+        <img src={logoSrc} width={logoSize} height={logoSize} alt="" />
 
         <div
           style={{
@@ -62,6 +74,21 @@ export async function GET(request: NextRequest) {
         >
           {title}
         </div>
+
+        {subtitle && (
+          <div
+            style={{
+              color: '#999999',
+              fontSize: subtitleSize,
+              fontFamily: 'GlacialIndifference',
+              fontWeight: 400,
+              textAlign: 'center',
+              lineHeight: 1.5,
+            }}
+          >
+            {subtitle}
+          </div>
+        )}
       </div>
     ),
     {

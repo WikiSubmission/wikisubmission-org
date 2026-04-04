@@ -328,13 +328,50 @@ export async function generateMetadata({
   if (parsed.type === 'range' && parsed.chapterNumber) {
     const title = `${queryText} | Quran | WikiSubmission`
     const description = `Read verses ${parsed.verseStart}–${parsed.verseEnd} of Sura ${parsed.chapterNumber} in the Final Testament`
-    return buildPageMetadata({ title, description, url: `/quran/${queryText}` })
+    let subtitle = ''
+    try {
+      const result = await wsApiServer.GET('/quran', {
+        params: {
+          query: {
+            chapter_number_start: parsed.chapterNumber,
+            langs: ['en'],
+            verse_start: parsed.verseStart,
+            verse_end: parsed.verseStart,
+          },
+        },
+      })
+      const tx = result.data?.chapters?.[0]?.verses?.[0]?.tr?.['en']?.tx ?? ''
+      subtitle = tx.length > 150 ? tx.slice(0, 147) + '…' : tx
+    } catch {}
+    const image = `/og?title=${encodeURIComponent(title)}&small=1${subtitle ? `&subtitle=${encodeURIComponent(subtitle)}` : ''}`
+    return buildPageMetadata({ title, description, url: `/quran/${queryText}`, image, imageSize: { width: 600, height: 315 } })
   }
 
   if (parsed.type === 'verse-list') {
     const title = `${queryText} | Quran | WikiSubmission`
     const description = `Read ${queryText} from the Final Testament (Quran) at WikiSubmission`
-    return buildPageMetadata({ title, description })
+    // For a single verse ref like "2:255", fetch the verse text for the OG subtitle
+    let subtitle = ''
+    const firstPart = queryText.split(',')[0].trim()
+    const singleVerseMatch = firstPart.match(/^(\d+):(\d+)$/)
+    if (singleVerseMatch) {
+      try {
+        const result = await wsApiServer.GET('/quran', {
+          params: {
+            query: {
+              chapter_number_start: parseInt(singleVerseMatch[1]),
+              langs: ['en'],
+              verse_start: parseInt(singleVerseMatch[2]),
+              verse_end: parseInt(singleVerseMatch[2]),
+            },
+          },
+        })
+        const tx = result.data?.chapters?.[0]?.verses?.[0]?.tr?.['en']?.tx ?? ''
+        subtitle = tx.length > 150 ? tx.slice(0, 147) + '…' : tx
+      } catch {}
+    }
+    const image = `/og?title=${encodeURIComponent(title)}&small=1${subtitle ? `&subtitle=${encodeURIComponent(subtitle)}` : ''}`
+    return buildPageMetadata({ title, description, image, imageSize: { width: 600, height: 315 } })
   }
 
   // text search

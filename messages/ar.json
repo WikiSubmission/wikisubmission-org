@@ -11,7 +11,8 @@
     "finalTestament": "العهد الأخير",
     "backToHome": "العودة إلى الرئيسية",
     "notFound": "عذرًا، لم نتمكن من العثور على ما تبحث عنه.",
-    "returnToPrevious": "← العودة إلى الصفحة السابقة"
+    "returnToPrevious": "← العودة إلى الصفحة السابقة",
+    "viewFullChapter": "عرض السورة كاملة"
   },
   "contact": {
     "heading": "تواصل معنا",
@@ -70,7 +71,8 @@
     "introductionDesc": "مقدمة العهد الأخير ومعجزته الرياضية",
     "modeVerse": "آية",
     "modeWordByWord": "كلمة بكلمة",
-    "modeReading": "قراءة"
+    "modeReading": "قراءة",
+    "versesRange": "الآيات {start}–{end}"
   },
   "search": {
     "placeholder": "ابحث في القرآن…",

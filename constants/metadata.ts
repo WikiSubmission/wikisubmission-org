@@ -10,13 +10,17 @@ export function buildPageMetadata({
   description,
   url,
   image,
+  imageSize,
 }: {
   title: string
   description: string
   url?: string
   image?: string
+  imageSize?: { width: number; height: number }
 }): _Metadata {
   const img = image ?? `/og?title=${encodeURIComponent(title)}`
+  const imgW = imageSize?.width ?? 1200
+  const imgH = imageSize?.height ?? 630
   return {
     title,
     description,
@@ -26,7 +30,7 @@ export function buildPageMetadata({
       description,
       ...(url ? { url } : {}),
       siteName: 'WikiSubmission',
-      images: [{ url: img, width: 1200, height: 630, alt: title }],
+      images: [{ url: img, width: imgW, height: imgH, alt: title }],
       locale: 'en_US',
       type: 'website',
     },
@@ -34,7 +38,7 @@ export function buildPageMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: [{ url: img, width: 1200, height: 630 }],
+      images: [{ url: img, width: imgW, height: imgH }],
     },
   }
 }

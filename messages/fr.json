@@ -11,7 +11,8 @@
     "finalTestament": "Le Testament Final",
     "backToHome": "Retour à l'accueil",
     "notFound": "Désolé, nous n'avons pas trouvé ce que vous cherchez.",
-    "returnToPrevious": "← Retour à la page précédente"
+    "returnToPrevious": "← Retour à la page précédente",
+    "viewFullChapter": "Voir le chapitre complet"
   },
   "contact": {
     "heading": "Nous contacter",
@@ -70,7 +71,8 @@
     "introductionDesc": "Une introduction au Testament Final et à son miracle mathématique",
     "modeVerse": "Verset",
     "modeWordByWord": "Mot par mot",
-    "modeReading": "Lecture"
+    "modeReading": "Lecture",
+    "versesRange": "Versets {start}–{end}"
   },
   "search": {
     "placeholder": "Rechercher dans le Coran…",
