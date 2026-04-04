@@ -84,12 +84,14 @@ function VerseRow({
   translationClass,
   arabicClass,
   showSubtitles,
+  showFootnotes,
 }: {
   verse: VerseData
   isLast: boolean
   translationClass: string
   arabicClass: string
   showSubtitles: boolean
+  showFootnotes: boolean
 }) {
   const en = verse.tr?.['en']
   const ar = verse.tr?.['ar']
@@ -122,6 +124,13 @@ function VerseRow({
             {ar.tx}
           </p>
         ) : null}
+
+        {/* Footnote */}
+        {showFootnotes && en?.f && (
+          <p className="text-sm text-muted-foreground/80 leading-relaxed italic">
+            <QuranRefText text={en.f} from={`footnote of ${verse.vk}`} />
+          </p>
+        )}
       </div>
     </div>
   )
@@ -136,6 +145,7 @@ function SegmentBlock({
   translationClass,
   arabicClass,
   showSubtitles,
+  showFootnotes,
 }: {
   seg: Segment
   verses: VerseData[]
@@ -143,6 +153,7 @@ function SegmentBlock({
   translationClass: string
   arabicClass: string
   showSubtitles: boolean
+  showFootnotes: boolean
 }) {
   if (verses.length === 0) return null
 
@@ -168,6 +179,7 @@ function SegmentBlock({
           translationClass={translationClass}
           arabicClass={arabicClass}
           showSubtitles={showSubtitles}
+          showFootnotes={showFootnotes}
         />
       ))}
     </div>
@@ -190,6 +202,7 @@ export function VerseListResult({
   const zoomFont = ZOOM_FONT[zoom]
   const maxW = ZOOM_WIDTH_CLASS[zoom]
   const showSubtitles = prefs.subtitles ?? true
+  const showFootnotes = prefs.footnotes ?? true
 
   if (apiError || !data) {
     return (
@@ -227,6 +240,7 @@ export function VerseListResult({
             translationClass={zoomFont.translation}
             arabicClass={zoomFont.arabic}
             showSubtitles={showSubtitles}
+            showFootnotes={showFootnotes}
           />
         )
       })}
