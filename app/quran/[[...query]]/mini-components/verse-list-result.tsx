@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT, ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
+import { QuranRefText } from '@/components/quran-ref-text'
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']
@@ -82,11 +83,13 @@ function VerseRow({
   isLast,
   translationClass,
   arabicClass,
+  showSubtitles,
 }: {
   verse: VerseData
   isLast: boolean
   translationClass: string
   arabicClass: string
+  showSubtitles: boolean
 }) {
   const en = verse.tr?.['en']
   const ar = verse.tr?.['ar']
@@ -94,8 +97,12 @@ function VerseRow({
   return (
     <div className={`px-4 py-4 space-y-2 ${!isLast ? 'border-b border-border/30' : ''}`}>
       {/* Subtitle */}
-      {en?.s && (
-        <p className="text-xs italic text-muted-foreground">{en.s}</p>
+      {showSubtitles && en?.s && (
+        <div className="flex justify-center">
+          <p className="text-violet-600 text-xs font-bold text-center">
+            <QuranRefText text={en.s} from={`subtitle of ${verse.vk}`} />
+          </p>
+        </div>
       )}
 
       <div className="space-y-2">
@@ -128,12 +135,14 @@ function SegmentBlock({
   chapterTitle,
   translationClass,
   arabicClass,
+  showSubtitles,
 }: {
   seg: Segment
   verses: VerseData[]
   chapterTitle: string
   translationClass: string
   arabicClass: string
+  showSubtitles: boolean
 }) {
   if (verses.length === 0) return null
 
@@ -158,6 +167,7 @@ function SegmentBlock({
           isLast={i === verses.length - 1}
           translationClass={translationClass}
           arabicClass={arabicClass}
+          showSubtitles={showSubtitles}
         />
       ))}
     </div>
@@ -175,10 +185,11 @@ export function VerseListResult({
   data: QuranResponse | undefined
   apiError: boolean
 }) {
-  const { zoomLevel } = useQuranPreferences()
-  const zoom = zoomLevel ?? 'comfortable'
+  const prefs = useQuranPreferences()
+  const zoom = prefs.zoomLevel ?? 'comfortable'
   const zoomFont = ZOOM_FONT[zoom]
   const maxW = ZOOM_WIDTH_CLASS[zoom]
+  const showSubtitles = prefs.subtitles ?? true
 
   if (apiError || !data) {
     return (
@@ -215,6 +226,7 @@ export function VerseListResult({
             chapterTitle={title}
             translationClass={zoomFont.translation}
             arabicClass={zoomFont.arabic}
+            showSubtitles={showSubtitles}
           />
         )
       })}
