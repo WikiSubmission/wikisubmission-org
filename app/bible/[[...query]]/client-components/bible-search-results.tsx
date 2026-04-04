@@ -6,11 +6,13 @@ import Link from 'next/link'
 import { Spinner } from '@/components/ui/spinner'
 import { wsApi } from '@/src/api/client'
 import { bookFromSlug, BIBLE_BOOKS } from '@/constants/bible-books'
+import { HighlightText, markQuery } from '@/components/highlight-text'
 import type { components } from '@/src/api/types.gen'
 
 type BibleVerseData = components['schemas']['BibleVerseData']
 
 type ResultVerse = BibleVerseData & { bookSlug: string; bookName: string; chapterNum: number }
+
 
 export function BibleSearchResults() {
   const searchParams = useSearchParams()
@@ -113,7 +115,7 @@ export function BibleSearchResults() {
                     {ref}
                   </span>
                   <p className="text-sm leading-relaxed text-foreground line-clamp-3">
-                    {tr?.tx ?? ''}
+                    <HighlightText text={markQuery(tr?.tx ?? '', searched)} />
                   </p>
                 </Link>
               )

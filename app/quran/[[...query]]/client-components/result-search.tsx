@@ -22,29 +22,8 @@ import {
 import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
 import { QuranRefText } from '@/components/quran-ref-text'
+import { HighlightText } from '@/components/highlight-text'
 import { useTranslations } from 'next-intl'
-
-// ─── HighlightText ────────────────────────────────────────────────────────────
-
-function HighlightText({ text }: { text?: string | null }) {
-  if (!text) return null
-  return (
-    <>
-      {text.split(/(<b>.*?<\/b>)/g).map((part, i) =>
-        part.startsWith('<b>') && part.endsWith('</b>') ? (
-          <mark
-            key={i}
-            className="bg-violet-600/10 text-violet-600 dark:text-violet-400 rounded-sm not-italic font-semibold px-0.5"
-          >
-            {part.slice(3, -4)}
-          </mark>
-        ) : (
-          part || null
-        )
-      )}
-    </>
-  )
-}
 
 // ─── SearchResultChapter ──────────────────────────────────────────────────────
 
