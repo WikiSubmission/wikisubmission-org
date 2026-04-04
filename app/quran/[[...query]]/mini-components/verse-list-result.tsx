@@ -56,20 +56,20 @@ function ArabicWords({ words }: { words: VerseData['w'] }) {
   if (!words || words.length === 0) return null
   const sorted = [...words].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0))
   return (
-    <div
+    <p
       dir="rtl"
-      className="flex flex-wrap justify-end gap-x-3 gap-y-1 pt-2 font-arabic text-lg text-foreground/85"
+      className="pt-2 font-arabic text-lg leading-relaxed text-foreground/85 text-right"
     >
       {sorted.map((w) => {
         const arabic = (w.tx as Record<string, string> | undefined)?.['ar']
         if (!arabic) return null
         return (
-          <span key={w.wi ?? arabic} className="leading-relaxed">
+          <span key={w.wi ?? arabic} className="mx-1">
             {arabic}
           </span>
         )
       })}
-    </div>
+    </p>
   )
 }
 
