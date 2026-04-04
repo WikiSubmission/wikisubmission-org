@@ -52,7 +52,7 @@ function BookRow({
         </span>
         <span className="flex-1 min-w-0 text-sm font-medium truncate">{book.bk}</span>
         <span className="text-[10px] text-muted-foreground/60 font-mono shrink-0">
-          {book.cc}ch
+          {book.cc} chapters
         </span>
         {expanded ? (
           <ChevronDown className="size-3.5 text-muted-foreground shrink-0" />
