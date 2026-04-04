@@ -9,7 +9,7 @@ import { ChevronRight } from 'lucide-react'
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 
-type Props = { params: Promise<{ query?: string[] }> }
+type Props = { params: Promise<{ query?: string[] }>; searchParams: Promise<{ verse?: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { query } = await params
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function BiblePage({ params }: Props) {
+export default async function BiblePage({ params, searchParams }: Props) {
   const { query } = await params
 
   // ── Home (/bible) ──────────────────────────────────────────────────────────
@@ -150,12 +150,16 @@ export default async function BiblePage({ params }: Props) {
       (b) => b.chapters?.flatMap((c) => c.verses ?? []) ?? []
     ) ?? []
 
+  const { verse } = await searchParams
+  const initialVerse = verse ? parseInt(verse) : undefined
+
   return (
     <BibleReader
       book={book}
       chapter={chapter}
       initialVerses={initialVerses}
       hasError={!!error}
+      initialVerse={initialVerse}
     />
   )
 }

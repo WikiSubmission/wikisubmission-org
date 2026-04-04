@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -76,9 +76,10 @@ type Props = {
   chapter: number
   initialVerses: BibleVerseData[]
   hasError: boolean
+  initialVerse?: number
 }
 
-export function BibleReader({ book, chapter, initialVerses, hasError }: Props) {
+export function BibleReader({ book, chapter, initialVerses, hasError, initialVerse }: Props) {
   const prefs = useBiblePreferences()
   const router = useRouter()
 
@@ -88,6 +89,23 @@ export function BibleReader({ book, chapter, initialVerses, hasError }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(hasError ? 'Failed to load chapter.' : null)
   const [footnoteDialog, setFootnoteDialog] = useState<FootnoteDialogState>(null)
+  const [highlightedVerse, setHighlightedVerse] = useState<number | null>(null)
+
+  // Scroll to the target verse once the DOM is ready, then briefly highlight it
+  useEffect(() => {
+    if (!initialVerse) return
+    const el = document.getElementById(`verse-${initialVerse}`)
+    if (!el) return
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const top = el.getBoundingClientRect().top + window.scrollY - 128
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+        setHighlightedVerse(initialVerse)
+        const t = setTimeout(() => setHighlightedVerse(null), 1800)
+        return () => clearTimeout(t)
+      })
+    )
+  }, [initialVerse, verses])
 
   const navigate = useCallback(
     async (targetChapter: number) => {
@@ -204,6 +222,7 @@ export function BibleReader({ book, chapter, initialVerses, hasError }: Props) {
                   showTheological={prefs.theologicalFootnotes}
                   manuscriptOffset={mOff}
                   theologicalOffset={tOff}
+                  highlighted={highlightedVerse === (verse.vn ?? 0)}
                   onFootnoteClick={(text, label) =>
                     setFootnoteDialog({ kind: 'manuscript', text, label })
                   }

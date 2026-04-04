@@ -106,7 +106,7 @@ export function BibleSearchResults() {
               return (
                 <Link
                   key={verse.vk}
-                  href={`/bible/${verse.bookSlug}/${verse.chapterNum}`}
+                  href={`/bible/${verse.bookSlug}/${verse.chapterNum}?verse=${vn}`}
                   className="flex gap-3 p-3 rounded-xl border border-border/40 hover:bg-accent/40 hover:border-primary/20 transition-all group"
                 >
                   <span className="shrink-0 font-mono text-[11px] text-muted-foreground mt-0.5 w-28 leading-relaxed">

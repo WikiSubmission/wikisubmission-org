@@ -11,6 +11,7 @@ type Props = {
   manuscriptOffset: number
   /** Index of the first theological footnote entry across all verses (for numbering). */
   theologicalOffset: number
+  highlighted?: boolean
   onFootnoteClick: (text: string, label: string) => void
   onTheologicalClick: (entries: string[], label: string) => void
 }
@@ -21,6 +22,7 @@ function BibleVerseCard({
   showTheological,
   manuscriptOffset,
   theologicalOffset,
+  highlighted,
   onFootnoteClick,
   onTheologicalClick,
 }: Props) {
@@ -31,7 +33,10 @@ function BibleVerseCard({
   const hasTheological = showTheological && tr?.fn && tr.fn.length > 0
 
   return (
-    <div className="flex gap-3 group py-1">
+    <div
+      id={`verse-${vn}`}
+      className={`flex gap-3 group py-1 rounded-lg transition-colors duration-700 ${highlighted ? 'bg-violet-500/10 -mx-2 px-2' : ''}`}
+    >
       {/* Verse number badge */}
       <span className="shrink-0 flex items-center justify-center size-7 rounded-md bg-muted text-muted-foreground font-mono text-xs font-semibold mt-0.5">
         {vn}
