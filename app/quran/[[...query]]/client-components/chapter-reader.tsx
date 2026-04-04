@@ -514,8 +514,8 @@ export function ChapterReader({
             </div>
           )}
 
-          {/* Verse anchor: show rendered range + link to full chapter */}
-          {!isRangeMode && initialVerse && (
+          {/* Verse anchor: show rendered range + link to full chapter (only when not starting from beginning) */}
+          {!isRangeMode && initialVerse && (reader.verses[0]?.vi ?? 0) > 1 && (
             <div className="mt-2 pt-2 border-t border-border/30 flex items-center justify-between gap-2">
               <span className="text-xs text-muted-foreground">
                 {(() => {
