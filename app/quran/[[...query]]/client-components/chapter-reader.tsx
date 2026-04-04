@@ -513,6 +513,28 @@ export function ChapterReader({
               </Link>
             </div>
           )}
+
+          {/* Verse anchor: show rendered range + link to full chapter */}
+          {!isRangeMode && initialVerse && (
+            <div className="mt-2 pt-2 border-t border-border/30 flex items-center justify-between gap-2">
+              <span className="text-xs text-muted-foreground">
+                {(() => {
+                  const first = reader.verses[0]?.vi
+                  const last = reader.verses[reader.verses.length - 1]?.vi
+                  return first !== undefined && last !== undefined
+                    ? t('versesRange', { start: first, end: last })
+                    : null
+                })()}
+              </span>
+              <Link
+                href={`/quran/${chapterNumber}`}
+                className="text-xs text-primary hover:underline flex items-center gap-1 shrink-0"
+              >
+                {tCommon('viewFullChapter')}
+                <ArrowRight className="size-3" />
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 

@@ -196,7 +196,7 @@ export default async function QuranPage({
       <main>
         <Suspense fallback={<Spinner />}>
           <ChapterReader
-            key={parsed.chapterNumber}
+            key={`${parsed.chapterNumber}-${verse ?? 'full'}`}
             chapterNumber={parsed.chapterNumber}
             initialData={data}
             initialVerse={verse}
