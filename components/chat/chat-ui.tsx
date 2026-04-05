@@ -92,18 +92,16 @@ const SUGGESTIONS = [
 
 export function SuggestionCards({ onSelect }: { onSelect: (s: string) => void }) {
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-5 text-center">
-      <div className="flex flex-col gap-2 w-full max-w-xs">
-        {SUGGESTIONS.map((s) => (
-          <button
-            key={s}
-            onClick={() => onSelect(s)}
-            className="text-xs text-left text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/70 hover:bg-muted/20 px-3 py-2 rounded-lg transition-colors"
-          >
-            {s}
-          </button>
-        ))}
-      </div>
+    <div className="flex flex-col gap-2 w-full max-w-xs">
+      {SUGGESTIONS.map((s) => (
+        <button
+          key={s}
+          onClick={() => onSelect(s)}
+          className="text-xs text-left text-muted-foreground hover:text-foreground border border-border/40 hover:border-border/70 hover:bg-muted/20 px-3 py-2 rounded-lg transition-colors"
+        >
+          {s}
+        </button>
+      ))}
     </div>
   )
 }

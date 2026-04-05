@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { X, Maximize2 } from 'lucide-react'
+import { X, Maximize2, SparklesIcon } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { useChatPanel } from './panel-context'
@@ -119,12 +119,19 @@ export function ChatSidebar() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6" style={{ minHeight: 0 }}>
-          {messages.length === 0
-            ? <SuggestionCards onSelect={submit} />
-            : <MessageList messages={messages} onNavigate={minimize} />
-          }
-          <div ref={bottomRef} />
+        <div className="relative flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
+          {messages.length === 0 ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center">
+              <SparklesIcon size={18} className="text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground/70">Ask anything.</p>
+              <SuggestionCards onSelect={submit} />
+            </div>
+          ) : (
+            <div className="px-4 py-5 space-y-6">
+              <MessageList messages={messages} onNavigate={minimize} />
+              <div ref={bottomRef} />
+            </div>
+          )}
         </div>
 
         {/* Input */}
