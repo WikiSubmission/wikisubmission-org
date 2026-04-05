@@ -4,30 +4,13 @@ import fs from 'fs'
 import path from 'path'
 import { About } from '@/constants/about'
 import { LegalMarkdown } from '@/components/legal-markdown'
+import { buildPageMetadata } from '@/constants/metadata'
 
-export const metadata = {
-  title: 'Terms of Use - WikiSubmission',
-  description: 'Terms of Use for WikiSubmission',
-  keywords: [
-    'WikiSubmission',
-    'Terms of Use',
-    'WikiSubmission Terms',
-    'WikiSubmission Terms of Use',
-  ],
-  openGraph: {
-    title: 'Terms of Use - WikiSubmission',
-    description: 'Terms of Use for WikiSubmission',
-    url: '/legal/terms-of-use',
-    images: [
-      {
-        url: '/brand-assets/logo-black.png',
-        width: 64,
-        height: 64,
-        alt: 'WikiSubmission Logo',
-      },
-    ],
-  },
-}
+export const metadata = buildPageMetadata({
+  title: 'Terms of Use — WikiSubmission',
+  description: 'Terms of Use for WikiSubmission.',
+  url: '/legal/terms-of-use',
+})
 
 export default function TermsOfService() {
   const content = fs.readFileSync(

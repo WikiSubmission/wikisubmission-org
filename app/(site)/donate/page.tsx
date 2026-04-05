@@ -1,3 +1,4 @@
+import { buildPageMetadata } from '@/constants/metadata'
 import {
   Item,
   ItemActions,
@@ -7,6 +8,12 @@ import {
 } from '@/components/ui/item'
 import { ChevronRight, Heart, Calendar, ChevronLeft, Gift } from 'lucide-react'
 import { About } from '@/constants/about'
+
+export const metadata = buildPageMetadata({
+  title: 'Donate — WikiSubmission',
+  description: 'Support WikiSubmission and help spread the message of Submission.',
+  url: '/donate',
+})
 import {
   FaApplePay,
   FaBitcoin,

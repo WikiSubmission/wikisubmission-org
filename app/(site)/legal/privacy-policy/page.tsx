@@ -4,30 +4,13 @@ import fs from 'fs'
 import path from 'path'
 import { LegalMarkdown } from '@/components/legal-markdown'
 import { About } from '@/constants/about'
+import { buildPageMetadata } from '@/constants/metadata'
 
-export const metadata = {
-  title: 'Privacy Policy - WikiSubmission',
-  description: 'Privacy Policy for WikiSubmission',
-  keywords: [
-    'WikiSubmission',
-    'Privacy Policy',
-    'WikiSubmission Privacy',
-    'WikiSubmission Privacy Policy',
-  ],
-  openGraph: {
-    title: 'Privacy Policy - WikiSubmission',
-    description: 'Privacy Policy for WikiSubmission',
-    url: '/legal/privacy-policy',
-    images: [
-      {
-        url: '/brand-assets/logo-black.png',
-        width: 64,
-        height: 64,
-        alt: 'WikiSubmission Logo',
-      },
-    ],
-  },
-}
+export const metadata = buildPageMetadata({
+  title: 'Privacy Policy — WikiSubmission',
+  description: 'Privacy Policy for WikiSubmission.',
+  url: '/legal/privacy-policy',
+})
 
 export default function PrivacyPolicy() {
   const content = fs.readFileSync(
