@@ -215,9 +215,9 @@ export function AskSidebar() {
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center gap-5 text-center">
               <div className="space-y-1">
-                <p className="text-sm font-semibold">Ask about the Quran</p>
+                <p className="text-sm font-semibold">Ask about Submission</p>
                 <p className="text-xs text-muted-foreground">
-                  Submission, the Miracle, or Islamic practice
+                  Quran, Submission, the Miracle, Practices
                 </p>
               </div>
               <div className="flex flex-col gap-2 w-full max-w-xs">

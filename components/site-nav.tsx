@@ -72,6 +72,8 @@ export function SiteNav() {
 
         {/* Right controls */}
         <div className="flex items-center gap-2">
+          <LocaleSwitcher currentLocale={locale} />
+          <ThemeToggle />
           <button
             onClick={toggleAsk}
             className={cn(
@@ -84,8 +86,6 @@ export function SiteNav() {
           >
             <Sparkles size={18} />
           </button>
-          <LocaleSwitcher currentLocale={locale} />
-          <ThemeToggle />
           {/* Phase 3: auth
           <SignedOut>
             <SignInButton mode="modal">
