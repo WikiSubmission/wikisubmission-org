@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 
 const glacial = localFont({
     src: "../public/font/GlacialIndifference-Regular.ttf",
-    weight: '400'
+    weight: '600'
 });
 
 const geistMono = Geist_Mono({

@@ -138,7 +138,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
                     {t('word', { index: occ.word_index })}
                   </span>
                 </div>
-                {occ.english && (
+                {occ && (
                   <p className="text-sm font-semibold text-foreground leading-tight group-hover:text-violet-600 transition-colors">
                     {occ.english}
                   </p>
