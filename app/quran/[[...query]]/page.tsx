@@ -184,6 +184,7 @@ export default async function QuranPage({
             include_words: true,
             include_root: true,
             include_meaning: true,
+            word_langs: ['ar', 'en', 'tl'],
           },
         },
       })
@@ -220,6 +221,7 @@ export default async function QuranPage({
             include_words: true,
             include_root: true,
             include_meaning: true,
+            word_langs: ['ar', 'en', 'tl'],
           },
         },
       })
