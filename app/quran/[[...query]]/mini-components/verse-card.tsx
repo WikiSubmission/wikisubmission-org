@@ -64,8 +64,9 @@ const WordByWordView = memo(
       <div dir="rtl" className="flex flex-wrap text-right justify-start gap-x-4 gap-y-6 py-2">
         {sorted.map((w) => {
           const arabic = (w.tx as Record<string, string>)?.['ar']
+          const english = (w.tx as Record<string, string>)?.['en'] ?? ''
           const root = w.r
-          const meaning = w.m ?? (w.tx as Record<string, string>)?.['en'] ?? ''
+          const meaning = w.m ?? english
           const wordIndex = w.wi ?? 0
 
           if (isTouch) {
@@ -102,13 +103,13 @@ const WordByWordView = memo(
                 >
                   <div className="flex flex-col gap-0.5 space-y-1 py-2 items-center text-center">
                     <p className="font-arabic text-xl text-violet-600">{arabic}</p>
-                    <p className="text-xs font-bold text-foreground">{meaning}</p>
+                    <p className="text-xs font-bold text-foreground">{english}</p>
                   </div>
                 </TooltipContent>
               </Tooltip>
 
               {root && (
-                <DialogContent className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl">
+                <DialogContent className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl" aria-describedby={undefined}>
                   <DialogHeader>
                     <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
                       <span className="text-4xl font-arabic text-violet-600 mb-3">{arabic}</span>
@@ -158,7 +159,7 @@ const WordByWordView = memo(
         {/* Mobile: shared dialog */}
         {isTouch && (
           <Dialog open={!!dialogWord} onOpenChange={(open) => { if (!open) setDialogWord(null) }}>
-            <DialogContent className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl">
+            <DialogContent className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl" aria-describedby={undefined}>
               {dialogWord && (
                 <>
                   <DialogHeader>
@@ -213,7 +214,7 @@ const WordByWordView = memo(
             </DialogTrigger>
 
             {root && (
-              <DialogContent className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl">
+              <DialogContent className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl" aria-describedby={undefined}>
                 <DialogHeader>
                   <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
                     <span className="text-4xl font-arabic text-violet-600 mb-1">{arabic}</span>
