@@ -168,19 +168,6 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
               <span className="truncate text-muted-foreground">{ap.title}</span>
             </button>
           ))}
-
-          <div className="border-t border-border/20" />
-          <button
-            type="button"
-            onMouseDown={() => {
-              setOpen(false)
-              performSearch(query)
-            }}
-            className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-muted/60 text-left text-muted-foreground"
-          >
-            <SearchIcon className="size-3.5 shrink-0 ml-0.5" />
-            <span className="truncate">Search &ldquo;{query}&rdquo;</span>
-          </button>
         </div>
       )}
     </div>

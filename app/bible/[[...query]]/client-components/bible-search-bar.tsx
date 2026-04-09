@@ -180,20 +180,6 @@ export default function BibleSearchBar({ className, large }: BibleSearchBarProps
               <span className="truncate">{book.bk}</span>
             </button>
           ))}
-
-          <div className="border-t border-border/20" />
-          <button
-            type="button"
-            onMouseDown={() => {
-              setOpen(false)
-              setQuery('')
-              router.push(`/bible/search?q=${encodeURIComponent(query)}`)
-            }}
-            className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-muted/60 text-left text-muted-foreground"
-          >
-            <SearchIcon className="size-3.5 shrink-0 ml-0.5" />
-            <span className="truncate">Search &ldquo;{query}&rdquo;</span>
-          </button>
         </div>
       )}
     </div>
