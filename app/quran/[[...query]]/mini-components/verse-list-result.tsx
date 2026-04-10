@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Copy, Check } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
@@ -153,6 +153,20 @@ export function VerseListResult({
   const [copiedAll, setCopiedAll] = useState(false)
 
   // Build lookup: cn → (verseNumber → VerseData) and cn → titles
+  const { byChapter, chapterTitles } = useMemo(() => {
+    const byChapter = new Map<number, Map<number, VerseData>>()
+    const chapterTitles = new Map<number, string>()
+    for (const ch of data?.chapters ?? []) {
+      const m = new Map<number, VerseData>()
+      for (const v of ch.verses ?? []) {
+        const vNum = parseInt((v.vk ?? '').split(':')[1] ?? '0', 10)
+        if (!isNaN(vNum)) m.set(vNum, v)
+      }
+      byChapter.set(ch.cn ?? 0, m)
+      chapterTitles.set(ch.cn ?? 0, ch.titles?.['en'] ?? `Chapter ${ch.cn}`)
+    }
+    return { byChapter, chapterTitles }
+  }, [data])
   const { byChapter, chapterTitles } = useMemo(() => {
     const byChapter = new Map<number, Map<number, VerseData>>()
     const chapterTitles = new Map<number, string>()

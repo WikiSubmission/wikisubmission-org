@@ -419,24 +419,6 @@ export const VerseCard = memo(
       () => ({ verse_id: verseId, ws_quran_text: {} }) satisfies QuranVerse,
       [verseId]
     )
-
-    const handleCopy = useCallback(() => {
-      const parts: string[] = [`[${verseId}]`]
-      if (prefs.text && tr?.tx) parts.push(tr.tx)
-      if (secondaryTr?.tx) parts.push(secondaryTr.tx)
-      if ((prefs.arabic || prefs.wordByWord) && arTr?.tx) parts.push(arTr.tx)
-      navigator.clipboard.writeText(parts.join('\n'))
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    }, [
-      verseId,
-      prefs.text,
-      prefs.arabic,
-      prefs.wordByWord,
-      tr,
-      secondaryTr,
-      arTr,
-    ])
     const handleCopy = useCallback(() => {
       const text = buildVerseLine(verse, {
         primaryCode,
