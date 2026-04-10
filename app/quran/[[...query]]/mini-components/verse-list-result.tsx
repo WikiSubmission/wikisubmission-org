@@ -23,7 +23,8 @@ function parseSegments(q: string): Segment[] {
     const v = part.match(/^(\d+):(\d+)$/)
     if (v) return [{ type: 'verse', cn: +v[1], v: +v[2], raw: part }]
     const r = part.match(/^(\d+):(\d+)-(\d+)$/)
-    if (r) return [{ type: 'range', cn: +r[1], vs: +r[2], ve: +r[3], raw: part }]
+    if (r)
+      return [{ type: 'range', cn: +r[1], vs: +r[2], ve: +r[3], raw: part }]
     return []
   })
 }
@@ -70,7 +71,8 @@ function SegmentBlock({
   optsKey: string
 }) {
   const prefs = useQuranPreferences()
-  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode =
+    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const [copied, setCopied] = useState(false)
 
   const handleCopySegment = useCallback(() => {
@@ -107,7 +109,11 @@ function SegmentBlock({
           className="shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted/60"
           aria-label="Copy segment verses"
         >
-          {copied ? <Check size={13} className="text-green-500" /> : <Copy size={13} />}
+          {copied ? (
+            <Check size={13} className="text-green-500" />
+          ) : (
+            <Copy size={13} />
+          )}
           <span>{copied ? 'Copied' : 'Copy'}</span>
         </button>
       </div>
@@ -120,6 +126,7 @@ function SegmentBlock({
           isLast={i === verses.length - 1}
           optsKey={optsKey}
           showAudio={false}
+          showCopyButton={false}
         />
       ))}
     </div>
@@ -140,7 +147,8 @@ export function VerseListResult({
   const prefs = useQuranPreferences()
   const zoom = prefs.zoomLevel ?? 'comfortable'
   const maxW = ZOOM_WIDTH_CLASS[zoom]
-  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode =
+    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
 
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${zoom}-${prefs.arabic}-${prefs.wordByWord}`
 
@@ -181,8 +189,15 @@ export function VerseListResult({
     navigator.clipboard.writeText(parts.join('\n').trimEnd())
     setCopiedAll(true)
     setTimeout(() => setCopiedAll(false), 1500)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [segments, byChapter, chapterTitles, primaryCode, prefs.text, prefs.arabic])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    segments,
+    byChapter,
+    chapterTitles,
+    primaryCode,
+    prefs.text,
+    prefs.arabic,
+  ])
 
   if (apiError || !data) {
     return (
@@ -203,7 +218,11 @@ export function VerseListResult({
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted/60 border border-border/40"
           aria-label="Copy all results as markdown"
         >
-          {copiedAll ? <Check size={13} className="text-green-500" /> : <Copy size={13} />}
+          {copiedAll ? (
+            <Check size={13} className="text-green-500" />
+          ) : (
+            <Copy size={13} />
+          )}
           <span>{copiedAll ? 'Copied!' : 'Copy all as markdown'}</span>
         </button>
       </div>

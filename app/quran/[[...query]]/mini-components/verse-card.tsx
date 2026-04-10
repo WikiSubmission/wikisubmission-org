@@ -11,7 +11,16 @@ import {
   type QuranVerse,
 } from '@/lib/quran-audio-context'
 import { RootWordOccurrences } from './root-word-occurrences'
-import { Play, Pause, Loader2, Copy, Check, ArrowUpRight } from 'lucide-react'
+import {
+  Play,
+  Pause,
+  Loader2,
+  Copy,
+  Check,
+  ArrowUpRight,
+  Bookmark,
+  StickyNote,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HighlightText } from '@/components/highlight-text'
 import {
@@ -334,6 +343,12 @@ type VerseCardProps = {
   isBuffering?: boolean
   /** Hide the audio play button. Default: true (show it). */
   showAudio?: boolean
+  /** Hide the copy button. Default: true (show it). */
+  showCopyButton?: boolean
+  /** Show the bookmark button (not yet implemented). Default: false. */
+  showBookmark?: boolean
+  /** Show the notes button (not yet implemented). Default: false. */
+  showNotes?: boolean
   /** When set, verse key badge becomes a link (for search results). */
   verseHref?: string
   /** Search highlight (hl field with <b> tags) to display alongside translation. */
@@ -350,6 +365,9 @@ export const VerseCard = memo(
     isPlaying = false,
     isBuffering = false,
     showAudio = true,
+    showCopyButton = true,
+    showBookmark = false,
+    showNotes = false,
     verseHref,
     searchHighlight,
   }: VerseCardProps) {
@@ -468,18 +486,40 @@ export const VerseCard = memo(
               </div>
             )}
             <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
-                onClick={handleCopy}
-              >
-                {copied ? (
-                  <Check className="w-4 h-4 text-green-500" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </Button>
+              {showBookmark && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+                  disabled
+                >
+                  <Bookmark className="w-4 h-4" />
+                </Button>
+              )}
+              {showNotes && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+                  disabled
+                >
+                  <StickyNote className="w-4 h-4" />
+                </Button>
+              )}
+              {showCopyButton && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+                  onClick={handleCopy}
+                >
+                  {copied ? (
+                    <Check className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </Button>
+              )}
               {showAudio && (
                 <Button
                   variant="ghost"
@@ -581,6 +621,9 @@ export const VerseCard = memo(
     prev.searchHighlight === next.searchHighlight &&
     prev.verseHref === next.verseHref &&
     prev.showAudio === next.showAudio &&
+    prev.showCopyButton === next.showCopyButton &&
+    prev.showBookmark === next.showBookmark &&
+    prev.showNotes === next.showNotes &&
     prev.isCurrentAudio === next.isCurrentAudio &&
     // Non-playing cards don't care about isPlaying/isBuffering (they always show Play).
     // Only check those for the active card to avoid re-rendering all cards on pause/resume.
