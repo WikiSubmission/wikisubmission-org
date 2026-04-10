@@ -67,7 +67,8 @@ const WordByWordView = memo(
       [words]
     )
 
-    const { zoomLevel } = useQuranPreferences()
+    const { zoomLevel, transliteration: showTransliteration } =
+      useQuranPreferences()
     const arabicClass = ZOOM_FONT[zoomLevel ?? 'comfortable'].arabic
     const isTouch = useIsTouch()
     const [activeWord, setActiveWord] = useState<{
@@ -273,7 +274,7 @@ const WordByWordView = memo(
                     className="flex flex-col items-center gap-0.5 pt-0.5"
                     dir="ltr"
                   >
-                    {transliteration && (
+                    {showTransliteration && transliteration && (
                       <p className="text-xs text-muted-foreground italic text-center">
                         {transliteration}
                       </p>
@@ -423,7 +424,9 @@ export const VerseCard = memo(
       const text = buildVerseLine(verse, {
         primaryCode,
         includeText: prefs.text,
-        includeArabic: prefs.arabic || prefs.wordByWord,
+        includeArabic: prefs.arabic,
+        includeWordByWord: prefs.wordByWord,
+        includeTransliteration: prefs.transliteration,
         secondaryCode:
           prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl'
             ? prefs.secondaryLanguage
@@ -438,6 +441,7 @@ export const VerseCard = memo(
       prefs.text,
       prefs.arabic,
       prefs.wordByWord,
+      prefs.transliteration,
       prefs.secondaryLanguage,
     ])
 
