@@ -308,8 +308,8 @@ export default function QuranSettings() {
             />
           )}
 
-          {/* Transliteration — verse mode only */}
-          {quranPreferences.displayMode === 'verse' && (
+          {/* Transliteration — verse mode or word-by-word */}
+          {(quranPreferences.displayMode === 'verse' || quranPreferences.wordByWord) && (
             <SettingTile
               icon={<LanguagesIcon className="size-3.5" />}
               label={t('transliteration')}

@@ -1,17 +1,40 @@
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']
+type WordData = components['schemas']['WordData']
 
 export interface CopyVerseOptions {
   primaryCode: string
   includeText: boolean
   includeArabic: boolean
   secondaryCode?: string
+  /** When true, emit per-word arabic/transliteration/meaning instead of the arabic verse string. */
+  includeWordByWord?: boolean
+  /** Include transliteration lines in word-by-word output. */
+  includeTransliteration?: boolean
+}
+
+/** Formats words into per-word blocks: arabic / transliteration / meaning */
+function buildWordByWordSection(words: WordData[], includeTransliteration: boolean): string {
+  const sorted = [...words].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0))
+  return sorted
+    .map((w) => {
+      const tx = w.tx as Record<string, string> | undefined
+      const arabic = tx?.['ar'] ?? ''
+      const transliteration = tx?.['tl'] ?? ''
+      const meaning = w.m ?? tx?.['en'] ?? ''
+      const lines = [arabic]
+      if (includeTransliteration && transliteration) lines.push(transliteration)
+      if (meaning) lines.push(meaning)
+      return lines.join('\n')
+    })
+    .join('\n\n')
 }
 
 /**
  * Builds a plain-text string for a single verse.
  * Format: `[vk] translation\narabic`
+ * With word-by-word: `[vk] translation\narabic\ntransliteration\nmeaning` (per word)
  */
 export function buildVerseLine(verse: VerseData, opts: CopyVerseOptions): string {
   const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']
@@ -28,7 +51,12 @@ export function buildVerseLine(verse: VerseData, opts: CopyVerseOptions): string
   }
 
   if (secondaryTr?.tx) lines.push(secondaryTr.tx)
-  if (opts.includeArabic && arTr?.tx) lines.push(arTr.tx)
+
+  if (opts.includeWordByWord && verse.w && verse.w.length > 0) {
+    lines.push(buildWordByWordSection(verse.w, opts.includeTransliteration ?? false))
+  } else if (opts.includeArabic && arTr?.tx) {
+    lines.push(arTr.tx)
+  }
 
   return lines.join('\n')
 }
