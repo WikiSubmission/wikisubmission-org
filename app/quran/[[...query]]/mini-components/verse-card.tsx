@@ -67,7 +67,8 @@ const WordByWordView = memo(
       [words]
     )
 
-    const { zoomLevel, transliteration: showTransliteration } = useQuranPreferences()
+    const { zoomLevel, transliteration: showTransliteration } =
+      useQuranPreferences()
     const arabicClass = ZOOM_FONT[zoomLevel ?? 'comfortable'].arabic
     const isTouch = useIsTouch()
     const [activeWord, setActiveWord] = useState<{
@@ -90,6 +91,7 @@ const WordByWordView = memo(
           {sorted.map((w) => {
             const arabic = (w.tx as Record<string, string>)?.['ar']
             const english = (w.tx as Record<string, string>)?.['en'] ?? ''
+            const transliteration = w.tx?.['tl']
             const root = w.r
             const meaning = w.m ?? english
             const wordIndex = w.wi ?? 0
@@ -128,10 +130,10 @@ const WordByWordView = memo(
                   >
                     <div className="flex flex-col gap-0.5 space-y-1 py-2 items-center text-center">
                       <p className="font-arabic text-xl text-violet-600">
-                        {arabic}
+                        {english}
                       </p>
                       <p className="text-xs font-bold text-foreground">
-                        {english}
+                        {transliteration}
                       </p>
                     </div>
                   </TooltipContent>
@@ -435,7 +437,15 @@ export const VerseCard = memo(
       navigator.clipboard.writeText(text)
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
-    }, [verse, primaryCode, prefs.text, prefs.arabic, prefs.wordByWord, prefs.transliteration, prefs.secondaryLanguage])
+    }, [
+      verse,
+      primaryCode,
+      prefs.text,
+      prefs.arabic,
+      prefs.wordByWord,
+      prefs.transliteration,
+      prefs.secondaryLanguage,
+    ])
 
     const handlePlay = useCallback(() => {
       if (isCurrentAudio) {
