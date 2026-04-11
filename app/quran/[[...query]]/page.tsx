@@ -200,7 +200,9 @@ export default async function QuranPage({
             langs: ['en', 'ar'],
             verses: queryText,
             include_words: true,
-            word_langs: ['ar'],
+            include_root: true,
+            include_meaning: true,
+            word_langs: ['ar', 'en', 'tl'],
           },
         },
       })

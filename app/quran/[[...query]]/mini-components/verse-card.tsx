@@ -91,6 +91,7 @@ const WordByWordView = memo(
           {sorted.map((w) => {
             const arabic = (w.tx as Record<string, string>)?.['ar']
             const english = (w.tx as Record<string, string>)?.['en'] ?? ''
+            const transliteration = w.tx?.['tl']
             const root = w.r
             const meaning = w.m ?? english
             const wordIndex = w.wi ?? 0
@@ -129,10 +130,10 @@ const WordByWordView = memo(
                   >
                     <div className="flex flex-col gap-0.5 space-y-1 py-2 items-center text-center">
                       <p className="font-arabic text-xl text-violet-600">
-                        {arabic}
+                        {english}
                       </p>
                       <p className="text-xs font-bold text-foreground">
-                        {english}
+                        {transliteration}
                       </p>
                     </div>
                   </TooltipContent>
