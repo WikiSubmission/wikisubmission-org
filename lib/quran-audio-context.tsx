@@ -167,13 +167,14 @@ export function QuranPlayerProvider({
     if (url !== lastUrlRef.current) {
       audioRef.current.src = url
       lastUrlRef.current = url
-
-      if (isPlaying) {
-        audioRef.current.play().catch((e) => {
-          console.error('Playback failed', e)
-          setIsPlaying(false)
-        })
-      }
+      // Reset progress state immediately so the bar doesn't linger at old position
+      setProgress(0)
+      setCurrentTime(0)
+      setDuration(0)
+      // Do NOT call play() here — the [isPlaying, currentVerse, reciter] effect
+      // below is the single place where play/pause is dispatched.
+      // Calling play() in both effects causes the first promise to be aborted by
+      // the second (Chrome throws AbortError → catch sets isPlaying=false → stops).
     }
     // Preload next verse
     const currentIdx = queue.findIndex(
@@ -216,7 +217,7 @@ export function QuranPlayerProvider({
     } else {
       audioRef.current.pause()
     }
-  }, [isPlaying, currentVerse])
+  }, [isPlaying, currentVerse, reciter])
 
   // ─── Stable callbacks — deps intentionally [] (read live state from refs) ─────
 
@@ -229,7 +230,9 @@ export function QuranPlayerProvider({
       const q = fullQueue && fullQueue.length > 0 ? fullQueue : queueRef.current
       const idx = q.findIndex((v) => v.verse_id === verse.verse_id)
       if (idx !== -1) {
-        setQueue(q.slice(idx))
+        // Keep the full queue — slicing removed earlier verses so prevVerse
+        // could never navigate backward past the start of playback.
+        setQueue(q)
         setCurrentVerse(verse)
         setIsPlaying(true)
       }
