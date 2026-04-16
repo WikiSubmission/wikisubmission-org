@@ -18,7 +18,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1028.0",
     "@aws-sdk/lib-storage": "^3.1028.0",
-    "@clerk/nextjs": "^6.39.1",
+    "@clerk/nextjs": "^6.39.2",
     "@deemlol/next-icons": "^0.1.9",
     "@portabletext/react": "^6.0.3",
     "@portabletext/types": "^4.0.2",
