@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '50mb',
     },
   },
+  allowedDevOrigins: ['192.168.1.68'],
   images: {
     remotePatterns: [
       {
@@ -73,8 +74,8 @@ const nextConfig: NextConfig = {
       {
         source: '/appendix/:path*',
         destination: '/appendices/:path*',
-        permanent: true
-      }
+        permanent: true,
+      },
     ]
   },
 }

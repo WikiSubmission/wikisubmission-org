@@ -75,6 +75,7 @@ const WordByWordView = memo(
       arabic: string
       root?: string
       english: string
+      meaning: string
       transliteration?: string
     } | null>(null)
     const [dialogWord, setDialogWord] = useState<{
@@ -108,6 +109,7 @@ const WordByWordView = memo(
                       arabic,
                       root: root ?? undefined,
                       english,
+                      meaning,
                       transliteration: transliteration ?? undefined,
                     })
                   }}
@@ -191,7 +193,7 @@ const WordByWordView = memo(
                     setDialogWord({
                       arabic: activeWord.arabic,
                       root: activeWord.root,
-                      meaning: activeWord.english,
+                      meaning: activeWord.meaning,
                     })
                     setActiveWord(null)
                   }
