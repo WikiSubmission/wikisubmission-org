@@ -31,6 +31,8 @@ export function SiteNav() {
   const locale = useLocale()
   const { toggle: toggleAsk, state: askState } = useChatPanel()
 
+  const closeMobileMenu = () => setMobileOpen(false)
+
   return (
     <nav className="sticky top-0 z-50 w-full glass-nav bg-background/80 border-b border-border/40">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
@@ -38,7 +40,7 @@ export function SiteNav() {
         <Link
           href="/"
           className="flex items-center gap-2.5 shrink-0"
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobileMenu}
         >
           <Image
             src="/brand-assets/logo-transparent.png"
@@ -76,6 +78,7 @@ export function SiteNav() {
           <LocaleSwitcher currentLocale={locale} />
           <ThemeToggle />
           <button
+            type="button"
             onClick={toggleAsk}
             className={cn(
               'h-9 w-9 flex items-center justify-center rounded-md transition-colors',
@@ -101,6 +104,7 @@ export function SiteNav() {
           */}
           {/* Mobile hamburger */}
           <button
+            type="button"
             className="md:hidden h-9 w-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
@@ -117,7 +121,7 @@ export function SiteNav() {
             <Link
               key={link.href}
               href={link.href}
-              onClick={() => setMobileOpen(false)}
+              onClick={closeMobileMenu}
               className={cn(
                 'px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 pathname === link.href ||
@@ -130,7 +134,7 @@ export function SiteNav() {
             </Link>
           ))}
           <div className="mt-2 pt-2 border-t border-border/40">
-            <LocaleSwitcher currentLocale={locale} />
+            <LocaleSwitcher currentLocale={locale} onSelect={closeMobileMenu} />
           </div>
         </div>
       )}
