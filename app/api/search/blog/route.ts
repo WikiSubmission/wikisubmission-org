@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server'
 import { sanityServer } from '@/lib/sanity'
 
+export const dynamic = 'force-dynamic'
+
 const ALLOWED_LOCALES = ['en', 'fr', 'ar', 'tr'] as const
 type AllowedLocale = (typeof ALLOWED_LOCALES)[number]
 
