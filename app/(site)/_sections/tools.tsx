@@ -5,7 +5,7 @@ export function ToolsSection() {
   return (
     <section
       style={{
-        backgroundColor: 'var(--ed-bg-alt)',
+        backgroundColor: 'color-mix(in oklab, var(--ed-bg), var(--ed-surface) 20%)',
         padding: 'clamp(64px, 8vw, 96px) 0',
       }}
     >
@@ -17,13 +17,12 @@ export function ToolsSection() {
 
         <div
           style={{ gap: 16 }}
-          className="grid grid-cols-3 max-md:grid-cols-1"
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
         >
           {/* Prayer Times — spans 2 columns */}
           <Link
             href="/practices"
             style={{
-              gridColumn: 'span 2',
               backgroundColor: 'var(--ed-surface)',
               border: '1px solid var(--ed-rule)',
               borderRadius: 3,
@@ -33,7 +32,7 @@ export function ToolsSection() {
               gap: 14,
               textDecoration: 'none',
             }}
-            className="max-md:col-span-1 ed-card"
+            className="ed-card xl:col-span-2"
           >
             <span
               style={{
@@ -46,7 +45,7 @@ export function ToolsSection() {
             >
               Prayer Times
             </span>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div
                 style={{
                   fontFamily: F.display,
@@ -54,7 +53,7 @@ export function ToolsSection() {
                   fontWeight: 500,
                   letterSpacing: '-0.01em',
                   color: 'var(--ed-fg)',
-                  marginBottom: 8,
+                  lineHeight: 1.2,
                 }}
               >
                 Fajr · Dhuhr · Asr · Maghrib · Isha
@@ -85,6 +84,7 @@ export function ToolsSection() {
               flexDirection: 'column',
               gap: 14,
               padding: 'clamp(22px, 5vw, 28px)',
+              minHeight: 0,
             }}
           >
             <div
@@ -142,7 +142,8 @@ export function ToolsSection() {
           </Link>
 
           {/* Simple tool cards */}
-          {[
+          <div className="grid grid-cols-2 gap-4 max-[420px]:grid-cols-1 md:col-span-2 xl:col-span-3">
+            {[
             {
               href: '/downloads',
               title: 'Downloads',
@@ -189,55 +190,58 @@ export function ToolsSection() {
               ),
             },
           ].map((tool) => (
-            <Link
-              key={tool.title}
-              href={tool.href}
-              className="ed-card"
-              style={{
-                backgroundColor: 'var(--ed-surface)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 12,
-                padding: 'clamp(18px, 4vw, 22px)',
-              }}
-            >
-              <div
+              <Link
+                key={tool.title}
+                href={tool.href}
+                className="ed-card"
                 style={{
-                  width: 40,
-                  height: 40,
-                  border: '1px solid var(--ed-rule)',
-                  borderRadius: 2,
+                  backgroundColor: 'var(--ed-surface)',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--ed-fg)',
+                  flexDirection: 'column',
+                  gap: 12,
+                  padding: 'clamp(18px, 4vw, 22px)',
+                  minHeight: '100%',
                 }}
               >
-                {tool.icon}
-              </div>
-              <div
-                style={{
-                  fontFamily: F.display,
-                  fontSize: 19,
-                  fontWeight: 500,
-                  letterSpacing: '-0.01em',
-                  color: 'var(--ed-fg)',
-                }}
-              >
-                {tool.title}
-              </div>
-              <p
-                style={{
-                  fontFamily: F.serif,
-                  fontSize: 13,
-                  color: 'var(--ed-fg-muted)',
-                  lineHeight: 1.55,
-                }}
-              >
-                {tool.desc}
-              </p>
-            </Link>
-          ))}
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    border: '1px solid var(--ed-rule)',
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--ed-fg)',
+                  }}
+                >
+                  {tool.icon}
+                </div>
+                <div
+                  style={{
+                    fontFamily: F.display,
+                    fontSize: 'clamp(17px, 4.8vw, 19px)',
+                    fontWeight: 500,
+                    letterSpacing: '-0.01em',
+                    color: 'var(--ed-fg)',
+                    lineHeight: 1.15,
+                  }}
+                >
+                  {tool.title}
+                </div>
+                <p
+                  style={{
+                    fontFamily: F.serif,
+                    fontSize: 13,
+                    color: 'var(--ed-fg-muted)',
+                    lineHeight: 1.55,
+                  }}
+                >
+                  {tool.desc}
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>
