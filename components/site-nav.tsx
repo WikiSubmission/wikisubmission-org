@@ -2,27 +2,28 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu, X, Sparkles } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import { ThemeToggle } from '@/components/toggles/theme-toggle'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
-// import { SignInButton, SignedIn, SignedOut, UserButton } from '' // Phase 3, but using supabase auth
-import { cn } from '@/lib/utils'
 import { useTranslations, useLocale } from 'next-intl'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 
 const NAV_LINKS = [
-  { label: 'home', href: '/' },
   { label: 'quran', href: '/quran' },
   { label: 'bible', href: '/bible' },
   { label: 'miracle', href: '/miracle' },
   { label: 'practices', href: '/practices' },
   { label: 'archive', href: '/archive' },
-  { label: 'music', href: '/music' },
   { label: 'blog', href: '/blog' },
-  { label: 'chat', href: '/chat' },
 ]
+
+const F = {
+  display: 'var(--font-cormorant), Georgia, serif',
+  mono: 'var(--font-jetbrains), ui-monospace, monospace',
+}
 
 export function SiteNav() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -30,114 +31,186 @@ export function SiteNav() {
   const t = useTranslations('navbar')
   const locale = useLocale()
   const { toggle: toggleAsk, state: askState } = useChatPanel()
-
-  const closeMobileMenu = () => setMobileOpen(false)
+  const close = () => setMobileOpen(false)
 
   return (
-    <nav className="sticky top-0 z-50 w-full glass-nav bg-background/80 border-b border-border/40">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
-        {/* Logo */}
+    <nav
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        backgroundColor: 'color-mix(in oklab, var(--ed-bg), transparent 18%)',
+        borderBottom: '1px solid color-mix(in oklab, var(--ed-rule), transparent 40%)',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1240,
+          margin: '0 auto',
+          padding: '0 40px',
+          height: 64,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 32,
+        }}
+      >
+        {/* Logo + Wordmark */}
         <Link
           href="/"
-          className="flex items-center gap-2.5 shrink-0"
-          onClick={closeMobileMenu}
+          onClick={close}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontFamily: F.display,
+            fontSize: 22,
+            fontWeight: 400,
+            letterSpacing: '-0.01em',
+            color: 'var(--ed-fg)',
+            flexShrink: 0,
+            lineHeight: 1,
+            textDecoration: 'none',
+          }}
         >
           <Image
             src="/brand-assets/logo-transparent.png"
-            alt="WikiSubmission"
-            width={32}
-            height={32}
-            className="rounded-full size-8"
+            alt=""
+            width={28}
+            height={28}
           />
-          <h1 className="text-lg hidden sm:block">
-            WikiSubmission
-          </h1>
+          WikiSubmission
         </Link>
 
         {/* Desktop nav links */}
-        <div className="hidden md:flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'text-sm font-medium transition-colors hover:text-primary',
-                pathname === link.href ||
-                  (link.href !== '/' && pathname?.startsWith(link.href))
-                  ? 'text-primary font-semibold'
-                  : 'text-muted-foreground'
-              )}
-            >
-              {t(link.label)}
-            </Link>
-          ))}
+        <div className="hidden md:flex items-center gap-7">
+          {NAV_LINKS.map((link) => {
+            const active =
+              pathname === link.href ||
+              (link.href !== '/' && pathname?.startsWith(link.href))
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  fontFamily: F.mono,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.16em',
+                  color: active ? 'var(--ed-fg)' : 'var(--ed-fg-muted)',
+                  transition: 'color 150ms',
+                  textDecoration: 'none',
+                }}
+              >
+                {t(link.label)}
+              </Link>
+            )
+          })}
         </div>
 
         {/* Right controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <LocaleSwitcher currentLocale={locale} />
           <ThemeToggle />
           <button
             type="button"
             onClick={toggleAsk}
-            className={cn(
-              'h-9 w-9 flex items-center justify-center rounded-md transition-colors',
-              askState !== 'closed'
-                ? 'text-primary bg-primary/10'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-            )}
             aria-label="Ask AI"
+            style={{
+              width: 34,
+              height: 34,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 6,
+              border: 'none',
+              background: 'none',
+              cursor: 'pointer',
+              color: askState !== 'closed' ? 'var(--ed-accent)' : 'var(--ed-fg-muted)',
+              transition: 'color 150ms, background 150ms',
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'color-mix(in oklab, var(--ed-fg), transparent 94%)' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'none' }}
           >
-            <Sparkles size={18} />
+            <Sparkles size={16} />
           </button>
-          {/* Phase 3: auth
-          <SignedOut>
-            <SignInButton mode="modal">
-              <button className="hidden sm:flex h-9 items-center px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-                Sign in
-              </button>
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-          */}
+
           {/* Mobile hamburger */}
           <button
             type="button"
-            className="md:hidden h-9 w-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="md:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md text-muted-foreground transition-colors"
+            style={{ border: 'none', background: 'none', cursor: 'pointer' }}
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
           >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={mobileOpen ? 'close' : 'open'}
+                initial={{ rotate: -45, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 45, opacity: 0 }}
+                transition={{ duration: 0.15, ease: 'easeInOut' }}
+                style={{ display: 'flex' }}
+              >
+                {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+              </motion.span>
+            </AnimatePresence>
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur-sm px-6 py-4 flex flex-col gap-1">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={closeMobileMenu}
-              className={cn(
-                'px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                pathname === link.href ||
-                  (link.href !== '/' && pathname?.startsWith(link.href))
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              )}
-            >
-              {t(link.label)}
-            </Link>
-          ))}
-          <div className="mt-2 pt-2 border-t border-border/40">
-            <LocaleSwitcher currentLocale={locale} onSelect={closeMobileMenu} />
+      <AnimatePresence>
+        {mobileOpen && (
+        <motion.div
+          key="mobile-menu"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          style={{
+            borderTop: '1px solid var(--ed-rule)',
+            backgroundColor: 'var(--ed-bg)',
+          }}
+          className="md:hidden px-6 py-4 flex flex-col gap-0.5"
+        >
+          {NAV_LINKS.map((link) => {
+            const active =
+              pathname === link.href ||
+              (link.href !== '/' && pathname?.startsWith(link.href))
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={close}
+                style={{
+                  fontFamily: F.mono,
+                  fontSize: 11,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.16em',
+                  color: active ? 'var(--ed-fg)' : 'var(--ed-fg-muted)',
+                  padding: '10px 12px',
+                  display: 'block',
+                  textDecoration: 'none',
+                  borderRadius: 4,
+                }}
+              >
+                {t(link.label)}
+              </Link>
+            )
+          })}
+          <div
+            className="mt-2 pt-2"
+            style={{ borderTop: '1px solid var(--ed-rule)' }}
+          >
+            <LocaleSwitcher currentLocale={locale} onSelect={close} />
           </div>
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   )
 }

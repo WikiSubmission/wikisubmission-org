@@ -125,7 +125,7 @@ const WordByWordView = memo(
                   <DialogTrigger asChild>
                     <TooltipTrigger asChild>
                       <p
-                        className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer hover:text-violet-600 hover:scale-105 active:scale-95 text-foreground/90`}
+                        className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer hover:text-primary hover:scale-105 active:scale-95 text-foreground/90`}
                       >
                         {arabic}
                       </p>
@@ -134,10 +134,10 @@ const WordByWordView = memo(
 
                   <TooltipContent
                     side="top"
-                    className="bg-popover/80 backdrop-blur-sm border-violet-600/20 px-4 py-2 rounded-xl"
+                    className="bg-popover/80 backdrop-blur-sm border-primary/20 px-4 py-2 rounded-xl"
                   >
                     <div className="flex flex-col gap-0.5 space-y-1 py-2 items-center text-center">
-                      <p className="font-arabic text-xl text-violet-600">
+                      <p className="text-base text-primary">
                         {english}
                       </p>
                       <p className="text-xs font-bold text-foreground">
@@ -154,11 +154,11 @@ const WordByWordView = memo(
                   >
                     <DialogHeader>
                       <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
-                        <span className="text-4xl font-arabic text-violet-600 mb-3">
+                        <span className="text-4xl font-arabic text-primary mb-3">
                           {arabic}
                         </span>
-                        <div className="px-2.5 py-0.5 bg-violet-600/10 rounded-full">
-                          <span className="text-[10px] font-bold text-violet-600">
+                        <div className="px-2.5 py-0.5 bg-primary/10 rounded-full">
+                          <span className="text-[10px] font-bold text-primary">
                             Root: {root}
                           </span>
                         </div>
@@ -187,7 +187,7 @@ const WordByWordView = memo(
                 onClick={() => setActiveWord(null)}
               />
               <div
-                className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-popover/90 backdrop-blur-sm border border-violet-600/20 rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-xl min-w-40"
+                className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-popover/90 backdrop-blur-sm border border-primary/20 rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-xl min-w-40"
                 onClick={() => {
                   if (activeWord.root) {
                     setDialogWord({
@@ -199,7 +199,7 @@ const WordByWordView = memo(
                   }
                 }}
               >
-                <p className="font-arabic text-3xl text-violet-600">
+                <p className="font-arabic text-3xl text-primary">
                   {activeWord.arabic}
                 </p>
                 {activeWord.english && (
@@ -237,11 +237,11 @@ const WordByWordView = memo(
                   <>
                     <DialogHeader>
                       <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
-                        <span className="text-4xl font-arabic text-violet-600 mb-3">
+                        <span className="text-4xl font-arabic text-primary mb-3">
                           {dialogWord.arabic}
                         </span>
-                        <div className="px-2.5 py-0.5 bg-violet-600/10 rounded-full">
-                          <span className="text-[10px] font-bold text-violet-600">
+                        <div className="px-2.5 py-0.5 bg-primary/10 rounded-full">
+                          <span className="text-[10px] font-bold text-primary">
                             Root: {dialogWord.root}
                           </span>
                         </div>
@@ -280,9 +280,9 @@ const WordByWordView = memo(
           return (
             <Dialog key={wordIndex}>
               <DialogTrigger asChild>
-                <div className="group flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer transition-all hover:bg-muted/50 rounded-xl border border-transparent hover:border-violet-600/20">
+                <div className="group flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer transition-all hover:bg-muted/50 rounded-xl border border-transparent hover:border-primary/20">
                   <p
-                    className={`font-arabic ${arabicClass} leading-snug group-hover:text-violet-600 transition-colors`}
+                    className={`font-arabic ${arabicClass} leading-snug group-hover:text-primary transition-colors`}
                   >
                     {arabic}
                   </p>
@@ -309,15 +309,15 @@ const WordByWordView = memo(
                 >
                   <DialogHeader>
                     <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
-                      <span className="text-4xl font-arabic text-violet-600 mb-1">
+                      <span className="text-4xl font-arabic text-primary mb-1">
                         {arabic}
                       </span>
                       <span className="text-base font-semibold text-foreground">
                         {meaning}
                       </span>
                       <div className="flex items-center gap-3 mt-1">
-                        <div className="px-2.5 py-0.5 bg-violet-600/10 rounded-full">
-                          <span className="text-[10px] font-bold text-violet-600">
+                        <div className="px-2.5 py-0.5 bg-primary/10 rounded-full">
+                          <span className="text-[10px] font-bold text-primary">
                             Root: {root}
                           </span>
                         </div>
@@ -475,14 +475,14 @@ export const VerseCard = memo(
       <div
         id={verseId}
         className={`transition-colors duration-500 ${
-          isScrollTarget || isCurrentAudio ? 'bg-violet-600/10' : ''
+          isScrollTarget || isCurrentAudio ? 'bg-primary/10' : ''
         }`}
       >
         <div className="px-6 py-4 sm:px-8 sm:py-5 space-y-2">
           {/* Subtitle */}
           {prefs.subtitles && tr?.s && (
             <div className="flex justify-center">
-              <p className="text-violet-600 text-xs font-bold text-center">
+              <p className="text-primary text-xs font-bold text-center">
                 <QuranRefText text={tr.s} from={`subtitle of ${verse.vk}`} />
               </p>
             </div>
@@ -496,12 +496,12 @@ export const VerseCard = memo(
                 target="_blank"
                 className="group flex items-center gap-1 w-fit"
               >
-                <div className="flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full group-hover:bg-violet-600/10 group-hover:text-violet-600 transition-colors">
+                <div className="flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full transition-colors">
                   <span className="text-lg font-semibold">{chNum}</span>
                   <span>:</span>
                   <span className="text-lg font-semibold">{vNum}</span>
                 </div>
-                <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-violet-600 transition-colors" />
+                <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
               </Link>
             ) : (
               <div className="w-fit shrink-0 flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full">

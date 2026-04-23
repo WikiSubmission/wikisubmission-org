@@ -57,9 +57,6 @@ export default async function MiraclePage() {
       {/* Hero */}
       <section className="border-b border-border/40 bg-muted/30">
         <div className="max-w-5xl mx-auto px-6 py-12">
-          <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold mb-4">
-            {t('badge')}
-          </span>
           <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
             {t('heading')}
           </h1>

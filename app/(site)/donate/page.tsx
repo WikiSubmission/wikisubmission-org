@@ -161,7 +161,7 @@ export default async function DonatePage() {
           {t('managePrefix')}{' '}
           <Link
             href="/donate/manage"
-            className="text-violet-600 hover:cursor-pointer hover:underline"
+            className="text-primary hover:cursor-pointer hover:underline"
           >
             {t('here')}
           </Link>
@@ -174,7 +174,7 @@ export default async function DonatePage() {
           {t('forQuestionsPrefix')}{' '}
           <a
             href={`mailto:${About.email}`}
-            className="text-violet-600 hover:cursor-pointer hover:underline"
+            className="text-primary hover:cursor-pointer hover:underline"
           >
             {About.email}
           </a>
@@ -195,7 +195,7 @@ export default async function DonatePage() {
       <section>
         <Link
           href="/"
-          className="flex items-center gap-2 text-muted-foreground hover:text-violet-600"
+          className="flex items-center gap-2 text-muted-foreground hover:text-primary"
         >
           <ChevronLeft className="size-4" />
           <p className="text-sm">{tCommon('backToHome')}</p>

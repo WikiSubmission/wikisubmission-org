@@ -109,7 +109,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-40">
-        <Loader2 className="animate-spin size-6 text-violet-600" />
+        <Loader2 className="animate-spin size-6 text-primary" />
       </div>
     )
   }
@@ -128,7 +128,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
         {occurrences.map((occ, i) => (
           <div
             key={`${occ.verse_key}:${occ.word_index}:${i}`}
-            className="group relative bg-muted/20 hover:bg-muted/40 transition-all p-4 rounded-2xl border border-border/50 hover:border-violet-600/30"
+            className="group relative bg-muted/20 hover:bg-muted/40 transition-all p-4 rounded-2xl border border-border/50 hover:border-primary/30"
           >
             <div className="flex justify-between items-center gap-4">
               <div className="flex flex-col gap-1.5 flex-1 min-w-0">
@@ -139,12 +139,12 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
                   </span>
                 </div>
                 {occ.english && (
-                  <p className="text-sm font-semibold text-foreground leading-tight group-hover:text-violet-600 transition-colors">
+                  <p className="text-sm font-semibold text-foreground leading-tight group-hover:text-primary transition-colors">
                     {occ.english}
                   </p>
                 )}
               </div>
-              <div className="text-3xl font-arabic text-right text-foreground group-hover:text-violet-600 transition-colors shrink-0">
+              <div className="text-3xl font-arabic text-right text-foreground group-hover:text-primary transition-colors shrink-0">
                 {occ.arabic}
               </div>
             </div>
@@ -156,7 +156,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
           <button
             onClick={loadMore}
             disabled={loadingMore}
-            className="text-xs text-violet-600 hover:underline disabled:opacity-50 flex items-center gap-1"
+            className="text-xs text-primary hover:underline disabled:opacity-50 flex items-center gap-1"
           >
             {loadingMore && <Loader2 className="animate-spin size-3" />}
             {loadingMore

@@ -11,7 +11,7 @@ export function HighlightText({ text }: { text?: string | null }) {
         part.startsWith('<b>') && part.endsWith('</b>') ? (
           <mark
             key={i}
-            className="bg-violet-600/10 text-violet-600 dark:text-violet-400 rounded-sm not-italic font-semibold px-0.5"
+            className="bg-primary/10 text-primary rounded-sm not-italic font-semibold px-0.5"
           >
             {part.slice(3, -4)}
           </mark>

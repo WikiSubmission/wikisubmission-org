@@ -124,6 +124,7 @@ function PrayerTimesContent() {
   useEffect(() => {
     const location = initialQuery || localStorage.getItem('pt_location') || ''
     if (location) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchPrayerTimes(location, asrAdjustment)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

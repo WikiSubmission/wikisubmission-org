@@ -110,6 +110,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     if (!searchQuery) return
 
     verseSearch.reset()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setWordMatches([])
     setSearchTab('all')
 
@@ -175,6 +176,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     if (didInitRef.current) return
     didInitRef.current = true
     if (forceTab === 'words') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchTab('words')
       runWordByWordQuery()
     }
@@ -335,7 +337,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                       <a
                         key={q}
                         href={`?q=${q}&tab=words`}
-                        className="flex items-center gap-1 text-sm text-violet-600 hover:text-violet-700 bg-violet-600/5 hover:bg-violet-600/10 rounded-lg px-3 py-1 transition-colors"
+                        className="flex items-center gap-1 text-sm text-primary hover:text-primary bg-primary/5 hover:bg-primary/10 rounded-lg px-3 py-1 transition-colors"
                       >
                         {q}
                         <ArrowRightIcon className="size-3" />

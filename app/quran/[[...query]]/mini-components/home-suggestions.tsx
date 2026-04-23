@@ -24,8 +24,8 @@ export default function HomeScreenSuggestions() {
             href={`/quran/?q=${suggestion.query}`}
             className="group"
           >
-            <div className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-muted/30 border border-border/40 hover:bg-muted/50 hover:border-violet-500/30 transition-all duration-200">
-              <SearchIcon className="size-3 text-muted-foreground/60 group-hover:text-violet-500 transition-colors" />
+            <div className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-muted/30 border border-border/40 hover:bg-muted/50 hover:border-primary/30 transition-all duration-200">
+              <SearchIcon className="size-3 text-muted-foreground/60 group-hover:text-primary transition-colors" />
               <p className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">
                 {suggestion.label}
               </p>

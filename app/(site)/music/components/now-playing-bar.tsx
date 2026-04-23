@@ -190,7 +190,7 @@ export function MusicPlayer() {
                       loopMode === 'context'
                         ? 'text-indigo-500 bg-indigo-500/10'
                         : loopMode === 'repeatOne'
-                          ? 'text-violet-500 bg-violet-500/10'
+                          ? 'text-primary bg-primary/10'
                           : 'text-muted-foreground'
                     )}
                     onClick={() => {
@@ -223,7 +223,7 @@ export function MusicPlayer() {
                   <Button
                     variant="default"
                     size="icon"
-                    className="h-11 w-11 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-500/20 hover:scale-105 transition-transform"
+                    className="h-11 w-11 bg-primary hover:bg-primary text-white rounded-full shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
                     onClick={togglePlayPause}
                   >
                     {isBuffering ? (
@@ -403,7 +403,7 @@ export function MusicPlayer() {
                     loopMode === 'context'
                       ? 'text-indigo-500 bg-indigo-500/10'
                       : loopMode === 'repeatOne'
-                        ? 'text-violet-500 bg-violet-500/10'
+                        ? 'text-primary bg-primary/10'
                         : 'text-foreground/40'
                   )}
                   onClick={() => {
@@ -431,7 +431,7 @@ export function MusicPlayer() {
                 <Button
                   variant="default"
                   size="icon"
-                  className="h-14 w-14 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg shadow-violet-500/20"
+                  className="h-14 w-14 bg-primary hover:bg-primary text-white rounded-full shadow-lg shadow-primary/20"
                   onClick={togglePlayPause}
                 >
                   {isBuffering ? (

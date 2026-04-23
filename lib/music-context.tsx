@@ -108,6 +108,7 @@ export function MusicProvider({
   // Initial Fetch (only if no initial data)
   useEffect(() => {
     if (initialTracks.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(false)
       return
     }

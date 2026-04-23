@@ -16,7 +16,7 @@ export interface QuranVerse {
   ws_quran_text: Record<string, string>
 }
 
-export type Reciter = 'mishary' | 'basit' | 'minshawi'
+export type Reciter = 'english-onyx' | 'mishary' | 'basit' | 'minshawi'
 
 // ─── State context — re-renders when player state changes ─────────────────────
 // Includes callbacks for backward compat with NowPlayingBar (they're stable refs
@@ -36,6 +36,7 @@ interface QuranPlayerContextType {
   seek: (progress: number) => void
   setReciter: (reciter: Reciter) => void
   setVolume: (volume: number) => void
+  dismiss: () => void
 }
 
 // ─── Callbacks-only context — stable forever, NEVER causes consumer re-renders ─
@@ -50,6 +51,7 @@ interface QuranPlayerCallbacksContextType {
   seek: (progress: number) => void
   setReciter: (reciter: Reciter) => void
   setVolume: (volume: number) => void
+  dismiss: () => void
 }
 
 interface QuranProgressContextType {
@@ -63,6 +65,7 @@ const QuranPlayerCallbacksContext = createContext<QuranPlayerCallbacksContextTyp
 const QuranProgressContext = createContext<QuranProgressContextType | undefined>(undefined)
 
 const RECITER_METADATA_NAMES: Record<Reciter, string> = {
+  'english-onyx': 'English (Onyx)',
   mishary: 'Mishary Rashid Alafasy',
   basit: 'Abdul Basit',
   minshawi: 'Mohamed Siddiq El-Minshawi',
@@ -76,7 +79,7 @@ export function QuranPlayerProvider({
   const [currentVerse, setCurrentVerse] = useState<QuranVerse | null>(null)
   const [queue, setQueue] = useState<QuranVerse[]>([])
   const [isPlaying, setIsPlaying] = useState(false)
-  const [reciter, setReciter] = useLocalStorage<Reciter>('reciter', 'mishary')
+  const [reciter, setReciter] = useLocalStorage<Reciter>('reciter', 'english-onyx')
   const [volume, setVolume] = useState(1)
 
   const [progress, setProgress] = useState(0)
@@ -94,8 +97,11 @@ export function QuranPlayerProvider({
   const currentVerseRef = useRef(currentVerse)
   const queueRef = useRef(queue)
   const currentTimeRef = useRef(currentTime)
+  // eslint-disable-next-line react-hooks/refs
   currentVerseRef.current = currentVerse
+  // eslint-disable-next-line react-hooks/refs
   queueRef.current = queue
+  // eslint-disable-next-line react-hooks/refs
   currentTimeRef.current = currentTime
 
   // Used to call the latest nextVerse from the audio 'ended' event handler,
@@ -155,7 +161,8 @@ export function QuranPlayerProvider({
   // Construct URL helper
   const getAudioUrl = (verse: QuranVerse, reciterName: string) => {
     const [chapter, verseNum] = verse.verse_id.split(':')
-    return `https://cdn.wikisubmission.org/media/quran-recitations/arabic-${reciterName}/${chapter}-${verseNum}.mp3`
+    const folder = reciterName === 'english-onyx' ? reciterName : `arabic-${reciterName}`
+    return `https://cdn.wikisubmission.org/media/quran-recitations/${folder}/${chapter}-${verseNum}.mp3`
   }
 
   // Handle Current Verse Change
@@ -285,6 +292,19 @@ export function QuranPlayerProvider({
     }
   }, [])
 
+  const dismiss = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.src = ''
+      lastUrlRef.current = null
+    }
+    setIsPlaying(false)
+    setCurrentVerse(null)
+    setProgress(0)
+    setCurrentTime(0)
+    setDuration(0)
+  }, [])
+
   useEffect(() => {
     nextVerseRef.current = nextVerse
   }, [nextVerse])
@@ -317,8 +337,8 @@ export function QuranPlayerProvider({
   // Callbacks context — all functions are stable ([] deps + ref-based reads).
   // Created once; never causes re-renders in subscribers (e.g. VerseCard).
   const callbacksContextValue = useMemo(
-    () => ({ playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse, seek, setReciter, setVolume }),
-    [playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse, seek, setReciter, setVolume]
+    () => ({ playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse, seek, setReciter, setVolume, dismiss }),
+    [playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse, seek, setReciter, setVolume, dismiss]
   )
 
   // State + callbacks context — re-renders only when player STATE changes.
@@ -327,7 +347,7 @@ export function QuranPlayerProvider({
   const playerContextValue = useMemo(
     () => ({
       currentVerse, isPlaying, queue, reciter, isBuffering, volume,
-      playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse, seek, setReciter, setVolume,
+      playFromVerse, setChapterQueue, togglePlayPause, nextVerse, prevVerse, seek, setReciter, setVolume, dismiss,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentVerse, isPlaying, queue, reciter, isBuffering, volume]

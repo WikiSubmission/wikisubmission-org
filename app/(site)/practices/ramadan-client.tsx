@@ -85,6 +85,7 @@ function RamadanContent() {
 
   useEffect(() => {
     if (initialQuery) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchRamadanSchedule(initialQuery, initialYear)
     }
   }, [initialQuery, initialYear, fetchRamadanSchedule])
@@ -184,7 +185,7 @@ function RamadanContent() {
                   {data.location_string}
                 </span>
               </div>
-              <h2 className="text-2xl font-bold tracking-tight text-violet-600 drop-shadow-sm">
+              <h2 className="text-2xl font-bold tracking-tight text-primary drop-shadow-sm">
                 {t('schedule', { year: data.year })}
               </h2>
               <p className="text-lg text-foreground/80 max-w-xl mx-auto font-medium">
@@ -198,12 +199,12 @@ function RamadanContent() {
             <SummaryCard
               title={t('firstFastingDay')}
               value={data.first_fasting_day}
-              icon={<CalendarIcon className="size-4 text-violet-500" />}
+              icon={<CalendarIcon className="size-4 text-primary" />}
             />
             <SummaryCard
               title={t('lastFastingDay')}
               value={data.last_fasting_day}
-              icon={<CalendarIcon className="size-4 text-violet-500" />}
+              icon={<CalendarIcon className="size-4 text-primary" />}
             />
             <SummaryCard
               title={t('nightOfDestiny')}
@@ -228,7 +229,7 @@ function RamadanContent() {
                   <th className="px-4 py-3 font-semibold text-muted-foreground">
                     {t('tableDate')}
                   </th>
-                  <th className="px-4 py-3 font-semibold text-violet-600/80">
+                  <th className="px-4 py-3 font-semibold text-primary/80">
                     {t('tableDawn')}
                   </th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">
@@ -251,14 +252,14 @@ function RamadanContent() {
                     key={day.day_number}
                     className={cn(
                       'hover:bg-muted/30 transition-colors',
-                      day.day_number === data.current_day && 'bg-violet-600/10'
+                      day.day_number === data.current_day && 'bg-primary/10'
                     )}
                   >
                     <td className="px-4 py-3 font-medium">{day.day_number}</td>
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                       {day.day}
                     </td>
-                    <td className="px-4 py-3 font-mono text-violet-600 font-semibold">
+                    <td className="px-4 py-3 font-mono text-primary font-semibold">
                       {stripAmPm(day.dawn)}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground font-mono">
@@ -294,7 +295,7 @@ function RamadanContent() {
           <footer className="flex flex-col items-center gap-4 text-[10px] text-muted-foreground justify-center uppercase tracking-widest pt-4">
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 text-violet-600 hover:text-violet-500 transition-colors cursor-pointer focus:outline-none bg-violet-600/5 px-4 py-2 rounded-full"
+              className="flex items-center gap-2 text-primary hover:text-primary transition-colors cursor-pointer focus:outline-none bg-primary/5 px-4 py-2 rounded-full"
             >
               <ShareIcon className="size-3" />
               <p className="font-semibold">{t('shareSchedule').toUpperCase()}</p>
@@ -349,7 +350,7 @@ function MoonDataSection({
   const t = useTranslations('ramadan')
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-violet-600 uppercase tracking-widest">
+      <h3 className="text-sm font-semibold text-primary uppercase tracking-widest">
         {title}
       </h3>
       <div className="space-y-2">

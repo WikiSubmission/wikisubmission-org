@@ -26,7 +26,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body
-        className={`${Fonts.glacial.className} ${Fonts.amiri.variable} antialiased wrap-break-words`}
+        className={`${Fonts.amiri.variable} ${Fonts.cormorant.variable} ${Fonts.sourceSerif.variable} ${Fonts.jetbrainsMono.variable} antialiased wrap-break-words`}
         suppressHydrationWarning
       >
         <NextIntlClientProvider>

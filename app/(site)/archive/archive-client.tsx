@@ -30,9 +30,6 @@ export default function ArchiveClient() {
       {/* Hero */}
       <section className="border-b border-border/40 bg-muted/30">
         <div className="max-w-5xl mx-auto px-6 py-12">
-          <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold mb-4">
-            Archive
-          </span>
           <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
             Media Archive
           </h1>
@@ -124,11 +121,13 @@ function ArchiveContent() {
     const currentType = searchParams.get('type') || activeType
     const currentCount = currentType === 'media' ? mCount : nCount
     if (currentCount === 0 && mCount + nCount > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveType(mCount > 0 ? 'media' : 'newsletters')
     }
   }, [mediaResults, newsletterResults, loading, searchParams, activeType])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialQuery) performSearch(initialQuery)
     setSearchQuery(initialQuery)
   }, [initialQuery, performSearch])

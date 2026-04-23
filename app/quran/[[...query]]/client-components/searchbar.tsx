@@ -22,7 +22,6 @@ export default function QuranSearchbar() {
     const urlQuery = searchParams.get('q')?.toString() || ''
     if (prevUrlQueryRef.current !== urlQuery) {
       prevUrlQueryRef.current = urlQuery
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchQuery(urlQuery)
     }
   }, [searchParams])

@@ -43,7 +43,7 @@ export function ScrollToTop({ className, showAfter = 300 }: ScrollToTopProps) {
       variant="outline"
       size="icon"
       className={cn(
-        'fixed bottom-6 right-6 z-50 shadow-lg transition-all duration-300 ease-in-out border-2 border-violet-700 dark:border-violet-500 rounded-full',
+        'fixed bottom-6 right-6 z-50 shadow-lg transition-all duration-300 ease-in-out border-2 border-primary dark:border-primary rounded-full',
         isVisible
           ? 'opacity-100 translate-y-0'
           : 'opacity-0 translate-y-2 pointer-events-none',

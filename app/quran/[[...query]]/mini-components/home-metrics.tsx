@@ -43,7 +43,7 @@ export default function HomeScreenMetrics() {
               className="hover:cursor-pointer w-fit"
             >
               <div className="flex rounded-lg px-2 py-1 hover:bg-muted/50 transition-colors">
-                <div className="flex items-center gap-1 text-violet-500 hover:text-violet-600">
+                <div className="flex items-center gap-1 text-primary hover:text-primary">
                   {entry.type === 'query' ? (
                     <SearchIcon className="size-3" />
                   ) : (

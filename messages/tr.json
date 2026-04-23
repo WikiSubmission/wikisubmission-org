@@ -366,5 +366,98 @@
     "appStorePrefix": "Download on the",
     "appStoreLabel": "App Store",
     "copyright": "© {year} WikiSubmission. All rights reserved."
+  },
+  "home2": {
+    "hero": {
+      "kicker": "Open Source · Free · Multilingual",
+      "headline1": "Wisdom",
+      "headline2": "for all",
+      "headline3": "nations.",
+      "arabicVerse": "﴿ تَبَارَكَ الَّذِي نَزَّلَ الْفُرْقَانَ عَلَىٰ عَبْدِهِ لِيَكُونَ لِلْعَالَمِينَ نَذِيرًا ﴾",
+      "arabicRef": "Sura 25 · verse 1",
+      "lede": "WikiSubmission is a free, open-source home for the Final Testament, the Bible, and the mathematical miracle of 19 — tools for every person who seeks God directly, without intermediary.",
+      "ctaPrimary": "Read the Final Testament",
+      "ctaSecondary": "The miracle of 19",
+      "stat1k": "114",
+      "stat1label": "chapters",
+      "stat2k": "6,234",
+      "stat2label": "verses",
+      "stat3k": "4",
+      "stat3label": "languages",
+      "stat4k": "free",
+      "stat4label": "always"
+    },
+    "scripture": {
+      "dividerNum": "I",
+      "dividerTitle": "Scripture",
+      "dividerSub": "Primary Texts",
+      "badge": "Most read",
+      "featuredTitle": "The Final Testament",
+      "featuredAlt": "· Al-Qur'ān",
+      "featuredDesc": "Authorized English version, translated from the Original by Rashad Khalifa, Ph.D — with the full Arabic, verse-by-verse footnotes, and the mathematical structure intact.",
+      "featuredTags": "114 suras · 6,234 verses · EN · AR · FR · TR",
+      "featuredCta": "Open the reader",
+      "bibleTitle": "The Bible",
+      "bibleDesc": "Comparative study of the Old & New Testaments — in the light of the Final Testament.",
+      "proclamationTitle": "The Proclamation",
+      "proclamationDesc": "One Unified Religion for All the People — Rashad Khalifa, 1989.",
+      "readCta": "Read"
+    },
+    "miracle": {
+      "dividerNum": "II",
+      "dividerTitle": "The Miracle",
+      "dividerSub": "A physical proof",
+      "heading": "Over it is nineteen.",
+      "ref": "Sura 74, verse 30",
+      "desc": "The Quran is mathematically composed — every chapter, every Bismillah, every letter count interlocked through the number nineteen. It could not have been authored by a human.",
+      "cta": "See the evidence",
+      "fact1k": "114",
+      "fact1v": "chapters",
+      "fact1note": "= 19 × 6",
+      "fact2k": "6,346",
+      "fact2v": "numbered verses",
+      "fact2note": "digit sum = 19",
+      "fact3k": "19",
+      "fact3v": "letters in Bismillah",
+      "fact3note": "opens the Quran",
+      "fact4k": "1,974",
+      "fact4v": "years gap",
+      "fact4note": "to decoded year"
+    },
+    "tools": {
+      "dividerNum": "III",
+      "dividerTitle": "Practices & Tools",
+      "dividerSub": "For daily life",
+      "prayerKicker": "Live · Prayer Times",
+      "aiTitle": "Submission AI",
+      "aiDesc": "Ask any question about the Quran or Islamic practice — grounded in scripture, not opinion.",
+      "aiCta": "Ask",
+      "downloadsTitle": "Downloads",
+      "downloadsDesc": "PDFs, audio, and printable editions.",
+      "appsTitle": "iOS & Android",
+      "appsDesc": "Read and listen on every device.",
+      "recitationTitle": "Recitation",
+      "recitationDesc": "Al-Minshawi, Al-Husary & more.",
+      "discordTitle": "Discord bot",
+      "discordDesc": "Verse lookup in your server."
+    },
+    "journal": {
+      "dividerNum": "IV",
+      "dividerTitle": "The Journal",
+      "dividerSub": "Recent writing",
+      "allWriting": "All writing"
+    },
+    "closing": {
+      "quote": "\"Say, I am instructed to worship God, devoting my religion absolutely to Him alone.\"",
+      "ref": "— 39:11",
+      "ctaPrimary": "Start at chapter 1",
+      "ctaSecondary": "Support the mission"
+    }
+  },
+  "brand": {
+    "title": "The visual covenant.",
+    "kicker": "WikiSubmission · Brand Guidelines",
+    "version": "1.0",
+    "revised": "April 2026"
   }
 }

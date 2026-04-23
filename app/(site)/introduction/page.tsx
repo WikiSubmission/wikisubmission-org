@@ -884,7 +884,7 @@ export default function IntroductionPage() {
                     href="/الأدلة النقلية والحسية على إمكان الصعود إلى الكواكب.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-violet-500 hover:text-violet-600 transition-colors"
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary transition-colors"
                   >
                     <FileText className="size-3" />
                     Source, page 11, left side

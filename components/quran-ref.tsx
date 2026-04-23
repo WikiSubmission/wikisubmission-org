@@ -40,12 +40,12 @@ function VersePreview({
     <div className="space-y-2 py-3 border-b last:border-0">
       <Link
         href={`/quran/${chNum}?verse=${vNum}`}
-        className="text-xs text-violet-500 hover:text-violet-600 flex items-center gap-1 w-fit transition-colors"
+        className="text-xs text-primary hover:text-primary flex items-center gap-1 w-fit transition-colors"
       >
         {verse.vk}
         <ArrowUpRight className="size-3" />
       </Link>
-      {tr?.s && <p className="text-xs text-violet-500 italic">{tr.s}</p>}
+      {tr?.s && <p className="text-xs text-primary italic">{tr.s}</p>}
       {tr?.tx && (
         <p className="text-sm leading-relaxed">{tr.tx}</p>
       )}
@@ -84,7 +84,7 @@ function BibleVersePreview({
 
   return (
     <div className="space-y-2 py-3 border-b last:border-0">
-      <span className="text-xs text-violet-500 font-mono">
+      <span className="text-xs text-primary font-mono">
         {bookDisplay} {cn}:{vn}
       </span>
       {tr?.tx && (
@@ -196,7 +196,7 @@ export function ScriptureRef({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <button
         onClick={() => handleOpenChange(true)}
-        className="inline-flex items-center font-mono text-xs bg-violet-600/10 text-violet-600 hover:bg-violet-600/20 active:bg-violet-600/25 px-1.5 py-0.5 rounded-md transition-colors cursor-pointer align-baseline select-none mx-0.5"
+        className="inline-flex items-center font-mono text-xs bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/25 px-1.5 py-0.5 rounded-md transition-colors cursor-pointer align-baseline select-none mx-0.5"
         aria-label={`View ${isBible ? 'Bible' : 'Quran'} verse ${reference}`}
       >
         {label}
@@ -216,7 +216,7 @@ export function ScriptureRef({
               </Button>
             )}
             <DialogTitle className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono text-violet-600">{currentLabel}</span>
+              <span className="font-mono text-primary">{currentLabel}</span>
               {from && (isBible || history.length === 1) && (
                 <span className="text-xs text-muted-foreground font-normal">
                   — from {from}
@@ -259,7 +259,7 @@ export function ScriptureRef({
             <Link
               href={`/quran/${currentParsed.cn}?verse=${currentParsed.vs}`}
               onClick={() => setOpen(false)}
-              className="text-xs text-violet-500 hover:text-violet-600 flex items-center gap-1 w-fit transition-colors"
+              className="text-xs text-primary hover:text-primary flex items-center gap-1 w-fit transition-colors"
             >
               Open in Quran reader
               <ArrowUpRight className="size-3" />

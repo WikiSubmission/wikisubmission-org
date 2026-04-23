@@ -66,7 +66,7 @@ export default function BibleSettings() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-80" align="end">
         {/* Zoom */}
-        <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
+        <DropdownMenuLabel className="flex items-center gap-2 text-primary">
           <ZoomInIcon className="size-4" />
           <strong>{t('zoom')}</strong>
         </DropdownMenuLabel>
@@ -103,7 +103,7 @@ export default function BibleSettings() {
         </div>
 
         {/* Footnotes */}
-        <DropdownMenuLabel className="flex items-center gap-2 text-violet-500 mt-1">
+        <DropdownMenuLabel className="flex items-center gap-2 text-primary mt-1">
           <BookOpenTextIcon className="size-4" />
           <strong>{t('footnotes')}</strong>
         </DropdownMenuLabel>
@@ -130,7 +130,7 @@ export default function BibleSettings() {
         </div>
 
         {/* Language */}
-        <DropdownMenuLabel className="flex items-center gap-2 text-violet-500 mt-1">
+        <DropdownMenuLabel className="flex items-center gap-2 text-primary mt-1">
           <LanguagesIcon className="size-4" />
           <strong>{t('language')}</strong>
         </DropdownMenuLabel>
