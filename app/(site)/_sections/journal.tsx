@@ -22,7 +22,10 @@ export function JournalSection({ articles }: { articles: Article[] }) {
         padding: 'clamp(64px, 8vw, 96px) 0',
       }}
     >
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px' }}>
+      <div
+        className="px-4 sm:px-6 md:px-10"
+        style={{ maxWidth: 1240, margin: '0 auto' }}
+      >
         <SectionDivider num="IV" title="The Journal" sub="Recent writing" />
 
         <div

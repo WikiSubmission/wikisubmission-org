@@ -9,7 +9,10 @@ export function ToolsSection() {
         padding: 'clamp(64px, 8vw, 96px) 0',
       }}
     >
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px' }}>
+      <div
+        className="px-4 sm:px-6 md:px-10"
+        style={{ maxWidth: 1240, margin: '0 auto' }}
+      >
         <SectionDivider num="III" title="Practices & Tools" sub="For daily life" />
 
         <div
@@ -24,7 +27,7 @@ export function ToolsSection() {
               backgroundColor: 'var(--ed-surface)',
               border: '1px solid var(--ed-rule)',
               borderRadius: 3,
-              padding: 32,
+              padding: 'clamp(24px, 6vw, 32px)',
               display: 'flex',
               flexDirection: 'column',
               gap: 14,
@@ -47,7 +50,7 @@ export function ToolsSection() {
               <div
                 style={{
                   fontFamily: F.display,
-                  fontSize: 22,
+                  fontSize: 'clamp(20px, 5.5vw, 22px)',
                   fontWeight: 500,
                   letterSpacing: '-0.01em',
                   color: 'var(--ed-fg)',
@@ -81,7 +84,7 @@ export function ToolsSection() {
               display: 'flex',
               flexDirection: 'column',
               gap: 14,
-              padding: 28,
+              padding: 'clamp(22px, 5vw, 28px)',
             }}
           >
             <div
@@ -195,7 +198,7 @@ export function ToolsSection() {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 12,
-                padding: 22,
+                padding: 'clamp(18px, 4vw, 22px)',
               }}
             >
               <div

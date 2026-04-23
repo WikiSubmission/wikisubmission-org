@@ -9,7 +9,10 @@ export function ScriptureSection() {
         padding: 'clamp(64px, 8vw, 96px) 0',
       }}
     >
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 40px' }}>
+      <div
+        className="px-4 sm:px-6 md:px-10"
+        style={{ maxWidth: 1240, margin: '0 auto' }}
+      >
         <SectionDivider num="I" title="Scripture" sub="Primary Texts" />
 
         <div
@@ -29,7 +32,7 @@ export function ScriptureSection() {
             <div
               style={{
                 flex: '1.2',
-                padding: 40,
+                padding: 'clamp(24px, 6vw, 40px)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 16,
@@ -61,7 +64,7 @@ export function ScriptureSection() {
               <h3
                 style={{
                   fontFamily: F.display,
-                  fontSize: 36,
+                  fontSize: 'clamp(30px, 8vw, 36px)',
                   fontWeight: 500,
                   lineHeight: 1.05,
                   letterSpacing: '-0.02em',
@@ -241,7 +244,7 @@ function CompactCard({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        padding: 32,
+        padding: 'clamp(24px, 5vw, 32px)',
         gap: 14,
         backgroundColor: 'var(--ed-surface)',
       }}

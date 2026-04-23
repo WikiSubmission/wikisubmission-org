@@ -18,11 +18,10 @@ export function SectionDivider({
 }) {
   return (
     <div
+      className="grid-cols-1 gap-y-3 sm:grid-cols-[auto_auto_1fr_auto] sm:gap-x-5 sm:gap-y-0"
       style={{
         display: 'grid',
-        gridTemplateColumns: 'auto auto 1fr auto',
         alignItems: 'baseline',
-        gap: 20,
         marginBottom: 64,
       }}
     >
@@ -40,7 +39,7 @@ export function SectionDivider({
       <span
         style={{
           fontFamily: F.display,
-          fontSize: 32,
+          fontSize: 'clamp(28px, 5vw, 32px)',
           letterSpacing: '-0.02em',
           fontWeight: 500,
           color: 'var(--ed-fg)',
@@ -48,7 +47,10 @@ export function SectionDivider({
       >
         {title}
       </span>
-      <div style={{ height: 1, backgroundColor: 'var(--ed-rule)' }} />
+      <div
+        className="hidden sm:block"
+        style={{ height: 1, backgroundColor: 'var(--ed-rule)' }}
+      />
       <span
         style={{
           fontFamily: F.mono,

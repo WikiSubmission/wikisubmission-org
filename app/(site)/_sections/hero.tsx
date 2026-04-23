@@ -34,9 +34,11 @@ function Stat({ k, label }: { k: string; label: string }) {
 export function HeroManifesto() {
   return (
     <section
+      className="px-4 sm:px-6 md:px-10"
       style={{
         position: 'relative',
-        padding: 'clamp(72px, 10vw, 120px) 40px clamp(52px, 8vw, 100px)',
+        paddingTop: 'clamp(56px, 10vw, 120px)',
+        paddingBottom: 'clamp(40px, 8vw, 100px)',
         maxWidth: 1240,
         margin: '0 auto',
         overflow: 'visible',
@@ -54,7 +56,7 @@ export function HeroManifesto() {
         <h1
           style={{
             fontFamily: F.display,
-            fontSize: 'clamp(64px, 9vw, 128px)',
+            fontSize: 'clamp(48px, 14vw, 128px)',
             fontWeight: 400,
             lineHeight: 0.92,
             letterSpacing: '-0.035em',
@@ -89,8 +91,8 @@ export function HeroManifesto() {
             dir="rtl"
             style={{
               fontFamily: F.arabic,
-              fontSize: 'clamp(18px, 1.8vw, 26px)',
-              lineHeight: 2,
+              fontSize: 'clamp(18px, 5vw, 26px)',
+              lineHeight: 1.85,
               color: 'var(--ed-fg)',
               textAlign: 'right',
             }}
@@ -116,7 +118,7 @@ export function HeroManifesto() {
         <p
           style={{
             fontFamily: F.serif,
-            fontSize: 18,
+            fontSize: 'clamp(16px, 4.2vw, 18px)',
             lineHeight: 1.6,
             color: 'var(--ed-fg-muted)',
             maxWidth: '52ch',
@@ -132,7 +134,7 @@ export function HeroManifesto() {
           style={{
             gridColumn: '1 / -1',
             display: 'flex',
-            gap: 12,
+            gap: 'clamp(10px, 3vw, 12px)',
             flexWrap: 'wrap',
           }}
         >
@@ -158,7 +160,7 @@ export function HeroManifesto() {
           style={{
             gridColumn: '1 / -1',
             display: 'flex',
-            gap: 56,
+            gap: 'clamp(24px, 8vw, 56px)',
             paddingTop: 40,
             borderTop: '1px solid var(--ed-rule)',
             flexWrap: 'wrap',

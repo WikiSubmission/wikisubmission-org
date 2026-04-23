@@ -5,7 +5,7 @@ function Fact({ k, v, note }: { k: string; v: string; note: string }) {
   return (
     <div
       style={{
-        padding: '32px 28px',
+        padding: 'clamp(24px, 5vw, 32px) clamp(20px, 5vw, 28px)',
         backgroundColor: 'var(--ed-surface)',
         display: 'flex',
         flexDirection: 'column',
@@ -53,8 +53,10 @@ function Fact({ k, v, note }: { k: string; v: string; note: string }) {
 export function MiracleSection() {
   return (
     <section
+      className="px-4 sm:px-6 md:px-10"
       style={{
-        padding: 'clamp(72px, 10vw, 120px) 40px',
+        paddingTop: 'clamp(72px, 10vw, 120px)',
+        paddingBottom: 'clamp(72px, 10vw, 120px)',
         maxWidth: 1240,
         margin: '0 auto',
       }}
@@ -66,12 +68,15 @@ export function MiracleSection() {
         className="grid grid-cols-[1.2fr_1fr] max-md:grid-cols-1 max-md:gap-12"
       >
         {/* Left: 19 + description */}
-        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
+        <div
+          className="max-sm:flex-col max-sm:gap-6"
+          style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}
+        >
           <div
             aria-hidden
             style={{
               fontFamily: F.display,
-              fontSize: 'clamp(100px, 14vw, 200px)',
+              fontSize: 'clamp(84px, 24vw, 200px)',
               lineHeight: 0.85,
               letterSpacing: '-0.04em',
               color: 'var(--ed-accent)',
@@ -88,7 +93,7 @@ export function MiracleSection() {
             <h3
               style={{
                 fontFamily: F.display,
-                fontSize: 44,
+                fontSize: 'clamp(34px, 8vw, 44px)',
                 fontWeight: 500,
                 letterSpacing: '-0.025em',
                 lineHeight: 1.05,
@@ -132,9 +137,8 @@ export function MiracleSection() {
 
         {/* Right: 2×2 fact grid */}
         <div
+          className="grid grid-cols-1 sm:grid-cols-2"
           style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
             gap: 0,
             border: '1px solid var(--ed-rule)',
             borderRadius: 3,
@@ -149,10 +153,7 @@ export function MiracleSection() {
           ].map((f, i) => (
             <div
               key={i}
-              style={{
-                borderRight: i % 2 === 0 ? '1px solid var(--ed-rule)' : 'none',
-                borderBottom: i < 2 ? '1px solid var(--ed-rule)' : 'none',
-              }}
+              className="border-b last:border-b-0 sm:last:border-b-0 sm:[&:nth-child(-n+2)]:border-b sm:[&:nth-child(odd)]:border-r sm:[&:nth-child(3)]:border-b-0"
             >
               <Fact {...f} />
             </div>

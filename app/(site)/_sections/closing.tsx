@@ -5,10 +5,12 @@ import { F, Arrow } from './shared'
 export function ClosingSection() {
   return (
     <section
+      className="px-4 sm:px-6 md:px-10"
       style={{
         backgroundColor: 'var(--ed-fg)',
         color: 'var(--ed-bg)',
-        padding: 'clamp(86px, 12vw, 144px) 40px',
+        paddingTop: 'clamp(72px, 12vw, 144px)',
+        paddingBottom: 'clamp(72px, 12vw, 144px)',
       }}
     >
       <div

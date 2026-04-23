@@ -17,6 +17,8 @@ const NAV_LINKS = [
   { label: 'miracle', href: '/miracle' },
   { label: 'practices', href: '/practices' },
   { label: 'archive', href: '/archive' },
+  { label: 'music', href: '/music' },
+  { label: 'chat', href: '/chat' },
   { label: 'blog', href: '/blog' },
 ]
 
@@ -49,12 +51,12 @@ export function SiteNav() {
         style={{
           maxWidth: 1240,
           margin: '0 auto',
-          padding: '0 40px',
+          padding: '0 clamp(16px, 4vw, 40px)',
           height: 64,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 32,
+          gap: 16,
         }}
       >
         {/* Logo + Wordmark */}
@@ -74,6 +76,7 @@ export function SiteNav() {
             lineHeight: 1,
             textDecoration: 'none',
           }}
+          className="min-w-0"
         >
           <Image
             src="/brand-assets/logo-transparent.png"
@@ -81,11 +84,11 @@ export function SiteNav() {
             width={28}
             height={28}
           />
-          WikiSubmission
+          <span className="truncate max-[380px]:hidden sm:inline">WikiSubmission</span>
         </Link>
 
         {/* Desktop nav links */}
-        <div className="hidden md:flex items-center gap-7">
+        <div className="hidden lg:flex items-center gap-6 xl:gap-7">
           {NAV_LINKS.map((link) => {
             const active =
               pathname === link.href ||
@@ -112,7 +115,7 @@ export function SiteNav() {
         </div>
 
         {/* Right controls */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <LocaleSwitcher currentLocale={locale} />
           <ThemeToggle />
           <button
@@ -141,7 +144,7 @@ export function SiteNav() {
           {/* Mobile hamburger */}
           <button
             type="button"
-            className="md:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md text-muted-foreground transition-colors"
+            className="lg:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md text-muted-foreground transition-colors"
             style={{ border: 'none', background: 'none', cursor: 'pointer' }}
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
@@ -175,7 +178,7 @@ export function SiteNav() {
             borderTop: '1px solid var(--ed-rule)',
             backgroundColor: 'var(--ed-bg)',
           }}
-          className="md:hidden px-6 py-4 flex flex-col gap-0.5"
+          className="lg:hidden px-4 py-4 flex flex-col gap-0.5 sm:px-6"
         >
           {NAV_LINKS.map((link) => {
             const active =
