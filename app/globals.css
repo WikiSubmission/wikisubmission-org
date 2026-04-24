@@ -176,6 +176,7 @@
   html.quran-page::-webkit-scrollbar {
     display: none;
   }
+
   html.quran-page {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -189,6 +190,7 @@
 }
 
 @layer utilities {
+
   /* Editorial hover card — border lift */
   .ed-card {
     border: 1px solid var(--ed-rule);
@@ -196,6 +198,7 @@
     transition: border-color 300ms ease, transform 300ms ease, box-shadow 300ms ease;
     text-decoration: none;
   }
+
   .ed-card:hover {
     border-color: var(--ed-fg);
     transform: translateY(-3px);
@@ -207,6 +210,7 @@
     text-decoration: none;
     transition: color 150ms;
   }
+
   .ed-link:hover {
     color: var(--ed-fg);
   }
@@ -221,6 +225,7 @@
     text-decoration: none;
     transition: gap 200ms;
   }
+
   .ed-cta:hover {
     gap: 14px;
   }
@@ -241,6 +246,7 @@
     border: none;
     cursor: pointer;
   }
+
   .ed-btn-primary:hover {
     background-color: var(--ed-accent);
   }
@@ -261,6 +267,7 @@
     transition: border-color 200ms;
     cursor: pointer;
   }
+
   .ed-btn-ghost:hover {
     border-color: var(--ed-fg);
   }
@@ -280,6 +287,7 @@
     transition: opacity 200ms;
     cursor: pointer;
   }
+
   .ed-btn-inv:hover {
     opacity: 0.9;
   }
@@ -300,6 +308,7 @@
     transition: border-color 200ms;
     cursor: pointer;
   }
+
   .ed-btn-ghost-inv:hover {
     border-color: var(--ed-bg);
   }
@@ -348,7 +357,40 @@
     z-index: 50;
     transition: transform 280ms ease;
   }
+
   html[data-nav-hidden] .quran-fixed-headers {
     transform: translateY(-64px);
+  }
+
+  @keyframes highlight-glow {
+
+    0%,
+    100% {
+      color: var(--ed-fg);
+      text-shadow: 0 0 0px transparent;
+    }
+
+    50% {
+      color: var(--ed-accent);
+      text-shadow: 0 0 12px rgba(var(--ed-accent-rgb), 0.4);
+    }
+  }
+
+  .glow-highlight {
+    display: inline-block;
+    font-weight: 500;
+    animation: highlight-glow 4s ease-in-out infinite;
+    padding: 0 2px;
+  }
+
+  /* Ensure the Arabic stays on one line and scrolls if needed on very small screens */
+  [dir="rtl"] {
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  [dir="rtl"]::-webkit-scrollbar {
+    display: none;
+    /* Safari and Chrome */
   }
 }

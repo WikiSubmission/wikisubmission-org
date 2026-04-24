@@ -48,7 +48,7 @@ export function ClosingSection() {
           }}
         >
           &ldquo;Say, I am instructed to worship God,{' '}
-          <em>devoting</em> my religion absolutely to Him alone.&rdquo;
+          <em>devoting</em>{' '}my religion absolutely to Him alone.&rdquo;
         </h2>
 
         <div

@@ -19,9 +19,9 @@ export default async function Page() {
     const res = await wsApiServer.GET('/quran', {
       params: {
         query: {
-          chapter_number_start: 9,
-          verse_start: 60,
-          verse_end: 60,
+          chapter_number_start: 2,
+          verse_start: 215,
+          verse_end: 215,
           langs: ['en'],
         },
       },

@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Activity, Wallet } from 'lucide-react'
 
 export function ZakatCalculator() {
   const [amount, setAmount] = useState('')
@@ -12,88 +14,116 @@ export function ZakatCalculator() {
   const isSmall = zakatDue !== null && zakatDue < 1
 
   return (
-    <div className="w-full max-w-lg mx-auto space-y-8">
+    <div className="w-full max-w-2xl mx-auto space-y-10">
       {/* Heading */}
-      <div>
-        <h2 className="font-headline text-2xl font-bold">Zakat Calculator</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Activity size={14} className="text-[var(--ed-accent)]" />
+          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[var(--ed-fg-muted)] opacity-40">Financial Module // ZKT-4</span>
+        </div>
+        <h2 className="text-3xl font-serif font-medium text-[var(--ed-fg)]">Zakat Asset Analyzer</h2>
+        <p className="text-sm text-[var(--ed-fg-muted)] leading-relaxed opacity-70">
           Based on the Quran: 2.5% of income is owed the moment you receive it —
           no waiting period, no minimum threshold.
         </p>
       </div>
 
       {/* Input row */}
-      <div className="flex gap-2">
-        <select
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value)}
-          className="h-12 rounded-lg border border-border bg-muted/50 px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
-        >
-          {['USD', 'EUR', 'GBP', 'SAR', 'AED', 'TRY'].map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <input
-          type="text"
-          inputMode="decimal"
-          placeholder="Amount received"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="flex-1 h-12 rounded-lg border border-border bg-muted/50 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="md:col-span-1">
+          <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">Currency</label>
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className="w-full h-12 rounded-xl border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--ed-accent)]/20 transition-all appearance-none"
+          >
+            {['USD', 'EUR', 'GBP', 'SAR', 'AED', 'TRY'].map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="md:col-span-3">
+          <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">Gross Liquidity / Harvest</label>
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder="Amount received..."
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="w-full h-12 rounded-xl border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ed-accent)]/20 transition-all placeholder:text-[var(--ed-fg-muted)]/30"
+          />
+        </div>
       </div>
 
       {/* Result */}
-      {zakatDue !== null && (
-        <div
-          className={cn(
-            'rounded-xl p-6 space-y-2 border',
-            isSmall
-              ? 'bg-muted/50 border-border'
-              : 'bg-primary/5 border-primary/20'
-          )}
-        >
-          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Zakat due now
-          </p>
-          <p className="font-headline text-4xl font-extrabold text-primary">
-            {currency}{' '}
-            {zakatDue.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            2.5% of {currency}{' '}
-            {parsed.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </p>
-
-          {isSmall && (
-            <div className="mt-4 pt-4 border-t border-border text-sm text-muted-foreground space-y-1">
-              <p className="font-semibold text-foreground">Recommendation</p>
-              <p>
-                This amount is very small. We recommend collecting your Zakat
-                over several payments and giving it all at once — or better yet,
-                giving it preemptively before you receive the income if you are
-                able to.
-              </p>
+      <AnimatePresence mode="wait">
+        {zakatDue !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={cn(
+              'relative overflow-hidden rounded-3xl p-8 space-y-4 border transition-all duration-700',
+              isSmall
+                ? 'bg-[var(--ed-surface)]/40 border-[var(--ed-rule)]'
+                : 'bg-gradient-to-br from-[var(--ed-accent-soft)]/20 to-transparent border-[var(--ed-accent)]/20 shadow-2xl'
+            )}
+          >
+            {/* Background HUD marker */}
+            <div className="absolute -top-4 -right-4 opacity-[0.03] pointer-events-none">
+              <Wallet size={160} />
             </div>
-          )}
-        </div>
-      )}
+
+            <div className="relative z-10">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--ed-fg-muted)] opacity-50">
+                Calculated Liability
+              </p>
+              <div className="flex items-baseline gap-3">
+                <span className="text-xl font-mono text-[var(--ed-accent)] opacity-60">{currency}</span>
+                <p className="text-5xl md:text-6xl font-mono font-bold text-[var(--ed-fg)] tracking-tighter tabular-nums">
+                  {zakatDue.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </p>
+              </div>
+              <p className="text-sm text-[var(--ed-fg-muted)] font-serif italic mt-2 opacity-60">
+                Exact 2.5% of {currency} {parsed.toLocaleString()}
+              </p>
+
+              {isSmall && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mt-6 pt-6 border-t border-[var(--ed-rule)] text-sm text-[var(--ed-fg-muted)] space-y-2"
+                >
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ed-accent)]">Recommendation</p>
+                  <p className="leading-relaxed opacity-80">
+                    This amount is below the typical distribution threshold. We recommend aggregating small Zakat dues over several receipts to optimize impact, or fulfilling the obligation preemptively.
+                  </p>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Guidance */}
-      <div className="text-xs text-muted-foreground space-y-1 border-t border-border pt-4">
-        <p>
-          <span className="font-semibold text-foreground">How this works:</span>{' '}
-          When you receive income, 2.5% belongs to those in need — give it
-          immediately or as soon as possible.
-        </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-[var(--ed-rule)]">
+        <div className="space-y-2">
+          <h4 className="font-mono text-[9px] uppercase tracking-widest text-[var(--ed-accent)] font-bold">Protocol</h4>
+          <p className="text-xs text-[var(--ed-fg-muted)] leading-relaxed opacity-60">
+            When you receive income, 2.5% belongs to those in need—give it immediately or as soon as possible to maintain system integrity.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <h4 className="font-mono text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)] font-bold">Variable</h4>
+          <p className="text-xs text-[var(--ed-fg-muted)] leading-relaxed opacity-60">
+            No minimum threshold (Nisab) or waiting period (Hawl) is required according to the Quranic directive (6:141).
+          </p>
+        </div>
       </div>
     </div>
   )

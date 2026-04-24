@@ -24,6 +24,7 @@ import {
   InfoIcon,
   XIcon,
   CalendarIcon,
+  Activity,
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -222,107 +223,85 @@ function PrayerTimesContent() {
       {data && !loading && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
 
-          {/* Location header + Asr toggle + Change */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground min-w-0">
-              <MapPinIcon className="size-3.5 shrink-0" />
-              <span className="font-medium truncate">{data.location_string}</span>
-            </div>
-
-            <div className="flex-1" />
-
-            {/* Asr toggle */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Label
-                htmlFor="asr-method"
-                className="text-[10px] text-muted-foreground font-light cursor-pointer whitespace-nowrap"
-              >
-                {t('asrMidpoint')}
-              </Label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <InfoIcon className="size-3 text-muted-foreground/50 hover:text-muted-foreground cursor-help transition-colors" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-50 text-center">
-                  {t('asrMidpointTooltip')}
-                </TooltipContent>
-              </Tooltip>
-              <Switch
-                id="asr-method"
-                checked={asrAdjustment}
-                onCheckedChange={toggleAsrAdjustment}
-                className="scale-75 origin-right"
-              />
-            </div>
-
-            {/* Change location */}
-            {showChangeForm ? (
-              <form
-                onSubmit={handleSearch}
-                className="flex items-center gap-2"
-              >
-                <div className="relative">
-                  <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-muted-foreground/60" />
-                  <Input
-                    autoFocus
-                    type="search"
-                    placeholder="New location…"
-                    className="pl-6 h-7 text-xs bg-muted/50 border-border/40 w-36"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowChangeForm(false)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <XIcon className="size-3.5" />
-                </button>
+          {/* Header row - High Priority Search */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 pb-6 border-b border-[var(--ed-rule)]/30">
+            <div className="flex-1 max-w-sm">
+              <form onSubmit={handleSearch} className="relative group">
+                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-[var(--ed-accent)] opacity-40 group-focus-within:opacity-100 transition-opacity" />
+                <Input
+                  type="search"
+                  placeholder={t('searchLocation')}
+                  className="pl-9 h-10 bg-[var(--ed-surface)]/40 border-[var(--ed-rule)] rounded-xl focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all font-mono text-[11px] tracking-wider"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </form>
-            ) : (
-              <button
-                onClick={() => setShowChangeForm(true)}
-                className="text-xs text-primary hover:text-primary/80 font-medium transition-colors shrink-0"
-              >
-                Change
-              </button>
-            )}
+              <div className="flex items-center gap-2 mt-2 px-1">
+                <MapPinIcon size={10} className="text-[var(--ed-accent)] opacity-40" />
+                <span className="font-mono text-[9px] text-[var(--ed-fg-muted)] uppercase tracking-widest">{data.location_string}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <Label htmlFor="asr-method" className="text-[9px] text-[var(--ed-fg-muted)] opacity-50 font-mono uppercase tracking-[0.2em] cursor-pointer">
+                  {t('asrMidpoint')}
+                </Label>
+                <Switch
+                  id="asr-method"
+                  checked={asrAdjustment}
+                  onCheckedChange={toggleAsrAdjustment}
+                  className="scale-75 origin-right"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Now / Next hero card */}
           {(data.current_prayer || data.upcoming_prayer) && (
-            <div className="grid grid-cols-2 divide-x divide-border/40 rounded-2xl border border-border/40 bg-card/50 overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-px rounded-[24px] border border-[var(--ed-rule)] bg-[var(--ed-rule)]/10 overflow-hidden shadow-2xl">
               {data.current_prayer && (
-                <div className="p-4 space-y-1">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Now
-                  </p>
-                  <p className="text-sm font-semibold capitalize">
-                    {prayerLabels[data.current_prayer.toLowerCase()] ??
-                      data.current_prayer}
-                  </p>
-                  {data.current_prayer_time_elapsed && (
-                    <p className="text-xs text-muted-foreground">
-                      {data.current_prayer_time_elapsed} elapsed
+                <div className="relative p-6 bg-[var(--ed-surface)]/60 backdrop-blur-md group overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
+                    <Activity size={80} />
+                  </div>
+                  <div className="relative z-10 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)] animate-pulse" />
+                      <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-accent)]">
+                        Active State
+                      </p>
+                    </div>
+                    <p className="text-3xl md:text-4xl font-serif font-medium text-[var(--ed-fg)] capitalize">
+                      {prayerLabels[data.current_prayer.toLowerCase()] ?? data.current_prayer}
                     </p>
-                  )}
+                    {data.current_prayer_time_elapsed && (
+                      <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--ed-fg-muted)] opacity-50">
+                        <span>Elapsed:</span>
+                        <span className="text-[var(--ed-fg)]">{data.current_prayer_time_elapsed}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               {data.upcoming_prayer && (
-                <div className="p-4 space-y-1">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Next
-                  </p>
-                  <p className="text-sm font-semibold capitalize">
-                    {prayerLabels[data.upcoming_prayer.toLowerCase()] ??
-                      data.upcoming_prayer}
-                  </p>
-                  {data.upcoming_prayer_time_left && (
-                    <p className="text-lg font-mono font-bold text-primary tabular-nums">
-                      {data.upcoming_prayer_time_left}
+                <div className="relative p-6 bg-[var(--ed-surface)]/80 backdrop-blur-md overflow-hidden">
+                  <div className="relative z-10 space-y-2">
+                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-fg-muted)] opacity-40">
+                      Sequential Event
                     </p>
-                  )}
+                    <p className="text-xl md:text-2xl font-serif font-medium text-[var(--ed-fg)] capitalize">
+                      {prayerLabels[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}
+                    </p>
+                    {data.upcoming_prayer_time_left && (
+                      <div className="flex flex-col gap-1">
+                        <div className="font-mono text-[10px] text-[var(--ed-fg-muted)] opacity-40 uppercase tracking-widest">T-Minus</div>
+                        <p className="text-4xl font-mono font-bold text-[var(--ed-accent)] tracking-tighter tabular-nums drop-shadow-[0_0_15px_var(--ed-accent-soft)]">
+                          {data.upcoming_prayer_time_left}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -590,20 +569,22 @@ function DayTimeline({
   const currentPrayer = data.current_prayer?.toLowerCase() ?? ''
 
   return (
-    <div className="relative pt-2 pb-14 px-3">
-      <div className="relative h-1.5 rounded-full bg-border/40">
+    <div className="relative pt-6 pb-20 px-4">
+      <div className="relative h-[2px] bg-[var(--ed-rule)]/30">
         {/* Filled portion */}
         <div
-          className="absolute left-0 top-0 h-full rounded-full bg-primary/40"
+          className="absolute left-0 top-0 h-full bg-[var(--ed-accent)]/20 shadow-[0_0_10px_var(--ed-accent-soft)]"
           style={{ width: `${progressPct}%` }}
         />
 
         {/* Current position dot */}
         {nowMin >= fajrMin && nowMin <= ishaMin && (
           <div
-            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-primary ring-2 ring-background shadow-sm z-10"
+            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-[var(--ed-accent)] border-2 border-[var(--ed-bg)] z-10"
             style={{ left: `${progressPct}%` }}
-          />
+          >
+             <div className="absolute inset-0 animate-ping bg-[var(--ed-accent)] opacity-20" />
+          </div>
         )}
 
         {/* Prayer markers */}
@@ -619,24 +600,27 @@ function DayTimeline({
             >
               <div
                 className={cn(
-                  'w-2 h-2 rounded-full border-2 border-background',
+                  'w-2 h-2 border border-[var(--ed-surface)] shadow-sm transition-all duration-500',
                   isCurrent
-                    ? 'bg-primary scale-150'
+                    ? 'bg-[var(--ed-accent)] scale-125'
                     : isPast
-                      ? 'bg-primary/50'
-                      : 'bg-border'
+                      ? 'bg-[var(--ed-accent)] opacity-40'
+                      : 'bg-[var(--ed-rule)]'
                 )}
               />
-              <div className="absolute top-4 -translate-x-1/2 left-1/2 flex flex-col items-center gap-0.5 w-[52px]">
+              <div className="absolute top-5 -translate-x-1/2 left-1/2 flex flex-col items-center gap-1 w-20">
                 <span
                   className={cn(
-                    'text-[9px] font-semibold uppercase tracking-wide text-center whitespace-nowrap',
-                    isCurrent ? 'text-primary' : 'text-muted-foreground/60'
+                    'font-mono text-[8px] uppercase tracking-[0.15em] transition-colors',
+                    isCurrent ? 'text-[var(--ed-accent)] font-bold' : 'text-[var(--ed-fg-muted)] opacity-30'
                   )}
                 >
                   {prayerLabels[prayer]}
                 </span>
-                <span className="text-[9px] text-muted-foreground/40 font-mono tabular-nums whitespace-nowrap">
+                <span className={cn(
+                  'font-mono text-[9px] tabular-nums',
+                  isCurrent ? 'text-[var(--ed-fg)] font-medium' : 'text-[var(--ed-fg-muted)] opacity-20'
+                )}>
                   {data.times?.[prayer]}
                 </span>
               </div>

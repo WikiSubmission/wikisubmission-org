@@ -25,6 +25,7 @@ const NAV_LINKS = [
 const F = {
   display: 'var(--font-cormorant), Georgia, serif',
   mono: 'var(--font-jetbrains), ui-monospace, monospace',
+  glacial: 'var(--font-glacial), sans-serif',
 }
 
 export function SiteNav() {
@@ -60,35 +61,45 @@ export function SiteNav() {
         }}
       >
         {/* Logo + Wordmark */}
-        <Link
-          href="/"
-          onClick={close}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            fontFamily: F.display,
-            fontSize: 22,
-            fontWeight: 400,
-            letterSpacing: '-0.01em',
-            color: 'var(--ed-fg)',
-            flexShrink: 0,
-            lineHeight: 1,
-            textDecoration: 'none',
-          }}
-          className="min-w-0"
-        >
-          <Image
-            src="/brand-assets/logo-transparent.png"
-            alt=""
-            width={28}
-            height={28}
-          />
-          <span className="truncate max-[380px]:hidden sm:inline">WikiSubmission</span>
-        </Link>
+        <div className="flex-1 min-w-0">
+          <Link
+            href="/"
+            onClick={close}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 10,
+              fontFamily: F.display,
+              fontSize: 23,
+              fontWeight: 600,
+              letterSpacing: '-0.025em',
+              color: 'var(--ed-fg)',
+              lineHeight: 1,
+              textDecoration: 'none',
+            }}
+          >
+            <Image
+              src="/brand-assets/logo-transparent.png"
+              alt=""
+              width={28}
+              height={28}
+            />
+            <span className="truncate max-[380px]:hidden sm:inline">WikiSubmission</span>
+          </Link>
+        </div>
 
-        {/* Desktop nav links */}
-        <div className="hidden lg:flex items-center gap-6 xl:gap-7">
+        {/* Tabbed Navigation (Desktop - Centered) */}
+        <div
+          className="hidden lg:flex flex-none"
+          style={{
+            background: 'color-mix(in oklab, var(--ed-fg), transparent 96%)',
+            padding: '2px',
+            borderRadius: '0px',
+            border: '1px solid var(--ed-rule)',
+            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)',
+            gap: '1px',
+          }}
+        >
           {NAV_LINKS.map((link) => {
             const active =
               pathname === link.href ||
@@ -98,24 +109,49 @@ export function SiteNav() {
                 key={link.href}
                 href={link.href}
                 style={{
-                  fontFamily: F.mono,
-                  fontSize: 11,
-                  fontWeight: 500,
+                  position: 'relative',
+                  fontFamily: F.glacial,
+                  fontSize: '11px',
+                  fontWeight: active ? 700 : 500,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.16em',
+                  letterSpacing: '0.15em',
+                  padding: '6px 16px',
                   color: active ? 'var(--ed-fg)' : 'var(--ed-fg-muted)',
-                  transition: 'color 150ms',
                   textDecoration: 'none',
+                  borderRadius: '0px',
+                  background: active ? 'var(--ed-bg)' : 'transparent',
+                  border: active ? '1px solid var(--ed-rule)' : '1px solid transparent',
+                  boxShadow: active ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                  transition: 'all 150ms ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 {t(link.label)}
+                {active && (
+                  <motion.div
+                    layoutId="nav-active-dot"
+                    style={{
+                      position: 'absolute',
+                      bottom: '-4px',
+                      left: '50%',
+                      width: '3px',
+                      height: '3px',
+                      borderRadius: '50%',
+                      background: 'var(--ed-accent)',
+                      boxShadow: '0 0 6px var(--ed-accent)',
+                      transform: 'translateX(-50%)',
+                    }}
+                  />
+                )}
               </Link>
             )
           })}
         </div>
 
         {/* Right controls */}
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex-1 flex items-center justify-end gap-1 shrink-0">
           <LocaleSwitcher currentLocale={locale} />
           <ThemeToggle />
           <button

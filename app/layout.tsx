@@ -8,7 +8,7 @@ import { GeometryDots } from '@/components/geometry-dots'
 import Providers from '@/components/providers'
 import type { Viewport } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
-import { getLocale } from 'next-intl/server'
+import { getLocale, getMessages } from 'next-intl/server'
 import { ReactScanInit } from '@/components/react-scan-init'
 
 export const metadata = Metadata
@@ -21,15 +21,16 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const locale = await getLocale()
+  const messages = await getMessages()
   const dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'
 
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body
-        className={`${Fonts.amiri.variable} ${Fonts.cormorant.variable} ${Fonts.sourceSerif.variable} ${Fonts.jetbrainsMono.variable} antialiased wrap-break-words`}
+        className={`${Fonts.amiri.variable} ${Fonts.cormorant.variable} ${Fonts.sourceSerif.variable} ${Fonts.jetbrainsMono.variable} ${Fonts.glacial.variable} antialiased wrap-break-words`}
         suppressHydrationWarning
       >
-        <NextIntlClientProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

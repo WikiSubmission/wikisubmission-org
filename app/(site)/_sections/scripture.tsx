@@ -106,7 +106,7 @@ export function ScriptureSection() {
               >
                 <span>114 suras</span>
                 <span>·</span>
-                <span>6,234 verses</span>
+                <span>6,346 verses</span>
                 <span>·</span>
                 <span>EN · AR · FR · TR</span>
               </div>

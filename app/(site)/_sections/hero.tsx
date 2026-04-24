@@ -1,3 +1,4 @@
+'use client'
 import Image from 'next/image'
 import Link from 'next/link'
 import { F, Arrow } from './shared'
@@ -167,7 +168,7 @@ export function HeroManifesto() {
           }}
         >
           <Stat k="114" label="chapters" />
-          <Stat k="6,234" label="verses" />
+          <Stat k="6,346" label="verses" />
           <Stat k="4" label="languages" />
           <Stat k="free" label="always" />
         </div>
