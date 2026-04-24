@@ -17,7 +17,7 @@ import {
 
 export const metadata = Metadata
 
-const RTL_LOCALES = ['ar', 'fa', 'ur']
+const RTL_LOCALES = ['ar', 'fa', 'ur', 'ku']
 
 export default async function RootLayout({
   children,

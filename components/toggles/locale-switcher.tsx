@@ -14,7 +14,9 @@ import { cn } from '@/lib/utils'
 const LOCALES = [
   { code: 'en', label: 'EN', name: 'English' },
   { code: 'ar', label: 'AR', name: 'العربية' },
+  { code: 'de', label: 'DE', name: 'Deutsch' },
   { code: 'fr', label: 'FR', name: 'Français' },
+  { code: 'ku', label: 'KU', name: 'کوردی' },
   { code: 'tr', label: 'TR', name: 'Türkçe' },
 ]
 
