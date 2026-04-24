@@ -4,8 +4,10 @@ import { getLocale } from 'next-intl/server'
 import { HeroManifesto } from './_sections/hero'
 import { ScriptureSection } from './_sections/scripture'
 import { MiracleSection } from './_sections/miracle'
-import { ToolsSection } from './_sections/tools'
+import { VerseOfTheDaySection } from './_sections/verse-of-day'
+import { PracticesSection } from './_sections/practices'
 import { JournalSection } from './_sections/journal'
+import { ToolsSection } from './_sections/tools'
 import { ClosingSection } from './_sections/closing'
 
 export const metadata = buildPageMetadata({
@@ -50,8 +52,10 @@ export default async function Home() {
       <HeroManifesto />
       <ScriptureSection />
       <MiracleSection />
-      <ToolsSection />
+      <VerseOfTheDaySection />
+      <PracticesSection />
       <JournalSection articles={latestArticles} />
+      <ToolsSection />
       <ClosingSection />
     </div>
   )

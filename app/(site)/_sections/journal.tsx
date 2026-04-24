@@ -26,7 +26,7 @@ export function JournalSection({ articles }: { articles: Article[] }) {
         className="px-4 sm:px-6 md:px-10"
         style={{ maxWidth: 1240, margin: '0 auto' }}
       >
-        <SectionDivider num="IV" title="The Journal" sub="Recent writing" />
+        <SectionDivider num="V" title="The Journal" sub="Recent writing" />
 
         <div
           style={{ gap: 24 }}

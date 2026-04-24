@@ -297,7 +297,10 @@
     "music": "موسيقى",
     "home": "الرئيسية",
     "blog": "المدونة",
-    "chat": "Chat"
+    "chat": "Chat",
+    "community": "المجتمع",
+    "signIn": "تسجيل الدخول",
+    "submissionAI": "SubmissionAI"
   },
   "miracle": {
     "badge": "المعجزة",

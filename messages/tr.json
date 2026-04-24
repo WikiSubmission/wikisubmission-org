@@ -297,7 +297,10 @@
     "music": "Müzik",
     "home": "Ana Sayfa",
     "blog": "Blog",
-    "chat": "Chat"
+    "chat": "Chat",
+    "community": "Topluluk",
+    "signIn": "Giriş yap",
+    "submissionAI": "SubmissionAI"
   },
   "miracle": {
     "badge": "Mucize",

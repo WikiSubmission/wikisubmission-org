@@ -1,11 +1,106 @@
+'use client'
+
 import Link from 'next/link'
+import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { F, SectionDivider, Arrow } from './shared'
 
+type Tool = {
+  key: string
+  title: string
+  desc: string
+  glyph: React.ReactNode
+  accent?: boolean
+} & ({ href: string } | { onClick: true })
+
+const TOOLS: Tool[] = [
+  {
+    key: 'ai',
+    title: 'SubmissionAI',
+    desc: 'Ask any question about the Quran or Submission — grounded in scripture, not opinion.',
+    accent: true,
+    onClick: true,
+    glyph: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" />
+        <circle cx="12" cy="12" r="4" />
+      </svg>
+    ),
+  },
+  {
+    key: 'downloads',
+    title: 'Downloads',
+    desc: 'PDFs, audio recitations, and printable editions.',
+    href: '/downloads',
+    glyph: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
+      </svg>
+    ),
+  },
+  {
+    key: 'ios',
+    title: 'iOS App',
+    desc: 'Read and listen on iPhone & iPad.',
+    href: 'https://apps.apple.com/app/id6444260632',
+    glyph: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.05 12.3c0-2.4 1.97-3.55 2.06-3.6-1.12-1.64-2.87-1.87-3.5-1.9-1.48-.15-2.9.87-3.64.87-.77 0-1.92-.85-3.16-.82-1.62.02-3.12.94-3.95 2.4-1.68 2.92-.43 7.23 1.2 9.6.8 1.16 1.75 2.46 3 2.42 1.2-.05 1.66-.78 3.12-.78s1.87.78 3.14.75c1.3-.03 2.12-1.18 2.9-2.35.92-1.35 1.3-2.66 1.32-2.73-.03-.02-2.52-.97-2.55-3.86Zm-2.44-7.1c.67-.8 1.12-1.93.99-3.04-.96.04-2.12.64-2.8 1.44-.62.7-1.17 1.85-1.02 2.94 1.07.08 2.17-.54 2.83-1.34Z" />
+      </svg>
+    ),
+  },
+  {
+    key: 'android',
+    title: 'Android App',
+    desc: 'Read and listen on every Android device.',
+    href: 'https://play.google.com/store/apps/details?id=org.wikisubmission.app',
+    glyph: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <rect x="6" y="3" width="12" height="18" rx="2" />
+        <path d="M10 18h4" />
+      </svg>
+    ),
+  },
+  {
+    key: 'discord',
+    title: 'Discord Bot',
+    desc: 'Verse lookup & AI answers for your server.',
+    href: 'https://discord.com/oauth2/authorize?client_id=978658099474890793',
+    glyph: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 0-5.3 0L9.6 3a19.8 19.8 0 0 0-4.9 1.4C1.5 9.1.6 13.7 1 18.2a19.9 19.9 0 0 0 6 3l.5-.7a13.6 13.6 0 0 1-2.3-1.1l.6-.4a14 14 0 0 0 12.4 0l.6.4a13.6 13.6 0 0 1-2.3 1.1l.5.7a19.9 19.9 0 0 0 6-3c.5-5.2-.9-9.7-2.6-13.8ZM8.4 15.5c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Zm7.2 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Z" />
+      </svg>
+    ),
+  },
+]
+
 export function ToolsSection() {
+  const { toggle: toggleAsk } = useChatPanel()
+
   return (
     <section
       style={{
-        backgroundColor: 'color-mix(in oklab, var(--ed-bg), var(--ed-surface) 20%)',
+        backgroundColor: 'var(--ed-bg)',
         padding: 'clamp(64px, 8vw, 96px) 0',
       }}
     >
@@ -13,214 +108,47 @@ export function ToolsSection() {
         className="px-4 sm:px-6 md:px-10"
         style={{ maxWidth: 1240, margin: '0 auto' }}
       >
-        <SectionDivider num="III" title="Practices & Tools" sub="For daily life" />
+        <SectionDivider num="VI" title="Tools & apps" sub="Built for readers" />
 
         <div
           style={{ gap: 16 }}
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
         >
-          {/* Prayer Times — spans 2 columns */}
-          <Link
-            href="/practices"
-            style={{
-              backgroundColor: 'var(--ed-surface)',
-              border: '1px solid var(--ed-rule)',
-              borderRadius: 3,
-              padding: 'clamp(24px, 6vw, 32px)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 14,
+          {TOOLS.map((tool) => {
+            const sharedClassName = 'ed-card'
+            const sharedStyle = {
+              backgroundColor: tool.accent
+                ? 'color-mix(in oklab, var(--ed-accent), transparent 92%)'
+                : 'var(--ed-surface)',
+              borderColor: tool.accent ? 'var(--ed-accent)' : undefined,
+              padding: 'clamp(20px, 4vw, 26px)',
+              display: 'flex' as const,
+              flexDirection: 'column' as const,
+              gap: 12,
               textDecoration: 'none',
-            }}
-            className="ed-card xl:col-span-2"
-          >
-            <span
-              style={{
-                fontFamily: F.mono,
-                fontSize: 10.5,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase' as const,
-                color: 'var(--ed-accent)',
-              }}
-            >
-              Prayer Times
-            </span>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div
-                style={{
-                  fontFamily: F.display,
-                  fontSize: 'clamp(20px, 5.5vw, 22px)',
-                  fontWeight: 500,
-                  letterSpacing: '-0.01em',
-                  color: 'var(--ed-fg)',
-                  lineHeight: 1.2,
-                }}
-              >
-                Fajr · Dhuhr · Asr · Maghrib · Isha
-              </div>
-              <p
-                style={{
-                  fontFamily: F.serif,
-                  fontSize: 13,
-                  color: 'var(--ed-fg-muted)',
-                  lineHeight: 1.55,
-                }}
-              >
-                Accurate prayer times calculated for your location, updated daily.
-              </p>
-            </div>
-            <div className="ed-cta" style={{ fontSize: 13 }}>
-              View times <Arrow />
-            </div>
-          </Link>
+              minHeight: 180,
+            }
 
-          {/* Submission AI */}
-          <Link
-            href="/chat"
-            className="ed-card"
-            style={{
-              backgroundColor: 'var(--ed-surface)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 14,
-              padding: 'clamp(22px, 5vw, 28px)',
-              minHeight: 0,
-            }}
-          >
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                border: '1px solid var(--ed-accent)',
-                borderRadius: 2,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--ed-accent)',
-              }}
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" />
-                <circle cx="12" cy="12" r="4" />
-              </svg>
-            </div>
-            <div style={{ flex: 1 }}>
-              <div
-                style={{
-                  fontFamily: F.display,
-                  fontSize: 19,
-                  fontWeight: 500,
-                  letterSpacing: '-0.01em',
-                  color: 'var(--ed-fg)',
-                  marginBottom: 6,
-                }}
-              >
-                Submission AI
-              </div>
-              <p
-                style={{
-                  fontFamily: F.serif,
-                  fontSize: 13,
-                  color: 'var(--ed-fg-muted)',
-                  lineHeight: 1.55,
-                }}
-              >
-                Ask any question about the Quran or Islamic practice — grounded
-                in scripture, not opinion.
-              </p>
-            </div>
-            <div className="ed-cta" style={{ fontSize: 13 }}>
-              Ask <Arrow />
-            </div>
-          </Link>
-
-          {/* Simple tool cards */}
-          <div className="grid grid-cols-2 gap-4 max-[420px]:grid-cols-1 md:col-span-2 xl:col-span-3">
-            {[
-            {
-              href: '/downloads',
-              title: 'Downloads',
-              desc: 'PDFs, audio, and printable editions.',
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
-                </svg>
-              ),
-            },
-            {
-              href: 'https://apps.apple.com/app/id6444260632',
-              title: 'iOS & Android',
-              desc: 'Read and listen on every device.',
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="6" y="2" width="12" height="20" rx="2" />
-                  <circle cx="12" cy="18" r="0.6" fill="currentColor" />
-                </svg>
-              ),
-            },
-            {
-              href: '/music',
-              title: 'Music',
-              desc: 'Al-Minshawi, Al-Husary & more.',
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M9 18V5l12-2v13" />
-                  <circle cx="6" cy="18" r="3" />
-                  <circle cx="18" cy="16" r="3" />
-                </svg>
-              ),
-            },
-            {
-              href: 'https://discord.com/oauth2/authorize?client_id=978658099474890793',
-              title: 'Discord Bot',
-              desc: 'Verse lookup in your server.',
-              icon: (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M8 12h.01M16 12h.01" />
-                  <path d="M5 16s1.5 2 7 2 7-2 7-2" />
-                  <path d="M7 8s2-3 5-3 5 3 5 3l2 10-3 1-1-2-6 0-1 2-3-1z" />
-                </svg>
-              ),
-            },
-          ].map((tool) => (
-              <Link
-                key={tool.title}
-                href={tool.href}
-                className="ed-card"
-                style={{
-                  backgroundColor: 'var(--ed-surface)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 12,
-                  padding: 'clamp(18px, 4vw, 22px)',
-                  minHeight: '100%',
-                }}
-              >
+            const body = (
+              <>
                 <div
                   style={{
                     width: 40,
                     height: 40,
-                    border: '1px solid var(--ed-rule)',
+                    border: `1px solid ${tool.accent ? 'var(--ed-accent)' : 'var(--ed-rule)'}`,
                     borderRadius: 2,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: 'var(--ed-fg)',
+                    color: tool.accent ? 'var(--ed-accent)' : 'var(--ed-fg)',
                   }}
                 >
-                  {tool.icon}
+                  {tool.glyph}
                 </div>
                 <div
                   style={{
                     fontFamily: F.display,
-                    fontSize: 'clamp(17px, 4.8vw, 19px)',
+                    fontSize: 'clamp(17px, 4.2vw, 19px)',
                     fontWeight: 500,
                     letterSpacing: '-0.01em',
                     color: 'var(--ed-fg)',
@@ -235,13 +163,55 @@ export function ToolsSection() {
                     fontSize: 13,
                     color: 'var(--ed-fg-muted)',
                     lineHeight: 1.55,
+                    flex: 1,
                   }}
                 >
                   {tool.desc}
                 </p>
+                <div
+                  className="ed-cta"
+                  style={{
+                    fontSize: 12,
+                    color: tool.accent ? 'var(--ed-accent)' : undefined,
+                  }}
+                >
+                  Open <Arrow />
+                </div>
+              </>
+            )
+
+            if ('onClick' in tool) {
+              return (
+                <button
+                  key={tool.key}
+                  type="button"
+                  onClick={toggleAsk}
+                  className={sharedClassName}
+                  style={{
+                    ...sharedStyle,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {body}
+                </button>
+              )
+            }
+
+            const isExternal = tool.href.startsWith('http')
+            return (
+              <Link
+                key={tool.key}
+                href={tool.href}
+                target={isExternal ? '_blank' : undefined}
+                rel={isExternal ? 'noreferrer' : undefined}
+                className={sharedClassName}
+                style={sharedStyle}
+              >
+                {body}
               </Link>
-            ))}
-          </div>
+            )
+          })}
         </div>
       </div>
     </section>

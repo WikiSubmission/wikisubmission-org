@@ -299,7 +299,10 @@
     "music": "Music",
     "home": "Home",
     "blog": "Blog",
-    "chat": "Chat"
+    "chat": "Chat",
+    "community": "Community",
+    "signIn": "Sign in",
+    "submissionAI": "SubmissionAI"
   },
   "miracle": {
     "badge": "Miracle",

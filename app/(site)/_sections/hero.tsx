@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { F, Arrow } from './shared'
 
 function Stat({ k, label }: { k: string; label: string }) {
@@ -33,6 +34,8 @@ function Stat({ k, label }: { k: string; label: string }) {
 }
 
 export function HeroManifesto() {
+  const { toggle: toggleAsk } = useChatPanel()
+
   return (
     <section
       className="px-4 sm:px-6 md:px-10"
@@ -53,7 +56,7 @@ export function HeroManifesto() {
         }}
         className="grid grid-cols-[1.3fr_1fr] max-md:grid-cols-1"
       >
-        {/* Headline */}
+        {/* Headline — Happiness is Submission to God */}
         <h1
           style={{
             fontFamily: F.display,
@@ -64,7 +67,7 @@ export function HeroManifesto() {
             color: 'var(--ed-fg)',
           }}
         >
-          <span style={{ display: 'block' }}>Wisdom</span>
+          <span style={{ display: 'block' }}>Happiness is</span>
           <span
             style={{
               display: 'block',
@@ -72,15 +75,15 @@ export function HeroManifesto() {
               color: 'var(--ed-fg-muted)',
             }}
           >
-            for all
+            Submission
           </span>
           <span style={{ display: 'block', color: 'var(--ed-accent)' }}>
-            <em>nations.</em>
+            to God.
           </span>
         </h1>
 
-        {/* Arabic verse — right column */}
-        <div
+        {/* Aside — verse 2:62 "those who believe…" */}
+        <aside
           style={{
             borderLeft: '1px solid var(--ed-rule)',
             paddingLeft: 32,
@@ -89,31 +92,33 @@ export function HeroManifesto() {
           className="max-md:border-l-0 max-md:border-t max-md:pl-0 max-md:pt-6"
         >
           <div
-            dir="rtl"
             style={{
-              fontFamily: F.arabic,
-              fontSize: 'clamp(18px, 5vw, 26px)',
-              lineHeight: 1.85,
-              color: 'var(--ed-fg)',
-              textAlign: 'right',
-            }}
-          >
-            ﴿ تَبَارَكَ الَّذِي نَزَّلَ الْفُرْقَانَ عَلَىٰ عَبْدِهِ لِيَكُونَ لِلْعَالَمِينَ نَذِيرًا ﴾
-          </div>
-          <div
-            style={{
-              marginTop: 14,
               fontFamily: F.mono,
               fontSize: 10.5,
-              textTransform: 'uppercase' as const,
+              textTransform: 'uppercase',
               letterSpacing: '0.16em',
-              color: 'var(--ed-fg-muted)',
-              textAlign: 'right',
+              color: 'var(--ed-accent)',
+              marginBottom: 10,
             }}
           >
-            Sura 25 · verse 1
+            Quran · 2:62 &amp; 5:69
           </div>
-        </div>
+          <p
+            style={{
+              fontFamily: F.serif,
+              fontSize: 'clamp(14px, 3.6vw, 15px)',
+              lineHeight: 1.65,
+              color: 'var(--ed-fg-muted)',
+              margin: 0,
+            }}
+          >
+            Surely, those who believe, those who are Jewish, the Christians, and
+            the converts; anyone who (1) believes in GOD, and (2) believes in
+            the Last Day, and (3) leads a righteous life, will receive their
+            recompense from their Lord. They have nothing to fear, nor will
+            they grieve.
+          </p>
+        </aside>
 
         {/* Lede */}
         <p
@@ -122,12 +127,13 @@ export function HeroManifesto() {
             fontSize: 'clamp(16px, 4.2vw, 18px)',
             lineHeight: 1.6,
             color: 'var(--ed-fg-muted)',
-            maxWidth: '52ch',
+            maxWidth: '54ch',
           }}
         >
-          WikiSubmission is a free, open-source home for the Final Testament,
-          the Bible, and the mathematical miracle of&nbsp;19 — tools for every
-          person who seeks God directly, without intermediary.
+          You are invited to join a unified religion for all people — Submission
+          to God alone. WikiSubmission is a free, open-source home for the
+          Final Testament, the Bible, and the mathematical miracle of&nbsp;19 —
+          tools for every person who seeks God directly, without intermediary.
         </p>
 
         {/* CTAs */}
@@ -147,13 +153,14 @@ export function HeroManifesto() {
             Read the Final Testament
             <Arrow />
           </Link>
-          <Link
-            href="/miracle"
+          <button
+            type="button"
+            onClick={toggleAsk}
             className="ed-btn-ghost"
             style={{ fontFamily: F.serif }}
           >
-            The miracle of 19
-          </Link>
+            Try SubmissionAI
+          </button>
         </div>
 
         {/* Stats row */}

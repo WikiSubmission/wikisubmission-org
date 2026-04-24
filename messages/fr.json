@@ -297,7 +297,10 @@
     "music": "Musique",
     "home": "Accueil",
     "blog": "Blog",
-    "chat": "Chat"
+    "chat": "Chat",
+    "community": "Communauté",
+    "signIn": "Connexion",
+    "submissionAI": "SubmissionAI"
   },
   "miracle": {
     "badge": "Miracle",
