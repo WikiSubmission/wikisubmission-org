@@ -434,7 +434,7 @@ export const VerseCard = memo(
       [verseId]
     )
 
-    // ─── Multi-select (long-press / shift-click) ───────────────────────────
+    // ─── Multi-select (long-press on touch / double-click on desktop) ──────
     const selectionActive = useVerseSelection((s) => s.active)
     const isSelected = useVerseSelection((s) =>
       verseId ? s.selected.has(verseId) : false
@@ -447,6 +447,17 @@ export const VerseCard = memo(
       startY: number
       fired: boolean
     }>({ timer: null, startX: 0, startY: 0, fired: false })
+
+    // Skip selection gestures when the interaction starts on an interactive
+    // control (audio/copy/bookmark buttons, dropdown triggers, or menu items).
+    // Links (the verse-key pill) are intentionally NOT skipped — users should
+    // be able to long-press anywhere on the card.
+    const isInteractiveTarget = (el: EventTarget | null) => {
+      const node = el as HTMLElement | null
+      return !!node?.closest(
+        'button, [role="menuitem"], [data-slot="dropdown-menu-trigger"], [data-slot="dropdown-menu-content"]'
+      )
+    }
 
     const cancelLongPress = useCallback(() => {
       const ref = longPressRef.current
@@ -461,32 +472,24 @@ export const VerseCard = memo(
     const onCardPointerDown = useCallback(
       (e: React.PointerEvent<HTMLDivElement>) => {
         if (!verseId) return
-        // Ignore interactions that start on a button/link — those have their own behavior.
-        const target = e.target as HTMLElement
-        if (target.closest('button, a, [role="menuitem"], [data-slot="dropdown-menu-trigger"]'))
-          return
-
-        // Shift-click (desktop): toggle selection without starting a timer.
-        if (e.shiftKey && e.pointerType === 'mouse') {
-          e.preventDefault()
-          toggleSelection(verse)
-          return
-        }
+        if (isInteractiveTarget(e.target)) return
 
         // While in selection mode, a plain tap toggles.
         if (selectionActive) {
-          e.preventDefault()
           toggleSelection(verse)
+          longPressRef.current.fired = true
           return
         }
 
-        // Otherwise start a long-press timer.
+        // Start a long-press timer. Activates selection after 500ms unless
+        // the pointer is released, moves too far, or gets cancelled first.
         const ref = longPressRef.current
         ref.startX = e.clientX
         ref.startY = e.clientY
         ref.fired = false
         cancelLongPress()
         ref.timer = window.setTimeout(() => {
+          ref.timer = null
           ref.fired = true
           activateSelection(verse)
           if ('vibrate' in navigator) {
@@ -516,16 +519,34 @@ export const VerseCard = memo(
       cancelLongPress()
     }, [cancelLongPress])
 
+    const onCardDoubleClick = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!verseId) return
+        if (isInteractiveTarget(e.target)) return
+        e.preventDefault()
+        e.stopPropagation()
+        toggleSelection(verse)
+        longPressRef.current.fired = true
+      },
+      [verse, verseId, toggleSelection]
+    )
+
+    const onCardContextMenu = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        // Suppress the mobile/desktop context menu while a long-press is
+        // active or selection is on — it fights the gesture.
+        if (longPressRef.current.fired || selectionActive) e.preventDefault()
+      },
+      [selectionActive]
+    )
+
     const onCardClickCapture = useCallback(
       (e: React.MouseEvent<HTMLDivElement>) => {
-        // Suppress `verseHref` Link navigation (and any other clicks) once a
-        // long-press or shift-click has activated selection.
+        // Suppress `verseHref` Link navigation once selection is active or a
+        // long-press/double-click has just fired. The buttons (copy/audio)
+        // remain fully interactive.
         if (longPressRef.current.fired || selectionActive) {
-          const target = e.target as HTMLElement
-          // Still allow the copy/audio buttons to work.
-          if (
-            !target.closest('button, [role="menuitem"], [data-slot="dropdown-menu-trigger"]')
-          ) {
+          if (!isInteractiveTarget(e.target)) {
             e.preventDefault()
             e.stopPropagation()
           }
@@ -551,7 +572,10 @@ export const VerseCard = memo(
         onPointerMove={onCardPointerMove}
         onPointerUp={onCardPointerEnd}
         onPointerCancel={onCardPointerEnd}
+        onDoubleClick={onCardDoubleClick}
+        onContextMenu={onCardContextMenu}
         onClickCapture={onCardClickCapture}
+        style={{ WebkitTouchCallout: 'none', WebkitUserSelect: selectionActive ? 'none' : undefined }}
         className={`relative transition-colors duration-500 ${
           isSelected ? 'bg-primary/10 ring-2 ring-primary ring-inset' : ''
         } ${
