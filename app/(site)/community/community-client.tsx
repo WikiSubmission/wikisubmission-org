@@ -2,7 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import {
+  ComposableMap,
+  Geographies,
+  Geography,
+  Marker,
+} from 'react-simple-maps'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import { F, Arrow } from '@/app/(site)/_sections/shared'
+
+const GEO_URL = '/maps/world-110m.json'
 
 // ─── Data ─────────────────────────────────────────────────────
 // TODO: source from CMS when the schema exists.
@@ -11,12 +24,10 @@ type Location = {
   id: string
   name: string
   city: string
-  region:
-    | 'North America'
-    | 'Europe'
-    | 'Middle East & Africa'
-    | 'Asia & Oceania'
-    | 'Latin America'
+  /** Free-form region name. Filter pills are derived from the values
+   *  present in LOCATIONS at runtime, so adding a community with a new
+   *  region (e.g. "South Asia") makes that filter pill appear automatically. */
+  region: string
   country: string
   founded: string
   lat: number
@@ -24,6 +35,20 @@ type Location = {
   contact: string
   desc: string
 }
+
+/** Suggested taxonomy when adding new communities. Not enforced — `region`
+ *  is a plain string and any value will be picked up by the filter pills. */
+export const KNOWN_REGIONS = [
+  'Western Europe',
+  'Eastern Europe',
+  'MENA',
+  'Sub-Saharan Africa',
+  'South Asia',
+  'East & Southeast Asia',
+  'North America',
+  'Latin America',
+  'Oceania',
+] as const
 
 const LOCATIONS: Location[] = [
   {
@@ -172,25 +197,43 @@ const LOCATIONS: Location[] = [
   },
 ]
 
+type ExtraSocial = {
+  /** Short visible label, e.g. "Twitter", "Mirror" */
+  label: string
+  /** Absolute URL */
+  url: string
+}
+
 type SocialCard = {
   id: string
   name: string
   platform: string
   sub: string
+  /** One-line summary shown on the collapsed row */
   desc: string
+  /** Long-form bio shown when the row is expanded. Plain text, 2–4 sentences. */
+  bio: string
+  /** Optional list of additional channels for this community. */
+  socials?: ExtraSocial[]
   color: string
   url: string
   icon: React.ReactNode
 }
 
-// TODO: move to CMS; multiple entries per platform allowed.
+// MOCK: shape mirrors the future API payload. Replace with a fetch when the
+// backend endpoint is live. `bio` and `socials` are placeholders to be edited.
 const SOCIAL_COMMUNITIES: SocialCard[] = [
   {
     id: 'discord-main',
     name: 'Submitters Discord',
     platform: 'Discord',
     sub: 'discord.gg/submitters',
-    desc: 'The main gathering place — verse-by-verse study channels, daily reminders, voice rooms for reading, and language-specific discussion (EN · AR · TR · FR · ES).',
+    desc: 'Main gathering place — verse-by-verse study, daily reminders, multilingual rooms.',
+    bio: 'Founded in 2019, the Submitters Discord is the largest active server for the global Submission community. Channels are organized by language (English, Arabic, Turkish, French, Spanish, Indonesian) and by topic — verse studies, the mathematical miracle of 19, prayer-time reminders, and an open Q&A room moderated by long-time submitters. Voice rooms host weekly Quran reading circles and informal hangouts.',
+    socials: [
+      { label: 'X / Twitter', url: '#' },
+      { label: 'YouTube', url: '#' },
+    ],
     color: '#5865F2',
     url: '#',
     icon: <IconDiscord />,
@@ -200,7 +243,11 @@ const SOCIAL_COMMUNITIES: SocialCard[] = [
     name: 'Teslim Turkish Discord',
     platform: 'Discord',
     sub: 'discord.gg/teslim',
-    desc: 'Turkish-language server for submitters in Türkiye and the diaspora — khutbahs, Quran recitation, and weekly Q&A.',
+    desc: 'Turkish-language server — khutbahs, Quran recitation, and weekly Q&A.',
+    bio: 'Run by submitters based in Istanbul and Ankara, this server caters to Turkish speakers in Türkiye and across the diaspora. Weekly khutbahs are streamed live, with archived recordings posted in the announcements channel. The server also runs an Arabic-recitation tutoring program for members new to reading the Final Testament in the original language.',
+    socials: [
+      { label: 'YouTube', url: '#' },
+    ],
     color: '#5865F2',
     url: '#',
     icon: <IconDiscord />,
@@ -210,7 +257,8 @@ const SOCIAL_COMMUNITIES: SocialCard[] = [
     name: 'Submission · Facebook Group',
     platform: 'Facebook',
     sub: 'facebook.com/groups/submitters',
-    desc: 'A long-running public group — questions, verse-of-the-day threads, and translated readings from all over the world.',
+    desc: 'Long-running public group — questions, verse-of-the-day threads, world-wide readings.',
+    bio: 'One of the oldest online gathering points for submitters, established in 2008. The group is moderated 24/7 by volunteers across multiple time zones. Most posts are in English, but threads frequently spawn in Arabic, French, and Spanish. Pinned topics include weekly verse studies and explanatory threads on the mathematical miracle.',
     color: '#1877F2',
     url: '#',
     icon: <IconFacebook />,
@@ -220,7 +268,8 @@ const SOCIAL_COMMUNITIES: SocialCard[] = [
     name: 'Sumisión a Dios · Grupo FB',
     platform: 'Facebook',
     sub: 'facebook.com/groups/sumision',
-    desc: 'Spanish-language Facebook group — translations, commentary, and live study rooms.',
+    desc: 'Spanish-language Facebook group — translations, commentary, live study rooms.',
+    bio: 'A Spanish-language hub primarily active across Latin America and Spain. Features include a verse-of-the-day post in Spanish, member-led translations of articles from Masjid Tucson, and monthly live audio rooms hosted via Facebook Live where members read and discuss the Final Testament together.',
     color: '#1877F2',
     url: '#',
     icon: <IconFacebook />,
@@ -230,7 +279,8 @@ const SOCIAL_COMMUNITIES: SocialCard[] = [
     name: 'r/Submitters',
     platform: 'Reddit',
     sub: 'reddit.com/r/submitters',
-    desc: 'Open discussion forum — Q&A, comparative readings, and weekly threads on the miracle of 19.',
+    desc: 'Open discussion forum — Q&A, comparative readings, weekly miracle-of-19 threads.',
+    bio: 'A small but active Reddit community focused on long-form discussion. The subreddit hosts weekly recurring threads (Verse Tuesday, Miracle Friday) and welcomes critical questions from members of other faiths. Moderation is hands-off — posts are removed only for personal attacks or spam, not for disagreement with the community position.',
     color: '#FF4500',
     url: '#',
     icon: <IconReddit />,
@@ -240,7 +290,8 @@ const SOCIAL_COMMUNITIES: SocialCard[] = [
     name: 'WhatsApp Circles',
     platform: 'WhatsApp',
     sub: 'By language & region',
-    desc: 'Private regional circles — English, Arabic, Turkish, Malay, Indonesian, Spanish, Portuguese. Request an invite to join your nearest circle.',
+    desc: 'Private regional circles — English, Arabic, Turkish, Malay, Indonesian, Spanish, Portuguese.',
+    bio: 'A network of small, invite-only WhatsApp groups organized by language and geography. Each circle averages 30–80 members and is run independently by a local moderator. Most groups send a daily verse, prayer-time reminders calibrated to the local timezone, and announce in-person meetups when applicable. Request an invite via any of the public communities listed here.',
     color: '#25D366',
     url: '#',
     icon: <IconWhatsapp />,
@@ -250,7 +301,11 @@ const SOCIAL_COMMUNITIES: SocialCard[] = [
     name: 'Submission · Telegram',
     platform: 'Telegram',
     sub: 't.me/submitters',
-    desc: 'Verse-of-the-day broadcasts, audio recitations, and a dedicated Arabic learners channel.',
+    desc: 'Verse-of-the-day broadcasts, audio recitations, dedicated Arabic learners channel.',
+    bio: 'A broadcast-style Telegram channel with a sister discussion group. The main channel posts verses, audio recitations from Al-Husary and Al-Minshawi, and announcements for online events. The discussion group is open to all and is one of the most active venues for comparative scripture conversations between submitters, traditional Muslims, and curious newcomers.',
+    socials: [
+      { label: 'YouTube', url: '#' },
+    ],
     color: '#0088CC',
     url: '#',
     icon: <IconTelegram />,
@@ -263,10 +318,16 @@ type ContentChannel = {
   kind: 'Blog' | 'YouTube' | 'Podcast' | 'Newsletter'
   author: string
   url: string
+  /** One-line summary shown on the collapsed card */
   desc: string
+  /** Long-form bio shown when the card is expanded. Plain text, 2–4 sentences. */
+  bio: string
+  /** Optional list of additional channels for this contributor. */
+  socials?: ExtraSocial[]
 }
 
-// TODO: move to CMS when schema exists.
+// MOCK: shape mirrors the future API payload. Replace with a fetch when the
+// backend endpoint is live. `bio` and `socials` are placeholders to be edited.
 const CONTENT_CHANNELS: ContentChannel[] = [
   {
     id: 'submission-yt',
@@ -275,6 +336,10 @@ const CONTENT_CHANNELS: ContentChannel[] = [
     author: 'Masjid Tucson',
     url: '#',
     desc: 'Full archive of khutbahs, lectures, and miracle explainers — subtitled in six languages.',
+    bio: "The official Masjid Tucson YouTube channel — the canonical archive of khutbahs, lectures, and explainers from the founding community of the movement. Includes Dr. Rashad Khalifa's original 1980s lectures, contemporary khutbahs from Friday services, and a long-running playlist on the mathematical miracle of 19.",
+    socials: [
+      { label: 'Website', url: '#' },
+    ],
   },
   {
     id: 'reflections-blog',
@@ -282,7 +347,12 @@ const CONTENT_CHANNELS: ContentChannel[] = [
     name: 'Reflections on the Final Testament',
     author: 'Samar K.',
     url: '#',
-    desc: 'A weekly essay on a single verse — historical context, linguistic notes, and practical application.',
+    desc: 'Weekly essays on a single verse — historical context, linguistic notes, practical application.',
+    bio: 'A long-running personal blog by Samar K., a submitter based in Toronto. Each post takes a single verse and works through it slowly — historical context, linguistic notes drawn from the Arabic, and practical reflections on what the verse asks of the reader. Posts publish every Sunday.',
+    socials: [
+      { label: 'RSS', url: '#' },
+      { label: 'X / Twitter', url: '#' },
+    ],
   },
   {
     id: 'teslim-podcast',
@@ -291,6 +361,11 @@ const CONTENT_CHANNELS: ContentChannel[] = [
     author: 'Istanbul Circle',
     url: '#',
     desc: 'Turkish-language podcast reading the Final Testament cover-to-cover, one sura per episode.',
+    bio: 'Produced by the Istanbul Submitters circle, Teslim Radio is a long-form podcast reading the Final Testament cover-to-cover in Turkish, one sura per episode. Each episode pairs the recitation with brief commentary from a rotating group of community contributors. Available on Spotify, Apple Podcasts, and direct RSS.',
+    socials: [
+      { label: 'Spotify', url: '#' },
+      { label: 'Apple Podcasts', url: '#' },
+    ],
   },
   {
     id: 'miracle-newsletter',
@@ -298,29 +373,13 @@ const CONTENT_CHANNELS: ContentChannel[] = [
     name: 'Over It Is Nineteen',
     author: 'Faisal M.',
     url: '#',
-    desc: 'Monthly newsletter exploring the mathematical structure of the Quran — plain-language pieces, no technical background required.',
+    desc: 'Monthly newsletter on the mathematical structure of the Quran — no technical background required.',
+    bio: 'A monthly Substack newsletter by Faisal M. that explores the mathematical structure of the Quran in plain language. Each issue picks one numerical pattern and works through the verses involved without assuming a mathematical background. Past issues have covered the 19-letter Bismillah, the 114-chapter structure, and the frequency of divine names.',
+    socials: [
+      { label: 'Substack', url: '#' },
+    ],
   },
 ]
-
-const REGIONS = [
-  'All',
-  'North America',
-  'Europe',
-  'Middle East & Africa',
-  'Asia & Oceania',
-  'Latin America',
-] as const
-type Region = (typeof REGIONS)[number]
-
-// ─── Map helpers ────────────────────────────────────────────────
-
-function project(lat: number, lng: number) {
-  const w = 900
-  const h = 450
-  const x = (lng + 180) * (w / 360)
-  const y = (90 - lat) * (h / 180)
-  return { x, y }
-}
 
 function PinIcon() {
   return (
@@ -374,109 +433,114 @@ function IconTelegram() {
   )
 }
 
-// ─── World map SVG ─────────────────────────────────────────────
+// ─── World map ──────────────────────────────────────────────────
+// Realistic geography via react-simple-maps + world-atlas TopoJSON
+// (public/maps/world-110m.json). All fills/strokes use --ed-* tokens so
+// the map respects every palette (ink / violet / mono) and theme.
 
 function WorldMap({
   locations,
   selectedId,
+  hoveredId,
   onSelect,
+  onHover,
 }: {
   locations: Location[]
   selectedId: string
+  hoveredId: string | null
   onSelect: (id: string) => void
+  onHover: (id: string | null) => void
 }) {
   return (
-    <svg
-      viewBox="0 0 900 450"
-      xmlns="http://www.w3.org/2000/svg"
-      className="community-map w-full h-auto"
-      preserveAspectRatio="xMidYMid meet"
+    <ComposableMap
+      projection="geoEqualEarth"
+      projectionConfig={{ scale: 165 }}
+      width={900}
+      height={450}
+      style={{ width: '100%', height: 'auto' }}
       role="img"
       aria-label="Map of submitter communities"
     >
-      <defs>
-        <pattern id="mapDots" width="6" height="6" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="0.9" fill="currentColor" opacity="0.55" />
-        </pattern>
-        <clipPath id="continentsMask">
-          <path d="M 90 90 L 180 80 L 240 100 L 260 150 L 235 195 L 210 215 L 180 235 L 150 220 L 120 180 L 95 140 Z" />
-          <path d="M 200 220 L 235 230 L 245 260 L 225 275 L 210 260 L 200 240 Z" />
-          <path d="M 250 250 L 290 260 L 320 310 L 310 370 L 285 410 L 270 400 L 255 340 L 245 280 Z" />
-          <path d="M 420 100 L 495 95 L 520 130 L 495 160 L 455 165 L 430 150 L 415 125 Z" />
-          <path d="M 430 175 L 510 175 L 545 215 L 555 275 L 525 330 L 485 345 L 455 310 L 440 260 L 430 210 Z" />
-          <path d="M 520 160 L 590 155 L 625 190 L 600 215 L 560 210 L 525 195 Z" />
-          <path d="M 530 95 L 680 85 L 760 120 L 790 170 L 760 210 L 700 220 L 640 210 L 600 170 L 550 140 Z" />
-          <path d="M 700 220 L 770 225 L 790 260 L 760 275 L 720 265 Z" />
-          <path d="M 740 295 L 810 290 L 830 325 L 790 345 L 755 330 Z" />
-        </clipPath>
-      </defs>
-
-      <rect width="900" height="450" fill="transparent" />
-
-      <g style={{ color: 'var(--ed-fg-muted)' }} clipPath="url(#continentsMask)">
-        <rect width="900" height="450" fill="url(#mapDots)" />
-      </g>
-
-      <g fill="none" stroke="var(--ed-rule)" strokeWidth="0.8" opacity="0.8">
-        <path d="M 90 90 L 180 80 L 240 100 L 260 150 L 235 195 L 210 215 L 180 235 L 150 220 L 120 180 L 95 140 Z" />
-        <path d="M 250 250 L 290 260 L 320 310 L 310 370 L 285 410 L 270 400 L 255 340 L 245 280 Z" />
-        <path d="M 420 100 L 495 95 L 520 130 L 495 160 L 455 165 L 430 150 L 415 125 Z" />
-        <path d="M 430 175 L 510 175 L 545 215 L 555 275 L 525 330 L 485 345 L 455 310 L 440 260 L 430 210 Z" />
-        <path d="M 530 95 L 680 85 L 760 120 L 790 170 L 760 210 L 700 220 L 640 210 L 600 170 L 550 140 Z" />
-        <path d="M 700 220 L 770 225 L 790 260 L 760 275 L 720 265 Z" />
-        <path d="M 740 295 L 810 290 L 830 325 L 790 345 L 755 330 Z" />
-      </g>
-
-      <g stroke="var(--ed-rule)" strokeWidth="0.5" opacity="0.5" strokeDasharray="2 4">
-        <line x1="0" y1="225" x2="900" y2="225" />
-        <line x1="450" y1="0" x2="450" y2="450" />
-      </g>
+      <Geographies geography={GEO_URL}>
+        {({ geographies }) =>
+          geographies.map((geo) => (
+            <Geography
+              key={geo.rsmKey}
+              geography={geo}
+              style={{
+                default: {
+                  fill: 'var(--ed-surface)',
+                  stroke: 'var(--ed-rule)',
+                  strokeWidth: 0.5,
+                  outline: 'none',
+                },
+                hover: {
+                  fill: 'var(--ed-rule)',
+                  stroke: 'var(--ed-rule)',
+                  strokeWidth: 0.5,
+                  outline: 'none',
+                },
+                pressed: {
+                  fill: 'var(--ed-rule)',
+                  outline: 'none',
+                },
+              }}
+            />
+          ))
+        }
+      </Geographies>
 
       {locations.map((loc) => {
-        const { x, y } = project(loc.lat, loc.lng)
         const isActive = loc.id === selectedId
-        const r = isActive ? 7 : 5
+        const isHovered = loc.id === hoveredId
+        const radius = isActive ? 4.5 : isHovered ? 3.5 : 2.8
         return (
-          <g
+          <Marker
             key={loc.id}
-            transform={`translate(${x}, ${y})`}
+            coordinates={[loc.lng, loc.lat]}
             onClick={() => onSelect(loc.id)}
-            style={{ cursor: 'pointer' }}
+            onMouseEnter={() => onHover(loc.id)}
+            onMouseLeave={() => onHover(null)}
+            style={{
+              default: { cursor: 'pointer' },
+              hover: { cursor: 'pointer' },
+              pressed: { cursor: 'pointer' },
+            }}
           >
             {isActive && (
               <circle
-                r={r + 6}
+                r={11}
                 fill="none"
                 stroke="var(--ed-accent)"
-                strokeWidth="2"
-                opacity="0.9"
+                strokeWidth={1.8}
+                opacity={0.9}
               />
             )}
-            <circle r={r + 2} fill="var(--ed-bg)" opacity="0.9" />
+            <circle r={radius + 1.5} fill="var(--ed-bg)" opacity={0.9} />
             <circle
-              r={r}
+              r={radius}
               fill="var(--ed-accent)"
               stroke="var(--ed-surface)"
-              strokeWidth="1.2"
-              style={{ transition: 'all 220ms' }}
+              strokeWidth={1}
+              style={{ transition: 'r 200ms ease' }}
             />
-            {isActive && (
+            {(isActive || isHovered) && (
               <text
-                y={-r - 8}
+                y={-12}
                 textAnchor="middle"
                 fontFamily="var(--font-jetbrains), monospace"
-                fontSize="9"
+                fontSize={8}
                 letterSpacing="0.1em"
                 fill="var(--ed-fg)"
-                style={{ textTransform: 'uppercase' }}
+                style={{ textTransform: 'uppercase', pointerEvents: 'none' }}
               >
                 {loc.city}
               </text>
             )}
-          </g>
+          </Marker>
         )
       })}
-    </svg>
+    </ComposableMap>
   )
 }
 
@@ -533,9 +597,20 @@ function getAllNotes(): Record<string, string> {
 
 export default function CommunityClient() {
   const [selectedId, setSelectedId] = useState<string>(LOCATIONS[0].id)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
-  const [region, setRegion] = useState<Region>('All')
+  const [region, setRegion] = useState<string>('All')
   const [notes, setNotes] = useState<Record<string, string>>({})
+  const [openSocialId, setOpenSocialId] = useState<string | null>(null)
+  const [openChannelId, setOpenChannelId] = useState<string | null>(null)
+
+  // Region pills are derived from the data so adding a community in a new
+  // region (e.g. "South Asia") automatically adds a filter pill for it.
+  const regionOptions = useMemo(
+    () =>
+      ['All', ...Array.from(new Set(LOCATIONS.map((l) => l.region))).sort()],
+    []
+  )
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -682,7 +757,7 @@ export default function CommunityClient() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search city, country, or note…"
+                  placeholder="Search city, country, region…"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   style={{
@@ -827,7 +902,7 @@ export default function CommunityClient() {
                 Atlas · {LOCATIONS.length} communities
               </span>
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                {REGIONS.map((r) => (
+                {regionOptions.map((r) => (
                   <button
                     key={r}
                     type="button"
@@ -856,7 +931,9 @@ export default function CommunityClient() {
               <WorldMap
                 locations={filtered}
                 selectedId={selectedId}
+                hoveredId={hoveredId}
                 onSelect={setSelectedId}
+                onHover={setHoveredId}
               />
             </div>
 
@@ -1008,91 +1085,177 @@ export default function CommunityClient() {
         />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {SOCIAL_COMMUNITIES.map((c) => (
-            <Link
-              key={c.id}
-              href={c.url}
-              className="ed-card"
-              style={{
-                backgroundColor: 'var(--ed-surface)',
-                padding: 'clamp(18px, 4vw, 24px)',
-                display: 'grid',
-                gridTemplateColumns: '56px 1fr auto',
-                alignItems: 'center',
-                gap: 'clamp(14px, 3vw, 24px)',
-                textDecoration: 'none',
-              }}
-            >
-              <span
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 6,
-                  background: c.color,
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 4px 14px -6px rgba(0,0,0,0.25)',
-                }}
+          {SOCIAL_COMMUNITIES.map((c) => {
+            const isOpen = openSocialId === c.id
+            return (
+              <Collapsible
+                key={c.id}
+                open={isOpen}
+                onOpenChange={(o) => setOpenSocialId(o ? c.id : null)}
               >
-                {c.icon}
-              </span>
-              <div className="min-w-0 flex flex-col gap-1.5">
-                <div className="flex items-baseline gap-3 flex-wrap">
-                  <span
-                    style={{
-                      fontFamily: F.display,
-                      fontSize: 'clamp(18px, 3.4vw, 22px)',
-                      fontWeight: 500,
-                      letterSpacing: '-0.015em',
-                      color: 'var(--ed-fg)',
-                    }}
-                  >
-                    {c.name}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: F.mono,
-                      fontSize: 10,
-                      letterSpacing: '0.16em',
-                      textTransform: 'uppercase',
-                      color: 'var(--ed-accent)',
-                    }}
-                  >
-                    {c.platform}
-                  </span>
+                <div
+                  className="ed-card community-row"
+                  style={{ backgroundColor: 'var(--ed-surface)' }}
+                >
+                  <CollapsibleTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${c.name}`}
+                      style={{
+                        all: 'unset',
+                        cursor: 'pointer',
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        padding: 'clamp(18px, 4vw, 24px)',
+                        display: 'grid',
+                        gridTemplateColumns: '56px 1fr auto',
+                        alignItems: 'center',
+                        gap: 'clamp(14px, 3vw, 24px)',
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 6,
+                          background: c.color,
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 4px 14px -6px rgba(0,0,0,0.25)',
+                        }}
+                      >
+                        {c.icon}
+                      </span>
+                      <div className="min-w-0 flex flex-col gap-1.5">
+                        <div className="flex items-baseline gap-3 flex-wrap">
+                          <span
+                            style={{
+                              fontFamily: F.display,
+                              fontSize: 'clamp(18px, 3.4vw, 22px)',
+                              fontWeight: 500,
+                              letterSpacing: '-0.015em',
+                              color: 'var(--ed-fg)',
+                            }}
+                          >
+                            {c.name}
+                          </span>
+                          <span
+                            style={{
+                              fontFamily: F.mono,
+                              fontSize: 10,
+                              letterSpacing: '0.16em',
+                              textTransform: 'uppercase',
+                              color: 'var(--ed-accent)',
+                            }}
+                          >
+                            {c.platform}
+                          </span>
+                        </div>
+                        <span
+                          style={{
+                            fontFamily: F.mono,
+                            fontSize: 11,
+                            color: 'var(--ed-fg-muted)',
+                          }}
+                        >
+                          {c.sub}
+                        </span>
+                        <p
+                          style={{
+                            fontFamily: F.serif,
+                            fontSize: 13.5,
+                            lineHeight: 1.6,
+                            color: 'var(--ed-fg-muted)',
+                            margin: '4px 0 0',
+                            maxWidth: '70ch',
+                          }}
+                        >
+                          {c.desc}
+                        </p>
+                      </div>
+                      <Chevron open={isOpen} />
+                    </button>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent className="community-collapse">
+                    <div
+                      style={{
+                        padding: '0 clamp(18px, 4vw, 24px) clamp(18px, 4vw, 24px) clamp(18px, 4vw, 24px)',
+                        marginLeft: 'calc(56px + clamp(14px, 3vw, 24px))',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 16,
+                        borderTop: '1px dashed var(--ed-rule)',
+                        paddingTop: 16,
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontFamily: F.serif,
+                          fontSize: 14.5,
+                          lineHeight: 1.7,
+                          color: 'var(--ed-fg)',
+                          margin: 0,
+                          maxWidth: '70ch',
+                        }}
+                      >
+                        {c.bio}
+                      </p>
+
+                      <div
+                        className="flex items-center gap-4 flex-wrap"
+                        style={{ marginTop: 4 }}
+                      >
+                        <Link
+                          href={c.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ed-cta"
+                          style={{ fontSize: 12, whiteSpace: 'nowrap' }}
+                        >
+                          Join {c.platform} <Arrow />
+                        </Link>
+                        {c.socials && c.socials.length > 0 && (
+                          <span
+                            style={{
+                              fontFamily: F.mono,
+                              fontSize: 10,
+                              letterSpacing: '0.16em',
+                              textTransform: 'uppercase',
+                              color: 'var(--ed-fg-muted)',
+                            }}
+                          >
+                            Also on
+                          </span>
+                        )}
+                        {c.socials?.map((s) => (
+                          <Link
+                            key={s.url + s.label}
+                            href={s.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontFamily: F.mono,
+                              fontSize: 11,
+                              letterSpacing: '0.12em',
+                              textTransform: 'uppercase',
+                              color: 'var(--ed-fg-muted)',
+                              textDecoration: 'underline',
+                              textUnderlineOffset: 3,
+                            }}
+                          >
+                            {s.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </CollapsibleContent>
                 </div>
-                <span
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 11,
-                    color: 'var(--ed-fg-muted)',
-                  }}
-                >
-                  {c.sub}
-                </span>
-                <p
-                  style={{
-                    fontFamily: F.serif,
-                    fontSize: 13.5,
-                    lineHeight: 1.6,
-                    color: 'var(--ed-fg-muted)',
-                    margin: '4px 0 0',
-                    maxWidth: '70ch',
-                  }}
-                >
-                  {c.desc}
-                </p>
-              </div>
-              <span
-                className="ed-cta hidden sm:inline-flex"
-                style={{ fontSize: 12, whiteSpace: 'nowrap' }}
-              >
-                Join {c.platform} <Arrow />
-              </span>
-            </Link>
-          ))}
+              </Collapsible>
+            )
+          })}
         </div>
       </section>
 
@@ -1116,76 +1279,192 @@ export default function CommunityClient() {
           className="grid grid-cols-1 md:grid-cols-2"
           style={{ gap: 16 }}
         >
-          {CONTENT_CHANNELS.map((c) => (
-            <Link
-              key={c.id}
-              href={c.url}
-              className="ed-card"
-              style={{
-                backgroundColor: 'var(--ed-surface)',
-                padding: 'clamp(20px, 4vw, 28px)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 12,
-                textDecoration: 'none',
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <span
+          {CONTENT_CHANNELS.map((c) => {
+            const isOpen = openChannelId === c.id
+            return (
+              <Collapsible
+                key={c.id}
+                open={isOpen}
+                onOpenChange={(o) => setOpenChannelId(o ? c.id : null)}
+              >
+                <div
+                  className="ed-card community-row"
                   style={{
-                    fontFamily: F.mono,
-                    fontSize: 10,
-                    letterSpacing: '0.18em',
-                    textTransform: 'uppercase',
-                    color: 'var(--ed-accent)',
+                    backgroundColor: 'var(--ed-surface)',
+                    height: '100%',
                   }}
                 >
-                  {c.kind}
-                </span>
-                <span
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 10,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    color: 'var(--ed-fg-muted)',
-                  }}
-                >
-                  by {c.author}
-                </span>
-              </div>
-              <div
-                style={{
-                  fontFamily: F.display,
-                  fontSize: 22,
-                  fontWeight: 500,
-                  letterSpacing: '-0.015em',
-                  color: 'var(--ed-fg)',
-                  lineHeight: 1.2,
-                }}
-              >
-                {c.name}
-              </div>
-              <p
-                style={{
-                  fontFamily: F.serif,
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                  color: 'var(--ed-fg-muted)',
-                  margin: 0,
-                  flex: 1,
-                }}
-              >
-                {c.desc}
-              </p>
-              <div className="ed-cta" style={{ fontSize: 13 }}>
-                Visit {c.kind.toLowerCase()} <Arrow />
-              </div>
-            </Link>
-          ))}
+                  <CollapsibleTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label={`${isOpen ? 'Collapse' : 'Expand'} ${c.name}`}
+                      style={{
+                        all: 'unset',
+                        cursor: 'pointer',
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        padding: 'clamp(20px, 4vw, 28px)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12,
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span
+                          style={{
+                            fontFamily: F.mono,
+                            fontSize: 10,
+                            letterSpacing: '0.18em',
+                            textTransform: 'uppercase',
+                            color: 'var(--ed-accent)',
+                          }}
+                        >
+                          {c.kind}
+                        </span>
+                        <div className="flex items-center gap-3">
+                          <span
+                            style={{
+                              fontFamily: F.mono,
+                              fontSize: 10,
+                              letterSpacing: '0.14em',
+                              textTransform: 'uppercase',
+                              color: 'var(--ed-fg-muted)',
+                            }}
+                          >
+                            by {c.author}
+                          </span>
+                          <Chevron open={isOpen} />
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: F.display,
+                          fontSize: 22,
+                          fontWeight: 500,
+                          letterSpacing: '-0.015em',
+                          color: 'var(--ed-fg)',
+                          lineHeight: 1.2,
+                          textAlign: 'left',
+                        }}
+                      >
+                        {c.name}
+                      </div>
+                      <p
+                        style={{
+                          fontFamily: F.serif,
+                          fontSize: 14,
+                          lineHeight: 1.6,
+                          color: 'var(--ed-fg-muted)',
+                          margin: 0,
+                          flex: 1,
+                        }}
+                      >
+                        {c.desc}
+                      </p>
+                    </button>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent className="community-collapse">
+                    <div
+                      style={{
+                        padding:
+                          '0 clamp(20px, 4vw, 28px) clamp(20px, 4vw, 28px) clamp(20px, 4vw, 28px)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 14,
+                        borderTop: '1px dashed var(--ed-rule)',
+                        paddingTop: 14,
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontFamily: F.serif,
+                          fontSize: 14.5,
+                          lineHeight: 1.7,
+                          color: 'var(--ed-fg)',
+                          margin: 0,
+                          maxWidth: '70ch',
+                        }}
+                      >
+                        {c.bio}
+                      </p>
+                      <div
+                        className="flex items-center gap-4 flex-wrap"
+                        style={{ marginTop: 4 }}
+                      >
+                        <Link
+                          href={c.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ed-cta"
+                          style={{ fontSize: 13 }}
+                        >
+                          Visit {c.kind.toLowerCase()} <Arrow />
+                        </Link>
+                        {c.socials && c.socials.length > 0 && (
+                          <span
+                            style={{
+                              fontFamily: F.mono,
+                              fontSize: 10,
+                              letterSpacing: '0.16em',
+                              textTransform: 'uppercase',
+                              color: 'var(--ed-fg-muted)',
+                            }}
+                          >
+                            Also on
+                          </span>
+                        )}
+                        {c.socials?.map((s) => (
+                          <Link
+                            key={s.url + s.label}
+                            href={s.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontFamily: F.mono,
+                              fontSize: 11,
+                              letterSpacing: '0.12em',
+                              textTransform: 'uppercase',
+                              color: 'var(--ed-fg-muted)',
+                              textDecoration: 'underline',
+                              textUnderlineOffset: 3,
+                            }}
+                          >
+                            {s.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </CollapsibleContent>
+                </div>
+              </Collapsible>
+            )
+          })}
         </div>
       </section>
     </div>
+  )
+}
+
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden
+      style={{
+        flexShrink: 0,
+        color: 'var(--ed-fg-muted)',
+        transform: open ? 'rotate(180deg)' : 'none',
+        transition: 'transform 220ms ease',
+      }}
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
   )
 }
 

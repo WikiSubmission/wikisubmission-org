@@ -16,9 +16,9 @@ export async function SiteFooter() {
   const LINKS = {
     scripture: [
       { label: nav('quran'), href: '/quran' },
+      { label: navbar('bible'), href: '/bible' },
       { label: nav('proclamation'), href: '/proclamation' },
       { label: nav('introduction'), href: '/introduction' },
-      { label: t('linkAppendices'), href: '/appendices/1' },
       { label: t('linkMiracle'), href: '/miracle' },
     ],
     explore: [
@@ -33,7 +33,6 @@ export async function SiteFooter() {
       { label: nav('donate'), href: '/donate' },
       { label: t('linkPrivacy'), href: '/legal/privacy-policy' },
       { label: t('linkTerms'), href: '/legal/terms-of-use' },
-      { label: 'Brand Guidelines', href: '/brand' },
     ],
   }
 

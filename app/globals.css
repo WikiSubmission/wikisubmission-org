@@ -527,4 +527,51 @@ html[data-palette='mono'].dark {
     display: none;
     /* Safari and Chrome */
   }
+
+  /* Collapsible rows on /community.
+     Radix exposes --radix-collapsible-content-height, which we animate over.
+     prefers-reduced-motion disables the animation. */
+  @keyframes community-collapse-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-collapsible-content-height);
+    }
+  }
+  @keyframes community-collapse-up {
+    from {
+      height: var(--radix-collapsible-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  .community-collapse {
+    overflow: hidden;
+  }
+
+  /* Visible keyboard focus on the row triggers — `all: unset` on the button
+     strips the default focus ring, so we add it back here for keyboard users. */
+  .community-row button:focus-visible {
+    outline: 2px solid var(--ed-accent);
+    outline-offset: -2px;
+    border-radius: 3px;
+  }
+
+  .community-collapse[data-state="open"] {
+    animation: community-collapse-down 220ms ease;
+  }
+
+  .community-collapse[data-state="closed"] {
+    animation: community-collapse-up 180ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .community-collapse[data-state="open"],
+    .community-collapse[data-state="closed"] {
+      animation: none;
+    }
+  }
 }

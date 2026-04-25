@@ -74,16 +74,16 @@ export function SiteNav() {
         style={{
           maxWidth: 1240,
           margin: '0 auto',
-          padding: '0 clamp(16px, 4vw, 40px)',
+          padding: '0 clamp(12px, 3vw, 40px)',
           height: 64,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 16,
+          gap: 10,
         }}
       >
         {/* Logo + Wordmark */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-none min-w-0">
           <Link
             href="/"
             onClick={close}
@@ -106,51 +106,53 @@ export function SiteNav() {
               width={28}
               height={28}
             />
-            <span className="truncate max-[380px]:hidden sm:inline">
+            <span className="max-[380px]:hidden sm:inline whitespace-nowrap">
               WikiSubmission
             </span>
           </Link>
         </div>
 
         {/* Tabbed Navigation (Desktop - Centered) */}
-        <div
-          className="hidden lg:flex flex-none"
-          style={{
-            background: 'color-mix(in oklab, var(--ed-fg), transparent 96%)',
-            padding: '2px',
-            borderRadius: '0px',
-            border: '1px solid var(--ed-rule)',
-            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)',
-            gap: '1px',
-          }}
-        >
-          {NAV_ITEMS.map((item) =>
-            item.kind === 'link' ? (
-              <NavTabLink
-                key={item.label}
-                item={item}
-                active={isActive(pathname, item.href)}
-                label={t(item.label)}
-              />
-            ) : (
-              <NavTabGroup
-                key={item.label}
-                item={item}
-                active={item.children.some((c) => isActive(pathname, c.href))}
-                label={t(item.label)}
-                tChild={t}
-              />
-            )
-          )}
+        <div className="hidden lg:flex flex-1 justify-center">
+          <div
+            className="flex"
+            style={{
+              background: 'color-mix(in oklab, var(--ed-fg), transparent 96%)',
+              padding: '2px',
+              borderRadius: '0px',
+              border: '1px solid var(--ed-rule)',
+              boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)',
+              gap: '1px',
+            }}
+          >
+            {NAV_ITEMS.map((item) =>
+              item.kind === 'link' ? (
+                <NavTabLink
+                  key={item.label}
+                  item={item}
+                  active={isActive(pathname, item.href)}
+                  label={t(item.label)}
+                />
+              ) : (
+                <NavTabGroup
+                  key={item.label}
+                  item={item}
+                  active={item.children.some((c) => isActive(pathname, c.href))}
+                  label={t(item.label)}
+                  tChild={t}
+                />
+              )
+            )}
+          </div>
         </div>
 
         {/* Right controls */}
-        <div className="flex-1 flex items-center justify-end gap-1 shrink-0">
+        <div className="flex-none flex items-center justify-end gap-1">
           <button
             type="button"
             onClick={toggleAsk}
             aria-label={t('submissionAI')}
-            className="hidden sm:inline-flex items-center gap-1.5 h-[34px] px-3 rounded-[2px] transition-colors"
+            className="hidden sm:inline-flex items-center gap-1 h-[34px] px-2.5 rounded-[2px] transition-colors"
             style={{
               fontFamily: F.mono,
               fontSize: 10.5,
@@ -180,31 +182,12 @@ export function SiteNav() {
             <span>{t('submissionAI')}</span>
           </button>
 
-          <LocaleSwitcher currentLocale={locale} />
-          <PaletteThemeSwitcher />
+          <div className="flex items-center gap-0.5">
+            <LocaleSwitcher currentLocale={locale} />
+            <PaletteThemeSwitcher />
+          </div>
 
-          <Link
-            href="/auth/sign-in"
-            className="hidden sm:inline-flex items-center h-[34px] px-3 transition-colors"
-            style={{
-              fontFamily: F.mono,
-              fontSize: 10.5,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color: 'var(--ed-fg-muted)',
-              textDecoration: 'none',
-            }}
-            onMouseEnter={(e) => {
-              ;(e.currentTarget as HTMLAnchorElement).style.color =
-                'var(--ed-fg)'
-            }}
-            onMouseLeave={(e) => {
-              ;(e.currentTarget as HTMLAnchorElement).style.color =
-                'var(--ed-fg-muted)'
-            }}
-          >
-            {t('signIn')}
-          </Link>
+          {/* Sign in (Clerk) — temporarily disabled. Re-enable: <Link href="/auth/sign-in">{t('signIn')}</Link> */}
 
           {/* Mobile controls: AI + hamburger */}
           <button
@@ -330,21 +313,7 @@ export function SiteNav() {
             >
               <LocaleSwitcher currentLocale={locale} onSelect={close} />
               <PaletteThemeSwitcher />
-              <Link
-                href="/auth/sign-in"
-                onClick={close}
-                style={{
-                  fontFamily: F.mono,
-                  fontSize: 11,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  color: 'var(--ed-fg-muted)',
-                  textDecoration: 'none',
-                  padding: '6px 12px',
-                }}
-              >
-                {t('signIn')}
-              </Link>
+              {/* Sign in (Clerk) — temporarily disabled. Re-enable: <Link href="/auth/sign-in">{t('signIn')}</Link> */}
             </div>
           </motion.div>
         )}

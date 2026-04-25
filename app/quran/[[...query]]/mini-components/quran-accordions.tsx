@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { RandomVerseTile } from './random-verse-tile'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import type { components } from '@/src/api/types.gen'
 
 type Chapter = components['schemas']['Chapter']
 type Appendix = components['schemas']['Appendix']
+
+const RTL_LOCALES = new Set(['ar', 'ku', 'fa', 'ur'])
 
 interface Props {
   chapters: Chapter[]
@@ -26,6 +28,8 @@ export function QuranAccordions({
   const [chaptersOpen, setChaptersOpen] = useState(initCh)
   const [appendicesOpen, setAppendicesOpen] = useState(initAp)
   const tSidebar = useTranslations('sidebar')
+  const locale = useLocale()
+  const titleDir = RTL_LOCALES.has(locale) ? 'rtl' : 'ltr'
 
   function syncUrl(key: 'ch' | 'ap', open: boolean) {
     const url = new URL(window.location.href)
@@ -73,7 +77,10 @@ export function QuranAccordions({
                 <span className="font-mono text-xs text-muted-foreground group-hover:text-foreground transition-colors">
                   {ch.chapter_number}
                 </span>
-                <span className="text-sm font-medium leading-snug line-clamp-2">
+                <span
+                  className="text-sm font-medium leading-snug line-clamp-2"
+                  dir={titleDir}
+                >
                   {ch.title}
                 </span>
               </Link>
@@ -106,7 +113,10 @@ export function QuranAccordions({
                 <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">
                   {app.code}
                 </span>
-                <span className="text-sm flex-1 min-w-0 truncate group-hover:text-foreground transition-colors">
+                <span
+                  className="text-sm flex-1 min-w-0 truncate group-hover:text-foreground transition-colors"
+                  dir={titleDir}
+                >
                   {app.title}
                 </span>
               </Link>

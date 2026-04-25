@@ -8,7 +8,7 @@ import QuranSearchBar from './client-components/search-bar'
 import { wsApiServer } from '@/src/api/server-client'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { buildPageMetadata } from '@/constants/metadata'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import { VerseListResult } from './mini-components/verse-list-result'
@@ -56,13 +56,14 @@ export default async function QuranPage({
   const queryText = rawQuery ? decodeURIComponent(rawQuery) : undefined
 
   if (!queryText) {
+    const locale = await getLocale()
     const [chaptersRes, appendicesRes] = await Promise.all([
       wsApiServer.GET('/chapters', {
-        params: { query: { lang: 'en' } },
+        params: { query: { lang: locale } },
         next: { revalidate: 86400 },
       }),
       wsApiServer.GET('/appendices', {
-        params: { query: { lang: 'en' } },
+        params: { query: { lang: locale } },
         next: { revalidate: 86400 },
       }),
     ])
@@ -264,9 +265,10 @@ export async function generateMetadata({
       let verseText = ''
       let chapterTitle = ''
       try {
+        const locale = await getLocale()
         const [chaptersRes, verseRes] = await Promise.all([
           wsApiServer.GET('/chapters', {
-            params: { query: { lang: 'en' } },
+            params: { query: { lang: locale } },
             next: { revalidate: 86400 },
           }),
           wsApiServer.GET('/quran', {
@@ -305,9 +307,10 @@ export async function generateMetadata({
     let verseCount = 0
     let versePreview = ''
     try {
+      const locale = await getLocale()
       const [chaptersRes, versesRes] = await Promise.all([
         wsApiServer.GET('/chapters', {
-          params: { query: { lang: 'en' } },
+          params: { query: { lang: locale } },
           next: { revalidate: 86400 },
         }),
         wsApiServer.GET('/quran', {

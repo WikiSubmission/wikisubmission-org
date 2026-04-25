@@ -21,11 +21,17 @@ import { useState } from 'react'
 import type { components } from '@/src/api/types.gen'
 import useLocalStorage from '@/hooks/use-local-storage'
 import { useParams } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
+import {
+  CHAPTER_TITLES_EN,
+  APPENDIX_TITLES_EN,
+} from '@/lib/quran-titles-en'
 
 type Chapter = components['schemas']['Chapter']
 type Appendix = components['schemas']['Appendix']
+
+const RTL_LOCALES = new Set(['ar', 'ku', 'fa', 'ur'])
 
 function NavSheetContent({
   chapters,
@@ -36,6 +42,8 @@ function NavSheetContent({
 }) {
   const t = useTranslations('sidebar')
   const tNav = useTranslations('nav')
+  const locale = useLocale()
+  const titleDir = RTL_LOCALES.has(locale) ? 'rtl' : 'ltr'
   const [chapterSearchQuery, setChapterSearchQuery] = useState('')
   const [appendixSearchQuery, setAppendixSearchQuery] = useState('')
   const [chaptersOpen, setChaptersOpen] = useLocalStorage<boolean>(
@@ -52,26 +60,40 @@ function NavSheetContent({
   )
   const { query: currentChapter } = useParams()
 
+  const chapterQ = chapterSearchQuery.toLowerCase().trim()
   const filteredChapters = chapters
     .filter((c) => c != null)
-    .filter(
-      (c) =>
-        c.title?.toLowerCase().includes(chapterSearchQuery.toLowerCase()) ||
-        c.chapter_number?.toString().includes(chapterSearchQuery)
-    )
+    .filter((c) => {
+      if (!chapterQ) return true
+      const localized = c.title?.toLowerCase() ?? ''
+      const english = CHAPTER_TITLES_EN[c.chapter_number ?? 0]?.toLowerCase() ?? ''
+      const numStr = c.chapter_number?.toString() ?? ''
+      return (
+        localized.includes(chapterQ) ||
+        english.includes(chapterQ) ||
+        numStr.includes(chapterSearchQuery)
+      )
+    })
     .sort((a, b) =>
       orderType === 'revelation'
         ? (a.revelation_order || 0) - (b.revelation_order || 0)
         : (a.chapter_number || 0) - (b.chapter_number || 0)
     )
 
+  const appendixQ = appendixSearchQuery.toLowerCase().trim()
   const filteredAppendices = appendices
     .filter((a) => a != null)
-    .filter(
-      (a) =>
-        a.code?.toString().includes(appendixSearchQuery) ||
-        a.title?.toLowerCase().includes(appendixSearchQuery.toLowerCase())
-    )
+    .filter((a) => {
+      if (!appendixQ) return true
+      const localized = a.title?.toLowerCase() ?? ''
+      const english = APPENDIX_TITLES_EN[a.code ?? 0]?.toLowerCase() ?? ''
+      const codeStr = a.code?.toString() ?? ''
+      return (
+        localized.includes(appendixQ) ||
+        english.includes(appendixQ) ||
+        codeStr.includes(appendixSearchQuery)
+      )
+    })
     .sort((a, b) => (a.code || 0) - (b.code || 0))
 
   return (
@@ -196,7 +218,10 @@ function NavSheetContent({
                           {chapter.chapter_number}
                         </span>
                         <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-                          <span className="text-sm font-medium truncate">
+                          <span
+                            className="text-sm font-medium truncate"
+                            dir={titleDir}
+                          >
                             {chapter.title}
                           </span>
                           <div className="flex items-center gap-1.5 shrink-0">
@@ -266,7 +291,10 @@ function NavSheetContent({
                       <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">
                         {appendix.code}
                       </span>
-                      <span className="text-xs break-words flex-1 min-w-0">
+                      <span
+                        className="text-xs break-words flex-1 min-w-0"
+                        dir={titleDir}
+                      >
                         {appendix.title}
                       </span>
                     </Link>
