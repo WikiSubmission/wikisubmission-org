@@ -11,14 +11,13 @@ import {
   CalendarIcon,
   StarIcon,
   Activity,
-  Timer
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 export default function RamadanClient() {
   return (
@@ -63,7 +62,7 @@ function RamadanContent() {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      setError(err instanceof Error ? err.message : t('genericError'))
       setData(null)
     } finally {
       setLoading(false)
@@ -71,7 +70,9 @@ function RamadanContent() {
   }, [t])
 
   useEffect(() => {
-    if (initialQuery) fetchRamadanSchedule(initialQuery, initialYear)
+    if (!initialQuery) return
+    const timer = setTimeout(() => fetchRamadanSchedule(initialQuery, initialYear), 0)
+    return () => clearTimeout(timer)
   }, [initialQuery, initialYear, fetchRamadanSchedule])
 
   const handleSearch = (e: React.FormEvent) => {
@@ -255,7 +256,13 @@ function SummaryCard({ title, value, icon }: { title: string; value: string; ico
   )
 }
 
-function MoonDataSection({ title, moon }: { title: string; moon: any }) {
+function MoonDataSection({
+  title,
+  moon,
+}: {
+  title: string
+  moon: RamadanResponse['moon_data']['start']
+}) {
   const t = useTranslations('ramadan')
   return (
     <div className="bg-[var(--ed-bg)] p-8 space-y-6">

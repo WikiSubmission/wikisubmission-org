@@ -20,6 +20,8 @@ import type { BibleBook } from '@/constants/bible-books'
 
 type Testament = 'OT' | 'NT'
 
+// TODO: Localize Bible book/chapter titles once the Bible API exposes translated title data.
+
 function BookRow({
   book,
   isActive,

@@ -31,6 +31,9 @@ const FEATURED_QUERY = 'God'
 type Tab = 'media' | 'newsletters'
 
 export default function ArchiveClient() {
+  const t = useTranslations('archive')
+  const heroTitlePrefix = t('heroTitlePrefix')
+
   return (
     <div
       style={{ backgroundColor: 'var(--ed-bg)', color: 'var(--ed-fg)' }}
@@ -56,9 +59,9 @@ export default function ArchiveClient() {
             color: 'var(--ed-fg)',
           }}
         >
-          The{' '}
+          {heroTitlePrefix ? `${heroTitlePrefix} ` : ''}
           <span style={{ fontStyle: 'italic', color: 'var(--ed-fg-muted)' }}>
-            Archive.
+            {t('heroTitleAccent')}
           </span>
         </h1>
         <p
@@ -71,8 +74,7 @@ export default function ArchiveClient() {
             marginTop: 24,
           }}
         >
-          A preserved record of the movement — historical sermons, programs,
-          recordings, and the full Submitters Perspective newsletter archive.
+          {t('heroDescription')}
         </p>
       </section>
 
@@ -100,6 +102,7 @@ export default function ArchiveClient() {
 
 function ArchiveContent() {
   const t = useTranslations('search')
+  const tArchive = useTranslations('archive')
   const tCommon = useTranslations('common')
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -227,8 +230,8 @@ function ArchiveContent() {
               tab="media"
               active={activeTab === 'media'}
               num="01"
-              label="Media"
-              sub="Video · Audio · Sermons"
+              label={tArchive('tabMediaLabel')}
+              sub={tArchive('tabMediaSub')}
               count={mCount}
               onClick={() => handleTabChange('media')}
             />
@@ -237,8 +240,8 @@ function ArchiveContent() {
               tab="newsletters"
               active={activeTab === 'newsletters'}
               num="02"
-              label="Newsletters"
-              sub="Submitters Perspective · since 1985"
+              label={tArchive('tabNewslettersLabel')}
+              sub={tArchive('tabNewslettersSub')}
               count={nCount}
               onClick={() => handleTabChange('newsletters')}
             />
@@ -264,8 +267,8 @@ function ArchiveContent() {
               type="search"
               placeholder={
                 activeTab === 'media'
-                  ? 'Search lectures, sermons, recordings…'
-                  : 'Search newsletter issues…'
+                  ? tArchive('placeholderMedia')
+                  : tArchive('placeholderNewsletters')
               }
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -307,7 +310,7 @@ function ArchiveContent() {
               color: 'var(--ed-fg-muted)',
             }}
           >
-            Featured · default picks until you search
+            {tArchive('featuredLabel')}
           </div>
         )}
       </div>
@@ -558,7 +561,13 @@ function CategoryFilters({
   selectedCategories: string[]
   setSelectedCategories: (cats: string[]) => void
 }) {
+  const t = useTranslations('archive')
   const categories = ['programs', 'sermons', 'audios']
+  const labels: Record<string, string> = {
+    programs: t('categoryPrograms'),
+    sermons: t('categorySermons'),
+    audios: t('categoryAudios'),
+  }
   const hasCategorySupport = categories.some(
     (cat) =>
       results.filter((item) => item.category?.toLowerCase() === cat).length > 0
@@ -598,7 +607,7 @@ function CategoryFilters({
                 color: 'var(--ed-fg-muted)',
               }}
             >
-              {cat}
+              {labels[cat] ?? cat}
               <span
                 style={{
                   padding: '2px 6px',
@@ -619,8 +628,18 @@ function CategoryFilters({
 }
 
 function MediaCardGrid({ items }: { items: MediaRow[] }) {
+  const t = useTranslations('archive')
   const first = items[0]
-  const kind = (first.category || 'Video').toUpperCase()
+  const category = first.category?.toLowerCase()
+  const categoryLabel =
+    category === 'programs'
+      ? t('categoryPrograms')
+      : category === 'sermons'
+        ? t('categorySermons')
+        : category === 'audios'
+          ? t('categoryAudios')
+          : first.category || t('categoryVideo')
+  const kind = categoryLabel.toUpperCase()
   const timestamp = first.start_timestamp
   return (
     <Link
@@ -737,7 +756,7 @@ function MediaCardGrid({ items }: { items: MediaRow[] }) {
             color: 'var(--ed-accent)',
           }}
         >
-          {first.category || 'Video'}
+          {categoryLabel}
         </div>
         <h3
           style={{
@@ -764,7 +783,7 @@ function MediaCardGrid({ items }: { items: MediaRow[] }) {
               color: 'var(--ed-fg-muted)',
             }}
           >
-            {items.length} matching segments
+            {t('matchingSegments', { count: items.length })}
           </div>
         )}
         {items[0].transcript && (
@@ -790,6 +809,7 @@ function MediaCardGrid({ items }: { items: MediaRow[] }) {
 }
 
 function NewsletterCardGrid({ items }: { items: NewsletterRow[] }) {
+  const t = useTranslations('archive')
   const first = items[0]
   const month = first.month ? String(first.month) : ''
   return (
@@ -829,7 +849,7 @@ function NewsletterCardGrid({ items }: { items: NewsletterRow[] }) {
             fontStyle: 'italic',
           }}
         >
-          Submitters Perspective
+          {t('newsletterMasthead')}
         </div>
         <div style={{ height: 1, background: 'var(--ed-rule)' }} />
         <div
@@ -860,7 +880,7 @@ function NewsletterCardGrid({ items }: { items: NewsletterRow[] }) {
             overflow: 'hidden',
           }}
         >
-          {items.length} {items.length === 1 ? 'page' : 'pages'} of reading
+          {t('readingPages', { count: items.length })}
         </div>
         <div
           style={{
@@ -905,7 +925,7 @@ function NewsletterCardGrid({ items }: { items: NewsletterRow[] }) {
           }}
         >
           <NewspaperIcon className="size-3.5" />
-          <span>Newsletter</span>
+          <span>{t('newsletterLabel')}</span>
         </div>
         <h3
           style={{
@@ -948,7 +968,7 @@ function NewsletterCardGrid({ items }: { items: NewsletterRow[] }) {
           }}
         >
           <ArrowUpRight className="size-3.5" />
-          Read issue
+          {t('readIssue')}
         </div>
       </div>
     </Link>

@@ -5,11 +5,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Image from 'next/image'
 import { PaletteThemeSwitcher } from '@/components/toggles/palette-theme-switcher'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
 import { useTranslations, useLocale } from 'next-intl'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
+import { SiteBrand } from '@/components/site-brand'
 
 type FlatLink = { kind: 'link'; label: string; href: string }
 type GroupLink = {
@@ -84,32 +84,7 @@ export function SiteNav() {
       >
         {/* Logo + Wordmark */}
         <div className="flex-none min-w-0">
-          <Link
-            href="/"
-            onClick={close}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 10,
-              fontFamily: F.display,
-              fontSize: 23,
-              fontWeight: 600,
-              letterSpacing: '-0.025em',
-              color: 'var(--ed-fg)',
-              lineHeight: 1,
-              textDecoration: 'none',
-            }}
-          >
-            <Image
-              src="/brand-assets/logo-transparent.png"
-              alt=""
-              width={28}
-              height={28}
-            />
-            <span className="max-[380px]:hidden sm:inline whitespace-nowrap">
-              WikiSubmission
-            </span>
-          </Link>
+          <SiteBrand onClick={close} />
         </div>
 
         {/* Tabbed Navigation (Desktop - Centered) */}

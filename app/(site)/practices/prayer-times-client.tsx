@@ -5,11 +5,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -21,8 +16,6 @@ import {
   SearchIcon,
   MapPinIcon,
   AlertCircleIcon,
-  InfoIcon,
-  XIcon,
   CalendarIcon,
   Activity,
 } from 'lucide-react'
@@ -73,7 +66,6 @@ function PrayerTimesContent() {
         ? (localStorage.getItem('pt_location') ?? '')
         : '')
   )
-  const [showChangeForm, setShowChangeForm] = useState(false)
   const [data, setData] = useState<PrayerTimesResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -98,8 +90,6 @@ function PrayerTimesContent() {
         }
         const result: PrayerTimesResponse = await response.json()
         setData(result)
-        setShowChangeForm(false)
-
         if (result.location_string) {
           localStorage.setItem('pt_location', result.location_string)
         }
@@ -113,7 +103,7 @@ function PrayerTimesContent() {
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        setError(err instanceof Error ? err.message : t('genericError'))
         setData(null)
       } finally {
         setLoading(false)
@@ -176,7 +166,7 @@ function PrayerTimesContent() {
             </div>
           )}
           <p className="text-sm text-muted-foreground">
-            Select a city or search for your location
+            {t('selectLocationPrompt')}
           </p>
           <div className="flex flex-wrap gap-2">
             {FEATURED_CITIES.map((city) => (
@@ -269,7 +259,7 @@ function PrayerTimesContent() {
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)] animate-pulse" />
                       <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-accent)]">
-                        Active State
+                        {t('activeState')}
                       </p>
                     </div>
                     <p className="text-3xl md:text-4xl font-serif font-medium text-[var(--ed-fg)] capitalize">
@@ -277,7 +267,7 @@ function PrayerTimesContent() {
                     </p>
                     {data.current_prayer_time_elapsed && (
                       <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--ed-fg-muted)] opacity-50">
-                        <span>Elapsed:</span>
+                        <span>{t('elapsedLabel')}</span>
                         <span className="text-[var(--ed-fg)]">{data.current_prayer_time_elapsed}</span>
                       </div>
                     )}
@@ -288,14 +278,16 @@ function PrayerTimesContent() {
                 <div className="relative p-6 bg-[var(--ed-surface)]/80 backdrop-blur-md overflow-hidden">
                   <div className="relative z-10 space-y-2">
                     <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-fg-muted)] opacity-40">
-                      Sequential Event
+                      {t('sequentialEvent')}
                     </p>
                     <p className="text-xl md:text-2xl font-serif font-medium text-[var(--ed-fg)] capitalize">
                       {prayerLabels[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}
                     </p>
                     {data.upcoming_prayer_time_left && (
                       <div className="flex flex-col gap-1">
-                        <div className="font-mono text-[10px] text-[var(--ed-fg-muted)] opacity-40 uppercase tracking-widest">T-Minus</div>
+                        <div className="font-mono text-[10px] text-[var(--ed-fg-muted)] opacity-40 uppercase tracking-widest">
+                          {t('tMinus')}
+                        </div>
                         <p className="text-4xl font-mono font-bold text-[var(--ed-accent)] tracking-tighter tabular-nums drop-shadow-[0_0_15px_var(--ed-accent-soft)]">
                           {data.upcoming_prayer_time_left}
                         </p>
@@ -343,7 +335,7 @@ function ScheduleDialog({
       <DialogTrigger asChild>
         <button className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 font-medium transition-colors w-fit">
           <CalendarIcon className="size-3.5" />
-          View Schedule
+          {t('viewSchedule')}
         </button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col gap-0 p-0">
@@ -357,7 +349,7 @@ function ScheduleDialog({
         <Tabs defaultValue="today" className="flex flex-col flex-1 min-h-0">
           <div className="px-6 py-3 border-b border-border/40">
             <TabsList>
-              <TabsTrigger value="today">Today</TabsTrigger>
+              <TabsTrigger value="today">{t('today')}</TabsTrigger>
               <TabsTrigger value="month">{t('monthlySchedule')}</TabsTrigger>
             </TabsList>
           </div>

@@ -4,8 +4,10 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Activity, Wallet } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export function ZakatCalculator() {
+  const t = useTranslations('zakatCalculator')
   const [amount, setAmount] = useState('')
   const [currency, setCurrency] = useState('USD')
 
@@ -19,19 +21,24 @@ export function ZakatCalculator() {
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Activity size={14} className="text-[var(--ed-accent)]" />
-          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[var(--ed-fg-muted)] opacity-40">Financial Module // ZKT-4</span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[var(--ed-fg-muted)] opacity-40">
+            {t('moduleLabel')}
+          </span>
         </div>
-        <h2 className="text-3xl font-serif font-medium text-[var(--ed-fg)]">Zakat Asset Analyzer</h2>
+        <h2 className="text-3xl font-serif font-medium text-[var(--ed-fg)]">
+          {t('title')}
+        </h2>
         <p className="text-sm text-[var(--ed-fg-muted)] leading-relaxed opacity-70">
-          Based on the Quran: 2.5% of income is owed the moment you receive it —
-          no waiting period, no minimum threshold.
+          {t('description')}
         </p>
       </div>
 
       {/* Input row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-1">
-          <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">Currency</label>
+          <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">
+            {t('currency')}
+          </label>
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
@@ -45,11 +52,13 @@ export function ZakatCalculator() {
           </select>
         </div>
         <div className="md:col-span-3">
-          <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">Gross Liquidity / Harvest</label>
+          <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">
+            {t('amountLabel')}
+          </label>
           <input
             type="text"
             inputMode="decimal"
-            placeholder="Amount received..."
+            placeholder={t('amountPlaceholder')}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             className="w-full h-12 rounded-xl border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ed-accent)]/20 transition-all placeholder:text-[var(--ed-fg-muted)]/30"
@@ -78,7 +87,7 @@ export function ZakatCalculator() {
 
             <div className="relative z-10">
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--ed-fg-muted)] opacity-50">
-                Calculated Liability
+                {t('calculatedLiability')}
               </p>
               <div className="flex items-baseline gap-3">
                 <span className="text-xl font-mono text-[var(--ed-accent)] opacity-60">{currency}</span>
@@ -90,7 +99,10 @@ export function ZakatCalculator() {
                 </p>
               </div>
               <p className="text-sm text-[var(--ed-fg-muted)] font-serif italic mt-2 opacity-60">
-                Exact 2.5% of {currency} {parsed.toLocaleString()}
+                {t('exactPercent', {
+                  currency,
+                  amount: parsed.toLocaleString(),
+                })}
               </p>
 
               {isSmall && (
@@ -99,9 +111,11 @@ export function ZakatCalculator() {
                   animate={{ opacity: 1 }}
                   className="mt-6 pt-6 border-t border-[var(--ed-rule)] text-sm text-[var(--ed-fg-muted)] space-y-2"
                 >
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ed-accent)]">Recommendation</p>
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ed-accent)]">
+                    {t('recommendationTitle')}
+                  </p>
                   <p className="leading-relaxed opacity-80">
-                    This amount is below the typical distribution threshold. We recommend aggregating small Zakat dues over several receipts to optimize impact, or fulfilling the obligation preemptively.
+                    {t('recommendationBody')}
                   </p>
                 </motion.div>
               )}
@@ -113,15 +127,19 @@ export function ZakatCalculator() {
       {/* Guidance */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-[var(--ed-rule)]">
         <div className="space-y-2">
-          <h4 className="font-mono text-[9px] uppercase tracking-widest text-[var(--ed-accent)] font-bold">Protocol</h4>
+          <h4 className="font-mono text-[9px] uppercase tracking-widest text-[var(--ed-accent)] font-bold">
+            {t('protocolTitle')}
+          </h4>
           <p className="text-xs text-[var(--ed-fg-muted)] leading-relaxed opacity-60">
-            When you receive income, 2.5% belongs to those in need—give it immediately or as soon as possible to maintain system integrity.
+            {t('protocolBody')}
           </p>
         </div>
         <div className="space-y-2">
-          <h4 className="font-mono text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)] font-bold">Variable</h4>
+          <h4 className="font-mono text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)] font-bold">
+            {t('variableTitle')}
+          </h4>
           <p className="text-xs text-[var(--ed-fg-muted)] leading-relaxed opacity-60">
-            No minimum threshold (Nisab) or waiting period (Hawl) is required according to the Quranic directive (6:141).
+            {t('variableBody')}
           </p>
         </div>
       </div>

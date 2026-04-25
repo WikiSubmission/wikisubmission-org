@@ -19,6 +19,7 @@ const GEO_URL = '/maps/world-110m.json'
 
 // ─── Data ─────────────────────────────────────────────────────
 // TODO: source from CMS when the schema exists.
+// TODO: Translate the Community page after its planned code/data rewrite.
 
 type Location = {
   id: string

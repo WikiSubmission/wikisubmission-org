@@ -4,12 +4,16 @@ import { FaYoutube } from 'react-icons/fa'
 import { getTranslations } from 'next-intl/server'
 import { buildPageMetadata } from '@/constants/metadata'
 import { MiracleVisualizer } from './miracle-visualizer'
+import type { Metadata } from 'next'
 
-export const metadata = buildPageMetadata({
-  title: 'The Mathematical Miracle | WikiSubmission',
-  description: 'Discover Code 19 — the mathematical miracle of the Quran, a built-in divine authentication discovered by Dr. Rashad Khalifa in 1974.',
-  url: '/miracle',
-})
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('miracle')
+  return buildPageMetadata({
+    title: t('metadataTitle'),
+    description: t('metadataDescription'),
+    url: '/miracle',
+  })
+}
 
 const F = {
   display: 'var(--font-cormorant), Georgia, serif',
@@ -101,8 +105,8 @@ export default async function MiraclePage() {
                 animationDelay: '100ms'
               }}
             >
-              The Mathematical Miracle <br className="hidden md:block" />
-              <span className="opacity-50">of the Quran</span>
+              {t('heroHeadingLine1')} <br className="hidden md:block" />
+              <span className="opacity-50">{t('heroHeadingLine2')}</span>
             </h1>
 
             <p
@@ -119,7 +123,7 @@ export default async function MiraclePage() {
             >
               <div className="px-12 py-8 rounded-[14px] bg-[var(--ed-bg)] border border-[var(--ed-rule)] flex flex-col items-center gap-2 shadow-2xl">
                 <div style={{ fontFamily: F.mono, fontSize: 10, letterSpacing: '0.4em', color: 'var(--ed-accent)', textTransform: 'uppercase', opacity: 0.6 }}>
-                  Interlocking Proof
+                  {t('proofLabel')}
                 </div>
                 <div style={{ fontFamily: F.mono, fontSize: 72, fontWeight: 700, lineHeight: 1, color: 'var(--ed-fg)' }}>
                   19
@@ -127,11 +131,11 @@ export default async function MiraclePage() {
                 <div className="flex gap-4 mt-2">
                   <div className="flex items-center gap-1.5 opacity-40">
                     <Binary size={12} />
-                    <span style={{ fontFamily: F.mono, fontSize: 9 }}>VERIFIED</span>
+                    <span style={{ fontFamily: F.mono, fontSize: 9 }}>{t('proofVerified')}</span>
                   </div>
                   <div className="flex items-center gap-1.5 opacity-40">
                     <ShieldCheck size={12} />
-                    <span style={{ fontFamily: F.mono, fontSize: 9 }}>TAMPER-PROOF</span>
+                    <span style={{ fontFamily: F.mono, fontSize: 9 }}>{t('proofTamperProof')}</span>
                   </div>
                 </div>
               </div>
@@ -151,7 +155,7 @@ export default async function MiraclePage() {
               <div className="flex items-center gap-4 text-[var(--ed-accent)]">
                 <Cpu size={24} strokeWidth={1.5} />
                 <h2 style={{ fontFamily: F.mono, fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                  Forensic Discovery
+                  {t('narrativeLabel')}
                 </h2>
               </div>
 

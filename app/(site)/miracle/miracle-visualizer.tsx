@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { Binary, Hash, BookOpen, Sparkles, Crosshair, Fingerprint, Activity } from 'lucide-react'
+import { Activity, Binary } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 // ─── DATA ─────────────────────────────────────────────────────────────
 
@@ -51,6 +52,20 @@ const BISMILLAH_WORDS = [
   { text: "الرَّحْمَنِ", translation: "Most Gracious", letters: ["ا", "ل", "رَّ", "حْ", "مَ", "نِ"] },
   { text: "الرَّحِيمِ", translation: "Most Merciful", letters: ["ا", "ل", "رَّ", "حِ", "ي", "مِ"] }
 ]
+
+const BISMILLAH_WORD_STARTS = BISMILLAH_WORDS.map((_, index) =>
+  BISMILLAH_WORDS.slice(0, index).reduce(
+    (sum, word) => sum + word.letters.length,
+    0
+  )
+)
+
+type MiracleFact = {
+  id: string
+  number: string
+  label: string
+  detail: string
+}
 
 // ─── UTILS & HOOKS ───────────────────────────────────────────────────
 
@@ -117,29 +132,33 @@ function Vignette() {
 }
 
 function CornerMarkers({ label, sublabel }: { label: string, sublabel?: string }) {
+  const t = useTranslations('miracle')
+
   return (
     <>
       <div className="absolute top-4 left-4 font-mono text-[7px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-25 z-30">
         {label}
       </div>
       <div className="absolute top-4 right-4 font-mono text-[7px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-25 z-30">
-        {sublabel || 'VERIFIED'}
+        {sublabel || t('visualVerified')}
       </div>
       <div className="absolute bottom-4 left-4 font-mono text-[7px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-25 z-30">
-        FORENSIC ANALYSIS // UNIT 19
+        {t('visualForensicUnit')}
       </div>
       <div className="absolute bottom-4 right-4 font-mono text-[7px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-25 z-30">
-        CONST 0.1974
+        {t('visualConst')}
       </div>
     </>
   )
 }
 
 function StatusBadge({ phase, scanningText, lockedText }: { phase: string, scanningText: string, lockedText: string }) {
+  const t = useTranslations('miracle')
+
   return (
     <div className="font-mono text-[9px] tracking-[0.25em] uppercase h-4 flex items-center justify-center gap-2">
       {phase === 'scanning' && <Activity size={10} className="animate-pulse" />}
-      {phase === 'idle' && <span className="text-[var(--ed-fg-muted)] opacity-40">Initializing forensic scan...</span>}
+      {phase === 'idle' && <span className="text-[var(--ed-fg-muted)] opacity-40">{t('visualInitializingScan')}</span>}
       {phase === 'scanning' && <span className="text-[var(--ed-accent)] animate-pulse">{scanningText}</span>}
       {phase === 'locked' && <span className="text-[var(--ed-accent)] font-bold">{lockedText}</span>}
     </div>
@@ -148,7 +167,7 @@ function StatusBadge({ phase, scanningText, lockedText }: { phase: string, scann
 
 // ─── MAIN EXPORT ──────────────────────────────────────────────────────
 
-export function MiracleVisualizer({ facts }: { facts: any[] }) {
+export function MiracleVisualizer({ facts }: { facts: MiracleFact[] }) {
   return (
     <div className="flex flex-col gap-12 md:gap-16">
       {facts.map((fact, i) => (
@@ -158,7 +177,8 @@ export function MiracleVisualizer({ facts }: { facts: any[] }) {
   )
 }
 
-function FactSection({ fact, i }: { fact: any, i: number }) {
+function FactSection({ fact, i }: { fact: MiracleFact, i: number }) {
+  const t = useTranslations('miracle')
   const ref = useRef(null)
   const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" })
 
@@ -171,7 +191,7 @@ function FactSection({ fact, i }: { fact: any, i: number }) {
               0{i + 1}
             </div>
             <div className="h-px w-6 bg-[var(--ed-rule)]" />
-            <span className="font-mono text-[8px] uppercase opacity-40">System Record</span>
+            <span className="font-mono text-[8px] uppercase opacity-40">{t('visualSystemRecord')}</span>
           </div>
 
           <div className="space-y-3">
@@ -185,7 +205,7 @@ function FactSection({ fact, i }: { fact: any, i: number }) {
 
           <div className="flex items-baseline gap-3 pt-3">
             <div className="font-mono text-3xl md:text-4xl font-bold text-[var(--ed-fg)] tracking-tighter opacity-60">{fact.number}</div>
-            <div className="font-mono text-[8px] uppercase opacity-20 tracking-widest">Constant</div>
+            <div className="font-mono text-[8px] uppercase opacity-20 tracking-widest">{t('visualConstant')}</div>
           </div>
         </div>
 
@@ -223,24 +243,22 @@ function VisualContent({ id }: { id: string }) {
 // ─── 01: BISMILLAH ────────────────────────────────────────────────────
 
 function BismillahVisual() {
+  const t = useTranslations('miracle')
   const totalLetters = 19
   const { phase, count, glow, isLocked } = useForensicScanner(totalLetters, 180)
-
-  let acc = 0
 
   return (
     <div className="relative w-full h-full min-h-[450px] flex flex-col items-center justify-center overflow-hidden">
       <ForensicScanlines />
       <Vignette />
-      <CornerMarkers label="SURAH 001" sublabel="BISMILLAH SCAN" />
+      <CornerMarkers label={t('visualBismillahLabel')} sublabel={t('visualBismillahSublabel')} />
 
       <div className="relative z-30 flex flex-col items-center gap-10 px-6">
         <AnimatePresence mode="wait">
           {!isLocked ? (
             <motion.div key="scan" className="flex flex-row flex-wrap items-center justify-center gap-x-8 gap-y-4" dir="rtl">
               {BISMILLAH_WORDS.map((word, wi) => {
-                const wordStart = acc
-                acc += word.letters.length
+                const wordStart = BISMILLAH_WORD_STARTS[wi] ?? 0
                 return (
                   <div key={`word-${wi}`} className="flex items-center gap-3">
                     <div className="flex gap-1.5 md:gap-2">
@@ -287,7 +305,7 @@ function BismillahVisual() {
                 بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ
               </div>
               <div className="text-sm md:text-lg font-serif italic text-[var(--ed-fg-muted)] opacity-60">
-                In the name of God, Most Gracious, Most Merciful.
+                {t('visualBismillahTranslation')}
               </div>
             </motion.div>
           )}
@@ -302,8 +320,8 @@ function BismillahVisual() {
           </div>
           <StatusBadge
             phase={phase}
-            scanningText="Scanning grapheme sequence..."
-            lockedText="VERIFIED: 19 LETTERS"
+            scanningText={t('visualScanningGraphemes')}
+            lockedText={t('visualVerified19Letters')}
           />
         </div>
       </div>
@@ -314,6 +332,7 @@ function BismillahVisual() {
 // ─── 02: 114 CHAPTERS ─────────────────────────────────────────────────
 
 function ChaptersVisual() {
+  const t = useTranslations('miracle')
   const [index, setIndex] = useState(0)
   const [phase, setPhase] = useState<'idle' | 'scanning' | 'locked'>('idle')
   const [glow, setGlow] = useState(0)
@@ -347,7 +366,7 @@ function ChaptersVisual() {
     <div className="relative w-full h-full min-h-[450px] flex flex-col items-center justify-center overflow-hidden">
       <ForensicScanlines />
       <Vignette />
-      <CornerMarkers label="CHAPTER INDEX" sublabel="114 UNITS" />
+      <CornerMarkers label={t('visualChapterIndex')} sublabel={t('visual114Units')} />
 
       <div className="relative z-30 flex flex-col items-center gap-8 px-6 w-full">
         <div className="h-12 flex items-center justify-center">
@@ -358,7 +377,7 @@ function ChaptersVisual() {
               </motion.div>
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-mono text-[10px] tracking-[0.3em] text-[var(--ed-accent)] uppercase">
-                All 114 Chapters Indexed
+                {t('visualAllChaptersIndexed')}
               </motion.div>
             )}
           </AnimatePresence>
@@ -383,7 +402,11 @@ function ChaptersVisual() {
           )}
         </AnimatePresence>
 
-        <StatusBadge phase={phase} scanningText={`Indexing ${index}...`} lockedText="VERIFIED: 114 = 19 × 6" />
+        <StatusBadge
+          phase={phase}
+          scanningText={t('visualIndexing', { index })}
+          lockedText={t('visualVerified114')}
+        />
       </div>
     </div>
   )
@@ -392,6 +415,7 @@ function ChaptersVisual() {
 // ─── 03: FIRST REVELATION ─────────────────────────────────────────────
 
 function RevelationVisual() {
+  const t = useTranslations('miracle')
   const { phase, count: wordCount, isLocked } = useForensicScanner(19, 350)
   const [beamX, setBeamX] = useState(-100)
 
@@ -407,7 +431,7 @@ function RevelationVisual() {
     <div className="relative w-full h-full min-h-[450px] flex flex-col items-center justify-center overflow-hidden">
       <ForensicScanlines />
       <Vignette />
-      <CornerMarkers label="SURAH 096:1-5" sublabel="FIRST REVELATION" />
+      <CornerMarkers label={t('visualRevelationLabel')} sublabel={t('visualFirstRevelation')} />
 
       {phase === 'scanning' && (
         <div className="absolute top-0 bottom-0 w-[2px] bg-gradient-to-b from-transparent via-[var(--ed-accent)] to-transparent opacity-30 z-20 pointer-events-none" style={{ left: `${beamX}%`, boxShadow: '0 0 20px var(--ed-accent-soft)' }} />
@@ -415,16 +439,16 @@ function RevelationVisual() {
 
       <div className="relative z-30 flex flex-col items-center gap-8 px-4 w-full max-w-lg">
         <div className="text-center space-y-1">
-          <div className="font-mono text-[8px] tracking-[0.4em] uppercase opacity-30">Source Text</div>
+          <div className="font-mono text-[8px] tracking-[0.4em] uppercase opacity-30">{t('visualSourceText')}</div>
           <div className="text-xs md:text-sm font-serif italic text-[var(--ed-fg-muted)] tracking-widest border-x border-[var(--ed-rule)]/30 px-6 py-1">
-            SURAH 96: AL-&apos;ALAQ <span className="opacity-40">(The Embryo)</span>
+            {t('visualSurahAlaq')} <span className="opacity-40">({t('visualEmbryo')})</span>
           </div>
         </div>
 
         <div className="flex flex-col gap-4 w-full text-right" dir="rtl">
           {REVELATION_VERSES.map((verse, vIdx) => (
             <div key={`verse-${vIdx}`} className="flex flex-wrap items-center gap-x-3 gap-y-2 justify-start leading-[1.8]">
-              {verse.words.map((word, wIdx) => {
+              {verse.words.map((word) => {
                 const idx = globalIdx++
                 const isLit = idx <= wordCount
                 const isCurrent = idx === wordCount && phase === 'scanning'
@@ -448,7 +472,11 @@ function RevelationVisual() {
           <div className="font-mono text-lg opacity-20">/ 19</div>
         </div>
 
-        <StatusBadge phase={phase} scanningText="Counting revelation words..." lockedText="VERIFIED: 19 WORDS" />
+        <StatusBadge
+          phase={phase}
+          scanningText={t('visualCountingRevelationWords')}
+          lockedText={t('visualVerified19Words')}
+        />
       </div>
     </div>
   )
@@ -457,6 +485,7 @@ function RevelationVisual() {
 // ─── 04: GOD FREQUENCY ────────────────────────────────────────────────
 
 function GodVisual() {
+  const t = useTranslations('miracle')
   const [count, setCount] = useState(0)
   const [phase, setPhase] = useState<'idle' | 'scanning' | 'locked'>('idle')
   const [glow, setGlow] = useState(0)
@@ -495,14 +524,16 @@ function GodVisual() {
     <div className="relative w-full h-full min-h-[450px] flex flex-col items-center justify-center overflow-hidden">
       <ForensicScanlines />
       <Vignette />
-      <CornerMarkers label="FREQUENCY SCAN" sublabel="WORD: ALLAH" />
+      <CornerMarkers label={t('visualFrequencyScan')} sublabel={t('visualWordAllah')} />
 
       <div className="relative z-30 flex flex-col items-center gap-8 px-6">
         <motion.div className="text-6xl md:text-8xl font-arabic opacity-10" style={{ fontFamily: 'var(--font-amiri)' }} animate={{ opacity: isLocked ? 0.15 : 0.05 }}>الله</motion.div>
         <div className="font-mono text-6xl md:text-8xl font-bold tabular-nums transition-all duration-500" style={{ color: isLocked ? 'var(--ed-accent)' : 'var(--ed-fg)', textShadow: isLocked ? `0 0 ${20 + glow * 40}px var(--ed-accent-soft)` : 'none' }}>
           {count.toLocaleString()}
         </div>
-        <div className="font-serif italic text-sm md:text-base text-[var(--ed-fg-muted)] opacity-50">&ldquo;Allah&rdquo; Frequency Across the Quran</div>
+        <div className="font-serif italic text-sm md:text-base text-[var(--ed-fg-muted)] opacity-50">
+          {t('visualAllahFrequency')}
+        </div>
         {isLocked && (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-4 bg-[var(--ed-surface)]/60 px-6 py-3 rounded-2xl border border-[var(--ed-rule)]">
             <div className="font-mono text-3xl md:text-5xl font-bold text-[var(--ed-accent)]">19</div>
@@ -510,7 +541,11 @@ function GodVisual() {
             <div className="font-mono text-2xl md:text-4xl font-bold text-[var(--ed-fg)]">142</div>
           </motion.div>
         )}
-        <StatusBadge phase={phase} scanningText="Tallying occurrences..." lockedText="VERIFIED: 2698 = 19 × 142" />
+        <StatusBadge
+          phase={phase}
+          scanningText={t('visualTallyingOccurrences')}
+          lockedText={t('visualVerified2698')}
+        />
       </div>
     </div>
   )
@@ -519,6 +554,7 @@ function GodVisual() {
 // ─── 05: CHAPTER 96 REEL ──────────────────────────────────────────────
 
 function Chapter96Visual() {
+  const t = useTranslations('miracle')
   const [phase, setPhase] = useState<'idle' | 'scanning' | 'locked'>('idle')
   const [displayVerse, setDisplayVerse] = useState(1)
   const [glowIntensity, setGlowIntensity] = useState(0)
@@ -532,7 +568,7 @@ function Chapter96Visual() {
     if (phase !== 'scanning') return
 
     let current = 1
-    setDisplayVerse(1)
+    const resetTimer = setTimeout(() => setDisplayVerse(1), 0)
 
     const reelInterval = setInterval(() => {
       if (current >= 19) {
@@ -545,7 +581,10 @@ function Chapter96Visual() {
       setDisplayVerse(current)
     }, 250)
 
-    return () => clearInterval(reelInterval)
+    return () => {
+      clearTimeout(resetTimer)
+      clearInterval(reelInterval)
+    }
   }, [phase])
 
   useEffect(() => {
@@ -561,15 +600,15 @@ function Chapter96Visual() {
     <div className="relative w-full h-full min-h-[450px] flex flex-col items-center justify-center overflow-hidden">
       <ForensicScanlines />
       <Vignette />
-      <CornerMarkers label="SURAH 096" sublabel="VERSE COUNT" />
+      <CornerMarkers label={t('visualSurah096')} sublabel={t('visualVerseCount')} />
 
       <div className="relative z-30 flex flex-col items-center gap-8 px-6 w-full">
         <div className="flex items-center gap-4">
-          <div className="font-mono text-[10px] tracking-[0.3em] uppercase opacity-40">Verse</div>
+          <div className="font-mono text-[10px] tracking-[0.3em] uppercase opacity-40">{t('visualVerse')}</div>
           <div className={`font-mono text-7xl md:text-8xl font-bold leading-none tabular-nums transition-all duration-500 ${isLocked ? 'text-[var(--ed-accent)] scale-110' : 'text-[var(--ed-fg)] opacity-30'}`}>
             {displayVerse.toString().padStart(2, '0')}
           </div>
-          <div className="font-mono text-[10px] tracking-[0.3em] uppercase opacity-40">of 19</div>
+          <div className="font-mono text-[10px] tracking-[0.3em] uppercase opacity-40">{t('visualOf19')}</div>
         </div>
 
         <div className="relative w-full max-w-2xl h-32 flex items-center justify-center">
@@ -588,7 +627,11 @@ function Chapter96Visual() {
               <div key={`alaq-indicator-${i}`} className={`h-1.5 flex-1 max-w-[18px] transition-colors duration-300 ${i + 1 <= displayVerse || isLocked ? 'bg-[var(--ed-accent)]/40' : 'bg-[var(--ed-rule)]/15'}`} />
             ))}
           </div>
-          <StatusBadge phase={phase} scanningText="Scanning Surah Al-Alaq..." lockedText="VERIFIED: 19 VERSES CONFIRMED" />
+          <StatusBadge
+            phase={phase}
+            scanningText={t('visualScanningAlaq')}
+            lockedText={t('visualVerified19Verses')}
+          />
         </div>
       </div>
     </div>
@@ -598,6 +641,7 @@ function Chapter96Visual() {
 // ─── 06: DISCOVERY YEAR ───────────────────────────────────────────────
 
 function DiscoveryVisual() {
+  const t = useTranslations('miracle')
   const [phase, setPhase] = useState<'idle' | 'decoding' | 'calculating' | 'factoring' | 'locked'>('idle')
   const [displayYear, setDisplayYear] = useState('----')
   const [glow, setGlow] = useState(0)
@@ -651,11 +695,11 @@ function DiscoveryVisual() {
 
   const getStatusText = () => {
     switch(phase) {
-      case 'decoding': return 'Decoding Gregorian timestamp...'
-      case 'calculating': return 'Calculating lunar duration...'
-      case 'factoring': return 'Extracting mathematical factors...'
-      case 'locked': return 'VERIFIED: PERFECT INTERLOCK'
-      default: return 'Initializing...'
+      case 'decoding': return t('visualDecodingTimestamp')
+      case 'calculating': return t('visualCalculatingLunar')
+      case 'factoring': return t('visualExtractingFactors')
+      case 'locked': return t('visualVerifiedInterlock')
+      default: return t('visualInitializing')
     }
   }
 
@@ -663,7 +707,7 @@ function DiscoveryVisual() {
     <div className="relative w-full h-full min-h-[600px] flex flex-col items-center justify-start py-12 pb-24 overflow-hidden">
       <ForensicScanlines />
       <Vignette />
-      <CornerMarkers label="TEMPORAL ANALYSIS" sublabel="YEAR 1974" />
+      <CornerMarkers label={t('visualTemporalAnalysis')} sublabel={t('visualYear1974')} />
 
       <div className="relative z-30 flex flex-col items-center gap-6 px-6 w-full max-w-lg mt-2">
         
@@ -696,21 +740,27 @@ function DiscoveryVisual() {
               >
                 <div className="flex flex-col items-center text-center">
                   <span className="text-[var(--ed-fg-muted)]">13 BH</span>
-                  <span className="text-[8px] uppercase text-[var(--ed-accent)] opacity-70 tracking-widest mt-1">Revelation of Quran</span>
+                  <span className="text-[8px] uppercase text-[var(--ed-accent)] opacity-70 tracking-widest mt-1">
+                    {t('visualRevelationOfQuran')}
+                  </span>
                 </div>
                 
                 <span className="text-[var(--ed-accent)] opacity-50">→</span>
                 
                 <div className="flex flex-col items-center text-center">
                   <span className="text-[var(--ed-fg-muted)]">1974 CE</span>
-                  <span className="text-[8px] uppercase text-[var(--ed-accent)] opacity-70 tracking-widest mt-1">Miracle Discovered</span>
+                  <span className="text-[8px] uppercase text-[var(--ed-accent)] opacity-70 tracking-widest mt-1">
+                    {t('visualMiracleDiscovered')}
+                  </span>
                 </div>
                 
                 <span className="text-[var(--ed-accent)] opacity-50">=</span>
                 
                 <div className="flex flex-col items-center text-center">
                   <span className="font-bold text-[var(--ed-fg)] text-base">1406</span>
-                  <span className="text-[8px] uppercase text-[var(--ed-accent)] opacity-70 tracking-widest mt-1">Lunar Years</span>
+                  <span className="text-[8px] uppercase text-[var(--ed-accent)] opacity-70 tracking-widest mt-1">
+                    {t('visualLunarYears')}
+                  </span>
                 </div>
               </motion.div>
             )}
@@ -747,7 +797,7 @@ function DiscoveryVisual() {
                 className="w-full flex flex-col items-center gap-4 pt-10 border-t border-[var(--ed-rule)]/50 mt-4"
               >
                 <div className="px-3 py-1 rounded border border-[var(--ed-accent)]/30 font-mono text-[9px] tracking-widest text-[var(--ed-accent)] bg-[var(--ed-accent)]/5 uppercase">
-                  Surah 74:30
+                  {t('visualSurah7430')}
                 </div>
                 <div 
                   className="font-arabic text-3xl md:text-4xl text-[var(--ed-fg)] mt-1" 
@@ -757,7 +807,7 @@ function DiscoveryVisual() {
                   عَلَيْهَا تِسْعَةَ عَشَرَ
                 </div>
                 <div className="font-serif italic text-base md:text-lg text-[var(--ed-fg-muted)] opacity-90 mt-1">
-                  "Over it is nineteen."
+                  {t('visualOverItIsNineteen')}
                 </div>
               </motion.div>
             )}
@@ -775,23 +825,5 @@ function DiscoveryVisual() {
           />
       </div>
     </div>
-  )
-}
-
-function ArrowUpRight({ size }: { size: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="7" y1="17" x2="17" y2="7"></line>
-      <polyline points="7 7 17 7 17 17"></polyline>
-    </svg>
   )
 }

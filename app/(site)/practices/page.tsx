@@ -2,12 +2,17 @@ import PracticesClient from './practices-client'
 import { wsApiServer } from '@/src/api/server-client'
 import type { components } from '@/src/api/types.gen'
 import { buildPageMetadata } from '@/constants/metadata'
+import { getTranslations } from 'next-intl/server'
+import type { Metadata } from 'next'
 
-export const metadata = buildPageMetadata({
-  title: 'Practices | WikiSubmission',
-  description: 'Prayer times, Ramadan schedule, and Zakat calculator for any location.',
-  url: '/practices',
-})
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('practices')
+  return buildPageMetadata({
+    title: t('metadataTitle'),
+    description: t('metadataDescription'),
+    url: '/practices',
+  })
+}
 
 type VerseData = components['schemas']['VerseData']
 

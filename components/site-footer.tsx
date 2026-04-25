@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { About } from '@/constants/about'
 import { getTranslations } from 'next-intl/server'
+import { FaDiscord, FaGithub, FaYoutube } from 'react-icons/fa'
+import { FaXTwitter } from 'react-icons/fa6'
 
 const F = {
   display: 'var(--font-cormorant), Georgia, serif',
@@ -37,16 +39,16 @@ export async function SiteFooter() {
   }
 
   const COLS = [
-    { heading: 'Scripture', links: LINKS.scripture },
-    { heading: 'Explore', links: LINKS.explore },
-    { heading: 'Organization', links: LINKS.organization },
+    { heading: t('sectionScripture'), links: LINKS.scripture },
+    { heading: t('sectionExplore'), links: LINKS.explore },
+    { heading: t('sectionOrganization'), links: LINKS.organization },
   ]
 
   const SOCIALS = [
-    { label: 'GitHub', href: About.social.github },
-    { label: 'Discord', href: About.social.discord },
-    { label: 'YouTube', href: About.social.youtube },
-    { label: 'X', href: About.social.twitter },
+    { label: 'GitHub', href: About.social.github, icon: FaGithub },
+    { label: 'Discord', href: About.social.discord, icon: FaDiscord },
+    { label: 'YouTube', href: About.social.youtube, icon: FaYoutube },
+    { label: 'X', href: About.social.twitter, icon: FaXTwitter },
   ]
 
   return (
@@ -92,9 +94,7 @@ export async function SiteFooter() {
                 maxWidth: '44ch',
               }}
             >
-              A faith-based nonprofit providing free, open-source tools for the
-              Final Testament (Quran), the Bible, and religious education —
-              <em> in service to God alone</em>.
+              {t('missionDesc')}
             </p>
 
             <div
@@ -115,7 +115,7 @@ export async function SiteFooter() {
                   marginBottom: 4,
                 }}
               >
-                Supported by contributors
+                {t('supportHeading')}
               </div>
               <div
                 style={{
@@ -125,15 +125,14 @@ export async function SiteFooter() {
                   lineHeight: 1.55,
                 }}
               >
-                501(c)(3) public charity · EIN 39‑4876245 · Donations fully
-                tax-deductible.
+                {t('supportBody')}
               </div>
               <Link
                 href="/donate"
                 className="ed-cta"
                 style={{ marginTop: 10, fontFamily: F.serif, fontSize: 13 }}
               >
-                Make a donation →
+                {t('donateCta')}
               </Link>
             </div>
           </div>
@@ -213,8 +212,7 @@ export async function SiteFooter() {
               color: 'var(--ed-fg-muted)',
             }}
           >
-            Proclaim, &ldquo;He is the One and only GOD. The Absolute GOD. Never did
-            He beget. Nor was He begotten. None equals Him.&rdquo;
+            {t('verse112')}
           </span>
         </div>
 
@@ -231,23 +229,27 @@ export async function SiteFooter() {
           className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-3"
         >
           <div className="flex items-center gap-3 flex-wrap">
-            <span>© MMXXVI · WikiSubmission.org</span>
+            <span>{t('copyrightLine')}</span>
             <span style={{ opacity: 0.5 }}>·</span>
-            <span>Made for the cause of God</span>
+            <span>{t('madeForCause')}</span>
           </div>
           <div className="sm:ml-auto flex gap-4">
-            {SOCIALS.map((s) => (
+            {SOCIALS.map((s) => {
+              const Icon = s.icon
+              return (
               <a
                 key={s.label}
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ed-link"
+                aria-label={s.label}
+                className="ed-link inline-flex items-center gap-1.5"
                 style={{ fontFamily: F.mono }}
               >
-                {s.label}
+                <Icon className="size-3.5" aria-hidden="true" />
+                <span>{s.label}</span>
               </a>
-            ))}
+            )})}
           </div>
         </div>
       </div>
