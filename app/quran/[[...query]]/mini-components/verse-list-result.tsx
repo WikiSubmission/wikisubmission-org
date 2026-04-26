@@ -171,11 +171,15 @@ export function VerseListResult({
   const segments = useMemo(() => parseSegments(queryText), [queryText])
 
   const handleCopyAllMarkdown = useCallback(() => {
+<<<<<<< HEAD
     const opts = {
       primaryCode,
       includeText: prefs.text,
       includeArabic: prefs.arabic,
     }
+=======
+    const opts = { primaryCode, includeText: prefs.text, includeArabic: prefs.arabic }
+>>>>>>> main
     const parts = segments
       .map((seg) => {
         const verses = getSegmentVerses(seg, byChapter)
@@ -187,6 +191,7 @@ export function VerseListResult({
     navigator.clipboard.writeText(parts.join('\n\n'))
     setCopiedAll(true)
     setTimeout(() => setCopiedAll(false), 1500)
+<<<<<<< HEAD
   }, [
     segments,
     byChapter,
@@ -195,6 +200,9 @@ export function VerseListResult({
     prefs.text,
     prefs.arabic,
   ])
+=======
+  }, [segments, byChapter, chapterTitles, primaryCode, prefs.text, prefs.arabic])
+>>>>>>> main
 
   if (apiError || !data) {
     return (

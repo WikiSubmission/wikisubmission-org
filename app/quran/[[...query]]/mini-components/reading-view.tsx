@@ -94,7 +94,7 @@ function FootnoteDialogContent({
               <ArrowLeft className="size-4" />
             </Button>
           )}
-          <DialogTitle className="font-mono text-violet-600 text-sm">{headerLabel}</DialogTitle>
+          <DialogTitle className="font-mono text-primary text-sm">{headerLabel}</DialogTitle>
         </div>
       </DialogHeader>
 
@@ -127,7 +127,7 @@ function FootnoteDialogContent({
                   <Link
                     href={`/quran/${chNum}?verse=${vNum}`}
                     onClick={onClose}
-                    className="text-xs text-violet-500 hover:text-violet-600 flex items-center gap-1 w-fit"
+                    className="text-xs text-primary/60 hover:text-primary flex items-center gap-1 w-fit"
                   >
                     {v.vk} <ArrowUpRight className="size-3" />
                   </Link>

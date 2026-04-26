@@ -81,14 +81,14 @@ export default async function ManageDonationPage({
         <div className="flex flex-col gap-4">
           <Link
             href="/donate"
-            className="text-violet-600 hover:underline font-medium"
+            className="text-primary hover:underline font-medium"
           >
             Return to Donation Page
           </Link>
 
           <Link
             href="/"
-            className="flex items-center justify-center gap-2 text-muted-foreground hover:text-violet-600"
+            className="flex items-center justify-center gap-2 text-muted-foreground hover:text-primary"
           >
             <ChevronLeft className="size-4" />
             <p className="text-sm">Back to Home</p>
@@ -139,7 +139,7 @@ export default async function ManageDonationPage({
       <div className="flex flex-col gap-4 pt-4">
         <Link
           href="/donate"
-          className="text-muted-foreground hover:text-violet-600 flex items-center justify-center gap-2"
+          className="text-muted-foreground hover:text-primary flex items-center justify-center gap-2"
         >
           <ChevronLeft className="size-4" />
           <p className="text-sm">Back to Donate</p>

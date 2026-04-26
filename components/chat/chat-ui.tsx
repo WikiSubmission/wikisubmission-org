@@ -77,7 +77,11 @@ export function VerseChip({ sources, onNavigate }: { sources: string[]; onNaviga
       <Link
         href={`/quran?q=${refs.join(',')}`}
         onClick={onNavigate}
+<<<<<<< HEAD
         className="inline-flex items-center text-[11px] font-mono text-violet-600 dark:text-violet-400 bg-violet-500/10 hover:bg-violet-500/20 px-2 py-0.5 rounded-md transition-colors"
+=======
+        className="inline-flex items-center text-[11px] font-mono text-primary dark:text-primary bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded-md transition-colors"
+>>>>>>> main
       >
         {refs.join(', ')}
       </Link>

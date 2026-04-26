@@ -50,7 +50,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
     <>
       {parts.map((part, i) =>
         regex.test(part) ? (
-          <mark key={i} className="bg-violet-600/10 text-violet-600 dark:text-violet-400 rounded-sm font-semibold px-0.5 not-italic">
+          <mark key={i} className="bg-primary/10 text-primary dark:text-primary rounded-sm font-semibold px-0.5 not-italic">
             {part}
           </mark>
         ) : part
@@ -208,6 +208,7 @@ function BlogBrowserInner({
     if (debounceRef.current) clearTimeout(debounceRef.current)
     const q = query.trim()
     if (q.length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchResults(null)
       setSearching(false)
       return

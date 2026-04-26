@@ -1,6 +1,7 @@
 import ArchiveClient from './archive-client'
 import { buildPageMetadata } from '@/constants/metadata'
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 
 type Props = {
   searchParams: Promise<{ q?: string; type?: string }>
@@ -8,16 +9,17 @@ type Props = {
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { q } = await searchParams
+  const t = await getTranslations('archive')
   if (q) {
     return buildPageMetadata({
-      title: `${q} | Archive | WikiSubmission`,
-      description: `Search results for "${q}" in the WikiSubmission media archive`,
+      title: t('metadataSearchTitle', { query: q }),
+      description: t('metadataSearchDescription', { query: q }),
       url: `https://wikisubmission.org/archive?q=${encodeURIComponent(q)}`,
     })
   }
   return buildPageMetadata({
-    title: 'Archive | WikiSubmission',
-    description: 'Search sermons, programs, and newsletters from the Submission community.',
+    title: t('metadataTitle'),
+    description: t('metadataDescription'),
     url: 'https://wikisubmission.org/archive',
   })
 }

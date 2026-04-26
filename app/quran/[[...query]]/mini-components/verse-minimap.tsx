@@ -134,13 +134,13 @@ export function VerseMinimap({
 
           {/* Progress fill tube */}
           <div
-            className="absolute left-1/2 -translate-x-1/2 top-0 w-3 rounded-full bg-violet-500/60 pointer-events-none"
+            className="absolute left-1/2 -translate-x-1/2 top-0 w-3 rounded-full bg-primary/60 pointer-events-none"
             style={{ height: `${progressPct}%`, transition: 'height 0.08s linear' }}
           />
 
           {/* Current verse thumb — 14px dot */}
           <div
-            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-violet-500 ring-2 ring-background/80 z-10 pointer-events-none"
+            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-primary ring-2 ring-background/80 z-10 pointer-events-none"
             style={{ top: `${progressPct}%`, transition: 'top 0.08s linear' }}
           />
 
@@ -149,12 +149,12 @@ export function VerseMinimap({
             <>
               {/* Ghost dot — 18px */}
               <div
-                className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 w-4.5 h-4.5 rounded-full bg-violet-400/25 ring-2 ring-violet-500/80 pointer-events-none z-20"
+                className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 w-4.5 h-4.5 rounded-full bg-primary/25 ring-2 ring-primary/80 pointer-events-none z-20"
                 style={{ top: `${previewPct}%` }}
               />
               {/* Verse badge */}
               <div
-                className="absolute right-full mr-2 px-2 py-0.5 text-xs font-semibold tabular-nums bg-popover/95 border border-violet-500/30 text-violet-500 rounded-md shadow-md pointer-events-none whitespace-nowrap z-30"
+                className="absolute right-full mr-2 px-2 py-0.5 text-xs font-semibold tabular-nums bg-popover/95 border border-primary/30 text-primary rounded-md shadow-md pointer-events-none whitespace-nowrap z-30"
                 style={{ top: `${previewPct}%`, transform: 'translateY(-50%)' }}
               >
                 {previewVerse}
@@ -177,7 +177,7 @@ export function VerseMinimap({
                 <span
                   className={`text-[7px] leading-none tabular-nums ${
                     isCurrent
-                      ? 'text-violet-500 font-bold'
+                      ? 'text-primary font-bold'
                       : isLoaded
                         ? 'text-foreground/35'
                         : 'text-muted-foreground/20'

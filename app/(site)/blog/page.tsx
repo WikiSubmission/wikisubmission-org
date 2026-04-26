@@ -3,23 +3,20 @@ export const dynamic = 'force-dynamic'
 import { sanityServer } from '@/lib/sanity'
 import { Metadata } from 'next'
 import { getLocale } from 'next-intl/server'
+import { notFound } from 'next/navigation'
 import { BlogBrowser } from './blog-browser'
 import type { Post, Category } from './blog-browser'
-import { buildPageMetadata } from '@/constants/metadata'
-
-const SANITY_LANGUAGES = ['en', 'fr', 'ar', 'tr'] as const
-type SanityLanguage = typeof SANITY_LANGUAGES[number]
-function toSanityLanguage(locale: string): SanityLanguage {
-  return (SANITY_LANGUAGES as readonly string[]).includes(locale)
-    ? (locale as SanityLanguage)
-    : 'en'
-}
-
-export const metadata: Metadata = buildPageMetadata({
-  title: 'Blog | WikiSubmission',
-  description: 'Articles, reflections, and research from the WikiSubmission community.',
-  url: 'https://wikisubmission.org/blog',
-})
+import {
+  BlogPostArticle,
+  type RelatedBlogPost,
+  buildBlogPostMetadata,
+  fetchPreviewBlogPostById,
+  fetchRelatedBlogPosts,
+  getBlogIndexMetadata,
+  hasBlogPreviewParams,
+  resolveBlogPreviewRequest,
+  toSanityLanguage,
+} from './blog-post'
 
 const ALL_ARTICLES_QUERY = `*[_type == "article" && language == $language] | order(publishedAt desc) {
   _id, title, slug, excerpt, publishedAt,
@@ -35,7 +32,78 @@ const CATEGORIES_QUERY = `*[_type == "category"] | order(name asc) {
   "count": count(*[_type == "article" && language == $language && references(^._id)])
 }`
 
-export default async function BlogPage() {
+type BlogPageProps = {
+  searchParams: Promise<{
+    blog_id?: string | string[]
+    preview?: string | string[]
+  }>
+}
+
+export async function generateMetadata({
+  searchParams,
+}: BlogPageProps): Promise<Metadata> {
+  const resolvedSearchParams = await searchParams
+  const previewRequest = resolveBlogPreviewRequest(resolvedSearchParams)
+
+  if (!previewRequest) {
+    if (hasBlogPreviewParams(resolvedSearchParams)) {
+      return {
+        ...getBlogIndexMetadata(),
+        title: 'Preview unavailable | WikiSubmission',
+        robots: {
+          index: false,
+          follow: false,
+        },
+      }
+    }
+    return getBlogIndexMetadata()
+  }
+
+  try {
+    const post = await fetchPreviewBlogPostById(previewRequest.documentId)
+    if (!post) return getBlogIndexMetadata()
+    return buildBlogPostMetadata(post, { preview: true })
+  } catch {
+    return getBlogIndexMetadata()
+  }
+}
+
+export default async function BlogPage({
+  searchParams,
+}: BlogPageProps) {
+  const resolvedSearchParams = await searchParams
+  const previewRequested = hasBlogPreviewParams(resolvedSearchParams)
+  const previewRequest = resolveBlogPreviewRequest(resolvedSearchParams)
+
+  if (previewRequested && !previewRequest) {
+    notFound()
+  }
+
+  if (previewRequest) {
+    let post = null
+    try {
+      post = await fetchPreviewBlogPostById(previewRequest.documentId)
+    } catch (err) {
+      console.error('[blog] Draft preview fetch failed:', err)
+      notFound()
+    }
+
+    if (!post) notFound()
+
+    let related: RelatedBlogPost[] = []
+    try {
+      related = await fetchRelatedBlogPosts({
+        categoryRef: post.categoryRef,
+        excludeId: post._id,
+        language: post.language ?? 'en',
+      })
+    } catch {
+      // non-critical — preview still renders without related posts
+    }
+
+    return <BlogPostArticle post={post} related={related} preview />
+  }
+
   const locale = await getLocale()
   const language = toSanityLanguage(locale)
 

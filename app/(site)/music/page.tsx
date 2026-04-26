@@ -23,7 +23,7 @@ export async function generateMetadata({
         .single()
 
       if (track && track.artistObj) {
-        const title = `${track.name} by ${track.artistObj.name} | Music (Zikr) | WikiSubmission`
+        const title = `${track.name} by ${track.artistObj.name} | Zikr | WikiSubmission`
         const description = `Listen to ${track.name} by ${track.artistObj.name} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`
         return {
           ...buildPageMetadata({
@@ -47,7 +47,7 @@ export async function generateMetadata({
   }
 
   return buildPageMetadata({
-    title: 'Music (Zikr) | WikiSubmission',
+    title: 'Zikr | WikiSubmission',
     description: 'Glorification and commemoration of God through beautiful recitations and melodies.',
     url: 'https://wikisubmission.org/music',
   })

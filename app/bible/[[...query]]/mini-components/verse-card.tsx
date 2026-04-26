@@ -35,7 +35,7 @@ function BibleVerseCard({
   return (
     <div
       id={`verse-${vn}`}
-      className={`flex gap-3 group py-1 rounded-lg transition-colors duration-700 ${highlighted ? 'bg-violet-500/10 -mx-2 px-2' : ''}`}
+      className={`flex gap-3 group py-1 rounded-lg transition-colors duration-700 ${highlighted ? 'bg-primary/10 -mx-2 px-2' : ''}`}
     >
       {/* Verse number badge */}
       <span className="shrink-0 flex items-center justify-center size-7 rounded-md bg-muted text-muted-foreground font-mono text-xs font-semibold mt-0.5">
@@ -65,7 +65,7 @@ function BibleVerseCard({
                 onClick={() =>
                   onTheologicalClick(tr!.fn!, `v.${vn} theological notes`)
                 }
-                className="inline-flex items-center font-mono text-[10px] text-violet-500/60 hover:text-violet-500 align-super mx-0.5 cursor-pointer transition-colors"
+                className="inline-flex items-center font-mono text-[10px] text-primary/60 hover:text-primary align-super mx-0.5 cursor-pointer transition-colors"
                 aria-label={`Theological note ${theologicalOffset + i + 1}`}
               >
                 *{theologicalOffset + i + 1}

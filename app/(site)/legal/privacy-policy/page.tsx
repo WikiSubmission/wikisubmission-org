@@ -44,7 +44,7 @@ export default function PrivacyPolicy() {
         </p>
       </section>
 
-      <section className="max-w-md flex flex-wrap gap-2 text-sm [&>a]:text-muted-foreground [&>a]:hover:text-violet-600 [&>a]:transition-colors">
+      <section className="max-w-md flex flex-wrap gap-2 text-sm [&>a]:text-muted-foreground [&>a]:hover:text-primary [&>a]:transition-colors">
         <Link href="/">Home</Link>
       </section>
     </main>

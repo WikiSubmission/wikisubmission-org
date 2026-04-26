@@ -17,6 +17,7 @@ import {
   VolumeX,
   Loader2,
   User,
+  X,
 } from 'lucide-react'
 import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
@@ -40,10 +41,14 @@ import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 
 const RECITER_NAMES: Record<Reciter, string> = {
+  'english-onyx': 'English (Onyx)',
   mishary: 'Mishary Rashid Alafasy',
   basit: 'Abdul Basit',
   minshawi: 'Mohamed Siddiq El-Minshawi',
 }
+
+const ENGLISH_RECITERS: Reciter[] = ['english-onyx']
+const ARABIC_RECITERS: Reciter[] = ['mishary', 'basit', 'minshawi']
 
 export function QuranPlayer() {
   const {
@@ -58,6 +63,7 @@ export function QuranPlayer() {
     volume,
     setVolume,
     isBuffering,
+    dismiss,
   } = useQuranPlayer()
 
   const { progress, duration, currentTime } = useQuranProgress()
@@ -69,6 +75,10 @@ export function QuranPlayer() {
   const previousTimeRef = React.useRef<number | undefined>(undefined)
 
   React.useEffect(() => {
+<<<<<<< HEAD
+=======
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+>>>>>>> main
     if (!isDragging) setLocalProgress(progress)
   }, [progress, isDragging])
 
@@ -200,7 +210,24 @@ export function QuranPlayer() {
                         <DialogTitle className="text-left">Select Reciter</DialogTitle>
                       </DialogHeader>
                       <div className="grid gap-2">
+<<<<<<< HEAD
                         {(Object.keys(RECITER_NAMES) as Reciter[]).map((r) => (
+=======
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 pt-1">English</p>
+                        {ENGLISH_RECITERS.map((r) => (
+                          <Button
+                            key={r}
+                            variant={reciter === r ? 'default' : 'outline'}
+                            className="justify-start h-12 px-4 rounded-xl text-sm"
+                            onClick={() => setReciter(r)}
+                          >
+                            <User className="w-4 h-4 mr-2 shrink-0" />
+                            {RECITER_NAMES[r]}
+                          </Button>
+                        ))}
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 pt-2">Arabic</p>
+                        {ARABIC_RECITERS.map((r) => (
+>>>>>>> main
                           <Button
                             key={r}
                             variant={reciter === r ? 'default' : 'outline'}
@@ -215,6 +242,20 @@ export function QuranPlayer() {
                     </DialogContent>
                   </Dialog>
 
+<<<<<<< HEAD
+=======
+                  {/* Mobile — dismiss */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-full text-muted-foreground"
+                    onClick={dismiss}
+                    aria-label="Close player"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+
+>>>>>>> main
                   {/* Mobile — volume */}
                   <Dialog>
                     <DialogTrigger asChild>
@@ -317,18 +358,47 @@ export function QuranPlayer() {
                       className="gap-1.5 h-8 text-xs text-muted-foreground hover:text-foreground rounded-full px-3"
                     >
                       <User className="w-3.5 h-3.5 shrink-0" />
+<<<<<<< HEAD
                       <span className="max-w-[80px] truncate capitalize">{reciter}</span>
+=======
+                      <span className="max-w-[80px] truncate">{RECITER_NAMES[reciter]}</span>
+>>>>>>> main
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
                     side="top"
+<<<<<<< HEAD
                     className="w-52 p-1.5 bg-background/90 backdrop-blur-xl border-border/30 shadow-xl rounded-xl"
                   >
                     <p className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
                       Reciters
                     </p>
                     {(Object.keys(RECITER_NAMES) as Reciter[]).map((r) => (
+=======
+                    className="w-56 p-1.5 bg-background/90 backdrop-blur-xl border-border/30 shadow-xl rounded-xl"
+                  >
+                    <p className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                      English
+                    </p>
+                    {ENGLISH_RECITERS.map((r) => (
+                      <DropdownMenuItem
+                        key={r}
+                        onClick={() => setReciter(r)}
+                        className={`rounded-lg mb-0.5 cursor-pointer text-sm ${
+                          reciter === r
+                            ? 'bg-primary text-primary-foreground focus:bg-primary/90 focus:text-primary-foreground'
+                            : ''
+                        }`}
+                      >
+                        {RECITER_NAMES[r]}
+                      </DropdownMenuItem>
+                    ))}
+                    <p className="px-2 pt-2 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                      Arabic
+                    </p>
+                    {ARABIC_RECITERS.map((r) => (
+>>>>>>> main
                       <DropdownMenuItem
                         key={r}
                         onClick={() => setReciter(r)}
@@ -374,6 +444,20 @@ export function QuranPlayer() {
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
+<<<<<<< HEAD
+=======
+
+                {/* Dismiss */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+                  onClick={dismiss}
+                  aria-label="Close player"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+>>>>>>> main
               </div>
 
             </div>

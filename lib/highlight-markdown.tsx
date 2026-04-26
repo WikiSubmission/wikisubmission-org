@@ -14,7 +14,7 @@ export const highlightMarkdown = (text?: string | null) => {
           return (
             <span
               key={index}
-              className="bg-violet-600/10 text-violet-600 dark:text-violet-400 rounded-sm font-bold"
+              className="bg-primary/10 text-primary dark:text-primary rounded-sm font-bold"
             >
               {part.slice(2, -2)}
             </span>

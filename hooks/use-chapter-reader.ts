@@ -111,20 +111,32 @@ export function useChapterReader(
       const verseEndParam = rangeEnd !== undefined
         ? rangeEnd
         : verseStart + PAGE_SIZE - 1
-      const { data, error } = await wsApi.GET('/quran', {
-        params: {
-          query: {
-            chapter_number_start: chapterNumber,
-            langs,
-            verse_start: verseStart,
-            verse_end: verseEndParam,
-            include_words: opts.includeWords || undefined,
-            include_root: opts.includeRoot || undefined,
-            include_meaning: opts.includeMeaning || undefined,
-            word_langs: opts.includeWords ? ['ar', 'en', 'tl'] : undefined,
+
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 15_000)
+
+      let data, error
+      try {
+        ;({ data, error } = await wsApi.GET('/quran', {
+          params: {
+            query: {
+              chapter_number_start: chapterNumber,
+              langs,
+              verse_start: verseStart,
+              verse_end: verseEndParam,
+              include_words: opts.includeWords || undefined,
+              include_root: opts.includeRoot || undefined,
+              include_meaning: opts.includeMeaning || undefined,
+              word_langs: opts.includeWords ? ['ar', 'en', 'tl'] : undefined,
+            },
           },
-        },
-      })
+          signal: controller.signal,
+        }))
+      } catch {
+        return { verses: null, titles: null, reachedEnd: undefined, error: 'Request timed out.' }
+      } finally {
+        clearTimeout(timeout)
+      }
 
       if (error || !data) {
         return { verses: null, titles: null, reachedEnd: undefined, error: 'Failed to load verses.' }

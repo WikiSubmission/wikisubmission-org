@@ -32,14 +32,13 @@ export default async function BiblePage({ params, searchParams }: Props) {
     return (
       <main className="min-h-screen py-16 px-4">
         <div className="max-w-2xl mx-auto space-y-10">
-          <header className="space-y-4 text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Scripture
-            </p>
-            <h1 className="text-3xl md:text-4xl font-bold">Bible</h1>
-            <p className="text-sm text-muted-foreground">
-              Old &amp; New Testament — English translation
-            </p>
+          <header className="space-y-6 text-center">
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold tracking-tight">Bible</h1>
+              <p className="text-sm text-muted-foreground">
+                Old &amp; New Testament — English translation
+              </p>
+            </div>
             <div className="max-w-sm mx-auto">
               <Suspense>
                 <BibleSearchBar className="w-full max-w-none" large />

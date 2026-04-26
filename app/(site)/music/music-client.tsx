@@ -17,6 +17,7 @@ import { useSearchParams } from 'next/navigation'
 import { AppPrompt } from '@/app/(site)/music/components/app-prompt'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
+import { F } from '@/app/(site)/_sections/shared'
 
 type Tab = 'all' | 'favorites' | 'recent'
 
@@ -41,7 +42,7 @@ export default function MusicClient() {
   useEffect(() => {
     if (currentTrack) {
       const artistName = currentTrack.artist?.name || 'Unknown Artist'
-      const title = `${currentTrack.title} by ${artistName} | Music (Zikr) | WikiSubmission`
+      const title = `${currentTrack.title} by ${artistName} | Zikr | WikiSubmission`
       const description = `Listen to ${currentTrack.title} by ${artistName} on WikiSubmission. Glorification and commemoration of God through beautiful recitations and melodies.`
 
       document.title = title
@@ -65,7 +66,7 @@ export default function MusicClient() {
       updateMeta('twitter:description', description)
       updateMeta('twitter:image', currentTrack.artist?.image_url)
     } else if (!isLoading) {
-      document.title = 'Music (Zikr) | WikiSubmission'
+      document.title = 'Zikr | WikiSubmission'
     }
   }, [currentTrack, isLoading])
 
@@ -99,37 +100,104 @@ export default function MusicClient() {
     .slice(0, 10)
 
   return (
-    <main className="min-h-screen pb-32">
+    <main
+      className="min-h-screen pb-32"
+      style={{ backgroundColor: 'var(--ed-bg)', color: 'var(--ed-fg)' }}
+    >
       <AppPrompt trackId={currentTrack?.id || trackId || undefined} />
 
-      {/* Hero */}
-      <section className="border-b border-border/40 bg-muted/30">
-        <div className="max-w-5xl mx-auto px-6 py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      {/* Hero — editorial */}
+      <section
+        className="px-4 sm:px-6 md:px-10"
+        style={{
+          maxWidth: 1240,
+          margin: '0 auto',
+          paddingTop: 'clamp(56px, 10vw, 96px)',
+          paddingBottom: 'clamp(24px, 5vw, 40px)',
+        }}
+      >
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
           <div>
-            <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold mb-4">
-              Zikr
+            <span
+              style={{
+                fontFamily: F.mono,
+                fontSize: 10.5,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                color: 'var(--ed-accent)',
+                display: 'inline-block',
+                marginBottom: 16,
+              }}
+            >
+              Zikr · Commemoration
             </span>
-            <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
+            <h1
+              style={{
+                fontFamily: F.display,
+                fontSize: 'clamp(44px, 9vw, 84px)',
+                fontWeight: 400,
+                lineHeight: 0.95,
+                letterSpacing: '-0.035em',
+                color: 'var(--ed-fg)',
+              }}
+            >
               {t('heading')}
             </h1>
-            <p className="text-lg text-muted-foreground max-w-md">{t('description')}</p>
+            <p
+              style={{
+                fontFamily: F.serif,
+                fontSize: 'clamp(15px, 3.2vw, 17px)',
+                lineHeight: 1.65,
+                color: 'var(--ed-fg-muted)',
+                maxWidth: '60ch',
+                marginTop: 16,
+              }}
+            >
+              {t('description')}
+            </p>
           </div>
 
           {/* Search */}
-          <div className="relative w-full max-w-xs shrink-0">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <div
+            className="relative w-full max-w-xs shrink-0"
+            style={{
+              border: '1px solid var(--ed-rule)',
+              borderRadius: 3,
+              background: 'var(--ed-surface)',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 14px',
+            }}
+          >
+            <Search
+              className="size-4 shrink-0"
+              style={{ color: 'var(--ed-fg-muted)' }}
+            />
             <input
               type="text"
               placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-12 pl-11 pr-4 rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm placeholder:text-muted-foreground"
+              style={{
+                flex: 1,
+                height: 44,
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                padding: '0 10px',
+                fontFamily: F.serif,
+                fontSize: 13.5,
+                color: 'var(--ed-fg)',
+              }}
             />
           </div>
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-10">
+      <div
+        className="px-4 sm:px-6 md:px-10 space-y-10"
+        style={{ maxWidth: 1240, margin: '0 auto', paddingTop: 24, paddingBottom: 48 }}
+      >
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-4">
             <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -140,12 +208,38 @@ export default function MusicClient() {
             {/* Featured */}
             {!searchQuery && featuredTracks.length > 0 && (
               <section>
-                <div className="flex items-baseline gap-4 mb-4">
-                  <h2 className="font-headline text-xl font-bold flex items-center gap-2 shrink-0">
-                    <Music2 className="size-4 text-primary" />
+                <div className="flex items-baseline gap-5 mb-5">
+                  <span
+                    style={{
+                      fontFamily: F.display,
+                      fontSize: 14,
+                      fontStyle: 'italic',
+                      color: 'var(--ed-accent)',
+                      letterSpacing: '0.1em',
+                    }}
+                  >
+                    § I
+                  </span>
+                  <h2
+                    className="flex items-center gap-2 shrink-0"
+                    style={{
+                      fontFamily: F.display,
+                      fontSize: 'clamp(22px, 4vw, 26px)',
+                      fontWeight: 500,
+                      letterSpacing: '-0.02em',
+                      color: 'var(--ed-fg)',
+                    }}
+                  >
+                    <Music2
+                      className="size-4"
+                      style={{ color: 'var(--ed-accent)' }}
+                    />
                     {t('featured')}
                   </h2>
-                  <div className="h-px grow bg-border/60" />
+                  <div
+                    className="grow"
+                    style={{ height: 1, background: 'var(--ed-rule)' }}
+                  />
                 </div>
                 <div className="w-full overflow-x-auto no-scrollbar">
                   <div className="flex gap-4 pb-2">

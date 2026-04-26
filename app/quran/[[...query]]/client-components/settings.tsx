@@ -132,7 +132,7 @@ export default function QuranSettings() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-80" align="end">
         {/* Zoom */}
-        <DropdownMenuLabel className="flex items-center gap-2 text-violet-500">
+        <DropdownMenuLabel className="flex items-center gap-2 text-primary">
           <ZoomInIcon className="size-4" />
           <strong>{t('zoom')}</strong>
         </DropdownMenuLabel>
@@ -173,7 +173,7 @@ export default function QuranSettings() {
         </div>
 
         {/* Language */}
-        <DropdownMenuLabel className="flex items-center gap-2 text-violet-500 mt-1">
+        <DropdownMenuLabel className="flex items-center gap-2 text-primary mt-1">
           <LanguagesIcon className="size-4" />
           <strong>{t('language')}</strong>
         </DropdownMenuLabel>
@@ -204,7 +204,7 @@ export default function QuranSettings() {
         />
 
         {/* Reading */}
-        <DropdownMenuLabel className="flex items-center gap-2 text-violet-500 mt-1">
+        <DropdownMenuLabel className="flex items-center gap-2 text-primary mt-1">
           <BookIcon className="size-4" />
           <strong>{t('reading')}</strong>
         </DropdownMenuLabel>

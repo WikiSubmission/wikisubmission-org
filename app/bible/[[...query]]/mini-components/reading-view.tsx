@@ -28,7 +28,7 @@ function FootnoteDialog({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-lg rounded-3xl">
         <DialogHeader>
-          <DialogTitle className="font-mono text-violet-600 text-sm">
+          <DialogTitle className="font-mono text-primary text-sm">
             {entry?.label ?? ''}
           </DialogTitle>
         </DialogHeader>
@@ -40,7 +40,7 @@ function FootnoteDialog({
             <ul className="space-y-2">
               {entry.entries.map((e, i) => (
                 <li key={i} className="text-sm leading-relaxed text-foreground border-b last:border-0 pb-2">
-                  <span className="font-mono text-[10px] text-violet-500 mr-1">{i + 1}.</span>
+                  <span className="font-mono text-[10px] text-primary mr-1">{i + 1}.</span>
                   {e}
                 </li>
               ))}
@@ -89,6 +89,7 @@ export function BibleReadingView({ verses, showManuscript, showTheological }: Pr
             const mIdx = manuscriptIdx
             if (hasManuscript) manuscriptIdx++
             const tIdx = theologicalIdx
+            // eslint-disable-next-line react-hooks/immutability
             if (hasTheological) theologicalIdx += tr!.fn!.length
 
             return (
@@ -111,7 +112,7 @@ export function BibleReadingView({ verses, showManuscript, showTheological }: Pr
                     <button
                       key={i}
                       onClick={() => openTheological(tr!.fn!, `v.${vn} theological notes`)}
-                      className="inline-flex items-center font-mono text-[10px] text-violet-500/60 hover:text-violet-500 align-super mx-0.5 cursor-pointer transition-colors"
+                      className="inline-flex items-center font-mono text-[10px] text-primary/60 hover:text-primary align-super mx-0.5 cursor-pointer transition-colors"
                     >
                       *{tIdx + i + 1}
                     </button>

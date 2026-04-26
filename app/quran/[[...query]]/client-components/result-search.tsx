@@ -20,6 +20,11 @@ import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { VerseCard } from '../mini-components/verse-card'
+<<<<<<< HEAD
+=======
+import { MultiSelectBar } from '../mini-components/multi-select-bar'
+import { useVerseSelection } from '@/hooks/use-verse-selection-store'
+>>>>>>> main
 import { useTranslations } from 'next-intl'
 
 // ─── SearchResultChapter ──────────────────────────────────────────────────────
@@ -100,6 +105,15 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const lastQueryRef = useRef<string | null>(null)
   const didInitRef = useRef(false)
 
+<<<<<<< HEAD
+=======
+  // Clear any active multi-select when the search query changes.
+  const clearSelection = useVerseSelection((s) => s.clear)
+  useEffect(() => {
+    clearSelection()
+  }, [searchQuery, clearSelection])
+
+>>>>>>> main
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${prefs.zoomLevel ?? 'comfortable'}-${prefs.arabic}-${prefs.wordByWord}`
 
   // ── Trigger search ────────────────────────────────────────────────────────
@@ -110,6 +124,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     if (!searchQuery) return
 
     verseSearch.reset()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setWordMatches([])
     setSearchTab('all')
 
@@ -175,6 +190,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     if (didInitRef.current) return
     didInitRef.current = true
     if (forceTab === 'words') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchTab('words')
       runWordByWordQuery()
     }
@@ -335,7 +351,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                       <a
                         key={q}
                         href={`?q=${q}&tab=words`}
-                        className="flex items-center gap-1 text-sm text-violet-600 hover:text-violet-700 bg-violet-600/5 hover:bg-violet-600/10 rounded-lg px-3 py-1 transition-colors"
+                        className="flex items-center gap-1 text-sm text-primary hover:text-primary bg-primary/5 hover:bg-primary/10 rounded-lg px-3 py-1 transition-colors"
                       >
                         {q}
                         <ArrowRightIcon className="size-3" />
@@ -404,6 +420,8 @@ export default function SearchResult({ props }: { props: { query: string } }) {
           )}
         </TabsContent>
       </Tabs>
+
+      <MultiSelectBar />
     </div>
   )
 }

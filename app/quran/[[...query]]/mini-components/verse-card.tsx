@@ -1,23 +1,38 @@
 'use client'
 
+<<<<<<< HEAD
 import { memo, useMemo, useCallback, useState } from 'react'
+=======
+import { memo, useMemo, useCallback, useEffect, useRef, useState } from 'react'
+>>>>>>> main
 import Link from 'next/link'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useIsTouch } from '@/hooks/use-is-touch'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
+<<<<<<< HEAD
+=======
+import { useVerseSelection } from '@/hooks/use-verse-selection-store'
+>>>>>>> main
 import {
   useQuranPlayerCallbacks,
   type QuranVerse,
 } from '@/lib/quran-audio-context'
 import { RootWordOccurrences } from './root-word-occurrences'
+<<<<<<< HEAD
 import { buildVerseLine } from '@/lib/quran-copy'
+=======
+import { CopyButton } from './copy-button'
+>>>>>>> main
 import {
   Play,
   Pause,
   Loader2,
+<<<<<<< HEAD
   Copy,
   Check,
+=======
+>>>>>>> main
   ArrowUpRight,
   Bookmark,
   StickyNote,
@@ -74,7 +89,13 @@ const WordByWordView = memo(
     const [activeWord, setActiveWord] = useState<{
       arabic: string
       root?: string
+<<<<<<< HEAD
       meaning: string
+=======
+      english: string
+      meaning: string
+      transliteration?: string
+>>>>>>> main
     } | null>(null)
     const [dialogWord, setDialogWord] = useState<{
       arabic: string
@@ -103,7 +124,17 @@ const WordByWordView = memo(
                   className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer active:scale-95 text-foreground/90`}
                   onClick={(e) => {
                     e.stopPropagation()
+<<<<<<< HEAD
                     setActiveWord({ arabic, root: root ?? undefined, meaning })
+=======
+                    setActiveWord({
+                      arabic,
+                      root: root ?? undefined,
+                      english,
+                      meaning,
+                      transliteration: transliteration ?? undefined,
+                    })
+>>>>>>> main
                   }}
                 >
                   {arabic}
@@ -117,7 +148,11 @@ const WordByWordView = memo(
                   <DialogTrigger asChild>
                     <TooltipTrigger asChild>
                       <p
+<<<<<<< HEAD
                         className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer hover:text-violet-600 hover:scale-105 active:scale-95 text-foreground/90`}
+=======
+                        className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer hover:text-primary hover:scale-105 active:scale-95 text-foreground/90`}
+>>>>>>> main
                       >
                         {arabic}
                       </p>
@@ -126,10 +161,17 @@ const WordByWordView = memo(
 
                   <TooltipContent
                     side="top"
+<<<<<<< HEAD
                     className="bg-popover/80 backdrop-blur-sm border-violet-600/20 px-4 py-2 rounded-xl"
                   >
                     <div className="flex flex-col gap-0.5 space-y-1 py-2 items-center text-center">
                       <p className="font-arabic text-xl text-violet-600">
+=======
+                    className="bg-popover/80 backdrop-blur-sm border-primary/20 px-4 py-2 rounded-xl"
+                  >
+                    <div className="flex flex-col gap-0.5 space-y-1 py-2 items-center text-center">
+                      <p className="text-base text-primary">
+>>>>>>> main
                         {english}
                       </p>
                       <p className="text-xs font-bold text-foreground">
@@ -146,11 +188,19 @@ const WordByWordView = memo(
                   >
                     <DialogHeader>
                       <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
+<<<<<<< HEAD
                         <span className="text-4xl font-arabic text-violet-600 mb-3">
                           {arabic}
                         </span>
                         <div className="px-2.5 py-0.5 bg-violet-600/10 rounded-full">
                           <span className="text-[10px] font-bold text-violet-600">
+=======
+                        <span className="text-4xl font-arabic text-primary mb-3">
+                          {arabic}
+                        </span>
+                        <div className="px-2.5 py-0.5 bg-primary/10 rounded-full">
+                          <span className="text-[10px] font-bold text-primary">
+>>>>>>> main
                             Root: {root}
                           </span>
                         </div>
@@ -179,7 +229,11 @@ const WordByWordView = memo(
                 onClick={() => setActiveWord(null)}
               />
               <div
+<<<<<<< HEAD
                 className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-popover/90 backdrop-blur-sm border border-violet-600/20 rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-xl min-w-40"
+=======
+                className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-popover/90 backdrop-blur-sm border border-primary/20 rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-xl min-w-40"
+>>>>>>> main
                 onClick={() => {
                   if (activeWord.root) {
                     setDialogWord({
@@ -191,12 +245,28 @@ const WordByWordView = memo(
                   }
                 }}
               >
+<<<<<<< HEAD
                 <p className="font-arabic text-3xl text-violet-600">
                   {activeWord.arabic}
                 </p>
                 <p className="text-sm font-bold text-foreground">
                   {activeWord.meaning}
                 </p>
+=======
+                <p className="font-arabic text-3xl text-primary">
+                  {activeWord.arabic}
+                </p>
+                {activeWord.english && (
+                  <p className="text-sm font-bold text-foreground text-center">
+                    {activeWord.english}
+                  </p>
+                )}
+                {activeWord.transliteration && (
+                  <p className="text-xs text-muted-foreground italic text-center">
+                    {activeWord.transliteration}
+                  </p>
+                )}
+>>>>>>> main
                 {activeWord.root && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Tap to see occurrences →
@@ -222,11 +292,19 @@ const WordByWordView = memo(
                   <>
                     <DialogHeader>
                       <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
+<<<<<<< HEAD
                         <span className="text-4xl font-arabic text-violet-600 mb-3">
                           {dialogWord.arabic}
                         </span>
                         <div className="px-2.5 py-0.5 bg-violet-600/10 rounded-full">
                           <span className="text-[10px] font-bold text-violet-600">
+=======
+                        <span className="text-4xl font-arabic text-primary mb-3">
+                          {dialogWord.arabic}
+                        </span>
+                        <div className="px-2.5 py-0.5 bg-primary/10 rounded-full">
+                          <span className="text-[10px] font-bold text-primary">
+>>>>>>> main
                             Root: {dialogWord.root}
                           </span>
                         </div>
@@ -253,7 +331,11 @@ const WordByWordView = memo(
     return (
       <div
         dir="rtl"
+<<<<<<< HEAD
         className="flex flex-wrap justify-start gap-y-8 gap-x-2 py-4"
+=======
+        className="flex flex-wrap justify-start gap-y-4 gap-x-1.5 py-3"
+>>>>>>> main
       >
         {sorted.map((w) => {
           const arabic = (w.tx as Record<string, string>)?.['ar']
@@ -265,14 +347,24 @@ const WordByWordView = memo(
           return (
             <Dialog key={wordIndex}>
               <DialogTrigger asChild>
+<<<<<<< HEAD
                 <div className="group flex flex-col items-center gap-2 px-3 py-2 cursor-pointer transition-all hover:bg-muted/50 rounded-2xl border border-transparent hover:border-violet-600/20">
                   <p
                     className={`font-arabic ${arabicClass} leading-snug group-hover:text-violet-600 transition-colors`}
+=======
+                <div className="group flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer transition-all hover:bg-muted/50 rounded-xl border border-transparent hover:border-primary/20">
+                  <p
+                    className={`font-arabic ${arabicClass} leading-snug group-hover:text-primary transition-colors`}
+>>>>>>> main
                   >
                     {arabic}
                   </p>
                   <div
+<<<<<<< HEAD
                     className="flex flex-col items-center gap-0.5 pt-0.5"
+=======
+                    className="flex flex-col items-center gap-0.5"
+>>>>>>> main
                     dir="ltr"
                   >
                     {showTransliteration && transliteration && (
@@ -280,7 +372,11 @@ const WordByWordView = memo(
                         {transliteration}
                       </p>
                     )}
+<<<<<<< HEAD
                     <p className="text-xs text-foreground/70 font-medium text-center wrap-break-words max-w-25">
+=======
+                    <p className="text-xs text-foreground/70 font-medium text-center wrap-break-words max-w-22">
+>>>>>>> main
                       {meaning}
                     </p>
                   </div>
@@ -294,15 +390,24 @@ const WordByWordView = memo(
                 >
                   <DialogHeader>
                     <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
+<<<<<<< HEAD
                       <span className="text-4xl font-arabic text-violet-600 mb-1">
+=======
+                      <span className="text-4xl font-arabic text-primary mb-1">
+>>>>>>> main
                         {arabic}
                       </span>
                       <span className="text-base font-semibold text-foreground">
                         {meaning}
                       </span>
                       <div className="flex items-center gap-3 mt-1">
+<<<<<<< HEAD
                         <div className="px-2.5 py-0.5 bg-violet-600/10 rounded-full">
                           <span className="text-[10px] font-bold text-violet-600">
+=======
+                        <div className="px-2.5 py-0.5 bg-primary/10 rounded-full">
+                          <span className="text-[10px] font-bold text-primary">
+>>>>>>> main
                             Root: {root}
                           </span>
                         </div>
@@ -415,6 +520,7 @@ export const VerseCard = memo(
       return result
     }, [searchHighlight, tr])
 
+<<<<<<< HEAD
     const [copied, setCopied] = useState(false)
 
     const audioVerse = useMemo(
@@ -472,6 +578,171 @@ export const VerseCard = memo(
             </div>
           )}
 
+=======
+    const audioVerse = useMemo(
+      () => ({ verse_id: verseId, ws_quran_text: {} }) satisfies QuranVerse,
+      [verseId]
+    )
+
+    // ─── Multi-select (long-press on touch / double-click on desktop) ──────
+    const selectionActive = useVerseSelection((s) => s.active)
+    const isSelected = useVerseSelection((s) =>
+      verseId ? s.selected.has(verseId) : false
+    )
+    const activateSelection = useVerseSelection((s) => s.activate)
+    const toggleSelection = useVerseSelection((s) => s.toggle)
+    const longPressRef = useRef<{
+      timer: number | null
+      startX: number
+      startY: number
+      fired: boolean
+    }>({ timer: null, startX: 0, startY: 0, fired: false })
+
+    // Skip selection gestures when the interaction starts on an interactive
+    // control (audio/copy/bookmark buttons, dropdown triggers, or menu items).
+    // Links (the verse-key pill) are intentionally NOT skipped — users should
+    // be able to long-press anywhere on the card.
+    const isInteractiveTarget = (el: EventTarget | null) => {
+      const node = el as HTMLElement | null
+      return !!node?.closest(
+        'button, [role="menuitem"], [data-slot="dropdown-menu-trigger"], [data-slot="dropdown-menu-content"]'
+      )
+    }
+
+    const cancelLongPress = useCallback(() => {
+      const ref = longPressRef.current
+      if (ref.timer !== null) {
+        window.clearTimeout(ref.timer)
+        ref.timer = null
+      }
+    }, [])
+
+    useEffect(() => cancelLongPress, [cancelLongPress])
+
+    const onCardPointerDown = useCallback(
+      (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!verseId) return
+        if (isInteractiveTarget(e.target)) return
+
+        // While in selection mode, a plain tap toggles.
+        if (selectionActive) {
+          toggleSelection(verse)
+          longPressRef.current.fired = true
+          return
+        }
+
+        // Start a long-press timer. Activates selection after 500ms unless
+        // the pointer is released, moves too far, or gets cancelled first.
+        const ref = longPressRef.current
+        ref.startX = e.clientX
+        ref.startY = e.clientY
+        ref.fired = false
+        cancelLongPress()
+        ref.timer = window.setTimeout(() => {
+          ref.timer = null
+          ref.fired = true
+          activateSelection(verse)
+          if ('vibrate' in navigator) {
+            try {
+              navigator.vibrate(30)
+            } catch {
+              // ignore
+            }
+          }
+        }, 500)
+      },
+      [verse, verseId, selectionActive, toggleSelection, activateSelection, cancelLongPress]
+    )
+
+    const onCardPointerMove = useCallback(
+      (e: React.PointerEvent<HTMLDivElement>) => {
+        const ref = longPressRef.current
+        if (ref.timer === null) return
+        const dx = e.clientX - ref.startX
+        const dy = e.clientY - ref.startY
+        if (dx * dx + dy * dy > 100) cancelLongPress()
+      },
+      [cancelLongPress]
+    )
+
+    const onCardPointerEnd = useCallback(() => {
+      cancelLongPress()
+    }, [cancelLongPress])
+
+    const onCardDoubleClick = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!verseId) return
+        if (isInteractiveTarget(e.target)) return
+        e.preventDefault()
+        e.stopPropagation()
+        toggleSelection(verse)
+        longPressRef.current.fired = true
+      },
+      [verse, verseId, toggleSelection]
+    )
+
+    const onCardContextMenu = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        // Suppress the mobile/desktop context menu while a long-press is
+        // active or selection is on — it fights the gesture.
+        if (longPressRef.current.fired || selectionActive) e.preventDefault()
+      },
+      [selectionActive]
+    )
+
+    const onCardClickCapture = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        // Suppress `verseHref` Link navigation once selection is active or a
+        // long-press/double-click has just fired. The buttons (copy/audio)
+        // remain fully interactive.
+        if (longPressRef.current.fired || selectionActive) {
+          if (!isInteractiveTarget(e.target)) {
+            e.preventDefault()
+            e.stopPropagation()
+          }
+          longPressRef.current.fired = false
+        }
+      },
+      [selectionActive]
+    )
+
+    const handlePlay = useCallback(() => {
+      if (isCurrentAudio) {
+        togglePlayPause()
+      } else {
+        // Queue was pre-set in ChapterReader via setChapterQueue; no need to pass it here
+        playFromVerse(audioVerse)
+      }
+    }, [isCurrentAudio, togglePlayPause, playFromVerse, audioVerse])
+
+    return (
+      <div
+        id={verseId}
+        onPointerDown={onCardPointerDown}
+        onPointerMove={onCardPointerMove}
+        onPointerUp={onCardPointerEnd}
+        onPointerCancel={onCardPointerEnd}
+        onDoubleClick={onCardDoubleClick}
+        onContextMenu={onCardContextMenu}
+        onClickCapture={onCardClickCapture}
+        style={{ WebkitTouchCallout: 'none', WebkitUserSelect: selectionActive ? 'none' : undefined }}
+        className={`relative transition-colors duration-500 ${
+          isSelected ? 'bg-primary/10 ring-2 ring-primary ring-inset' : ''
+        } ${
+          !isSelected && (isScrollTarget || isCurrentAudio) ? 'bg-primary/10' : ''
+        } ${selectionActive ? 'cursor-pointer select-none' : ''}`}
+      >
+        <div className="px-6 py-4 sm:px-8 sm:py-5 space-y-2">
+          {/* Subtitle */}
+          {prefs.subtitles && tr?.s && (
+            <div className="flex justify-center">
+              <p className="text-primary text-xs font-bold text-center">
+                <QuranRefText text={tr.s} from={`subtitle of ${verse.vk}`} />
+              </p>
+            </div>
+          )}
+
+>>>>>>> main
           {/* Verse key + play button */}
           <div className="flex items-center justify-between gap-2">
             {verseHref ? (
@@ -480,12 +751,20 @@ export const VerseCard = memo(
                 target="_blank"
                 className="group flex items-center gap-1 w-fit"
               >
+<<<<<<< HEAD
                 <div className="flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full group-hover:bg-violet-600/10 group-hover:text-violet-600 transition-colors">
+=======
+                <div className="flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full transition-colors">
+>>>>>>> main
                   <span className="text-lg font-semibold">{chNum}</span>
                   <span>:</span>
                   <span className="text-lg font-semibold">{vNum}</span>
                 </div>
+<<<<<<< HEAD
                 <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-violet-600 transition-colors" />
+=======
+                <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+>>>>>>> main
               </Link>
             ) : (
               <div className="w-fit shrink-0 flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full">
@@ -516,6 +795,7 @@ export const VerseCard = memo(
                 </Button>
               )}
               {showCopyButton && (
+<<<<<<< HEAD
                 <Button
                   variant="ghost"
                   size="icon"
@@ -528,6 +808,9 @@ export const VerseCard = memo(
                     <Copy className="w-4 h-4" />
                   )}
                 </Button>
+=======
+                <CopyButton verse={verse} searchHighlight={searchHighlight} />
+>>>>>>> main
               )}
               {showAudio && (
                 <Button

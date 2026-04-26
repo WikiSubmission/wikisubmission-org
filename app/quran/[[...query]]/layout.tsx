@@ -13,6 +13,7 @@ import { SiteFooter } from '@/components/site-footer'
 import { QuranNavSheet } from './client-components/nav-sheet'
 import { QuranModeSelector } from './client-components/mode-selector'
 import { QuranScrollContainer } from './client-components/scroll-container'
+import { getLocale } from 'next-intl/server'
 
 export default async function QuranLayout({
   children,
@@ -21,13 +22,14 @@ export default async function QuranLayout({
   children: React.ReactNode
   params: Promise<{ query?: string[] }>
 }) {
+  const locale = await getLocale()
   const [chaptersRes, appendicesRes, languagesRes] = await Promise.all([
     wsApiServer.GET('/chapters', {
-      params: { query: { lang: 'en' } },
+      params: { query: { lang: locale } },
       next: { revalidate: 86400 },
     }),
     wsApiServer.GET('/appendices', {
-      params: { query: { lang: 'en' } },
+      params: { query: { lang: locale } },
       next: { revalidate: 86400 },
     }),
     wsApiServer.GET('/languages', { next: { revalidate: 86400 } }),
