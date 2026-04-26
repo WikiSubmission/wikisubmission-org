@@ -32,7 +32,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   { kind: 'link', label: 'miracle', href: '/miracle' },
   { kind: 'link', label: 'practices', href: '/practices' },
-  { kind: 'link', label: 'community', href: '/community' },
+  // { kind: 'link', label: 'community', href: '/community' },
   { kind: 'link', label: 'archive', href: '/archive' },
   { kind: 'link', label: 'music', href: '/music' },
   { kind: 'link', label: 'blog', href: '/blog' },
@@ -67,7 +67,8 @@ export function SiteNav() {
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         backgroundColor: 'color-mix(in oklab, var(--ed-bg), transparent 18%)',
-        borderBottom: '1px solid color-mix(in oklab, var(--ed-rule), transparent 40%)',
+        borderBottom:
+          '1px solid color-mix(in oklab, var(--ed-rule), transparent 40%)',
       }}
     >
       <div
