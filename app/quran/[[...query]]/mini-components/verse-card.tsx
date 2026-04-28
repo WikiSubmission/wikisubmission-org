@@ -46,6 +46,60 @@ export function toQuranVerse(verse: VerseData): QuranVerse {
   return { verse_id: verse.vk ?? '', ws_quran_text: {} }
 }
 
+function WordOccurrencesDialogContent({
+  arabic,
+  root,
+  meaning,
+}: {
+  arabic: string
+  root: string
+  meaning: string
+}) {
+  const [showMeaning, setShowMeaning] = useState(false)
+
+  return (
+    <DialogContent
+      className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl"
+      aria-describedby={undefined}
+    >
+      <DialogHeader className="items-center text-center pb-3 border-b">
+        <DialogTitle className="flex flex-col items-center gap-3 text-center">
+          <span className="text-4xl font-arabic text-primary mb-1">
+            {arabic}
+          </span>
+          <span className="px-2.5 py-0.5 bg-primary/10 rounded-full text-[10px] font-bold text-primary">
+            Root: {root}
+          </span>
+        </DialogTitle>
+
+        {meaning && (
+          <>
+            <button
+              type="button"
+              className="text-xs font-semibold text-primary hover:underline"
+              onClick={() => setShowMeaning((v) => !v)}
+            >
+              {showMeaning ? 'Tap to hide meaning' : 'Tap to see meaning'}
+            </button>
+            {showMeaning && (
+              <p className="max-h-24 overflow-y-auto px-2 text-sm font-medium leading-relaxed text-foreground">
+                {meaning}
+              </p>
+            )}
+          </>
+        )}
+      </DialogHeader>
+
+      <div className="mt-0">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-3 px-1">
+          Other Occurrences
+        </p>
+        <RootWordOccurrences rootWord={root} />
+      </div>
+    </DialogContent>
+  )
+}
+
 // ─── Word-by-word (Arabic) ────────────────────────────────────────────────────
 
 const WordByWordView = memo(
@@ -147,32 +201,11 @@ const WordByWordView = memo(
                 </Tooltip>
 
                 {root && (
-                  <DialogContent
-                    className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl"
-                    aria-describedby={undefined}
-                  >
-                    <DialogHeader>
-                      <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
-                        <span className="text-4xl font-arabic text-primary mb-3">
-                          {arabic}
-                        </span>
-                        <div className="px-2.5 py-0.5 bg-primary/10 rounded-full">
-                          <span className="text-[10px] font-bold text-primary">
-                            Root: {root}
-                          </span>
-                        </div>
-                        <span className="text-base font-semibold text-foreground">
-                          {meaning}
-                        </span>
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="mt-3">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-3 px-1">
-                        Other Occurrences
-                      </p>
-                      <RootWordOccurrences rootWord={root} />
-                    </div>
-                  </DialogContent>
+                  <WordOccurrencesDialogContent
+                    arabic={arabic}
+                    root={root}
+                    meaning={meaning}
+                  />
                 )}
               </Dialog>
             )
@@ -186,7 +219,7 @@ const WordByWordView = memo(
                 onClick={() => setActiveWord(null)}
               />
               <div
-                className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-popover/90 backdrop-blur-sm border border-primary/20 rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-xl min-w-40"
+                className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-popover/90 backdrop-blur-sm border border-primary/20 rounded-2xl px-6 py-4 flex flex-col items-center gap-2 shadow-xl min-w-52 max-w-[calc(100vw-2rem)]"
                 onClick={() => {
                   if (activeWord.root) {
                     setDialogWord({
@@ -212,8 +245,8 @@ const WordByWordView = memo(
                   </p>
                 )}
                 {activeWord.root && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Tap to see occurrences →
+                  <p className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
+                    Tap to see occurrences
                   </p>
                 )}
               </div>
@@ -228,36 +261,13 @@ const WordByWordView = memo(
                 if (!open) setDialogWord(null)
               }}
             >
-              <DialogContent
-                className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl"
-                aria-describedby={undefined}
-              >
-                {dialogWord && (
-                  <>
-                    <DialogHeader>
-                      <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
-                        <span className="text-4xl font-arabic text-primary mb-3">
-                          {dialogWord.arabic}
-                        </span>
-                        <div className="px-2.5 py-0.5 bg-primary/10 rounded-full">
-                          <span className="text-[10px] font-bold text-primary">
-                            Root: {dialogWord.root}
-                          </span>
-                        </div>
-                        <span className="text-base font-semibold text-foreground">
-                          {dialogWord.meaning}
-                        </span>
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="mt-3">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-3 px-1">
-                        Other Occurrences
-                      </p>
-                      <RootWordOccurrences rootWord={dialogWord.root} />
-                    </div>
-                  </>
-                )}
-              </DialogContent>
+              {dialogWord && (
+                <WordOccurrencesDialogContent
+                  arabic={dialogWord.arabic}
+                  root={dialogWord.root}
+                  meaning={dialogWord.meaning}
+                />
+              )}
             </Dialog>
           )}
         </div>
@@ -302,34 +312,11 @@ const WordByWordView = memo(
               </DialogTrigger>
 
               {root && (
-                <DialogContent
-                  className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl"
-                  aria-describedby={undefined}
-                >
-                  <DialogHeader>
-                    <DialogTitle className="flex flex-col items-center gap-3 text-center pb-3 border-b">
-                      <span className="text-4xl font-arabic text-primary mb-1">
-                        {arabic}
-                      </span>
-                      <span className="text-base font-semibold text-foreground">
-                        {meaning}
-                      </span>
-                      <div className="flex items-center gap-3 mt-1">
-                        <div className="px-2.5 py-0.5 bg-primary/10 rounded-full">
-                          <span className="text-[10px] font-bold text-primary">
-                            Root: {root}
-                          </span>
-                        </div>
-                      </div>
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="mt-3">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-3 px-1">
-                      Other Occurrences
-                    </p>
-                    <RootWordOccurrences rootWord={root} />
-                  </div>
-                </DialogContent>
+                <WordOccurrencesDialogContent
+                  arabic={arabic}
+                  root={root}
+                  meaning={meaning}
+                />
               )}
             </Dialog>
           )
