@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { About } from '@/constants/about'
 import { getTranslations } from 'next-intl/server'
-import { FaDiscord, FaGithub, FaYoutube } from 'react-icons/fa'
+import { FaApple, FaDiscord, FaGithub, FaYoutube } from 'react-icons/fa'
 import { FaXTwitter } from 'react-icons/fa6'
 
 const F = {
@@ -96,6 +96,60 @@ export async function SiteFooter() {
             >
               {t('missionDesc')}
             </p>
+
+            <a
+              href="https://apps.apple.com/us/app/submission-religion-of-god/id6444260632"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${t('appStorePrefix')} ${t('appStoreLabel')}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '8px 16px',
+                backgroundColor: '#000',
+                color: '#fff',
+                borderRadius: 8,
+                textDecoration: 'none',
+                width: 'fit-content',
+                border: '1px solid #000',
+                lineHeight: 1,
+              }}
+            >
+              <FaApple size={26} aria-hidden="true" />
+              <span
+                style={{
+                  display: 'inline-flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  gap: 2,
+                  lineHeight: 1,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily:
+                      '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif',
+                    fontSize: 10,
+                    fontWeight: 400,
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {t('appStorePrefix')}
+                </span>
+                <span
+                  style={{
+                    fontFamily:
+                      '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif',
+                    fontSize: 19,
+                    fontWeight: 500,
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {t('appStoreLabel')}
+                </span>
+              </span>
+            </a>
 
             <div
               style={{

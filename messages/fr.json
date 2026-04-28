@@ -207,8 +207,8 @@
     "metadataDescription": "Recherchez sermons, programmes et newsletters de la communauté de la Soumission.",
     "metadataSearchTitle": "{query} | Archive | WikiSubmission",
     "metadataSearchDescription": "Résultats de recherche pour \"{query}\" dans l’archive média WikiSubmission",
-    "heroTitlePrefix": "Les",
-    "heroTitleAccent": "Archives.",
+    "heroTitlePrefix": "",
+    "heroTitleAccent": "Archives",
     "heroDescription": "Un registre préservé du mouvement — sermons historiques, programmes, enregistrements et l’archive complète de la newsletter Submitters Perspective.",
     "tabMediaLabel": "Médias",
     "tabMediaSub": "Vidéo · Audio · Sermons",
@@ -228,7 +228,7 @@
     "readIssue": "Lire le numéro"
   },
   "music": {
-    "heading": "ZIKR",
+    "heading": "Musique",
     "description": "Glorification et commémoration de Dieu à travers de belles récitations et mélodies.",
     "searchPlaceholder": "Rechercher des pistes ou des artistes…",
     "loading": "Chargement des pistes…",
@@ -301,7 +301,7 @@
     "brandDomain": "WIKISUBMISSION.ORG"
   },
   "downloads": {
-    "heading": "TÉLÉCHARGEMENTS",
+    "heading": "Téléchargements",
     "description": "Livres gratuits, articles de recherche et ressources pour la Soumission.",
     "tabFullPdf": "PDF complet",
     "tabAppendices": "Annexes",
@@ -330,7 +330,7 @@
     "search": "Rechercher",
     "videos": "Vidéos",
     "archive": "Archive",
-    "music": "Zikr",
+    "music": "Musique",
     "home": "Accueil",
     "blog": "Blog",
     "chat": "Chat",
@@ -447,8 +447,6 @@
     "heading": "La vie en tant que Soumis",
     "description": "Horaires de prière, programme du Ramadan et calculateur de Zakat — des outils pour soutenir votre adoration quotidienne.",
     "prayerTimes": "Horaires de prière",
-    "sectionPrayerLabel": "Géospatial // Salat",
-    "prayerDescription": "Calculé avec des éphémérides astronomiques de haute précision. L’algorithme ajuste dynamiquement la réfraction atmosphérique et l’altitude pour assurer une précision inférieure à la minute.",
     "zakat": "Zakat",
     "sectionZakatLabel": "Distribution // Aumône",
     "zakatDescription": "Une charité obligatoire de 2,5 % sur tous les actifs liquides. Le commandement coranique (6:141) souligne la distribution immédiate au moment de la réception, afin d’assurer un flux constant de capital vers ceux qui en ont besoin.",
@@ -468,7 +466,6 @@
     "card4Desc": "Le pèlerinage à La Mecque — ses rites et sa signification spirituelle."
   },
   "zakatCalculator": {
-    "moduleLabel": "Module financier // ZKT-4",
     "title": "Analyseur d’actifs de Zakat",
     "description": "Selon le Coran : 2,5 % du revenu est dû au moment où vous le recevez — sans délai d’attente ni seuil minimum.",
     "currency": "Devise",

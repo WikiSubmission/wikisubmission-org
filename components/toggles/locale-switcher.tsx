@@ -44,7 +44,7 @@ export function LocaleSwitcher({
   const current = LOCALES.find((l) => l.code === currentLocale) ?? LOCALES[0]
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"

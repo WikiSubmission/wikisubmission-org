@@ -208,7 +208,7 @@
     "metadataSearchTitle": "{query} | الأرشيف | WikiSubmission",
     "metadataSearchDescription": "نتائج البحث عن \"{query}\" في أرشيف وسائط WikiSubmission",
     "heroTitlePrefix": "",
-    "heroTitleAccent": "الأرشيف.",
+    "heroTitleAccent": "الأرشيف",
     "heroDescription": "سجل محفوظ للحركة — خطب تاريخية وبرامج وتسجيلات والأرشيف الكامل لنشرة Submitters Perspective.",
     "tabMediaLabel": "الوسائط",
     "tabMediaSub": "فيديو · صوت · خطب",
@@ -228,7 +228,7 @@
     "readIssue": "اقرأ العدد"
   },
   "music": {
-    "heading": "ذِكْر",
+    "heading": "موسيقى",
     "description": "تمجيد الله وذكره من خلال التلاوات والألحان الجميلة.",
     "searchPlaceholder": "ابحث عن مقاطع أو فنانين…",
     "loading": "جارٍ تحميل المقاطع…",
@@ -330,7 +330,7 @@
     "search": "بحث",
     "videos": "مقاطع فيديو",
     "archive": "الأرشيف",
-    "music": "ذِكْر",
+    "music": "موسيقى",
     "home": "الرئيسية",
     "blog": "المدونة",
     "chat": "Chat",
@@ -447,8 +447,6 @@
     "heading": "الحياة كمسلم",
     "description": "أوقات الصلاة وجدول رمضان وحاسبة الزكاة — أدوات لدعم عبادتك اليومية.",
     "prayerTimes": "أوقات الصلاة",
-    "sectionPrayerLabel": "جغرافي // الصلاة",
-    "prayerDescription": "محسوبة بواسطة جداول فلكية عالية الدقة. تعدّل الخوارزمية الانكسار الجوي والارتفاع ديناميكيًا لضمان دقة أقل من دقيقة.",
     "zakat": "الزكاة",
     "sectionZakatLabel": "التوزيع // الصدقة",
     "zakatDescription": "صدقة واجبة بنسبة 2.5% على جميع الأصول السائلة. يؤكد الأمر القرآني (6:141) التوزيع الفوري عند الاستلام، لضمان تدفق مستمر للمال إلى المحتاجين.",
@@ -468,7 +466,6 @@
     "card4Desc": "الحج إلى مكة المكرمة — شعائره وأهميته الروحية."
   },
   "zakatCalculator": {
-    "moduleLabel": "وحدة مالية // ZKT-4",
     "title": "محلل أصول الزكاة",
     "description": "بناءً على القرآن: 2.5% من الدخل تستحق لحظة استلامه — بلا مدة انتظار ولا حد أدنى.",
     "currency": "العملة",

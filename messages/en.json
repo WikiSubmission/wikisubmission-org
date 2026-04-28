@@ -207,8 +207,8 @@
     "metadataDescription": "Search sermons, programs, and newsletters from the Submission community.",
     "metadataSearchTitle": "{query} | Archive | WikiSubmission",
     "metadataSearchDescription": "Search results for \"{query}\" in the WikiSubmission media archive",
-    "heroTitlePrefix": "The",
-    "heroTitleAccent": "Archive.",
+    "heroTitlePrefix": "",
+    "heroTitleAccent": "Archive",
     "heroDescription": "A preserved record of the movement — historical sermons, programs, recordings, and the full Submitters Perspective newsletter archive.",
     "tabMediaLabel": "Media",
     "tabMediaSub": "Video · Audio · Sermons",
@@ -228,7 +228,7 @@
     "readIssue": "Read issue"
   },
   "music": {
-    "heading": "Zikr",
+    "heading": "Music",
     "description": "Glorification and commemoration of God through beautiful recitations and melodies.",
     "searchPlaceholder": "Search tracks or artists…",
     "loading": "Loading tracks…",
@@ -301,7 +301,7 @@
     "brandDomain": "WIKISUBMISSION.ORG"
   },
   "downloads": {
-    "heading": "DOWNLOADS",
+    "heading": "Downloads",
     "description": "Free books, research papers, and resources for Submission.",
     "tabFullPdf": "Full PDF",
     "tabAppendices": "Appendices",
@@ -330,7 +330,7 @@
     "search": "Search",
     "videos": "Videos",
     "archive": "Archive",
-    "music": "Zikr",
+    "music": "Music",
     "home": "Home",
     "blog": "Blog",
     "chat": "Chat",
@@ -447,8 +447,6 @@
     "heading": "Life as a submitter",
     "description": "Prayer times, Ramadan schedule, and Zakat calculator — tools to support your daily worship.",
     "prayerTimes": "Prayer Times",
-    "sectionPrayerLabel": "Geospatial // Salah",
-    "prayerDescription": "Calculated via high-precision astronomical ephemeris. The algorithm dynamically adjusts for atmospheric refraction and elevation to ensure sub-minute accuracy.",
     "zakat": "Zakat",
     "sectionZakatLabel": "Distribution // Alms",
     "zakatDescription": "A mandatory charity of 2.5% on all liquid assets. The Quranic mandate (6:141) emphasizes immediate distribution at the point of receipt, ensuring constant flow of capital to those in need.",
@@ -468,7 +466,6 @@
     "card4Desc": "The pilgrimage to Mecca — its rites and spiritual significance."
   },
   "zakatCalculator": {
-    "moduleLabel": "Financial Module // ZKT-4",
     "title": "Zakat Asset Analyzer",
     "description": "Based on the Quran: 2.5% of income is owed the moment you receive it — no waiting period, no minimum threshold.",
     "currency": "Currency",

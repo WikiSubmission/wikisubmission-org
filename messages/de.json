@@ -207,8 +207,8 @@
     "metadataDescription": "Durchsuchen Sie Predigten, Programme und Newsletter der Submission-Gemeinschaft.",
     "metadataSearchTitle": "{query} | Archiv | WikiSubmission",
     "metadataSearchDescription": "Suchergebnisse für \"{query}\" im Medienarchiv von WikiSubmission",
-    "heroTitlePrefix": "Das",
-    "heroTitleAccent": "Archiv.",
+    "heroTitlePrefix": "",
+    "heroTitleAccent": "Archiv",
     "heroDescription": "Ein bewahrtes Zeugnis der Bewegung — historische Predigten, Programme, Aufnahmen und das vollständige Archiv des Submitters Perspective-Newsletters.",
     "tabMediaLabel": "Medien",
     "tabMediaSub": "Video · Audio · Predigten",
@@ -228,7 +228,7 @@
     "readIssue": "Ausgabe lesen"
   },
   "music": {
-    "heading": "Zikr",
+    "heading": "Musik",
     "description": "Lobpreis und Gedenken an Gott durch wunderschöne Rezitationen und Melodien.",
     "searchPlaceholder": "Titel oder Künstler suchen…",
     "loading": "Titel werden geladen…",
@@ -301,7 +301,7 @@
     "brandDomain": "WIKISUBMISSION.ORG"
   },
   "downloads": {
-    "heading": "DOWNLOADS",
+    "heading": "Downloads",
     "description": "Kostenlose Bücher, Forschungsarbeiten und Ressourcen zur Hingabe.",
     "tabFullPdf": "Gesamt-PDF",
     "tabAppendices": "Anhänge",
@@ -330,7 +330,7 @@
     "search": "Suche",
     "videos": "Videos",
     "archive": "Archiv",
-    "music": "Zikr",
+    "music": "Musik",
     "home": "Startseite",
     "blog": "Blog",
     "chat": "Chat",
@@ -447,8 +447,6 @@
     "heading": "Das Leben eines Submitter",
     "description": "Gebetszeiten, Ramadan-Kalender und Zakat-Rechner — Werkzeuge für Ihren täglichen Gottesdienst.",
     "prayerTimes": "Gebetszeiten",
-    "sectionPrayerLabel": "Geospatial // Salat",
-    "prayerDescription": "Berechnet mit hochpräzisen astronomischen Ephemeriden. Der Algorithmus passt atmosphärische Brechung und Höhe dynamisch an, um Genauigkeit im Bereich unter einer Minute zu erreichen.",
     "zakat": "Zakat",
     "sectionZakatLabel": "Verteilung // Almosen",
     "zakatDescription": "Eine verpflichtende Abgabe von 2,5 % auf alle liquiden Vermögenswerte. Die koranische Weisung (6:141) betont die sofortige Verteilung beim Empfang, damit Kapital beständig zu Bedürftigen fließt.",
@@ -468,7 +466,6 @@
     "card4Desc": "Die Pilgerfahrt nach Mekka — ihre Riten und spirituelle Bedeutung."
   },
   "zakatCalculator": {
-    "moduleLabel": "Finanzmodul // ZKT-4",
     "title": "Zakat-Vermögensanalyse",
     "description": "Gemäß dem Koran sind 2,5 % des Einkommens in dem Moment fällig, in dem Sie es erhalten — ohne Wartezeit und ohne Mindestschwelle.",
     "currency": "Währung",

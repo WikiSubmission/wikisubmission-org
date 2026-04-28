@@ -208,7 +208,7 @@
     "metadataSearchTitle": "{query} | Arşiv | WikiSubmission",
     "metadataSearchDescription": "WikiSubmission medya arşivinde \"{query}\" için arama sonuçları",
     "heroTitlePrefix": "",
-    "heroTitleAccent": "Arşiv.",
+    "heroTitleAccent": "Arşiv",
     "heroDescription": "Hareketin korunmuş kaydı — tarihi hutbeler, programlar, kayıtlar ve Submitters Perspective bülten arşivinin tamamı.",
     "tabMediaLabel": "Medya",
     "tabMediaSub": "Video · Ses · Hutbeler",
@@ -228,7 +228,7 @@
     "readIssue": "Sayıyı oku"
   },
   "music": {
-    "heading": "ZİKİR",
+    "heading": "Müzik",
     "description": "Güzel tilavetler ve melodiler aracılığıyla Allah'ın yüceltilmesi ve zikredilmesi.",
     "searchPlaceholder": "Parça veya sanatçı ara…",
     "loading": "Parçalar yükleniyor…",
@@ -301,7 +301,7 @@
     "brandDomain": "WIKISUBMISSION.ORG"
   },
   "downloads": {
-    "heading": "İNDİRMELER",
+    "heading": "İndirmeler",
     "description": "Teslimiyet için ücretsiz kitaplar, araştırma makaleleri ve kaynaklar.",
     "tabFullPdf": "Tam PDF",
     "tabAppendices": "Ekler",
@@ -330,7 +330,7 @@
     "search": "Ara",
     "videos": "Videolar",
     "archive": "Arşiv",
-    "music": "Zikir",
+    "music": "Müzik",
     "home": "Ana Sayfa",
     "blog": "Blog",
     "chat": "Chat",
@@ -447,8 +447,6 @@
     "heading": "Müslim Olarak Yaşam",
     "description": "Namaz vakitleri, Ramazan takvimi ve Zekat hesaplayıcısı — günlük ibadetinizi desteklemek için araçlar.",
     "prayerTimes": "Namaz Vakitleri",
-    "sectionPrayerLabel": "Coğrafi // Namaz",
-    "prayerDescription": "Yüksek hassasiyetli astronomik efemeris ile hesaplanır. Algoritma, dakikanın altında doğruluk sağlamak için atmosferik kırılma ve rakımı dinamik olarak ayarlar.",
     "zakat": "Zekat",
     "sectionZakatLabel": "Dağıtım // Sadaka",
     "zakatDescription": "Tüm likit varlıklar üzerinden zorunlu %2,5 sadaka. Kuran emri (6:141), ihtiyaç sahiplerine sürekli sermaye akışı sağlamak için alındığı anda dağıtımı vurgular.",
@@ -468,7 +466,6 @@
     "card4Desc": "Mekke'ye hac — ibadetleri ve ruhani önemi."
   },
   "zakatCalculator": {
-    "moduleLabel": "Finans Modülü // ZKT-4",
     "title": "Zekat Varlık Analizörü",
     "description": "Kuran’a göre: gelirin %2,5’i onu aldığınız anda borçtur — bekleme süresi yok, minimum eşik yok.",
     "currency": "Para birimi",

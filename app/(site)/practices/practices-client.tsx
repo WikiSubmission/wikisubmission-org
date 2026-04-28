@@ -7,9 +7,9 @@ import RamadanClient from './ramadan-client'
 import { ZakatCalculator } from '@/components/zakat-calculator'
 import type { components } from '@/src/api/types.gen'
 import { useTranslations } from 'next-intl'
-import { 
-  BookOpen, 
-  MapPin, 
+import {
+  BookOpen,
+  MapPin,
   Calendar,
   Compass,
   ArrowUpRight,
@@ -25,9 +25,9 @@ type VerseData = components['schemas']['VerseData']
 function gregorianToHijri(date: Date): { year: number; month: number; day: number } {
   const Y = date.getFullYear(), M = date.getMonth() + 1, D = date.getDate()
   const JD = Math.floor((1461 * (Y + 4800 + Math.floor((M - 14) / 12))) / 4) +
-             Math.floor((367 * (M - 2 - 12 * Math.floor((M - 14) / 12))) / 12) -
-             Math.floor((3 * Math.floor((Y + 4900 + Math.floor((M - 14) / 12)) / 100)) / 4) +
-             D - 32075
+    Math.floor((367 * (M - 2 - 12 * Math.floor((M - 14) / 12))) / 12) -
+    Math.floor((3 * Math.floor((Y + 4900 + Math.floor((M - 14) / 12)) / 100)) / 4) +
+    D - 32075
   const Z = JD - 1948438 + 10632
   const N = Math.floor(Z / 10631)
   const AA = Z - 10631 * N + 354
@@ -67,7 +67,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function VerseQuote({ verseKey, text }: { verseKey: string; text: string }) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: -10 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
@@ -98,7 +98,7 @@ export default function PracticesClient({
   prayerVerse: VerseData | null
 }) {
   const t = useTranslations('practices')
-  
+
   const daysUntilRamadan = useMemo(() => daysUntilNextRamadan(), [])
   const showRamadan = daysUntilRamadan <= 15
 
@@ -118,10 +118,10 @@ export default function PracticesClient({
       <section className="relative border-b border-[var(--ed-rule)] overflow-hidden">
         {/* Subtle Background HUD Grid */}
         <div className="absolute inset-0 z-0 bg-grid opacity-[0.02]" />
-        
+
         <div className="relative z-10 max-w-6xl mx-auto px-6 pt-24 pb-20 md:pt-32 md:pb-28">
           <div className="max-w-3xl space-y-8">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="space-y-6"
@@ -150,27 +150,13 @@ export default function PracticesClient({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
           <div className="lg:col-span-4 space-y-10">
             <div>
-              <SectionLabel>{t('sectionPrayerLabel')}</SectionLabel>
               <h2 className="text-3xl md:text-4xl font-serif font-medium text-[var(--ed-fg)] mb-6">
                 {t('prayerTimes')}
               </h2>
-              <p className="text-sm text-[var(--ed-fg-muted)] leading-relaxed opacity-60">
-                {t('prayerDescription')}
-              </p>
-            </div>
-
-            {prayerText && (
-              <VerseQuote
-                verseKey="4:103"
-                text={prayerText}
-              />
-            )}
-          </div>
-
-          <div className="lg:col-span-8">
-            <div className="p-1 rounded-[32px] bg-gradient-to-br from-[var(--ed-rule)] to-transparent">
-              <div className="bg-[var(--ed-bg)] rounded-[31px] p-6 md:p-10 border border-[var(--ed-rule)]/50">
-                <PrayerTimesClient />
+              <div className="p-1 rounded-[32px] bg-gradient-to-br from-[var(--ed-rule)] to-transparent">
+                <div className="bg-[var(--ed-bg)] rounded-[31px] p-6 md:p-10 border border-[var(--ed-rule)]/50">
+                  <PrayerTimesClient />
+                </div>
               </div>
             </div>
           </div>

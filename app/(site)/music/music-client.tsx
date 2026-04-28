@@ -118,19 +118,6 @@ export default function MusicClient() {
       >
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
           <div>
-            <span
-              style={{
-                fontFamily: F.mono,
-                fontSize: 10.5,
-                letterSpacing: '0.2em',
-                textTransform: 'uppercase',
-                color: 'var(--ed-accent)',
-                display: 'inline-block',
-                marginBottom: 16,
-              }}
-            >
-              Zikr · Commemoration
-            </span>
             <h1
               style={{
                 fontFamily: F.display,
