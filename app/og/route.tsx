@@ -12,12 +12,6 @@ async function loadAsset(
   return Buffer.from(await res.arrayBuffer())
 }
 
-function toArrayBuffer(buf: Buffer): ArrayBuffer {
-  const ab = new ArrayBuffer(buf.byteLength)
-  new Uint8Array(ab).set(buf)
-  return ab
-}
-
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const rawTitle = searchParams.get('title') ?? 'WikiSubmission'
@@ -33,10 +27,11 @@ export async function GET(request: NextRequest) {
   const WIDTH = small ? 600 : 1200
   const HEIGHT = small ? 240 : 480
 
-  const fontData = toArrayBuffer(
-    loadAsset('public/font/GlacialIndifference-Regular.ttf', request)
+  const fontData = await loadAsset(
+    'public/font/GlacialIndifference-Regular.ttf',
+    request
   )
-  const logoData = loadAsset(
+  const logoData = await loadAsset(
     'public/brand-assets/logo-transparent.png',
     request
   )
