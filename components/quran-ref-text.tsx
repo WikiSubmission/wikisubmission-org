@@ -33,7 +33,7 @@ function InlineRefBadge({
   return (
     <button
       onClick={() => onNavigateRef(reference)}
-      className="inline-flex items-center font-mono text-xs bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/25 px-1.5 py-0.5 rounded-md transition-colors cursor-pointer align-baseline select-none mx-0.5"
+      className="inline-flex items-center font-glacial text-[10px] font-bold text-primary hover:underline px-0.5 transition-colors cursor-pointer align-baseline select-none mx-0.5"
       aria-label={`View verse ${reference}`}
     >
       {label}

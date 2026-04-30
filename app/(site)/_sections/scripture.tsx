@@ -52,7 +52,7 @@ export function ScriptureSection() {
                     position: 'absolute',
                     inset: 0,
                     background: 'var(--ed-fg)',
-                    borderRadius: '2px 8px 8px 2px',
+                    borderRadius: '1px 3px 3px 1px',
                     opacity: 0.3,
                     transform: 'rotate(6deg) translateX(20px)',
                   }}
@@ -62,7 +62,7 @@ export function ScriptureSection() {
                     position: 'absolute',
                     inset: 0,
                     background: `linear-gradient(135deg, color-mix(in oklab, var(--ed-accent), var(--ed-bg) 20%), color-mix(in oklab, var(--ed-accent), var(--ed-fg) 20%))`,
-                    borderRadius: '2px 8px 8px 2px',
+                    borderRadius: '1px 3px 3px 1px',
                     boxShadow: '0 20px 60px -20px rgba(20,15,10,0.4)',
                     transform: 'rotate(-4deg)',
                   }}
@@ -107,7 +107,7 @@ export function ScriptureSection() {
                     position: 'absolute',
                     inset: 0,
                     background: 'var(--ed-fg-muted)',
-                    borderRadius: '2px 8px 8px 2px',
+                    borderRadius: '1px 3px 3px 1px',
                     opacity: 0.25,
                     transform: 'rotate(6deg) translateX(20px)',
                   }}
@@ -117,7 +117,7 @@ export function ScriptureSection() {
                     position: 'absolute',
                     inset: 0,
                     background: `linear-gradient(135deg, color-mix(in oklab, var(--ed-fg-muted), var(--ed-bg) 30%), color-mix(in oklab, var(--ed-fg-muted), var(--ed-fg) 20%))`,
-                    borderRadius: '2px 8px 8px 2px',
+                    borderRadius: '1px 3px 3px 1px',
                     boxShadow: '0 20px 60px -20px rgba(20,15,10,0.35)',
                     transform: 'rotate(-4deg)',
                   }}
@@ -216,16 +216,17 @@ function FeaturedCard({
             display: 'flex',
             gap: 10,
             flexWrap: 'wrap',
-            fontFamily: F.mono,
-            fontSize: 10.5,
+            fontFamily: F.glacial,
+            fontSize: 10,
+            fontWeight: 700,
             color: 'var(--ed-fg-muted)',
-            letterSpacing: '0.1em',
+            letterSpacing: '0.12em',
             textTransform: 'uppercase' as const,
           }}
         >
           {tags.map((tag, i) => (
             <span key={i}>
-              {i > 0 ? <span style={{ marginRight: 10 }}>·</span> : null}
+              {i > 0 ? <span style={{ marginRight: 10, opacity: 0.5 }}>·</span> : null}
               {tag}
             </span>
           ))}

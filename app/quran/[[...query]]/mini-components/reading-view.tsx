@@ -94,7 +94,7 @@ function FootnoteDialogContent({
               <ArrowLeft className="size-4" />
             </Button>
           )}
-          <DialogTitle className="font-mono text-primary text-sm">{headerLabel}</DialogTitle>
+          <DialogTitle className="font-glacial font-bold text-primary text-xs uppercase tracking-widest">{headerLabel}</DialogTitle>
         </div>
       </DialogHeader>
 
@@ -131,11 +131,11 @@ function FootnoteDialogContent({
                   >
                     {v.vk} <ArrowUpRight className="size-3" />
                   </Link>
-                  {tr?.tx && (
-                    <p className="text-base leading-relaxed">
-                      <strong>[{v.vk}]</strong> {tr.tx}
-                    </p>
-                  )}
+                    {tr?.tx && (
+                      <p className="text-base leading-relaxed">
+                        <strong className="font-glacial text-xs text-primary mr-2 uppercase tracking-tighter">Verse {v.vk}</strong> {tr.tx}
+                      </p>
+                    )}
                   {tr?.f && (
                     <p className="text-sm text-muted-foreground italic">
                       <QuranRefText
@@ -175,10 +175,10 @@ function FootnoteButton({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center font-mono text-[10px] text-muted-foreground/60 hover:text-primary/70 align-super mx-0.5 cursor-pointer transition-colors"
+        className="inline-flex items-center font-glacial font-bold text-[9px] text-primary hover:underline align-super mx-0.5 cursor-pointer transition-colors"
         aria-label={`Footnote ${index + 1}`}
       >
-        [{index + 1}]
+        {index + 1}
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg rounded-3xl">
@@ -259,7 +259,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
                   )}
                   {arTr?.tx ?? ''}
                   {prefs.showVerseNumbers && (
-                    <span className="inline-flex items-center justify-center size-5 rounded-full bg-primary/10 text-primary text-[9px] font-mono mx-1 align-middle">
+                    <span className="inline-flex items-center justify-center size-5 rounded-full bg-primary/10 text-primary text-[9px] font-glacial font-bold mx-1 align-middle">
                       {vNum}
                     </span>
                   )}
@@ -288,7 +288,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
                   )}
                   {tr?.tx ?? ''}
                   {prefs.showVerseNumbers && (
-                    <span className="inline-flex items-center justify-center size-5 rounded-full bg-primary/10 text-primary text-[9px] font-mono mx-1 align-middle">
+                    <span className="inline-flex items-center justify-center size-5 rounded-full bg-primary/10 text-primary text-[9px] font-glacial font-bold mx-1 align-middle">
                       {vNum}
                     </span>
                   )}

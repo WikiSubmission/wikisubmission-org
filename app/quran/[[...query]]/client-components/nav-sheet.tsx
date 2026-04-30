@@ -209,7 +209,7 @@ function NavSheetContent({
                       >
                         <span
                           className={cn(
-                            'flex-shrink-0 flex items-center justify-center size-8 rounded-lg font-mono text-xs font-bold',
+                            'flex-shrink-0 flex items-center justify-center size-8 rounded-lg font-glacial text-xs font-bold',
                             isActive
                               ? 'bg-primary/20 text-primary'
                               : 'bg-muted text-muted-foreground'
@@ -232,7 +232,7 @@ function NavSheetContent({
                                 })}
                               </span>
                             )}
-                            <span className="text-[10px] text-muted-foreground/60 font-mono">
+                            <span className="text-[10px] text-muted-foreground/60 font-glacial font-bold">
                               {chapter.verse_count}v
                             </span>
                           </div>
@@ -288,7 +288,7 @@ function NavSheetContent({
                       onClick={() => { document.body.style.top = '0px' }}
                       className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-accent/50 transition-colors"
                     >
-                      <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">
+                      <span className="flex-shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-glacial text-xs font-bold">
                         {appendix.code}
                       </span>
                       <span

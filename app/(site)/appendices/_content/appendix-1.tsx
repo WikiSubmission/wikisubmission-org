@@ -647,6 +647,7 @@ export function AppendixContent() {
         </p>
       </section>
 
+      {/* ── A.L.M. Table ─────────────────────────────────────────────────── */}
       <div className="overflow-x-auto rounded-xl border border-border/40">
         <table className="w-full text-sm">
           <thead>
@@ -697,6 +698,7 @@ export function AppendixContent() {
         </p>
       </section>
 
+      {/* ── A.L.R. Table ─────────────────────────────────────────────────── */}
       <div className="overflow-x-auto rounded-xl border border-border/40">
         <table className="w-full text-sm">
           <thead>
@@ -831,6 +833,7 @@ export function AppendixContent() {
         </p>
       </section>
 
+      {/* ── Complex Table ────────────────────────────────────────────────── */}
       <div className="overflow-x-auto rounded-xl border border-border/40">
         <table className="w-full text-sm">
           <thead>
@@ -863,7 +866,7 @@ export function AppendixContent() {
         </table>
       </div>
 
-      <div data-card className="rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-2">
+      <div data-card className="rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-2 text-center">
         <p className="text-sm font-semibold text-primary">
           426 + 107 + 290 + 944 = 1767 = 19×93
         </p>
@@ -889,6 +892,7 @@ export function AppendixContent() {
         </p>
       </section>
 
+      {/* ── Gematrical Table ─────────────────────────────────────────────── */}
       <div className="overflow-x-auto rounded-xl border border-border/40">
         <table className="w-full text-sm">
           <thead>
@@ -956,6 +960,7 @@ export function AppendixContent() {
         </p>
       </section>
 
+      {/* ── Initial Totals Table ─────────────────────────────────────────── */}
       <div className="overflow-x-auto rounded-xl border border-border/40">
         <table className="w-full text-sm">
           <thead>
@@ -993,7 +998,7 @@ export function AppendixContent() {
         </table>
       </div>
 
-      <div data-card className="rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-2">
+      <div data-card className="rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-2 text-center">
         <p className="text-sm font-semibold text-primary">
           693 + 295 = 988 = 19×52
         </p>
@@ -1169,6 +1174,7 @@ export function AppendixContent() {
         </p>
       </section>
 
+      {/* ── Basmalah Table ────────────────────────────────────────────────── */}
       <div
         data-card
         className="rounded-xl border border-border/60 overflow-hidden"

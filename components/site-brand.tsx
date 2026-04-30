@@ -24,11 +24,19 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
     }
 
     const mark = root.querySelector('[data-brand-mark]')
+    const wordmark = root.querySelector('[data-brand-wordmark]')
 
     gsap
       .timeline({ defaults: { ease: 'power2.out' } })
-      .to(mark, { rotate: -8, duration: 0.18 })
-      .to(mark, { rotate: 0, duration: 0.28, ease: 'power3.out' })
+      .to(mark, { rotate: -8, scale: 1.08, duration: 0.18 })
+      .to(wordmark, { letterSpacing: '0.005em', duration: 0.16 }, '<')
+      .to([mark, wordmark], {
+        rotate: 0,
+        scale: 1,
+        letterSpacing: '-0.015em',
+        duration: 0.28,
+        ease: 'power3.out',
+      })
   }, [])
 
   useEffect(() => {

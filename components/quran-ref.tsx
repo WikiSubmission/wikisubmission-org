@@ -84,7 +84,7 @@ function BibleVersePreview({
 
   return (
     <div className="space-y-2 py-3 border-b last:border-0">
-      <span className="text-xs text-primary font-mono">
+      <span className="text-xs text-primary font-glacial font-bold">
         {bookDisplay} {cn}:{vn}
       </span>
       {tr?.tx && (
@@ -149,7 +149,7 @@ export function ScriptureRef({
 
   // If unparseable, render plain text so we don't swallow content
   if (!isBible && !quranRef) {
-    return <span className="font-mono text-xs">{reference}</span>
+    return <span className="font-glacial text-[10px] font-bold">{reference}</span>
   }
 
   // Badge label
@@ -196,7 +196,7 @@ export function ScriptureRef({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <button
         onClick={() => handleOpenChange(true)}
-        className="inline-flex items-center font-mono text-xs bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/25 px-1.5 py-0.5 rounded-md transition-colors cursor-pointer align-baseline select-none mx-0.5"
+        className="inline-flex items-center font-glacial text-[10px] font-bold text-primary hover:underline px-0.5 transition-colors cursor-pointer align-baseline select-none mx-0.5"
         aria-label={`View ${isBible ? 'Bible' : 'Quran'} verse ${reference}`}
       >
         {label}
@@ -216,7 +216,7 @@ export function ScriptureRef({
               </Button>
             )}
             <DialogTitle className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono text-primary">{currentLabel}</span>
+              <span className="font-glacial font-bold text-primary uppercase tracking-wider">{currentLabel}</span>
               {from && (isBible || history.length === 1) && (
                 <span className="text-xs text-muted-foreground font-normal">
                   — from {from}

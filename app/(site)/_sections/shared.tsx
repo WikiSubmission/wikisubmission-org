@@ -1,9 +1,12 @@
+'use client'
 import React from 'react'
+import { motion } from 'framer-motion'
 
 export const F = {
   display: 'var(--font-cormorant), Georgia, serif',
   mono: 'var(--font-jetbrains), ui-monospace, monospace',
   serif: 'var(--font-source-serif), Georgia, serif',
+  glacial: 'var(--font-glacial), sans-serif',
   arabic: 'var(--font-amiri), "Scheherazade New", serif',
 }
 
@@ -49,15 +52,30 @@ export function SectionDivider({
       </span>
       <div
         className="hidden sm:block"
-        style={{ height: 1, backgroundColor: 'var(--ed-rule)' }}
-      />
+        style={{ height: 1, backgroundColor: 'var(--ed-rule)', position: 'relative' }}
+      >
+        <motion.div
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease: "circOut", delay: 0.2 }}
+          style={{ 
+            position: 'absolute', 
+            inset: 0, 
+            backgroundColor: 'var(--ed-accent)', 
+            opacity: 0.3,
+            originX: 0 
+          }}
+        />
+      </div>
       <span
         style={{
-          fontFamily: F.mono,
+          fontFamily: F.glacial,
           fontSize: 11,
           textTransform: 'uppercase' as const,
           letterSpacing: '0.18em',
           color: 'var(--ed-fg-muted)',
+          fontWeight: 600,
         }}
       >
         {sub}

@@ -211,7 +211,6 @@ function FactSection({ fact, i }: { fact: MiracleFact, i: number }) {
 
         <div className="relative min-h-[400px] md:min-h-[500px] w-full rounded-[24px] md:rounded-[32px] bg-[var(--ed-surface)]/5 border border-[var(--ed-rule)] overflow-hidden flex items-center justify-center p-4 md:p-8">
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-0 w-full h-full bg-grid opacity-[0.015]" />
           </div>
 
           <div className="relative w-full h-full flex items-center justify-center">
@@ -337,20 +336,29 @@ function ChaptersVisual() {
   const [phase, setPhase] = useState<'idle' | 'scanning' | 'locked'>('idle')
   const [glow, setGlow] = useState(0)
 
+  // ── Master Sequence ──
   useEffect(() => {
-    const t = setTimeout(() => setPhase('scanning'), 300)
-    return () => clearTimeout(t)
+    const startTimer = setTimeout(() => setPhase('scanning'), 400)
+    return () => clearTimeout(startTimer)
   }, [])
 
   useEffect(() => {
     if (phase !== 'scanning') return
-    const delay = index < 100 ? 12 : index < 110 ? 40 : 80
-    const t = setTimeout(() => {
-      if (index < 114) setIndex(i => i + 1)
-      else setPhase('locked')
-    }, delay)
-    return () => clearTimeout(t)
-  }, [index, phase])
+
+    let current = 0
+    const ticker = setInterval(() => {
+      current++
+      if (current >= 114) {
+        clearInterval(ticker)
+        setIndex(114)
+        setPhase('locked')
+      } else {
+        setIndex(current)
+      }
+    }, 25) // Smooth, rapid ticker
+
+    return () => clearInterval(ticker)
+  }, [phase])
 
   useEffect(() => {
     if (phase !== 'locked') return
@@ -358,7 +366,7 @@ function ChaptersVisual() {
     return () => clearInterval(t)
   }, [phase])
 
-  const displayIndex = Math.min(index, 113)
+  const displayIndex = Math.min(Math.max(0, index - 1), 113)
   const currentName = CHAPTER_NAMES[displayIndex]
   const isLocked = phase === 'locked'
 
@@ -369,32 +377,57 @@ function ChaptersVisual() {
       <CornerMarkers label={t('visualChapterIndex')} sublabel={t('visual114Units')} />
 
       <div className="relative z-30 flex flex-col items-center gap-8 px-6 w-full">
+        {/* Name Ticker */}
         <div className="h-12 flex items-center justify-center">
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {!isLocked ? (
-              <motion.div key={displayIndex} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 0.5, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.05 }} className="text-xl md:text-2xl font-serif italic text-[var(--ed-fg-muted)]">
+              <motion.div 
+                key={displayIndex} 
+                initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }} 
+                animate={{ opacity: 0.4, y: 0, filter: 'blur(0px)' }} 
+                exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }} 
+                transition={{ duration: 0.1 }}
+                className="text-xl md:text-2xl font-serif italic text-[var(--ed-fg-muted)]"
+              >
                 {currentName}
               </motion.div>
             ) : (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-mono text-[10px] tracking-[0.3em] text-[var(--ed-accent)] uppercase">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                className="font-mono text-[10px] tracking-[0.3em] text-[var(--ed-accent)] uppercase font-bold"
+              >
                 {t('visualAllChaptersIndexed')}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
+        {/* Counter Circle */}
         <div className="relative flex items-center justify-center">
           <svg className="absolute w-64 h-64 md:w-80 md:h-80 animate-[spin_20s_linear_infinite] opacity-10" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="48" fill="none" stroke="var(--ed-accent)" strokeWidth="0.5" strokeDasharray="4 4" />
           </svg>
-          <div className="font-mono text-7xl md:text-9xl font-bold leading-none tabular-nums transition-all duration-700" style={{ color: isLocked ? 'var(--ed-accent)' : 'var(--ed-fg)', textShadow: isLocked ? `0 0 ${30 + glow * 40}px var(--ed-accent-soft)` : 'none' }}>
+          <div 
+            className="font-mono text-7xl md:text-9xl font-bold leading-none tabular-nums transition-all duration-700" 
+            style={{ 
+              color: isLocked ? 'var(--ed-accent)' : 'var(--ed-fg)', 
+              textShadow: isLocked ? `0 0 ${30 + glow * 40}px var(--ed-accent-soft)` : 'none',
+              transform: isLocked ? 'scale(1.05)' : 'scale(1)'
+            }}
+          >
             {index}
           </div>
         </div>
 
+        {/* Formula Link */}
         <AnimatePresence>
           {isLocked && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4 bg-[var(--ed-surface)]/60 px-6 py-3 rounded-2xl border border-[var(--ed-rule)] backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              className="flex items-center gap-4 bg-[var(--ed-surface)]/60 px-6 py-3 rounded-2xl border border-[var(--ed-rule)] backdrop-blur-sm"
+            >
               <div className="font-mono text-4xl md:text-5xl font-bold text-[var(--ed-accent)]">19</div>
               <div className="text-xl opacity-20">×</div>
               <div className="font-mono text-3xl md:text-4xl font-bold text-[var(--ed-fg)]">6</div>

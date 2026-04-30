@@ -36,10 +36,10 @@ export function JournalSection({ articles }: { articles: Article[] }) {
         />
 
         <div
-          style={{ gap: 24 }}
-          className="grid grid-cols-3 max-md:grid-cols-1"
+          style={{ gap: 32 }}
+          className="grid grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1"
         >
-          {articles.slice(0, 3).map((post) => (
+          {articles.slice(0, 6).map((post) => (
             <Link
               key={post._id}
               href={`/blog/${post.slug?.current}`}
@@ -47,19 +47,23 @@ export function JournalSection({ articles }: { articles: Article[] }) {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 20,
+                padding: 16,
+                backgroundColor: 'var(--ed-bg)',
+                border: '1px solid var(--ed-rule)',
                 textDecoration: 'none',
-                transition: 'transform 250ms',
+                transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+                height: '100%',
               }}
-              className="group"
+              className="group hover:border-[var(--ed-fg-muted)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
             >
               {/* Visual */}
               <div
                 style={{
                   position: 'relative',
-                  aspectRatio: '4 / 3',
+                  aspectRatio: '16 / 9',
                   backgroundColor: 'var(--ed-surface)',
                   border: '1px solid var(--ed-rule)',
-                  borderRadius: 2,
+                  borderRadius: 0,
                   overflow: 'hidden',
                 }}
               >
@@ -85,16 +89,19 @@ export function JournalSection({ articles }: { articles: Article[] }) {
                   <div
                     style={{
                       position: 'absolute',
-                      top: 16,
-                      left: 16,
-                      padding: '4px 10px',
-                      backgroundColor: 'var(--ed-surface)',
-                      border: '1px solid var(--ed-rule)',
-                      fontFamily: F.mono,
-                      fontSize: 10,
+                      top: 0,
+                      left: 0,
+                      padding: '6px 12px',
+                      backgroundColor: 'var(--ed-bg)',
+                      borderRight: '1px solid var(--ed-rule)',
+                      borderBottom: '1px solid var(--ed-rule)',
+                      fontFamily: F.glacial,
+                      fontSize: 9,
+                      fontWeight: 700,
                       letterSpacing: '0.14em',
                       textTransform: 'uppercase' as const,
                       color: 'var(--ed-accent)',
+                      zIndex: 10,
                     }}
                   >
                     {post.category}
@@ -135,12 +142,13 @@ export function JournalSection({ articles }: { articles: Article[] }) {
                 {post.publishedAt && (
                   <div
                     style={{
-                      fontFamily: F.mono,
-                      fontSize: 10.5,
+                      fontFamily: F.glacial,
+                      fontSize: 10,
+                      fontWeight: 700,
                       letterSpacing: '0.12em',
                       textTransform: 'uppercase' as const,
                       color: 'var(--ed-fg-muted)',
-                      marginTop: 4,
+                      marginTop: 6,
                     }}
                   >
                     {new Date(post.publishedAt).toLocaleDateString('en-US', {

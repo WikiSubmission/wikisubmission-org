@@ -1,8 +1,9 @@
 'use client'
-
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Copy, Check } from 'lucide-react'
 import { F, SectionDivider, Arrow } from './shared'
 
 type Verse = {
@@ -23,6 +24,7 @@ const ROTATE_MS = 7000
 
 export function VerseOfTheDaySection() {
   const t = useTranslations('homePage.verseOfDay')
+  const [copied, setCopied] = useState(false)
 
   const TABS: Tab[] = useMemo(
     () => [
@@ -106,6 +108,7 @@ export function VerseOfTheDaySection() {
 
   const [tabKey, setTabKey] = useState<Tab['key']>('quran')
   const [idx, setIdx] = useState(0)
+  const [progressKey, setProgressKey] = useState(0)
 
   const current = useMemo(
     () => TABS.find((tab) => tab.key === tabKey) ?? TABS[0],
@@ -113,19 +116,26 @@ export function VerseOfTheDaySection() {
   )
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIdx(0)
+    setProgressKey(k => k + 1)
   }, [tabKey])
 
   useEffect(() => {
     const tm = setInterval(() => {
       setIdx((p) => (p + 1) % current.verses.length)
+      setProgressKey(k => k + 1)
     }, ROTATE_MS)
     return () => clearInterval(tm)
   }, [current.verses.length])
 
   const v = current.verses[idx]
   const continueHref = tabKey === 'quran' ? '/quran' : '/bible'
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(`${v.english}\n— ${v.ref}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <section
@@ -147,11 +157,31 @@ export function VerseOfTheDaySection() {
         <div
           style={{
             border: '1px solid var(--ed-rule)',
-            borderRadius: 3,
+            borderRadius: 0,
             backgroundColor: 'var(--ed-surface)',
             overflow: 'hidden',
+            position: 'relative'
           }}
         >
+          {/* Progress Bar */}
+          <motion.div
+            key={progressKey}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: ROTATE_MS / 1000, ease: 'linear' }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 2,
+              background: 'var(--ed-accent)',
+              originX: 0,
+              zIndex: 10,
+              opacity: 0.6
+            }}
+          />
+
           <div
             className="flex items-center justify-between gap-3 flex-wrap"
             style={{
@@ -161,8 +191,9 @@ export function VerseOfTheDaySection() {
           >
             <div
               style={{
-                fontFamily: F.mono,
+                fontFamily: F.glacial,
                 fontSize: 10.5,
+                fontWeight: 600,
                 letterSpacing: '0.18em',
                 textTransform: 'uppercase',
                 color: 'var(--ed-fg-muted)',
@@ -174,10 +205,10 @@ export function VerseOfTheDaySection() {
               role="tablist"
               style={{
                 display: 'inline-flex',
-                gap: 2,
-                padding: 2,
+                gap: 0,
+                padding: 0,
                 border: '1px solid var(--ed-rule)',
-                borderRadius: 2,
+                borderRadius: 0,
               }}
             >
               {TABS.map((tab) => (
@@ -188,11 +219,12 @@ export function VerseOfTheDaySection() {
                   onClick={() => setTabKey(tab.key)}
                   type="button"
                   style={{
-                    fontFamily: F.mono,
-                    fontSize: 10.5,
+                    fontFamily: F.glacial,
+                    fontSize: 10,
+                    fontWeight: tabKey === tab.key ? 700 : 500,
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase',
-                    padding: '6px 12px',
+                    padding: '8px 18px',
                     border: 'none',
                     background:
                       tabKey === tab.key ? 'var(--ed-fg)' : 'transparent',
@@ -201,8 +233,9 @@ export function VerseOfTheDaySection() {
                         ? 'var(--ed-bg)'
                         : 'var(--ed-fg-muted)',
                     cursor: 'pointer',
-                    borderRadius: 2,
+                    borderRadius: 0,
                     transition: 'all 150ms',
+                    borderRight: '1px solid var(--ed-rule)',
                   }}
                 >
                   {tab.label}
@@ -229,8 +262,9 @@ export function VerseOfTheDaySection() {
             >
               <span
                 style={{
-                  fontFamily: F.mono,
+                  fontFamily: F.glacial,
                   fontSize: 11,
+                  fontWeight: 700,
                   letterSpacing: '0.18em',
                   textTransform: 'uppercase',
                   color: 'var(--ed-accent)',
@@ -249,33 +283,48 @@ export function VerseOfTheDaySection() {
               >
                 {v.title}
               </span>
+              
+              <button
+                onClick={handleCopy}
+                className="ml-auto p-2 opacity-50 hover:opacity-100 transition-opacity"
+                title="Copy verse"
+              >
+                {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+              </button>
             </div>
 
-            <p
-              style={{
-                fontFamily: F.display,
-                fontSize: 'clamp(22px, 5vw, 30px)',
-                lineHeight: 1.35,
-                color: 'var(--ed-fg)',
-                letterSpacing: '-0.015em',
-                maxWidth: '52ch',
-                margin: 0,
-              }}
-            >
-              <span
-                aria-hidden
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={`${tabKey}-${idx}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.4 }}
                 style={{
-                  color: 'var(--ed-accent)',
-                  fontSize: '1.4em',
-                  lineHeight: 0,
-                  marginRight: 6,
                   fontFamily: F.display,
+                  fontSize: 'clamp(22px, 5vw, 30px)',
+                  lineHeight: 1.35,
+                  color: 'var(--ed-fg)',
+                  letterSpacing: '-0.015em',
+                  maxWidth: '52ch',
+                  margin: 0,
                 }}
               >
-                &ldquo;
-              </span>
-              {v.english}
-            </p>
+                <span
+                  aria-hidden
+                  style={{
+                    color: 'var(--ed-accent)',
+                    fontSize: '1.4em',
+                    lineHeight: 0,
+                    marginRight: 6,
+                    fontFamily: F.display,
+                  }}
+                >
+                  &ldquo;
+                </span>
+                {v.english}
+              </motion.p>
+            </AnimatePresence>
 
             {v.footnote && (
               <div
@@ -290,8 +339,9 @@ export function VerseOfTheDaySection() {
               >
                 <span
                   style={{
-                    fontFamily: F.mono,
-                    fontSize: 10.5,
+                    fontFamily: F.glacial,
+                    fontSize: 10,
+                    fontWeight: 700,
                     letterSpacing: '0.16em',
                     textTransform: 'uppercase',
                     color: 'var(--ed-fg-muted)',
@@ -329,7 +379,10 @@ export function VerseOfTheDaySection() {
                 <button
                   key={i}
                   type="button"
-                  onClick={() => setIdx(i)}
+                  onClick={() => {
+                    setIdx(i)
+                    setProgressKey(k => k + 1)
+                  }}
                   aria-label={t('verseAria', { n: i + 1 })}
                   aria-current={i === idx ? 'true' : undefined}
                   style={{

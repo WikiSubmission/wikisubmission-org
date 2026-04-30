@@ -137,11 +137,11 @@ function ArchiveContent() {
         ])
         setMediaResults(
           mediaResponse?.data ||
-            (Array.isArray(mediaResponse) ? mediaResponse : [])
+          (Array.isArray(mediaResponse) ? mediaResponse : [])
         )
         setNewsletterResults(
           newsletterResponse?.data ||
-            (Array.isArray(newsletterResponse) ? newsletterResponse : [])
+          (Array.isArray(newsletterResponse) ? newsletterResponse : [])
         )
         setPerformedQuery(featured ? '' : q)
         setIsFeatured(featured)

@@ -9,6 +9,9 @@ import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
+import { motion, AnimatePresence } from 'framer-motion'
+import { BlogTutorial } from './blog-tutorial'
+import { BookOpenIcon } from 'lucide-react'
 
 export type Post = {
   _id: string
@@ -149,9 +152,11 @@ function SearchResultRow({ post, query }: { post: SearchPost; query: string }) {
 function BlogBrowserInner({
   articles,
   categories,
+  tutorial,
 }: {
   articles: Post[]
   categories: Category[]
+  tutorial?: any
 }) {
   const t = useTranslations('blog')
   const router = useRouter()
@@ -163,6 +168,7 @@ function BlogBrowserInner({
   const [query, setQuery] = useState(() => searchParams.get('q') ?? '')
   const [searchResults, setSearchResults] = useState<SearchPost[] | null>(null)
   const [searching, setSearching] = useState(false)
+  const [tutorialOpen, setTutorialOpen] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const updateUrl = useCallback(
@@ -255,25 +261,35 @@ function BlogBrowserInner({
             </p>
           </div>
 
-          {/* Search bar */}
-          <div className="relative">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60 pointer-events-none" />
-            <input
-              type="text"
-              placeholder={t('searchPlaceholder')}
-              value={query}
-              onChange={(e) => handleQueryChange(e.target.value)}
-              className="w-full h-12 rounded-lg bg-background border border-border pl-11 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {searching ? (
-                <Spinner className="size-4 text-muted-foreground" />
-              ) : query ? (
-                <button onClick={clearSearch} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
-                  <XIcon className="size-3.5" />
-                </button>
-              ) : null}
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+            {/* Search bar */}
+            <div className="relative flex-1">
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60 pointer-events-none" />
+              <input
+                type="text"
+                placeholder={t('searchPlaceholder')}
+                value={query}
+                onChange={(e) => handleQueryChange(e.target.value)}
+                className="w-full h-12 rounded-lg bg-background border border-border pl-11 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {searching ? (
+                  <Spinner className="size-4 text-muted-foreground" />
+                ) : query ? (
+                  <button onClick={clearSearch} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
+                    <XIcon className="size-3.5" />
+                  </button>
+                ) : null}
+              </div>
             </div>
+
+            <button 
+              onClick={() => setTutorialOpen(true)}
+              className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all shrink-0 shadow-lg shadow-primary/10"
+            >
+              <BookOpenIcon size={18} />
+              Instructions
+            </button>
           </div>
 
           {/* Category pills */}
@@ -405,6 +421,22 @@ function BlogBrowserInner({
           </div>
         )}
       </div>
+
+      {/* Tutorial Overlay */}
+      <AnimatePresence>
+        {tutorialOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setTutorialOpen(false)}
+              className="absolute inset-0 bg-background/40 backdrop-blur-md cursor-pointer"
+            />
+            <BlogTutorial onClose={() => setTutorialOpen(false)} />
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -412,13 +444,15 @@ function BlogBrowserInner({
 export function BlogBrowser({
   articles,
   categories,
+  tutorial,
 }: {
   articles: Post[]
   categories: Category[]
+  tutorial?: any
 }) {
   return (
     <Suspense>
-      <BlogBrowserInner articles={articles} categories={categories} />
+      <BlogBrowserInner articles={articles} categories={categories} tutorial={tutorial} />
     </Suspense>
   )
 }

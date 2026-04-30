@@ -16,8 +16,6 @@
     "generate": "openapi-typescript src/api/openapi.yaml -o src/api/types.gen.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1031.0",
-    "@aws-sdk/lib-storage": "^3.1031.0",
     "@clerk/nextjs": "^6.39.2",
     "@deemlol/next-icons": "^0.1.9",
     "@portabletext/react": "^6.0.3",

@@ -2,12 +2,17 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { motion } from 'framer-motion'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { F, Arrow } from './shared'
+import { STAGGER_CONTAINER, FADE_UP } from '@/lib/motion'
 
 function Stat({ k, label }: { k: string; label: string }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <motion.div 
+      variants={FADE_UP}
+      style={{ display: 'flex', flexDirection: 'column', gap: 4 }}
+    >
       <div
         style={{
           fontFamily: F.display,
@@ -21,8 +26,9 @@ function Stat({ k, label }: { k: string; label: string }) {
       </div>
       <div
         style={{
-          fontFamily: F.mono,
-          fontSize: 10.5,
+          fontFamily: F.glacial,
+          fontSize: 10,
+          fontWeight: 700,
           letterSpacing: '0.14em',
           textTransform: 'uppercase' as const,
           color: 'var(--ed-fg-muted)',
@@ -30,7 +36,7 @@ function Stat({ k, label }: { k: string; label: string }) {
       >
         {label}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -50,7 +56,10 @@ export function HeroManifesto() {
         overflow: 'visible',
       }}
     >
-      <div
+      <motion.div
+        variants={STAGGER_CONTAINER}
+        initial="hidden"
+        animate="show"
         style={{
           columnGap: 60,
           rowGap: 48,
@@ -58,7 +67,8 @@ export function HeroManifesto() {
         }}
         className="grid grid-cols-[1.3fr_1fr] max-md:grid-cols-1"
       >
-        <h1
+        <motion.h1
+          variants={FADE_UP}
           style={{
             fontFamily: F.display,
             fontSize: 'clamp(48px, 14vw, 128px)',
@@ -81,9 +91,10 @@ export function HeroManifesto() {
           <span style={{ display: 'block', color: 'var(--ed-accent)' }}>
             {t('headline3')}
           </span>
-        </h1>
+        </motion.h1>
 
-        <aside
+        <motion.aside
+          variants={FADE_UP}
           style={{
             borderLeft: '1px solid var(--ed-rule)',
             paddingLeft: 32,
@@ -93,8 +104,9 @@ export function HeroManifesto() {
         >
           <div
             style={{
-              fontFamily: F.mono,
-              fontSize: 10.5,
+              fontFamily: F.glacial,
+              fontSize: 10,
+              fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.16em',
               color: 'var(--ed-accent)',
@@ -114,9 +126,10 @@ export function HeroManifesto() {
           >
             {t('verse')}
           </p>
-        </aside>
+        </motion.aside>
 
-        <p
+        <motion.p
+          variants={FADE_UP}
           style={{
             fontFamily: F.serif,
             fontSize: 'clamp(16px, 4.2vw, 18px)',
@@ -126,9 +139,10 @@ export function HeroManifesto() {
           }}
         >
           {t('lede')}
-        </p>
+        </motion.p>
 
-        <div
+        <motion.div
+          variants={FADE_UP}
           style={{
             gridColumn: '1 / -1',
             display: 'flex',
@@ -152,9 +166,10 @@ export function HeroManifesto() {
           >
             {t('ctaSecondary')}
           </button>
-        </div>
+        </motion.div>
 
-        <div
+        <motion.div
+          variants={FADE_UP}
           style={{
             gridColumn: '1 / -1',
             display: 'flex',
@@ -168,17 +183,19 @@ export function HeroManifesto() {
           <Stat k={t('stat2k')} label={t('stat2label')} />
           <Stat k={t('stat3k')} label={t('stat3label')} />
           <Stat k={t('stat4k')} label={t('stat4label')} />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.05 }}
+        transition={{ duration: 1.5, delay: 0.5 }}
         aria-hidden
         style={{
           position: 'absolute',
           right: -80,
           top: 40,
           width: 420,
-          opacity: 0.05,
           pointerEvents: 'none',
           mixBlendMode: 'multiply',
         }}
@@ -189,8 +206,10 @@ export function HeroManifesto() {
           alt=""
           width={420}
           height={420}
+          priority
         />
-      </div>
+      </motion.div>
     </section>
   )
 }
+

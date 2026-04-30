@@ -72,7 +72,6 @@ export default async function MiraclePage() {
       >
         {/* Background Grid & Calligraphy */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.07]" aria-hidden="true">
-          <div className="absolute inset-0 bg-grid" style={{ backgroundSize: '40px 40px' }} />
         </div>
 
         {/* Fixed Background Calligraphy (Stylized 19) */}
@@ -248,17 +247,29 @@ export default async function MiraclePage() {
               </p>
             </div>
 
-            <a
-              href="https://cdn.wikisubmission.org/books/quran-the-final-testament-appendix-1.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all group shadow-lg"
-            >
-              <span style={{ fontFamily: F.mono, fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>
-                {t('appendixButton')}
-              </span>
-              <ExternalLink size={16} className="group-hover:translate-x-1 transition-transform" />
-            </a>
+            <div className="flex flex-col items-center gap-4">
+              <a
+                href="https://cdn.wikisubmission.org/books/quran-the-final-testament-appendix-1.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all group shadow-lg"
+              >
+                <span style={{ fontFamily: F.mono, fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>
+                  {t('appendixButton')}
+                </span>
+                <ExternalLink size={16} className="group-hover:translate-x-1 transition-transform" />
+              </a>
+
+              <Link
+                href="/appendices/1"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-full border border-[var(--ed-rule)] bg-[var(--ed-bg)] text-[var(--ed-fg)] hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] transition-all group"
+              >
+                <span style={{ fontFamily: F.mono, fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>
+                  {t('appendixButtonDigital')}
+                </span>
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

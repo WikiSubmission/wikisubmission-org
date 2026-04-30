@@ -1,9 +1,11 @@
 'use client'
-
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { motion } from 'framer-motion'
+import { ExternalLink } from 'lucide-react'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { F, SectionDivider, Arrow } from './shared'
+import { FADE_UP, STAGGER_CONTAINER, useScrollAnimation } from '@/lib/motion'
 
 type Tool = {
   key: string
@@ -69,6 +71,7 @@ const GLYPH_DISCORD = (
 export function ToolsSection() {
   const { toggle: toggleAsk } = useChatPanel()
   const t = useTranslations('homePage.tools')
+  const { ref, isInView } = useScrollAnimation()
 
   const TOOLS: Tool[] = [
     {
@@ -111,6 +114,7 @@ export function ToolsSection() {
 
   return (
     <section
+      ref={ref}
       style={{
         backgroundColor: 'var(--ed-bg)',
         padding: 'clamp(64px, 8vw, 96px) 0',
@@ -126,12 +130,16 @@ export function ToolsSection() {
           sub={t('dividerSub')}
         />
 
-        <div
+        <motion.div
+          variants={STAGGER_CONTAINER}
+          initial="hidden"
+          animate={isInView ? 'show' : 'hidden'}
           style={{ gap: 16 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
         >
           {TOOLS.map((tool) => {
-            const sharedClassName = 'ed-card'
+            const isExternal = 'href' in tool && tool.href.startsWith('http')
+            const sharedClassName = 'ed-card group transition-all duration-300 hover:border-[var(--ed-accent)]/30'
             const sharedStyle = {
               backgroundColor: tool.accent
                 ? 'color-mix(in oklab, var(--ed-accent), transparent 92%)'
@@ -143,6 +151,8 @@ export function ToolsSection() {
               gap: 12,
               textDecoration: 'none',
               minHeight: 180,
+              position: 'relative' as const,
+              overflow: 'hidden' as const
             }
 
             const body = (
@@ -169,9 +179,13 @@ export function ToolsSection() {
                     letterSpacing: '-0.01em',
                     color: 'var(--ed-fg)',
                     lineHeight: 1.15,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
                   }}
                 >
                   {tool.title}
+                  {isExternal && <ExternalLink size={12} className="opacity-30 group-hover:opacity-100 transition-opacity" />}
                 </div>
                 <p
                   style={{
@@ -198,8 +212,10 @@ export function ToolsSection() {
 
             if ('onClick' in tool) {
               return (
-                <button
+                <motion.button
                   key={tool.key}
+                  variants={FADE_UP}
+                  whileHover={{ y: -2 }}
                   type="button"
                   onClick={toggleAsk}
                   className={sharedClassName}
@@ -210,25 +226,29 @@ export function ToolsSection() {
                   }}
                 >
                   {body}
-                </button>
+                </motion.button>
               )
             }
 
-            const isExternal = tool.href.startsWith('http')
             return (
-              <Link
+              <motion.div
                 key={tool.key}
-                href={tool.href}
-                target={isExternal ? '_blank' : undefined}
-                rel={isExternal ? 'noreferrer' : undefined}
-                className={sharedClassName}
-                style={sharedStyle}
+                variants={FADE_UP}
+                whileHover={{ y: -2 }}
               >
-                {body}
-              </Link>
+                <Link
+                  href={tool.href}
+                  target={isExternal ? '_blank' : undefined}
+                  rel={isExternal ? 'noreferrer' : undefined}
+                  className={sharedClassName}
+                  style={sharedStyle}
+                >
+                  {body}
+                </Link>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

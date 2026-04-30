@@ -1,17 +1,44 @@
 'use client'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { motion, useSpring, useTransform, animate } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { F, SectionDivider, Arrow } from './shared'
+import { useScrollAnimation, FADE_UP, STAGGER_CONTAINER } from '@/lib/motion'
+
+function CountUp({ value, duration = 2 }: { value: number; duration?: number }) {
+  const [displayValue, setDisplayValue] = useState(0)
+  const { ref, isInView } = useScrollAnimation()
+
+  useEffect(() => {
+    if (isInView) {
+      const controls = animate(0, value, {
+        duration,
+        onUpdate: (latest) => setDisplayValue(Math.floor(latest)),
+        ease: 'easeOut'
+      })
+      return () => controls.stop()
+    }
+  }, [isInView, value, duration])
+
+  return <span ref={ref}>{displayValue}</span>
+}
 
 function Fact({ k, v, note }: { k: string; v: string; note: string }) {
   return (
-    <div
+    <motion.div
+      variants={FADE_UP}
+      whileHover={{ y: -2, backgroundColor: 'var(--ed-bg)' }}
+      className="transition-colors duration-300 group"
       style={{
         padding: 'clamp(24px, 5vw, 32px) clamp(20px, 5vw, 28px)',
         backgroundColor: 'var(--ed-surface)',
         display: 'flex',
         flexDirection: 'column',
         gap: 6,
+        height: '100%',
+        cursor: 'default',
+        border: '1px solid transparent'
       }}
     >
       <div
@@ -23,6 +50,7 @@ function Fact({ k, v, note }: { k: string; v: string; note: string }) {
           lineHeight: 1,
           color: 'var(--ed-fg)',
         }}
+        className="group-hover:text-[var(--ed-accent)] transition-colors duration-300"
       >
         {k}
       </div>
@@ -44,18 +72,22 @@ function Fact({ k, v, note }: { k: string; v: string; note: string }) {
           letterSpacing: '0.12em',
           color: 'var(--ed-accent)',
           marginTop: 'auto',
+          opacity: 0.8
         }}
       >
         {note}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
 export function MiracleSection() {
   const t = useTranslations('homePage.miracle')
+  const { ref, isInView } = useScrollAnimation()
+
   return (
     <section
+      ref={ref}
       className="px-4 sm:px-6 md:px-10"
       style={{
         paddingTop: 'clamp(72px, 10vw, 120px)',
@@ -70,12 +102,16 @@ export function MiracleSection() {
         sub={t('dividerSub')}
       />
 
-      <div
+      <motion.div
+        variants={STAGGER_CONTAINER}
+        initial="hidden"
+        animate={isInView ? 'show' : 'hidden'}
         style={{ gap: 72, alignItems: 'stretch' }}
         className="grid grid-cols-[1.2fr_1fr] max-md:grid-cols-1 max-md:gap-12"
       >
         {/* Left: 19 + description */}
-        <div
+        <motion.div
+          variants={FADE_UP}
           className="max-sm:flex-col max-sm:gap-6"
           style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}
         >
@@ -94,7 +130,9 @@ export function MiracleSection() {
             }}
           >
             <span style={{ fontStyle: 'italic' }}>1</span>
-            <span style={{ fontStyle: 'italic' }}>9</span>
+            <span style={{ fontStyle: 'italic' }}>
+              {isInView ? <CountUp value={9} duration={1.5} /> : '9'}
+            </span>
           </div>
           <div>
             <h3
@@ -138,10 +176,11 @@ export function MiracleSection() {
               {t('cta')} <Arrow />
             </Link>
           </div>
-        </div>
+        </motion.div>
 
         {/* Right: 2×2 fact grid */}
-        <div
+        <motion.div
+          variants={STAGGER_CONTAINER}
           className="grid grid-cols-1 sm:grid-cols-2"
           style={{
             gap: 0,
@@ -163,8 +202,9 @@ export function MiracleSection() {
               <Fact {...f} />
             </div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   )
 }
+

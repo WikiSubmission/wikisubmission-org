@@ -2,13 +2,17 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { motion } from 'framer-motion'
 import { F, Arrow } from './shared'
+import { STAGGER_CONTAINER, FADE_UP, useScrollAnimation } from '@/lib/motion'
 
 export function ClosingSection() {
   const t = useTranslations('homePage.closing')
+  const { ref, isInView } = useScrollAnimation()
 
   return (
     <section
+      ref={ref}
       className="px-4 sm:px-6 md:px-10"
       style={{
         backgroundColor: 'var(--ed-fg)',
@@ -17,7 +21,10 @@ export function ClosingSection() {
         paddingBottom: 'clamp(72px, 12vw, 144px)',
       }}
     >
-      <div
+      <motion.div
+        variants={STAGGER_CONTAINER}
+        initial="hidden"
+        animate={isInView ? 'show' : 'hidden'}
         style={{
           maxWidth: 880,
           margin: '0 auto',
@@ -28,17 +35,19 @@ export function ClosingSection() {
           textAlign: 'center',
         }}
       >
-        <div style={{ width: 80 }}>
+        <motion.div variants={FADE_UP} style={{ width: 80 }}>
           <Image
             src="/brand-assets/logo-transparent.png"
             alt=""
             width={80}
             height={80}
             aria-hidden
+            className="invert grayscale"
           />
-        </div>
+        </motion.div>
 
-        <h2
+        <motion.h2
+          variants={FADE_UP}
           style={{
             fontFamily: F.display,
             fontSize: 'clamp(32px, 4vw, 52px)',
@@ -50,9 +59,10 @@ export function ClosingSection() {
           }}
         >
           {t('quote')}
-        </h2>
+        </motion.h2>
 
-        <div
+        <motion.div
+          variants={FADE_UP}
           style={{
             fontFamily: F.mono,
             fontSize: 12,
@@ -62,9 +72,10 @@ export function ClosingSection() {
           }}
         >
           {t('ref')}
-        </div>
+        </motion.div>
 
-        <div
+        <motion.div
+          variants={FADE_UP}
           style={{
             display: 'flex',
             gap: 12,
@@ -88,8 +99,8 @@ export function ClosingSection() {
           >
             {t('ctaSecondary')}
           </Link>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   )
 }

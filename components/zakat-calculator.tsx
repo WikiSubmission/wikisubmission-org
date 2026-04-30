@@ -21,6 +21,9 @@ export function ZakatCalculator() {
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Activity size={14} className="text-[var(--ed-accent)]" />
+          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[var(--ed-fg-muted)] opacity-40">
+            {t('moduleLabel')}
+          </span>
         </div>
         <h2 className="text-3xl font-serif font-medium text-[var(--ed-fg)]">
           {t('title')}

@@ -6,8 +6,8 @@ import { FaXTwitter } from 'react-icons/fa6'
 
 const F = {
   display: 'var(--font-cormorant), Georgia, serif',
-  mono: 'var(--font-jetbrains), ui-monospace, monospace',
   serif: 'var(--font-source-serif), Georgia, serif',
+  glacial: 'var(--font-glacial), sans-serif',
 }
 
 export async function SiteFooter() {
@@ -161,7 +161,7 @@ export async function SiteFooter() {
             >
               <div
                 style={{
-                  fontFamily: F.mono,
+                  fontFamily: F.glacial,
                   fontSize: 10.5,
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase' as const,
@@ -196,7 +196,7 @@ export async function SiteFooter() {
             <div key={col.heading}>
               <div
                 style={{
-                  fontFamily: F.mono,
+                  fontFamily: F.glacial,
                   fontSize: 11,
                   letterSpacing: '0.18em',
                   textTransform: 'uppercase' as const,
@@ -247,7 +247,7 @@ export async function SiteFooter() {
         >
           <span
             style={{
-              fontFamily: F.mono,
+              fontFamily: F.glacial,
               fontSize: 11,
               letterSpacing: '0.12em',
               color: 'var(--ed-accent)',
@@ -255,7 +255,7 @@ export async function SiteFooter() {
               paddingTop: 2,
             }}
           >
-            [112:1–4]
+            112:1–4
           </span>
           <span
             style={{
@@ -274,7 +274,7 @@ export async function SiteFooter() {
         <div
           style={{
             marginTop: 24,
-            fontFamily: F.mono,
+            fontFamily: F.glacial,
             fontSize: 11,
             letterSpacing: '0.1em',
             textTransform: 'uppercase' as const,
@@ -298,7 +298,7 @@ export async function SiteFooter() {
                 rel="noopener noreferrer"
                 aria-label={s.label}
                 className="ed-link inline-flex items-center gap-1.5"
-                style={{ fontFamily: F.mono }}
+                style={{ fontFamily: F.glacial }}
               >
                 <Icon className="size-3.5" aria-hidden="true" />
                 <span>{s.label}</span>

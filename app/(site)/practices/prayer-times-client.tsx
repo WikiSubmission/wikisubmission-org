@@ -23,6 +23,8 @@ import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import { F } from '../_sections/shared'
+
 
 const FEATURED_CITIES = [
   'Mecca',
@@ -40,10 +42,10 @@ export default function PrayerTimesClient() {
     <Suspense
       fallback={
         <div className="space-y-6">
-          <Skeleton className="h-8 w-2/5" />
-          <Skeleton className="h-24 w-full rounded-2xl" />
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-8 w-2/5 rounded-none" />
+          <Skeleton className="h-24 w-full rounded-none" />
+          <Skeleton className="h-20 w-full rounded-none" />
+          <Skeleton className="h-4 w-28 rounded-none" />
         </div>
       }
     >
@@ -165,7 +167,10 @@ function PrayerTimesContent() {
               <span className="text-sm font-medium">{error}</span>
             </div>
           )}
-          <p className="text-sm text-muted-foreground">
+          <p 
+            className="text-sm text-muted-foreground"
+            style={{ fontFamily: F.serif }}
+          >
             {t('selectLocationPrompt')}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -177,6 +182,7 @@ function PrayerTimesContent() {
                   fetchPrayerTimes(city, asrAdjustment)
                 }}
                 className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted/60 hover:bg-primary/10 hover:text-primary border border-border/40 transition-colors cursor-pointer"
+                style={{ fontFamily: F.glacial }}
               >
                 {city}
               </button>
@@ -234,7 +240,10 @@ function PrayerTimesContent() {
 
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
-                <Label htmlFor="asr-method" className="text-[9px] text-[var(--ed-fg-muted)] opacity-50 font-mono uppercase tracking-[0.2em] cursor-pointer">
+                <Label 
+                  htmlFor="asr-method" 
+                  className="text-[9px] text-[var(--ed-fg-muted)] opacity-50 font-mono uppercase tracking-[0.2em] cursor-pointer"
+                >
                   {t('asrMidpoint')}
                 </Label>
                 <Switch
@@ -262,7 +271,10 @@ function PrayerTimesContent() {
                         {t('activeState')}
                       </p>
                     </div>
-                    <p className="text-3xl md:text-4xl font-serif font-medium text-[var(--ed-fg)] capitalize">
+                    <p 
+                      className="text-3xl md:text-4xl font-medium text-[var(--ed-fg)] capitalize"
+                      style={{ fontFamily: F.serif }}
+                    >
                       {prayerLabels[data.current_prayer.toLowerCase()] ?? data.current_prayer}
                     </p>
                     {data.current_prayer_time_elapsed && (
@@ -280,7 +292,10 @@ function PrayerTimesContent() {
                     <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-fg-muted)] opacity-40">
                       {t('sequentialEvent')}
                     </p>
-                    <p className="text-xl md:text-2xl font-serif font-medium text-[var(--ed-fg)] capitalize">
+                    <p 
+                      className="text-xl md:text-2xl font-medium text-[var(--ed-fg)] capitalize"
+                      style={{ fontFamily: F.serif }}
+                    >
                       {prayerLabels[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}
                     </p>
                     {data.upcoming_prayer_time_left && (
@@ -338,7 +353,7 @@ function ScheduleDialog({
           {t('viewSchedule')}
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col gap-0 p-0">
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col gap-0 p-0 rounded-none border-[var(--ed-rule)]">
         <DialogHeader className="px-6 py-4 border-b border-border/40">
           <DialogTitle className="flex items-center gap-2 text-sm font-semibold">
             <MapPinIcon className="size-3.5 text-muted-foreground" />
@@ -356,7 +371,7 @@ function ScheduleDialog({
 
           {/* Today tab */}
           <TabsContent value="today" className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
-            <div className="overflow-hidden rounded-xl border border-border/40">
+            <div className="overflow-hidden border border-border/40">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border/40 text-muted-foreground uppercase tracking-widest text-[10px]">
@@ -425,9 +440,9 @@ function ScheduleDialog({
                         <td className="py-3.5 px-4 text-right">
                           <span
                             className={cn(
-                              'font-mono tabular-nums',
+                              'font-bold uppercase tracking-tight',
                               isCurrent
-                                ? 'font-bold text-primary'
+                                ? 'text-primary'
                                 : 'text-foreground'
                             )}
                           >
@@ -479,7 +494,7 @@ function ScheduleDialog({
                         >
                           <td className="py-2.5 pr-4 whitespace-nowrap px-2 relative">
                             {isToday && (
-                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r" />
+                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
                             )}
                             <div className="flex flex-col ml-1">
                               <span className={cn('font-semibold', isToday && 'text-primary')}>
@@ -501,9 +516,9 @@ function ScheduleDialog({
                             <td
                               key={ti}
                               className={cn(
-                                'py-2.5 text-center font-mono tabular-nums transition-colors',
+                                'py-2.5 text-center font-glacial font-bold transition-colors',
                                 isToday
-                                  ? 'text-primary font-medium'
+                                  ? 'text-primary'
                                   : 'text-muted-foreground group-hover:text-foreground'
                               )}
                             >
@@ -592,7 +607,7 @@ function DayTimeline({
             >
               <div
                 className={cn(
-                  'w-2 h-2 border border-[var(--ed-surface)] shadow-sm transition-all duration-500',
+                  'w-2.5 h-2.5 border border-[var(--ed-surface)] transition-all duration-500',
                   isCurrent
                     ? 'bg-[var(--ed-accent)] scale-125'
                     : isPast
@@ -603,16 +618,17 @@ function DayTimeline({
               <div className="absolute top-5 -translate-x-1/2 left-1/2 flex flex-col items-center gap-1 w-20">
                 <span
                   className={cn(
-                    'font-mono text-[8px] uppercase tracking-[0.15em] transition-colors',
-                    isCurrent ? 'text-[var(--ed-accent)] font-bold' : 'text-[var(--ed-fg-muted)] opacity-30'
+                    'text-[8px] uppercase tracking-[0.15em] transition-colors font-bold',
+                    isCurrent ? 'text-[var(--ed-accent)]' : 'text-[var(--ed-fg-muted)] opacity-30'
                   )}
+                  style={{ fontFamily: F.glacial }}
                 >
                   {prayerLabels[prayer]}
                 </span>
                 <span className={cn(
-                  'font-mono text-[9px] tabular-nums',
-                  isCurrent ? 'text-[var(--ed-fg)] font-medium' : 'text-[var(--ed-fg-muted)] opacity-20'
-                )}>
+                  'text-[9px] font-bold',
+                  isCurrent ? 'text-[var(--ed-fg)]' : 'text-[var(--ed-fg-muted)] opacity-20'
+                )} style={{ fontFamily: F.mono }}>
                   {data.times?.[prayer]}
                 </span>
               </div>

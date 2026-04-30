@@ -38,7 +38,7 @@ function BibleVerseCard({
       className={`flex gap-3 group py-1 rounded-lg transition-colors duration-700 ${highlighted ? 'bg-primary/10 -mx-2 px-2' : ''}`}
     >
       {/* Verse number badge */}
-      <span className="shrink-0 flex items-center justify-center size-7 rounded-md bg-muted text-muted-foreground font-mono text-xs font-semibold mt-0.5">
+      <span className="shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-glacial text-xs font-bold mt-0.5">
         {vn}
       </span>
 
@@ -47,15 +47,15 @@ function BibleVerseCard({
           {tr?.tx ?? ''}
           {/* Manuscript footnote marker */}
           {hasManuscript && (
-            <button
-              onClick={() =>
-                onFootnoteClick(tr!.f!, `v.${vn} manuscript note`)
-              }
-              className="inline-flex items-center font-mono text-[10px] text-muted-foreground/60 hover:text-primary/70 align-super mx-0.5 cursor-pointer transition-colors"
-              aria-label={`Manuscript footnote ${manuscriptOffset + 1}`}
-            >
-              [{manuscriptOffset + 1}]
-            </button>
+              <button
+                onClick={() =>
+                  onFootnoteClick(tr!.f!, `v.${vn} manuscript note`)
+                }
+                className="inline-flex items-center font-glacial font-bold text-[9px] text-primary hover:underline align-super mx-0.5 cursor-pointer transition-colors"
+                aria-label={`Manuscript footnote ${manuscriptOffset + 1}`}
+              >
+                {manuscriptOffset + 1}
+              </button>
           )}
           {/* Theological footnote markers */}
           {hasTheological &&
@@ -65,7 +65,7 @@ function BibleVerseCard({
                 onClick={() =>
                   onTheologicalClick(tr!.fn!, `v.${vn} theological notes`)
                 }
-                className="inline-flex items-center font-mono text-[10px] text-primary/60 hover:text-primary align-super mx-0.5 cursor-pointer transition-colors"
+                className="inline-flex items-center font-glacial font-bold text-[9px] text-primary hover:underline align-super mx-0.5 cursor-pointer transition-colors"
                 aria-label={`Theological note ${theologicalOffset + i + 1}`}
               >
                 *{theologicalOffset + i + 1}
