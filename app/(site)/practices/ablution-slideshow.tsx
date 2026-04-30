@@ -9,6 +9,8 @@ import {
   Play, X, BookOpen, Clock, Activity,
 } from 'lucide-react'
 import Link from 'next/link'
+import { F } from '../_sections/shared'
+
 
 const STEPS = [
   { title: 'The Intention', description: 'Before beginning, silently state your intention to perform ablution in preparation for the Contact Prayer.', details: 'Pure intention (Niyyah) is the spiritual foundation of all worship in Submission.', icon: Heart, arabic: 'النِّيَّة' },
@@ -173,16 +175,41 @@ export function AblutionSlideshow() {
           {/* ── Header ── */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-[var(--ed-rule)] pb-12">
             <div className="space-y-4">
-              <span className="font-glacial text-[11px] tracking-[0.2em] uppercase text-[var(--ed-accent)] font-bold">Purification Ritual</span>
-              <h2 className="text-5xl md:text-7xl font-serif font-medium text-[var(--ed-fg)] leading-[0.85] tracking-tighter uppercase">THE <br />ABLUTION</h2>
+              <span 
+                className="text-[11px] tracking-[0.2em] uppercase text-[var(--ed-accent)] font-bold"
+                style={{ fontFamily: F.glacial }}
+              >
+                Purification Ritual
+              </span>
+              <h2 
+                className="text-4xl md:text-6xl font-medium text-[var(--ed-fg)] leading-[1.1] tracking-tight"
+                style={{ fontFamily: F.serif }}
+              >
+                The Ablution
+              </h2>
             </div>
             <div className="flex items-center gap-6">
               <div className="hidden md:flex flex-col items-end gap-1">
-                <span className="font-glacial text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)]">Instruction</span>
+                <span 
+                  className="text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)]"
+                  style={{ fontFamily: F.glacial }}
+                >
+                  Instruction
+                </span>
                 <div className="flex items-center gap-3">
-                  <span className="text-4xl font-serif font-bold text-[var(--ed-fg)] leading-none italic">{String(slide + 1).padStart(2, '0')}</span>
+                  <span 
+                    className="text-4xl font-bold text-[var(--ed-fg)] leading-none italic"
+                    style={{ fontFamily: F.display }}
+                  >
+                    {String(slide + 1).padStart(2, '0')}
+                  </span>
                   <div className="h-6 w-px bg-[var(--ed-rule)]" />
-                  <span className="text-sm font-glacial text-[var(--ed-fg-muted)]">{STEPS.length}</span>
+                  <span 
+                    className="text-sm text-[var(--ed-fg-muted)]"
+                    style={{ fontFamily: F.glacial }}
+                  >
+                    {STEPS.length}
+                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -197,9 +224,19 @@ export function AblutionSlideshow() {
             {/* Left */}
             <div className="lg:col-span-6 flex flex-col border-r border-[var(--ed-rule)] bg-[var(--ed-bg)]">
               <div className="h-10 px-6 border-b border-[var(--ed-rule)] bg-[var(--ed-surface)] flex items-center gap-3">
-                <span className="font-glacial text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg)] font-bold">DECREE</span>
+                <span 
+                  className="text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg)] font-bold"
+                  style={{ fontFamily: F.glacial }}
+                >
+                  DECREE
+                </span>
                 <div className="h-3 w-px bg-[var(--ed-rule)]" />
-                <span className="font-glacial text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg-muted)]">SURA 5:6</span>
+                <span 
+                  className="text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg-muted)]"
+                  style={{ fontFamily: F.glacial }}
+                >
+                  SURA 5:6
+                </span>
               </div>
               <div className="flex-1 p-8 md:p-12 flex flex-col justify-center min-h-[450px]">
                 <AnimatePresence mode="wait">
@@ -207,16 +244,41 @@ export function AblutionSlideshow() {
                     <div className="space-y-4">
                       <div className="flex items-center gap-6">
                         <div className="h-px flex-1 bg-[var(--ed-rule)]" />
-                        <span className="font-amiri text-4xl text-[var(--ed-accent)] leading-none">{step.arabic}</span>
+                        <span 
+                          className="text-4xl text-[var(--ed-accent)] leading-none"
+                          style={{ fontFamily: F.arabic }}
+                        >
+                          {step.arabic}
+                        </span>
                         <div className="h-px flex-1 bg-[var(--ed-rule)]" />
                       </div>
-                      <h3 className="text-3xl md:text-4xl font-bold text-[var(--ed-fg)] tracking-tight leading-tight text-center uppercase">{step.title}</h3>
+                      <h3 
+                        className="text-2xl md:text-3xl font-semibold text-[var(--ed-fg)] tracking-tight leading-tight text-center"
+                        style={{ fontFamily: F.serif }}
+                      >
+                        {step.title}
+                      </h3>
                     </div>
                     <div className="space-y-6">
-                      <p className="text-xl text-[var(--ed-fg)] leading-relaxed font-serif text-center">{step.description}</p>
+                      <p 
+                        className="text-xl text-[var(--ed-fg)] leading-relaxed text-center"
+                        style={{ fontFamily: F.serif }}
+                      >
+                        {step.description}
+                      </p>
                       <div className="max-w-md mx-auto py-6 border-t border-b border-[var(--ed-rule)] flex flex-col items-center gap-4">
-                        <div className="font-glacial text-[9px] uppercase tracking-[0.3em] text-[var(--ed-accent)] font-bold">Scriptural Detail</div>
-                        <p className="text-sm italic text-[var(--ed-fg-muted)] leading-relaxed font-serif text-center px-4">{step.details}</p>
+                        <div 
+                          className="text-[9px] uppercase tracking-[0.3em] text-[var(--ed-accent)] font-bold"
+                          style={{ fontFamily: F.glacial }}
+                        >
+                          Scriptural Detail
+                        </div>
+                        <p 
+                          className="text-sm italic text-[var(--ed-fg-muted)] leading-relaxed text-center px-4"
+                          style={{ fontFamily: F.serif }}
+                        >
+                          {step.details}
+                        </p>
                       </div>
                     </div>
                   </motion.div>
@@ -228,9 +290,19 @@ export function AblutionSlideshow() {
               <div className="h-10 px-4 border-b border-[var(--ed-rule)] bg-[var(--ed-surface)] flex items-center justify-between">
                 <div className="flex gap-1.5"><div className="size-2.5 rounded-full bg-[#ff5f56]" /><div className="size-2.5 rounded-full bg-[#ffbd2e]" /><div className="size-2.5 rounded-full bg-[#27c93f]" /></div>
                 <div className="flex items-center gap-3">
-                  <span className="font-glacial text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg)] font-bold">EDITOR</span>
+                  <span 
+                    className="text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg)] font-bold"
+                    style={{ fontFamily: F.glacial }}
+                  >
+                    EDITOR
+                  </span>
                   <div className="h-3 w-px bg-[var(--ed-rule)]" />
-                  <span className="font-glacial text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg-muted)]">PURIFICATION GUIDE</span>
+                  <span 
+                    className="text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg-muted)]"
+                    style={{ fontFamily: F.glacial }}
+                  >
+                    PURIFICATION GUIDE
+                  </span>
                 </div>
               </div>
               <div className="flex-1 relative flex items-center justify-center p-6 md:p-12 min-h-[450px]">
@@ -247,20 +319,36 @@ export function AblutionSlideshow() {
                       {slide === 0 ? (
                         <div className="text-center space-y-10 p-8">
                           <div className="space-y-4">
-                            <span className="font-amiri text-6xl text-[var(--ed-accent)] block mb-4">نويت الوضوء</span>
-                            <p className="font-serif text-2xl italic text-[var(--ed-fg)]">
+                            <span 
+                              className="text-6xl text-[var(--ed-accent)] block mb-4"
+                              style={{ fontFamily: F.arabic }}
+                            >
+                              نويت الوضوء
+                            </span>
+                            <p 
+                              className="text-2xl italic text-[var(--ed-fg)]"
+                              style={{ fontFamily: F.serif }}
+                            >
                               "Nawaytu al-wudu"
                             </p>
                           </div>
                           
                           <div className="flex items-center gap-4 justify-center">
                             <div className="h-px w-8 bg-[var(--ed-rule)]" />
-                            <span className="font-glacial text-[10px] uppercase tracking-[0.5em] text-[var(--ed-fg-muted)] font-bold">OR</span>
+                             <span 
+                               className="text-[10px] uppercase tracking-[0.5em] text-[var(--ed-fg-muted)] font-bold"
+                               style={{ fontFamily: F.glacial }}
+                             >
+                               OR
+                             </span>
                             <div className="h-px w-8 bg-[var(--ed-rule)]" />
                           </div>
 
                           <div className="space-y-4">
-                            <p className="font-serif text-2xl italic text-[var(--ed-fg)]">
+                            <p 
+                              className="text-2xl italic text-[var(--ed-fg)]"
+                              style={{ fontFamily: F.serif }}
+                            >
                               "I intend to perform ablution"
                             </p>
                           </div>
@@ -278,7 +366,10 @@ export function AblutionSlideshow() {
                                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--ed-bg)] via-transparent to-transparent opacity-60" />
                               </div>
                               <div className="p-6 bg-[var(--ed-bg)] border-t border-[var(--ed-rule)]">
-                                <p className="text-[11px] md:text-xs leading-relaxed text-[var(--ed-fg)] font-serif italic text-center px-4">
+                                <p 
+                                  className="text-[11px] md:text-xs leading-relaxed text-[var(--ed-fg)] italic text-center px-4"
+                                  style={{ fontFamily: F.serif }}
+                                >
                                   "O you who believe, when you observe the Contact Prayers (Salat), you shall:{" "}
                                   <span className={cn("transition-all duration-500", slide === 1 ? "text-[var(--ed-accent)] font-bold not-italic underline underline-offset-4 decoration-[var(--ed-accent)]/40" : "opacity-40")}>
                                     (1) wash your faces
@@ -307,9 +398,19 @@ export function AblutionSlideshow() {
                                 <div className="absolute -inset-4 border border-[var(--ed-rule)] opacity-40 group-hover:scale-110 transition-transform duration-700" />
                               </div>
                               <div className="text-center space-y-3">
-                                <div className="font-glacial text-[10px] uppercase tracking-[0.5em] text-[var(--ed-accent)] font-bold">Visual Study</div>
+                                <div 
+                                  className="text-[10px] uppercase tracking-[0.5em] text-[var(--ed-accent)] font-bold"
+                                  style={{ fontFamily: F.glacial }}
+                                >
+                                  Visual Study
+                                </div>
                                 <div className="h-px w-24 bg-[var(--ed-rule)] mx-auto" />
-                                <p className="text-[10px] font-glacial text-[var(--ed-fg-muted)] uppercase tracking-widest">Awaiting Demonstration</p>
+                                <p 
+                                  className="text-[10px] text-[var(--ed-fg-muted)] uppercase tracking-widest"
+                                  style={{ fontFamily: F.glacial }}
+                                >
+                                  Awaiting Demonstration
+                                </p>
                               </div>
                             </div>
                           )}
@@ -326,7 +427,12 @@ export function AblutionSlideshow() {
           <div className="flex flex-col items-center gap-8 -mt-6">
             <button onClick={openModal} className="group flex items-center gap-4 px-8 py-4 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-500 shadow-xl">
               <div className="size-8 rounded-full border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform"><Play size={14} fill="currentColor" /></div>
-              <span className="font-glacial text-[11px] uppercase tracking-[0.3em] font-bold">Watch Video Guide</span>
+              <span 
+                className="text-[11px] uppercase tracking-[0.3em] font-bold"
+                style={{ fontFamily: F.glacial }}
+              >
+                Watch Video Guide
+              </span>
             </button>
             <div className="flex flex-wrap justify-center gap-3">
               {STEPS.map((_, i) => (
@@ -339,21 +445,35 @@ export function AblutionSlideshow() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 border-t border-[var(--ed-rule)]">
             {FOOTNOTES.map((n, i) => (
               <div key={i} className="space-y-4">
-                <div className="flex items-center gap-3"><n.icon size={14} className="text-[var(--ed-accent)]" /><span className="font-glacial text-[10px] uppercase tracking-[0.2em] text-[var(--ed-fg)] font-bold">{n.title}</span></div>
-                <p className="text-xs text-[var(--ed-fg-muted)] leading-relaxed font-serif italic">{n.text}</p>
+                <div className="flex items-center gap-3"><n.icon size={14} className="text-[var(--ed-accent)]" /><span className="text-[10px] uppercase tracking-[0.2em] text-[var(--ed-fg)] font-bold" style={{ fontFamily: F.glacial }}>{n.title}</span></div>
+                <p 
+                  className="text-xs text-[var(--ed-fg-muted)] leading-relaxed italic"
+                  style={{ fontFamily: F.serif }}
+                >
+                  {n.text}
+                </p>
               </div>
             ))}
           </div>
 
           {/* ── Verse ── */}
           <div className="flex flex-col items-center gap-3 max-w-2xl mx-auto text-center border-t border-[var(--ed-rule)] pt-8">
-            <span className="font-glacial text-[10px] uppercase tracking-[0.4em] text-[var(--ed-accent)] font-bold">Scriptural Compliance</span>
-            <p className="text-sm text-[var(--ed-fg-muted)] leading-relaxed font-serif italic opacity-80">
+            <span 
+              className="text-[10px] uppercase tracking-[0.4em] text-[var(--ed-accent)] font-bold"
+              style={{ fontFamily: F.glacial }}
+            >
+              Scriptural Compliance
+            </span>
+            <p 
+              className="text-sm text-[var(--ed-fg-muted)] leading-relaxed italic opacity-80"
+              style={{ fontFamily: F.serif }}
+            >
               "O you who believe, when you observe the Contact Prayers (Salat), you shall: (1) wash your faces, (2) wash your arms to the elbows, (3) wipe your heads, and (4) wash your feet to the ankles. If you were unclean due to sexual orgasm, you shall bathe. If you are ill, or traveling, or had any digestive excretion (urinary, fecal, or gas), or had (sexual) contact with the women, and you cannot find water, you shall observe the dry ablution (Tayammum) by touching clean dry soil, then rubbing your faces and hands. GOD does not wish to make the religion difficult for you; He wishes to cleanse you and to perfect His blessing upon you, that you may be appreciative."
             </p>
             <Link 
               href="/quran/5:6"
-              className="group flex items-center gap-2 font-glacial text-[10px] uppercase tracking-widest text-[var(--ed-fg)] hover:text-[var(--ed-accent)] transition-colors"
+              className="group flex items-center gap-2 text-[10px] uppercase tracking-widest text-[var(--ed-fg)] hover:text-[var(--ed-accent)] transition-colors"
+              style={{ fontFamily: F.glacial }}
             >
               <span>Examine Verse 5:6</span>
               <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
@@ -382,9 +502,19 @@ export function AblutionSlideshow() {
               <div className="flex items-center justify-between border-b border-[var(--ed-rule)] pb-6">
                 <div className="space-y-1">
                   <div className="flex items-center gap-3">
-                    <span className="font-glacial text-[10px] uppercase tracking-[0.3em] text-[var(--ed-fg)] font-bold">Ablution Guide</span>
+                    <span 
+                      className="text-[10px] uppercase tracking-[0.3em] text-[var(--ed-fg)] font-bold"
+                      style={{ fontFamily: F.glacial }}
+                    >
+                      Ablution Guide
+                    </span>
                   </div>
-                  <h3 className="font-serif text-2xl text-[var(--ed-fg)] italic">Visual Demonstration</h3>
+                  <h3 
+                    className="text-2xl text-[var(--ed-fg)] italic"
+                    style={{ fontFamily: F.serif }}
+                  >
+                    Visual Demonstration
+                  </h3>
                 </div>
                 <button onClick={closeModal} className="size-12 bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all border-none">
                   <X size={20} />
@@ -408,17 +538,30 @@ export function AblutionSlideshow() {
                     <div className="flex items-center gap-6">
                       <div className="flex items-center gap-2">
                         <Clock size={12} className="text-[var(--ed-fg-muted)]" />
-                        <span className="font-mono text-[10px] text-[var(--ed-fg)]">{Math.floor(currentTime)}s</span>
+                        <span 
+                          className="text-[10px] text-[var(--ed-fg)]"
+                          style={{ fontFamily: F.mono }}
+                        >
+                          {Math.floor(currentTime)}s
+                        </span>
                       </div>
                       <div className="h-3 w-px bg-[var(--ed-rule)]" />
                       <div className="flex items-center gap-2">
                         <div className={`size-1.5 rounded-full animate-pulse ${showTranscription ? 'bg-green-500' : 'bg-red-500'}`} />
-                        <span className="font-glacial text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)]">
+                        <span 
+                          className="text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)]"
+                          style={{ fontFamily: F.glacial }}
+                        >
                           Transcription {showTranscription ? 'Active' : 'Inactive'}
                         </span>
                       </div>
                     </div>
-                    <div className="font-glacial text-[9px] uppercase tracking-[0.2em] text-[var(--ed-accent)] font-bold">Exhibition Mode</div>
+                    <div 
+                      className="text-[9px] uppercase tracking-[0.2em] text-[var(--ed-accent)] font-bold"
+                      style={{ fontFamily: F.glacial }}
+                    >
+                      Exhibition Mode
+                    </div>
                   </div>
                 </div>
 
@@ -427,10 +570,16 @@ export function AblutionSlideshow() {
                   <div className="p-8 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 min-h-[140px] flex flex-col justify-center">
                     <div className="space-y-4">
                       <div className="flex items-center justify-between border-b border-[var(--ed-rule)] pb-3">
-                        <span className="font-glacial text-[10px] uppercase tracking-[0.4em] text-[var(--ed-fg)] font-bold">Transcription</span>
+                        <span 
+                          className="text-[10px] uppercase tracking-[0.4em] text-[var(--ed-fg)] font-bold"
+                          style={{ fontFamily: F.glacial }}
+                        >
+                          Transcription
+                        </span>
                         <button
                           onClick={() => setShowTranscription(!showTranscription)}
-                          className={`px-3 py-1 font-glacial text-[9px] uppercase tracking-widest transition-all ${showTranscription ? 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white'}`}
+                          className={`px-3 py-1 text-[9px] uppercase tracking-widest transition-all ${showTranscription ? 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white'}`}
+                          style={{ fontFamily: F.glacial }}
                         >
                           Toggle {showTranscription ? 'Off' : 'On'}
                         </button>
@@ -439,7 +588,11 @@ export function AblutionSlideshow() {
                       <div className="flex items-center justify-center min-h-[80px]">
                         <AnimatePresence mode="wait">
                           {!showTranscription ? (
-                            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 0.3 }} className="text-sm font-glacial uppercase tracking-widest text-center">
+                            <motion.p 
+                              initial={{ opacity: 0 }} animate={{ opacity: 0.3 }} 
+                              className="text-sm uppercase tracking-widest text-center"
+                              style={{ fontFamily: F.glacial }}
+                            >
                               Transcription Disabled
                             </motion.p>
                           ) : activeCaption ? (
@@ -448,8 +601,11 @@ export function AblutionSlideshow() {
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -10 }}
-                              className="text-2xl md:text-3xl font-serif leading-relaxed text-center max-w-3xl italic"
-                              style={{ color: activeCaption.isVerse ? '#D4AF37' : activeCaption.isWarning ? '#EF4444' : 'var(--ed-fg)' }}
+                              className="text-2xl md:text-3xl leading-relaxed text-center max-w-3xl italic"
+                              style={{ 
+                                fontFamily: F.serif,
+                                color: activeCaption.isVerse ? '#D4AF37' : activeCaption.isWarning ? '#EF4444' : 'var(--ed-fg)' 
+                              }}
                             >
                               {activeCaption.text}
                             </motion.p>
@@ -457,7 +613,8 @@ export function AblutionSlideshow() {
                             <motion.p
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 0.3 }}
-                              className="text-sm font-glacial uppercase tracking-widest text-center"
+                              className="text-sm uppercase tracking-widest text-center"
+                              style={{ fontFamily: F.glacial }}
                             >
                               Awaiting Audio Signal...
                             </motion.p>

@@ -328,7 +328,7 @@ html[data-palette='mono'].dark {
   /* Editorial hover card — border lift */
   .ed-card {
     border: 1px solid var(--ed-rule);
-    border-radius: 0;
+    border-radius: 3px;
     transition: border-color 300ms ease, transform 300ms ease, box-shadow 300ms ease;
     text-decoration: none;
   }
@@ -374,7 +374,7 @@ html[data-palette='mono'].dark {
     color: var(--ed-bg);
     font-size: 14px;
     font-weight: 500;
-    border-radius: 0;
+    border-radius: 2px;
     text-decoration: none;
     transition: background-color 200ms;
     border: none;
@@ -396,7 +396,7 @@ html[data-palette='mono'].dark {
     font-size: 14px;
     font-weight: 500;
     border: 1px solid var(--ed-rule);
-    border-radius: 0;
+    border-radius: 2px;
     text-decoration: none;
     transition: border-color 200ms;
     cursor: pointer;
@@ -416,7 +416,7 @@ html[data-palette='mono'].dark {
     color: var(--ed-fg);
     font-size: 14px;
     font-weight: 500;
-    border-radius: 0;
+    border-radius: 2px;
     text-decoration: none;
     transition: opacity 200ms;
     cursor: pointer;
@@ -437,7 +437,7 @@ html[data-palette='mono'].dark {
     font-size: 14px;
     font-weight: 500;
     border: 1px solid color-mix(in oklab, var(--ed-bg), transparent 70%);
-    border-radius: 0;
+    border-radius: 2px;
     text-decoration: none;
     transition: border-color 200ms;
     cursor: pointer;
@@ -535,14 +535,17 @@ html[data-palette='mono'].dark {
     from {
       height: 0;
     }
+
     to {
       height: var(--radix-collapsible-content-height);
     }
   }
+
   @keyframes community-collapse-up {
     from {
       height: var(--radix-collapsible-content-height);
     }
+
     to {
       height: 0;
     }
@@ -569,6 +572,7 @@ html[data-palette='mono'].dark {
   }
 
   @media (prefers-reduced-motion: reduce) {
+
     .community-collapse[data-state="open"],
     .community-collapse[data-state="closed"] {
       animation: none;

@@ -447,7 +447,7 @@
     "metadataDescription": "Prayer times and Ramadan schedule for any location.",
     "badge": "Practices",
     "heading": "Life as a submitter",
-    "description": "Prayer times and Ramadan schedule — tools to support your daily worship.",
+    "description": "Prayer times, Ramadan schedule, and Zakat calculator — tools to support your daily worship.",
     "prayerTimes": "Prayer Times",
     "sectionPrayerLabel": "Astronomical // Times",
     "zakat": "Zakat",
@@ -469,7 +469,6 @@
     "card4Title": "Hajj Overview",
     "card4Desc": "The pilgrimage to Mecca — its rites and spiritual significance."
   },
-
   "zakatCalculator": {
     "moduleLabel": "CALCULATION_STUDY",
     "title": "Zakat Asset Analyzer",
@@ -714,7 +713,6 @@
       "zakatQuote": "“They ask you about giving: say, 'The charity you give shall go to the parents, the relatives, the orphans, the poor, and the traveling alien.' Any good you do, GOD is fully aware thereof.”",
       "zakatRef": "— Quran 2:215",
       "zakatDesc": "A 2.5% charity on every income, paid the moment you receive it — to the categories God has specified. No threshold, no lunar year.",
-
       "ramadanKicker": "Fasting · Ramadan",
       "ramadanDesc": "The month of Ramadan is the month in which the Quran was revealed, providing guidance for the people and clear teachings.",
       "fastingVerse183": "O you who believe, fasting is decreed for you, as it was decreed for those before you, that you may attain salvation.",

@@ -23,6 +23,8 @@ import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import { F } from '../_sections/shared'
+
 
 const FEATURED_CITIES = [
   'Mecca',
@@ -165,7 +167,10 @@ function PrayerTimesContent() {
               <span className="text-sm font-medium">{error}</span>
             </div>
           )}
-          <p className="text-sm text-muted-foreground">
+          <p 
+            className="text-sm text-muted-foreground"
+            style={{ fontFamily: F.serif }}
+          >
             {t('selectLocationPrompt')}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -177,6 +182,7 @@ function PrayerTimesContent() {
                   fetchPrayerTimes(city, asrAdjustment)
                 }}
                 className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted/60 hover:bg-primary/10 hover:text-primary border border-border/40 transition-colors cursor-pointer"
+                style={{ fontFamily: F.glacial }}
               >
                 {city}
               </button>
@@ -221,20 +227,23 @@ function PrayerTimesContent() {
                 <Input
                   type="search"
                   placeholder={t('searchLocation')}
-                  className="pl-9 h-10 bg-[var(--ed-surface)]/40 border-[var(--ed-rule)] rounded-xl focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all font-glacial text-[11px] font-bold tracking-wider"
+                  className="pl-9 h-10 bg-[var(--ed-surface)]/40 border-[var(--ed-rule)] rounded-xl focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all font-mono text-[11px] tracking-wider"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </form>
               <div className="flex items-center gap-2 mt-2 px-1">
                 <MapPinIcon size={10} className="text-[var(--ed-accent)] opacity-40" />
-                <span className="font-glacial text-[9px] text-[var(--ed-fg-muted)] uppercase tracking-widest font-bold">{data.location_string}</span>
+                <span className="font-mono text-[9px] text-[var(--ed-fg-muted)] uppercase tracking-widest">{data.location_string}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
-                <Label htmlFor="asr-method" className="text-[9px] text-[var(--ed-fg-muted)] opacity-50 font-glacial font-bold uppercase tracking-[0.2em] cursor-pointer">
+                <Label 
+                  htmlFor="asr-method" 
+                  className="text-[9px] text-[var(--ed-fg-muted)] opacity-50 font-mono uppercase tracking-[0.2em] cursor-pointer"
+                >
                   {t('asrMidpoint')}
                 </Label>
                 <Switch
@@ -258,16 +267,19 @@ function PrayerTimesContent() {
                   <div className="relative z-10 space-y-2">
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)] animate-pulse" />
-                      <p className="font-glacial text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-accent)]">
+                      <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-accent)]">
                         {t('activeState')}
                       </p>
                     </div>
-                    <p className="text-3xl md:text-4xl font-serif font-medium text-[var(--ed-fg)] capitalize">
+                    <p 
+                      className="text-3xl md:text-4xl font-medium text-[var(--ed-fg)] capitalize"
+                      style={{ fontFamily: F.serif }}
+                    >
                       {prayerLabels[data.current_prayer.toLowerCase()] ?? data.current_prayer}
                     </p>
                     {data.current_prayer_time_elapsed && (
-                      <div className="flex items-center gap-2 font-glacial text-[10px] text-[var(--ed-fg-muted)] font-bold">
-                        <span className="opacity-50">{t('elapsedLabel')}</span>
+                      <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--ed-fg-muted)] opacity-50">
+                        <span>{t('elapsedLabel')}</span>
                         <span className="text-[var(--ed-fg)]">{data.current_prayer_time_elapsed}</span>
                       </div>
                     )}
@@ -277,18 +289,21 @@ function PrayerTimesContent() {
               {data.upcoming_prayer && (
                 <div className="relative p-6 bg-[var(--ed-surface)]/80 backdrop-blur-md overflow-hidden">
                   <div className="relative z-10 space-y-2">
-                    <p className="font-glacial text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-fg-muted)] opacity-40">
+                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-fg-muted)] opacity-40">
                       {t('sequentialEvent')}
                     </p>
-                    <p className="text-xl md:text-2xl font-serif font-medium text-[var(--ed-fg)] capitalize">
+                    <p 
+                      className="text-xl md:text-2xl font-medium text-[var(--ed-fg)] capitalize"
+                      style={{ fontFamily: F.serif }}
+                    >
                       {prayerLabels[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}
                     </p>
                     {data.upcoming_prayer_time_left && (
                       <div className="flex flex-col gap-1">
-                        <div className="font-glacial text-[10px] text-[var(--ed-fg-muted)] opacity-40 uppercase tracking-widest font-bold">
+                        <div className="font-mono text-[10px] text-[var(--ed-fg-muted)] opacity-40 uppercase tracking-widest">
                           {t('tMinus')}
                         </div>
-                        <p className="text-4xl font-glacial font-bold text-[var(--ed-accent)] tracking-tighter drop-shadow-[0_0_15px_var(--ed-accent-soft)]">
+                        <p className="text-4xl font-mono font-bold text-[var(--ed-accent)] tracking-tighter tabular-nums drop-shadow-[0_0_15px_var(--ed-accent-soft)]">
                           {data.upcoming_prayer_time_left}
                         </p>
                       </div>
@@ -603,16 +618,17 @@ function DayTimeline({
               <div className="absolute top-5 -translate-x-1/2 left-1/2 flex flex-col items-center gap-1 w-20">
                 <span
                   className={cn(
-                    'font-glacial text-[8px] uppercase tracking-[0.15em] transition-colors font-bold',
+                    'text-[8px] uppercase tracking-[0.15em] transition-colors font-bold',
                     isCurrent ? 'text-[var(--ed-accent)]' : 'text-[var(--ed-fg-muted)] opacity-30'
                   )}
+                  style={{ fontFamily: F.glacial }}
                 >
                   {prayerLabels[prayer]}
                 </span>
                 <span className={cn(
-                  'font-glacial text-[9px] font-bold',
+                  'text-[9px] font-bold',
                   isCurrent ? 'text-[var(--ed-fg)]' : 'text-[var(--ed-fg-muted)] opacity-20'
-                )}>
+                )} style={{ fontFamily: F.mono }}>
                   {data.times?.[prayer]}
                 </span>
               </div>

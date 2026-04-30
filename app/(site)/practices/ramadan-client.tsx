@@ -18,6 +18,8 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
+import { F } from '../_sections/shared'
+
 
 export default function RamadanClient() {
   return (
@@ -126,7 +128,8 @@ function RamadanContent() {
             <select
               value={year}
               onChange={(e) => handleYearChange(e.target.value)}
-              className="w-full h-11 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 rounded-xl px-4 text-[11px] appearance-none cursor-pointer uppercase tracking-widest text-[var(--ed-fg-muted)] font-glacial font-bold focus:outline-none focus:border-[var(--ed-accent)]/50 transition-all"
+              className="w-full h-11 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 rounded-xl px-4 text-[11px] appearance-none cursor-pointer uppercase tracking-widest text-[var(--ed-fg-muted)] font-bold focus:outline-none focus:border-[var(--ed-accent)]/50 transition-all"
+              style={{ fontFamily: F.glacial }}
             >
               {years.map((y) => <option key={y} value={y}>{y}</option>)}
             </select>
@@ -161,13 +164,26 @@ function RamadanContent() {
           <header className="flex flex-col items-center text-center space-y-6">
             <div className="flex items-center gap-2 px-4 py-1.5 bg-[var(--ed-surface)] border border-[var(--ed-rule)]">
               <MapPinIcon size={10} className="text-[var(--ed-accent)]" />
-              <span className="font-bold text-[10px] tracking-widest uppercase text-[var(--ed-fg-muted)]">{data.location_string}</span>
+              <span 
+                className="font-bold text-[10px] tracking-widest uppercase text-[var(--ed-fg-muted)]"
+                style={{ fontFamily: F.glacial }}
+              >
+                {data.location_string}
+              </span>
             </div>
-            <h2 className="text-4xl font-bold uppercase tracking-tight text-[var(--ed-fg)]">
+            <h2 
+              className="text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
+              style={{ fontFamily: F.serif }}
+            >
               {t('schedule', { year: data.year })}
             </h2>
             <div className="flex items-center gap-3 text-[var(--ed-fg-muted)] text-sm">
-              <p className="font-serif italic opacity-60">{data.status_string}</p>
+              <p 
+                className="italic opacity-60"
+                style={{ fontFamily: F.serif }}
+              >
+                {data.status_string}
+              </p>
             </div>
           </header>
 
@@ -202,7 +218,7 @@ function RamadanContent() {
                       )}
                     >
                       <td className="py-4 px-6 font-bold text-[10px] tracking-tight">{day.day_number.toString().padStart(2, '0')}</td>
-                      <td className="py-4 px-6 text-[var(--ed-fg-muted)] whitespace-nowrap text-xs opacity-60 group-hover:opacity-100 font-serif">{day.day}</td>
+                      <td className="py-4 px-6 text-[var(--ed-fg-muted)] whitespace-nowrap text-xs opacity-60 group-hover:opacity-100" style={{ fontFamily: F.serif }}>{day.day}</td>
                       <td className="py-4 px-6 font-bold text-xs text-center text-[var(--ed-accent)]">{stripAmPm(day.dawn)}</td>
                       <td className="py-4 px-6 font-bold text-xs text-center text-[var(--ed-fg-muted)] opacity-50">{stripAmPm(day.noon)}</td>
                       <td className="py-4 px-6 font-bold text-xs text-center text-[var(--ed-fg-muted)] opacity-50">{stripAmPm(day.afternoon)}</td>
@@ -227,7 +243,10 @@ function RamadanContent() {
               className="group flex items-center gap-3 px-8 py-3 border border-[var(--ed-rule)] bg-[var(--ed-surface)] hover:bg-[var(--ed-accent)] hover:text-white hover:border-[var(--ed-accent)] transition-all"
             >
               <ShareIcon size={14} className="opacity-60 group-hover:opacity-100 transition-colors" />
-              <span className="font-bold text-[11px] uppercase tracking-[0.2em]">
+              <span 
+                className="font-bold text-[11px] uppercase tracking-[0.2em]"
+                style={{ fontFamily: F.glacial }}
+              >
                 {t('shareSchedule')}
               </span>
             </button>
@@ -245,9 +264,14 @@ function SummaryCard({ title, value, icon }: { title: string; value: string; ico
     <div className="bg-[var(--ed-bg)] p-8 space-y-4">
       <div className="flex items-center gap-2">
         {icon}
-        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--ed-fg-muted)]">{title}</span>
+        <span 
+          className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--ed-fg-muted)]"
+          style={{ fontFamily: F.glacial }}
+        >
+          {title}
+        </span>
       </div>
-      <div className="text-sm font-medium text-[var(--ed-fg)] font-serif">{value}</div>
+      <div className="text-sm font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>{value}</div>
     </div>
   )
 }
@@ -264,15 +288,20 @@ function MoonDataSection({
     <div className="bg-[var(--ed-bg)] p-10 space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-1 h-4 bg-[var(--ed-accent)]" />
-        <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-[var(--ed-fg-muted)]">{title}</h3>
+        <h3 
+          className="text-[11px] font-bold uppercase tracking-[0.4em] text-[var(--ed-fg-muted)]"
+          style={{ fontFamily: F.glacial }}
+        >
+          {title}
+        </h3>
       </div>
       <div className="space-y-4">
         <div className="flex justify-between items-center text-sm">
-          <span className="text-[var(--ed-fg-muted)] opacity-60 text-xs font-serif italic">{t('newMoonLocal')}</span>
+          <span className="text-[var(--ed-fg-muted)] opacity-60 text-xs italic" style={{ fontFamily: F.serif }}>{t('newMoonLocal')}</span>
           <span className="font-bold text-xs text-[var(--ed-fg)] tracking-tight">{moon.new_moon_local}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
-          <span className="text-[var(--ed-fg-muted)] opacity-60 text-xs font-serif italic">{t('sunsetLocal')}</span>
+          <span className="text-[var(--ed-fg-muted)] opacity-60 text-xs italic" style={{ fontFamily: F.serif }}>{t('sunsetLocal')}</span>
           <span className="font-bold text-xs text-[var(--ed-fg)] tracking-tight">{moon.sunset_local}</span>
         </div>
         <div className="pt-4 text-[9px] text-[var(--ed-fg-muted)] opacity-40 font-bold border-t border-[var(--ed-rule)] tracking-wider uppercase">
