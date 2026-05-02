@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowUp, Loader2, ChevronDown, Trash2 } from 'lucide-react'
+import { ArrowUp, Loader2, ChevronDown, Trash2, ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import React, { type FormEvent, type KeyboardEvent, useRef, useState } from 'react'
 import { QuranRef } from '@/components/quran-ref'
@@ -68,19 +68,96 @@ export function TypingDots() {
 
 // ── Verse source chip ──────────────────────────────────────────────────────────
 
+const SMALL_WORDS = new Set([
+  'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'into',
+  'nor', 'of', 'on', 'or', 'the', 'to', 'vs', 'with',
+])
+
+function titleCase(input: string): string {
+  const words = input.split(/\s+/).filter(Boolean)
+  return words
+    .map((w, i) => {
+      const lower = w.toLowerCase()
+      if (i !== 0 && SMALL_WORDS.has(lower)) return lower
+      return lower.charAt(0).toUpperCase() + lower.slice(1)
+    })
+    .join(' ')
+}
+
+function formatLinkLabel(url: string): string {
+  try {
+    const u = new URL(url)
+    let slug = u.pathname.split('/').filter(Boolean).pop() ?? ''
+    slug = slug.replace(/\.\w+$/, '')
+    // strip trailing numeric tokens (e.g. collapsed verse refs like 11114-11117)
+    slug = slug.replace(/(?:[-_]+\d+)+$/, '')
+    const title = slug.replace(/[-_]+/g, ' ').trim()
+    if (title) return titleCase(title)
+    return u.hostname.replace(/^www\./, '')
+  } catch {
+    return url
+  }
+}
+
+function getLinkIcon(url: string): string | null {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '').toLowerCase()
+    if (host.endsWith('qurantalkblog.com') || host.endsWith('qurantalk.com')) {
+      return '/graphics/qurantalk.png'
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 export function VerseChip({ sources, onNavigate }: { sources: string[]; onNavigate?: () => void }) {
   const refs = sources.filter((s) => /^\d+:\d+/.test(s))
-  if (!refs.length) return null
+  const links = sources.filter((s) => /^https?:\/\//i.test(s))
+  if (!refs.length && !links.length) return null
   return (
-    <div className="mt-3">
+    <div className="mt-3 space-y-2">
       <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40">Sources</p>
-      <Link
-        href={`/quran?q=${refs.join(',')}`}
-        onClick={onNavigate}
-        className="inline-flex items-center text-[11px] font-mono text-primary dark:text-primary bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded-md transition-colors"
-      >
-        {refs.join(', ')}
-      </Link>
+      {refs.length > 0 && (
+        <div>
+          <Link
+            href={`/quran?q=${refs.join(',')}`}
+            onClick={onNavigate}
+            className="inline-flex items-center text-[11px] font-mono text-primary dark:text-primary bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded-md transition-colors"
+          >
+            {refs.join(', ')}
+          </Link>
+        </div>
+      )}
+      {links.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {links.map((url) => {
+            const icon = getLinkIcon(url)
+            return (
+              <a
+                key={url}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-1.5 text-[11px] text-primary dark:text-primary bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded-md transition-colors max-w-[18rem]"
+                title={url}
+              >
+                {icon && (
+                  <Image
+                    src={icon}
+                    alt=""
+                    width={12}
+                    height={12}
+                    className="size-3 rounded-sm shrink-0"
+                  />
+                )}
+                <span className="truncate">{formatLinkLabel(url)}</span>
+                <ArrowUpRight className="size-3 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" />
+              </a>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
