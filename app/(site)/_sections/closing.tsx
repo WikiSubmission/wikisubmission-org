@@ -15,8 +15,8 @@ export function ClosingSection() {
       ref={ref}
       className="px-4 sm:px-6 md:px-10"
       style={{
-        backgroundColor: 'var(--ed-fg)',
-        color: 'var(--ed-bg)',
+        backgroundColor: 'var(--ed-invert-bg)',
+        color: 'var(--ed-invert-fg)',
         paddingTop: 'clamp(72px, 12vw, 144px)',
         paddingBottom: 'clamp(72px, 12vw, 144px)',
       }}
@@ -55,7 +55,7 @@ export function ClosingSection() {
             lineHeight: 1.2,
             letterSpacing: '-0.02em',
             maxWidth: '20ch',
-            color: 'var(--ed-bg)',
+            color: 'var(--ed-invert-fg)',
           }}
         >
           {t('quote')}
@@ -85,7 +85,7 @@ export function ClosingSection() {
           }}
         >
           <Link
-            href="/quran"
+            href="/quran/1"
             className="ed-btn-inv"
             style={{ fontFamily: F.serif }}
           >

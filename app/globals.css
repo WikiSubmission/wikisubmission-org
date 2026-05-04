@@ -165,6 +165,14 @@
   /* --ed-* aliases inherit from :root and auto-resolve to dark values */
 }
 
+/* In dark mode (any palette), the "inverted" surface stays dark — using the
+   palette's elevated card surface — so it doesn't blast bright in dark mode. */
+.dark {
+  --ed-invert-bg: var(--card);
+  --ed-invert-fg: var(--foreground);
+  --ed-invert-fg-muted: color-mix(in oklab, var(--foreground), transparent 40%);
+}
+
 /* ─── Palette: Sharpened Violet ─── */
 html[data-palette='violet'] {
   --background: #fafafa;
@@ -417,8 +425,8 @@ html[data-palette='mono'].dark {
     align-items: center;
     gap: 10px;
     padding: 14px 22px;
-    background-color: var(--ed-bg);
-    color: var(--ed-fg);
+    background-color: var(--ed-invert-fg);
+    color: var(--ed-invert-bg);
     font-size: 14px;
     font-weight: 500;
     border-radius: 2px;
@@ -438,10 +446,10 @@ html[data-palette='mono'].dark {
     gap: 10px;
     padding: 14px 22px;
     background-color: transparent;
-    color: var(--ed-bg);
+    color: var(--ed-invert-fg);
     font-size: 14px;
     font-weight: 500;
-    border: 1px solid color-mix(in oklab, var(--ed-bg), transparent 70%);
+    border: 1px solid color-mix(in oklab, var(--ed-invert-fg), transparent 70%);
     border-radius: 2px;
     text-decoration: none;
     transition: border-color 200ms;
@@ -449,7 +457,7 @@ html[data-palette='mono'].dark {
   }
 
   .ed-btn-ghost-inv:hover {
-    border-color: var(--ed-bg);
+    border-color: var(--ed-invert-fg);
   }
 
   .no-scrollbar::-webkit-scrollbar {
