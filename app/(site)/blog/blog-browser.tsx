@@ -66,30 +66,37 @@ function PostCard({ post }: { post: Post }) {
   return (
     <Link
       href={`/blog/${post.slug?.current}`}
-      className="group flex flex-col bg-background rounded-xl border border-border/40 overflow-hidden transition-colors hover:border-border/80"
+      className="group flex flex-col bg-card rounded-2xl border border-border/60 overflow-hidden transition-colors hover:border-border"
     >
-      {post.thumbnailUrl && (
-        <div className="relative w-full aspect-video overflow-hidden bg-muted shrink-0">
+      <div className="relative w-full aspect-[16/9] overflow-hidden bg-muted shrink-0">
+        {post.thumbnailUrl && (
           <Image
             src={post.thumbnailUrl}
             alt={post.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover"
+            className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
           />
-        </div>
-      )}
-      <div className="flex flex-col flex-1 p-4 gap-1.5">
+        )}
+      </div>
+      <div className="flex flex-col flex-1 p-6 gap-2">
         {post.category && (
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
             {post.category}
           </span>
         )}
-        <h3 className="font-headline font-bold text-sm leading-snug">{post.title}</h3>
+        <h3 className="font-headline text-xl tracking-[-0.01em] leading-snug group-hover:text-muted-foreground transition-colors">
+          {post.title}
+        </h3>
         {post.excerpt && (
-          <p className="text-xs text-muted-foreground line-clamp-2">{post.excerpt}</p>
+          <p className="text-sm text-muted-foreground leading-[1.55] flex-1 line-clamp-3">
+            {post.excerpt}
+          </p>
         )}
-        <p className="text-xs text-muted-foreground mt-auto pt-1">{formatDate(post.publishedAt)}</p>
+        <div className="mt-4 pt-3.5 border-t border-border/50 flex justify-between items-center text-xs text-muted-foreground/80">
+          <span className="truncate">{post.authorName ?? ''}</span>
+          <span className="shrink-0">{formatDate(post.publishedAt)}</span>
+        </div>
       </div>
     </Link>
   )
@@ -247,85 +254,85 @@ function BlogBrowserInner({
 
   return (
     <div className="min-h-screen">
-      {/* ── Header + search ───────────────────────────────────────────────── */}
-      <section className="border-b border-border/40 bg-muted/30">
-        <div className="max-w-5xl mx-auto px-6 py-12 space-y-6">
-          <div>
-            <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
-              {t('heading')}
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-xl">
-              {t('description')}
-            </p>
-          </div>
+      {/* ── Hero ──────────────────────────────────────────────────────────── */}
+      <section className="px-6 md:px-12 pt-16 pb-8 max-w-[1200px] mx-auto">
+        <h1 className="font-headline tracking-[-0.02em] leading-none text-[clamp(40px,5vw,72px)] mb-4">
+          {t('heading')}
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-[60ch]">
+          {t('description')}
+        </p>
+      </section>
 
-          <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
-            {/* Search bar */}
-            <div className="relative flex-1">
-              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60 pointer-events-none" />
-              <input
-                type="text"
-                placeholder={t('searchPlaceholder')}
-                value={query}
-                onChange={(e) => handleQueryChange(e.target.value)}
-                className="w-full h-12 rounded-lg bg-background border border-border pl-11 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
-              />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                {searching ? (
-                  <Spinner className="size-4 text-muted-foreground" />
-                ) : query ? (
-                  <button onClick={clearSearch} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
-                    <XIcon className="size-3.5" />
-                  </button>
-                ) : null}
-              </div>
-            </div>
-
-            <button
-              onClick={() => setTutorialOpen(true)}
-              className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-lg bg-background border border-border text-sm font-medium text-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-colors shrink-0"
-            >
-              <BookOpenIcon size={16} />
-              Instructions
-            </button>
-          </div>
-
-          {/* Category pills */}
-          {visibleCategories.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setActiveCategory(null)}
-                className={cn(
-                  'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer',
-                  !activeCategory && !query
-                    ? 'bg-primary/10 text-primary border-primary/20'
-                    : 'bg-muted/60 text-muted-foreground border-border/40 hover:bg-primary/10 hover:text-primary hover:border-primary/20'
-                )}
-              >
-                {t('filterAll')}
-              </button>
-              {visibleCategories.map((cat) => (
-                <button
-                  key={cat.slug}
-                  onClick={() => setActiveCategory(cat.slug)}
-                  className={cn(
-                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer',
-                    activeCategory === cat.slug && !query
-                      ? 'bg-primary/10 text-primary border-primary/20'
-                      : 'bg-muted/60 text-muted-foreground border-border/40 hover:bg-primary/10 hover:text-primary hover:border-primary/20'
-                  )}
-                >
-                  {cat.name}
-                  <span className="ml-1 opacity-50">{cat.count}</span>
+      {/* ── Search + tutorial ─────────────────────────────────────────────── */}
+      <section className="px-6 md:px-12 max-w-[1200px] mx-auto">
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+          <div className="relative flex-1">
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60 pointer-events-none" />
+            <input
+              type="text"
+              placeholder={t('searchPlaceholder')}
+              value={query}
+              onChange={(e) => handleQueryChange(e.target.value)}
+              className="w-full h-12 rounded-full bg-card border border-border/60 pl-11 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 placeholder:text-muted-foreground transition-colors"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {searching ? (
+                <Spinner className="size-4 text-muted-foreground" />
+              ) : query ? (
+                <button onClick={clearSearch} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
+                  <XIcon className="size-3.5" />
                 </button>
-              ))}
+              ) : null}
             </div>
-          )}
+          </div>
+
+          <button
+            onClick={() => setTutorialOpen(true)}
+            className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-card border border-border/60 text-sm font-medium text-foreground hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-colors shrink-0"
+          >
+            <BookOpenIcon size={16} />
+            Instructions
+          </button>
         </div>
       </section>
 
+      {/* ── Category chips ────────────────────────────────────────────────── */}
+      {visibleCategories.length > 0 && (
+        <section className="px-6 md:px-12 max-w-[1200px] mx-auto">
+          <div className="flex flex-wrap gap-1.5 py-4 mt-6 border-y border-border/50">
+            <button
+              onClick={() => setActiveCategory(null)}
+              className={cn(
+                'cursor-pointer px-3.5 py-2 rounded-full text-[11px] font-semibold uppercase tracking-[0.14em] border transition-colors',
+                !activeCategory && !query
+                  ? 'border-primary text-primary bg-primary/10'
+                  : 'border-border/50 text-muted-foreground hover:border-border hover:text-foreground'
+              )}
+            >
+              {t('filterAll')}
+            </button>
+            {visibleCategories.map((cat) => (
+              <button
+                key={cat.slug}
+                onClick={() => setActiveCategory(cat.slug)}
+                className={cn(
+                  'cursor-pointer px-3.5 py-2 rounded-full text-[11px] font-semibold uppercase tracking-[0.14em] border transition-colors',
+                  activeCategory === cat.slug && !query
+                    ? 'border-primary text-primary bg-primary/10'
+                    : 'border-border/50 text-muted-foreground hover:border-border hover:text-foreground'
+                )}
+              >
+                {cat.name}
+                <span className="ml-1.5 opacity-50">{cat.count}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ── Content ───────────────────────────────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-10">
+      <div className="px-6 md:px-12 max-w-[1200px] mx-auto py-8 space-y-12">
 
         {/* Search results */}
         {isSearching && (
@@ -353,7 +360,7 @@ function BlogBrowserInner({
         {/* Category filter results */}
         {!isSearching && categoryFiltered && (
           categoryFiltered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {categoryFiltered.map((post) => (
                 <PostCard key={post._id} post={post} />
               ))}
@@ -374,20 +381,20 @@ function BlogBrowserInner({
               const hasMore = group.posts.length > 3
               return (
                 <section key={group.slug}>
-                  <div className="flex items-baseline gap-4 mb-5">
-                    <h2 className="font-headline text-lg font-bold shrink-0">{group.name}</h2>
-                    <span className="text-xs text-muted-foreground font-medium">{group.posts.length}</span>
-                    <div className="h-px flex-1 bg-border/60" />
+                  <div className="flex items-baseline gap-4 mb-6">
+                    <h2 className="font-headline text-2xl tracking-[-0.01em] shrink-0">{group.name}</h2>
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground/70 font-medium">{group.posts.length}</span>
+                    <div className="h-px flex-1 bg-border/50" />
                     {hasMore && (
                       <button
                         onClick={() => setActiveCategory(group.slug)}
-                        className="text-xs text-primary hover:text-primary/80 font-medium transition-colors shrink-0"
+                        className="text-[11px] uppercase tracking-[0.14em] font-semibold text-primary hover:text-primary/80 transition-colors shrink-0"
                       >
-                        {t('viewAll')}
+                        {t('viewAll')} →
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {preview.map((post) => (
                       <PostCard key={post._id} post={post} />
                     ))}
@@ -398,7 +405,7 @@ function BlogBrowserInner({
 
             {uncategorised.length > 0 && (
               <section>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {uncategorised.map((post) => (
                     <PostCard key={post._id} post={post} />
                   ))}

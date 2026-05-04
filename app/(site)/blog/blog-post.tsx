@@ -272,124 +272,187 @@ export function BlogPostArticle({
   const publishedRelated = related.filter((relatedPost) => relatedPost.slug?.current)
 
   return (
-    <div className="min-h-screen">
-      <section className="border-b border-border/40 bg-muted/30">
-        <div className="max-w-3xl mx-auto px-6 pt-8 pb-10 space-y-5">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeftIcon className="size-4" />
-            Blog
-          </Link>
+    <div className="min-h-screen pb-32 md:pb-40">
+      {/* ── Top breadcrumb / back link ─────────────────────────────────── */}
+      <nav
+        aria-label="Article navigation"
+        className="px-6 md:px-12 max-w-[1200px] mx-auto pt-6 pb-2 text-[13px]"
+      >
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeftIcon className="size-4" />
+          <span>All articles</span>
+        </Link>
+      </nav>
 
-          {preview && (
-            <div className="rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-              Draft preview. This article is being loaded from unpublished Sanity content through a secret link.
+      {/* ── Title block (centered, magazine style) ──────────────────────── */}
+      <section className="px-6 md:px-12 pt-8 pb-10 max-w-[760px] mx-auto text-center">
+        {preview && (
+          <div className="mb-8 rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-950 text-left">
+            Draft preview. This article is being loaded from unpublished Sanity content through a secret link.
+          </div>
+        )}
+
+        {post.category && (
+          <span className="inline-block mb-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+            {post.category}
+          </span>
+        )}
+
+        <h1 className="font-headline text-[clamp(36px,5vw,64px)] tracking-[-0.02em] leading-[1.08] mb-6">
+          {title}
+        </h1>
+
+        {post.excerpt && (
+          <p className="italic text-[20px] md:text-[22px] leading-[1.4] text-muted-foreground max-w-[50ch] mx-auto mb-9">
+            {post.excerpt}
+          </p>
+        )}
+
+        <dl className="flex flex-wrap justify-center gap-x-10 gap-y-5 text-left">
+          {post.authorName && (
+            <div className="flex flex-col gap-1.5">
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+                Author
+              </dt>
+              <dd className="flex items-center gap-2 text-[14px] text-foreground">
+                {post.authorPhotoUrl && (
+                  <Image
+                    src={post.authorPhotoUrl}
+                    alt=""
+                    aria-hidden
+                    width={20}
+                    height={20}
+                    className="rounded-full object-cover"
+                  />
+                )}
+                <span>{post.authorName}</span>
+              </dd>
             </div>
           )}
-
-          <div className="space-y-3">
-            {post.category && (
-              <span className="text-xs font-semibold uppercase tracking-widest text-primary">
-                {post.category}
-              </span>
-            )}
-            <h1 className="font-headline text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
-              {title}
-            </h1>
-            {post.excerpt && (
-              <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                {post.excerpt}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3 pt-1 border-t border-border/40 pt-5">
-            {post.authorPhotoUrl && (
-              <Image
-                src={post.authorPhotoUrl}
-                alt={post.authorName ?? ''}
-                width={40}
-                height={40}
-                className="rounded-full shrink-0"
-              />
-            )}
-            <div className="flex flex-col gap-0.5">
-              {post.authorName && <span className="text-sm font-semibold">{post.authorName}</span>}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                {post.publishedAt && <span>{formatDate(post.publishedAt)}</span>}
-                {post.publishedAt && post.body && <span>·</span>}
-                {post.body && <span>{readingTime(post.body)}</span>}
-              </div>
-            </div>
-          </div>
-
-          {post.thumbnailUrl && (
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-muted">
-              <Image
-                src={post.thumbnailUrl}
-                alt={title}
-                fill
-                sizes="(max-width: 768px) 100vw, 768px"
-                className="object-cover"
-                priority
-              />
+          {post.publishedAt && (
+            <div className="flex flex-col gap-1.5">
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+                Published
+              </dt>
+              <dd className="text-[14px] text-foreground">
+                <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+              </dd>
             </div>
           )}
-        </div>
+          {post.body && (
+            <div className="flex flex-col gap-1.5">
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+                Read time
+              </dt>
+              <dd className="text-[14px] text-foreground">{readingTime(post.body)}</dd>
+            </div>
+          )}
+        </dl>
       </section>
 
-      <div className="max-w-3xl mx-auto px-6 py-12">
+      {/* ── Cover image ─────────────────────────────────────────────────── */}
+      {post.thumbnailUrl && (
+        <div className="max-w-[680px] mx-auto px-6 mb-12">
+          <div className="rounded-2xl overflow-hidden bg-muted">
+            <Image
+              src={post.thumbnailUrl}
+              alt={title}
+              width={1200}
+              height={675}
+              sizes="(max-width: 680px) 100vw, 680px"
+              className="w-full h-auto object-contain"
+              priority
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── Body ────────────────────────────────────────────────────────── */}
+      <article className="max-w-[680px] mx-auto px-6">
         {post.body?.length ? (
-          <article className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-primary">
-            <PortableText value={post.body} components={portableTextComponents} />
-          </article>
+          <PortableText value={post.body} components={portableTextComponents} />
         ) : (
           <p className="text-sm text-muted-foreground">
             This article does not have any body content yet.
           </p>
         )}
+      </article>
+
+      {/* ── Article footer (signature + share-back) ─────────────────────── */}
+      <div className="max-w-[680px] mx-auto px-6 mt-16 pt-8 border-t border-border/50">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] font-semibold text-primary hover:text-primary/80 transition-colors self-start sm:self-auto"
+          >
+            <ArrowLeftIcon className="size-3.5" /> All articles
+          </Link>
+          <div className="flex items-center gap-3">
+            {post.authorPhotoUrl && (
+              <Image
+                src={post.authorPhotoUrl}
+                alt={post.authorName ?? ''}
+                width={24}
+                height={24}
+                className="rounded-full object-cover shrink-0"
+              />
+            )}
+            <div className="text-[13px] leading-tight">
+              {post.authorName && (
+                <div className="font-semibold text-foreground">{post.authorName}</div>
+              )}
+              {post.publishedAt && (
+                <div className="text-muted-foreground/80">
+                  {formatDate(post.publishedAt)}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
+      {/* ── Related ─────────────────────────────────────────────────────── */}
       {publishedRelated.length > 0 && (
-        <section className="border-t border-border/40 bg-muted/30 py-16">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-baseline gap-6 mb-8">
-              <h2 className="font-headline text-2xl font-bold shrink-0">
-                Related
-              </h2>
-              <div className="h-px grow bg-border/60" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              {publishedRelated.map((relatedPost) => (
-                <Link
-                  key={relatedPost._id}
-                  href={`/blog/${relatedPost.slug?.current}`}
-                  className="group bg-background rounded-xl border border-border/40 overflow-hidden transition-colors hover:border-border/80"
-                >
+        <section className="px-6 md:px-12 max-w-[1200px] mx-auto mt-20 pt-12 border-t border-border/50">
+          <div className="text-center mb-12 md:mb-14">
+            <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.18em] text-primary mb-3">
+              Continue reading
+            </span>
+            <h2 className="font-headline text-[clamp(28px,3.2vw,40px)] tracking-[-0.02em] leading-[1.1]">
+              More from the journal
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {publishedRelated.map((relatedPost) => (
+              <Link
+                key={relatedPost._id}
+                href={`/blog/${relatedPost.slug?.current}`}
+                className="group flex flex-col bg-card rounded-2xl border border-border/60 overflow-hidden transition-colors hover:border-border"
+              >
+                <div className="relative w-full aspect-[16/9] overflow-hidden bg-muted">
                   {relatedPost.thumbnailUrl && (
-                    <div className="relative w-full aspect-video overflow-hidden bg-muted">
-                      <Image
-                        src={relatedPost.thumbnailUrl}
-                        alt={relatedPost.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        className="object-cover"
-                      />
-                    </div>
+                    <Image
+                      src={relatedPost.thumbnailUrl}
+                      alt={relatedPost.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
                   )}
-                  <div className="p-4 space-y-1">
-                    <h3 className="font-headline font-bold text-sm leading-snug group-hover:text-primary transition-colors">
-                      {relatedPost.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(relatedPost.publishedAt)}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                </div>
+                <div className="p-5 space-y-1.5">
+                  <h3 className="font-headline text-base tracking-[-0.01em] leading-snug group-hover:text-muted-foreground transition-colors">
+                    {relatedPost.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground/80">
+                    {formatDate(relatedPost.publishedAt)}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
       )}
@@ -399,60 +462,108 @@ export function BlogPostArticle({
 
 const portableTextComponents = {
   block: {
+    normal: ({ children }: { children?: React.ReactNode }) => (
+      <p className="mb-6 leading-[1.7] text-[19px] text-foreground/85">{children}</p>
+    ),
     h1: ({ children }: { children?: React.ReactNode }) => (
-      <h1 className="font-headline">{children}</h1>
+      <h1 className="font-headline text-[40px] mt-14 mb-5 tracking-[-0.02em] leading-[1.1]">
+        {children}
+      </h1>
     ),
     h2: ({ children }: { children?: React.ReactNode }) => (
-      <h2 className="font-headline">{children}</h2>
+      <h2 className="font-headline text-[34px] mt-14 mb-4 tracking-[-0.02em] leading-[1.15]">
+        {children}
+      </h2>
     ),
     h3: ({ children }: { children?: React.ReactNode }) => (
-      <h3 className="font-headline">{children}</h3>
+      <h3 className="font-headline text-[24px] mt-10 mb-3 tracking-[-0.015em] leading-[1.2]">
+        {children}
+      </h3>
     ),
     h4: ({ children }: { children?: React.ReactNode }) => (
-      <h4 className="font-headline">{children}</h4>
+      <h4 className="font-headline text-[19px] mt-8 mb-2 tracking-[-0.01em]">
+        {children}
+      </h4>
     ),
     blockquote: ({ children }: { children?: React.ReactNode }) => (
-      <blockquote className="border-l-4 border-primary/40 pl-4 italic">
+      <blockquote className="my-9 pl-6 border-l-2 border-primary italic text-[22px] leading-[1.45]">
         {children}
       </blockquote>
     ),
   },
+  list: {
+    bullet: ({ children }: { children?: React.ReactNode }) => (
+      <ul className="mb-6 space-y-2 pl-5 list-disc marker:text-primary text-[19px] leading-[1.7] text-foreground/85">
+        {children}
+      </ul>
+    ),
+    number: ({ children }: { children?: React.ReactNode }) => (
+      <ol className="mb-6 space-y-2 pl-5 list-decimal marker:text-primary text-[19px] leading-[1.7] text-foreground/85">
+        {children}
+      </ol>
+    ),
+  },
+  listItem: {
+    bullet: ({ children }: { children?: React.ReactNode }) => <li>{children}</li>,
+    number: ({ children }: { children?: React.ReactNode }) => <li>{children}</li>,
+  },
   marks: {
+    strong: ({ children }: { children?: React.ReactNode }) => (
+      <strong className="font-semibold text-foreground">{children}</strong>
+    ),
+    em: ({ children }: { children?: React.ReactNode }) => (
+      <em className="italic">{children}</em>
+    ),
+    code: ({ children }: { children?: React.ReactNode }) => (
+      <code className="px-1.5 py-0.5 rounded text-[15px] font-mono bg-muted text-foreground">
+        {children}
+      </code>
+    ),
     link: ({
       children,
       value,
     }: {
       children?: React.ReactNode
       value?: { href?: string; blank?: boolean }
-    }) => (
-      <a
-        href={value?.href}
-        target={value?.blank ? '_blank' : undefined}
-        rel={value?.blank ? 'noopener noreferrer' : undefined}
-        className="text-primary underline underline-offset-2 hover:opacity-80"
-      >
-        {children}
-      </a>
-    ),
+    }) => {
+      const isExternal = value?.href?.startsWith('http')
+      return (
+        <a
+          href={value?.href}
+          target={isExternal || value?.blank ? '_blank' : undefined}
+          rel={isExternal ? 'noopener noreferrer' : undefined}
+          className="text-primary underline underline-offset-4 decoration-primary/40 hover:decoration-primary transition-colors"
+        >
+          {children}
+        </a>
+      )
+    },
   },
   types: {
     image: ({
       value,
     }: {
-      value: { asset?: { url?: string }; alt?: string }
+      value: { asset?: { url?: string }; alt?: string; caption?: string }
     }) => {
       const url = urlFor(value)
       if (!url) return null
       return (
-        <div className="my-8 rounded-xl overflow-hidden editorial-shadow">
-          <Image
-            src={url}
-            alt={value.alt ?? ''}
-            width={800}
-            height={450}
-            className="w-full object-cover"
-          />
-        </div>
+        <figure className="my-10">
+          <div className="relative w-full rounded-2xl overflow-hidden bg-muted" style={{ aspectRatio: '16 / 9' }}>
+            <Image
+              src={url}
+              alt={value.alt ?? ''}
+              fill
+              className="object-contain"
+              sizes="(max-width: 768px) 100vw, 720px"
+            />
+          </div>
+          {value.caption && (
+            <figcaption className="mt-2.5 text-center text-[13px] text-muted-foreground/80">
+              {value.caption}
+            </figcaption>
+          )}
+        </figure>
       )
     },
   },
