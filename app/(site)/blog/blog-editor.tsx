@@ -1,25 +1,26 @@
 'use client'
 
-import { useState } from 'react'
-import { 
-  X, 
-  Bold, 
-  Italic, 
-  Underline, 
-  Link as LinkIcon, 
-  Plus, 
+import { useEffect, useRef, useState } from 'react'
+import {
+  X,
+  Bold,
+  Italic,
+  Underline,
+  Link as LinkIcon,
+  Plus,
   Image as ImageIcon,
   Save,
   Send,
-  RotateCcw
+  RotateCcw,
 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import gsap from 'gsap'
 import { cn } from '@/lib/utils'
 
 export function BlogEditor({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [wordCount, setWordCount] = useState(0)
+  const editorRef = useRef<HTMLDivElement | null>(null)
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value
@@ -27,15 +28,33 @@ export function BlogEditor({ onClose }: { onClose: () => void }) {
     setWordCount(text.trim() ? text.trim().split(/\s+/).length : 0)
   }
 
+  useEffect(() => {
+    const el = editorRef.current
+    if (!el) return
+    gsap.fromTo(
+      el,
+      {
+        opacity: 0,
+        rotateY: 20,
+        rotateX: 10,
+        scale: 0.9,
+        z: -200,
+      },
+      {
+        opacity: 1,
+        rotateY: -8,
+        rotateX: 4,
+        scale: 1,
+        z: 0,
+        duration: 1,
+        ease: 'expo.out',
+      },
+    )
+  }, [])
+
   return (
     <div className="relative w-full max-w-5xl mx-auto" style={{ perspective: '2000px' }}>
-      <motion.div
-        initial={{ opacity: 0, rotateY: 20, rotateX: 10, scale: 0.9, translateZ: -200 }}
-        animate={{ opacity: 1, rotateY: -8, rotateX: 4, scale: 1, translateZ: 0 }}
-        exit={{ opacity: 0, rotateY: 20, rotateX: 10, scale: 0.9, translateZ: -200 }}
-        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-        className="relative"
-      >
+      <div ref={editorRef} className="relative" style={{ transformStyle: 'preserve-3d' }}>
         {/* Background Glows (Subtle, matching Editorial palette) */}
         <div className="absolute -top-[10%] -left-[5%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] -z-10" />
         <div className="absolute -bottom-[10%] -right-[5%] w-[30%] h-[30%] bg-ed-accent/20 rounded-full blur-[120px] -z-10" />
@@ -163,7 +182,7 @@ export function BlogEditor({ onClose }: { onClose: () => void }) {
           </div>
         </div>
       </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

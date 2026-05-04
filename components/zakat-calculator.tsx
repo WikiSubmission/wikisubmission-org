@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 import { cn } from '@/lib/utils'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Activity, Wallet } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -15,9 +15,37 @@ export function ZakatCalculator() {
   const zakatDue = isNaN(parsed) || parsed <= 0 ? null : parsed * 0.025
   const isSmall = zakatDue !== null && zakatDue < 1
 
+  const resultRef = useRef<HTMLDivElement | null>(null)
+  const recommendationRef = useRef<HTMLDivElement | null>(null)
+  const wasShowingRef = useRef(false)
+
+  useEffect(() => {
+    const el = resultRef.current
+    if (!el) return
+    if (zakatDue !== null) {
+      if (!wasShowingRef.current) {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+        )
+      }
+      wasShowingRef.current = true
+    } else {
+      wasShowingRef.current = false
+    }
+  }, [zakatDue])
+
+  useEffect(() => {
+    const el = recommendationRef.current
+    if (!el) return
+    if (isSmall) {
+      gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' })
+    }
+  }, [isSmall])
+
   return (
     <div className="w-full max-w-2xl mx-auto space-y-10">
-      {/* Heading */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Activity size={14} className="text-[var(--ed-accent)]" />
@@ -33,7 +61,6 @@ export function ZakatCalculator() {
         </p>
       </div>
 
-      {/* Input row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-1">
           <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">
@@ -66,65 +93,59 @@ export function ZakatCalculator() {
         </div>
       </div>
 
-      {/* Result */}
-      <AnimatePresence mode="wait">
-        {zakatDue !== null && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className={cn(
-              'relative overflow-hidden rounded-3xl p-8 space-y-4 border transition-all duration-700',
-              isSmall
-                ? 'bg-[var(--ed-surface)]/40 border-[var(--ed-rule)]'
-                : 'bg-gradient-to-br from-[var(--ed-accent-soft)]/20 to-transparent border-[var(--ed-accent)]/20 shadow-2xl'
-            )}
-          >
-            {/* Background HUD marker */}
-            <div className="absolute -top-4 -right-4 opacity-[0.03] pointer-events-none">
-              <Wallet size={160} />
-            </div>
+      {zakatDue !== null && (
+        <div
+          ref={resultRef}
+          className={cn(
+            'relative overflow-hidden rounded-3xl p-8 space-y-4 border transition-all duration-700',
+            isSmall
+              ? 'bg-[var(--ed-surface)]/40 border-[var(--ed-rule)]'
+              : 'bg-gradient-to-br from-[var(--ed-accent-soft)]/20 to-transparent border-[var(--ed-accent)]/20 shadow-2xl',
+          )}
+        >
+          <div className="absolute -top-4 -right-4 opacity-[0.03] pointer-events-none">
+            <Wallet size={160} />
+          </div>
 
-            <div className="relative z-10">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--ed-fg-muted)] opacity-50">
-                {t('calculatedLiability')}
-              </p>
-              <div className="flex items-baseline gap-3">
-                <span className="text-xl font-mono text-[var(--ed-accent)] opacity-60">{currency}</span>
-                <p className="text-5xl md:text-6xl font-mono font-bold text-[var(--ed-fg)] tracking-tighter tabular-nums">
-                  {zakatDue.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </p>
-              </div>
-              <p className="text-sm text-[var(--ed-fg-muted)] font-serif italic mt-2 opacity-60">
-                {t('exactPercent', {
-                  currency,
-                  amount: parsed.toLocaleString(),
+          <div className="relative z-10">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--ed-fg-muted)] opacity-50">
+              {t('calculatedLiability')}
+            </p>
+            <div className="flex items-baseline gap-3">
+              <span className="text-xl font-mono text-[var(--ed-accent)] opacity-60">
+                {currency}
+              </span>
+              <p className="text-5xl md:text-6xl font-mono font-bold text-[var(--ed-fg)] tracking-tighter tabular-nums">
+                {zakatDue.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
                 })}
               </p>
-
-              {isSmall && (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mt-6 pt-6 border-t border-[var(--ed-rule)] text-sm text-[var(--ed-fg-muted)] space-y-2"
-                >
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ed-accent)]">
-                    {t('recommendationTitle')}
-                  </p>
-                  <p className="leading-relaxed opacity-80">
-                    {t('recommendationBody')}
-                  </p>
-                </motion.div>
-              )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <p className="text-sm text-[var(--ed-fg-muted)] font-serif italic mt-2 opacity-60">
+              {t('exactPercent', {
+                currency,
+                amount: parsed.toLocaleString(),
+              })}
+            </p>
 
-      {/* Guidance */}
+            {isSmall && (
+              <div
+                ref={recommendationRef}
+                className="mt-6 pt-6 border-t border-[var(--ed-rule)] text-sm text-[var(--ed-fg-muted)] space-y-2"
+              >
+                <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--ed-accent)]">
+                  {t('recommendationTitle')}
+                </p>
+                <p className="leading-relaxed opacity-80">
+                  {t('recommendationBody')}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-[var(--ed-rule)]">
         <div className="space-y-2">
           <h4 className="font-mono text-[9px] uppercase tracking-widest text-[var(--ed-accent)] font-bold">

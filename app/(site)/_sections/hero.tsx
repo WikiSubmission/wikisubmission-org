@@ -1,18 +1,16 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
-import { motion } from 'framer-motion'
+import gsap from 'gsap'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { F, Arrow } from './shared'
-import { STAGGER_CONTAINER, FADE_UP } from '@/lib/motion'
+import { StaggerContainer } from '@/lib/motion'
 
 function Stat({ k, label }: { k: string; label: string }) {
   return (
-    <motion.div 
-      variants={FADE_UP}
-      style={{ display: 'flex', flexDirection: 'column', gap: 4 }}
-    >
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <div
         style={{
           fontFamily: F.display,
@@ -36,7 +34,42 @@ function Stat({ k, label }: { k: string; label: string }) {
       >
         {label}
       </div>
-    </motion.div>
+    </div>
+  )
+}
+
+function HeroLogo() {
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    gsap.to(el, { opacity: 0.05, duration: 1.5, delay: 0.5, ease: 'power2.out' })
+  }, [])
+
+  return (
+    <div
+      ref={ref}
+      aria-hidden
+      style={{
+        position: 'absolute',
+        right: -80,
+        top: 40,
+        width: 420,
+        pointerEvents: 'none',
+        mixBlendMode: 'multiply',
+        opacity: 0,
+      }}
+      className="hidden lg:block"
+    >
+      <Image
+        src="/brand-assets/logo-transparent.png"
+        alt=""
+        width={420}
+        height={420}
+        priority
+      />
+    </div>
   )
 }
 
@@ -56,10 +89,11 @@ export function HeroManifesto() {
         overflow: 'visible',
       }}
     >
-      <motion.div
-        variants={STAGGER_CONTAINER}
-        initial="hidden"
-        animate="show"
+      <StaggerContainer
+        stagger={0.1}
+        delay={0}
+        once={true}
+        threshold={0.01}
         style={{
           columnGap: 60,
           rowGap: 48,
@@ -67,8 +101,7 @@ export function HeroManifesto() {
         }}
         className="grid grid-cols-[1.3fr_1fr] max-md:grid-cols-1"
       >
-        <motion.h1
-          variants={FADE_UP}
+        <h1
           style={{
             fontFamily: F.display,
             fontSize: 'clamp(48px, 14vw, 128px)',
@@ -91,10 +124,9 @@ export function HeroManifesto() {
           <span style={{ display: 'block', color: 'var(--ed-accent)' }}>
             {t('headline3')}
           </span>
-        </motion.h1>
+        </h1>
 
-        <motion.aside
-          variants={FADE_UP}
+        <aside
           style={{
             borderLeft: '1px solid var(--ed-rule)',
             paddingLeft: 32,
@@ -126,10 +158,9 @@ export function HeroManifesto() {
           >
             {t('verse')}
           </p>
-        </motion.aside>
+        </aside>
 
-        <motion.p
-          variants={FADE_UP}
+        <p
           style={{
             fontFamily: F.serif,
             fontSize: 'clamp(16px, 4.2vw, 18px)',
@@ -139,10 +170,9 @@ export function HeroManifesto() {
           }}
         >
           {t('lede')}
-        </motion.p>
+        </p>
 
-        <motion.div
-          variants={FADE_UP}
+        <div
           style={{
             gridColumn: '1 / -1',
             display: 'flex',
@@ -166,10 +196,9 @@ export function HeroManifesto() {
           >
             {t('ctaSecondary')}
           </button>
-        </motion.div>
+        </div>
 
-        <motion.div
-          variants={FADE_UP}
+        <div
           style={{
             gridColumn: '1 / -1',
             display: 'flex',
@@ -183,33 +212,10 @@ export function HeroManifesto() {
           <Stat k={t('stat2k')} label={t('stat2label')} />
           <Stat k={t('stat3k')} label={t('stat3label')} />
           <Stat k={t('stat4k')} label={t('stat4label')} />
-        </motion.div>
-      </motion.div>
+        </div>
+      </StaggerContainer>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.05 }}
-        transition={{ duration: 1.5, delay: 0.5 }}
-        aria-hidden
-        style={{
-          position: 'absolute',
-          right: -80,
-          top: 40,
-          width: 420,
-          pointerEvents: 'none',
-          mixBlendMode: 'multiply',
-        }}
-        className="hidden lg:block"
-      >
-        <Image
-          src="/brand-assets/logo-transparent.png"
-          alt=""
-          width={420}
-          height={420}
-          priority
-        />
-      </motion.div>
+      <HeroLogo />
     </section>
   )
 }
-

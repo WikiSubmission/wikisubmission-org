@@ -1,8 +1,8 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { motion, AnimatePresence } from 'framer-motion'
+import gsap from 'gsap'
 import { Copy, Check } from 'lucide-react'
 import { F, SectionDivider, Arrow } from './shared'
 import { BIBLE_BOOKS } from '@/constants/bible-books'
@@ -34,6 +34,93 @@ type Tab = {
 }
 
 const ROTATE_MS = 7000
+
+function ProgressBar({ progressKey, durationMs }: { progressKey: number; durationMs: number }) {
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    gsap.fromTo(
+      el,
+      { scaleX: 0 },
+      { scaleX: 1, duration: durationMs / 1000, ease: 'none' },
+    )
+  }, [progressKey, durationMs])
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 2,
+        background: 'var(--ed-accent)',
+        transformOrigin: 'left center',
+        transform: 'scaleX(0)',
+        zIndex: 10,
+        opacity: 0.6,
+      }}
+    />
+  )
+}
+
+function VerseText({
+  verseKey,
+  verse,
+}: {
+  verseKey: string
+  verse: Verse
+}) {
+  const ref = useRef<HTMLParagraphElement | null>(null)
+  const prevKeyRef = useRef(verseKey)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (prevKeyRef.current === verseKey) {
+      gsap.set(el, { opacity: 1, y: 0 })
+    } else {
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+      )
+    }
+    prevKeyRef.current = verseKey
+  }, [verseKey])
+
+  return (
+    <p
+      ref={ref}
+      style={{
+        fontFamily: F.display,
+        fontSize: 'clamp(22px, 5vw, 30px)',
+        lineHeight: 1.35,
+        color: 'var(--ed-fg)',
+        letterSpacing: '-0.015em',
+        maxWidth: '52ch',
+        margin: 0,
+      }}
+    >
+      <span
+        aria-hidden
+        style={{
+          color: 'var(--ed-accent)',
+          fontSize: '1.4em',
+          lineHeight: 0,
+          marginRight: 6,
+          fontFamily: F.display,
+        }}
+      >
+        &ldquo;
+      </span>
+      {verse.english}
+    </p>
+  )
+}
 
 export function VerseOfTheDaySection() {
   const t = useTranslations('homePage.verseOfDay')
@@ -116,7 +203,7 @@ export function VerseOfTheDaySection() {
         ],
       },
     ],
-    [t]
+    [t],
   )
 
   const [tabKey, setTabKey] = useState<Tab['key']>('quran')
@@ -125,19 +212,19 @@ export function VerseOfTheDaySection() {
 
   const current = useMemo(
     () => TABS.find((tab) => tab.key === tabKey) ?? TABS[0],
-    [tabKey, TABS]
+    [tabKey, TABS],
   )
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIdx(0)
-    setProgressKey(k => k + 1)
+    setProgressKey((k) => k + 1)
   }, [tabKey])
 
   useEffect(() => {
     const tm = setInterval(() => {
       setIdx((p) => (p + 1) % current.verses.length)
-      setProgressKey(k => k + 1)
+      setProgressKey((k) => k + 1)
     }, ROTATE_MS)
     return () => clearInterval(tm)
   }, [current.verses.length])
@@ -174,27 +261,10 @@ export function VerseOfTheDaySection() {
             borderRadius: 0,
             backgroundColor: 'var(--ed-surface)',
             overflow: 'hidden',
-            position: 'relative'
+            position: 'relative',
           }}
         >
-          {/* Progress Bar */}
-          <motion.div
-            key={progressKey}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: ROTATE_MS / 1000, ease: 'linear' }}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 2,
-              background: 'var(--ed-accent)',
-              originX: 0,
-              zIndex: 10,
-              opacity: 0.6
-            }}
-          />
+          <ProgressBar progressKey={progressKey} durationMs={ROTATE_MS} />
 
           <div
             className="flex items-center justify-between gap-3 flex-wrap"
@@ -297,7 +367,7 @@ export function VerseOfTheDaySection() {
               >
                 {v.title}
               </span>
-              
+
               <button
                 onClick={handleCopy}
                 className="ml-auto p-2 opacity-50 hover:opacity-100 transition-opacity"
@@ -307,38 +377,7 @@ export function VerseOfTheDaySection() {
               </button>
             </div>
 
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={`${tabKey}-${idx}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.4 }}
-                style={{
-                  fontFamily: F.display,
-                  fontSize: 'clamp(22px, 5vw, 30px)',
-                  lineHeight: 1.35,
-                  color: 'var(--ed-fg)',
-                  letterSpacing: '-0.015em',
-                  maxWidth: '52ch',
-                  margin: 0,
-                }}
-              >
-                <span
-                  aria-hidden
-                  style={{
-                    color: 'var(--ed-accent)',
-                    fontSize: '1.4em',
-                    lineHeight: 0,
-                    marginRight: 6,
-                    fontFamily: F.display,
-                  }}
-                >
-                  &ldquo;
-                </span>
-                {v.english}
-              </motion.p>
-            </AnimatePresence>
+            <VerseText verseKey={`${tabKey}-${idx}`} verse={v} />
 
             {v.footnote && (
               <div
@@ -395,7 +434,7 @@ export function VerseOfTheDaySection() {
                   type="button"
                   onClick={() => {
                     setIdx(i)
-                    setProgressKey(k => k + 1)
+                    setProgressKey((k) => k + 1)
                   }}
                   aria-label={t('verseAria', { n: i + 1 })}
                   aria-current={i === idx ? 'true' : undefined}

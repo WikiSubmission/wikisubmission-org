@@ -1,8 +1,8 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { motion, AnimatePresence } from 'framer-motion'
+import gsap from 'gsap'
 import { F, SectionDivider } from './shared'
 
 const PRAYER_TIMES: { time: string; active: boolean }[] = [
@@ -13,12 +13,83 @@ const PRAYER_TIMES: { time: string; active: boolean }[] = [
   { time: '19:48', active: false },
 ]
 
+function ProgressBar({ progressKey, durationMs }: { progressKey: number; durationMs: number }) {
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    gsap.fromTo(
+      el,
+      { scaleX: 0 },
+      { scaleX: 1, duration: durationMs / 1000, ease: 'none' },
+    )
+  }, [progressKey, durationMs])
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 3,
+        background: 'var(--ed-accent)',
+        transformOrigin: 'left center',
+        transform: 'scaleX(0)',
+        zIndex: 10,
+        opacity: 0.4,
+      }}
+    />
+  )
+}
+
+function FastingVerseSwitcher({
+  verses,
+  index,
+}: {
+  verses: { text: string; ref: string }[]
+  index: number
+}) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const prevIndexRef = useRef(index)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (prevIndexRef.current === index) {
+      gsap.set(el, { opacity: 1, x: 0 })
+    } else {
+      gsap.fromTo(
+        el,
+        { opacity: 0, x: 20 },
+        { opacity: 1, x: 0, duration: 0.5, ease: 'power2.out' },
+      )
+    }
+    prevIndexRef.current = index
+  }, [index])
+
+  const verse = verses[index]
+
+  return (
+    <div ref={ref} className="space-y-3">
+      <p className="text-[17px] font-display italic text-[var(--ed-fg)] leading-relaxed">
+        &ldquo;{verse.text}&rdquo;
+      </p>
+      <p className="text-[9px] font-glacial font-bold tracking-widest text-[var(--ed-accent)] uppercase">
+        Verse {verse.ref}
+      </p>
+    </div>
+  )
+}
+
 export function PracticesSection() {
   const t = useTranslations('homePage.practices')
   const [fastingIdx, setFastingIdx] = useState(0)
   const [progressKey, setProgressKey] = useState(0)
   const ROTATE_MS = 6000
-  
+
   const PRAYER_NAMES = [
     t('fajr'),
     t('dhuhr'),
@@ -203,7 +274,7 @@ export function PracticesSection() {
                 minHeight: 140,
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center'
+                justifyContent: 'center',
               }}
             >
               {t('zakatQuote')}
@@ -237,8 +308,6 @@ export function PracticesSection() {
             </p>
           </Link>
 
-
-
           {/* Ramadan Tile */}
           <Link
             href="/practices"
@@ -251,27 +320,10 @@ export function PracticesSection() {
               gap: 20,
               textDecoration: 'none',
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}
           >
-            {/* Progress Bar */}
-            <motion.div
-              key={progressKey}
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: ROTATE_MS / 1000, ease: 'linear' }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 3,
-                background: 'var(--ed-accent)',
-                originX: 0,
-                zIndex: 10,
-                opacity: 0.4
-              }}
-            />
+            <ProgressBar progressKey={progressKey} durationMs={ROTATE_MS} />
 
             <div
               className="flex items-center justify-between"
@@ -291,23 +343,7 @@ export function PracticesSection() {
             </div>
 
             <div className="relative min-h-[140px] flex flex-col justify-center overflow-hidden border-l-2 border-[var(--ed-accent)]/30 bg-black/5 p-6">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={fastingIdx}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="space-y-3"
-                >
-                  <p className="text-[17px] font-display italic text-[var(--ed-fg)] leading-relaxed">
-                    &ldquo;{FASTING_VERSES[fastingIdx].text}&rdquo;
-                  </p>
-                  <p className="text-[9px] font-glacial font-bold tracking-widest text-[var(--ed-accent)] uppercase">
-                    Verse {FASTING_VERSES[fastingIdx].ref}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
+              <FastingVerseSwitcher verses={FASTING_VERSES} index={fastingIdx} />
             </div>
 
             <p
@@ -367,7 +403,7 @@ export function PracticesSection() {
                 minHeight: 140,
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center'
+                justifyContent: 'center',
               }}
             >
               “Proclaim that the people shall observe Hajj pilgrimage... They will come from the farthest locations.”

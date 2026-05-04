@@ -16,7 +16,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
-import { motion } from 'framer-motion'
+import { FadeUp } from '@/lib/motion'
 import { F } from '../_sections/shared'
 
 
@@ -154,11 +154,7 @@ function RamadanContent() {
       )}
 
       {data && !loading && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="space-y-12"
-        >
+        <FadeUp distance={0} duration={0.5} className="space-y-12">
           {/* Status HUD */}
           <header className="flex flex-col items-center text-center space-y-6">
             <div className="flex items-center gap-2 px-4 py-1.5 bg-[var(--ed-surface)] border border-[var(--ed-rule)]">
@@ -250,7 +246,7 @@ function RamadanContent() {
               </span>
             </button>
           </footer>
-        </motion.div>
+        </FadeUp>
       )}
     </div>
   )

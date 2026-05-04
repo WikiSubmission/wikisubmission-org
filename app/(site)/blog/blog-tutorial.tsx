@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 import { 
   X, ChevronLeft, ChevronRight, BookOpen, Lightbulb, CheckCircle2,
   ImageIcon, ArrowRightLeft, User, Mail, Lock,
@@ -560,12 +560,91 @@ export function BlogTutorial({
     setMockupSubId(HARDCODED_STEPS[newSlideIndex].mockupSubId)
   }
 
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  const progressRef = useRef<HTMLDivElement | null>(null)
+  const slideRef = useRef<HTMLDivElement | null>(null)
+  const previewRef = useRef<HTMLDivElement | null>(null)
+  const mockupRef = useRef<HTMLDivElement | null>(null)
+  const [previewRender, setPreviewRender] = useState(previewOpen)
+  const slideKeyRef = useRef(currentSlide)
+  const mockupKeyRef = useRef(`${currentSlide}-${mockupSubId}`)
+
+  useEffect(() => {
+    const el = rootRef.current
+    if (!el) return
+    gsap.fromTo(
+      el,
+      { opacity: 0, y: 16, scale: 0.98 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'expo.out' },
+    )
+  }, [])
+
+  useEffect(() => {
+    const el = progressRef.current
+    if (!el) return
+    gsap.to(el, {
+      width: `${progress}%`,
+      duration: 0.5,
+      ease: 'power3.out',
+      overwrite: 'auto',
+    })
+  }, [progress])
+
+  useEffect(() => {
+    const el = slideRef.current
+    if (!el) return
+    if (slideKeyRef.current === currentSlide) {
+      gsap.set(el, { opacity: 1, y: 0 })
+    } else {
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' },
+      )
+    }
+    slideKeyRef.current = currentSlide
+  }, [currentSlide])
+
+  useEffect(() => {
+    const el = mockupRef.current
+    if (!el) return
+    const key = `${currentSlide}-${mockupSubId}`
+    if (mockupKeyRef.current === key) {
+      gsap.set(el, { opacity: 1 })
+    } else {
+      gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' })
+    }
+    mockupKeyRef.current = key
+  }, [currentSlide, mockupSubId])
+
+  useEffect(() => {
+    if (previewOpen) setPreviewRender(true)
+  }, [previewOpen])
+
+  useEffect(() => {
+    const el = previewRef.current
+    if (!el) return
+    if (previewOpen) {
+      const target = el.scrollHeight
+      gsap.fromTo(
+        el,
+        { opacity: 0, height: 0 },
+        { opacity: 1, height: target, duration: 0.25, ease: 'power2.out', clearProps: 'height' },
+      )
+    } else if (previewRender) {
+      gsap.to(el, {
+        opacity: 0,
+        height: 0,
+        duration: 0.25,
+        ease: 'power2.out',
+        onComplete: () => setPreviewRender(false),
+      })
+    }
+  }, [previewOpen, previewRender])
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 16, scale: 0.98 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+    <div
+      ref={rootRef}
       className="relative z-10 w-full sm:max-w-3xl bg-card border-y sm:border border-border sm:rounded-2xl shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[88vh] overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
@@ -589,25 +668,20 @@ export function BlogTutorial({
 
       {/* Progress */}
       <div className="h-0.5 bg-muted shrink-0">
-        <motion.div
+        <div
+          ref={progressRef}
           className="h-full bg-primary"
-          initial={false}
-          animate={{ width: `${progress}%` }}
-          transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+          style={{ width: `${progress}%` }}
         />
       </div>
 
       {/* Scrollable Body */}
       <div className="flex-1 overflow-y-auto overscroll-contain">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="px-5 sm:px-8 py-6 sm:py-8 space-y-5"
-          >
+        <div
+          ref={slideRef}
+          key={currentSlide}
+          className="px-5 sm:px-8 py-6 sm:py-8 space-y-5"
+        >
             <div className="space-y-2">
               <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-mono text-primary font-bold uppercase tracking-widest">
                 Step {currentSlide + 1}
@@ -657,26 +731,17 @@ export function BlogTutorial({
                   {previewOpen ? 'Hide' : 'Show'}
                 </button>
               </div>
-              <AnimatePresence initial={false}>
-                {previewOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="overflow-hidden"
-                  >
+              {previewRender && (
+                <div ref={previewRef} className="overflow-hidden">
                   <div className="p-3 sm:p-5">
                     <div className="relative w-full overflow-hidden rounded-lg bg-[#0d0e0f] border border-white/5" style={{ aspectRatio: '12 / 7' }}>
-                      <motion.div
+                      <div
+                        ref={mockupRef}
                         key={`${currentSlide}-${mockupSubId}`}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
                         className="absolute top-0 left-0 w-[1200px] h-[700px] origin-top-left scale-[0.26] sm:scale-[0.46] md:scale-[0.55]"
                       >
                         <RenderMockup id={slide.mockupId} subId={mockupSubId} />
-                      </motion.div>
+                      </div>
                     </div>
 
                     {slide.mockupId === 'editor' && (
@@ -708,12 +773,10 @@ export function BlogTutorial({
                       </div>
                     )}
                   </div>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
             </div>
-          </motion.div>
-        </AnimatePresence>
+        </div>
       </div>
 
       {/* Footer */}
@@ -760,7 +823,7 @@ export function BlogTutorial({
           </button>
         )}
       </div>
-    </motion.div>
+    </div>
   )
 }
 

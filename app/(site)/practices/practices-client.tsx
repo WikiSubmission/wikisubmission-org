@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { FadeUp } from '@/lib/motion'
 import PrayerTimesClient from './prayer-times-client'
 import RamadanClient from './ramadan-client'
 import { ZakatCalculator } from '@/components/zakat-calculator'
@@ -74,12 +74,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function VerseQuote({ verseKey, text }: { verseKey: string; text: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      className="group"
-    >
+    <FadeUp className="group" distance={0} initiallyHidden>
       <div className="block p-6 border-l-2 border-[var(--ed-accent)]/20 bg-[var(--ed-surface)]/10">
         <div className="flex items-center gap-2 mb-3">
           <BookOpen size={12} className="text-[var(--ed-accent)] opacity-60" />
@@ -97,7 +92,7 @@ function VerseQuote({ verseKey, text }: { verseKey: string; text: string }) {
           &ldquo;{text}&rdquo;
         </p>
       </div>
-    </motion.div>
+    </FadeUp>
   )
 }
 
@@ -132,11 +127,7 @@ export default function PracticesClient({
 
           <div className="relative z-10 max-w-6xl mx-auto px-6 pt-24 pb-20 md:pt-32 md:pb-28">
             <div className="max-w-3xl space-y-8">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
+              <FadeUp distance={10} duration={0.5} className="space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="h-px w-12 bg-[var(--ed-accent)]/30" />
                   <div className="flex items-center gap-2 opacity-30">
@@ -157,7 +148,7 @@ export default function PracticesClient({
                 >
                   {t('description')}
                 </p>
-              </motion.div>
+              </FadeUp>
             </div>
           </div>
         </section>

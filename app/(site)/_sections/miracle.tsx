@@ -1,23 +1,26 @@
 'use client'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { motion, animate } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 import { F, SectionDivider, Arrow } from './shared'
-import { useScrollAnimation, FADE_UP, STAGGER_CONTAINER } from '@/lib/motion'
+import { useScrollAnimation, FadeUp, StaggerContainer } from '@/lib/motion'
 
 function CountUp({ value, duration = 2 }: { value: number; duration?: number }) {
   const [displayValue, setDisplayValue] = useState(0)
   const { ref, isInView } = useScrollAnimation()
 
   useEffect(() => {
-    if (isInView) {
-      const controls = animate(0, value, {
-        duration,
-        onUpdate: (latest) => setDisplayValue(Math.floor(latest)),
-        ease: 'easeOut'
-      })
-      return () => controls.stop()
+    if (!isInView) return
+    const proxy = { n: 0 }
+    const tween = gsap.to(proxy, {
+      n: value,
+      duration,
+      ease: 'power2.out',
+      onUpdate: () => setDisplayValue(Math.floor(proxy.n)),
+    })
+    return () => {
+      tween.kill()
     }
   }, [isInView, value, duration])
 
@@ -25,10 +28,40 @@ function CountUp({ value, duration = 2 }: { value: number; duration?: number }) 
 }
 
 function Fact({ k, v, note }: { k: string; v: string; note: string }) {
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const onEnter = () => {
+      gsap.to(el, {
+        y: -2,
+        backgroundColor: 'var(--ed-bg)',
+        duration: 0.3,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      })
+    }
+    const onLeave = () => {
+      gsap.to(el, {
+        y: 0,
+        backgroundColor: 'var(--ed-surface)',
+        duration: 0.3,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      })
+    }
+    el.addEventListener('mouseenter', onEnter)
+    el.addEventListener('mouseleave', onLeave)
+    return () => {
+      el.removeEventListener('mouseenter', onEnter)
+      el.removeEventListener('mouseleave', onLeave)
+    }
+  }, [])
+
   return (
-    <motion.div
-      variants={FADE_UP}
-      whileHover={{ y: -2, backgroundColor: 'var(--ed-bg)' }}
+    <div
+      ref={ref}
       className="transition-colors duration-300 group"
       style={{
         padding: 'clamp(24px, 5vw, 32px) clamp(20px, 5vw, 28px)',
@@ -38,7 +71,7 @@ function Fact({ k, v, note }: { k: string; v: string; note: string }) {
         gap: 6,
         height: '100%',
         cursor: 'default',
-        border: '1px solid transparent'
+        border: '1px solid transparent',
       }}
     >
       <div
@@ -72,22 +105,20 @@ function Fact({ k, v, note }: { k: string; v: string; note: string }) {
           letterSpacing: '0.12em',
           color: 'var(--ed-accent)',
           marginTop: 'auto',
-          opacity: 0.8
+          opacity: 0.8,
         }}
       >
         {note}
       </div>
-    </motion.div>
+    </div>
   )
 }
 
 export function MiracleSection() {
   const t = useTranslations('homePage.miracle')
-  const { ref, isInView } = useScrollAnimation()
 
   return (
     <section
-      ref={ref}
       className="px-4 sm:px-6 md:px-10"
       style={{
         paddingTop: 'clamp(72px, 10vw, 120px)',
@@ -102,16 +133,14 @@ export function MiracleSection() {
         sub={t('dividerSub')}
       />
 
-      <motion.div
-        variants={STAGGER_CONTAINER}
-        initial="hidden"
-        animate={isInView ? 'show' : 'hidden'}
+      <StaggerContainer
+        stagger={0.12}
+        delay={0}
         style={{ gap: 72, alignItems: 'stretch' }}
         className="grid grid-cols-[1.2fr_1fr] max-md:grid-cols-1 max-md:gap-12"
       >
         {/* Left: 19 + description */}
-        <motion.div
-          variants={FADE_UP}
+        <FadeUp
           className="max-sm:flex-col max-sm:gap-6"
           style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}
         >
@@ -131,7 +160,7 @@ export function MiracleSection() {
           >
             <span style={{ fontStyle: 'italic' }}>1</span>
             <span style={{ fontStyle: 'italic' }}>
-              {isInView ? <CountUp value={9} duration={1.5} /> : '9'}
+              <CountUp value={9} duration={1.5} />
             </span>
           </div>
           <div>
@@ -176,12 +205,14 @@ export function MiracleSection() {
               {t('cta')} <Arrow />
             </Link>
           </div>
-        </motion.div>
+        </FadeUp>
 
         {/* Right: 2×2 fact grid */}
-        <motion.div
-          variants={STAGGER_CONTAINER}
+        <StaggerContainer
+          stagger={0.08}
+          delay={0.1}
           className="grid grid-cols-1 sm:grid-cols-2"
+          childSelector=".fact-cell"
           style={{
             gap: 0,
             border: '1px solid var(--ed-rule)',
@@ -197,14 +228,13 @@ export function MiracleSection() {
           ].map((f, i) => (
             <div
               key={i}
-              className="border-b last:border-b-0 sm:last:border-b-0 sm:[&:nth-child(-n+2)]:border-b sm:[&:nth-child(odd)]:border-r sm:[&:nth-child(3)]:border-b-0"
+              className="fact-cell border-b last:border-b-0 sm:last:border-b-0 sm:[&:nth-child(-n+2)]:border-b sm:[&:nth-child(odd)]:border-r sm:[&:nth-child(3)]:border-b-0"
             >
               <Fact {...f} />
             </div>
           ))}
-        </motion.div>
-      </motion.div>
+        </StaggerContainer>
+      </StaggerContainer>
     </section>
   )
 }
-
