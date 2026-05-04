@@ -13,11 +13,9 @@ import {
   MapPin,
   Calendar,
   Compass,
-  ArrowUpRight,
   Sun,
   Moon,
-  Wallet,
-  Link as LinkIcon
+  Wallet
 } from 'lucide-react'
 import Link from 'next/link'
 import { AblutionSlideshow } from './ablution-slideshow'
@@ -106,10 +104,8 @@ function VerseQuote({ verseKey, text }: { verseKey: string; text: string }) {
 // ── MAIN COMPONENT ────────────────────────────────────────────────────
 
 export default function PracticesClient({
-  zakatVerse,
   prayerVerse,
 }: {
-  zakatVerse: VerseData | null
   prayerVerse: VerseData | null
 }) {
   const t = useTranslations('practices')
@@ -117,8 +113,6 @@ export default function PracticesClient({
   const daysUntilRamadan = useMemo(() => daysUntilNextRamadan(), [])
   const showRamadan = daysUntilRamadan <= 15
 
-
-  const zakatText = zakatVerse?.tr?.['en']?.tx
   const prayerText = prayerVerse?.tr?.['en']?.tx
 
   const LEARNING_CARDS = [
@@ -184,7 +178,7 @@ export default function PracticesClient({
                   className="text-sm text-[var(--ed-fg-muted)] leading-relaxed mb-8"
                   style={{ fontFamily: F.serif }}
                 >
-                  Establish the five daily contact prayers, precisely timed to the sun's position.
+                  Establish the five daily contact prayers, precisely timed to the sun&apos;s position.
                 </p>
               </div>
 

@@ -5,11 +5,43 @@ import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronLeft, ChevronRight,
-  Droplets, User, Heart, AlertCircle, Wind, Waves,
-  Play, X, BookOpen, Clock, Activity,
+  Droplets, User, Heart, Wind, Waves,
+  Play, X, Clock,
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { F } from '../_sections/shared'
+
+type YTPlayer = {
+  destroy: () => void
+  getCurrentTime: () => number
+}
+
+type YTStateEvent = { data: number }
+
+type YTPlayerCtor = new (
+  elementId: string,
+  options: {
+    videoId: string
+    playerVars?: Record<string, number>
+    events?: {
+      onReady?: () => void
+      onStateChange?: (event: YTStateEvent) => void
+    }
+  }
+) => YTPlayer
+
+type YTNamespace = {
+  Player: YTPlayerCtor
+  PlayerState: { PLAYING: number }
+}
+
+declare global {
+  interface Window {
+    YT?: YTNamespace
+    onYouTubeIframeAPIReady?: () => void
+  }
+}
 
 
 const STEPS = [
@@ -88,7 +120,7 @@ export function AblutionSlideshow() {
   const [open, setOpen] = useState(false)
   const [showTranscription, setShowTranscription] = useState(true)
   const [currentTime, setCurrentTime] = useState(0)
-  const playerRef = useRef<any>(null)
+  const playerRef = useRef<YTPlayer | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const step = STEPS[slide]
@@ -100,8 +132,20 @@ export function AblutionSlideshow() {
   useEffect(() => {
     if (!open) return
 
-    // Load YouTube IFrame API if not already present
-    if (!(window as any).YT) {
+    const startTimer = () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+      timerRef.current = setInterval(() => {
+        if (playerRef.current && playerRef.current.getCurrentTime) {
+          setCurrentTime(playerRef.current.getCurrentTime())
+        }
+      }, 50)
+    }
+
+    const stopTimer = () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+
+    if (!window.YT) {
       const tag = document.createElement('script')
       tag.src = 'https://www.youtube.com/iframe_api'
       const firstScriptTag = document.getElementsByTagName('script')[0]
@@ -109,7 +153,8 @@ export function AblutionSlideshow() {
     }
 
     const initPlayer = () => {
-      playerRef.current = new (window as any).YT.Player('yt-player', {
+      if (!window.YT) return
+      playerRef.current = new window.YT.Player('yt-player', {
         videoId: 'Y8QnnhDGgtw',
         playerVars: {
           autoplay: 1,
@@ -122,21 +167,21 @@ export function AblutionSlideshow() {
           onReady: () => {
             startTimer()
           },
-          onStateChange: (event: any) => {
-            if (event.data === (window as any).YT.PlayerState.PLAYING) {
+          onStateChange: (event: YTStateEvent) => {
+            if (window.YT && event.data === window.YT.PlayerState.PLAYING) {
               startTimer()
             } else {
               stopTimer()
             }
-          }
-        }
+          },
+        },
       })
     }
 
-    if ((window as any).YT && (window as any).YT.Player) {
+    if (window.YT && window.YT.Player) {
       initPlayer()
     } else {
-      (window as any).onYouTubeIframeAPIReady = initPlayer
+      window.onYouTubeIframeAPIReady = initPlayer
     }
 
     return () => {
@@ -147,19 +192,6 @@ export function AblutionSlideshow() {
       }
     }
   }, [open])
-
-  const startTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current)
-    timerRef.current = setInterval(() => {
-      if (playerRef.current && playerRef.current.getCurrentTime) {
-        setCurrentTime(playerRef.current.getCurrentTime())
-      }
-    }, 50)
-  }
-
-  const stopTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current)
-  }
 
   const next = () => setSlide(p => (p + 1) % STEPS.length)
   const prev = () => setSlide(p => (p - 1 + STEPS.length) % STEPS.length)
@@ -329,7 +361,7 @@ export function AblutionSlideshow() {
                               className="text-2xl italic text-[var(--ed-fg)]"
                               style={{ fontFamily: F.serif }}
                             >
-                              "Nawaytu al-wudu"
+                              &ldquo;Nawaytu al-wudu&rdquo;
                             </p>
                           </div>
                           
@@ -349,7 +381,7 @@ export function AblutionSlideshow() {
                               className="text-2xl italic text-[var(--ed-fg)]"
                               style={{ fontFamily: F.serif }}
                             >
-                              "I intend to perform ablution"
+                              &ldquo;I intend to perform ablution&rdquo;
                             </p>
                           </div>
                         </div>
@@ -358,10 +390,11 @@ export function AblutionSlideshow() {
                           {step.image ? (
                             <>
                               <div className="flex-1 relative overflow-hidden">
-                                <img 
-                                  src={step.image} 
+                                <Image
+                                  src={step.image}
                                   alt={step.title}
-                                  className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-700"
+                                  fill
+                                  className="object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-700"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-[var(--ed-bg)] via-transparent to-transparent opacity-60" />
                               </div>
@@ -370,7 +403,7 @@ export function AblutionSlideshow() {
                                   className="text-[11px] md:text-xs leading-relaxed text-[var(--ed-fg)] italic text-center px-4"
                                   style={{ fontFamily: F.serif }}
                                 >
-                                  "O you who believe, when you observe the Contact Prayers (Salat), you shall:{" "}
+                                  &ldquo;O you who believe, when you observe the Contact Prayers (Salat), you shall:{" "}
                                   <span className={cn("transition-all duration-500", slide === 1 ? "text-[var(--ed-accent)] font-bold not-italic underline underline-offset-4 decoration-[var(--ed-accent)]/40" : "opacity-40")}>
                                     (1) wash your faces
                                   </span>,{" "}
@@ -385,7 +418,7 @@ export function AblutionSlideshow() {
                                   </span>...{" "}
                                   <span className="font-glacial text-[10px] uppercase tracking-widest not-italic opacity-60 ml-1">
                                     Quran 5:6
-                                  </span>"
+                                  </span>&rdquo;
                                 </p>
                               </div>
                             </>
@@ -468,7 +501,7 @@ export function AblutionSlideshow() {
               className="text-sm text-[var(--ed-fg-muted)] leading-relaxed italic opacity-80"
               style={{ fontFamily: F.serif }}
             >
-              "O you who believe, when you observe the Contact Prayers (Salat), you shall: (1) wash your faces, (2) wash your arms to the elbows, (3) wipe your heads, and (4) wash your feet to the ankles. If you were unclean due to sexual orgasm, you shall bathe. If you are ill, or traveling, or had any digestive excretion (urinary, fecal, or gas), or had (sexual) contact with the women, and you cannot find water, you shall observe the dry ablution (Tayammum) by touching clean dry soil, then rubbing your faces and hands. GOD does not wish to make the religion difficult for you; He wishes to cleanse you and to perfect His blessing upon you, that you may be appreciative."
+              &ldquo;O you who believe, when you observe the Contact Prayers (Salat), you shall: (1) wash your faces, (2) wash your arms to the elbows, (3) wipe your heads, and (4) wash your feet to the ankles. If you were unclean due to sexual orgasm, you shall bathe. If you are ill, or traveling, or had any digestive excretion (urinary, fecal, or gas), or had (sexual) contact with the women, and you cannot find water, you shall observe the dry ablution (Tayammum) by touching clean dry soil, then rubbing your faces and hands. GOD does not wish to make the religion difficult for you; He wishes to cleanse you and to perfect His blessing upon you, that you may be appreciative.&rdquo;
             </p>
             <Link 
               href="/quran/5:6"

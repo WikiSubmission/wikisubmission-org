@@ -116,6 +116,7 @@ export function VerseOfTheDaySection() {
   )
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIdx(0)
     setProgressKey(k => k + 1)
   }, [tabKey])

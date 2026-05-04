@@ -47,9 +47,9 @@ export const SCALE_IN: Variants = {
  */
 export function useScrollAnimation(threshold = 0.2) {
   const ref = useRef(null)
-  const isInView = useInView(ref, { 
-    once: true, 
-    margin: `-${threshold * 100}% 0px` as any
+  const isInView = useInView(ref, {
+    once: true,
+    margin: `-${threshold * 100}% 0px` as `${number}px`,
   })
   
   return { ref, isInView }

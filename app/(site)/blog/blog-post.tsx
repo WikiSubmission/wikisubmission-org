@@ -224,6 +224,13 @@ export function buildBlogPostMetadata(
     title: metadataTitle,
     description,
     ...(preview ? {} : { url }),
+    ...(post.thumbnailUrl
+      ? {
+          image: post.thumbnailUrl,
+          imageAlt: title,
+          twitterCard: 'summary_large_image' as const,
+        }
+      : {}),
   })
 
   return {

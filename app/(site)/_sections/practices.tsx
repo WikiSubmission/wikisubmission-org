@@ -301,7 +301,7 @@ export function PracticesSection() {
                   className="space-y-3"
                 >
                   <p className="text-[17px] font-display italic text-[var(--ed-fg)] leading-relaxed">
-                    "{FASTING_VERSES[fastingIdx].text}"
+                    &ldquo;{FASTING_VERSES[fastingIdx].text}&rdquo;
                   </p>
                   <p className="text-[9px] font-glacial font-bold tracking-widest text-[var(--ed-accent)] uppercase">
                     Verse {FASTING_VERSES[fastingIdx].ref}

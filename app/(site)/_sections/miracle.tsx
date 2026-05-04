@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { motion, useSpring, useTransform, animate } from 'framer-motion'
+import { motion, animate } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { F, SectionDivider, Arrow } from './shared'
 import { useScrollAnimation, FADE_UP, STAGGER_CONTAINER } from '@/lib/motion'

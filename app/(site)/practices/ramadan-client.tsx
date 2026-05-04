@@ -10,7 +10,6 @@ import {
   MoonIcon,
   CalendarIcon,
   StarIcon,
-  Activity,
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'

@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  X, ChevronLeft, ChevronRight, BookOpen, Lightbulb, CheckCircle2, 
-  ImageIcon, ArrowRightLeft, User, Mail, Lock, Settings, 
+  X, ChevronLeft, ChevronRight, BookOpen, Lightbulb, CheckCircle2,
+  ImageIcon, ArrowRightLeft, User, Mail, Lock,
   Search, Plus, Globe, Send, MoreVertical, LayoutGrid, FileText
 } from 'lucide-react'
 import { cn } from '@/lib/utils'

@@ -1,9 +1,17 @@
 import type { Metadata as _Metadata } from 'next'
 
+const SITE_LOGO_IMAGE = '/brand-assets/logo-transparent.png'
+const SITE_LOGO_SIZE = { width: 512, height: 512 }
+
 /**
  * Builds a complete Metadata object with consistent OG + Twitter cards.
- * The OG image is always the dynamic /og route keyed by title — ensuring
- * a consistent branded template across every page.
+ *
+ * By default, the OG image is the site logo and the Twitter card is the
+ * compact "summary" variant — link previews surface the logo in a corner
+ * and emphasize the title/description rather than a full-bleed image.
+ *
+ * Pages that legitimately want a large preview image (e.g. blog posts)
+ * can pass an explicit `image` plus `twitterCard: 'summary_large_image'`.
  */
 export function buildPageMetadata({
   title,
@@ -11,6 +19,7 @@ export function buildPageMetadata({
   url,
   image,
   imageSize,
+  imageAlt,
   twitterCard,
 }: {
   title: string
@@ -18,12 +27,14 @@ export function buildPageMetadata({
   url?: string
   image?: string
   imageSize?: { width: number; height: number }
+  imageAlt?: string
   twitterCard?: 'summary' | 'summary_large_image'
 }): _Metadata {
-  const img = image ?? `/og?title=${encodeURIComponent(title)}`
-  const card = twitterCard ?? 'summary_large_image'
-  const imgW = imageSize?.width ?? 1200
-  const imgH = imageSize?.height ?? 480
+  const usingCustomImage = Boolean(image)
+  const img = image ?? SITE_LOGO_IMAGE
+  const card = twitterCard ?? (usingCustomImage ? 'summary_large_image' : 'summary')
+  const size = imageSize ?? (usingCustomImage ? { width: 1200, height: 630 } : SITE_LOGO_SIZE)
+  const alt = imageAlt ?? (usingCustomImage ? title : 'WikiSubmission')
   return {
     title,
     description,
@@ -33,7 +44,7 @@ export function buildPageMetadata({
       description,
       ...(url ? { url } : {}),
       siteName: 'WikiSubmission',
-      images: [{ url: img, width: imgW, height: imgH, alt: title }],
+      images: [{ url: img, width: size.width, height: size.height, alt }],
       locale: 'en_US',
       type: 'website',
     },
@@ -81,15 +92,22 @@ export const Metadata: _Metadata = {
       'Access the Final Testament at WikiSubmission – a free and open source platform for Submission.',
     url: 'https://wikisubmission.org',
     siteName: 'WikiSubmission',
-    images: [{ url: '/og?title=WikiSubmission', width: 1200, height: 480, alt: 'WikiSubmission' }],
+    images: [
+      {
+        url: SITE_LOGO_IMAGE,
+        width: SITE_LOGO_SIZE.width,
+        height: SITE_LOGO_SIZE.height,
+        alt: 'WikiSubmission',
+      },
+    ],
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: 'WikiSubmission',
     description:
       'Access the Final Testament at WikiSubmission – a free and open source platform for Submission.',
-    images: [{ url: '/og?title=WikiSubmission', width: 1200, height: 480 }],
+    images: [{ url: SITE_LOGO_IMAGE }],
   },
 }

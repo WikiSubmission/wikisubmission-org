@@ -152,11 +152,9 @@ function SearchResultRow({ post, query }: { post: SearchPost; query: string }) {
 function BlogBrowserInner({
   articles,
   categories,
-  tutorial,
 }: {
   articles: Post[]
   categories: Category[]
-  tutorial?: any
 }) {
   const t = useTranslations('blog')
   const router = useRouter()
@@ -440,15 +438,13 @@ function BlogBrowserInner({
 export function BlogBrowser({
   articles,
   categories,
-  tutorial,
 }: {
   articles: Post[]
   categories: Category[]
-  tutorial?: any
 }) {
   return (
     <Suspense>
-      <BlogBrowserInner articles={articles} categories={categories} tutorial={tutorial} />
+      <BlogBrowserInner articles={articles} categories={categories} />
     </Suspense>
   )
 }

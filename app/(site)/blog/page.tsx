@@ -109,23 +109,17 @@ export default async function BlogPage({
 
   let allArticles: Post[] = []
   let categories: Category[] = []
-  let tutorialPost = null
 
   try {
-    const [articlesData, categoriesData, tutorialData] = await Promise.all([
+    const [articlesData, categoriesData] = await Promise.all([
       sanityServer.fetch<Post[]>(ALL_ARTICLES_QUERY, { language }),
       sanityServer.fetch<Category[]>(CATEGORIES_QUERY, { language }),
-      sanityServer.fetch(`*[_type == "article" && slug.current == "tutorial" && language == $language][0] {
-        title,
-        body
-      }`, { language })
     ])
     allArticles = articlesData
     categories = categoriesData
-    tutorialPost = tutorialData
   } catch (err) {
     console.error('[blog] Sanity fetch failed:', err)
   }
 
-  return <BlogBrowser articles={allArticles} categories={categories} tutorial={tutorialPost} />
+  return <BlogBrowser articles={allArticles} categories={categories} />
 }
