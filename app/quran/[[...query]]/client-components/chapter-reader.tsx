@@ -243,9 +243,24 @@ function VirtualizedVerseList({
     return () => clearTimeout(timer)
   }, [hasMore, isRangeMode, lastVirtualIndex, loadMore, loading, opts, seekTarget, verses.length])
 
+  // Only begin syncing the URL to the centred verse after the user has actually
+  // scrolled. Without this guard, an inherited scroll position from the previous
+  // route would be captured on mount and rewritten into the URL as ?verse=N,
+  // making chapter cards appear to "open" at a mid-chapter verse.
+  const userScrolledRef = useRef(false)
+  useEffect(() => {
+    userScrolledRef.current = false
+    const onScroll = () => {
+      userScrolledRef.current = true
+    }
+    window.addEventListener('scroll', onScroll, { passive: true, once: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [chapterNumber])
+
   useEffect(() => {
     if (isRangeMode) return
     if (lastVirtualIndex < 0 || verses.length === 0) return
+    if (!userScrolledRef.current) return
     const timer = setTimeout(() => {
       const centerY = window.scrollY + window.innerHeight / 2
       const items = virtualizer.getVirtualItems()
@@ -529,13 +544,44 @@ export function ChapterReader({
   }, [])
 
   useLayoutEffect(() => {
-    // Reset once on initial entry so chapter navigation never inherits the
-    // previous page's scroll position. The keyed virtualized child uses the
-    // live scrollY on later remounts, so in-reader mode switches stay anchored.
+    // Reset on initial entry and whenever the chapter changes (e.g. clicking a
+    // chapter card from inside the reader) so navigation never inherits the
+    // previous page's scroll position. Skip when a specific verse is targeted —
+    // the seek logic anchors to that verse instead.
+    //
+    // Re-assert across the next few frames: the document's height grows as the
+    // virtualizer measures items and the browser may re-apply an inherited
+    // scrollY mid-layout, which would otherwise be picked up by the URL-sync
+    // listener and rewritten into the URL as ?verse=N.
+    if (seekTarget) return
     window.scrollTo(0, 0)
-  }, [])
+    let frames = 0
+    let rafId = 0
+    const tick = () => {
+      if (window.scrollY !== 0) window.scrollTo(0, 0)
+      frames += 1
+      if (frames < 6) rafId = requestAnimationFrame(tick)
+    }
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapterNumber])
 
   const firstVerseKey = reader.verses[0]?.vk ?? ''
+
+  // Re-assert top alignment once verses first render. The initial useLayoutEffect
+  // fires before content lays out, so the browser can re-apply an inherited
+  // scroll position from the previous route once the page grows tall. Without
+  // this, the URL-sync scroll listener would then capture that stale offset and
+  // rewrite the URL to a mid-chapter verse.
+  const didInitialScrollRef = useRef(false)
+  useLayoutEffect(() => {
+    if (didInitialScrollRef.current) return
+    if (!firstVerseKey) return
+    didInitialScrollRef.current = true
+    if (seekTarget) return
+    window.scrollTo(0, 0)
+  }, [firstVerseKey, seekTarget])
 
   // Reading mode: scroll to the target verse by ID once it appears in the DOM.
   // ReadingView auto-loads all verses; this fires on each new batch until found.
