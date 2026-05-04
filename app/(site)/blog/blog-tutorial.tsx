@@ -543,224 +543,224 @@ const HARDCODED_STEPS: TutorialSlide[] = [
   }
 ]
 
-export function BlogTutorial({ 
-  onClose 
-}: { 
-  onClose: () => void 
+export function BlogTutorial({
+  onClose
+}: {
+  onClose: () => void
 }) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [mockupSubId, setMockupSubId] = useState<string | undefined>(HARDCODED_STEPS[0].mockupSubId)
+  const [previewOpen, setPreviewOpen] = useState(true)
 
   const slide = HARDCODED_STEPS[currentSlide]
   const progress = ((currentSlide + 1) / HARDCODED_STEPS.length) * 100
 
-  // Reset mockup subId when slide changes
   const handleSlideChange = (newSlideIndex: number) => {
     setCurrentSlide(newSlideIndex)
     setMockupSubId(HARDCODED_STEPS[newSlideIndex].mockupSubId)
   }
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.98 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative"
-      >
-        {/* Main Container */}
-        <div className="bg-card/98 backdrop-blur-3xl border border-border/80 rounded-2xl shadow-[0_40px_100px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col min-h-[880px] max-h-[96vh] w-[98vw] max-w-6xl">
-          
-          {/* Window Chrome */}
-          <div className="h-12 bg-muted/40 border-b border-border/50 flex items-center px-4 justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#ff5f56]/80" />
-              <div className="w-3 h-3 rounded-full bg-[#ffbd2e]/80" />
-              <div className="w-3 h-3 rounded-full bg-[#27c93f]/80" />
-            </div>
-            
-            <div className="absolute left-1/2 -translate-x-1/2 text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground/60 font-bold">
-              WikiSubmission // Contributor Onboarding
-            </div>
-            
-            <button 
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-muted/80 text-muted-foreground transition-colors"
-            >
-              <X size={18} />
-            </button>
-          </div>
+    <motion.div
+      initial={{ opacity: 0, y: 16, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 16, scale: 0.98 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="relative z-10 w-full sm:max-w-3xl bg-card border-y sm:border border-border sm:rounded-2xl shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[88vh] overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/60 bg-background/40 shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <BookOpen size={16} className="text-primary shrink-0" />
+          <span className="font-headline font-bold text-sm truncate">Contributor Guide</span>
+          <span className="text-[10px] font-mono text-muted-foreground/70 shrink-0 ml-1">
+            {currentSlide + 1}/{HARDCODED_STEPS.length}
+          </span>
+        </div>
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="p-1.5 -mr-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <X size={18} />
+        </button>
+      </div>
 
-          {/* Progress Bar */}
-          <div className="h-1 bg-muted/20 w-full shrink-0">
-            <motion.div 
-              className="h-full bg-primary"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-            />
-          </div>
+      {/* Progress */}
+      <div className="h-0.5 bg-muted shrink-0">
+        <motion.div
+          className="h-full bg-primary"
+          initial={false}
+          animate={{ width: `${progress}%` }}
+          transition={{ type: 'spring', stiffness: 120, damping: 22 }}
+        />
+      </div>
 
-          {/* Content Area */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-            
-            {/* Top Section: Text Content */}
-            <div className="shrink-0 p-6 md:p-8 bg-background/10 border-b border-border/40">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentSlide}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.3 }}
-                  className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8 items-center"
-                >
-                  <div className="flex-1 space-y-3 text-center md:text-left">
-                    <div className="flex items-center justify-center md:justify-start gap-3">
-                      <span className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-mono text-primary font-bold uppercase tracking-widest">
-                        Step {currentSlide + 1}
-                      </span>
-                    </div>
-                    <h2 className="font-headline text-2xl md:text-4xl font-extrabold tracking-tight leading-tight">
-                      {slide.title}
-                    </h2>
-                    <div className="space-y-3 text-muted-foreground/90 text-base md:text-lg leading-relaxed font-sans max-w-2xl">
-                      {slide.content}
+      {/* Scrollable Body */}
+      <div className="flex-1 overflow-y-auto overscroll-contain">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="px-5 sm:px-8 py-6 sm:py-8 space-y-5"
+          >
+            <div className="space-y-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-mono text-primary font-bold uppercase tracking-widest">
+                Step {currentSlide + 1}
+              </span>
+              <h2 className="font-headline text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
+                {slide.title}
+              </h2>
+            </div>
+
+            <div className="space-y-3 text-muted-foreground text-[15px] leading-relaxed">
+              {slide.content}
+            </div>
+
+            {(slide.tip || slide.success) && (
+              <div className="grid sm:grid-cols-2 gap-3 pt-1">
+                {slide.tip && (
+                  <div className="p-3.5 rounded-lg bg-muted/40 border border-border/60 flex gap-3">
+                    <Lightbulb size={15} className="shrink-0 mt-0.5 text-amber-500/80" />
+                    <div className="min-w-0">
+                      <h4 className="text-[10px] font-bold mb-0.5 text-muted-foreground uppercase tracking-widest">Tip</h4>
+                      <p className="text-xs text-muted-foreground/90 leading-relaxed">{slide.tip}</p>
                     </div>
                   </div>
+                )}
+                {slide.success && (
+                  <div className="p-3.5 rounded-lg bg-muted/40 border border-border/60 flex gap-3">
+                    <CheckCircle2 size={15} className="shrink-0 mt-0.5 text-emerald-500/80" />
+                    <div className="min-w-0">
+                      <h4 className="text-[10px] font-bold mb-0.5 text-muted-foreground uppercase tracking-widest">Outcome</h4>
+                      <p className="text-xs text-muted-foreground/90 leading-relaxed">{slide.success}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
-                  <div className="w-full md:w-80 shrink-0 space-y-3">
-                    {slide.tip && (
-                      <div className="p-4 rounded-xl bg-muted/20 border border-border/40 flex gap-3 group/tip transition-colors hover:bg-muted/30">
-                        <div className="shrink-0 text-muted-foreground/60 mt-0.5 group-hover/tip:text-amber-500/60 transition-colors">
-                          <Lightbulb size={16} />
-                        </div>
-                        <div>
-                          <h4 className="text-[10px] font-bold mb-1 text-muted-foreground uppercase tracking-widest">Expert Tip</h4>
-                          <p className="text-[11px] text-muted-foreground/80 leading-relaxed font-medium">
-                            {slide.tip}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    {slide.success && (
-                      <div className="p-4 rounded-xl bg-muted/20 border border-border/40 flex gap-3 group/milestone transition-colors hover:bg-muted/30">
-                        <div className="shrink-0 text-muted-foreground/60 mt-0.5 group-hover/milestone:text-emerald-500/60 transition-colors">
-                          <CheckCircle2 size={16} />
-                        </div>
-                        <div>
-                          <h4 className="text-[10px] font-bold mb-1 text-muted-foreground uppercase tracking-widest">Milestone</h4>
-                          <p className="text-[11px] text-muted-foreground/80 leading-relaxed font-medium">
-                            {slide.success}
-                          </p>
-                        </div>
+            <div className="rounded-xl border border-border/60 bg-muted/30 overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-border/60 bg-muted/40">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <ImageIcon size={12} />
+                  Preview
+                </div>
+                <button
+                  onClick={() => setPreviewOpen((v) => !v)}
+                  className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
+                >
+                  {previewOpen ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              <AnimatePresence initial={false}>
+                {previewOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden"
+                  >
+                  <div className="p-3 sm:p-5">
+                    <div className="relative w-full overflow-hidden rounded-lg bg-[#0d0e0f] border border-white/5" style={{ aspectRatio: '12 / 7' }}>
+                      <motion.div
+                        key={`${currentSlide}-${mockupSubId}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                        className="absolute top-0 left-0 w-[1200px] h-[700px] origin-top-left scale-[0.26] sm:scale-[0.46] md:scale-[0.55]"
+                      >
+                        <RenderMockup id={slide.mockupId} subId={mockupSubId} />
+                      </motion.div>
+                    </div>
+
+                    {slide.mockupId === 'editor' && (
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">View</span>
+                        <button
+                          onClick={() => setMockupSubId(undefined)}
+                          className={cn(
+                            'px-3 py-1 rounded-full text-[11px] font-medium border transition-colors',
+                            mockupSubId === undefined
+                              ? 'bg-primary/10 text-primary border-primary/20'
+                              : 'bg-muted/60 text-muted-foreground border-border/40 hover:bg-primary/10 hover:text-primary hover:border-primary/20'
+                          )}
+                        >
+                          Editor
+                        </button>
+                        <button
+                          onClick={() => setMockupSubId('language')}
+                          className={cn(
+                            'px-3 py-1 rounded-full text-[11px] font-medium border transition-colors inline-flex items-center gap-1.5',
+                            mockupSubId === 'language'
+                              ? 'bg-primary/10 text-primary border-primary/20'
+                              : 'bg-muted/60 text-muted-foreground border-border/40 hover:bg-primary/10 hover:text-primary hover:border-primary/20'
+                          )}
+                        >
+                          <ArrowRightLeft size={11} />
+                          Translations
+                        </button>
                       </div>
                     )}
                   </div>
                 </motion.div>
-              </AnimatePresence>
+              )}
+            </AnimatePresence>
             </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
-            {/* Bottom Section: CSS Mockup Preview */}
-            <div className="flex-1 bg-muted/30 p-4 md:p-10 flex flex-col items-center justify-center min-h-0 relative overflow-hidden">
-              <div className="relative w-full h-full flex items-center justify-center max-w-5xl mx-auto">
-                {/* 
-                  VIRTUAL DESKTOP ENGINE
-                  We scale the entire mockup to prevent "squishing" of elements.
-                  This keeps buttons, text, and inputs at a constant relative size.
-                */}
-                <div className="w-full h-full flex items-center justify-center">
-                  <motion.div
-                    key={`${currentSlide}-${mockupSubId}`}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-[1200px] h-[700px] relative bg-[#0d0e0f] rounded-2xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border border-white/5 overflow-hidden origin-center scale-[0.3] sm:scale-[0.45] md:scale-[0.6] lg:scale-[0.75] xl:scale-[0.85]"
-                  >
-                    <RenderMockup id={slide.mockupId} subId={mockupSubId} />
-                  </motion.div>
-                </div>
+      {/* Footer */}
+      <div className="border-t border-border/60 bg-background/40 px-4 sm:px-6 py-3 flex items-center justify-between gap-3 shrink-0">
+        <button
+          onClick={() => handleSlideChange(Math.max(0, currentSlide - 1))}
+          disabled={currentSlide === 0}
+          className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg border border-border bg-background hover:bg-muted/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+        >
+          <ChevronLeft size={16} />
+          <span className="hidden sm:inline">Previous</span>
+        </button>
 
-                {/* Switcher for Step 5 (Language) */}
-                {slide.mockupId === 'editor' && (
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-black/90 backdrop-blur-xl px-5 py-2.5 rounded-full border border-white/10 shadow-2xl z-[100]">
-                    <button 
-                      onClick={() => setMockupSubId(undefined)}
-                      className={cn(
-                        "size-2.5 rounded-full transition-all",
-                        mockupSubId === undefined ? "bg-primary w-6" : "bg-white/20 hover:bg-white/40"
-                      )}
-                    />
-                    <button 
-                      onClick={() => setMockupSubId('language')}
-                      className={cn(
-                        "size-2.5 rounded-full transition-all",
-                        mockupSubId === 'language' ? "bg-primary w-6" : "bg-white/20 hover:bg-white/40"
-                      )}
-                    />
-                    <div className="w-px h-4 bg-white/10 mx-1" />
-                    <button 
-                      onClick={() => setMockupSubId(prev => (prev === 'language' ? undefined : 'language'))}
-                      className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-1.5"
-                    >
-                      <ArrowRightLeft size={12} />
-                      {mockupSubId === 'language' ? 'Hide UI' : 'Open UI'}
-                    </button>
-                  </div>
-                )}
-              </div>
-              
-              <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground/30 font-mono uppercase tracking-[0.4em] pointer-events-none">
-                Hardware Accelerated Preview // {slide.title}
-              </p>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="h-20 bg-muted/20 border-t border-border/40 flex items-center justify-between px-8 shrink-0">
+        <div className="flex items-center gap-1.5">
+          {HARDCODED_STEPS.map((_, i) => (
             <button
-              onClick={() => handleSlideChange(Math.max(0, currentSlide - 1))}
-              disabled={currentSlide === 0}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-background hover:bg-muted/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-bold"
-            >
-              <ChevronLeft size={18} />
-              Previous
-            </button>
-
-            <div className="hidden sm:flex gap-1.5">
-              {HARDCODED_STEPS.map((_, i) => (
-                <button 
-                  key={i}
-                  onClick={() => handleSlideChange(i)}
-                  className={cn(
-                    "h-1.5 rounded-full transition-all duration-300",
-                    i === currentSlide ? "w-10 bg-primary" : "w-2 bg-border hover:bg-muted-foreground/30"
-                  )}
-                />
-              ))}
-            </div>
-
-            {currentSlide < HARDCODED_STEPS.length - 1 ? (
-              <button
-                onClick={() => handleSlideChange(Math.min(HARDCODED_STEPS.length - 1, currentSlide + 1))}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all text-sm font-bold"
-              >
-                Continue
-                <ChevronRight size={18} />
-              </button>
-            ) : (
-              <button
-                onClick={onClose}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all text-sm font-bold"
-              >
-                Start Writing
-                <CheckCircle2 size={18} />
-              </button>
-            )}
-          </div>
+              key={i}
+              onClick={() => handleSlideChange(i)}
+              aria-label={`Go to step ${i + 1}`}
+              className={cn(
+                'h-1.5 rounded-full transition-all duration-300',
+                i === currentSlide ? 'w-7 bg-primary' : 'w-1.5 bg-border hover:bg-muted-foreground/40'
+              )}
+            />
+          ))}
         </div>
-      </motion.div>
-    </div>
+
+        {currentSlide < HARDCODED_STEPS.length - 1 ? (
+          <button
+            onClick={() => handleSlideChange(Math.min(HARDCODED_STEPS.length - 1, currentSlide + 1))}
+            className="inline-flex items-center gap-1.5 h-10 px-4 sm:px-5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-semibold"
+          >
+            <span className="hidden sm:inline">Continue</span>
+            <span className="sm:hidden">Next</span>
+            <ChevronRight size={16} />
+          </button>
+        ) : (
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-1.5 h-10 px-4 sm:px-5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors text-sm font-semibold"
+          >
+            <span className="hidden sm:inline">Done</span>
+            <CheckCircle2 size={16} />
+          </button>
+        )}
+      </div>
+    </motion.div>
   )
 }
+

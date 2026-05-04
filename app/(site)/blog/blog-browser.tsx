@@ -283,11 +283,11 @@ function BlogBrowserInner({
               </div>
             </div>
 
-            <button 
+            <button
               onClick={() => setTutorialOpen(true)}
-              className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all shrink-0 shadow-lg shadow-primary/10"
+              className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-lg bg-background border border-border text-sm font-medium text-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-colors shrink-0"
             >
-              <BookOpenIcon size={18} />
+              <BookOpenIcon size={16} />
               Instructions
             </button>
           </div>
@@ -400,10 +400,6 @@ function BlogBrowserInner({
 
             {uncategorised.length > 0 && (
               <section>
-                <div className="flex items-baseline gap-4 mb-5">
-                  <h2 className="font-headline text-lg font-bold shrink-0 text-muted-foreground">{t('uncategorised')}</h2>
-                  <div className="h-px flex-1 bg-border/60" />
-                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {uncategorised.map((post) => (
                     <PostCard key={post._id} post={post} />
@@ -425,13 +421,13 @@ function BlogBrowserInner({
       {/* Tutorial Overlay */}
       <AnimatePresence>
         {tutorialOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8">
-            <motion.div 
+          <div className="fixed inset-0 z-[100] flex items-stretch sm:items-center justify-center sm:p-6">
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setTutorialOpen(false)}
-              className="absolute inset-0 bg-background/40 backdrop-blur-md cursor-pointer"
+              className="absolute inset-0 bg-background/60 backdrop-blur-md cursor-pointer"
             />
             <BlogTutorial onClose={() => setTutorialOpen(false)} />
           </div>
