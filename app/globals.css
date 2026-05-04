@@ -116,6 +116,11 @@
   --ed-rule: var(--border);
   --ed-accent: var(--primary);
   --ed-accent-soft: var(--accent);
+
+  /* Inverted surface (e.g. closing section) — dark-on-light by default */
+  --ed-invert-bg: var(--foreground);
+  --ed-invert-fg: var(--background);
+  --ed-invert-fg-muted: color-mix(in oklab, var(--background), transparent 40%);
 }
 
 .dark {

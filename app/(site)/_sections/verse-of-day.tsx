@@ -5,6 +5,19 @@ import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Copy, Check } from 'lucide-react'
 import { F, SectionDivider, Arrow } from './shared'
+import { BIBLE_BOOKS } from '@/constants/bible-books'
+
+function buildVerseHref(tabKey: Tab['key'], ref: string): string {
+  if (tabKey === 'quran') {
+    return `/quran/${ref}`
+  }
+  const match = ref.match(/^(.+?)\s+(\d+):(\d+)$/)
+  if (!match) return tabKey === 'ot' || tabKey === 'nt' ? '/bible' : '/'
+  const [, bookName, chapter, verse] = match
+  const book = BIBLE_BOOKS.find((b) => b.bk.toLowerCase() === bookName.toLowerCase())
+  if (!book) return '/bible'
+  return `/bible/${book.slug}/${chapter}?verse=${verse}`
+}
 
 type Verse = {
   ref: string
@@ -130,7 +143,7 @@ export function VerseOfTheDaySection() {
   }, [current.verses.length])
 
   const v = current.verses[idx]
-  const continueHref = tabKey === 'quran' ? '/quran' : '/bible'
+  const continueHref = buildVerseHref(tabKey, v.ref)
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`${v.english}\n— ${v.ref}`)
