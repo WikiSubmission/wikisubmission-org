@@ -73,6 +73,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: '/appendix/0',
+        destination: '/introduction',
+        permanent: true,
+      },
+      {
+        source: '/appendices/0',
+        destination: '/introduction',
+        permanent: true,
+      },
+      {
         source: '/appendix/:path*',
         destination: '/appendices/:path*',
         permanent: true,
