@@ -1,11 +1,12 @@
 'use client'
 import Link from 'next/link'
+import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
-import { motion } from 'framer-motion'
+import gsap from 'gsap'
 import { ExternalLink } from 'lucide-react'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { F, SectionDivider, Arrow } from './shared'
-import { FADE_UP, STAGGER_CONTAINER, useScrollAnimation } from '@/lib/motion'
+import { StaggerContainer } from '@/lib/motion'
 
 type Tool = {
   key: string
@@ -68,10 +69,84 @@ const GLYPH_DISCORD = (
   </svg>
 )
 
+function useHoverLift<T extends HTMLElement>(ref: React.RefObject<T | null>) {
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const onEnter = () => {
+      gsap.to(el, { y: -2, duration: 0.25, ease: 'power2.out', overwrite: 'auto' })
+    }
+    const onLeave = () => {
+      gsap.to(el, { y: 0, duration: 0.25, ease: 'power2.out', overwrite: 'auto' })
+    }
+    el.addEventListener('mouseenter', onEnter)
+    el.addEventListener('mouseleave', onLeave)
+    return () => {
+      el.removeEventListener('mouseenter', onEnter)
+      el.removeEventListener('mouseleave', onLeave)
+    }
+  }, [ref])
+}
+
+function ToolButton({
+  className,
+  style,
+  onClick,
+  children,
+}: {
+  className?: string
+  style?: React.CSSProperties
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  const ref = useRef<HTMLButtonElement | null>(null)
+  useHoverLift(ref)
+  return (
+    <button
+      ref={ref}
+      type="button"
+      onClick={onClick}
+      className={`tool-card ${className ?? ''}`}
+      style={style}
+    >
+      {children}
+    </button>
+  )
+}
+
+function ToolLink({
+  href,
+  isExternal,
+  className,
+  style,
+  children,
+}: {
+  href: string
+  isExternal: boolean
+  className?: string
+  style?: React.CSSProperties
+  children: React.ReactNode
+}) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  useHoverLift(ref)
+  return (
+    <div ref={ref} className="tool-card">
+      <Link
+        href={href}
+        target={isExternal ? '_blank' : undefined}
+        rel={isExternal ? 'noreferrer' : undefined}
+        className={className}
+        style={style}
+      >
+        {children}
+      </Link>
+    </div>
+  )
+}
+
 export function ToolsSection() {
   const { toggle: toggleAsk } = useChatPanel()
   const t = useTranslations('homePage.tools')
-  const { ref, isInView } = useScrollAnimation()
 
   const TOOLS: Tool[] = [
     {
@@ -114,7 +189,6 @@ export function ToolsSection() {
 
   return (
     <section
-      ref={ref}
       style={{
         backgroundColor: 'var(--ed-bg)',
         padding: 'clamp(64px, 8vw, 96px) 0',
@@ -130,16 +204,17 @@ export function ToolsSection() {
           sub={t('dividerSub')}
         />
 
-        <motion.div
-          variants={STAGGER_CONTAINER}
-          initial="hidden"
-          animate={isInView ? 'show' : 'hidden'}
+        <StaggerContainer
+          stagger={0.1}
+          delay={0.1}
+          childSelector=".tool-card"
           style={{ gap: 16 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
         >
           {TOOLS.map((tool) => {
             const isExternal = 'href' in tool && tool.href.startsWith('http')
-            const sharedClassName = 'ed-card group transition-all duration-300 hover:border-[var(--ed-accent)]/30'
+            const sharedClassName =
+              'ed-card group transition-all duration-300 hover:border-[var(--ed-accent)]/30'
             const sharedStyle = {
               backgroundColor: tool.accent
                 ? 'color-mix(in oklab, var(--ed-accent), transparent 92%)'
@@ -152,7 +227,7 @@ export function ToolsSection() {
               textDecoration: 'none',
               minHeight: 180,
               position: 'relative' as const,
-              overflow: 'hidden' as const
+              overflow: 'hidden' as const,
             }
 
             const body = (
@@ -181,11 +256,16 @@ export function ToolsSection() {
                     lineHeight: 1.15,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 6
+                    gap: 6,
                   }}
                 >
                   {tool.title}
-                  {isExternal && <ExternalLink size={12} className="opacity-30 group-hover:opacity-100 transition-opacity" />}
+                  {isExternal && (
+                    <ExternalLink
+                      size={12}
+                      className="opacity-30 group-hover:opacity-100 transition-opacity"
+                    />
+                  )}
                 </div>
                 <p
                   style={{
@@ -212,11 +292,8 @@ export function ToolsSection() {
 
             if ('onClick' in tool) {
               return (
-                <motion.button
+                <ToolButton
                   key={tool.key}
-                  variants={FADE_UP}
-                  whileHover={{ y: -2 }}
-                  type="button"
                   onClick={toggleAsk}
                   className={sharedClassName}
                   style={{
@@ -226,29 +303,23 @@ export function ToolsSection() {
                   }}
                 >
                   {body}
-                </motion.button>
+                </ToolButton>
               )
             }
 
             return (
-              <motion.div
+              <ToolLink
                 key={tool.key}
-                variants={FADE_UP}
-                whileHover={{ y: -2 }}
+                href={tool.href}
+                isExternal={isExternal}
+                className={sharedClassName}
+                style={sharedStyle}
               >
-                <Link
-                  href={tool.href}
-                  target={isExternal ? '_blank' : undefined}
-                  rel={isExternal ? 'noreferrer' : undefined}
-                  className={sharedClassName}
-                  style={sharedStyle}
-                >
-                  {body}
-                </Link>
-              </motion.div>
+                {body}
+              </ToolLink>
             )
           })}
-        </motion.div>
+        </StaggerContainer>
       </div>
     </section>
   )

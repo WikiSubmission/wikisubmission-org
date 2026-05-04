@@ -1,6 +1,6 @@
 'use client'
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useRef, useEffect } from 'react'
+import gsap from 'gsap'
 
 export const F = {
   display: 'var(--font-cormorant), Georgia, serif',
@@ -8,6 +8,49 @@ export const F = {
   serif: 'var(--font-source-serif), Georgia, serif',
   glacial: 'var(--font-glacial), sans-serif',
   arabic: 'var(--font-amiri), "Scheherazade New", serif',
+}
+
+function DividerLine() {
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    let triggered = false
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && !triggered) {
+            triggered = true
+            gsap.fromTo(
+              el,
+              { scaleX: 0 },
+              { scaleX: 1, duration: 1, ease: 'circ.out', delay: 0.2 },
+            )
+            observer.disconnect()
+          }
+        }
+      },
+      { threshold: 0.2 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: 'var(--ed-accent)',
+        opacity: 0.3,
+        transformOrigin: 'left center',
+        transform: 'scaleX(0)',
+      }}
+    />
+  )
 }
 
 export function SectionDivider({
@@ -54,19 +97,7 @@ export function SectionDivider({
         className="hidden sm:block"
         style={{ height: 1, backgroundColor: 'var(--ed-rule)', position: 'relative' }}
       >
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, ease: "circOut", delay: 0.2 }}
-          style={{ 
-            position: 'absolute', 
-            inset: 0, 
-            backgroundColor: 'var(--ed-accent)', 
-            opacity: 0.3,
-            originX: 0 
-          }}
-        />
+        <DividerLine />
       </div>
       <span
         style={{

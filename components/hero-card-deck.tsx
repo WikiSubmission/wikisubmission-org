@@ -1,36 +1,53 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 import Image from 'next/image'
 import Link from 'next/link'
 
 const FRONT = { rotate: 3, scale: 1, x: 0, y: 0 }
-const BACK  = { rotate: -5, scale: 0.93, x: -16, y: 16 }
-
-const SPRING = { type: 'spring', stiffness: 280, damping: 28 } as const
+const BACK = { rotate: -5, scale: 0.93, x: -16, y: 16 }
 
 export function HeroCardDeck() {
-  const [front, setFront] = useState(0) // 0 = logo, 1 = quote
+  const [front, setFront] = useState(0)
+  const quoteRef = useRef<HTMLDivElement | null>(null)
+  const logoRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const id = setInterval(() => setFront((v) => 1 - v), 5000)
     return () => clearInterval(id)
   }, [])
 
+  useEffect(() => {
+    const quoteEl = quoteRef.current
+    const logoEl = logoRef.current
+    if (!quoteEl || !logoEl) return
+    const quoteTarget = front === 1 ? FRONT : BACK
+    const logoTarget = front === 0 ? FRONT : BACK
+    gsap.to(quoteEl, {
+      ...quoteTarget,
+      duration: 0.6,
+      ease: 'power3.out',
+      overwrite: 'auto',
+    })
+    gsap.to(logoEl, {
+      ...logoTarget,
+      duration: 0.6,
+      ease: 'power3.out',
+      overwrite: 'auto',
+    })
+  }, [front])
+
   return (
-    // Extra padding left+top so the back card's negative x/y offset isn't clipped
-    <div className="relative w-full max-w-sm mx-auto md:mx-0 pt-6 pl-6 pb-10 cursor-pointer select-none"
+    <div
+      className="relative w-full max-w-sm mx-auto md:mx-0 pt-6 pl-6 pb-10 cursor-pointer select-none"
       onClick={() => setFront((v) => 1 - v)}
       title="Click to flip"
     >
-      {/* Inner reference box — cards are absolute within this */}
       <div className="relative w-full aspect-square">
-
-        {/* ── Quote card ──────────────────────────────────────────────────── */}
-        <motion.div
-          animate={front === 1 ? FRONT : BACK}
-          transition={SPRING}
+        {/* Quote card */}
+        <div
+          ref={quoteRef}
           style={{ zIndex: front === 1 ? 10 : 0 }}
           className="absolute inset-0 rounded-2xl border border-primary/15 overflow-hidden"
           onClick={front === 1 ? (e) => e.stopPropagation() : undefined}
@@ -65,12 +82,11 @@ export function HeroCardDeck() {
               Quran 2:62, 5:69
             </Link>
           </div>
-        </motion.div>
+        </div>
 
-        {/* ── Logo card ───────────────────────────────────────────────────── */}
-        <motion.div
-          animate={front === 0 ? FRONT : BACK}
-          transition={SPRING}
+        {/* Logo card */}
+        <div
+          ref={logoRef}
           style={{ zIndex: front === 0 ? 10 : 0 }}
           className="absolute inset-0 bg-surface-container rounded-2xl editorial-shadow group"
         >
@@ -87,18 +103,19 @@ export function HeroCardDeck() {
               }`}
             />
           </div>
-        </motion.div>
+        </div>
 
-        {/* Blur decoration */}
         <div className="absolute -bottom-4 -left-4 w-36 h-36 bg-primary/10 rounded-full blur-3xl pointer-events-none z-0" />
       </div>
 
-      {/* ── Dots ──────────────────────────────────────────────────────────── */}
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 z-20">
         {[0, 1].map((i) => (
           <button
             key={i}
-            onClick={(e) => { e.stopPropagation(); setFront(i) }}
+            onClick={(e) => {
+              e.stopPropagation()
+              setFront(i)
+            }}
             className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
               front === i
                 ? 'bg-primary scale-125'

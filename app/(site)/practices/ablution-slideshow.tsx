@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { motion, AnimatePresence } from 'framer-motion'
+import gsap from 'gsap'
 import {
   ChevronLeft, ChevronRight,
   Droplets, User, Heart, Wind, Waves,
@@ -118,14 +118,89 @@ const VIDEO_CAPTIONS = [
 export function AblutionSlideshow() {
   const [slide, setSlide] = useState(0)
   const [open, setOpen] = useState(false)
+  const [renderModal, setRenderModal] = useState(false)
   const [showTranscription, setShowTranscription] = useState(true)
   const [currentTime, setCurrentTime] = useState(0)
   const playerRef = useRef<YTPlayer | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  const slideTextRef = useRef<HTMLDivElement | null>(null)
+  const slideImageRef = useRef<HTMLDivElement | null>(null)
+  const modalBackdropRef = useRef<HTMLDivElement | null>(null)
+  const modalContentRef = useRef<HTMLDivElement | null>(null)
+  const captionRef = useRef<HTMLParagraphElement | null>(null)
+
+  const slideKeyRef = useRef(slide)
+
+  useEffect(() => {
+    const textEl = slideTextRef.current
+    const imageEl = slideImageRef.current
+    if (!textEl || !imageEl) return
+    if (slideKeyRef.current === slide) {
+      gsap.set(textEl, { opacity: 1, x: 0 })
+      gsap.set(imageEl, { opacity: 1, scale: 1 })
+    } else {
+      gsap.fromTo(
+        textEl,
+        { opacity: 0, x: -20 },
+        { opacity: 1, x: 0, duration: 0.5, ease: 'expo.out' },
+      )
+      gsap.fromTo(
+        imageEl,
+        { opacity: 0, scale: 0.98 },
+        { opacity: 1, scale: 1, duration: 0.6, ease: 'expo.out' },
+      )
+    }
+    slideKeyRef.current = slide
+  }, [slide])
+
   const step = STEPS[slide]
   const StepIcon = step.icon
   const activeCaption = VIDEO_CAPTIONS.find(c => currentTime >= c.start && currentTime <= c.end)
+  const captionKey = activeCaption ? activeCaption.text : `state-${showTranscription}`
+  const captionKeyRef = useRef(captionKey)
+
+  useEffect(() => {
+    const el = captionRef.current
+    if (!el) return
+    if (captionKeyRef.current === captionKey) {
+      gsap.set(el, { opacity: 1, y: 0 })
+    } else {
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' },
+      )
+    }
+    captionKeyRef.current = captionKey
+  }, [captionKey])
+
+  useEffect(() => {
+    if (open) setRenderModal(true)
+  }, [open])
+
+  useEffect(() => {
+    const backdrop = modalBackdropRef.current
+    const content = modalContentRef.current
+    if (!backdrop || !content) return
+    if (open) {
+      gsap.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'power2.out' })
+      gsap.fromTo(
+        content,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.35, ease: 'expo.out' },
+      )
+    } else if (renderModal) {
+      gsap.to(backdrop, { opacity: 0, duration: 0.2, ease: 'power2.out' })
+      gsap.to(content, {
+        opacity: 0,
+        y: 20,
+        duration: 0.2,
+        ease: 'power2.out',
+        onComplete: () => setRenderModal(false),
+      })
+    }
+  }, [open, renderModal])
 
   // ── YouTube API Setup ──────────────────────────────────────────────
 
@@ -271,8 +346,7 @@ export function AblutionSlideshow() {
                 </span>
               </div>
               <div className="flex-1 p-8 md:p-12 flex flex-col justify-center min-h-[450px]">
-                <AnimatePresence mode="wait">
-                  <motion.div key={slide} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="space-y-10">
+                <div ref={slideTextRef} key={slide} className="space-y-10">
                     <div className="space-y-4">
                       <div className="flex items-center gap-6">
                         <div className="h-px flex-1 bg-[var(--ed-rule)]" />
@@ -313,8 +387,7 @@ export function AblutionSlideshow() {
                         </p>
                       </div>
                     </div>
-                  </motion.div>
-                </AnimatePresence>
+                </div>
               </div>
             </div>
             {/* Right */}
@@ -338,15 +411,7 @@ export function AblutionSlideshow() {
                 </div>
               </div>
               <div className="flex-1 relative flex items-center justify-center p-6 md:p-12 min-h-[450px]">
-                <AnimatePresence mode="wait">
-                  <motion.div 
-                    key={slide} 
-                    initial={{ opacity: 0, scale: 0.98 }} 
-                    animate={{ opacity: 1, scale: 1 }} 
-                    exit={{ opacity: 0, scale: 1.02 }} 
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} 
-                    className="w-full h-full relative"
-                  >
+                <div ref={slideImageRef} key={slide} className="w-full h-full relative">
                     <div className="w-full h-full flex flex-col items-center justify-center bg-[var(--ed-bg)] border border-[var(--ed-rule)] shadow-inner group overflow-hidden">
                       {slide === 0 ? (
                         <div className="text-center space-y-10 p-8">
@@ -450,8 +515,7 @@ export function AblutionSlideshow() {
                         </div>
                       )}
                     </div>
-                  </motion.div>
-                </AnimatePresence>
+                </div>
               </div>
             </div>
           </div>
@@ -519,18 +583,17 @@ export function AblutionSlideshow() {
       {/* ══════════════════════════════════════════════════════════════
           YOUTUBE EXHIBITION DISPLAY
           ══════════════════════════════════════════════════════════════ */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--ed-bg)]/98 backdrop-blur-xl"
-            onClick={closeModal}
+      {renderModal && (
+        <div
+          ref={modalBackdropRef}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--ed-bg)]/98 backdrop-blur-xl"
+          onClick={closeModal}
+        >
+          <div
+            ref={modalContentRef}
+            className="relative w-full max-w-6xl mx-auto p-4 md:p-12 flex flex-col gap-8"
+            onClick={e => e.stopPropagation()}
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
-              className="relative w-full max-w-6xl mx-auto p-4 md:p-12 flex flex-col gap-8"
-              onClick={e => e.stopPropagation()}
-            >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-[var(--ed-rule)] pb-6">
                 <div className="space-y-1">
@@ -619,40 +682,41 @@ export function AblutionSlideshow() {
                       </div>
 
                       <div className="flex items-center justify-center min-h-[80px]">
-                        <AnimatePresence mode="wait">
-                          {!showTranscription ? (
-                            <motion.p 
-                              initial={{ opacity: 0 }} animate={{ opacity: 0.3 }} 
-                              className="text-sm uppercase tracking-widest text-center"
-                              style={{ fontFamily: F.glacial }}
-                            >
-                              Transcription Disabled
-                            </motion.p>
-                          ) : activeCaption ? (
-                            <motion.p
-                              key={activeCaption.text}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
-                              className="text-2xl md:text-3xl leading-relaxed text-center max-w-3xl italic"
-                              style={{ 
-                                fontFamily: F.serif,
-                                color: activeCaption.isVerse ? '#D4AF37' : activeCaption.isWarning ? '#EF4444' : 'var(--ed-fg)' 
-                              }}
-                            >
-                              {activeCaption.text}
-                            </motion.p>
-                          ) : (
-                            <motion.p
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 0.3 }}
-                              className="text-sm uppercase tracking-widest text-center"
-                              style={{ fontFamily: F.glacial }}
-                            >
-                              Awaiting Audio Signal...
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
+                        {!showTranscription ? (
+                          <p
+                            ref={captionRef}
+                            key="disabled"
+                            className="text-sm uppercase tracking-widest text-center"
+                            style={{ fontFamily: F.glacial, opacity: 0.3 }}
+                          >
+                            Transcription Disabled
+                          </p>
+                        ) : activeCaption ? (
+                          <p
+                            ref={captionRef}
+                            key={activeCaption.text}
+                            className="text-2xl md:text-3xl leading-relaxed text-center max-w-3xl italic"
+                            style={{
+                              fontFamily: F.serif,
+                              color: activeCaption.isVerse
+                                ? '#D4AF37'
+                                : activeCaption.isWarning
+                                ? '#EF4444'
+                                : 'var(--ed-fg)',
+                            }}
+                          >
+                            {activeCaption.text}
+                          </p>
+                        ) : (
+                          <p
+                            ref={captionRef}
+                            key="awaiting"
+                            className="text-sm uppercase tracking-widest text-center"
+                            style={{ fontFamily: F.glacial, opacity: 0.3 }}
+                          >
+                            Awaiting Audio Signal...
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -665,10 +729,9 @@ export function AblutionSlideshow() {
                 <div className="h-px w-24 bg-[var(--ed-rule)]" />
               </div>
 
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

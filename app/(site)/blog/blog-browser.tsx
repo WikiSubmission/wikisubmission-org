@@ -9,7 +9,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
-import { motion, AnimatePresence } from 'framer-motion'
+import gsap from 'gsap'
 import { BlogTutorial } from './blog-tutorial'
 import { BookOpenIcon } from 'lucide-react'
 
@@ -424,20 +424,44 @@ function BlogBrowserInner({
       </div>
 
       {/* Tutorial Overlay */}
-      <AnimatePresence>
-        {tutorialOpen && (
-          <div className="fixed inset-0 z-[100] flex items-stretch sm:items-center justify-center sm:p-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setTutorialOpen(false)}
-              className="absolute inset-0 bg-background/60 backdrop-blur-md cursor-pointer"
-            />
-            <BlogTutorial onClose={() => setTutorialOpen(false)} />
-          </div>
-        )}
-      </AnimatePresence>
+      <TutorialOverlay open={tutorialOpen} onClose={() => setTutorialOpen(false)} />
+    </div>
+  )
+}
+
+function TutorialOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const backdropRef = useRef<HTMLDivElement | null>(null)
+  const [render, setRender] = useState(open)
+
+  useEffect(() => {
+    if (open) setRender(true)
+  }, [open])
+
+  useEffect(() => {
+    const el = backdropRef.current
+    if (!el) return
+    if (open) {
+      gsap.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power2.out' })
+    } else if (render) {
+      gsap.to(el, {
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power2.out',
+        onComplete: () => setRender(false),
+      })
+    }
+  }, [open, render])
+
+  if (!render) return null
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-stretch sm:items-center justify-center sm:p-6">
+      <div
+        ref={backdropRef}
+        onClick={onClose}
+        className="absolute inset-0 bg-background/60 backdrop-blur-md cursor-pointer"
+      />
+      <BlogTutorial onClose={onClose} />
     </div>
   )
 }

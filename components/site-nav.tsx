@@ -1,10 +1,10 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, Sparkles } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import gsap from 'gsap'
 import { PaletteThemeSwitcher } from '@/components/toggles/palette-theme-switcher'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
 import { useTranslations, useLocale } from 'next-intl'
@@ -32,7 +32,6 @@ const NAV_ITEMS: NavItem[] = [
   },
   { kind: 'link', label: 'miracle', href: '/miracle' },
   { kind: 'link', label: 'practices', href: '/practices' },
-  // { kind: 'link', label: 'community', href: '/community' },
   { kind: 'link', label: 'archive', href: '/archive' },
   { kind: 'link', label: 'music', href: '/music' },
   { kind: 'link', label: 'blog', href: '/blog' },
@@ -48,6 +47,155 @@ function isActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false
   if (href === '/') return pathname === '/'
   return pathname === href || pathname.startsWith(`${href}/`)
+}
+
+function HamburgerIcon({ open }: { open: boolean }) {
+  const ref = useRef<HTMLSpanElement | null>(null)
+  const prevRef = useRef<boolean | null>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (prevRef.current === null) {
+      gsap.set(el, { rotate: 0, opacity: 1 })
+    } else {
+      gsap.fromTo(
+        el,
+        { rotate: -45, opacity: 0 },
+        { rotate: 0, opacity: 1, duration: 0.15, ease: 'power1.inOut' },
+      )
+    }
+    prevRef.current = open
+  }, [open])
+
+  return (
+    <span ref={ref} key={open ? 'close' : 'open'} style={{ display: 'flex' }}>
+      {open ? <X size={18} /> : <Menu size={18} />}
+    </span>
+  )
+}
+
+function MobileMenu({
+  open,
+  pathname,
+  t,
+  locale,
+  close,
+}: {
+  open: boolean
+  pathname: string | null
+  t: (k: string) => string
+  locale: string
+  close: () => void
+}) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const [render, setRender] = useState(open)
+
+  useEffect(() => {
+    if (open) setRender(true)
+  }, [open])
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (open) {
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: -8 },
+        { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' },
+      )
+    } else if (render) {
+      gsap.to(el, {
+        opacity: 0,
+        y: -8,
+        duration: 0.2,
+        ease: 'power2.out',
+        onComplete: () => setRender(false),
+      })
+    }
+  }, [open, render])
+
+  if (!render) return null
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        borderTop: '1px solid var(--ed-rule)',
+        backgroundColor: 'var(--ed-bg)',
+      }}
+      className="lg:hidden px-4 py-4 flex flex-col gap-0.5 sm:px-6"
+    >
+      {NAV_ITEMS.map((item) =>
+        item.kind === 'link' ? (
+          <Link
+            key={item.label}
+            href={item.href}
+            onClick={close}
+            style={{
+              fontFamily: F.mono,
+              fontSize: 11,
+              textTransform: 'uppercase',
+              letterSpacing: '0.16em',
+              color: isActive(pathname, item.href)
+                ? 'var(--ed-fg)'
+                : 'var(--ed-fg-muted)',
+              padding: '10px 12px',
+              display: 'block',
+              textDecoration: 'none',
+              borderRadius: 4,
+            }}
+          >
+            {t(item.label)}
+          </Link>
+        ) : (
+          <div key={item.label} className="flex flex-col">
+            <div
+              style={{
+                fontFamily: F.mono,
+                fontSize: 10,
+                textTransform: 'uppercase',
+                letterSpacing: '0.18em',
+                color: 'var(--ed-fg-muted)',
+                padding: '10px 12px 4px',
+              }}
+            >
+              {t(item.label)}
+            </div>
+            {item.children.map((c) => (
+              <Link
+                key={c.label}
+                href={c.href}
+                onClick={close}
+                style={{
+                  fontFamily: F.mono,
+                  fontSize: 11,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.16em',
+                  color: isActive(pathname, c.href)
+                    ? 'var(--ed-fg)'
+                    : 'var(--ed-fg-muted)',
+                  padding: '8px 24px',
+                  display: 'block',
+                  textDecoration: 'none',
+                  borderRadius: 4,
+                }}
+              >
+                {t(c.label)}
+              </Link>
+            ))}
+          </div>
+        ),
+      )}
+      <div
+        className="mt-2 pt-2 flex items-center gap-2 flex-wrap"
+        style={{ borderTop: '1px solid var(--ed-rule)' }}
+      >
+        <LocaleSwitcher currentLocale={locale} onSelect={close} />
+        <PaletteThemeSwitcher />
+      </div>
+    </div>
+  )
 }
 
 export function SiteNav() {
@@ -83,12 +231,10 @@ export function SiteNav() {
           gap: 10,
         }}
       >
-        {/* Logo + Wordmark */}
         <div className="flex-none min-w-0">
           <SiteBrand onClick={close} />
         </div>
 
-        {/* Tabbed Navigation (Desktop - Centered) */}
         <div className="hidden lg:flex flex-1 justify-center">
           <div
             className="flex"
@@ -117,12 +263,11 @@ export function SiteNav() {
                   label={t(item.label)}
                   tChild={t}
                 />
-              )
+              ),
             )}
           </div>
         </div>
 
-        {/* Right controls */}
         <div className="flex-none flex items-center justify-end gap-1">
           <button
             type="button"
@@ -163,9 +308,6 @@ export function SiteNav() {
             <PaletteThemeSwitcher />
           </div>
 
-          {/* Sign in (Clerk) — temporarily disabled. Re-enable: <Link href="/auth/sign-in">{t('signIn')}</Link> */}
-
-          {/* Mobile controls: AI + hamburger */}
           <button
             type="button"
             onClick={toggleAsk}
@@ -191,110 +333,37 @@ export function SiteNav() {
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
           >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={mobileOpen ? 'close' : 'open'}
-                initial={{ rotate: -45, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 45, opacity: 0 }}
-                transition={{ duration: 0.15, ease: 'easeInOut' }}
-                style={{ display: 'flex' }}
-              >
-                {mobileOpen ? <X size={18} /> : <Menu size={18} />}
-              </motion.span>
-            </AnimatePresence>
+            <HamburgerIcon open={mobileOpen} />
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            key="mobile-menu"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            style={{
-              borderTop: '1px solid var(--ed-rule)',
-              backgroundColor: 'var(--ed-bg)',
-            }}
-            className="lg:hidden px-4 py-4 flex flex-col gap-0.5 sm:px-6"
-          >
-            {NAV_ITEMS.map((item) =>
-              item.kind === 'link' ? (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  onClick={close}
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 11,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.16em',
-                    color: isActive(pathname, item.href)
-                      ? 'var(--ed-fg)'
-                      : 'var(--ed-fg-muted)',
-                    padding: '10px 12px',
-                    display: 'block',
-                    textDecoration: 'none',
-                    borderRadius: 4,
-                  }}
-                >
-                  {t(item.label)}
-                </Link>
-              ) : (
-                <div key={item.label} className="flex flex-col">
-                  <div
-                    style={{
-                      fontFamily: F.mono,
-                      fontSize: 10,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.18em',
-                      color: 'var(--ed-fg-muted)',
-                      padding: '10px 12px 4px',
-                    }}
-                  >
-                    {t(item.label)}
-                  </div>
-                  {item.children.map((c) => (
-                    <Link
-                      key={c.label}
-                      href={c.href}
-                      onClick={close}
-                      style={{
-                        fontFamily: F.mono,
-                        fontSize: 11,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.16em',
-                        color: isActive(pathname, c.href)
-                          ? 'var(--ed-fg)'
-                          : 'var(--ed-fg-muted)',
-                        padding: '8px 24px',
-                        display: 'block',
-                        textDecoration: 'none',
-                        borderRadius: 4,
-                      }}
-                    >
-                      {t(c.label)}
-                    </Link>
-                  ))}
-                </div>
-              )
-            )}
-            <div
-              className="mt-2 pt-2 flex items-center gap-2 flex-wrap"
-              style={{ borderTop: '1px solid var(--ed-rule)' }}
-            >
-              <LocaleSwitcher currentLocale={locale} onSelect={close} />
-              <PaletteThemeSwitcher />
-              {/* Sign in (Clerk) — temporarily disabled. Re-enable: <Link href="/auth/sign-in">{t('signIn')}</Link> */}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <MobileMenu
+        open={mobileOpen}
+        pathname={pathname}
+        t={t}
+        locale={locale}
+        close={close}
+      />
     </nav>
+  )
+}
+
+function NavActiveDot() {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: '-4px',
+        left: '50%',
+        width: '3px',
+        height: '3px',
+        borderRadius: '50%',
+        background: 'var(--ed-accent)',
+        boxShadow: '0 0 6px var(--ed-accent)',
+        transform: 'translateX(-50%)',
+      }}
+    />
   )
 }
 
@@ -331,23 +400,117 @@ function NavTabLink({
       }}
     >
       {label}
-      {active && (
-        <motion.div
-          layoutId="nav-active-dot"
-          style={{
-            position: 'absolute',
-            bottom: '-4px',
-            left: '50%',
-            width: '3px',
-            height: '3px',
-            borderRadius: '50%',
-            background: 'var(--ed-accent)',
-            boxShadow: '0 0 6px var(--ed-accent)',
-            transform: 'translateX(-50%)',
-          }}
-        />
-      )}
+      {active && <NavActiveDot />}
     </Link>
+  )
+}
+
+function NavGroupMenu({
+  open,
+  item,
+  setOpen,
+  tChild,
+}: {
+  open: boolean
+  item: GroupLink
+  setOpen: (v: boolean) => void
+  tChild: (k: string) => string
+}) {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const [render, setRender] = useState(open)
+
+  useEffect(() => {
+    if (open) setRender(true)
+  }, [open])
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (open) {
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 4 },
+        { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' },
+      )
+    } else if (render) {
+      gsap.to(el, {
+        opacity: 0,
+        y: 4,
+        duration: 0.12,
+        ease: 'power2.out',
+        onComplete: () => setRender(false),
+      })
+    }
+  }, [open, render])
+
+  if (!render) return null
+
+  return (
+    <div
+      ref={ref}
+      role="menu"
+      style={{
+        position: 'absolute',
+        top: 'calc(100% + 6px)',
+        left: 0,
+        minWidth: 220,
+        borderRadius: 3,
+        border: '1px solid var(--ed-rule)',
+        background: 'var(--ed-surface)',
+        boxShadow: '0 12px 32px -12px rgba(0,0,0,0.25)',
+        padding: 4,
+        zIndex: 60,
+      }}
+    >
+      {item.children.map((c) => (
+        <Link
+          key={c.href}
+          href={c.href}
+          onClick={() => setOpen(false)}
+          role="menuitem"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
+            alignItems: 'baseline',
+            gap: 12,
+            padding: '10px 12px',
+            borderRadius: 2,
+            textDecoration: 'none',
+            color: 'var(--ed-fg)',
+          }}
+          onMouseEnter={(e) => {
+            ;(e.currentTarget as HTMLAnchorElement).style.background =
+              'color-mix(in oklab, var(--ed-fg), transparent 94%)'
+          }}
+          onMouseLeave={(e) => {
+            ;(e.currentTarget as HTMLAnchorElement).style.background =
+              'transparent'
+          }}
+        >
+          <span
+            style={{
+              fontFamily: F.display,
+              fontSize: 15,
+              fontWeight: 500,
+              letterSpacing: '-0.01em',
+            }}
+          >
+            {tChild(c.label)}
+          </span>
+          <span
+            style={{
+              fontFamily: F.mono,
+              fontSize: 10,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--ed-fg-muted)',
+            }}
+          >
+            {c.sub}
+          </span>
+        </Link>
+      ))}
+    </div>
   )
 }
 
@@ -426,96 +589,10 @@ function NavTabGroup({
         >
           <path d="m6 9 6 6 6-6" />
         </svg>
-        {active && (
-          <motion.div
-            layoutId="nav-active-dot"
-            style={{
-              position: 'absolute',
-              bottom: '-4px',
-              left: '50%',
-              width: '3px',
-              height: '3px',
-              borderRadius: '50%',
-              background: 'var(--ed-accent)',
-              boxShadow: '0 0 6px var(--ed-accent)',
-              transform: 'translateX(-50%)',
-            }}
-          />
-        )}
+        {active && <NavActiveDot />}
       </Link>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            role="menu"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4 }}
-            transition={{ duration: 0.12, ease: 'easeOut' }}
-            style={{
-              position: 'absolute',
-              top: 'calc(100% + 6px)',
-              left: 0,
-              minWidth: 220,
-              borderRadius: 3,
-              border: '1px solid var(--ed-rule)',
-              background: 'var(--ed-surface)',
-              boxShadow: '0 12px 32px -12px rgba(0,0,0,0.25)',
-              padding: 4,
-              zIndex: 60,
-            }}
-          >
-            {item.children.map((c) => (
-              <Link
-                key={c.href}
-                href={c.href}
-                onClick={() => setOpen(false)}
-                role="menuitem"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr auto',
-                  alignItems: 'baseline',
-                  gap: 12,
-                  padding: '10px 12px',
-                  borderRadius: 2,
-                  textDecoration: 'none',
-                  color: 'var(--ed-fg)',
-                }}
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLAnchorElement).style.background =
-                    'color-mix(in oklab, var(--ed-fg), transparent 94%)'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLAnchorElement).style.background =
-                    'transparent'
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: F.display,
-                    fontSize: 15,
-                    fontWeight: 500,
-                    letterSpacing: '-0.01em',
-                  }}
-                >
-                  {tChild(c.label)}
-                </span>
-                <span
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 10,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    color: 'var(--ed-fg-muted)',
-                  }}
-                >
-                  {c.sub}
-                </span>
-              </Link>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <NavGroupMenu open={open} item={item} setOpen={setOpen} tChild={tChild} />
     </div>
   )
 }

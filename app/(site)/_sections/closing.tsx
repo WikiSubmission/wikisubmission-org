@@ -2,17 +2,14 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { motion } from 'framer-motion'
 import { F, Arrow } from './shared'
-import { STAGGER_CONTAINER, FADE_UP, useScrollAnimation } from '@/lib/motion'
+import { StaggerContainer, FadeUp } from '@/lib/motion'
 
 export function ClosingSection() {
   const t = useTranslations('homePage.closing')
-  const { ref, isInView } = useScrollAnimation()
 
   return (
     <section
-      ref={ref}
       className="px-4 sm:px-6 md:px-10"
       style={{
         backgroundColor: 'var(--ed-invert-bg)',
@@ -21,10 +18,9 @@ export function ClosingSection() {
         paddingBottom: 'clamp(72px, 12vw, 144px)',
       }}
     >
-      <motion.div
-        variants={STAGGER_CONTAINER}
-        initial="hidden"
-        animate={isInView ? 'show' : 'hidden'}
+      <StaggerContainer
+        stagger={0.12}
+        delay={0}
         style={{
           maxWidth: 880,
           margin: '0 auto',
@@ -35,7 +31,7 @@ export function ClosingSection() {
           textAlign: 'center',
         }}
       >
-        <motion.div variants={FADE_UP} style={{ width: 80 }}>
+        <div style={{ width: 80 }}>
           <Image
             src="/brand-assets/logo-transparent.png"
             alt=""
@@ -44,10 +40,9 @@ export function ClosingSection() {
             aria-hidden
             className="invert grayscale"
           />
-        </motion.div>
+        </div>
 
-        <motion.h2
-          variants={FADE_UP}
+        <h2
           style={{
             fontFamily: F.display,
             fontSize: 'clamp(32px, 4vw, 52px)',
@@ -59,10 +54,9 @@ export function ClosingSection() {
           }}
         >
           {t('quote')}
-        </motion.h2>
+        </h2>
 
-        <motion.div
-          variants={FADE_UP}
+        <div
           style={{
             fontFamily: F.mono,
             fontSize: 12,
@@ -72,10 +66,9 @@ export function ClosingSection() {
           }}
         >
           {t('ref')}
-        </motion.div>
+        </div>
 
-        <motion.div
-          variants={FADE_UP}
+        <div
           style={{
             display: 'flex',
             gap: 12,
@@ -99,8 +92,8 @@ export function ClosingSection() {
           >
             {t('ctaSecondary')}
           </Link>
-        </motion.div>
-      </motion.div>
+        </div>
+      </StaggerContainer>
     </section>
   )
 }
