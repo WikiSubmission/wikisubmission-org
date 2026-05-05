@@ -6,6 +6,11 @@ export type ParsedRef = {
   ve: number // verse end (= vs for a single verse)
 }
 
+export type ParsedAllChaptersVerseRef = {
+  vs: number // verse start (applied to every chapter)
+  ve: number // verse end (= vs for a single verse)
+}
+
 export type ParsedBibleRef = {
   bn: number         // book number (1–66)
   cs: number         // chapter start
@@ -29,13 +34,89 @@ export function createQuranInlineRefRe(): RegExp {
 }
 
 /**
+ * Returns a fresh regex for scanning prose text for numeric Bible references
+ * in the form "bookNumber:chapter:verse[-verseEnd]" (e.g. "40:5:3", "40:5:3-6").
+ * Book numbers 1–66 only.
+ */
+export function createBibleNumericInlineRefRe(): RegExp {
+  return /\b([1-9]|[1-5][0-9]|6[0-6]):\d{1,3}:\d{1,3}(?:-\d{1,3})?\b/g
+}
+
+/**
+ * Returns a fresh regex for scanning prose text for named Bible references
+ * (e.g. "Mark 4:12", "1 Sam 3:1-5", "Song of Solomon 1:1").
+ *
+ * Built dynamically from BIBLE_BOOK_MAP keys, longest-first so multi-word
+ * names like "Song of Solomon" win over a sub-match like "Song". Case-insensitive.
+ */
+export function createBibleNamedInlineRefRe(): RegExp {
+  const names = Object.keys(BIBLE_BOOK_MAP)
+    .sort((a, b) => b.length - a.length)
+    .map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|')
+  return new RegExp(`\\b(?:${names})\\s+\\d{1,3}:\\d{1,3}(?:-\\d{1,3})?\\b`, 'gi')
+}
+
+/**
  * Returns true when the user's search input looks like a Quran verse reference
  * (e.g. "2:255", "2 255", "2:255-257"), so that chapter autocomplete can be
  * suppressed while the user is typing a ref.
  */
 export function isQuranRefInput(input: string): boolean {
   // Already has a colon separator ("2:") or a space followed by a digit ("2 2")
-  return /^\d+:/.test(input) || /^\d+\s+\d/.test(input)
+  // Also matches the all-chapters form ":50" / ":50-55"
+  return /^\d+:/.test(input) || /^\d+\s+\d/.test(input) || /^:\d/.test(input)
+}
+
+/**
+ * Parses the all-chapters-by-verse form ":50" or ":50-55" — meaning
+ * "every chapter that has verse 50" (or the verse range).
+ *
+ *   ":50"     → { vs: 50, ve: 50 }
+ *   ":50-55"  → { vs: 50, ve: 55 }
+ *
+ * Returns null for unrecognised input. Note this is intentionally a separate
+ * function from `parseQuranRef` because the result is fundamentally a list
+ * of refs, not a single (chapter, verse) pair — call `expandAllChaptersVerseRef`
+ * with chapter metadata to produce a concrete verse list.
+ */
+export function parseAllChaptersVerseRef(input: string): ParsedAllChaptersVerseRef | null {
+  const m = input.trim().match(/^:(\d{1,3})(?:-(\d{1,3}))?$/)
+  if (!m) return null
+  const vs = parseInt(m[1])
+  const ve = m[2] ? parseInt(m[2]) : vs
+  if (vs < 0 || ve < vs) return null
+  return { vs, ve }
+}
+
+/**
+ * Expands a parsed `:N` / `:N-M` ref into a comma-separated verse list
+ * suitable for the `/quran/<verses>` route. Chapters whose `verse_count`
+ * is below `ve` are skipped (verse doesn't exist there).
+ *
+ *   { vs: 50, ve: 50 }, [{cn:1,vc:7},{cn:2,vc:286}, ...]  → "2:50,3:50,..."
+ *
+ * Returns an empty string when no chapter qualifies.
+ */
+export function expandAllChaptersVerseRef(
+  parsed: ParsedAllChaptersVerseRef,
+  chapters: ReadonlyArray<{ chapter_number?: number; verse_count?: number }>
+): string {
+  const parts: string[] = []
+  const sorted = [...chapters].sort(
+    (a, b) => (a.chapter_number ?? 0) - (b.chapter_number ?? 0)
+  )
+  for (const ch of sorted) {
+    const cn = ch.chapter_number
+    const vc = ch.verse_count ?? 0
+    if (cn == null || vc < parsed.ve) continue
+    parts.push(
+      parsed.vs === parsed.ve
+        ? `${cn}:${parsed.vs}`
+        : `${cn}:${parsed.vs}-${parsed.ve}`
+    )
+  }
+  return parts.join(',')
 }
 
 /**

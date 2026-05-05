@@ -8,7 +8,13 @@ import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useQuranNavStore } from '@/hooks/use-quran-nav-store'
 import { CHAPTER_TRANSLITERATIONS } from '@/constants/quran-chapters'
-import { isQuranRefInput, normalizeQuranInput, parseQuranRef } from '@/lib/scripture-parser'
+import {
+  isQuranRefInput,
+  normalizeQuranInput,
+  parseQuranRef,
+  parseAllChaptersVerseRef,
+  expandAllChaptersVerseRef,
+} from '@/lib/scripture-parser'
 
 export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const t = useTranslations('search')
@@ -33,6 +39,16 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
         replace(`${pathname}`)
         return
       }
+      // All-chapters verse form (e.g. ":50" or ":50-55") — expand to every
+      // chapter that has the requested verse, then navigate as a verse list.
+      const allChapters = parseAllChaptersVerseRef(q.trim())
+      if (allChapters) {
+        const expanded = expandAllChaptersVerseRef(allChapters, chapters)
+        if (expanded) {
+          router.push(`/quran/${expanded}`)
+          return
+        }
+      }
       // Comma-separated verse refs (e.g. "1:1,2:255-257" or "1 1,2 255-257")
       // Normalize each part to canonical colon form before navigating.
       if (q.includes(',')) {
@@ -48,7 +64,7 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
       params.set('q', decodeURIComponent(normalized))
       replace(`${pathname}?${params.toString()}`)
     },
-    [pathname, replace, router, searchParams]
+    [pathname, replace, router, searchParams, chapters]
   )
 
   // Autocomplete: skip verse-ref patterns (colon or space-separated)
