@@ -64,7 +64,7 @@ export async function SiteFooter() {
       >
         {/* Main grid */}
         <div
-          className="grid grid-cols-[2fr_1fr_1fr_1fr] max-md:grid-cols-2 max-sm:grid-cols-1 gap-12 sm:gap-12 md:gap-12 mb-16"
+          className="grid grid-cols-[2fr_1fr_1fr_1fr] max-md:grid-cols-2 max-sm:grid-cols-1 gap-12 sm:gap-12 md:gap-12 mb-6"
         >
           {/* Brand column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }} className="max-md:col-span-2 max-sm:col-span-1">
@@ -151,44 +151,6 @@ export async function SiteFooter() {
               </span>
             </a>
 
-            <div
-              style={{
-                padding: '14px 16px',
-                backgroundColor: 'var(--ed-bg-alt)',
-                borderRadius: 2,
-                maxWidth: 380,
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: F.glacial,
-                  fontSize: 10.5,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase' as const,
-                  color: 'var(--ed-accent)',
-                  marginBottom: 4,
-                }}
-              >
-                {t('supportHeading')}
-              </div>
-              <div
-                style={{
-                  fontFamily: F.serif,
-                  fontSize: 12.5,
-                  color: 'var(--ed-fg-muted)',
-                  lineHeight: 1.55,
-                }}
-              >
-                {t('supportBody')}
-              </div>
-              <Link
-                href="/donate"
-                className="ed-cta"
-                style={{ marginTop: 10, fontFamily: F.serif, fontSize: 13 }}
-              >
-                {t('donateCta')}
-              </Link>
-            </div>
           </div>
 
           {/* Link columns */}
@@ -232,6 +194,89 @@ export async function SiteFooter() {
               </ul>
             </div>
           ))}
+        </div>
+
+        {/* Support + Connect cards (full-width row) */}
+        <div
+          className="grid grid-cols-2 max-sm:grid-cols-1 gap-4 mb-12"
+        >
+          <div
+            style={{
+              padding: '18px 20px',
+              backgroundColor: 'var(--ed-bg-alt)',
+              borderRadius: 2,
+            }}
+          >
+            <div
+              style={{
+                fontFamily: F.glacial,
+                fontSize: 10.5,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase' as const,
+                color: 'var(--ed-accent)',
+                marginBottom: 6,
+              }}
+            >
+              {t('supportHeading')}
+            </div>
+            <div
+              style={{
+                fontFamily: F.serif,
+                fontSize: 13,
+                color: 'var(--ed-fg-muted)',
+                lineHeight: 1.6,
+              }}
+            >
+              {t('supportBody')}
+            </div>
+            <Link
+              href="/donate"
+              className="ed-cta"
+              style={{ marginTop: 10, fontFamily: F.serif, fontSize: 13 }}
+            >
+              {t('donateCta')}
+            </Link>
+          </div>
+
+          <div
+            style={{
+              padding: '18px 20px',
+              backgroundColor: 'var(--ed-bg-alt)',
+              borderRadius: 2,
+            }}
+          >
+            <div
+              style={{
+                fontFamily: F.glacial,
+                fontSize: 10.5,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase' as const,
+                color: 'var(--ed-accent)',
+                marginBottom: 6,
+              }}
+            >
+              {t('connectHeading')}
+            </div>
+            <div
+              style={{
+                fontFamily: F.serif,
+                fontSize: 13,
+                color: 'var(--ed-fg-muted)',
+                lineHeight: 1.6,
+              }}
+            >
+              {t('connectShortBody')}
+            </div>
+            <a
+              href={About.social.discord}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ed-cta"
+              style={{ marginTop: 10, fontFamily: F.serif, fontSize: 13 }}
+            >
+              {t('joinDiscordCta')}
+            </a>
+          </div>
         </div>
 
         {/* Verse block */}

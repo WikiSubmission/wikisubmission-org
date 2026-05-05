@@ -486,10 +486,10 @@
   "footer": {
     "missionDesc": "منظمة دينية غير ربحية توفر تقنية مجانية ومفتوحة المصدر وموارد تعليمية وأعمالًا إبداعية في سبيل الله.",
     "supportHeading": "مدعوم من المساهمين",
-    "supportBody": "جمعية خيرية عامة 501(c)(3) · EIN 39-4876245 · التبرعات قابلة للخصم الضريبي بالكامل.",
+    "supportBody": "We operate as a registered 501(c)(3) public charity (EIN 39-4876245). Every contribution funds the work directly and is fully tax-deductible.",
     "donateCta": "تبرع →",
     "verse112": "أعلن: «هو الله الواحد الأحد. الله الصمد. لم يلد ولم يولد. ولم يكن له كفوًا أحد.»",
-    "copyrightLine": "© MMXXVI · WikiSubmission.org",
+    "copyrightLine": "© WikiSubmission.org",
     "madeForCause": "صُنع في سبيل الله",
     "poweredHeading": "Powered by your contributions",
     "poweredBody": "We are committed to developing free and open-source tools & technology. No ads, no paywalls. To help us in this cause, you can <donateLink>make a contribution</donateLink>. As a 501(c)(3) registered nonprofit (EIN: 39-4876245), your donations may be tax-deductible depending on your country.",
@@ -503,7 +503,9 @@
     "linkTerms": "Terms of Use",
     "appStorePrefix": "Download on the",
     "appStoreLabel": "App Store",
-    "copyright": "© {year} WikiSubmission. All rights reserved."
+    "copyright": "© {year} WikiSubmission. All rights reserved.",
+    "connectShortBody": "Our team is growing and is working 24/7 to further research, technology, and art in the cause of God.",
+    "joinDiscordCta": "Join the Discord →"
   },
   "home2": {
     "hero": {

@@ -8,7 +8,6 @@ import {
   useState,
   type CSSProperties,
   type ElementType,
-  type ReactNode,
 } from 'react'
 import gsap from 'gsap'
 
@@ -46,7 +45,9 @@ function useIntersectionTrigger<T extends HTMLElement>(
   }: { once?: boolean; threshold?: number; rootMargin?: string; enabled?: boolean } = {},
 ) {
   const callbackRef = useRef(callback)
-  callbackRef.current = callback
+  useEffect(() => {
+    callbackRef.current = callback
+  })
 
   useEffect(() => {
     if (!isClient || !enabled) return

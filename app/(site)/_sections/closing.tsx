@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { F, Arrow } from './shared'
-import { StaggerContainer, FadeUp } from '@/lib/motion'
+import { StaggerContainer } from '@/lib/motion'
 
 export function ClosingSection() {
   const t = useTranslations('homePage.closing')
@@ -38,7 +38,6 @@ export function ClosingSection() {
             width={80}
             height={80}
             aria-hidden
-            className="invert grayscale"
           />
         </div>
 

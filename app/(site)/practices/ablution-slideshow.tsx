@@ -176,6 +176,7 @@ export function AblutionSlideshow() {
   }, [captionKey])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (open) setRenderModal(true)
   }, [open])
 

@@ -92,6 +92,7 @@ function MobileMenu({
   const [render, setRender] = useState(open)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (open) setRender(true)
   }, [open])
 
@@ -379,6 +380,18 @@ function NavTabLink({
   return (
     <Link
       href={item.href}
+      onMouseEnter={(e) => {
+        if (active) return
+        const el = e.currentTarget as HTMLAnchorElement
+        el.style.color = 'var(--ed-fg)'
+        el.style.background = 'color-mix(in oklab, var(--ed-fg), transparent 94%)'
+      }}
+      onMouseLeave={(e) => {
+        if (active) return
+        const el = e.currentTarget as HTMLAnchorElement
+        el.style.color = 'var(--ed-fg-muted)'
+        el.style.background = 'transparent'
+      }}
       style={{
         position: 'relative',
         fontFamily: F.glacial,
@@ -393,7 +406,7 @@ function NavTabLink({
         background: active ? 'var(--ed-bg)' : 'transparent',
         border: active ? '1px solid var(--ed-rule)' : '1px solid transparent',
         boxShadow: active ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-        transition: 'all 150ms ease',
+        transition: 'color 150ms ease, background-color 150ms ease',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -420,6 +433,7 @@ function NavGroupMenu({
   const [render, setRender] = useState(open)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (open) setRender(true)
   }, [open])
 
@@ -469,10 +483,9 @@ function NavGroupMenu({
           onClick={() => setOpen(false)}
           role="menuitem"
           style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            alignItems: 'baseline',
-            gap: 12,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
             padding: '10px 12px',
             borderRadius: 2,
             textDecoration: 'none',
@@ -493,6 +506,7 @@ function NavGroupMenu({
               fontSize: 15,
               fontWeight: 500,
               letterSpacing: '-0.01em',
+              lineHeight: 1.2,
             }}
           >
             {tChild(c.label)}
@@ -504,6 +518,7 @@ function NavGroupMenu({
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
               color: 'var(--ed-fg-muted)',
+              lineHeight: 1.2,
             }}
           >
             {c.sub}
@@ -551,6 +566,18 @@ function NavTabGroup({
             openNow()
           }
         }}
+        onMouseEnter={(e) => {
+          if (active) return
+          const el = e.currentTarget as HTMLAnchorElement
+          el.style.color = 'var(--ed-fg)'
+          el.style.background = 'color-mix(in oklab, var(--ed-fg), transparent 94%)'
+        }}
+        onMouseLeave={(e) => {
+          if (active) return
+          const el = e.currentTarget as HTMLAnchorElement
+          el.style.color = 'var(--ed-fg-muted)'
+          el.style.background = 'transparent'
+        }}
         aria-haspopup="menu"
         aria-expanded={open}
         style={{
@@ -567,7 +594,7 @@ function NavTabGroup({
           background: active ? 'var(--ed-bg)' : 'transparent',
           border: active ? '1px solid var(--ed-rule)' : '1px solid transparent',
           boxShadow: active ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-          transition: 'all 150ms ease',
+          transition: 'color 150ms ease, background-color 150ms ease',
           display: 'flex',
           alignItems: 'center',
           gap: 4,

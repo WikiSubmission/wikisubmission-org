@@ -486,10 +486,10 @@
   "footer": {
     "missionDesc": "Glaubensbasierte gemeinnützige Organisation, die kostenlose Open-Source-Technologie, Bildungsressourcen und kreative Arbeiten im Dienste Gottes bereitstellt.",
     "supportHeading": "Unterstützt von Mitwirkenden",
-    "supportBody": "501(c)(3) gemeinnützige Körperschaft · EIN 39-4876245 · Spenden vollständig steuerlich absetzbar.",
+    "supportBody": "We operate as a registered 501(c)(3) public charity (EIN 39-4876245). Every contribution funds the work directly and is fully tax-deductible.",
     "donateCta": "Spenden →",
     "verse112": "Verkünde: „Er ist der eine und einzige GOTT. Der absolute GOTT. Niemals zeugte Er. Noch wurde Er gezeugt. Keiner ist Ihm gleich.“",
-    "copyrightLine": "© MMXXVI · WikiSubmission.org",
+    "copyrightLine": "© WikiSubmission.org",
     "madeForCause": "Gemacht für die Sache Gottes",
     "poweredHeading": "Getragen von Ihren Beiträgen",
     "poweredBody": "Wir setzen uns für die Entwicklung kostenloser und quelloffener Werkzeuge ein. Keine Werbung, keine Paywalls. Um uns dabei zu unterstützen, können Sie <donateLink>einen Beitrag leisten</donateLink>. Als registrierte gemeinnützige 501(c)(3)-Organisation (EIN: 39-4876245) können Ihre Spenden je nach Land steuerlich absetzbar sein.",
@@ -503,7 +503,9 @@
     "linkTerms": "Nutzungsbedingungen",
     "appStorePrefix": "Laden im",
     "appStoreLabel": "App Store",
-    "copyright": "© {year} WikiSubmission. Alle Rechte vorbehalten."
+    "copyright": "© {year} WikiSubmission. Alle Rechte vorbehalten.",
+    "connectShortBody": "Our team is growing and is working 24/7 to further research, technology, and art in the cause of God.",
+    "joinDiscordCta": "Join the Discord →"
   },
   "home2": {
     "hero": {

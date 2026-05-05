@@ -486,10 +486,10 @@
   "footer": {
     "missionDesc": "ڕێکخراوێکی خێرخوازی ئاینی کە تەکنەلۆجیای بێبەرامبەر و سەرچاوە پەروەردەیی و کاری داهێنەرانەی لە ڕێگای خوداوەنددا پێشکەش دەکات.",
     "supportHeading": "بە هاوبەشەکان پشتگیری دەکرێت",
-    "supportBody": "خێرخوازی گشتی 501(c)(3) · EIN 39-4876245 · بەخشینەکان بە تەواوی لە باج دادەبڕدرێن.",
+    "supportBody": "We operate as a registered 501(c)(3) public charity (EIN 39-4876245). Every contribution funds the work directly and is fully tax-deductible.",
     "donateCta": "بەخشین بکە →",
     "verse112": "ڕابگەیەنە: «ئەو خودای یەک و تەنهاست. خودای ڕەها. نەی زایە و نە زایرا. هیچ کەسێک هاوتای نییە.»",
-    "copyrightLine": "© MMXXVI · WikiSubmission.org",
+    "copyrightLine": "WikiSubmission.org",
     "madeForCause": "بۆ ڕێگای خوداوەند دروستکراوە",
     "poweredHeading": "بە بەخشینەکانتانەوە بەرزکراوە",
     "poweredBody": "ئێمە پابەندی گەشەپێدانی ئامرازی بێبەرامبەر و سەرچاوە کراوەین. هیچ ڕیکلام و هیچ پەیوەاڵ نییە. بۆ یارمەتیدانمان، دەتوانیت <donateLink>بەخشینێک بکەیت</donateLink>. وەک ڕێکخراوێکی خێرخوازی 501(c)(3) (EIN: 39-4876245)، بەخشینەکانت بە پێی وڵاتەکەت ڕەنگە لە باجدا لاپێچ بکرێن.",
@@ -503,7 +503,9 @@
     "linkTerms": "مەرجەکانی بەکارهێنان",
     "appStorePrefix": "داگرتن لە",
     "appStoreLabel": "App Store",
-    "copyright": "© {year} ویکیسەبمیشن. هەموو مافەکان پارێزراون."
+    "copyright": "© {year} ویکیسەبمیشن. هەموو مافەکان پارێزراون.",
+    "connectShortBody": "Our team is growing and is working 24/7 to further research, technology, and art in the cause of God.",
+    "joinDiscordCta": "Join the Discord →"
   },
   "home2": {
     "hero": {

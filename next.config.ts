@@ -87,6 +87,11 @@ const nextConfig: NextConfig = {
         destination: '/appendices/:path*',
         permanent: true,
       },
+      {
+        source: '/prayer-times',
+        destination: '/practices',
+        permanent: true,
+      },
     ]
   },
 }

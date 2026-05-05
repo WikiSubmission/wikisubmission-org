@@ -486,10 +486,10 @@
   "footer": {
     "missionDesc": "Organisation confessionnelle à but non lucratif fournissant des technologies gratuites et open source, des ressources éducatives et des œuvres créatives dans la cause de Dieu.",
     "supportHeading": "Soutenu par les contributeurs",
-    "supportBody": "Organisme public de bienfaisance 501(c)(3) · EIN 39-4876245 · Dons entièrement déductibles des impôts.",
+    "supportBody": "We operate as a registered 501(c)(3) public charity (EIN 39-4876245). Every contribution funds the work directly and is fully tax-deductible.",
     "donateCta": "Faire un don →",
     "verse112": "Proclame : « Il est le seul et unique DIEU. Le DIEU Absolu. Il n’a jamais engendré. Il n’a pas été engendré. Nul ne Lui est égal. »",
-    "copyrightLine": "© MMXXVI · WikiSubmission.org",
+    "copyrightLine": "© WikiSubmission.org",
     "madeForCause": "Fait pour la cause de Dieu",
     "poweredHeading": "Powered by your contributions",
     "poweredBody": "We are committed to developing free and open-source tools & technology. No ads, no paywalls. To help us in this cause, you can <donateLink>make a contribution</donateLink>. As a 501(c)(3) registered nonprofit (EIN: 39-4876245), your donations may be tax-deductible depending on your country.",
@@ -503,7 +503,9 @@
     "linkTerms": "Terms of Use",
     "appStorePrefix": "Download on the",
     "appStoreLabel": "App Store",
-    "copyright": "© {year} WikiSubmission. All rights reserved."
+    "copyright": "© {year} WikiSubmission. All rights reserved.",
+    "connectShortBody": "Our team is growing and is working 24/7 to further research, technology, and art in the cause of God.",
+    "joinDiscordCta": "Join the Discord →"
   },
   "home2": {
     "hero": {

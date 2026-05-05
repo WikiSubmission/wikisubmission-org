@@ -4,20 +4,10 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   SearchIcon,
-  MapPinIcon,
   AlertCircleIcon,
-  CalendarIcon,
-  Activity,
 } from 'lucide-react'
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -129,7 +119,7 @@ function PrayerTimesContent() {
     if (trimmed) {
       const params = new URLSearchParams(searchParams.toString())
       params.set('q', trimmed)
-      router.push(`/practices?${params.toString()}`)
+      router.push(`/practices?${params.toString()}`, { scroll: false })
       fetchPrayerTimes(trimmed, asrAdjustment)
     }
   }
@@ -149,6 +139,13 @@ function PrayerTimesContent() {
 
   const prayerOrder = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']
   const prayerLabels: Record<string, string> = {
+    fajr: 'Dawn',
+    dhuhr: 'Noon',
+    asr: 'Afternoon',
+    maghrib: 'Sunset',
+    isha: 'Night',
+  }
+  const prayerArabic: Record<string, string> = {
     fajr: t('fajr'),
     dhuhr: t('noon'),
     asr: t('asr'),
@@ -219,97 +216,74 @@ function PrayerTimesContent() {
       {data && !loading && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
 
-          {/* Header row - High Priority Search */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 pb-6 border-b border-[var(--ed-rule)]/30">
-            <div className="flex-1 max-w-sm">
-              <form onSubmit={handleSearch} className="relative group">
-                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-[var(--ed-accent)] opacity-40 group-focus-within:opacity-100 transition-opacity" />
-                <Input
-                  type="search"
-                  placeholder={t('searchLocation')}
-                  className="pl-9 h-10 bg-[var(--ed-surface)]/40 border-[var(--ed-rule)] rounded-xl focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all font-mono text-[11px] tracking-wider"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </form>
-              <div className="flex items-center gap-2 mt-2 px-1">
-                <MapPinIcon size={10} className="text-[var(--ed-accent)] opacity-40" />
-                <span className="font-mono text-[9px] text-[var(--ed-fg-muted)] uppercase tracking-widest">{data.location_string}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <Label 
-                  htmlFor="asr-method" 
-                  className="text-[9px] text-[var(--ed-fg-muted)] opacity-50 font-mono uppercase tracking-[0.2em] cursor-pointer"
-                >
-                  {t('asrMidpoint')}
-                </Label>
-                <Switch
-                  id="asr-method"
-                  checked={asrAdjustment}
-                  onCheckedChange={toggleAsrAdjustment}
-                  className="scale-75 origin-right"
-                />
-              </div>
+          {/* Search + ASR toggle (one cohesive control row) */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <form onSubmit={handleSearch} className="relative group flex-1">
+              <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 size-3.5 text-[var(--ed-accent)] opacity-40 group-focus-within:opacity-100 transition-opacity" />
+              <Input
+                type="search"
+                placeholder={t('searchLocation')}
+                className="pl-9 pr-3 h-11 bg-[var(--ed-surface)]/40 border-[var(--ed-rule)] rounded-xl focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all font-mono text-[12px] tracking-wider"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </form>
+            <div className="flex items-center gap-2.5 sm:pl-1 shrink-0">
+              <Switch
+                id="asr-method"
+                checked={asrAdjustment}
+                onCheckedChange={toggleAsrAdjustment}
+                className="scale-75 origin-left"
+              />
+              <Label
+                htmlFor="asr-method"
+                className="text-[10px] text-[var(--ed-fg-muted)] font-mono uppercase tracking-[0.18em] cursor-pointer"
+              >
+                {t('asrMidpoint')}
+              </Label>
             </div>
           </div>
 
-          {/* Now / Next hero card */}
-          {(data.current_prayer || data.upcoming_prayer) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-px rounded-[24px] border border-[var(--ed-rule)] bg-[var(--ed-rule)]/10 overflow-hidden shadow-2xl">
-              {data.current_prayer && (
-                <div className="relative p-6 bg-[var(--ed-surface)]/60 backdrop-blur-md group overflow-hidden">
-                  <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
-                    <Activity size={80} />
-                  </div>
-                  <div className="relative z-10 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)] animate-pulse" />
-                      <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-accent)]">
-                        {t('activeState')}
-                      </p>
-                    </div>
-                    <p 
-                      className="text-3xl md:text-4xl font-medium text-[var(--ed-fg)] capitalize"
-                      style={{ fontFamily: F.serif }}
-                    >
-                      {prayerLabels[data.current_prayer.toLowerCase()] ?? data.current_prayer}
-                    </p>
-                    {data.current_prayer_time_elapsed && (
-                      <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--ed-fg-muted)] opacity-50">
-                        <span>{t('elapsedLabel')}</span>
-                        <span className="text-[var(--ed-fg)]">{data.current_prayer_time_elapsed}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+          {/* Resolved location + the API's reported local time (so the
+              displayed prayer times have an unambiguous reference clock). */}
+          {data.location_string && (
+            <div
+              className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg-muted)]"
+              style={{ fontFamily: F.glacial }}
+            >
+              <span className="opacity-70">{data.location_string}</span>
+              {data.local_time && (
+                <span className="opacity-50">
+                  <span aria-hidden className="mr-2">·</span>
+                  <span className="tabular-nums">{data.local_time}</span>
+                  {data.local_timezone && (
+                    <span className="ml-1.5 opacity-70">{data.local_timezone}</span>
+                  )}
+                </span>
               )}
-              {data.upcoming_prayer && (
-                <div className="relative p-6 bg-[var(--ed-surface)]/80 backdrop-blur-md overflow-hidden">
-                  <div className="relative z-10 space-y-2">
-                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-[var(--ed-fg-muted)] opacity-40">
-                      {t('sequentialEvent')}
-                    </p>
-                    <p 
-                      className="text-xl md:text-2xl font-medium text-[var(--ed-fg)] capitalize"
-                      style={{ fontFamily: F.serif }}
-                    >
-                      {prayerLabels[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}
-                    </p>
-                    {data.upcoming_prayer_time_left && (
-                      <div className="flex flex-col gap-1">
-                        <div className="font-mono text-[10px] text-[var(--ed-fg-muted)] opacity-40 uppercase tracking-widest">
-                          {t('tMinus')}
-                        </div>
-                        <p className="text-4xl font-mono font-bold text-[var(--ed-accent)] tracking-tighter tabular-nums drop-shadow-[0_0_15px_var(--ed-accent-soft)]">
-                          {data.upcoming_prayer_time_left}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+            </div>
+          )}
+
+          {/* Now / Next — primary headline */}
+          {(data.current_prayer || data.upcoming_prayer) && (
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 -mt-2">
+              {data.current_prayer && (
+                <span
+                  className="text-3xl md:text-4xl font-medium text-[var(--ed-accent)] capitalize tracking-tight leading-none"
+                  style={{ fontFamily: F.serif }}
+                >
+                  {prayerLabels[data.current_prayer.toLowerCase()] ?? data.current_prayer}
+                </span>
+              )}
+              {data.upcoming_prayer && data.upcoming_prayer_time_left && (
+                <span
+                  className="text-base md:text-lg text-[var(--ed-fg-muted)] tabular-nums leading-none whitespace-nowrap"
+                  style={{ fontFamily: F.serif }}
+                >
+                  <span className="opacity-60 mx-1">→</span>
+                  <span className="capitalize text-[var(--ed-fg)]"> {prayerLabels[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}</span>
+                  <span className="font-mono text-[var(--ed-accent)]"> {data.upcoming_prayer_time_left}</span>
+                </span>
               )}
             </div>
           )}
@@ -319,22 +293,76 @@ function PrayerTimesContent() {
             <DayTimeline data={data} prayerLabels={prayerLabels} />
           )}
 
-          {/* Schedule dialog */}
-          <ScheduleDialog
-            data={data}
-            prayerOrder={prayerOrder}
-            prayerLabels={prayerLabels}
-            t={t}
-          />
+          {/* Inline schedule (today + monthly) */}
+          <div className="space-y-2">
+            <SchedulePanel
+              data={data}
+              prayerOrder={prayerOrder}
+              prayerLabels={prayerLabels}
+              t={t}
+            />
+            {/* English → Arabic name mapping, right under the card */}
+            <div
+              className="flex flex-wrap justify-end gap-x-3 gap-y-1 text-[10px] text-[var(--ed-fg-muted)] opacity-80 leading-relaxed"
+              style={{ fontFamily: F.glacial }}
+            >
+              {prayerOrder.map((prayer) => (
+                <span key={prayer}>
+                  <span className="text-[var(--ed-fg)]/80">{prayerLabels[prayer]}</span>
+                  <span className="opacity-60"> · {prayerArabic[prayer]}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Footnotes — supplementary metadata pulled from the API response */}
+          <dl
+            className="!mt-1.5 pt-3 border-t border-[var(--ed-rule)]/30 text-[10px] text-[var(--ed-fg-muted)] opacity-80 leading-relaxed space-y-1.5"
+            style={{ fontFamily: F.glacial }}
+          >
+            {(data.times?.sunrise || data.times?.sunset) && (
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <dt className="uppercase tracking-[0.18em] shrink-0">Daylight</dt>
+                <dd className="inline-flex flex-wrap gap-x-3 gap-y-1 tabular-nums">
+                  {data.times?.sunrise && (
+                    <span>
+                      <span className="text-[var(--ed-fg)]/80">Sunrise</span>
+                      <span className="opacity-60"> · {data.times.sunrise}</span>
+                    </span>
+                  )}
+                  {data.times?.sunset && (
+                    <span>
+                      <span className="text-[var(--ed-fg)]/80">Sunset</span>
+                      <span className="opacity-60"> · {data.times.sunset}</span>
+                    </span>
+                  )}
+                </dd>
+              </div>
+            )}
+            {data.coordinates && (
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <dt className="uppercase tracking-[0.18em] shrink-0">Coordinates</dt>
+                <dd className="tabular-nums text-[var(--ed-fg)]/80">
+                  {`${data.coordinates.latitude.toFixed(4)}°N, ${data.coordinates.longitude.toFixed(4)}°E`}
+                </dd>
+              </div>
+            )}
+            {data.local_timezone_id && (
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <dt className="uppercase tracking-[0.18em] shrink-0">Timezone</dt>
+                <dd className="text-[var(--ed-fg)]/80">{data.local_timezone_id}</dd>
+              </div>
+            )}
+          </dl>
         </div>
       )}
     </div>
   )
 }
 
-// ── Schedule Dialog ───────────────────────────────────────────────────────────
+// ── Schedule Panel (inline, expanded by default) ─────────────────────────────
 
-function ScheduleDialog({
+function SchedulePanel({
   data,
   prayerOrder,
   prayerLabels,
@@ -346,23 +374,9 @@ function ScheduleDialog({
   t: (key: string, values?: Record<string, string>) => string
 }) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 font-medium transition-colors w-fit">
-          <CalendarIcon className="size-3.5" />
-          {t('viewSchedule')}
-        </button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col gap-0 p-0 rounded-none border-[var(--ed-rule)]">
-        <DialogHeader className="px-6 py-4 border-b border-border/40">
-          <DialogTitle className="flex items-center gap-2 text-sm font-semibold">
-            <MapPinIcon className="size-3.5 text-muted-foreground" />
-            {data.location_string}
-          </DialogTitle>
-        </DialogHeader>
-
-        <Tabs defaultValue="today" className="flex flex-col flex-1 min-h-0">
-          <div className="px-6 py-3 border-b border-border/40">
+    <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 rounded-md overflow-hidden">
+      <Tabs defaultValue="today" className="flex flex-col gap-0">
+          <div className="px-5 py-3 border-b border-border/40">
             <TabsList>
               <TabsTrigger value="today">{t('today')}</TabsTrigger>
               <TabsTrigger value="month">{t('monthlySchedule')}</TabsTrigger>
@@ -370,7 +384,7 @@ function ScheduleDialog({
           </div>
 
           {/* Today tab */}
-          <TabsContent value="today" className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+          <TabsContent value="today" className="px-5 py-5 space-y-4">
             <div className="overflow-hidden border border-border/40">
               <table className="w-full text-sm">
                 <thead>
@@ -455,16 +469,10 @@ function ScheduleDialog({
                 </tbody>
               </table>
             </div>
-            <div className="flex flex-col items-center gap-1 text-[10px] text-muted-foreground/40 uppercase tracking-widest pt-2 border-t border-border/20">
-              {data.coordinates && (
-                <span>{`${data.coordinates.latitude.toFixed(4)}°N, ${data.coordinates.longitude.toFixed(4)}°E`}</span>
-              )}
-              <span>{data.local_timezone}</span>
-            </div>
           </TabsContent>
 
           {/* Month tab */}
-          <TabsContent value="month" className="overflow-y-auto flex-1 px-6 py-5">
+          <TabsContent value="month" className="px-5 py-5">
             {data.schedule ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-[10px] sm:text-xs">
@@ -537,9 +545,8 @@ function ScheduleDialog({
               </p>
             )}
           </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+      </Tabs>
+    </div>
   )
 }
 
@@ -567,74 +574,80 @@ function DayTimeline({
 }) {
   const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const
   const times = prayers.map((p) => parseTimeToMinutes(data.times?.[p] ?? ''))
-  const [fajrMin, , , , ishaMin] = times
-  const span = ishaMin - fajrMin || 1
+  const [, , , , ishaMin] = times
 
   const now = new Date()
   const nowMin = now.getHours() * 60 + now.getMinutes()
-  const progressPct = Math.max(0, Math.min(100, ((nowMin - fajrMin) / span) * 100))
   const currentPrayer = data.current_prayer?.toLowerCase() ?? ''
 
+  // Map "now" onto the cell grid: locate the current interval, then interpolate
+  // within that cell's 20%-wide column. This keeps the progress indicator
+  // visually consistent with the highlighted cell — unlike a Fajr→Isha
+  // proportional bar, which floats far from whichever cell is "current".
+  const currentIdx = prayers.findIndex((p) => p === currentPrayer)
+  const intervalProgress = (() => {
+    if (currentIdx < 0) return null
+    const start = times[currentIdx]
+    const end = times[currentIdx + 1] ?? ishaMin
+    if (end <= start) return 0
+    return Math.max(0, Math.min(1, (nowMin - start) / (end - start)))
+  })()
+  const cellPct = 100 / prayers.length
+  const nowPct =
+    intervalProgress === null ? null : currentIdx * cellPct + intervalProgress * cellPct
+
   return (
-    <div className="relative pt-6 pb-20 px-4">
-      <div className="relative h-[2px] bg-[var(--ed-rule)]/30">
-        {/* Filled portion */}
-        <div
-          className="absolute left-0 top-0 h-full bg-[var(--ed-accent)]/20 shadow-[0_0_10px_var(--ed-accent-soft)]"
-          style={{ width: `${progressPct}%` }}
-        />
-
-        {/* Current position dot */}
-        {nowMin >= fajrMin && nowMin <= ishaMin && (
-          <div
-            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-[var(--ed-accent)] border-2 border-[var(--ed-bg)] z-10"
-            style={{ left: `${progressPct}%` }}
-          >
-             <div className="absolute inset-0 animate-ping bg-[var(--ed-accent)] opacity-20" />
-          </div>
-        )}
-
-        {/* Prayer markers */}
+    <div className="relative">
+      {/* Prayer cells — equal-width columns, current cell is the visual anchor */}
+      <div className="grid grid-cols-5 border-y border-[var(--ed-rule)]/40 relative">
         {prayers.map((prayer, i) => {
-          const pct = ((times[i] - fajrMin) / span) * 100
           const isCurrent = currentPrayer === prayer
-          const isPast = nowMin > times[i]
+          const isPast = nowMin > times[i] && !isCurrent
           return (
             <div
               key={prayer}
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
-              style={{ left: `${pct}%` }}
+              className={cn(
+                'flex flex-col items-center gap-1 py-3 px-1 border-l first:border-l-0 border-[var(--ed-rule)]/40 transition-colors',
+                isCurrent && 'bg-[var(--ed-accent)]/8',
+                isPast && 'opacity-50'
+              )}
             >
-              <div
+              <span
                 className={cn(
-                  'w-2.5 h-2.5 border border-[var(--ed-surface)] transition-all duration-500',
-                  isCurrent
-                    ? 'bg-[var(--ed-accent)] scale-125'
-                    : isPast
-                      ? 'bg-[var(--ed-accent)] opacity-40'
-                      : 'bg-[var(--ed-rule)]'
+                  'text-[10px] uppercase tracking-[0.2em] font-semibold',
+                  isCurrent ? 'text-[var(--ed-accent)]' : 'text-[var(--ed-fg-muted)]'
                 )}
-              />
-              <div className="absolute top-5 -translate-x-1/2 left-1/2 flex flex-col items-center gap-1 w-20">
-                <span
-                  className={cn(
-                    'text-[8px] uppercase tracking-[0.15em] transition-colors font-bold',
-                    isCurrent ? 'text-[var(--ed-accent)]' : 'text-[var(--ed-fg-muted)] opacity-30'
-                  )}
-                  style={{ fontFamily: F.glacial }}
-                >
-                  {prayerLabels[prayer]}
-                </span>
-                <span className={cn(
-                  'text-[9px] font-bold',
-                  isCurrent ? 'text-[var(--ed-fg)]' : 'text-[var(--ed-fg-muted)] opacity-20'
-                )} style={{ fontFamily: F.mono }}>
-                  {data.times?.[prayer]}
-                </span>
-              </div>
+                style={{ fontFamily: F.glacial }}
+              >
+                {prayerLabels[prayer]}
+              </span>
+              <span
+                className={cn(
+                  'text-[13px] tabular-nums font-semibold',
+                  isCurrent ? 'text-[var(--ed-fg)]' : 'text-[var(--ed-fg-muted)]'
+                )}
+                style={{ fontFamily: F.mono }}
+              >
+                {data.times?.[prayer]}
+              </span>
             </div>
           )
         })}
+
+        {/* Within-interval "now" sweep — sits along the bottom edge of the
+            current cell and grows as the interval elapses. Width is one cell;
+            the filled portion shows interval progress. */}
+        {nowPct !== null && (
+          <div
+            className="pointer-events-none absolute bottom-0 h-[2px] bg-[var(--ed-rule)]/30"
+            style={{ left: `${currentIdx * cellPct}%`, width: `${cellPct}%` }}
+          >
+            <div
+              className="absolute left-0 top-0 h-full bg-[var(--ed-accent)] transition-[width] duration-500"
+              style={{ width: `${(intervalProgress ?? 0) * 100}%` }}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

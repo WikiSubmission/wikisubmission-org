@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { FadeUp } from '@/lib/motion'
 import PrayerTimesClient from './prayer-times-client'
 import RamadanClient from './ramadan-client'
@@ -13,8 +14,6 @@ import {
   MapPin,
   Calendar,
   Compass,
-  Sun,
-  Moon,
   Wallet
 } from 'lucide-react'
 import Link from 'next/link'
@@ -104,6 +103,20 @@ export default function PracticesClient({
   prayerVerse: VerseData | null
 }) {
   const t = useTranslations('practices')
+  const searchParams = useSearchParams()
+  const hasQuery = !!searchParams.get('q')
+
+  // When the user lands on /practices?q=… (including the redirect from
+  // /prayer-times?q=…), smooth-scroll to the prayer-times section so the
+  // search input that consumes `q` is in view.
+  useEffect(() => {
+    if (!hasQuery) return
+    const el = document.getElementById('prayer-times')
+    if (!el) return
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [hasQuery])
 
   const daysUntilRamadan = useMemo(() => daysUntilNextRamadan(), [])
   const showRamadan = daysUntilRamadan <= 15
@@ -128,14 +141,6 @@ export default function PracticesClient({
           <div className="relative z-10 max-w-6xl mx-auto px-6 pt-24 pb-20 md:pt-32 md:pb-28">
             <div className="max-w-3xl space-y-8">
               <FadeUp distance={10} duration={0.5} className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-px w-12 bg-[var(--ed-accent)]/30" />
-                  <div className="flex items-center gap-2 opacity-30">
-                    <Sun size={12} className="text-[var(--ed-accent)]" />
-                    <Moon size={12} className="text-[var(--ed-fg-muted)]" />
-                  </div>
-                </div>
-
                 <h1 
                 className="text-5xl md:text-7xl font-medium text-[var(--ed-fg)] leading-[1.1] tracking-tight"
                 style={{ fontFamily: F.serif }}
@@ -154,11 +159,10 @@ export default function PracticesClient({
         </section>
 
         {/* ── Prayer Times ──────────────────────────────────────────────── */}
-        <section className="max-w-6xl mx-auto px-6 py-20 md:py-28">
+        <section id="prayer-times" className="max-w-6xl mx-auto px-6 py-20 md:py-28 scroll-mt-20">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
             <div className="lg:col-span-4 space-y-10">
               <div>
-                <SectionLabel>{t('sectionPrayerLabel')}</SectionLabel>
                 <h2 
                 className="text-3xl md:text-4xl font-medium tracking-tight text-[var(--ed-fg)] mb-6"
                 style={{ fontFamily: F.serif }}

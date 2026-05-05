@@ -486,10 +486,10 @@
   "footer": {
     "missionDesc": "Allah yolunda ücretsiz ve açık kaynak teknoloji, eğitim kaynakları ve yaratıcı çalışmalar sunan inanç temelli kâr amacı gütmeyen kuruluş.",
     "supportHeading": "Katkıda bulunanlar tarafından desteklenir",
-    "supportBody": "501(c)(3) kamu yararına hayır kurumu · EIN 39-4876245 · Bağışlar tamamen vergiden düşülebilir.",
+    "supportBody": "We operate as a registered 501(c)(3) public charity (EIN 39-4876245). Every contribution funds the work directly and is fully tax-deductible.",
     "donateCta": "Bağış yap →",
     "verse112": "Duyur: “O, tek ve biricik TANRI’dır. Mutlak TANRI’dır. O doğurmadı. Doğurulmadı. Hiç kimse O’na denk değildir.”",
-    "copyrightLine": "© MMXXVI · WikiSubmission.org",
+    "copyrightLine": "© WikiSubmission.org",
     "madeForCause": "Allah’ın davası için yapıldı",
     "poweredHeading": "Powered by your contributions",
     "poweredBody": "We are committed to developing free and open-source tools & technology. No ads, no paywalls. To help us in this cause, you can <donateLink>make a contribution</donateLink>. As a 501(c)(3) registered nonprofit (EIN: 39-4876245), your donations may be tax-deductible depending on your country.",
@@ -503,7 +503,9 @@
     "linkTerms": "Terms of Use",
     "appStorePrefix": "Download on the",
     "appStoreLabel": "App Store",
-    "copyright": "© {year} WikiSubmission. All rights reserved."
+    "copyright": "© {year} WikiSubmission. All rights reserved.",
+    "connectShortBody": "Our team is growing and is working 24/7 to further research, technology, and art in the cause of God.",
+    "joinDiscordCta": "Join the Discord →"
   },
   "home2": {
     "hero": {

@@ -434,6 +434,7 @@ function TutorialOverlay({ open, onClose }: { open: boolean; onClose: () => void
   const [render, setRender] = useState(open)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (open) setRender(true)
   }, [open])
 
