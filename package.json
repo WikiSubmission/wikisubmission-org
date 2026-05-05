@@ -82,7 +82,9 @@
   "pnpm": {
     "overrides": {
       "@types/react": "19.2.14",
-      "@types/react-dom": "19.2.3"
+      "@types/react-dom": "19.2.3",
+      "d3-color": ">=3.1.0",
+      "postcss": ">=8.5.10"
     }
   },
   "trustedDependencies": [
