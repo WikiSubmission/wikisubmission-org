@@ -26,6 +26,57 @@ import { LanguageEntry, useLanguagesStore } from '@/hooks/use-languages-store'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import { useEffect, useRef, useState } from 'react'
+
+function HorizontalScrollArea({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [showLeft, setShowLeft] = useState(false)
+  const [showRight, setShowRight] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const update = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = el
+      setShowLeft(scrollLeft > 1)
+      setShowRight(scrollLeft + clientWidth < scrollWidth - 1)
+    }
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => {
+      el.removeEventListener('scroll', update)
+      ro.disconnect()
+    }
+  }, [])
+
+  return (
+    <div className="relative">
+      <div
+        ref={ref}
+        className="overflow-x-auto scrollbar-none"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {children}
+      </div>
+      <div
+        aria-hidden
+        className={cn(
+          'pointer-events-none absolute inset-y-0 left-0 w-6 bg-linear-to-r from-popover to-transparent transition-opacity',
+          showLeft ? 'opacity-100' : 'opacity-0'
+        )}
+      />
+      <div
+        aria-hidden
+        className={cn(
+          'pointer-events-none absolute inset-y-0 right-0 w-6 bg-linear-to-l from-popover to-transparent transition-opacity',
+          showRight ? 'opacity-100' : 'opacity-0'
+        )}
+      />
+    </div>
+  )
+}
 
 function SettingTile({
   icon,
@@ -138,38 +189,40 @@ export default function QuranSettings() {
         </DropdownMenuLabel>
 
         <div className="px-3 py-2">
-          <div className="flex gap-1.5">
-            {ZOOM_LEVELS.map((level) => {
-              const labelKey =
-                `zoom${level.charAt(0).toUpperCase()}${level.slice(1)}` as
-                  | 'zoomCompact'
-                  | 'zoomNormal'
-                  | 'zoomComfortable'
-                  | 'zoomWide'
-                  | 'zoomFull'
-              const isActive =
-                (quranPreferences.zoomLevel ?? 'comfortable') === level
-              return (
-                <button
-                  key={level}
-                  onClick={() =>
-                    quranPreferences.setPreferences({
-                      ...quranPreferences,
-                      zoomLevel: level as ZoomLevel,
-                    })
-                  }
-                  className={cn(
-                    'flex-1 px-1.5 py-1 rounded-lg text-xs font-medium transition-all border',
-                    isActive
-                      ? 'bg-primary/10 text-primary border-primary/20'
-                      : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-accent hover:text-foreground'
-                  )}
-                >
-                  {t(labelKey)}
-                </button>
-              )
-            })}
-          </div>
+          <HorizontalScrollArea>
+            <div className="flex gap-1.5 w-max">
+              {ZOOM_LEVELS.map((level) => {
+                const labelKey =
+                  `zoom${level.charAt(0).toUpperCase()}${level.slice(1)}` as
+                    | 'zoomCompact'
+                    | 'zoomNormal'
+                    | 'zoomComfortable'
+                    | 'zoomWide'
+                    | 'zoomFull'
+                const isActive =
+                  (quranPreferences.zoomLevel ?? 'comfortable') === level
+                return (
+                  <button
+                    key={level}
+                    onClick={() =>
+                      quranPreferences.setPreferences({
+                        ...quranPreferences,
+                        zoomLevel: level as ZoomLevel,
+                      })
+                    }
+                    className={cn(
+                      'shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium transition-all border whitespace-nowrap',
+                      isActive
+                        ? 'bg-primary/10 text-primary border-primary/20'
+                        : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-accent hover:text-foreground'
+                    )}
+                  >
+                    {t(labelKey)}
+                  </button>
+                )
+              })}
+            </div>
+          </HorizontalScrollArea>
         </div>
 
         {/* Language */}
