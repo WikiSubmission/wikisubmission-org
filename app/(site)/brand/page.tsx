@@ -2,12 +2,11 @@ import React from 'react'
 import Image from 'next/image'
 import { buildPageMetadata } from '@/constants/metadata'
 import { SectionDivider, F } from '@/app/(site)/_sections/shared'
-import { BrandBrief } from './brand-brief'
 
 export const metadata = buildPageMetadata({
   title: 'Brand · WikiSubmission',
   description:
-    'WikiSubmission brand guidelines — palettes, typography, tokens, components, voice, and a copy-pasteable design brief for AI tooling.',
+    'WikiSubmission brand guidelines — palettes, typography, tokens, components, and voice.',
   url: '/brand',
 })
 
@@ -158,75 +157,6 @@ const DONTS = [
   'Use icon-only buttons without aria labels.',
   'Recolor or distort the logo mark.',
 ]
-
-/* ------------------------------------------------------------------ */
-/* Claude / AI design brief — copy-pasteable                            */
-/* ------------------------------------------------------------------ */
-
-const CLAUDE_BRIEF = `# WikiSubmission Design Brief
-
-## Identity
-Editorial, scripture-first. Newspapers, not dashboards. Type-led, hairline rules,
-generous whitespace. Quiet surfaces so verses can speak.
-
-## Palettes (three, each with light + dark)
-- Ink on Parchment (default) — warm, paper-like, brown ink
-- Sharpened Violet            — contemporary, high contrast, violet accent
-- Monochrome                  — minimal, true black/white
-
-The brand is the SYSTEM, not a single colorway. Always reference semantic
-tokens, never the underlying palette hex.
-
-## Semantic Tokens (CSS custom properties — use these everywhere)
---ed-bg          page background
---ed-fg          primary text
---ed-fg-muted    secondary text, captions
---ed-accent      highlights, links, key motifs
---ed-accent-soft tinted accent surface
---ed-rule        hairline borders, dividers
---ed-bg-alt      muted surface (cards, callouts)
---ed-surface     elevated card surface
-
-## Typography
-Display:  Cormorant Garamond  (var --font-cormorant)
-Body:     Source Serif 4      (var --font-source-serif)
-Mono:     JetBrains Mono      (var --font-jetbrains)
-Arabic:   Amiri               (var --font-amiri)
-Eyebrow:  Glacial Indifference (var --font-glacial, uppercase, 0.18em tracking)
-
-Pair Cormorant displays with Source Serif body. Maximum two type families per
-screen. Italic Cormorant for kickers and section numbers (§ I, § II).
-
-## Geometry
-Border radius:    0–3px. Squares preferred. Buttons 2px. Cards 3px.
-Hairlines:        1px solid var(--ed-rule). Never thicker.
-Max content:      1240px.
-Section padding:  20–40px horizontal, 80–120px vertical.
-Vertical rhythm:  8 / 12 / 16 / 24 / 32 / 48 / 64 / 96.
-
-## Components (utility classes)
-.ed-link         inline text link (muted → fg on hover)
-.ed-cta          arrow CTA (gap grows on hover)
-.ed-btn-primary  solid button (fg on bg)
-.ed-btn-ghost    bordered button (transparent)
-.ed-card         hover-lift card (3px radius, hairline border)
-
-## Voice
-Scholarly · Reverent · Plain · Timeless.
-Precise, sourced, never speculative. No jargon. No trends.
-
-## Logo
-public/brand-assets/logo-transparent.png  (any background)
-public/brand-assets/logo-black.png         (light backgrounds only)
-public/brand-assets/logo-white.png         (dark backgrounds only)
-Clear space ≥ 30% of mark height. Never recolor or distort.
-
-## Application Rules
-DO    use --ed-* tokens, 1px hairlines, two type families max,
-      test all three palettes × both modes.
-DON'T hardcode hex, round corners >3px, decorate empty space,
-      recolor the logo.
-`
 
 /* ------------------------------------------------------------------ */
 /* Page                                                                 */
@@ -694,29 +624,6 @@ export default function BrandPage() {
             items={DONTS}
           />
         </div>
-      </section>
-
-      <Hairline />
-
-      {/* ---------- § X — Claude / AI brief ---------- */}
-      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
-        <SectionDivider num="§ X" title="For AI tooling" sub="Copy-pasteable brief" />
-        <p
-          style={{
-            fontFamily: F.serif,
-            fontSize: 15,
-            lineHeight: 1.65,
-            color: 'var(--ed-fg-muted)',
-            marginBottom: 28,
-            maxWidth: '64ch',
-          }}
-        >
-          Drop this brief into a Claude project, system prompt, or design-aware
-          AI tool. It encodes everything above as plain markdown — tokens,
-          typography, geometry, voice, and rules — small enough to fit in a
-          context window with room to spare.
-        </p>
-        <BrandBrief text={CLAUDE_BRIEF} />
       </section>
 
       {/* ---------- Closing verse ---------- */}
