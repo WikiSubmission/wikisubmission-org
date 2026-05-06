@@ -1,7 +1,15 @@
 'use client'
 
 import Link from 'next/link'
+import { ChevronDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useVirtualizer } from '@tanstack/react-virtual'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import {
   ABJAD,
   abjadiCompare,
@@ -12,10 +20,12 @@ import {
 import {
   filterRoots,
   useRootDetail,
+  useRootOccurrences,
   useRootsIndex,
   type Occurrence,
   type RootRecord,
 } from '@/hooks/use-roots-index'
+import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import './word-lab.css'
 
 type SortMode = 'frequency' | 'abjadi' | 'reverse'
@@ -29,24 +39,64 @@ const CHEAT_PAIRS: ReadonlyArray<readonly [string, string]> = [
   ['k', 'ك'], ['l', 'ل'], ['m', 'م'], ['n', 'ن'], ['h', 'ه'], ['w', 'و'], ['y', 'ي'], ["'", 'ء'],
 ]
 
-function highlight(ar: string, hi: string): React.ReactNode {
-  if (!hi) return ar
-  const idx = ar.indexOf(hi)
-  if (idx < 0) return ar
+/**
+ * Word-boundary highlight. Splits the verse on whitespace, finds the token
+ * whose diacritic-stripped form equals the diacritic-stripped target, and
+ * wraps only that token in <mark>. Avoids the indexOf trap where a short
+ * surface form like مِن matches as a substring inside مُؤْمِنُونَ.
+ *
+ * If `wi` is provided (1-based word_index from the backend), highlights the
+ * token at that exact position — the most accurate path.
+ */
+function highlight(ar: string, hi: string, wi?: number | null): React.ReactNode {
+  if (!ar) return ar
+  const tokens = ar.split(/(\s+)/)
+  // Tokens are interleaved: [word, sep, word, sep, ...]. Word slots have even index.
+  const wordSlots: number[] = []
+  for (let i = 0; i < tokens.length; i++) {
+    if (i % 2 === 0 && tokens[i].length > 0) wordSlots.push(i)
+  }
+
+  let matchIdx = -1
+  if (typeof wi === 'number' && wi > 0 && wi <= wordSlots.length) {
+    matchIdx = wordSlots[wi - 1]
+  } else if (hi) {
+    const targetBare = stripDiacritics(hi).replace(/^ٱ|^ا/, '')
+    for (const slot of wordSlots) {
+      const tok = tokens[slot]
+      const bare = stripDiacritics(tok).replace(/^ٱ|^ا/, '')
+      if (bare === stripDiacritics(hi) || bare === targetBare) {
+        matchIdx = slot
+        break
+      }
+    }
+    // Fallback: any token containing the diacritic-stripped target as a *whole-token* match
+    if (matchIdx < 0) {
+      for (const slot of wordSlots) {
+        if (stripDiacritics(tokens[slot]) === stripDiacritics(hi)) {
+          matchIdx = slot
+          break
+        }
+      }
+    }
+  }
+
+  if (matchIdx < 0) return ar
   return (
     <>
-      {ar.slice(0, idx)}
-      <mark className="wl-hl">{hi}</mark>
-      {ar.slice(idx + hi.length)}
+      {tokens.slice(0, matchIdx).join('')}
+      <mark className="wl-hl">{tokens[matchIdx]}</mark>
+      {tokens.slice(matchIdx + 1).join('')}
     </>
   )
 }
 
-export function WordLab() {
+export function WordLab({ initialLetters }: { initialLetters?: string }) {
+  const t = useTranslations('wordLab')
   const { status, data, error } = useRootsIndex()
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('frequency')
-  const [activeKey, setActiveKey] = useState<string | null>(null)
+  const [activeKey, setActiveKey] = useState<string | null>(initialLetters ?? null)
   const [activeDeriv, setActiveDeriv] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -102,6 +152,20 @@ export function WordLab() {
     }
   }, [activeRoot, activeKey])
 
+  // Keep the URL in sync with the active root. We use replaceState (not
+  // router.push/replace) so the change is silent — no Next router re-render
+  // and no entry in the history stack per click. Browser Back still works
+  // because each genuine navigation (initial mount via [letters] route) goes
+  // through the App Router normally.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!activeRoot) return
+    const target = `/quran/words/${encodeURIComponent(activeRoot.letters)}`
+    if (window.location.pathname !== target) {
+      window.history.replaceState(window.history.state, '', target)
+    }
+  }, [activeRoot])
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const cmd = (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey
@@ -123,7 +187,7 @@ export function WordLab() {
     return (
       <div className="wl-page">
         <Hero />
-        <div className="wl-loading">Loading the roots index…</div>
+        <div className="wl-loading">{t('loadingIndex')}</div>
       </div>
     )
   }
@@ -131,7 +195,7 @@ export function WordLab() {
     return (
       <div className="wl-page">
         <Hero />
-        <div className="wl-loading">{error ?? 'Failed to build roots index.'}</div>
+        <div className="wl-loading">{error ?? t('indexError')}</div>
       </div>
     )
   }
@@ -153,10 +217,10 @@ export function WordLab() {
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search a root — try ktb, rHm, slm, or paste Arabic"
+              placeholder={t('searchPlaceholder')}
               spellCheck={false}
               autoComplete="off"
-              aria-label="Search Quranic roots"
+              aria-label={t('searchAria')}
             />
             {showPreview && (
               <div className="wl-search-preview" aria-live="polite">
@@ -167,12 +231,12 @@ export function WordLab() {
             <kbd>⌘K</kbd>
           </div>
 
-          <div className="wl-sort" role="radiogroup" aria-label="Sort roots">
-            <span className="wl-sort-label">Sort</span>
+          <div className="wl-sort" role="radiogroup" aria-label={t('sortAria')}>
+            <span className="wl-sort-label">{t('sortLabel')}</span>
             {([
-              ['frequency', 'Frequency'],
-              ['abjadi', 'Abjadi  ا → ي'],
-              ['reverse', 'Reverse  ي → ا'],
+              ['frequency', t('sortFrequency')],
+              ['abjadi', t('sortAbjadi')],
+              ['reverse', t('sortReverse')],
             ] as const).map(([k, l]) => (
               <button
                 key={k}
@@ -188,7 +252,7 @@ export function WordLab() {
         </div>
 
         <details className="wl-cheat">
-          <summary>Transliteration key</summary>
+          <summary>{t('cheatToggle')}</summary>
           <div className="wl-cheat-grid">
             {CHEAT_PAIRS.map(([lat, ar]) => (
               <div key={lat} className="wl-cheat-cell">
@@ -203,10 +267,13 @@ export function WordLab() {
       <div className="wl-lab">
         <aside className="wl-index">
           <div className="wl-index-head">
-            <span>Roots</span>
+            <span>{t('sectionRoots')}</span>
             <span className="wl-index-count">
               {isCapped
-                ? `${INDEX_RENDER_CAP} of ${visible.length.toLocaleString()}`
+                ? t('indexCount', {
+                    cap: INDEX_RENDER_CAP.toLocaleString(),
+                    total: visible.length.toLocaleString(),
+                  })
                 : visible.length.toLocaleString()}
             </span>
           </div>
@@ -247,12 +314,14 @@ export function WordLab() {
             ))
           )}
           {visible.length === 0 && (
-            <div className="wl-empty">No roots match. Try the transliteration key below the search.</div>
+            <div className="wl-empty">{t('noRoots')}</div>
           )}
           {isCapped && (
             <div className="wl-empty">
-              Showing the top {INDEX_RENDER_CAP.toLocaleString()} of {totalRoots.toLocaleString()} roots. Search to
-              narrow down.
+              {t('showingTopN', {
+                cap: INDEX_RENDER_CAP.toLocaleString(),
+                total: totalRoots.toLocaleString(),
+              })}
             </div>
           )}
         </aside>
@@ -264,14 +333,17 @@ export function WordLab() {
 }
 
 function Hero() {
+  const t = useTranslations('wordLab')
   return (
     <header className="wl-hero">
       <h1 className="wl-title">
-        Word <em>lab</em>.
+        {t('heroTitle')} <em>{t('heroTitleAccent')}</em>.
       </h1>
       <p className="wl-lede">
-        Every Arabic root in the Quran, every derived word, every occurrence — searchable by Arabic letters or by their
-        Latin equivalents. Type <span className="wl-mono">ktb</span> and find <span className="wl-arab">ك ت ب</span>.
+        {t.rich('heroLede', {
+          mono: (chunks) => <span className="wl-mono">{chunks}</span>,
+          arab: (chunks) => <span className="wl-arab">{chunks}</span>,
+        })}
       </p>
     </header>
   )
@@ -299,6 +371,34 @@ function RootRow({
   )
 }
 
+function Section({
+  num,
+  title,
+  sub,
+  open,
+  onOpenChange,
+  children,
+}: {
+  num: string
+  title: React.ReactNode
+  sub?: React.ReactNode
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  children: React.ReactNode
+}) {
+  return (
+    <Collapsible open={open} onOpenChange={onOpenChange} className="wl-section">
+      <CollapsibleTrigger className="wl-section-head" data-open={open}>
+        <span className="num">{num}</span>
+        <span className="title">{title}</span>
+        {sub && <span className="sub">{sub}</span>}
+        <ChevronDown className="chevron" size={14} aria-hidden />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="wl-section-body">{children}</CollapsibleContent>
+    </Collapsible>
+  )
+}
+
 function Detail({
   root,
   activeDeriv,
@@ -308,42 +408,64 @@ function Detail({
   activeDeriv: number
   setActiveDeriv: (n: number) => void
 }) {
+  const t = useTranslations('wordLab')
   const detail = useRootDetail(root.letters)
   const derivs = detail.derivs
-  const occ = detail.occ
+  const meaning = detail.meaning
   const deriv = derivs[activeDeriv] ?? derivs[0]
-  const isLoading = detail.status === 'loading' || detail.status === 'idle'
+  const isLoadingDetail = detail.status === 'loading' || detail.status === 'idle'
+
+  const [activeSurface, setActiveSurface] = useState<string | null>(null)
+  // Reset filter when the root changes.
+  useEffect(() => {
+    setActiveSurface(null)
+  }, [root.letters])
+
+  const prefs = useQuranPreferences()
+  const sections = prefs.wordLabSections
+  const setSection = (k: keyof typeof sections, v: boolean) =>
+    prefs.setPreferences({ ...prefs, wordLabSections: { ...sections, [k]: v } })
+
+  const onChipClick = (i: number) => {
+    setActiveDeriv(i)
+    const surface = derivs[i]?.ar ?? null
+    // Toggle: if already filtering by this surface, clear; else set.
+    setActiveSurface((prev) => (prev === surface ? null : surface))
+  }
 
   return (
     <article className="wl-detail">
       <header className="wl-detail-head">
         <div className="top">
-          <span className="kicker">Root</span>
+          <span className="kicker">{t('detailKickerRoot')}</span>
           <span className="tr">{root.tr}</span>
           <span className="count">
-            <strong>{root.count.toLocaleString()}</strong> occurrences
+            <strong>{root.count.toLocaleString()}</strong> {t('detailOccurrencesSuffix')}
           </span>
         </div>
         <div className="letters" dir="rtl" lang="ar">
           {root.letters}
         </div>
+        {meaning && <RootMeaning meaning={meaning} />}
       </header>
 
-      <section className="wl-section">
-        <div className="wl-section-head">
-          <span className="num">01</span>
-          <span className="title">Derived forms</span>
-          <span className="sub">{derivs.length}</span>
-        </div>
-        {isLoading ? (
-          <div className="wl-loading">Loading derived forms…</div>
+      <Section
+        num="01"
+        title={t('sectionDerivedForms')}
+        sub={derivs.length}
+        open={sections.derivs}
+        onOpenChange={(v) => setSection('derivs', v)}
+      >
+        {isLoadingDetail ? (
+          <div className="wl-loading">{t('loadingDerivs')}</div>
         ) : (
           <div className="wl-derivs">
             {derivs.map((d, i) => (
               <button
                 key={d.ar}
-                onClick={() => setActiveDeriv(i)}
-                className={`wl-deriv ${activeDeriv === i ? 'on' : ''}`}
+                onClick={() => onChipClick(i)}
+                className={`wl-deriv ${activeDeriv === i ? 'on' : ''} ${activeSurface === d.ar ? 'filtering' : ''}`}
+                title={activeSurface === d.ar ? t('filterClickAgain') : t('filterClick')}
               >
                 <div className="ar" dir="rtl" lang="ar">
                   {d.ar}
@@ -357,62 +479,318 @@ function Detail({
             ))}
           </div>
         )}
-      </section>
+      </Section>
 
-      <section className="wl-section">
-        <div className="wl-section-head">
-          <span className="num">02</span>
-          <span className="title">Occurrences</span>
-          <span className="sub">
-            showing {occ.length} of {root.count.toLocaleString()}
-          </span>
-        </div>
-        {isLoading ? (
-          <div className="wl-loading">Loading occurrences…</div>
-        ) : (
-          <div className="wl-occ-list">
-            {occ.map((o, i) => (
-              <OccurrenceCard key={`${o.ref}-${i}`} occ={o} />
-            ))}
-          </div>
-        )}
-      </section>
+      <OccurrencesSection
+        rootLetters={root.letters}
+        rootCount={root.count}
+        activeSurface={activeSurface}
+        onClearFilter={() => setActiveSurface(null)}
+        open={sections.occurrences}
+        onOpenChange={(v) => setSection('occurrences', v)}
+        showTranslit={prefs.transliteration}
+        showTranslation={prefs.text}
+      />
 
       {deriv && (
-        <section className="wl-section">
-          <div className="wl-section-head">
-            <span className="num">03</span>
-            <span className="title">
-              Morphology of <span className="wl-arab">{deriv.ar}</span>
-            </span>
-          </div>
+        <Section
+          num="03"
+          title={t.rich('sectionMorphologyOf', {
+            lemma: deriv.ar,
+            arab: (chunks) => <span className="wl-arab">{chunks}</span>,
+          })}
+          open={sections.morphology}
+          onOpenChange={(v) => setSection('morphology', v)}
+        >
           <div className="wl-morph-grid">
-            <Cell k="Lemma" v={deriv.ar} ar />
-            <Cell k="Translit." v={deriv.tr ?? arabicToLatin(stripDiacritics(deriv.ar))} />
-            <Cell k="Gloss" v="—" />
-            <Cell k="POS" v="—" />
-            <Cell k="Root" v={root.letters} ar />
-            <Cell k="Count" v={`${deriv.count}×`} />
+            <Cell k={t('morphLemma')} v={deriv.ar} ar />
+            <Cell k={t('morphTranslit')} v={deriv.tr ?? arabicToLatin(stripDiacritics(deriv.ar))} />
+            <Cell k={t('morphGloss')} v="—" />
+            <Cell k={t('morphPos')} v="—" />
+            <Cell k={t('morphRoot')} v={root.letters} ar />
+            <Cell k={t('morphCount')} v={`${deriv.count}×`} />
           </div>
-        </section>
+        </Section>
       )}
     </article>
   )
 }
 
-function OccurrenceCard({ occ }: { occ: Occurrence }) {
+function OccurrencesSection({
+  rootLetters,
+  rootCount,
+  activeSurface,
+  onClearFilter,
+  open,
+  onOpenChange,
+  showTranslit,
+  showTranslation,
+}: {
+  rootLetters: string
+  rootCount: number
+  activeSurface: string | null
+  onClearFilter: () => void
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  showTranslit: boolean
+  showTranslation: boolean
+}) {
+  const t = useTranslations('wordLab')
+  const { items, total, hasMore, loadMore, status } = useRootOccurrences(
+    rootLetters,
+    activeSurface,
+  )
+  const isLoading = status === 'loading' || status === 'idle'
+  const sub = activeSurface
+    ? t('occurrencesFiltered', {
+        total: total.toLocaleString(),
+        surface: activeSurface,
+      })
+    : t('occurrencesCount', {
+        shown: items.length.toLocaleString(),
+        total: (total || rootCount).toLocaleString(),
+      })
+
+  return (
+    <Section
+      num="02"
+      title={
+        activeSurface ? (
+          <>
+            {t.rich('sectionOccurrencesOf', {
+              surface: activeSurface,
+              arab: (chunks) => <span className="wl-arab">{chunks}</span>,
+            })}{' '}
+            <button
+              type="button"
+              className="wl-clear-filter"
+              onClick={(e) => {
+                e.preventDefault()
+                onClearFilter()
+              }}
+            >
+              {t('clear')}
+            </button>
+          </>
+        ) : (
+          t('sectionOccurrences')
+        )
+      }
+      sub={sub}
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      {isLoading && items.length === 0 ? (
+        <div className="wl-loading">{t('loadingOccurrences')}</div>
+      ) : items.length === 0 ? (
+        <div className="wl-empty">{t('noOccurrences')}</div>
+      ) : (
+        <VirtualizedOccurrences
+          items={items}
+          total={total}
+          hasMore={hasMore}
+          loadMore={loadMore}
+          showTranslit={showTranslit}
+          showTranslation={showTranslation}
+        />
+      )}
+    </Section>
+  )
+}
+
+function VirtualizedOccurrences({
+  items,
+  total,
+  hasMore,
+  loadMore,
+  showTranslit,
+  showTranslation,
+}: {
+  items: Occurrence[]
+  total: number
+  hasMore: boolean
+  loadMore: () => void
+  showTranslit: boolean
+  showTranslation: boolean
+}) {
+  const t = useTranslations('wordLab')
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const [loadingAll, setLoadingAll] = useState(false)
+
+  const virtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => scrollerRef.current,
+    estimateSize: () => 200,
+    overscan: 6,
+  })
+
+  const virtualItems = virtualizer.getVirtualItems()
+
+  // Auto-load when scrolling near the end of the loaded slice.
+  useEffect(() => {
+    if (!hasMore) return
+    if (virtualItems.length === 0) return
+    const lastIdx = virtualItems[virtualItems.length - 1].index
+    if (lastIdx >= items.length - 5) loadMore()
+  }, [virtualItems, hasMore, items.length, loadMore])
+
+  // "End ↓" loop: keep calling loadMore until everything's loaded, then scroll
+  // to the bottom and reset.
+  useEffect(() => {
+    if (!loadingAll) return
+    if (hasMore) {
+      loadMore()
+      return
+    }
+    // Done loading — scroll to the absolute end and clear the flag.
+    const el = scrollerRef.current
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+    setLoadingAll(false)
+  }, [loadingAll, hasMore, items.length, loadMore])
+
+  // Range readout: derive the visible window from the virtualizer's items.
+  // first/last are 1-indexed and clamped to non-empty.
+  const first = virtualItems.length > 0 ? virtualItems[0].index + 1 : 0
+  const last = virtualItems.length > 0 ? virtualItems[virtualItems.length - 1].index + 1 : 0
+
+  const onJumpTop = () => {
+    scrollerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const onJumpEnd = () => {
+    if (hasMore) {
+      setLoadingAll(true)
+    } else {
+      const el = scrollerRef.current
+      if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+    }
+  }
+
+  return (
+    <div className="wl-occ-wrap">
+      <div ref={scrollerRef} className="wl-occ-scroll">
+        <div
+          className="wl-occ-virt"
+          style={{ height: virtualizer.getTotalSize(), position: 'relative' }}
+        >
+          {virtualItems.map((vi) => {
+            const o = items[vi.index]
+            return (
+              <div
+                key={vi.key}
+                data-index={vi.index}
+                ref={virtualizer.measureElement}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  transform: `translateY(${vi.start}px)`,
+                }}
+              >
+                <OccurrenceCard
+                  occ={o}
+                  showTranslit={showTranslit}
+                  showTranslation={showTranslation}
+                />
+              </div>
+            )
+          })}
+        </div>
+      </div>
+      <div className="wl-occ-footer">
+        <span className="range">
+          {loadingAll
+            ? t('rangeLoading', {
+                shown: items.length.toLocaleString(),
+                total: total.toLocaleString(),
+              })
+            : t('rangeShowing', {
+                first: first.toLocaleString(),
+                last: last.toLocaleString(),
+                total: total.toLocaleString(),
+              })}
+        </span>
+        <div className="actions">
+          <button
+            type="button"
+            onClick={onJumpTop}
+            disabled={loadingAll}
+            className="wl-occ-jump"
+            aria-label={t('ariaJumpTop')}
+          >
+            <ArrowUp className="size-3" />
+            <span>{t('jumpTop')}</span>
+          </button>
+          <button
+            type="button"
+            onClick={onJumpEnd}
+            disabled={loadingAll}
+            className="wl-occ-jump"
+            aria-label={t('ariaJumpEnd')}
+          >
+            <span>{t('jumpEnd')}</span>
+            <ArrowDown className="size-3" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function OccurrenceCard({
+  occ,
+  showTranslit,
+  showTranslation,
+}: {
+  occ: Occurrence
+  showTranslit: boolean
+  showTranslation: boolean
+}) {
   return (
     <Link href={`/quran/${occ.ref}`} className="wl-occ">
       <span className="ref">{occ.ref}</span>
       <div className="body">
         <div className="ar" dir="rtl" lang="ar">
-          {highlight(occ.ar, occ.hi)}
+          {highlight(occ.ar, occ.hi, occ.wi)}
         </div>
-        {occ.tl && <div className="tl">{occ.tl}</div>}
-        {occ.en && <div className="en">{occ.en}</div>}
+        {showTranslit && occ.tl && <div className="tl">{occ.tl}</div>}
+        {showTranslation && occ.en && <div className="en">{occ.en}</div>}
       </div>
       <span className="arrow">↗</span>
     </Link>
+  )
+}
+
+function RootMeaning({ meaning }: { meaning: string }) {
+  const t = useTranslations('wordLab')
+  const [showAll, setShowAll] = useState(false)
+  // Senses are separated by `;` in the corpus. Some entries also use `/` and `=`
+  // to cluster meanings per surface form (e.g. `مَن = ... / مِن = ...`).
+  // We don't try to parse those — when expanded, render the whole string.
+  const senses = useMemo(
+    () =>
+      meaning
+        .split(';')
+        .map((s) => s.trim())
+        .filter(Boolean),
+    [meaning],
+  )
+  const preview = senses.slice(0, 3).join('; ')
+  const hasMore = senses.length > 3 || meaning.includes('/') || meaning.includes('=')
+
+  return (
+    <div className="wl-meaning">
+      <div className="text">{showAll ? meaning : preview}</div>
+      {hasMore && (
+        <button
+          type="button"
+          className="wl-meaning-toggle"
+          onClick={() => setShowAll((v) => !v)}
+        >
+          {showAll ? t('showLess') : t('showAll')}
+        </button>
+      )}
+    </div>
   )
 }
 

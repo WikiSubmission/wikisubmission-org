@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { wsApi } from '@/src/api/client'
 import { rootToLatin, stripDiacritics } from '@/lib/transliteration'
 
@@ -16,6 +16,7 @@ export type Occurrence = {
   en: string | null
   tl: string | null
   hi: string
+  wi: number | null
 }
 
 export type RootRecord = {
@@ -34,7 +35,7 @@ export type RootsIndex = {
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
 const INDEX_CACHE_KEY = 'ws-roots-index-v2'
-const DETAIL_CACHE_KEY = 'ws-roots-detail-v3'
+const DETAIL_CACHE_KEY = 'ws-roots-detail-v5'
 const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 7
 const ROOTS_FETCH_LIMIT = 5000
 
@@ -139,13 +140,18 @@ export function useRootsIndex(): UseRootsIndex {
   }
 }
 
-type DetailCache = Record<string, { detail: { derivs: Derivative[]; occ: Occurrence[] }; fetchedAt: number }>
+type DetailCache = Record<
+  string,
+  { detail: { derivs: Derivative[]; occ: Occurrence[]; meaning: string | null }; fetchedAt: number }
+>
 
 function readDetailCache(): DetailCache {
   return readJSON<DetailCache>(DETAIL_CACHE_KEY) ?? {}
 }
 
-async function fetchDetail(letters: string): Promise<{ derivs: Derivative[]; occ: Occurrence[] }> {
+async function fetchDetail(
+  letters: string,
+): Promise<{ derivs: Derivative[]; occ: Occurrence[]; meaning: string | null }> {
   const { data, error } = await wsApi.GET('/roots/{letters}', {
     params: {
       path: { letters },
@@ -165,14 +171,17 @@ async function fetchDetail(letters: string): Promise<{ derivs: Derivative[]; occ
     en: o.en ?? null,
     tl: o.tl ?? null,
     hi: o.hl ?? '',
+    wi: o.wi ?? null,
   }))
-  return { derivs, occ }
+  const meaning = data.m ?? null
+  return { derivs, occ, meaning }
 }
 
 export type UseRootDetail = {
   status: Status
   derivs: Derivative[]
   occ: Occurrence[]
+  meaning: string | null
   error: string | null
 }
 
@@ -191,6 +200,7 @@ export function useRootDetail(letters: string | null): UseRootDetail {
   const [status, setStatus] = useState<Status>(initial ? 'ready' : letters ? 'loading' : 'idle')
   const [derivs, setDerivs] = useState<Derivative[]>(initial?.derivs ?? [])
   const [occ, setOcc] = useState<Occurrence[]>(initial?.occ ?? [])
+  const [meaning, setMeaning] = useState<string | null>(initial?.meaning ?? null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -198,6 +208,7 @@ export function useRootDetail(letters: string | null): UseRootDetail {
       setStatus('idle')
       setDerivs([])
       setOcc([])
+      setMeaning(null)
       setError(null)
       return
     }
@@ -207,6 +218,7 @@ export function useRootDetail(letters: string | null): UseRootDetail {
     if (cached && Date.now() - cached.fetchedAt <= CACHE_TTL_MS) {
       setDerivs(cached.detail.derivs)
       setOcc(cached.detail.occ)
+      setMeaning(cached.detail.meaning ?? null)
       setStatus('ready')
       return
     }
@@ -222,6 +234,7 @@ export function useRootDetail(letters: string | null): UseRootDetail {
         writeJSON(DETAIL_CACHE_KEY, next)
         setDerivs(detail.derivs)
         setOcc(detail.occ)
+        setMeaning(detail.meaning)
         setStatus('ready')
       })
       .catch((e: unknown) => {
@@ -235,7 +248,145 @@ export function useRootDetail(letters: string | null): UseRootDetail {
     }
   }, [letters])
 
-  return { status, derivs, occ, error }
+  return { status, derivs, occ, meaning, error }
+}
+
+// ─── Paginated occurrences ─────────────────────────────────────────────────
+
+const OCC_PAGE_SIZE = 50
+
+function mapOccurrence(o: {
+  vk: string
+  ar: string
+  en?: string | null
+  tl?: string | null
+  hl?: string | null
+  wi?: number | null
+}): Occurrence {
+  return {
+    ref: o.vk,
+    ar: o.ar,
+    en: o.en ?? null,
+    tl: o.tl ?? null,
+    hi: o.hl ?? '',
+    wi: o.wi ?? null,
+  }
+}
+
+async function fetchOccurrencesPage(
+  letters: string,
+  surface: string | null,
+  offset: number,
+): Promise<{ items: Occurrence[]; total: number }> {
+  const { data, error } = await wsApi.GET('/roots/{letters}/occurrences', {
+    params: {
+      path: { letters },
+      query: {
+        limit: OCC_PAGE_SIZE,
+        offset,
+        ...(surface ? { surface } : {}),
+      },
+    },
+  })
+  if (error || !data) {
+    throw new Error(`Failed to load occurrences for ${letters}`)
+  }
+  return {
+    items: (data.items ?? []).map(mapOccurrence),
+    total: data.total ?? 0,
+  }
+}
+
+export type UseRootOccurrences = {
+  status: Status
+  items: Occurrence[]
+  total: number
+  hasMore: boolean
+  loadMore: () => void
+  error: string | null
+}
+
+/**
+ * Paginated occurrences for a root, optionally narrowed to a single surface
+ * form. Fetches page 1 on mount, exposes `loadMore` for the virtualized list
+ * to call when scrolling near the bottom. Resets when (letters, surface)
+ * changes.
+ */
+export function useRootOccurrences(
+  letters: string | null,
+  surface: string | null,
+): UseRootOccurrences {
+  const [status, setStatus] = useState<Status>(letters ? 'loading' : 'idle')
+  const [items, setItems] = useState<Occurrence[]>([])
+  const [total, setTotal] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+  const offsetRef = useRef(0)
+  const loadingRef = useRef(false)
+
+  const fetchKey = letters ? `${letters}|${surface ?? ''}` : null
+
+  useEffect(() => {
+    if (!letters) {
+      setStatus('idle')
+      setItems([])
+      setTotal(0)
+      setError(null)
+      offsetRef.current = 0
+      return
+    }
+    let cancelled = false
+    offsetRef.current = 0
+    setStatus('loading')
+    setError(null)
+    loadingRef.current = true
+    void fetchOccurrencesPage(letters, surface, 0)
+      .then(({ items, total }) => {
+        if (cancelled) return
+        setItems(items)
+        setTotal(total)
+        offsetRef.current = items.length
+        setStatus('ready')
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return
+        setError(e instanceof Error ? e.message : 'Failed to load occurrences')
+        setStatus('error')
+      })
+      .finally(() => {
+        loadingRef.current = false
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [fetchKey, letters, surface])
+
+  const loadMore = useCallback(() => {
+    if (!letters) return
+    if (loadingRef.current) return
+    if (offsetRef.current >= total) return
+    loadingRef.current = true
+    const nextOffset = offsetRef.current
+    void fetchOccurrencesPage(letters, surface, nextOffset)
+      .then(({ items: page }) => {
+        setItems((prev) => [...prev, ...page])
+        offsetRef.current = nextOffset + page.length
+      })
+      .catch((e: unknown) => {
+        setError(e instanceof Error ? e.message : 'Failed to load more occurrences')
+      })
+      .finally(() => {
+        loadingRef.current = false
+      })
+  }, [letters, surface, total])
+
+  return {
+    status,
+    items,
+    total,
+    hasMore: items.length < total,
+    loadMore,
+    error,
+  }
 }
 
 /** Filter helpers — pure, exported for testing and re-use. */

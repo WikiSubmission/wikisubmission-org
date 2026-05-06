@@ -25,6 +25,12 @@ export type LangCode =
 export type DisplayMode = 'verse' | 'reading'
 export type ReadingModeLang = 'translation' | 'arabic'
 
+export type WordLabSections = {
+  derivs: boolean
+  occurrences: boolean
+  morphology: boolean
+}
+
 export type QuranPreferences = {
   arabic: boolean
   subtitles: boolean
@@ -38,6 +44,7 @@ export type QuranPreferences = {
   primaryLanguage: LangCode
   secondaryLanguage?: LangCode
   zoomLevel: ZoomLevel
+  wordLabSections: WordLabSections
   setPreferences: (preferences: QuranPreferences) => void
 }
 
@@ -63,21 +70,34 @@ export const useQuranPreferences = create(
       primaryLanguage: getLocaleCookie(),
       secondaryLanguage: undefined,
       zoomLevel: 'comfortable' as ZoomLevel,
+      wordLabSections: {
+        derivs: true,
+        occurrences: true,
+        morphology: false,
+      },
       setPreferences: (preferences: QuranPreferences) => set(preferences),
     }),
     {
       name: 'quran-preferences-v4',
       storage: createJSONStorage(() => localStorage),
-      version: 5,
+      version: 6,
       migrate: (state, version) => {
-        let next = state as Omit<QuranPreferences, 'displayMode'> & { displayMode?: string }
+        let next = state as Omit<QuranPreferences, 'displayMode' | 'wordLabSections'> & {
+          displayMode?: string
+          wordLabSections?: WordLabSections
+        }
         if (version < 4) {
           next = { ...next, zoomLevel: 'comfortable' as ZoomLevel }
         }
         if (version < 5) {
-          // WBW is now an additive toggle on verse mode, not a separate displayMode.
           if (next.displayMode === 'word') {
             next = { ...next, displayMode: 'verse', wordByWord: true }
+          }
+        }
+        if (version < 6) {
+          next = {
+            ...next,
+            wordLabSections: { derivs: true, occurrences: true, morphology: false },
           }
         }
         return next as QuranPreferences

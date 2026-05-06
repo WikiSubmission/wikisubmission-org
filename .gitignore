@@ -50,3 +50,4 @@ CLAUDE.md
 hooks/use-verse-search.ts
 todo.md
 .claude*
+docs/*

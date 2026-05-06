@@ -554,6 +554,17 @@ paths:
             minimum: 0
             default: 0
           example: 0
+        - name: surface
+          in: query
+          required: false
+          description: >
+            Optional Arabic surface form filter. When provided, narrows the
+            result set to occurrences where the matched word equals this exact
+            string (used by the Word Lab "click derivative chip" flow). The
+            `total` field reflects the filtered universe.
+          schema:
+            type: string
+          example: "كِتَاب"
       responses:
         '200':
           description: OK
@@ -1285,6 +1296,16 @@ components:
               description: >
                 Morphology note for the root (Phase 2; always `null` for now).
               example: null
+            m:
+              type: string
+              nullable: true
+              description: >
+                Per-root meaning string. The `meaning` column in `word_text` is
+                denormalized — every surface form sharing this root carries the
+                same string. The server returns one canonical row's value here.
+                Senses are typically separated by `;`. May be `null` when no
+                English meaning row exists for the root.
+              example: "to write; note; record; collect; book; writing; scripture; decree; letter"
 
     Derivative:
       type: object
@@ -1362,6 +1383,15 @@ components:
             from the per-word `tl` entry in `word_text`. May be `null` if no
             transliteration row exists for that word.
           example: "kitāb"
+        wi:
+          type: integer
+          nullable: true
+          description: >
+            1-based word index of the matched word inside its verse. Lets the
+            client highlight the exact token without resorting to substring
+            matching (which mis-targets short surface forms like `مِن` that
+            embed inside longer words like `مُؤْمِن`).
+          example: 4
 
     RootsIndexResponse:
       type: object

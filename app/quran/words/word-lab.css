@@ -378,6 +378,35 @@
   line-height: 1;
   letter-spacing: 0.12em;
 }
+.wl-meaning {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 64ch;
+}
+.wl-meaning .text {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--ed-fg-muted);
+  line-height: 1.5;
+}
+.wl-meaning-toggle {
+  align-self: flex-start;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ed-accent);
+  background: transparent;
+  border: 1px solid var(--ed-rule);
+  border-radius: 2px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 140ms;
+}
+.wl-meaning-toggle:hover { border-color: var(--ed-accent); background: var(--ed-accent-soft); }
 
 .wl-section {
   display: flex;
@@ -390,7 +419,25 @@
   gap: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--ed-rule);
+  width: 100%;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  transition: opacity 140ms;
 }
+.wl-section-head:hover { opacity: 0.85; }
+.wl-section-head .chevron {
+  margin-left: 4px;
+  color: var(--ed-fg-muted);
+  transition: transform 180ms ease;
+  align-self: center;
+}
+.wl-section-head[data-state='closed'] .chevron { transform: rotate(-90deg); }
+.wl-section-body { display: flex; flex-direction: column; gap: 16px; padding-top: 16px; }
 .wl-section-head .num {
   font-family: var(--font-cormorant), Georgia, serif;
   font-style: italic;
@@ -438,6 +485,89 @@
   border-color: var(--ed-accent);
   background: var(--ed-accent-soft);
 }
+.wl-deriv.filtering {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: -2px;
+}
+.wl-clear-filter {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ed-accent);
+  background: transparent;
+  border: 1px solid var(--ed-rule);
+  border-radius: 2px;
+  padding: 2px 8px;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: all 140ms;
+}
+.wl-clear-filter:hover { border-color: var(--ed-accent); background: var(--ed-accent-soft); }
+.wl-occ-wrap {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ed-rule);
+  border-radius: 3px;
+  background: var(--ed-bg-alt);
+  overflow: hidden;
+}
+.wl-occ-scroll {
+  /* Fill the viewport below the section header AND the footer (220 + ~44). */
+  max-height: calc(100vh - 264px);
+  min-height: 320px;
+  overflow-y: auto;
+  padding: 4px;
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--ed-rule) transparent;
+}
+.wl-occ-scroll::-webkit-scrollbar { width: 8px; }
+.wl-occ-scroll::-webkit-scrollbar-thumb { background: var(--ed-rule); border-radius: 4px; }
+.wl-occ-scroll::-webkit-scrollbar-thumb:hover { background: var(--ed-fg-muted); }
+.wl-occ-virt { width: 100%; }
+.wl-occ-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--ed-rule);
+  background: var(--ed-surface);
+}
+.wl-occ-footer .range {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ed-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+.wl-occ-footer .actions {
+  display: flex;
+  gap: 6px;
+}
+.wl-occ-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ed-fg-muted);
+  background: transparent;
+  border: 1px solid var(--ed-rule);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 140ms;
+}
+.wl-occ-jump:hover:not(:disabled) {
+  color: var(--ed-fg);
+  border-color: var(--ed-fg);
+}
+.wl-occ-jump:disabled { opacity: 0.5; cursor: not-allowed; }
 .wl-deriv .ar {
   font-family: var(--font-arabic), 'Amiri', serif;
   font-size: 28px;

@@ -546,6 +546,11 @@ export interface components {
              * @example null
              */
             mp?: string | null;
+            /**
+             * @description Per-root meaning string. The `meaning` column in `word_text` is denormalized — every surface form sharing this root carries the same string. The server returns one canonical row's value here. Senses are typically separated by `;`. May be `null` when no English meaning row exists for the root.
+             * @example to write; note; record; collect; book; writing; scripture; decree; letter
+             */
+            m?: string | null;
         };
         /** @description A distinct surface form (token spelling) of a root, with its occurrence count. `tr` is the Latin transliteration of the surface form, sourced from `word_text` rows tagged with the `tl` language (most-common value when multiple readings exist). `en` and `p` (POS) remain reserved for Phase 2 morphology data and are still `null`. */
         Derivative: {
@@ -603,6 +608,11 @@ export interface components {
              * @example kitāb
              */
             tl?: string | null;
+            /**
+             * @description 1-based word index of the matched word inside its verse. Lets the client highlight the exact token without resorting to substring matching (which mis-targets short surface forms like `مِن` that embed inside longer words like `مُؤْمِن`).
+             * @example 4
+             */
+            wi?: number | null;
         };
         /** @description Paginated index of roots returned by `/roots`. */
         RootsIndexResponse: {
@@ -1426,6 +1436,11 @@ export interface operations {
                  * @example 0
                  */
                 offset?: number;
+                /**
+                 * @description Optional Arabic surface form filter. When provided, narrows the result set to occurrences where the matched word equals this exact string (used by the Word Lab "click derivative chip" flow). The `total` field reflects the filtered universe.
+                 * @example كِتَاب
+                 */
+                surface?: string;
             };
             header?: never;
             path: {

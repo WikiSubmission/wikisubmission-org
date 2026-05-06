@@ -1,6 +1,4 @@
-import { SiteNav } from '@/components/site-nav'
-import { SiteFooter } from '@/components/site-footer'
-import { WordLab } from './word-lab'
+import { WordLabPageShell } from './shell'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,15 +9,5 @@ export const metadata = {
 }
 
 export default function WordLabPage() {
-  return (
-    <>
-      <div className="quran-fixed-headers">
-        <SiteNav />
-      </div>
-      <main className="pt-16">
-        <WordLab />
-      </main>
-      <SiteFooter />
-    </>
-  )
+  return <WordLabPageShell />
 }

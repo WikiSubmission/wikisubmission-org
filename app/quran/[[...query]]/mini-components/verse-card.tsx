@@ -2,6 +2,7 @@
 
 import { memo, useMemo, useCallback, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useIsTouch } from '@/hooks/use-is-touch'
@@ -55,6 +56,7 @@ function WordOccurrencesDialogContent({
   root: string
   meaning: string
 }) {
+  const t = useTranslations('wordLab')
   const [showMeaning, setShowMeaning] = useState(false)
 
   return (
@@ -88,6 +90,14 @@ function WordOccurrencesDialogContent({
             )}
           </>
         )}
+
+        <Link
+          href={`/quran/words/${encodeURIComponent(root)}`}
+          className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+        >
+          {t('openInWordLab')}
+          <ArrowUpRight className="size-3" />
+        </Link>
       </DialogHeader>
 
       <div className="mt-0">
