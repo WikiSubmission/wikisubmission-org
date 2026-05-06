@@ -1184,7 +1184,7 @@ export interface operations {
                  */
                 chapter_number_end?: number;
                 /**
-                 * @description First verse to include within `chapter_number_start`, 1-based. Defaults to 1 when omitted. Ignored when `verses` is provided.
+                 * @description First verse to include within `chapter_number_start`. Use `0` for the Basmallah; `1` and above for numbered verses. Defaults to 1 when omitted. Ignored when `verses` is provided.
                  * @example 1
                  */
                 verse_start?: number;
