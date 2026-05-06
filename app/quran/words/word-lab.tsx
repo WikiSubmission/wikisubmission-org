@@ -750,11 +750,12 @@ function OccurrenceCard({
   const [chapterStr, verseStr] = occ.ref.split(':')
   const chapter = Number(chapterStr)
   const verse = Number(verseStr)
+  // Occurrence.wi is 1-based per the openapi spec — pass it through unchanged.
   const canPlay =
     occ.wi !== null &&
     Number.isFinite(chapter) &&
     Number.isFinite(verse) &&
-    occ.wi >= 0
+    occ.wi > 0
   return (
     <Link href={`/quran/${occ.ref}`} className="wl-occ">
       <div className="lead">
@@ -763,7 +764,7 @@ function OccurrenceCard({
           <PlayWordButton
             chapter={chapter}
             verse={verse}
-            word={(occ.wi as number) + 1}
+            word={occ.wi as number}
             size="sm"
             className="wl-occ-play"
           />

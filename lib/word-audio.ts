@@ -3,7 +3,6 @@
 import { useSyncExternalStore } from 'react'
 
 const PRIMARY_BASE = 'https://audio.qurancdn.com/wbw'
-const FALLBACK_BASE = 'https://static.quranwbw.com/words'
 const LOAD_TIMEOUT_MS = 5000
 
 function pad3(n: number): string {
@@ -15,15 +14,7 @@ export function buildWordAudioUrl(
   verse: number,
   word1Based: number,
 ): string {
-  return `${PRIMARY_BASE}/${pad3(chapter)}${pad3(verse)}${pad3(word1Based)}.mp3`
-}
-
-function buildFallbackUrl(
-  chapter: number,
-  verse: number,
-  word1Based: number,
-): string {
-  return `${FALLBACK_BASE}/${pad3(chapter)}_${pad3(verse)}_${pad3(word1Based)}.mp3`
+  return `${PRIMARY_BASE}/${pad3(chapter)}_${pad3(verse)}_${pad3(word1Based)}.mp3`
 }
 
 export function wordAudioId(
@@ -42,7 +33,6 @@ interface WordAudioState {
 let audioEl: HTMLAudioElement | null = null
 let state: WordAudioState = { playingId: null, loadingId: null }
 let timeoutId: ReturnType<typeof setTimeout> | null = null
-let triedFallbackForId: string | null = null
 const listeners = new Set<() => void>()
 
 function emit(): void {
@@ -67,7 +57,6 @@ function clearTimeoutSafe(): void {
 
 function reset(): void {
   clearTimeoutSafe()
-  triedFallbackForId = null
   setState({ playingId: null, loadingId: null })
 }
 
@@ -81,21 +70,7 @@ function getAudio(): HTMLAudioElement {
     clearTimeoutSafe()
   })
   el.addEventListener('ended', reset)
-  el.addEventListener('error', () => {
-    const id = state.loadingId ?? state.playingId
-    if (id && triedFallbackForId !== id) {
-      triedFallbackForId = id
-      const [c, v, w] = id.split(':').map(Number)
-      el.src = buildFallbackUrl(c, v, w)
-      el.play().catch(reset)
-      return
-    }
-    reset()
-  })
-  el.addEventListener('pause', () => {
-    if (el.ended) return
-    if (state.playingId !== null || state.loadingId !== null) reset()
-  })
+  el.addEventListener('error', reset)
 
   audioEl = el
   return el
@@ -125,15 +100,11 @@ export function playWordAudio(
   pauseVerseAudioIfPlaying()
 
   const el = getAudio()
-  el.pause()
-  el.currentTime = 0
-  triedFallbackForId = null
   setState({ playingId: null, loadingId: id })
 
   el.src = buildWordAudioUrl(chapter, verse, word1Based)
-  el.play().catch(() => {
-    // 'error' handler triggers fallback; nothing to do here.
-  })
+  el.currentTime = 0
+  void el.play().catch(() => reset())
 
   clearTimeoutSafe()
   timeoutId = setTimeout(() => {
