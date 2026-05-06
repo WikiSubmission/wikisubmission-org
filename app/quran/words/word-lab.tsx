@@ -49,6 +49,39 @@ const CHEAT_PAIRS: ReadonlyArray<readonly [string, string]> = [
  * If `wi` is provided (1-based word_index from the backend), highlights the
  * token at that exact position — the most accurate path.
  */
+type FormMeanings = {
+  /** Map of diacritic-stripped surface form → its English gloss. */
+  byForm: Map<string, string>
+  /** Whole-root meaning to use when the string isn't structured per form. */
+  fallback: string | null
+}
+
+/**
+ * The corpus stores the root meaning denormalized as a single string. When a
+ * root has multiple distinct surface forms with different meanings, the string
+ * encodes them as `surface = meaning [/ surface = meaning ...]` (e.g.
+ * `مَن = he; she; who / مِن = from; of`). For roots with one shared meaning
+ * the string is just the gloss with no `=` separator. Parse both shapes so the
+ * derivative cards can show the form-specific gloss when available.
+ */
+function parseFormMeanings(meaning: string | null): FormMeanings {
+  if (!meaning) return { byForm: new Map(), fallback: null }
+  const trimmed = meaning.trim()
+  if (!trimmed) return { byForm: new Map(), fallback: null }
+
+  const byForm = new Map<string, string>()
+  const segments = trimmed.split(/\s*\/\s*(?=\S+\s*=)/)
+  for (const segment of segments) {
+    const eqIdx = segment.indexOf('=')
+    if (eqIdx <= 0) continue
+    const surface = segment.slice(0, eqIdx).trim()
+    const text = segment.slice(eqIdx + 1).trim()
+    if (!surface || !text) continue
+    byForm.set(stripDiacritics(surface), text)
+  }
+  return { byForm, fallback: trimmed }
+}
+
 function highlight(ar: string, hi: string, wi?: number | null): React.ReactNode {
   if (!ar) return ar
   const tokens = ar.split(/(\s+)/)
@@ -434,6 +467,18 @@ function Detail({
     setActiveSurface((prev) => (prev === surface ? null : surface))
   }
 
+  const formMeanings = useMemo(
+    () => parseFormMeanings(meaning),
+    [meaning],
+  )
+  const lookupFormMeaning = (ar: string): string | null => {
+    if (formMeanings.byForm.size === 0) {
+      // No per-form structure — every form shares the root meaning.
+      return formMeanings.fallback
+    }
+    return formMeanings.byForm.get(stripDiacritics(ar)) ?? null
+  }
+
   return (
     <article className="wl-detail">
       <header className="wl-detail-head">
@@ -461,23 +506,27 @@ function Detail({
           <div className="wl-loading">{t('loadingDerivs')}</div>
         ) : (
           <div className="wl-derivs">
-            {derivs.map((d, i) => (
-              <button
-                key={d.ar}
-                onClick={() => onChipClick(i)}
-                className={`wl-deriv ${activeDeriv === i ? 'on' : ''} ${activeSurface === d.ar ? 'filtering' : ''}`}
-                title={activeSurface === d.ar ? t('filterClickAgain') : t('filterClick')}
-              >
-                <div className="ar" dir="rtl" lang="ar">
-                  {d.ar}
-                </div>
-                <div className="tr">{d.tr ?? arabicToLatin(stripDiacritics(d.ar))}</div>
-                <div className="meta">
-                  <span className="pos">—</span>
-                  <span>{d.count}×</span>
-                </div>
-              </button>
-            ))}
+            {derivs.map((d, i) => {
+              const formEn = lookupFormMeaning(d.ar)
+              return (
+                <button
+                  key={d.ar}
+                  onClick={() => onChipClick(i)}
+                  className={`wl-deriv ${activeDeriv === i ? 'on' : ''} ${activeSurface === d.ar ? 'filtering' : ''}`}
+                  title={activeSurface === d.ar ? t('filterClickAgain') : t('filterClick')}
+                >
+                  <div className="ar" dir="rtl" lang="ar">
+                    {d.ar}
+                  </div>
+                  <div className="tr">{d.tr ?? arabicToLatin(stripDiacritics(d.ar))}</div>
+                  {formEn && <div className="en">{formEn}</div>}
+                  <div className="meta">
+                    <span className="pos">—</span>
+                    <span>{d.count}×</span>
+                  </div>
+                </button>
+              )
+            })}
           </div>
         )}
       </Section>
@@ -506,7 +555,7 @@ function Detail({
           <div className="wl-morph-grid">
             <Cell k={t('morphLemma')} v={deriv.ar} ar />
             <Cell k={t('morphTranslit')} v={deriv.tr ?? arabicToLatin(stripDiacritics(deriv.ar))} />
-            <Cell k={t('morphGloss')} v="—" />
+            <Cell k={t('morphGloss')} v={lookupFormMeaning(deriv.ar) ?? '—'} />
             <Cell k={t('morphPos')} v="—" />
             <Cell k={t('morphRoot')} v={root.letters} ar />
             <Cell k={t('morphCount')} v={`${deriv.count}×`} />

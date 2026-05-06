@@ -580,6 +580,18 @@
   color: var(--ed-accent);
   letter-spacing: 0.04em;
 }
+.wl-deriv .en {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ed-fg-muted);
+  margin-top: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-align: left;
+}
 .wl-deriv .meta {
   display: flex;
   justify-content: space-between;
