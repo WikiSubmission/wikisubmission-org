@@ -149,7 +149,7 @@ export function ScriptureRef({
 
   // If unparseable, render plain text so we don't swallow content
   if (!isBible && !quranRef) {
-    return <span className="font-glacial text-[10px] font-bold">{reference}</span>
+    return <span className="font-glacial text-[0.85em] font-bold">{reference}</span>
   }
 
   // Badge label
@@ -196,7 +196,7 @@ export function ScriptureRef({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <button
         onClick={() => handleOpenChange(true)}
-        className="inline-flex items-center font-glacial text-[10px] font-bold text-primary hover:underline px-0.5 transition-colors cursor-pointer align-baseline select-none mx-0.5"
+        className="inline-flex items-center font-glacial text-[0.85em] font-bold text-primary hover:underline px-0.5 transition-colors cursor-pointer align-baseline select-none mx-0.5"
         aria-label={`View ${isBible ? 'Bible' : 'Quran'} verse ${reference}`}
       >
         {label}
