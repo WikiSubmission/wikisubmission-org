@@ -33,6 +33,7 @@ export async function SiteFooter() {
     organization: [
       { label: nav('contact'), href: '/contact' },
       { label: nav('donate'), href: '/donate' },
+      { label: t('linkBrand'), href: '/brand' },
       { label: t('linkPrivacy'), href: '/legal/privacy-policy' },
       { label: t('linkTerms'), href: '/legal/terms-of-use' },
     ],
