@@ -6,6 +6,7 @@ import { rootToLatin, stripDiacritics } from '@/lib/transliteration'
 
 export type Derivative = {
   ar: string
+  tr: string | null
   count: number
 }
 
@@ -13,6 +14,7 @@ export type Occurrence = {
   ref: string
   ar: string
   en: string | null
+  tl: string | null
   hi: string
 }
 
@@ -31,127 +33,56 @@ export type RootsIndex = {
 
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
-const CACHE_KEY = 'ws-roots-index-v1'
+const INDEX_CACHE_KEY = 'ws-roots-index-v2'
+const DETAIL_CACHE_KEY = 'ws-roots-detail-v3'
 const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 7
-const MAX_OCC_PER_ROOT = 25
-const MAX_DERIVS_PER_ROOT = 12
+const ROOTS_FETCH_LIMIT = 5000
 
-function readCache(): RootsIndex | null {
+function readJSON<T>(key: string): T | null {
   if (typeof window === 'undefined') return null
   try {
-    const raw = window.localStorage.getItem(CACHE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as RootsIndex
-    if (Date.now() - parsed.fetchedAt > CACHE_TTL_MS) return null
-    return parsed
+    const raw = window.localStorage.getItem(key)
+    return raw ? (JSON.parse(raw) as T) : null
   } catch {
     return null
   }
 }
 
-function writeCache(index: RootsIndex): void {
+function writeJSON(key: string, value: unknown): void {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(CACHE_KEY, JSON.stringify(index))
+    window.localStorage.setItem(key, JSON.stringify(value))
   } catch {
-    // Quota exceeded — drop the cache silently.
+    // Quota exceeded — drop silently.
   }
 }
 
-/**
- * Format a raw root string ("رحم") as space-separated letters ("ر ح م"),
- * matching the design handoff data shape.
- */
-function spaceLetters(root: string): string {
-  return Array.from(root.replace(/\s+/g, '')).join(' ')
+function readIndex(): RootsIndex | null {
+  const cached = readJSON<RootsIndex>(INDEX_CACHE_KEY)
+  if (!cached) return null
+  if (Date.now() - cached.fetchedAt > CACHE_TTL_MS) return null
+  return cached
 }
 
-async function fetchAndAggregate(): Promise<RootRecord[]> {
-  type RootBucket = {
-    letters: string
-    count: number
-    derivs: Map<string, number>
-    occ: Occurrence[]
-    occChapters: Set<number>
-  }
-
-  const buckets = new Map<string, RootBucket>()
-
-  // The /quran endpoint accepts a chapter range; fetch each chapter sequentially
-  // to keep payload size manageable and surface progress if we ever wire one up.
-  for (let chapter = 1; chapter <= 114; chapter++) {
-    const { data, error } = await wsApi.GET('/quran', {
-      params: {
-        query: {
-          chapter_number_start: chapter,
-          chapter_number_end: chapter,
-          langs: ['ar', 'en'],
-          include_words: true,
-          include_root: true,
-          include_meaning: true,
-          word_langs: ['ar', 'en'],
-        },
+async function fetchIndex(): Promise<RootRecord[]> {
+  const { data, error } = await wsApi.GET('/roots', {
+    params: {
+      query: {
+        sort: 'frequency',
+        limit: ROOTS_FETCH_LIMIT,
       },
-    })
-    if (error || !data) {
-      throw new Error(`Failed to fetch chapter ${chapter}`)
-    }
-    const verses = data.chapters?.[0]?.verses ?? []
-    for (const verse of verses) {
-      const verseAr = verse.tr?.ar?.tx ?? ''
-      const verseEn = verse.tr?.en?.tx ?? null
-      const ref = verse.vk ?? ''
-      for (const word of verse.w ?? []) {
-        const root = word.r
-        if (!root) continue
-        const ar = word.tx?.ar
-        if (!ar) continue
-        let bucket = buckets.get(root)
-        if (!bucket) {
-          bucket = {
-            letters: spaceLetters(root),
-            count: 0,
-            derivs: new Map(),
-            occ: [],
-            occChapters: new Set(),
-          }
-          buckets.set(root, bucket)
-        }
-        bucket.count += 1
-        bucket.derivs.set(ar, (bucket.derivs.get(ar) ?? 0) + 1)
-        // Spread occurrences across distinct chapters for variety.
-        if (
-          bucket.occ.length < MAX_OCC_PER_ROOT &&
-          !bucket.occChapters.has(verse.sc ?? 0)
-        ) {
-          bucket.occ.push({
-            ref,
-            ar: verseAr,
-            en: verseEn,
-            hi: ar,
-          })
-          bucket.occChapters.add(verse.sc ?? 0)
-        }
-      }
-    }
+    },
+  })
+  if (error || !data) {
+    throw new Error('Failed to load roots index')
   }
-
-  const records: RootRecord[] = []
-  for (const bucket of buckets.values()) {
-    const derivs = Array.from(bucket.derivs.entries())
-      .map(([ar, count]): Derivative => ({ ar, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, MAX_DERIVS_PER_ROOT)
-    records.push({
-      letters: bucket.letters,
-      tr: rootToLatin(bucket.letters),
-      count: bucket.count,
-      derivs,
-      occ: bucket.occ,
-    })
-  }
-  records.sort((a, b) => b.count - a.count)
-  return records
+  return (data.items ?? []).map((s) => ({
+    letters: s.r,
+    tr: s.tr || rootToLatin(s.r),
+    count: s.c,
+    derivs: [],
+    occ: [],
+  }))
 }
 
 export type UseRootsIndex = {
@@ -162,47 +93,42 @@ export type UseRootsIndex = {
 }
 
 /**
- * Aggregates a Quran-wide roots index on the client. First call streams the
- * whole corpus (one request per chapter), subsequent calls hit localStorage.
+ * Fetches the Quran roots index from the backend `/roots` endpoint.
+ * One request, cached in localStorage with a 7-day TTL.
  *
- * Phase 1 implementation — designed to be replaced by a `/roots` backend
- * endpoint without changing the consuming UI. See plan §A.
+ * The cache is read synchronously during initial state — when warm, the first
+ * render already has the data, eliminating the loading flash on navigation.
  */
 export function useRootsIndex(): UseRootsIndex {
-  const [status, setStatus] = useState<Status>('idle')
-  const [data, setData] = useState<RootRecord[] | null>(null)
+  const [data, setData] = useState<RootRecord[] | null>(() => readIndex()?.roots ?? null)
+  const [status, setStatus] = useState<Status>(() => (readIndex() ? 'ready' : 'idle'))
   const [error, setError] = useState<string | null>(null)
   const [reloadTick, setReloadTick] = useState(0)
 
   useEffect(() => {
     let cancelled = false
 
-    const cached = readCache()
-    if (cached && reloadTick === 0) {
-      setData(cached.roots)
-      setStatus('ready')
-      return
-    }
+    if (status === 'ready' && reloadTick === 0) return
 
     setStatus('loading')
     setError(null)
-    void fetchAndAggregate()
+    void fetchIndex()
       .then((roots) => {
         if (cancelled) return
-        const index: RootsIndex = { roots, fetchedAt: Date.now() }
-        writeCache(index)
+        writeJSON(INDEX_CACHE_KEY, { roots, fetchedAt: Date.now() } satisfies RootsIndex)
         setData(roots)
         setStatus('ready')
       })
       .catch((e: unknown) => {
         if (cancelled) return
-        setError(e instanceof Error ? e.message : 'Failed to build roots index')
+        setError(e instanceof Error ? e.message : 'Failed to load roots index')
         setStatus('error')
       })
 
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reloadTick])
 
   return {
@@ -213,7 +139,106 @@ export function useRootsIndex(): UseRootsIndex {
   }
 }
 
-/** Filter + sort helpers — pure, exported for testing and re-use. */
+type DetailCache = Record<string, { detail: { derivs: Derivative[]; occ: Occurrence[] }; fetchedAt: number }>
+
+function readDetailCache(): DetailCache {
+  return readJSON<DetailCache>(DETAIL_CACHE_KEY) ?? {}
+}
+
+async function fetchDetail(letters: string): Promise<{ derivs: Derivative[]; occ: Occurrence[] }> {
+  const { data, error } = await wsApi.GET('/roots/{letters}', {
+    params: {
+      path: { letters },
+    },
+  })
+  if (error || !data) {
+    throw new Error(`Failed to load root ${letters}`)
+  }
+  const derivs: Derivative[] = (data.dv ?? []).map((d) => ({
+    ar: d.ar,
+    tr: d.tr ?? null,
+    count: d.c,
+  }))
+  const occ: Occurrence[] = (data.oc ?? []).map((o) => ({
+    ref: o.vk,
+    ar: o.ar,
+    en: o.en ?? null,
+    tl: o.tl ?? null,
+    hi: o.hl ?? '',
+  }))
+  return { derivs, occ }
+}
+
+export type UseRootDetail = {
+  status: Status
+  derivs: Derivative[]
+  occ: Occurrence[]
+  error: string | null
+}
+
+/**
+ * Lazy-loads a single root's derivatives and first 20 occurrences.
+ * Cached in localStorage so revisiting a root is instant.
+ */
+export function useRootDetail(letters: string | null): UseRootDetail {
+  const initial = (() => {
+    if (!letters) return null
+    const cache = readDetailCache()
+    const c = cache[letters]
+    if (c && Date.now() - c.fetchedAt <= CACHE_TTL_MS) return c.detail
+    return null
+  })()
+  const [status, setStatus] = useState<Status>(initial ? 'ready' : letters ? 'loading' : 'idle')
+  const [derivs, setDerivs] = useState<Derivative[]>(initial?.derivs ?? [])
+  const [occ, setOcc] = useState<Occurrence[]>(initial?.occ ?? [])
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!letters) {
+      setStatus('idle')
+      setDerivs([])
+      setOcc([])
+      setError(null)
+      return
+    }
+
+    const cache = readDetailCache()
+    const cached = cache[letters]
+    if (cached && Date.now() - cached.fetchedAt <= CACHE_TTL_MS) {
+      setDerivs(cached.detail.derivs)
+      setOcc(cached.detail.occ)
+      setStatus('ready')
+      return
+    }
+
+    let cancelled = false
+    setStatus('loading')
+    setError(null)
+    void fetchDetail(letters)
+      .then((detail) => {
+        if (cancelled) return
+        const next = readDetailCache()
+        next[letters] = { detail, fetchedAt: Date.now() }
+        writeJSON(DETAIL_CACHE_KEY, next)
+        setDerivs(detail.derivs)
+        setOcc(detail.occ)
+        setStatus('ready')
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return
+        setError(e instanceof Error ? e.message : 'Failed to load root detail')
+        setStatus('error')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [letters])
+
+  return { status, derivs, occ, error }
+}
+
+/** Filter helpers — pure, exported for testing and re-use. */
 export function filterRoots(
   roots: RootRecord[],
   query: string,

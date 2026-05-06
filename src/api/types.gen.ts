@@ -547,7 +547,7 @@ export interface components {
              */
             mp?: string | null;
         };
-        /** @description A distinct surface form (token spelling) of a root, with its occurrence count. `tr`, `en`, and `p` (POS) are reserved for Phase 2 morphology data and are always `null` for now. */
+        /** @description A distinct surface form (token spelling) of a root, with its occurrence count. `tr` is the Latin transliteration of the surface form, sourced from `word_text` rows tagged with the `tl` language (most-common value when multiple readings exist). `en` and `p` (POS) remain reserved for Phase 2 morphology data and are still `null`. */
         Derivative: {
             /**
              * @description Surface form (Arabic word as it appears in the corpus).
@@ -555,8 +555,8 @@ export interface components {
              */
             ar: string;
             /**
-             * @description Latin transliteration of the surface form (Phase 2; always `null`).
-             * @example null
+             * @description Latin transliteration of the surface form (e.g. "kitāb"). Drawn from the per-word `tl` entry in `word_text`. May be `null` if no transliteration row exists for that word.
+             * @example kitāb
              */
             tr?: string | null;
             /**
@@ -598,6 +598,11 @@ export interface components {
              * @example كِتَاب
              */
             hl?: string | null;
+            /**
+             * @description Latin transliteration of the matched surface form (`hl`). Drawn from the per-word `tl` entry in `word_text`. May be `null` if no transliteration row exists for that word.
+             * @example kitāb
+             */
+            tl?: string | null;
         };
         /** @description Paginated index of roots returned by `/roots`. */
         RootsIndexResponse: {

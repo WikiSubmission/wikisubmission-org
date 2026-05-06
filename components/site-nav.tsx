@@ -12,11 +12,17 @@ import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { SiteBrand } from '@/components/site-brand'
 
 type FlatLink = { kind: 'link'; label: string; href: string }
+type GroupChild = {
+  label: string
+  sub: string
+  href: string
+  children?: { label: string; sub: string; href: string }[]
+}
 type GroupLink = {
   kind: 'group'
   label: string
   href: string
-  children: { label: string; sub: string; href: string }[]
+  children: GroupChild[]
 }
 type NavItem = FlatLink | GroupLink
 
@@ -26,9 +32,15 @@ const NAV_ITEMS: NavItem[] = [
     label: 'scripture',
     href: '/quran',
     children: [
-      { label: 'quran', sub: 'Final Testament', href: '/quran' },
+      {
+        label: 'quran',
+        sub: 'Final Testament',
+        href: '/quran',
+        children: [
+          { label: 'wordLab', sub: 'Roots & concordance', href: '/quran/words' },
+        ],
+      },
       { label: 'bible', sub: 'Old & New Testaments', href: '/bible' },
-      { label: 'wordLab', sub: 'Roots & concordance', href: '/quran/words' },
     ],
   },
   { kind: 'link', label: 'miracle', href: '/miracle' },
@@ -165,26 +177,49 @@ function MobileMenu({
               {t(item.label)}
             </div>
             {item.children.map((c) => (
-              <Link
-                key={c.label}
-                href={c.href}
-                onClick={close}
-                style={{
-                  fontFamily: F.mono,
-                  fontSize: 11,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.16em',
-                  color: isActive(pathname, c.href)
-                    ? 'var(--ed-fg)'
-                    : 'var(--ed-fg-muted)',
-                  padding: '8px 24px',
-                  display: 'block',
-                  textDecoration: 'none',
-                  borderRadius: 4,
-                }}
-              >
-                {t(c.label)}
-              </Link>
+              <div key={c.label} className="flex flex-col">
+                <Link
+                  href={c.href}
+                  onClick={close}
+                  style={{
+                    fontFamily: F.mono,
+                    fontSize: 11,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.16em',
+                    color: isActive(pathname, c.href)
+                      ? 'var(--ed-fg)'
+                      : 'var(--ed-fg-muted)',
+                    padding: '8px 24px',
+                    display: 'block',
+                    textDecoration: 'none',
+                    borderRadius: 4,
+                  }}
+                >
+                  {t(c.label)}
+                </Link>
+                {c.children?.map((g) => (
+                  <Link
+                    key={g.label}
+                    href={g.href}
+                    onClick={close}
+                    style={{
+                      fontFamily: F.mono,
+                      fontSize: 10.5,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.16em',
+                      color: isActive(pathname, g.href)
+                        ? 'var(--ed-fg)'
+                        : 'var(--ed-fg-muted)',
+                      padding: '6px 36px',
+                      display: 'block',
+                      textDecoration: 'none',
+                      borderRadius: 4,
+                    }}
+                  >
+                    {t(g.label)}
+                  </Link>
+                ))}
+              </div>
             ))}
           </div>
         ),
@@ -478,53 +513,115 @@ function NavGroupMenu({
       }}
     >
       {item.children.map((c) => (
-        <Link
-          key={c.href}
-          href={c.href}
-          onClick={() => setOpen(false)}
-          role="menuitem"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            padding: '10px 12px',
-            borderRadius: 2,
-            textDecoration: 'none',
-            color: 'var(--ed-fg)',
-          }}
-          onMouseEnter={(e) => {
-            ;(e.currentTarget as HTMLAnchorElement).style.background =
-              'color-mix(in oklab, var(--ed-fg), transparent 94%)'
-          }}
-          onMouseLeave={(e) => {
-            ;(e.currentTarget as HTMLAnchorElement).style.background =
-              'transparent'
-          }}
-        >
-          <span
+        <div key={c.href} style={{ display: 'flex', flexDirection: 'column' }}>
+          <Link
+            href={c.href}
+            onClick={() => setOpen(false)}
+            role="menuitem"
             style={{
-              fontFamily: F.display,
-              fontSize: 15,
-              fontWeight: 500,
-              letterSpacing: '-0.01em',
-              lineHeight: 1.2,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              padding: '10px 12px',
+              borderRadius: 2,
+              textDecoration: 'none',
+              color: 'var(--ed-fg)',
+            }}
+            onMouseEnter={(e) => {
+              ;(e.currentTarget as HTMLAnchorElement).style.background =
+                'color-mix(in oklab, var(--ed-fg), transparent 94%)'
+            }}
+            onMouseLeave={(e) => {
+              ;(e.currentTarget as HTMLAnchorElement).style.background =
+                'transparent'
             }}
           >
-            {tChild(c.label)}
-          </span>
-          <span
-            style={{
-              fontFamily: F.mono,
-              fontSize: 10,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'var(--ed-fg-muted)',
-              lineHeight: 1.2,
-            }}
-          >
-            {c.sub}
-          </span>
-        </Link>
+            <span
+              style={{
+                fontFamily: F.display,
+                fontSize: 15,
+                fontWeight: 500,
+                letterSpacing: '-0.01em',
+                lineHeight: 1.2,
+              }}
+            >
+              {tChild(c.label)}
+            </span>
+            <span
+              style={{
+                fontFamily: F.mono,
+                fontSize: 10,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: 'var(--ed-fg-muted)',
+                lineHeight: 1.2,
+              }}
+            >
+              {c.sub}
+            </span>
+          </Link>
+          {c.children && c.children.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                marginLeft: 16,
+                paddingLeft: 8,
+                borderLeft: '1px solid var(--ed-rule)',
+              }}
+            >
+              {c.children.map((g) => (
+                <Link
+                  key={g.href}
+                  href={g.href}
+                  onClick={() => setOpen(false)}
+                  role="menuitem"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                    padding: '8px 12px',
+                    borderRadius: 2,
+                    textDecoration: 'none',
+                    color: 'var(--ed-fg)',
+                  }}
+                  onMouseEnter={(e) => {
+                    ;(e.currentTarget as HTMLAnchorElement).style.background =
+                      'color-mix(in oklab, var(--ed-fg), transparent 94%)'
+                  }}
+                  onMouseLeave={(e) => {
+                    ;(e.currentTarget as HTMLAnchorElement).style.background =
+                      'transparent'
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: F.display,
+                      fontSize: 13,
+                      fontWeight: 500,
+                      letterSpacing: '-0.01em',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {tChild(g.label)}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: F.mono,
+                      fontSize: 9.5,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: 'var(--ed-fg-muted)',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {g.sub}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       ))}
     </div>
   )

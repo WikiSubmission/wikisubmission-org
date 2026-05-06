@@ -1290,8 +1290,10 @@ components:
       type: object
       description: >
         A distinct surface form (token spelling) of a root, with its
-        occurrence count. `tr`, `en`, and `p` (POS) are reserved for Phase 2
-        morphology data and are always `null` for now.
+        occurrence count. `tr` is the Latin transliteration of the surface
+        form, sourced from `word_text` rows tagged with the `tl` language
+        (most-common value when multiple readings exist). `en` and `p` (POS)
+        remain reserved for Phase 2 morphology data and are still `null`.
       required: [ar, c]
       properties:
         ar:
@@ -1301,8 +1303,11 @@ components:
         tr:
           type: string
           nullable: true
-          description: Latin transliteration of the surface form (Phase 2; always `null`).
-          example: null
+          description: >
+            Latin transliteration of the surface form (e.g. "kitāb"). Drawn
+            from the per-word `tl` entry in `word_text`. May be `null` if no
+            transliteration row exists for that word.
+          example: "kitāb"
         en:
           type: string
           nullable: true
@@ -1349,6 +1354,14 @@ components:
             the client may need to handle diacritics when locating the
             substring.
           example: "كِتَاب"
+        tl:
+          type: string
+          nullable: true
+          description: >
+            Latin transliteration of the matched surface form (`hl`). Drawn
+            from the per-word `tl` entry in `word_text`. May be `null` if no
+            transliteration row exists for that word.
+          example: "kitāb"
 
     RootsIndexResponse:
       type: object

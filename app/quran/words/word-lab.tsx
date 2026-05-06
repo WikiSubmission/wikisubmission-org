@@ -5,10 +5,13 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ABJAD,
   abjadiCompare,
+  arabicToLatin,
+  stripDiacritics,
   toArabicLetters,
 } from '@/lib/transliteration'
 import {
   filterRoots,
+  useRootDetail,
   useRootsIndex,
   type Occurrence,
   type RootRecord,
@@ -16,6 +19,8 @@ import {
 import './word-lab.css'
 
 type SortMode = 'frequency' | 'abjadi' | 'reverse'
+
+const INDEX_RENDER_CAP = 300
 
 const CHEAT_PAIRS: ReadonlyArray<readonly [string, string]> = [
   ['a', 'ا'], ['b', 'ب'], ['t', 'ت'], ['th', 'ث'], ['j', 'ج'], ['H', 'ح'], ['kh', 'خ'],
@@ -65,6 +70,10 @@ export function WordLab() {
     return list
   }, [data, query, arabicTarget, sort])
 
+  const totalRoots = data?.length ?? 0
+  const indexRendered = useMemo(() => visible.slice(0, INDEX_RENDER_CAP), [visible])
+  const isCapped = visible.length > INDEX_RENDER_CAP
+
   const grouped = useMemo(() => {
     if (sort !== 'abjadi' && sort !== 'reverse') return null
     const out: Record<string, RootRecord[]> = {}
@@ -95,20 +104,26 @@ export function WordLab() {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      const cmd = (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey
+      if (cmd && e.key.toLowerCase() === 'k') {
         e.preventDefault()
-        inputRef.current?.focus()
+        e.stopPropagation()
+        const el = inputRef.current
+        if (el) {
+          el.focus()
+          el.select()
+        }
       }
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    document.addEventListener('keydown', onKey, true)
+    return () => document.removeEventListener('keydown', onKey, true)
   }, [])
 
   if (status === 'loading' || status === 'idle') {
     return (
       <div className="wl-page">
         <Hero />
-        <div className="wl-loading">Building roots index from the corpus — this happens once.</div>
+        <div className="wl-loading">Loading the roots index…</div>
       </div>
     )
   }
@@ -189,30 +204,37 @@ export function WordLab() {
         <aside className="wl-index">
           <div className="wl-index-head">
             <span>Roots</span>
-            <span className="wl-index-count">{visible.length}</span>
+            <span className="wl-index-count">
+              {isCapped
+                ? `${INDEX_RENDER_CAP} of ${visible.length.toLocaleString()}`
+                : visible.length.toLocaleString()}
+            </span>
           </div>
           {grouped ? (
-            ABJAD.filter((l) => grouped[l]?.length).map((letter) => (
-              <div key={letter} className="wl-index-group">
-                <div className="wl-index-group-head">
-                  <span className="letter">{letter}</span>
-                  <span className="count">{grouped[letter]!.length}</span>
+            ABJAD.filter((l) => grouped[l]?.length).map((letter) => {
+              const slice = grouped[letter]!.slice(0, INDEX_RENDER_CAP)
+              return (
+                <div key={letter} className="wl-index-group">
+                  <div className="wl-index-group-head">
+                    <span className="letter">{letter}</span>
+                    <span className="count">{grouped[letter]!.length}</span>
+                  </div>
+                  {slice.map((r) => (
+                    <RootRow
+                      key={r.letters}
+                      root={r}
+                      active={activeRoot?.letters === r.letters}
+                      onClick={() => {
+                        setActiveKey(r.letters)
+                        setActiveDeriv(0)
+                      }}
+                    />
+                  ))}
                 </div>
-                {grouped[letter]!.map((r) => (
-                  <RootRow
-                    key={r.letters}
-                    root={r}
-                    active={activeRoot?.letters === r.letters}
-                    onClick={() => {
-                      setActiveKey(r.letters)
-                      setActiveDeriv(0)
-                    }}
-                  />
-                ))}
-              </div>
-            ))
+              )
+            })
           ) : (
-            visible.map((r) => (
+            indexRendered.map((r) => (
               <RootRow
                 key={r.letters}
                 root={r}
@@ -226,6 +248,12 @@ export function WordLab() {
           )}
           {visible.length === 0 && (
             <div className="wl-empty">No roots match. Try the transliteration key below the search.</div>
+          )}
+          {isCapped && (
+            <div className="wl-empty">
+              Showing the top {INDEX_RENDER_CAP.toLocaleString()} of {totalRoots.toLocaleString()} roots. Search to
+              narrow down.
+            </div>
           )}
         </aside>
 
@@ -265,7 +293,6 @@ function RootRow({
       </span>
       <span className="mid">
         <span className="tr">{root.tr}</span>
-        <span className="sense">{root.derivs[0]?.ar ?? ''}</span>
       </span>
       <span className="num">{root.count.toLocaleString()}</span>
     </button>
@@ -281,7 +308,12 @@ function Detail({
   activeDeriv: number
   setActiveDeriv: (n: number) => void
 }) {
-  const deriv = root.derivs[activeDeriv] ?? root.derivs[0]
+  const detail = useRootDetail(root.letters)
+  const derivs = detail.derivs
+  const occ = detail.occ
+  const deriv = derivs[activeDeriv] ?? derivs[0]
+  const isLoading = detail.status === 'loading' || detail.status === 'idle'
+
   return (
     <article className="wl-detail">
       <header className="wl-detail-head">
@@ -301,25 +333,30 @@ function Detail({
         <div className="wl-section-head">
           <span className="num">01</span>
           <span className="title">Derived forms</span>
-          <span className="sub">{root.derivs.length}</span>
+          <span className="sub">{derivs.length}</span>
         </div>
-        <div className="wl-derivs">
-          {root.derivs.map((d, i) => (
-            <button
-              key={d.ar}
-              onClick={() => setActiveDeriv(i)}
-              className={`wl-deriv ${activeDeriv === i ? 'on' : ''}`}
-            >
-              <div className="ar" dir="rtl" lang="ar">
-                {d.ar}
-              </div>
-              <div className="meta">
-                <span>—</span>
-                <span>{d.count}×</span>
-              </div>
-            </button>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="wl-loading">Loading derived forms…</div>
+        ) : (
+          <div className="wl-derivs">
+            {derivs.map((d, i) => (
+              <button
+                key={d.ar}
+                onClick={() => setActiveDeriv(i)}
+                className={`wl-deriv ${activeDeriv === i ? 'on' : ''}`}
+              >
+                <div className="ar" dir="rtl" lang="ar">
+                  {d.ar}
+                </div>
+                <div className="tr">{d.tr ?? arabicToLatin(stripDiacritics(d.ar))}</div>
+                <div className="meta">
+                  <span className="pos">—</span>
+                  <span>{d.count}×</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="wl-section">
@@ -327,14 +364,18 @@ function Detail({
           <span className="num">02</span>
           <span className="title">Occurrences</span>
           <span className="sub">
-            showing {root.occ.length} of {root.count.toLocaleString()}
+            showing {occ.length} of {root.count.toLocaleString()}
           </span>
         </div>
-        <div className="wl-occ-list">
-          {root.occ.map((o) => (
-            <OccurrenceCard key={`${o.ref}-${o.hi}`} occ={o} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="wl-loading">Loading occurrences…</div>
+        ) : (
+          <div className="wl-occ-list">
+            {occ.map((o, i) => (
+              <OccurrenceCard key={`${o.ref}-${i}`} occ={o} />
+            ))}
+          </div>
+        )}
       </section>
 
       {deriv && (
@@ -347,7 +388,7 @@ function Detail({
           </div>
           <div className="wl-morph-grid">
             <Cell k="Lemma" v={deriv.ar} ar />
-            <Cell k="Translit." v="—" />
+            <Cell k="Translit." v={deriv.tr ?? arabicToLatin(stripDiacritics(deriv.ar))} />
             <Cell k="Gloss" v="—" />
             <Cell k="POS" v="—" />
             <Cell k="Root" v={root.letters} ar />
@@ -367,6 +408,7 @@ function OccurrenceCard({ occ }: { occ: Occurrence }) {
         <div className="ar" dir="rtl" lang="ar">
           {highlight(occ.ar, occ.hi)}
         </div>
+        {occ.tl && <div className="tl">{occ.tl}</div>}
         {occ.en && <div className="en">{occ.en}</div>}
       </div>
       <span className="arrow">↗</span>

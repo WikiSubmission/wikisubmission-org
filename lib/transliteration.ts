@@ -116,3 +116,24 @@ export function rootToLatin(letters: string): string {
 export function stripDiacritics(s: string): string {
   return s.replace(ARABIC_DIACRITICS, '')
 }
+
+const ARABIC_TO_LATIN: Readonly<Record<string, string>> = {
+  'ا': 'a', 'أ': 'a', 'إ': 'i', 'آ': 'aa', 'ٱ': '', 'ء': '\'', 'ؤ': 'u', 'ئ': 'i',
+  'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'j', 'ح': 'H', 'خ': 'kh', 'د': 'd', 'ذ': 'dh',
+  'ر': 'r', 'ز': 'z', 'س': 's', 'ش': 'sh', 'ص': 'S', 'ض': 'D', 'ط': 'T', 'ظ': 'Z',
+  'ع': 'c', 'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'ل': 'l', 'م': 'm', 'ن': 'n',
+  'ه': 'h', 'و': 'w', 'ي': 'y', 'ى': 'a', 'ة': 'h',
+  'َ': 'a', 'ُ': 'u', 'ِ': 'i', 'ً': 'an', 'ٌ': 'un', 'ٍ': 'in', 'ّ': '', 'ْ': '', 'ٰ': 'aa',
+}
+
+/**
+ * Best-effort transliteration of an Arabic surface form to Latin.
+ * Used as a placeholder until the backend ships per-word transliteration.
+ */
+export function arabicToLatin(s: string): string {
+  let out = ''
+  for (const ch of s) {
+    out += ARABIC_TO_LATIN[ch] ?? (ch === ' ' ? ' ' : '')
+  }
+  return out
+}
