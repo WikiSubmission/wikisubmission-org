@@ -791,6 +791,7 @@
     "morphPos": "Catégorie",
     "morphRoot": "Racine",
     "morphCount": "Nombre",
-    "openInWordLab": "Ouvrir dans le Labo des mots"
+    "openInWordLab": "Ouvrir dans le Labo des mots",
+    "playPronunciation": "Écouter la prononciation"
   }
 }

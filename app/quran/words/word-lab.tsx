@@ -26,6 +26,7 @@ import {
   type RootRecord,
 } from '@/hooks/use-roots-index'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { PlayWordButton } from '@/components/play-word-button'
 import './word-lab.css'
 
 type SortMode = 'frequency' | 'abjadi' | 'reverse'
@@ -746,9 +747,28 @@ function OccurrenceCard({
   showTranslit: boolean
   showTranslation: boolean
 }) {
+  const [chapterStr, verseStr] = occ.ref.split(':')
+  const chapter = Number(chapterStr)
+  const verse = Number(verseStr)
+  const canPlay =
+    occ.wi !== null &&
+    Number.isFinite(chapter) &&
+    Number.isFinite(verse) &&
+    occ.wi >= 0
   return (
     <Link href={`/quran/${occ.ref}`} className="wl-occ">
-      <span className="ref">{occ.ref}</span>
+      <div className="lead">
+        <span className="ref">{occ.ref}</span>
+        {canPlay && (
+          <PlayWordButton
+            chapter={chapter}
+            verse={verse}
+            word={(occ.wi as number) + 1}
+            size="sm"
+            className="wl-occ-play"
+          />
+        )}
+      </div>
       <div className="body">
         <div className="ar" dir="rtl" lang="ar">
           {highlight(occ.ar, occ.hi, occ.wi)}

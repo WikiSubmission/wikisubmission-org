@@ -791,6 +791,7 @@
     "morphPos": "Wortart",
     "morphRoot": "Wurzel",
     "morphCount": "Anzahl",
-    "openInWordLab": "Im Wortlabor öffnen"
+    "openInWordLab": "Im Wortlabor öffnen",
+    "playPronunciation": "Aussprache abspielen"
   }
 }

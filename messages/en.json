@@ -803,6 +803,7 @@
     "morphPos": "POS",
     "morphRoot": "Root",
     "morphCount": "Count",
-    "openInWordLab": "Open in Word Lab"
+    "openInWordLab": "Open in Word Lab",
+    "playPronunciation": "Play pronunciation"
   }
 }

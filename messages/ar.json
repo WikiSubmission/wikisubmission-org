@@ -791,6 +791,7 @@
     "morphPos": "نوع الكلمة",
     "morphRoot": "الجذر",
     "morphCount": "العدد",
-    "openInWordLab": "افتح في مختبر الكلمات"
+    "openInWordLab": "افتح في مختبر الكلمات",
+    "playPronunciation": "استمع إلى النطق"
   }
 }

@@ -12,6 +12,7 @@ import {
   useQuranPlayerCallbacks,
   type QuranVerse,
 } from '@/lib/quran-audio-context'
+import { PlayWordButton } from '@/components/play-word-button'
 import { RootWordOccurrences } from './root-word-occurrences'
 import { CopyButton } from './copy-button'
 import {
@@ -51,10 +52,17 @@ function WordOccurrencesDialogContent({
   arabic,
   root,
   meaning,
+  chapter,
+  verse,
+  word,
 }: {
   arabic: string
   root: string
   meaning: string
+  chapter?: number
+  verse?: number
+  /** 1-based word index within the verse. */
+  word?: number
 }) {
   const t = useTranslations('wordLab')
   const [showMeaning, setShowMeaning] = useState(false)
@@ -69,9 +77,21 @@ function WordOccurrencesDialogContent({
           <span className="text-4xl font-arabic text-primary mb-1">
             {arabic}
           </span>
-          <span className="px-2.5 py-0.5 bg-primary/10 rounded-full text-[10px] font-bold text-primary">
-            Root: {root}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 bg-primary/10 rounded-full text-[10px] font-bold text-primary">
+              Root: {root}
+            </span>
+            {typeof chapter === 'number' &&
+              typeof verse === 'number' &&
+              typeof word === 'number' && (
+                <PlayWordButton
+                  chapter={chapter}
+                  verse={verse}
+                  word={word}
+                  size="md"
+                />
+              )}
+          </div>
         </DialogTitle>
 
         {meaning && (
@@ -115,10 +135,10 @@ function WordOccurrencesDialogContent({
 const WordByWordView = memo(
   function WordByWordView({
     words,
+    verseKey,
     compact,
   }: {
     words: WordData[]
-    /** Used only in arePropsEqual — not needed in the render body. */
     verseKey: string
     compact: boolean
     /** Forwarded from VerseCard — forces re-render on language reload. */
@@ -130,6 +150,12 @@ const WordByWordView = memo(
       [words]
     )
 
+    const { chapter, verse } = useMemo(() => {
+      const [c, v] = verseKey.split(':')
+      return { chapter: Number(c), verse: Number(v) }
+    }, [verseKey])
+    const verseCoordsValid = Number.isFinite(chapter) && Number.isFinite(verse)
+
     const { zoomLevel, transliteration: showTransliteration } =
       useQuranPreferences()
     const arabicClass = ZOOM_FONT[zoomLevel ?? 'comfortable'].arabic
@@ -140,11 +166,13 @@ const WordByWordView = memo(
       english: string
       meaning: string
       transliteration?: string
+      word1Based?: number
     } | null>(null)
     const [dialogWord, setDialogWord] = useState<{
       arabic: string
       root: string
       meaning: string
+      word1Based?: number
     } | null>(null)
 
     if (compact) {
@@ -161,6 +189,8 @@ const WordByWordView = memo(
             const meaning = w.m ?? english
             const wordIndex = w.wi ?? 0
 
+            const word1Based = wordIndex + 1
+
             if (isTouch) {
               return (
                 <p
@@ -174,6 +204,7 @@ const WordByWordView = memo(
                       english,
                       meaning,
                       transliteration: transliteration ?? undefined,
+                      word1Based,
                     })
                   }}
                 >
@@ -215,6 +246,9 @@ const WordByWordView = memo(
                     arabic={arabic}
                     root={root}
                     meaning={meaning}
+                    chapter={verseCoordsValid ? chapter : undefined}
+                    verse={verseCoordsValid ? verse : undefined}
+                    word={word1Based}
                   />
                 )}
               </Dialog>
@@ -236,6 +270,7 @@ const WordByWordView = memo(
                       arabic: activeWord.arabic,
                       root: activeWord.root,
                       meaning: activeWord.meaning,
+                      word1Based: activeWord.word1Based,
                     })
                     setActiveWord(null)
                   }
@@ -253,6 +288,15 @@ const WordByWordView = memo(
                   <p className="text-xs text-muted-foreground italic text-center">
                     {activeWord.transliteration}
                   </p>
+                )}
+                {verseCoordsValid && typeof activeWord.word1Based === 'number' && (
+                  <PlayWordButton
+                    chapter={chapter}
+                    verse={verse}
+                    word={activeWord.word1Based}
+                    size="md"
+                    className="mt-1"
+                  />
                 )}
                 {activeWord.root && (
                   <p className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
@@ -276,6 +320,9 @@ const WordByWordView = memo(
                   arabic={dialogWord.arabic}
                   root={dialogWord.root}
                   meaning={dialogWord.meaning}
+                  chapter={verseCoordsValid ? chapter : undefined}
+                  verse={verseCoordsValid ? verse : undefined}
+                  word={dialogWord.word1Based}
                 />
               )}
             </Dialog>
@@ -295,11 +342,21 @@ const WordByWordView = memo(
           const meaning = (w.tx as Record<string, string>)?.['en'] ?? ''
           const transliteration = (w.tx as Record<string, string>)?.['tl'] ?? ''
           const wordIndex = w.wi ?? 0
+          const word1Based = wordIndex + 1
 
           return (
             <Dialog key={wordIndex}>
               <DialogTrigger asChild>
-                <div className="group flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer transition-all hover:bg-muted/50 rounded-xl border border-transparent hover:border-primary/20">
+                <div className="group relative flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer transition-all hover:bg-muted/50 rounded-xl border border-transparent hover:border-primary/20">
+                  {verseCoordsValid && (
+                    <PlayWordButton
+                      chapter={chapter}
+                      verse={verse}
+                      word={word1Based}
+                      size="xs"
+                      className="absolute top-0.5 right-0.5"
+                    />
+                  )}
                   <p
                     className={`font-arabic ${arabicClass} leading-snug group-hover:text-primary transition-colors`}
                   >
@@ -326,6 +383,9 @@ const WordByWordView = memo(
                   arabic={arabic}
                   root={root}
                   meaning={meaning}
+                  chapter={verseCoordsValid ? chapter : undefined}
+                  verse={verseCoordsValid ? verse : undefined}
+                  word={word1Based}
                 />
               )}
             </Dialog>

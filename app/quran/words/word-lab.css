@@ -613,13 +613,22 @@
 .wl-occ:hover {
   border-color: var(--ed-fg);
 }
+.wl-occ .lead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 4px;
+}
 .wl-occ .ref {
   font-family: var(--font-jetbrains), ui-monospace, monospace;
   font-size: 12px;
   letter-spacing: 0.1em;
   color: var(--ed-accent);
   font-variant-numeric: tabular-nums;
-  padding-top: 4px;
+}
+.wl-occ-play {
+  flex-shrink: 0;
 }
 .wl-occ .body {
   display: flex;
