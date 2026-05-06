@@ -28,6 +28,7 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { label: 'quran', sub: 'Final Testament', href: '/quran' },
       { label: 'bible', sub: 'Old & New Testaments', href: '/bible' },
+      { label: 'wordLab', sub: 'Roots & concordance', href: '/quran/words' },
     ],
   },
   { kind: 'link', label: 'miracle', href: '/miracle' },

@@ -1,6 +1,6 @@
 'use client'
 
-import { BookOpen, List, ScanText } from 'lucide-react'
+import { BookOpen, List } from 'lucide-react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import type { DisplayMode } from '@/hooks/use-quran-preferences'
@@ -41,7 +41,6 @@ export function QuranModeSelector() {
 
   const MODES: { id: DisplayMode; label: string; icon: React.ReactNode }[] = [
     { id: 'verse', label: t('modeVerse'), icon: <List className="size-4" /> },
-    { id: 'word', label: t('modeWordByWord'), icon: <ScanText className="size-4" /> },
     { id: 'reading', label: t('modeReading'), icon: <BookOpen className="size-4" /> },
   ]
 
@@ -50,8 +49,6 @@ export function QuranModeSelector() {
     prefs.setPreferences({
       ...prefs,
       displayMode: mode,
-      // Keep wordByWord in sync so VerseCard renders correctly
-      wordByWord: mode === 'word',
     })
   }
 

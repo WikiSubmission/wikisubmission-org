@@ -14,6 +14,7 @@ import {
   HashIcon,
   LanguagesIcon,
   MessageSquareTextIcon,
+  ScanTextIcon,
   SettingsIcon,
   TextIcon,
   TypeIcon,
@@ -315,15 +316,28 @@ export default function QuranSettings() {
               icon={<TypeIcon className="size-3.5" />}
               label={t('arabic')}
               description="Original Arabic text"
-              checked={
-                quranPreferences.arabic ||
-                quranPreferences.displayMode === 'word'
-              }
-              disabled={quranPreferences.displayMode === 'word'}
+              checked={quranPreferences.arabic || quranPreferences.wordByWord}
+              disabled={quranPreferences.wordByWord}
               onCheckedChange={(checked) =>
                 quranPreferences.setPreferences({
                   ...quranPreferences,
                   arabic: checked,
+                })
+              }
+            />
+          )}
+
+          {/* Word-by-word — verse mode only; layered toggle */}
+          {quranPreferences.displayMode !== 'reading' && (
+            <SettingTile
+              icon={<ScanTextIcon className="size-3.5" />}
+              label="Word by Word"
+              description="Per-word Arabic with translation"
+              checked={quranPreferences.wordByWord}
+              onCheckedChange={(checked) =>
+                quranPreferences.setPreferences({
+                  ...quranPreferences,
+                  wordByWord: checked,
                 })
               }
             />
@@ -361,8 +375,8 @@ export default function QuranSettings() {
             />
           )}
 
-          {/* Transliteration — verse mode or word-by-word */}
-          {(quranPreferences.displayMode === 'verse' || quranPreferences.wordByWord) && (
+          {/* Transliteration — verse mode (covers WBW, since WBW is a verse-mode toggle) */}
+          {quranPreferences.displayMode === 'verse' && (
             <SettingTile
               icon={<LanguagesIcon className="size-3.5" />}
               label={t('transliteration')}

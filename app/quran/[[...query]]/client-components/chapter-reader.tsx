@@ -15,7 +15,6 @@ import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
 import {
   useQuranPreferences,
-  type DisplayMode,
   type QuranPreferences,
 } from '@/hooks/use-quran-preferences'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -52,7 +51,6 @@ type VirtualizedVerseListProps = {
   ) => Promise<void>
   opts: ChapterReaderOptions
   prefs: QuranPreferences
-  displayMode: DisplayMode
   zoomLevel: QuranPreferences['zoomLevel']
   optsKey: string
   isRangeMode: boolean
@@ -75,7 +73,6 @@ function VirtualizedVerseList({
   seekToVerse,
   opts,
   prefs,
-  displayMode,
   zoomLevel,
   optsKey,
   isRangeMode,
@@ -122,7 +119,7 @@ function VirtualizedVerseList({
       const zoomMaxW = ZOOM_WIDTH_PX[prefs.zoomLevel ?? 'comfortable']
       const containerW = Math.min(vw - 32 - innerPad, zoomMaxW - 32 - 64)
 
-      if (displayMode === 'word') {
+      if (prefs.wordByWord) {
         const wordsPerRow = Math.max(2, Math.floor(containerW / 118))
         const wordRows = Math.ceil(wordCount / wordsPerRow)
         return Math.max(320, 160 + wordRows * 141 + footnoteRows * 22)
@@ -485,7 +482,7 @@ export function ChapterReader({
   const opts = useMemo<ChapterReaderOptions>(
     () => ({
       primaryLang: prefs.primaryLanguage,
-      secondaryLang: displayMode === 'word' ? undefined : prefs.secondaryLanguage,
+      secondaryLang: prefs.wordByWord ? undefined : prefs.secondaryLanguage,
       includeArabic: needsArabic,
       includeWords: needsArabic && displayMode !== 'reading',
       includeRoot: needsArabic && displayMode !== 'reading',
@@ -618,7 +615,7 @@ export function ChapterReader({
 
   // Stable key that changes when language prefs change — propagated to VerseCard
   // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
-  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}-${zoomLevel}`
+  const optsKey = `v2-${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}-${zoomLevel}`
   const layoutKey = `${optsKey}-${prefs.text}-${prefs.footnotes}-${prefs.subtitles}-${prefs.transliteration}`
 
   const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
@@ -735,7 +732,6 @@ export function ChapterReader({
           seekToVerse={reader.seekToVerse}
           opts={opts}
           prefs={prefs}
-          displayMode={displayMode}
           zoomLevel={zoomLevel}
           optsKey={optsKey}
           isRangeMode={isRangeMode}

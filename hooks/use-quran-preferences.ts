@@ -22,7 +22,7 @@ export type LangCode =
   | 'ur' // Urdu
   | 'xl' // Transliterated (custom, not sent to API)
 
-export type DisplayMode = 'verse' | 'word' | 'reading'
+export type DisplayMode = 'verse' | 'reading'
 export type ReadingModeLang = 'translation' | 'arabic'
 
 export type QuranPreferences = {
@@ -68,13 +68,19 @@ export const useQuranPreferences = create(
     {
       name: 'quran-preferences-v4',
       storage: createJSONStorage(() => localStorage),
-      version: 4,
+      version: 5,
       migrate: (state, version) => {
-        // Migrate from v3: preserve all existing prefs, add new zoomLevel default
+        let next = state as Omit<QuranPreferences, 'displayMode'> & { displayMode?: string }
         if (version < 4) {
-          return { ...(state as QuranPreferences), zoomLevel: 'comfortable' as ZoomLevel }
+          next = { ...next, zoomLevel: 'comfortable' as ZoomLevel }
         }
-        return state as QuranPreferences
+        if (version < 5) {
+          // WBW is now an additive toggle on verse mode, not a separate displayMode.
+          if (next.displayMode === 'word') {
+            next = { ...next, displayMode: 'verse', wordByWord: true }
+          }
+        }
+        return next as QuranPreferences
       },
     }
   )
