@@ -1,294 +1,1008 @@
-import { buildPageMetadata } from '@/constants/metadata'
 import React from 'react'
 import Image from 'next/image'
+import { buildPageMetadata } from '@/constants/metadata'
+import { SectionDivider, F } from '@/app/(site)/_sections/shared'
+import { BrandBrief } from './brand-brief'
 
 export const metadata = buildPageMetadata({
-  title: 'Brand Guidelines · WikiSubmission',
+  title: 'Brand · WikiSubmission',
   description:
-    'The visual covenant — WikiSubmission brand guidelines covering palette, typography, logo, and motifs.',
+    'WikiSubmission brand guidelines — palettes, typography, tokens, components, voice, and a copy-pasteable design brief for AI tooling.',
   url: '/brand',
 })
 
-const F = {
-  display: 'var(--font-cormorant), Georgia, serif',
-  mono: 'var(--font-jetbrains), ui-monospace, monospace',
-  serif: 'var(--font-source-serif), Georgia, serif',
-  arabic: 'var(--font-amiri), serif',
+/* ------------------------------------------------------------------ */
+/* Palette documentation — three palettes × two modes.
+   These are intentionally hardcoded here: brand swatches must show
+   their canonical hex values regardless of the user's active theme. */
+/* ------------------------------------------------------------------ */
+
+interface ModeSwatches {
+  bg: string
+  fg: string
+  accent: string
+  rule: string
 }
 
-/* Brand page is always dark (Bitumen bg) — scholarly document */
-const D = {
-  bg: '#14110E',
-  bgAlt: '#0F0D0B',
-  surface: '#1C1815',
-  fg: '#EEE4D0',
-  fgMuted: '#8A8075',
-  rule: '#2A241E',
-  accent: '#D4A373',
-  accentSoft: '#3A2A1C',
+interface PaletteDoc {
+  key: 'ink' | 'violet' | 'mono'
+  label: string
+  tagline: string
+  light: ModeSwatches
+  dark: ModeSwatches
 }
 
-function SectionHead({
-  num,
-  title,
-  tag,
-}: {
-  num: string
-  title: string
-  tag: string
-}) {
+const PALETTES: PaletteDoc[] = [
+  {
+    key: 'ink',
+    label: 'Ink on Parchment',
+    tagline: 'Editorial. Default. The canonical look.',
+    light: { bg: '#F6F2EA', fg: '#1A1715', accent: '#6B3410', rule: '#D9CFB9' },
+    dark: { bg: '#14110E', fg: '#EEE4D0', accent: '#D4A373', rule: '#2A241E' },
+  },
+  {
+    key: 'violet',
+    label: 'Sharpened Violet',
+    tagline: 'Contemporary. High contrast. Modernist.',
+    light: { bg: '#FAFAFA', fg: '#121214', accent: '#5A1FD4', rule: '#E5E5EA' },
+    dark: { bg: '#0C0C0E', fg: '#F4F4F5', accent: '#B48CFF', rule: '#27272C' },
+  },
+  {
+    key: 'mono',
+    label: 'Monochrome',
+    tagline: 'Minimal. True black on warm white.',
+    light: { bg: '#F4F4F2', fg: '#0E0E0D', accent: '#0E0E0D', rule: '#D8D8D4' },
+    dark: { bg: '#0A0A09', fg: '#F1F1EC', accent: '#F1F1EC', rule: '#23231F' },
+  },
+]
+
+/* ------------------------------------------------------------------ */
+/* Semantic token documentation. These flow through the active palette.  */
+/* ------------------------------------------------------------------ */
+
+const TOKENS: Array<{ name: string; role: string; mapsTo: string }> = [
+  { name: '--ed-bg', role: 'Page background', mapsTo: '--background' },
+  { name: '--ed-fg', role: 'Primary text', mapsTo: '--foreground' },
+  { name: '--ed-fg-muted', role: 'Secondary text, captions', mapsTo: '--muted-foreground' },
+  { name: '--ed-accent', role: 'Highlights, links, key motifs', mapsTo: '--primary' },
+  { name: '--ed-accent-soft', role: 'Tinted accent surface', mapsTo: '--accent' },
+  { name: '--ed-rule', role: 'Hairline borders, dividers', mapsTo: '--border' },
+  { name: '--ed-bg-alt', role: 'Muted surface (cards, callouts)', mapsTo: '--muted' },
+  { name: '--ed-surface', role: 'Card surface (elevated)', mapsTo: '--card' },
+]
+
+/* ------------------------------------------------------------------ */
+/* Typography specimens                                                */
+/* ------------------------------------------------------------------ */
+
+const TYPE: Array<{
+  name: string
+  role: string
+  variable: string
+  family: string
+  sample: string
+  size: number
+  italic?: boolean
+}> = [
+  {
+    name: 'Cormorant Garamond',
+    role: 'Display, headings, italic accents',
+    variable: '--font-cormorant',
+    family: F.display,
+    sample: 'In the name of God, Most Gracious, Most Merciful.',
+    size: 40,
+  },
+  {
+    name: 'Source Serif 4',
+    role: 'Body copy, paragraphs, reading',
+    variable: '--font-source-serif',
+    family: F.serif,
+    sample: 'Praise be to God, Lord of the universe, Most Gracious, Most Merciful.',
+    size: 18,
+  },
+  {
+    name: 'JetBrains Mono',
+    role: 'References, verse keys, tokens, code',
+    variable: '--font-jetbrains',
+    family: F.mono,
+    sample: '1:1  ·  Sura 112:1–4  ·  --ed-accent',
+    size: 14,
+  },
+  {
+    name: 'Amiri',
+    role: 'Arabic Quranic text',
+    variable: '--font-amiri',
+    family: F.arabic,
+    sample: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+    size: 32,
+  },
+  {
+    name: 'Glacial Indifference',
+    role: 'UI eyebrow, uppercase metadata',
+    variable: '--font-glacial',
+    family: F.glacial,
+    sample: 'CHAPTER · VERSE · TRANSLATION',
+    size: 12,
+  },
+]
+
+/* ------------------------------------------------------------------ */
+/* Voice                                                                */
+/* ------------------------------------------------------------------ */
+
+const VOICE = [
+  { word: 'Scholarly', body: 'Precise, sourced, footnoted. Never speculative.' },
+  { word: 'Reverent', body: 'Quiet, deliberate. The verses are the focus.' },
+  { word: 'Plain', body: 'No jargon. A 12-year-old can read every page.' },
+  { word: 'Timeless', body: 'No trends. No dates in the design language.' },
+]
+
+/* ------------------------------------------------------------------ */
+/* Application — Do / Don't                                             */
+/* ------------------------------------------------------------------ */
+
+const DOS = [
+  'Use --ed-* tokens for every color reference.',
+  'Pair Cormorant displays with Source Serif body.',
+  'Keep hairlines at exactly 1px, never thicker.',
+  'Let Arabic breathe — generous line-height (1.7+).',
+  'Use the section-number motif (§ I, § II) for chaptering.',
+  'Test every page in all three palettes, both modes.',
+]
+
+const DONTS = [
+  'Hardcode hex values in components.',
+  'Round corners beyond 3px — squares are the language.',
+  'Decorate empty space — silence is part of the layout.',
+  'Mix more than two type families on a single screen.',
+  'Use icon-only buttons without aria labels.',
+  'Recolor or distort the logo mark.',
+]
+
+/* ------------------------------------------------------------------ */
+/* Claude / AI design brief — copy-pasteable                            */
+/* ------------------------------------------------------------------ */
+
+const CLAUDE_BRIEF = `# WikiSubmission Design Brief
+
+## Identity
+Editorial, scripture-first. Newspapers, not dashboards. Type-led, hairline rules,
+generous whitespace. Quiet surfaces so verses can speak.
+
+## Palettes (three, each with light + dark)
+- Ink on Parchment (default) — warm, paper-like, brown ink
+- Sharpened Violet            — contemporary, high contrast, violet accent
+- Monochrome                  — minimal, true black/white
+
+The brand is the SYSTEM, not a single colorway. Always reference semantic
+tokens, never the underlying palette hex.
+
+## Semantic Tokens (CSS custom properties — use these everywhere)
+--ed-bg          page background
+--ed-fg          primary text
+--ed-fg-muted    secondary text, captions
+--ed-accent      highlights, links, key motifs
+--ed-accent-soft tinted accent surface
+--ed-rule        hairline borders, dividers
+--ed-bg-alt      muted surface (cards, callouts)
+--ed-surface     elevated card surface
+
+## Typography
+Display:  Cormorant Garamond  (var --font-cormorant)
+Body:     Source Serif 4      (var --font-source-serif)
+Mono:     JetBrains Mono      (var --font-jetbrains)
+Arabic:   Amiri               (var --font-amiri)
+Eyebrow:  Glacial Indifference (var --font-glacial, uppercase, 0.18em tracking)
+
+Pair Cormorant displays with Source Serif body. Maximum two type families per
+screen. Italic Cormorant for kickers and section numbers (§ I, § II).
+
+## Geometry
+Border radius:    0–3px. Squares preferred. Buttons 2px. Cards 3px.
+Hairlines:        1px solid var(--ed-rule). Never thicker.
+Max content:      1240px.
+Section padding:  20–40px horizontal, 80–120px vertical.
+Vertical rhythm:  8 / 12 / 16 / 24 / 32 / 48 / 64 / 96.
+
+## Components (utility classes)
+.ed-link         inline text link (muted → fg on hover)
+.ed-cta          arrow CTA (gap grows on hover)
+.ed-btn-primary  solid button (fg on bg)
+.ed-btn-ghost    bordered button (transparent)
+.ed-card         hover-lift card (3px radius, hairline border)
+
+## Voice
+Scholarly · Reverent · Plain · Timeless.
+Precise, sourced, never speculative. No jargon. No trends.
+
+## Logo
+public/brand-assets/logo-transparent.png  (any background)
+public/brand-assets/logo-black.png         (light backgrounds only)
+public/brand-assets/logo-white.png         (dark backgrounds only)
+Clear space ≥ 30% of mark height. Never recolor or distort.
+
+## Application Rules
+DO    use --ed-* tokens, 1px hairlines, two type families max,
+      test all three palettes × both modes.
+DON'T hardcode hex, round corners >3px, decorate empty space,
+      recolor the logo.
+`
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                 */
+/* ------------------------------------------------------------------ */
+
+const SECTION_PADDING = 'py-20 sm:py-28'
+const CONTAINER = 'max-w-[1240px] mx-auto px-5 sm:px-10'
+
+export default function BrandPage() {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '80px auto 1fr auto',
-        alignItems: 'baseline',
-        gap: 24,
-        marginBottom: 48,
-      }}
-    >
-      <span
-        style={{
-          fontFamily: F.display,
-          fontStyle: 'italic',
-          fontSize: 14,
-          color: D.accent,
-          letterSpacing: '0.12em',
-        }}
-      >
-        § {num}
-      </span>
-      <span
-        style={{
-          fontFamily: F.display,
-          fontSize: 28,
-          fontWeight: 500,
-          letterSpacing: '-0.02em',
-          color: D.fg,
-        }}
-      >
-        {title}
-      </span>
-      <div style={{ height: 1, backgroundColor: D.rule }} />
-      <span
-        style={{
-          fontFamily: F.mono,
-          fontSize: 10,
-          textTransform: 'uppercase',
-          letterSpacing: '0.2em',
-          color: D.fgMuted,
-        }}
-      >
-        {tag}
-      </span>
-    </div>
+    <main style={{ backgroundColor: 'var(--ed-bg)', color: 'var(--ed-fg)' }}>
+      {/* ---------- Masthead ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <div
+          style={{
+            fontFamily: F.glacial,
+            fontSize: 11,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: 'var(--ed-accent)',
+            fontWeight: 600,
+            marginBottom: 24,
+          }}
+        >
+          WikiSubmission · Brand Guidelines
+        </div>
+        <h1
+          style={{
+            fontFamily: F.display,
+            fontSize: 'clamp(56px, 10vw, 96px)',
+            lineHeight: 0.95,
+            letterSpacing: '-0.03em',
+            fontWeight: 500,
+            color: 'var(--ed-fg)',
+            marginBottom: 24,
+          }}
+        >
+          The visual <em style={{ fontStyle: 'italic', color: 'var(--ed-accent)' }}>covenant</em>
+        </h1>
+        <p
+          style={{
+            fontFamily: F.serif,
+            fontSize: 19,
+            lineHeight: 1.6,
+            color: 'var(--ed-fg-muted)',
+            maxWidth: '60ch',
+          }}
+        >
+          WikiSubmission ships under three palettes and two modes. This document
+          defines the system that holds them together — the tokens, typography,
+          motifs, and voice that read the same in every theme.
+        </p>
+      </section>
+
+      <Hairline />
+
+      {/* ---------- § I — North Star ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider num="§ I" title="North star" sub="Why this exists" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {[
+            {
+              title: 'Scripture first',
+              body: 'Every visual decision serves the reading. Surfaces stay quiet so the verses can speak.',
+            },
+            {
+              title: 'Editorial, not corporate',
+              body: 'Type-led layouts, hairline rules, generous whitespace. We borrow from broadsheets, not dashboards.',
+            },
+            {
+              title: 'Theme-honest',
+              body: 'Three palettes, two modes. The brand is the system, not a single colorway.',
+            },
+          ].map((card) => (
+            <div key={card.title}>
+              <div
+                style={{
+                  fontFamily: F.display,
+                  fontSize: 24,
+                  fontWeight: 500,
+                  letterSpacing: '-0.015em',
+                  color: 'var(--ed-fg)',
+                  marginBottom: 12,
+                }}
+              >
+                {card.title}
+              </div>
+              <p
+                style={{
+                  fontFamily: F.serif,
+                  fontSize: 15,
+                  lineHeight: 1.65,
+                  color: 'var(--ed-fg-muted)',
+                }}
+              >
+                {card.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Hairline />
+
+      {/* ---------- § II — Palettes ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider num="§ II" title="Palettes" sub="Three documented" />
+        <p
+          style={{
+            fontFamily: F.serif,
+            fontSize: 15,
+            lineHeight: 1.65,
+            color: 'var(--ed-fg-muted)',
+            marginBottom: 48,
+            maxWidth: '64ch',
+          }}
+        >
+          This page follows your active palette — switch via the theme control
+          in the header to see the chrome adapt. The swatches below always show
+          all three palettes at their canonical hex values.
+        </p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {PALETTES.map((p) => (
+            <PaletteCard key={p.key} palette={p} />
+          ))}
+        </div>
+      </section>
+
+      <Hairline />
+
+      {/* ---------- § III — Tokens ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider num="§ III" title="Tokens" sub="The semantic API" />
+        <p
+          style={{
+            fontFamily: F.serif,
+            fontSize: 15,
+            lineHeight: 1.65,
+            color: 'var(--ed-fg-muted)',
+            marginBottom: 36,
+            maxWidth: '64ch',
+          }}
+        >
+          Always reference these tokens — never the underlying palette hex.
+          The token layer absorbs theme switching so a single component reads
+          correctly in every palette × mode.
+        </p>
+        <div
+          style={{
+            border: '1px solid var(--ed-rule)',
+            borderRadius: 3,
+            overflow: 'hidden',
+          }}
+        >
+          {TOKENS.map((tok, i) => (
+            <div
+              key={tok.name}
+              className="grid grid-cols-[auto_1fr_auto] sm:grid-cols-[200px_1fr_220px]"
+              style={{
+                alignItems: 'center',
+                gap: 16,
+                padding: '14px 18px',
+                borderTop: i === 0 ? 'none' : '1px solid var(--ed-rule)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 18,
+                    height: 18,
+                    backgroundColor: `var(${tok.name})`,
+                    border: '1px solid var(--ed-rule)',
+                    borderRadius: 2,
+                    flexShrink: 0,
+                  }}
+                />
+                <code
+                  style={{
+                    fontFamily: F.mono,
+                    fontSize: 12.5,
+                    color: 'var(--ed-fg)',
+                  }}
+                >
+                  {tok.name}
+                </code>
+              </div>
+              <div
+                style={{
+                  fontFamily: F.serif,
+                  fontSize: 14,
+                  color: 'var(--ed-fg-muted)',
+                }}
+              >
+                {tok.role}
+              </div>
+              <code
+                className="hidden sm:block"
+                style={{
+                  fontFamily: F.mono,
+                  fontSize: 11,
+                  color: 'var(--ed-fg-muted)',
+                  textAlign: 'right',
+                }}
+              >
+                → {tok.mapsTo}
+              </code>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Hairline />
+
+      {/* ---------- § IV — Typography ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider num="§ IV" title="Typography" sub="Five families" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+          {TYPE.map((t) => (
+            <div
+              key={t.name}
+              className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 md:gap-12"
+              style={{
+                paddingBottom: 32,
+                borderBottom: '1px solid var(--ed-rule)',
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontFamily: F.display,
+                    fontSize: 22,
+                    fontWeight: 500,
+                    letterSpacing: '-0.015em',
+                    color: 'var(--ed-fg)',
+                    marginBottom: 6,
+                  }}
+                >
+                  {t.name}
+                </div>
+                <div
+                  style={{
+                    fontFamily: F.serif,
+                    fontSize: 13,
+                    color: 'var(--ed-fg-muted)',
+                    marginBottom: 10,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {t.role}
+                </div>
+                <code
+                  style={{
+                    fontFamily: F.mono,
+                    fontSize: 11,
+                    color: 'var(--ed-accent)',
+                  }}
+                >
+                  var({t.variable})
+                </code>
+              </div>
+              <div
+                dir={t.variable === '--font-amiri' ? 'rtl' : 'ltr'}
+                style={{
+                  fontFamily: t.family,
+                  fontSize: t.size,
+                  lineHeight: 1.4,
+                  color: 'var(--ed-fg)',
+                  letterSpacing: t.size > 24 ? '-0.01em' : 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                {t.sample}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Hairline />
+
+      {/* ---------- § V — Logo ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider num="§ V" title="Logo" sub="Mark variants" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <LogoCard
+            src="/brand-assets/logo-transparent.png"
+            label="Transparent"
+            note="Default. Any background."
+            bg="var(--ed-bg-alt)"
+          />
+          <LogoCard
+            src="/brand-assets/logo-black.png"
+            label="Black"
+            note="Light backgrounds only."
+            bg="#FBF8F1"
+          />
+          <LogoCard
+            src="/brand-assets/logo-white.png"
+            label="White"
+            note="Dark backgrounds only."
+            bg="#14110E"
+          />
+        </div>
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10"
+          style={{
+            paddingTop: 28,
+            borderTop: '1px solid var(--ed-rule)',
+          }}
+        >
+          <Rule
+            heading="Clear space"
+            body="Reserve at least 30% of the mark's height as padding on all sides. Never let other content encroach."
+          />
+          <Rule
+            heading="Don't"
+            body="Recolor, distort, rotate, or apply effects. Use the provided variants only."
+          />
+        </div>
+      </section>
+
+      <Hairline />
+
+      {/* ---------- § VI — Components ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider num="§ VI" title="Components" sub="Editorial primitives" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <ComponentCard label=".ed-link">
+            <a href="#" className="ed-link" style={{ fontFamily: F.serif, fontSize: 16 }}>
+              Read the introduction →
+            </a>
+          </ComponentCard>
+          <ComponentCard label=".ed-cta">
+            <a href="#" className="ed-cta" style={{ fontFamily: F.serif, fontSize: 14 }}>
+              Begin reading <span aria-hidden="true">→</span>
+            </a>
+          </ComponentCard>
+          <ComponentCard label=".ed-btn-primary">
+            <span className="ed-btn-primary" style={{ fontFamily: F.serif }}>
+              Open the Quran
+            </span>
+          </ComponentCard>
+          <ComponentCard label=".ed-btn-ghost">
+            <span className="ed-btn-ghost" style={{ fontFamily: F.serif }}>
+              Learn more
+            </span>
+          </ComponentCard>
+        </div>
+      </section>
+
+      <Hairline />
+
+      {/* ---------- § VII — Geometry ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider num="§ VII" title="Geometry" sub="Numbers, fixed" />
+        <div
+          style={{
+            border: '1px solid var(--ed-rule)',
+            borderRadius: 3,
+            overflow: 'hidden',
+          }}
+        >
+          {[
+            ['Max content width', '1240px'],
+            ['Section padding', '20–40px horizontal · 80–120px vertical'],
+            ['Border radius', '0–3px (squares preferred · buttons 2px · cards 3px)'],
+            ['Hairlines', '1px solid var(--ed-rule)'],
+            ['Vertical rhythm', '8 · 12 · 16 · 24 · 32 · 48 · 64 · 96'],
+          ].map(([k, v], i) => (
+            <div
+              key={k}
+              className="grid grid-cols-1 sm:grid-cols-[260px_1fr]"
+              style={{
+                gap: 16,
+                padding: '14px 18px',
+                borderTop: i === 0 ? 'none' : '1px solid var(--ed-rule)',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: F.glacial,
+                  fontSize: 11,
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                  color: 'var(--ed-accent)',
+                  fontWeight: 600,
+                  alignSelf: 'center',
+                }}
+              >
+                {k}
+              </div>
+              <div
+                style={{
+                  fontFamily: F.mono,
+                  fontSize: 13,
+                  color: 'var(--ed-fg)',
+                }}
+              >
+                {v}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Hairline />
+
+      {/* ---------- § VIII — Voice ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider num="§ VIII" title="Voice" sub="How we sound" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {VOICE.map((v) => (
+            <div
+              key={v.word}
+              style={{
+                padding: '24px 22px',
+                border: '1px solid var(--ed-rule)',
+                borderRadius: 3,
+                backgroundColor: 'var(--ed-bg-alt)',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: F.display,
+                  fontSize: 28,
+                  fontWeight: 500,
+                  letterSpacing: '-0.02em',
+                  color: 'var(--ed-fg)',
+                  marginBottom: 8,
+                }}
+              >
+                {v.word}
+              </div>
+              <p
+                style={{
+                  fontFamily: F.serif,
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  color: 'var(--ed-fg-muted)',
+                }}
+              >
+                {v.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Hairline />
+
+      {/* ---------- § IX — Application ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider num="§ IX" title="Application" sub="Do · Don't" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <ApplicationList
+            heading="Do"
+            tone="positive"
+            items={DOS}
+          />
+          <ApplicationList
+            heading="Don't"
+            tone="negative"
+            items={DONTS}
+          />
+        </div>
+      </section>
+
+      <Hairline />
+
+      {/* ---------- § X — Claude / AI brief ---------- */}
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider num="§ X" title="For AI tooling" sub="Copy-pasteable brief" />
+        <p
+          style={{
+            fontFamily: F.serif,
+            fontSize: 15,
+            lineHeight: 1.65,
+            color: 'var(--ed-fg-muted)',
+            marginBottom: 28,
+            maxWidth: '64ch',
+          }}
+        >
+          Drop this brief into a Claude project, system prompt, or design-aware
+          AI tool. It encodes everything above as plain markdown — tokens,
+          typography, geometry, voice, and rules — small enough to fit in a
+          context window with room to spare.
+        </p>
+        <BrandBrief text={CLAUDE_BRIEF} />
+      </section>
+
+      {/* ---------- Closing verse ---------- */}
+      <section className={`${CONTAINER}`} style={{ paddingTop: 64, paddingBottom: 96 }}>
+        <div
+          style={{
+            paddingTop: 28,
+            paddingBottom: 28,
+            borderTop: '1px solid var(--ed-rule)',
+            borderBottom: '1px solid var(--ed-rule)',
+            display: 'flex',
+            gap: 20,
+            alignItems: 'baseline',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: F.glacial,
+              fontSize: 11,
+              letterSpacing: '0.12em',
+              color: 'var(--ed-accent)',
+              flexShrink: 0,
+              paddingTop: 2,
+            }}
+          >
+            41:53
+          </span>
+          <span
+            style={{
+              fontFamily: F.display,
+              fontStyle: 'italic',
+              fontSize: 17,
+              lineHeight: 1.55,
+              color: 'var(--ed-fg-muted)',
+            }}
+          >
+            We will show them Our proofs in the horizons, and within themselves,
+            until they realize that this is the truth.
+          </span>
+        </div>
+      </section>
+    </main>
   )
 }
 
-function PaletteCard({
-  hex,
-  token,
-  name,
-  bg,
-}: {
-  hex: string
-  token: string
-  name: string
-  bg?: string
-}) {
+/* ============================================================ */
+/* Small composables                                              */
+/* ============================================================ */
+
+function Hairline() {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        height: 1,
+        backgroundColor: 'var(--ed-rule)',
+        maxWidth: 1240,
+        margin: '0 auto',
+      }}
+    />
+  )
+}
+
+function PaletteCard({ palette }: { palette: PaletteDoc }) {
   return (
     <div
       style={{
-        border: '1px solid',
-        borderColor: D.rule,
+        border: '1px solid var(--ed-rule)',
         borderRadius: 3,
         overflow: 'hidden',
+        backgroundColor: 'var(--ed-bg-alt)',
       }}
     >
-      <div
-        style={{
-          height: 140,
-          backgroundColor: hex,
-          border: bg ? `1px solid ${D.rule}` : undefined,
-        }}
-      />
-      <div
-        style={{
-          padding: '14px 16px',
-          backgroundColor: D.surface,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 4,
-        }}
-      >
+      <div style={{ padding: '18px 20px' }}>
         <div
           style={{
-            fontFamily: F.mono,
-            fontSize: 12,
-            color: D.fg,
-            letterSpacing: '0.06em',
+            fontFamily: F.glacial,
+            fontSize: 10.5,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'var(--ed-accent)',
+            fontWeight: 600,
+            marginBottom: 6,
           }}
         >
-          {hex}
+          {palette.key}
         </div>
         <div
           style={{
-            fontFamily: F.mono,
-            fontSize: 10,
-            color: D.accent,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
+            fontFamily: F.display,
+            fontSize: 22,
+            fontWeight: 500,
+            letterSpacing: '-0.015em',
+            color: 'var(--ed-fg)',
+            marginBottom: 4,
           }}
         >
-          {token}
+          {palette.label}
         </div>
         <div
           style={{
             fontFamily: F.serif,
             fontSize: 13,
-            color: D.fgMuted,
+            color: 'var(--ed-fg-muted)',
+            lineHeight: 1.5,
           }}
         >
-          {name}
+          {palette.tagline}
         </div>
+      </div>
+      <PaletteModeRow label="Light" mode={palette.light} />
+      <PaletteModeRow label="Dark" mode={palette.dark} isLast />
+    </div>
+  )
+}
+
+function PaletteModeRow({
+  label,
+  mode,
+  isLast,
+}: {
+  label: string
+  mode: ModeSwatches
+  isLast?: boolean
+}) {
+  const SWATCHES: Array<[keyof ModeSwatches, string]> = [
+    ['bg', 'bg'],
+    ['fg', 'fg'],
+    ['accent', 'accent'],
+    ['rule', 'rule'],
+  ]
+  return (
+    <div
+      style={{
+        borderTop: '1px solid var(--ed-rule)',
+        borderBottom: isLast ? 'none' : 'none',
+        backgroundColor: mode.bg,
+        padding: '18px 20px',
+      }}
+    >
+      <div
+        style={{
+          fontFamily: F.glacial,
+          fontSize: 10,
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          color: mode.fg,
+          opacity: 0.6,
+          fontWeight: 600,
+          marginBottom: 12,
+        }}
+      >
+        {label}
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {SWATCHES.map(([k, lbl]) => (
+          <div key={k}>
+            <div
+              aria-hidden="true"
+              style={{
+                width: '100%',
+                aspectRatio: '1 / 1',
+                backgroundColor: mode[k],
+                border: `1px solid ${mode.rule}`,
+                borderRadius: 2,
+                marginBottom: 6,
+              }}
+            />
+            <div
+              style={{
+                fontFamily: F.glacial,
+                fontSize: 9,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: mode.fg,
+                opacity: 0.6,
+                fontWeight: 600,
+              }}
+            >
+              {lbl}
+            </div>
+            <div
+              style={{
+                fontFamily: F.mono,
+                fontSize: 10.5,
+                color: mode.fg,
+                marginTop: 1,
+              }}
+            >
+              {mode[k]}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
 }
 
-function TypeSpecimen({
-  family,
-  use,
-  sample,
-  weight,
+function LogoCard({
+  src,
+  label,
+  note,
+  bg,
 }: {
-  family: string
-  use: string
-  sample: string
-  weight: string
+  src: string
+  label: string
+  note: string
+  bg: string
 }) {
   return (
     <div
       style={{
-        border: '1px solid',
-        borderColor: D.rule,
+        border: '1px solid var(--ed-rule)',
         borderRadius: 3,
         overflow: 'hidden',
-        backgroundColor: D.surface,
       }}
     >
       <div
         style={{
-          padding: '20px 28px',
-          borderBottom: `1px solid ${D.rule}`,
+          backgroundColor: bg,
+          padding: 40,
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'baseline',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: 180,
         }}
       >
+        <Image
+          src={src}
+          alt={`WikiSubmission logo — ${label}`}
+          width={88}
+          height={88}
+          style={{ height: 'auto', width: 88 }}
+        />
+      </div>
+      <div style={{ padding: '14px 18px', backgroundColor: 'var(--ed-bg-alt)' }}>
         <div
           style={{
-            fontFamily: F.mono,
+            fontFamily: F.glacial,
             fontSize: 11,
-            color: D.fg,
-            letterSpacing: '0.08em',
+            letterSpacing: '0.16em',
+            textTransform: 'uppercase',
+            color: 'var(--ed-accent)',
+            fontWeight: 600,
+            marginBottom: 4,
           }}
         >
-          {family}
+          {label}
         </div>
         <div
           style={{
-            fontFamily: F.mono,
-            fontSize: 10,
-            color: D.accent,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
+            fontFamily: F.serif,
+            fontSize: 13,
+            color: 'var(--ed-fg-muted)',
+            lineHeight: 1.5,
           }}
         >
-          {use}
+          {note}
         </div>
-      </div>
-      <div
-        style={{
-          padding: '40px 28px',
-          fontSize: 'clamp(36px, 5vw, 64px)',
-          lineHeight: 1.1,
-          color: D.fg,
-          fontFamily: family.includes('Cormorant')
-            ? F.display
-            : family.includes('JetBrains')
-            ? F.mono
-            : family.includes('Amiri')
-            ? F.arabic
-            : F.serif,
-          letterSpacing: '-0.02em',
-        }}
-      >
-        {sample}
-      </div>
-      <div
-        style={{
-          padding: '12px 28px',
-          borderTop: `1px solid ${D.rule}`,
-          fontFamily: F.mono,
-          fontSize: 10,
-          color: D.fgMuted,
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-        }}
-      >
-        {weight}
       </div>
     </div>
   )
 }
 
-function Principle({
-  num,
-  title,
-  body,
-}: {
-  num: string
-  title: string
-  body: string
-}) {
+function Rule({ heading, body }: { heading: string; body: string }) {
   return (
-    <div
-      style={{
-        paddingTop: 20,
-        borderTop: `2px solid ${D.accent}`,
-      }}
-    >
+    <div>
       <div
         style={{
-          fontFamily: F.mono,
-          fontSize: 10,
-          color: D.accent,
+          fontFamily: F.glacial,
+          fontSize: 11,
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
-          marginBottom: 12,
+          color: 'var(--ed-accent)',
+          fontWeight: 600,
+          marginBottom: 8,
         }}
       >
-        {num}
-      </div>
-      <div
-        style={{
-          fontFamily: F.display,
-          fontSize: 22,
-          fontWeight: 500,
-          color: D.fg,
-          marginBottom: 12,
-          lineHeight: 1.15,
-        }}
-      >
-        {title}
+        {heading}
       </div>
       <p
         style={{
           fontFamily: F.serif,
           fontSize: 14,
-          color: D.fgMuted,
-          lineHeight: 1.65,
+          lineHeight: 1.6,
+          color: 'var(--ed-fg-muted)',
         }}
       >
         {body}
@@ -297,640 +1011,110 @@ function Principle({
   )
 }
 
-export default function BrandPage() {
+function ComponentCard({
+  children,
+  label,
+}: {
+  children: React.ReactNode
+  label: string
+}) {
   return (
     <div
       style={{
-        backgroundColor: D.bg,
-        color: D.fg,
-        minHeight: '100vh',
+        border: '1px solid var(--ed-rule)',
+        borderRadius: 3,
+        overflow: 'hidden',
       }}
     >
       <div
         style={{
-          maxWidth: 1180,
-          margin: '0 auto',
-          padding: '80px 40px 160px',
+          padding: 36,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: 120,
+          backgroundColor: 'var(--ed-bg-alt)',
         }}
       >
-        {/* ── Masthead ── */}
-        <div
-          style={{
-            paddingBottom: 56,
-            borderBottom: `1px solid ${D.rule}`,
-            marginBottom: 80,
-          }}
-        >
-          <h1
-            style={{
-              fontFamily: F.display,
-              fontSize: 'clamp(64px, 8vw, 120px)',
-              lineHeight: 0.92,
-              letterSpacing: '-0.035em',
-              fontWeight: 400,
-              color: D.fg,
-            }}
-          >
-            The{' '}
-            <em style={{ fontStyle: 'italic', color: D.fgMuted }}>visual</em>
-            <br />
-            covenant.
-          </h1>
-        </div>
-
-        {/* ── § I · Principles ── */}
-        <div style={{ marginBottom: 120 }}>
-          <SectionHead num="I" title="Principles" tag="Foundation" />
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 32,
-            }}
-            className="max-md:grid-cols-1"
-          >
-            <Principle
-              num="01"
-              title="Scripture first"
-              body="Every design decision serves the text. Typography, spacing, and colour exist to make the words easier to read and remember — never to impress."
-            />
-            <Principle
-              num="02"
-              title="Ink on parchment"
-              body="We borrow from the tradition of illuminated manuscripts: warm, unhurried, tactile. The aesthetic communicates age and authority without artifice."
-            />
-            <Principle
-              num="03"
-              title="No intermediary"
-              body="The design removes barriers between the reader and the source. No dark patterns, no paywalls, no signup walls. The brand reflects the mission."
-            />
-          </div>
-        </div>
-
-        {/* ── § II · Voice ── */}
-        <div style={{ marginBottom: 120 }}>
-          <SectionHead num="II" title="Voice" tag="Editorial tone" />
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 40,
-            }}
-            className="max-md:grid-cols-1"
-          >
-            {[
-              {
-                head: 'Scholarly, not academic',
-                body: 'We write with precision and cite our sources, but we never write to exclude. A first-time reader and a graduate student should both feel welcomed.',
-              },
-              {
-                head: 'Reverent, not dogmatic',
-                body: 'The tone reflects awe before the text, not enforcement of a creed. We present the Quran and invite the reader to draw their own conclusions.',
-              },
-              {
-                head: 'Plain, not plain-spoken',
-                body: "We choose words that are exact, not simple. Clarity is a form of respect. We don't condescend or over-explain, but we also don't obscure.",
-              },
-              {
-                head: 'Timeless, not trendy',
-                body: 'Copy written today should read without embarrassment in ten years. Avoid idioms, slang, or references that date quickly.',
-              },
-            ].map((v) => (
-              <div key={v.head}>
-                <div
-                  style={{
-                    fontFamily: F.display,
-                    fontSize: 20,
-                    fontWeight: 500,
-                    color: D.fg,
-                    marginBottom: 10,
-                  }}
-                >
-                  {v.head}
-                </div>
-                <p
-                  style={{
-                    fontFamily: F.serif,
-                    fontSize: 14,
-                    color: D.fgMuted,
-                    lineHeight: 1.65,
-                  }}
-                >
-                  {v.body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── § III · Logo ── */}
-        <div style={{ marginBottom: 120 }}>
-          <SectionHead num="III" title="Logo" tag="Mark & wordmark" />
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 16,
-            }}
-            className="max-md:grid-cols-1"
-          >
-            {[
-              { label: 'i.', rule: 'Primary mark — logo-transparent.png on any background', bg: D.surface, src: '/brand-assets/logo-transparent.png' },
-              { label: 'ii.', rule: 'On sienna or coloured ground', bg: '#6B3410', src: '/brand-assets/logo-transparent.png' },
-              { label: 'iii.', rule: 'On deep dark ground', bg: '#14110E', src: '/brand-assets/logo-transparent.png' },
-              { label: 'iv.', rule: 'Minimum clear space: ½ mark height on all sides', bg: D.surface, src: null },
-              { label: 'v.', rule: 'Minimum size: 24px height for digital, 8mm for print', bg: D.surface, src: null },
-              { label: 'vi.', rule: 'Never distort, recolour, or add effects to the mark', bg: D.surface, src: null },
-            ].map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  backgroundColor: item.bg,
-                  border: `1px solid ${D.rule}`,
-                  borderRadius: 3,
-                  padding: 32,
-                  minHeight: 180,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: F.display,
-                    fontStyle: 'italic',
-                    fontSize: 16,
-                    color: D.accent,
-                  }}
-                >
-                  {item.label}
-                </span>
-                {item.src && (
-                  <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0' }}>
-                    <Image src={item.src} alt="" width={72} height={72} style={{ objectFit: 'contain' }} />
-                  </div>
-                )}
-                <p
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 11,
-                    letterSpacing: '0.12em',
-                    color: item.bg === D.surface ? D.fgMuted : item.bg === '#F6F2EA' ? '#6A6158' : '#8A8075',
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {item.rule}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── § IV · Palette ── */}
-        <div style={{ marginBottom: 120 }}>
-          <SectionHead num="IV" title="Palette" tag="Colour system" />
-
-          <div
-            style={{
-              fontFamily: F.mono,
-              fontSize: 11,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: D.accent,
-              marginBottom: 20,
-            }}
-          >
-            Light mode — Ink on Parchment
-          </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: 16,
-              marginBottom: 48,
-            }}
-            className="max-md:grid-cols-2 max-sm:grid-cols-1"
-          >
-            <PaletteCard hex="#F6F2EA" token="--ed-bg" name="Parchment · Page background" bg="#D9CFB9" />
-            <PaletteCard hex="#FBF8F1" token="--ed-surface" name="Vellum · Card surface" bg="#D9CFB9" />
-            <PaletteCard hex="#1A1715" token="--ed-fg" name="Ink · Foreground text" />
-            <PaletteCard hex="#6B3410" token="--ed-accent" name="Sienna · Accent & links" />
-            <PaletteCard hex="#EFE8D9" token="--ed-bg-alt" name="Parchment alt · Banded sections" />
-            <PaletteCard hex="#6A6158" token="--ed-fg-muted" name="Ash · Muted / metadata" />
-            <PaletteCard hex="#D9CFB9" token="--ed-rule" name="Hairline · Borders" />
-            <PaletteCard hex="#ECD9C5" token="--ed-accent-soft" name="Sienna 10% · Highlight bg" />
-          </div>
-
-          <div
-            style={{
-              fontFamily: F.mono,
-              fontSize: 11,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: D.accent,
-              marginBottom: 20,
-            }}
-          >
-            Dark mode — Night Scholar
-          </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: 16,
-            }}
-            className="max-md:grid-cols-2 max-sm:grid-cols-1"
-          >
-            <PaletteCard hex="#14110E" token="--ed-bg" name="Bitumen · Page background" bg="#2A241E" />
-            <PaletteCard hex="#1C1815" token="--ed-surface" name="Surface · Card bg" />
-            <PaletteCard hex="#EEE4D0" token="--ed-fg" name="Linen · Foreground text" />
-            <PaletteCard hex="#D4A373" token="--ed-accent" name="Brass · Accent" />
-            <PaletteCard hex="#0F0D0B" token="--ed-bg-alt" name="Alt bg · Banded sections" />
-            <PaletteCard hex="#8A8075" token="--ed-fg-muted" name="Muted text" />
-            <PaletteCard hex="#2A241E" token="--ed-rule" name="Ash · Borders" />
-            <PaletteCard hex="#3A2A1C" token="--ed-accent-soft" name="Brass soft · Highlight bg" />
-          </div>
-        </div>
-
-        {/* ── § V · Typography ── */}
-        <div style={{ marginBottom: 120 }}>
-          <SectionHead num="V" title="Typography" tag="Type system" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <TypeSpecimen
-              family="Cormorant Garamond"
-              use="Display / headings"
-              sample="The Final Testament"
-              weight="400 · 500 · 600 — regular & italic"
-            />
-            <TypeSpecimen
-              family="Source Serif 4"
-              use="Body / lede / captions"
-              sample="Wisdom for all nations."
-              weight="300 · 400 · 600 · 700 — regular & italic"
-            />
-            <TypeSpecimen
-              family="JetBrains Mono"
-              use="Kickers / metadata / references"
-              sample="OVER IT IS NINETEEN"
-              weight="400 · 500"
-            />
-            <TypeSpecimen
-              family="Amiri"
-              use="Arabic scripture"
-              sample="بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
-              weight="400 · 700"
-            />
-          </div>
-        </div>
-
-        {/* ── § VI · Layout ── */}
-        <div style={{ marginBottom: 120 }}>
-          <SectionHead num="VI" title="Layout" tag="Grid & spacing" />
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 40,
-            }}
-            className="max-md:grid-cols-1"
-          >
-            {[
-              { label: 'Max content width', value: '1240px' },
-              { label: 'Horizontal padding', value: '40px desktop · 24px mobile' },
-              { label: 'Section rhythm (spacious)', value: '120px' },
-              { label: 'Section rhythm (compact)', value: '72px' },
-              { label: 'Card radius', value: '3px' },
-              { label: 'Button radius', value: '2px' },
-              { label: 'Hairline', value: '1px solid var(--ed-rule)' },
-              { label: 'Emphasis rule', value: '2px solid var(--ed-accent)' },
-            ].map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'baseline',
-                  padding: '14px 0',
-                  borderBottom: `1px solid ${D.rule}`,
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: F.serif,
-                    fontSize: 14,
-                    color: D.fgMuted,
-                  }}
-                >
-                  {item.label}
-                </span>
-                <span
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 12,
-                    color: D.fg,
-                    letterSpacing: '0.06em',
-                  }}
-                >
-                  {item.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── § VII · Motifs ── */}
-        <div style={{ marginBottom: 120 }}>
-          <SectionHead num="VII" title="Motifs" tag="Visual language" />
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 24,
-            }}
-            className="max-md:grid-cols-1"
-          >
-            {/* Nineteen */}
-            <div
-              style={{
-                backgroundColor: D.surface,
-                border: `1px solid ${D.rule}`,
-                borderRadius: 3,
-                padding: 40,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 16,
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: F.display,
-                  fontStyle: 'italic',
-                  fontSize: 96,
-                  color: D.accent,
-                  lineHeight: 0.9,
-                  letterSpacing: '-0.04em',
-                }}
-              >
-                19
-              </div>
-              <div>
-                <div
-                  style={{
-                    fontFamily: F.display,
-                    fontSize: 18,
-                    fontWeight: 500,
-                    color: D.fg,
-                    marginBottom: 8,
-                  }}
-                >
-                  Nineteen
-                </div>
-                <p
-                  style={{
-                    fontFamily: F.serif,
-                    fontSize: 13,
-                    color: D.fgMuted,
-                    lineHeight: 1.6,
-                  }}
-                >
-                  The italic numeral in large display serif. Use sparingly —
-                  in miracle sections and mathematical proofs only.
-                </p>
-              </div>
-            </div>
-
-            {/* Hairlines */}
-            <div
-              style={{
-                backgroundColor: D.surface,
-                border: `1px solid ${D.rule}`,
-                borderRadius: 3,
-                padding: 40,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 16,
-              }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                {[false, true].map((dashed, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                    }}
-                  >
-                    <div
-                      style={{
-                        flex: 1,
-                        height: 1,
-                        background: dashed
-                          ? `repeating-linear-gradient(to right, ${D.rule} 0, ${D.rule} 6px, transparent 6px, transparent 12px)`
-                          : D.rule,
-                      }}
-                    />
-                    {dashed && (
-                      <div
-                        style={{
-                          width: 5,
-                          height: 5,
-                          borderRadius: '50%',
-                          backgroundColor: D.accent,
-                        }}
-                      />
-                    )}
-                    {dashed && (
-                      <div
-                        style={{
-                          flex: 1,
-                          height: 1,
-                          background: `repeating-linear-gradient(to right, ${D.rule} 0, ${D.rule} 6px, transparent 6px, transparent 12px)`,
-                        }}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <div
-                  style={{
-                    fontFamily: F.display,
-                    fontSize: 18,
-                    fontWeight: 500,
-                    color: D.fg,
-                    marginBottom: 8,
-                  }}
-                >
-                  Hairlines
-                </div>
-                <p
-                  style={{
-                    fontFamily: F.serif,
-                    fontSize: 13,
-                    color: D.fgMuted,
-                    lineHeight: 1.6,
-                  }}
-                >
-                  Simple 1px horizontal rules — solid or dashed with a center
-                  accent dot. Used as section dividers throughout.
-                </p>
-              </div>
-            </div>
-
-            {/* Quranic brackets */}
-            <div
-              style={{
-                backgroundColor: D.surface,
-                border: `1px solid ${D.rule}`,
-                borderRadius: 3,
-                padding: 40,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 16,
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: F.arabic,
-                  fontSize: 64,
-                  color: D.accent,
-                  lineHeight: 1,
-                }}
-                dir="rtl"
-              >
-                ﴿ ﴾
-              </div>
-              <div>
-                <div
-                  style={{
-                    fontFamily: F.display,
-                    fontSize: 18,
-                    fontWeight: 500,
-                    color: D.fg,
-                    marginBottom: 8,
-                  }}
-                >
-                  Quranic brackets
-                </div>
-                <p
-                  style={{
-                    fontFamily: F.serif,
-                    fontSize: 13,
-                    color: D.fgMuted,
-                    lineHeight: 1.6,
-                  }}
-                >
-                  ﴿ ﴾ in Amiri, accent colour. Used to bracket displayed
-                  Quranic verses. Never used decoratively.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── § VIII · Application ── */}
-        <div style={{ marginBottom: 40 }}>
-          <SectionHead num="VIII" title="Application" tag="Do & don't" />
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 40,
-            }}
-            className="max-md:grid-cols-1"
-          >
-            <div>
-              <div
-                style={{
-                  fontFamily: F.mono,
-                  fontSize: 10,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  color: '#5A9A6A',
-                  marginBottom: 20,
-                }}
-              >
-                Do
-              </div>
-              {[
-                'Use Cormorant Garamond for all display headings',
-                'Use hairlines and editorial spacing to let content breathe',
-                'Keep the Parchment / Ink palette as the default light mode',
-                'Use the 19 motif only in miracle-related contexts',
-                'Right-align all Arabic text (dir="rtl")',
-                'Link the wordmark to the homepage in every context',
-              ].map((item) => (
-                <div
-                  key={item}
-                  style={{
-                    display: 'flex',
-                    gap: 12,
-                    padding: '10px 0',
-                    borderBottom: `1px solid ${D.rule}`,
-                  }}
-                >
-                  <span style={{ color: '#5A9A6A', flexShrink: 0 }}>✓</span>
-                  <span
-                    style={{
-                      fontFamily: F.serif,
-                      fontSize: 14,
-                      color: D.fgMuted,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {item}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div>
-              <div
-                style={{
-                  fontFamily: F.mono,
-                  fontSize: 10,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  color: '#C0504A',
-                  marginBottom: 20,
-                }}
-              >
-                Don&apos;t
-              </div>
-              {[
-                'Use rounded corners larger than 3px on editorial elements',
-                'Mix the editorial palette with Violet / primary system colours',
-                'Add drop-shadows heavier than 0 12px 40px rgba(26,23,21,0.06)',
-                'Use the 19 motif as general decoration',
-                'Rasterize or stretch the logo mark',
-                'Use purple / violet primary on the homepage or brand page',
-              ].map((item) => (
-                <div
-                  key={item}
-                  style={{
-                    display: 'flex',
-                    gap: 12,
-                    padding: '10px 0',
-                    borderBottom: `1px solid ${D.rule}`,
-                  }}
-                >
-                  <span style={{ color: '#C0504A', flexShrink: 0 }}>✕</span>
-                  <span
-                    style={{
-                      fontFamily: F.serif,
-                      fontSize: 14,
-                      color: D.fgMuted,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {item}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        {children}
       </div>
+      <div
+        style={{
+          padding: '12px 16px',
+          borderTop: '1px solid var(--ed-rule)',
+          fontFamily: F.mono,
+          fontSize: 11.5,
+          color: 'var(--ed-fg-muted)',
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  )
+}
+
+function ApplicationList({
+  heading,
+  items,
+  tone,
+}: {
+  heading: string
+  items: string[]
+  tone: 'positive' | 'negative'
+}) {
+  const accent = tone === 'positive' ? 'var(--ed-accent)' : 'var(--ed-fg-muted)'
+  const symbol = tone === 'positive' ? '✓' : '×'
+  return (
+    <div>
+      <div
+        style={{
+          fontFamily: F.display,
+          fontSize: 28,
+          fontWeight: 500,
+          letterSpacing: '-0.02em',
+          color: 'var(--ed-fg)',
+          marginBottom: 20,
+          paddingBottom: 12,
+          borderBottom: '1px solid var(--ed-rule)',
+        }}
+      >
+        {heading}
+      </div>
+      <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {items.map((item) => (
+          <li
+            key={item}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '20px 1fr',
+              gap: 12,
+              alignItems: 'baseline',
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                fontFamily: F.mono,
+                fontSize: 14,
+                color: accent,
+                fontWeight: 600,
+              }}
+            >
+              {symbol}
+            </span>
+            <span
+              style={{
+                fontFamily: F.serif,
+                fontSize: 14.5,
+                lineHeight: 1.55,
+                color: 'var(--ed-fg-muted)',
+              }}
+            >
+              {item}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
