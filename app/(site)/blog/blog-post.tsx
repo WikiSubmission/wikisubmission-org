@@ -123,6 +123,15 @@ function matchesSecret(secret: string, expectedSecret: string) {
   return timingSafeEqual(provided, expected)
 }
 
+function parseSanityImageDimensions(url: string): { width: number; height: number } | null {
+  const match = url.match(/-(\d+)x(\d+)\.[a-z0-9]+(?:\?.*)?$/i)
+  if (!match) return null
+  const width = Number(match[1])
+  const height = Number(match[2])
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null
+  return { width, height }
+}
+
 function formatDate(dateString?: string) {
   if (!dateString) return ''
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -224,6 +233,8 @@ export function buildBlogPostMetadata(
     ? `${title} | Draft Preview | WikiSubmission`
     : `${title} | WikiSubmission`
 
+  const thumbnailDimensions = post.thumbnailUrl ? parseSanityImageDimensions(post.thumbnailUrl) : null
+
   const base = buildPageMetadata({
     title: metadataTitle,
     description,
@@ -233,6 +244,7 @@ export function buildBlogPostMetadata(
           image: post.thumbnailUrl,
           imageAlt: title,
           twitterCard: 'summary_large_image' as const,
+          ...(thumbnailDimensions ? { imageSize: thumbnailDimensions } : {}),
         }
       : {}),
   })
