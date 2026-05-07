@@ -1,6 +1,11 @@
+'use client'
+
+import { toast } from 'sonner'
+
 /**
- * Renders text containing `<b>...</b>` highlight markers as styled marks.
- * Use `markQuery(text, query)` to produce the marked string from plain text + query.
+ * Renders text containing `<b>...</b>` highlight markers as click-to-copy
+ * pills. Tap (mobile) or click (desktop) writes the matched text to the
+ * clipboard.
  */
 export function HighlightText({ text }: { text?: string | null }) {
   if (!text) return null
@@ -9,17 +14,35 @@ export function HighlightText({ text }: { text?: string | null }) {
     <>
       {normalized.split(/(<b>.*?<\/b>)/g).map((part, i) =>
         part.startsWith('<b>') && part.endsWith('</b>') ? (
-          <mark
-            key={i}
-            className="bg-primary/10 text-primary rounded-sm not-italic font-semibold px-0.5"
-          >
-            {part.slice(3, -4)}
-          </mark>
+          <CopyMark key={i} text={part.slice(3, -4)} />
         ) : (
           part || null
         )
       )}
     </>
+  )
+}
+
+function CopyMark({ text }: { text: string }) {
+  return (
+    <button
+      type="button"
+      onClick={async (e) => {
+        e.stopPropagation()
+        e.preventDefault()
+        try {
+          await navigator.clipboard.writeText(text)
+          toast.success(`Copied: ${text}`)
+        } catch {
+          toast.error('Could not copy to clipboard')
+        }
+      }}
+      className="bg-primary/10 text-primary rounded-sm not-italic font-semibold px-0.5 hover:bg-primary/20 active:scale-95 cursor-copy transition-all"
+      aria-label={`Copy ${text}`}
+      title={`Copy: ${text}`}
+    >
+      {text}
+    </button>
   )
 }
 

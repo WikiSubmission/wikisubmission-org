@@ -796,7 +796,15 @@ export const VerseCard = memo(
       let result = tr.tx
       for (const word of boldedWords) {
         const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        result = result.replace(new RegExp(`(${escaped})`, 'gi'), '<b>$1</b>')
+        // Unicode-aware word boundary: only match when the surrounding chars
+        // aren't letters/digits, so "test" won't match inside "testify".
+        result = result.replace(
+          new RegExp(
+            `(?<![\\p{L}\\p{N}_])(${escaped})(?![\\p{L}\\p{N}_])`,
+            'giu'
+          ),
+          '<b>$1</b>'
+        )
       }
       return result
     }, [searchHighlight, tr])

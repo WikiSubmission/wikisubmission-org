@@ -24,6 +24,37 @@ import { MultiSelectBar } from '../mini-components/multi-select-bar'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useTranslations } from 'next-intl'
 
+/** Click-to-copy text — used to let users grab the active search query. */
+function CopyableText({
+  text,
+  className,
+  ariaLabel,
+}: {
+  text: string
+  className?: string
+  ariaLabel?: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={async (e) => {
+        e.stopPropagation()
+        try {
+          await navigator.clipboard.writeText(text)
+          toast.success(`Copied: ${text}`)
+        } catch {
+          toast.error('Could not copy to clipboard')
+        }
+      }}
+      className={`text-left cursor-copy hover:text-primary active:scale-[0.98] transition-all ${className ?? ''}`}
+      title={`Copy: ${text}`}
+      aria-label={ariaLabel ?? `Copy ${text}`}
+    >
+      {text}
+    </button>
+  )
+}
+
 // ─── SearchResultChapter ──────────────────────────────────────────────────────
 
 function SearchResultChapter({
@@ -50,34 +81,6 @@ function SearchResultChapter({
         <ChevronRight className="size-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
       </div>
     </Link>
-  )
-}
-
-// ─── SearchResultVerse ────────────────────────────────────────────────────────
-
-function SearchResultVerse({
-  verse,
-  primaryCode,
-  optsKey,
-}: {
-  verse: VerseResult
-  primaryCode: string
-  optsKey: string
-}) {
-  const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
-  const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
-
-  return (
-    <div className="bg-muted/30 backdrop-blur-sm rounded-2xl border border-border/40 overflow-hidden">
-      <VerseCard
-        verse={verse}
-        isLast={true}
-        optsKey={optsKey}
-        showAudio={false}
-        verseHref={`/quran/${chNum}?verse=${vNum}`}
-        searchHighlight={tr?.hl ?? undefined}
-      />
-    </div>
   )
 }
 
@@ -220,9 +223,13 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     <div
       className={`space-y-5 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
     >
-      {/* Header */}
+      {/* Header — query is click-to-copy */}
       <div className="flex items-baseline gap-3 bg-muted/30 border border-border/40 rounded-2xl px-5 py-4">
-        <h2 className="text-xl font-semibold">{searchQuery}</h2>
+        <CopyableText
+          text={searchQuery}
+          className="text-xl font-semibold"
+          ariaLabel={`Copy search query ${searchQuery}`}
+        />
         <span className="text-sm text-muted-foreground">
           {verseSearch.total} results
         </span>
@@ -276,16 +283,23 @@ export default function SearchResult({ props }: { props: { query: string } }) {
             </div>
           )}
 
-          {/* Verse list */}
-          <div className="space-y-3">
-            {allVerses.map((verse, index) => (
-              <SearchResultVerse
-                key={verse.vk ?? index}
-                verse={verse}
-                primaryCode={primaryCode}
-                optsKey={optsKey}
-              />
-            ))}
+          {/* Verse list — uses VerseCard directly to match the chapter reader's look */}
+          <div>
+            {allVerses.map((verse, index) => {
+              const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
+              const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
+              return (
+                <VerseCard
+                  key={verse.vk ?? index}
+                  verse={verse}
+                  isLast={index === allVerses.length - 1}
+                  optsKey={optsKey}
+                  showAudio={false}
+                  verseHref={`/quran/${chNum}?verse=${vNum}`}
+                  searchHighlight={tr?.hl ?? undefined}
+                />
+              )
+            })}
           </div>
 
           {verseSearch.loading && (
