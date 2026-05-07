@@ -41,6 +41,9 @@ export function VerseMinimap({
   const [previewVerse, setPreviewVerse] = useState<number | null>(null)
   // Mobile: low opacity until press, then fully visible
   const [isActive, setIsActive] = useState(false)
+  // Throttle network-bound preview calls during drag (visual previewVerse
+  // still updates on every move for smooth feedback).
+  const lastPreviewAt = useRef(0)
 
   const loadedNumbers = useMemo(
     () => new Set(verses.map((v) => parseInt(v.vk?.split(':')[1] ?? '-1'))),
@@ -73,6 +76,7 @@ export function VerseMinimap({
       e.currentTarget.setPointerCapture(e.pointerId)
       const v = pointToVerse(e.clientY)
       setPreviewVerse(v)
+      lastPreviewAt.current = performance.now()
       onPreview?.(v)
     },
     [pointToVerse, onPreview]
@@ -83,7 +87,11 @@ export function VerseMinimap({
       if (!isDragging.current) return
       const v = pointToVerse(e.clientY)
       setPreviewVerse(v)
-      onPreview?.(v)
+      const now = performance.now()
+      if (now - lastPreviewAt.current > 100) {
+        lastPreviewAt.current = now
+        onPreview?.(v)
+      }
     },
     [pointToVerse, onPreview]
   )
