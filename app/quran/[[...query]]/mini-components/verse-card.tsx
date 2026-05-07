@@ -1,9 +1,10 @@
 'use client'
 
-import { memo, useMemo, useCallback, useState } from 'react'
+import { memo, useMemo, useCallback, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import type { WordTapAction } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useIsTouch } from '@/hooks/use-is-touch'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -13,6 +14,7 @@ import {
   type QuranVerse,
 } from '@/lib/quran-audio-context'
 import { PlayWordButton } from '@/components/play-word-button'
+import { useWordAudio, wordAudioId } from '@/lib/word-audio'
 import { RootWordOccurrences } from './root-word-occurrences'
 import { CopyButton } from './copy-button'
 import {
@@ -22,6 +24,8 @@ import {
   ArrowUpRight,
   Bookmark,
   StickyNote,
+  Volume2,
+  BookOpen,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HighlightText } from '@/components/highlight-text'
@@ -30,7 +34,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   Tooltip,
@@ -132,6 +135,413 @@ function WordOccurrencesDialogContent({
 
 // ─── Word-by-word (Arabic) ────────────────────────────────────────────────────
 
+const LONG_PRESS_MS = 380
+const LONG_PRESS_MOVE_TOLERANCE = 8
+
+/**
+ * Returns pointer/click handlers that distinguish a tap (primary) from a
+ * long-press / right-click (secondary). Move beyond a small tolerance cancels
+ * the long-press timer so vertical scroll is never hijacked.
+ */
+function useTapOrLongPress({
+  primary,
+  secondary,
+  disabled = false,
+}: {
+  primary: () => void
+  secondary?: (() => void) | null
+  disabled?: boolean
+}) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const firedRef = useRef(false)
+  const startRef = useRef({ x: 0, y: 0 })
+
+  const cancel = useCallback(() => {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+  }, [])
+
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (disabled || !secondary) return
+      firedRef.current = false
+      startRef.current = { x: e.clientX, y: e.clientY }
+      cancel()
+      timerRef.current = setTimeout(() => {
+        firedRef.current = true
+        secondary()
+      }, LONG_PRESS_MS)
+    },
+    [disabled, secondary, cancel]
+  )
+
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (timerRef.current === null) return
+      const dx = Math.abs(e.clientX - startRef.current.x)
+      const dy = Math.abs(e.clientY - startRef.current.y)
+      if (dx > LONG_PRESS_MOVE_TOLERANCE || dy > LONG_PRESS_MOVE_TOLERANCE) {
+        cancel()
+      }
+    },
+    [cancel]
+  )
+
+  const onClick = useCallback(
+    (e: React.MouseEvent) => {
+      cancel()
+      if (disabled) return
+      if (firedRef.current) {
+        firedRef.current = false
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
+      primary()
+    },
+    [cancel, disabled, primary]
+  )
+
+  const onContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      if (disabled || !secondary) return
+      e.preventDefault()
+      cancel()
+      secondary()
+    },
+    [cancel, disabled, secondary]
+  )
+
+  return {
+    onPointerDown,
+    onPointerMove,
+    onPointerUp: cancel,
+    onPointerLeave: cancel,
+    onPointerCancel: cancel,
+    onClick,
+    onContextMenu,
+  }
+}
+
+/**
+ * Single word card (non-compact) with tap-action–aware behavior.
+ * Tap = primary action. Long-press / right-click = secondary action.
+ * The Arabic glyph glows + the secondary affordance icon fades in on hover.
+ */
+function WordCardItem({
+  word,
+  chapter,
+  verse,
+  verseCoordsValid,
+  arabicClass,
+  showTransliteration,
+  tapAction,
+  selectionActive,
+}: {
+  word: WordData
+  chapter: number
+  verse: number
+  verseCoordsValid: boolean
+  arabicClass: string
+  showTransliteration: boolean
+  tapAction: WordTapAction
+  selectionActive: boolean
+}) {
+  const arabic = (word.tx as Record<string, string>)?.['ar'] ?? ''
+  const root = word.r
+  const meaning = (word.tx as Record<string, string>)?.['en'] ?? ''
+  const transliteration = (word.tx as Record<string, string>)?.['tl'] ?? ''
+  // `wi` is already 1-based in the API response (1..N).
+  const word1Based = word.wi ?? 0
+  const hasRoot = !!root && verseCoordsValid
+
+  const { playingId, loadingId, play } = useWordAudio()
+  const audioId = wordAudioId(chapter, verse, word1Based)
+  const isPlaying = playingId === audioId
+  const isLoading = loadingId === audioId
+
+  const [dialogOpen, setDialogOpen] = useState(false)
+
+  const playAudio = useCallback(() => {
+    if (verseCoordsValid) play(chapter, verse, word1Based)
+  }, [play, chapter, verse, word1Based, verseCoordsValid])
+  const openDetails = useCallback(() => {
+    if (hasRoot) setDialogOpen(true)
+  }, [hasRoot])
+
+  // Resolve actions, with graceful fallback when a word has no root:
+  // requesting "details" on a rootless word falls back to playing audio.
+  const primary = tapAction === 'play' ? playAudio : hasRoot ? openDetails : playAudio
+  const secondary =
+    tapAction === 'play' ? (hasRoot ? openDetails : null) : playAudio
+
+  const handlers = useTapOrLongPress({
+    primary,
+    secondary,
+    disabled: selectionActive,
+  })
+
+  // Secondary affordance icon: shows the *other* action on hover (desktop)
+  // and at low opacity always (mobile cue).
+  const showSecondaryIcon = !!secondary
+  const secondaryIcon =
+    tapAction === 'play' ? (
+      <BookOpen className="size-3" />
+    ) : (
+      <Volume2 className="size-3" />
+    )
+  const secondaryLabel =
+    tapAction === 'play' ? 'Hold for details' : 'Hold to play'
+
+  return (
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={
+          tapAction === 'play' ? `Play ${arabic}` : `Details for ${arabic}`
+        }
+        title={secondaryLabel}
+        className={`group relative flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer transition-all rounded-xl border ${
+          isPlaying
+            ? 'bg-primary/10 border-primary/40'
+            : 'border-transparent hover:bg-muted/50 hover:border-primary/20'
+        }`}
+        onPointerDown={handlers.onPointerDown}
+        onPointerMove={handlers.onPointerMove}
+        onPointerUp={handlers.onPointerUp}
+        onPointerLeave={handlers.onPointerLeave}
+        onPointerCancel={handlers.onPointerCancel}
+        onClick={handlers.onClick}
+        onContextMenu={handlers.onContextMenu}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            primary()
+          }
+        }}
+      >
+        <p
+          className={`font-arabic ${arabicClass} leading-snug transition-colors ${
+            isPlaying
+              ? 'text-primary'
+              : 'group-hover:text-primary'
+          }`}
+        >
+          {arabic}
+        </p>
+        <div className="flex flex-col items-center gap-0.5" dir="ltr">
+          {showTransliteration && transliteration && (
+            <p className="text-xs text-muted-foreground italic text-center">
+              {transliteration}
+            </p>
+          )}
+          <p className="text-xs text-foreground/70 font-medium text-center wrap-break-words max-w-22">
+            {meaning}
+          </p>
+        </div>
+
+        {/* Secondary action affordance + playing indicator */}
+        <div className="h-3.5 flex items-center justify-center">
+          {isLoading ? (
+            <Loader2 className="size-3 text-primary animate-spin" />
+          ) : isPlaying ? (
+            <Volume2 className="size-3 text-primary" />
+          ) : showSecondaryIcon ? (
+            <span className="opacity-30 group-hover:opacity-80 text-muted-foreground transition-opacity">
+              {secondaryIcon}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {hasRoot && root && (
+        <WordOccurrencesDialogContent
+          arabic={arabic}
+          root={root}
+          meaning={meaning}
+          chapter={chapter}
+          verse={verse}
+          word={word1Based}
+        />
+      )}
+    </Dialog>
+  )
+}
+
+/**
+ * Compact word (Arabic glyph only). On desktop the tooltip still surfaces
+ * meaning/transliteration on hover; tap/click respects the tap-action setting.
+ * On touch we keep the existing bottom-popup pattern but route activation
+ * through the tap-action.
+ */
+function WordCompactItem({
+  word,
+  chapter,
+  verse,
+  verseCoordsValid,
+  arabicClass,
+  tapAction,
+  isTouch,
+  selectionActive,
+  onTouchPreview,
+}: {
+  word: WordData
+  chapter: number
+  verse: number
+  verseCoordsValid: boolean
+  arabicClass: string
+  tapAction: WordTapAction
+  isTouch: boolean
+  selectionActive: boolean
+  onTouchPreview: (data: {
+    arabic: string
+    root?: string
+    english: string
+    meaning: string
+    transliteration?: string
+    word1Based: number
+  }) => void
+}) {
+  const arabic = (word.tx as Record<string, string>)?.['ar'] ?? ''
+  const english = (word.tx as Record<string, string>)?.['en'] ?? ''
+  const transliteration = (word.tx as Record<string, string>)?.['tl']
+  const root = word.r
+  const meaning = word.m ?? english
+  const word1Based = word.wi ?? 0
+  const hasRoot = !!root && verseCoordsValid
+
+  const { playingId, loadingId, play } = useWordAudio()
+  const audioId = wordAudioId(chapter, verse, word1Based)
+  const isPlaying = playingId === audioId
+  const isLoading = loadingId === audioId
+
+  const [dialogOpen, setDialogOpen] = useState(false)
+
+  const playAudio = useCallback(() => {
+    if (verseCoordsValid) play(chapter, verse, word1Based)
+  }, [play, chapter, verse, word1Based, verseCoordsValid])
+
+  const openDetails = useCallback(() => {
+    if (isTouch) {
+      onTouchPreview({
+        arabic,
+        root: root ?? undefined,
+        english,
+        meaning,
+        transliteration: transliteration ?? undefined,
+        word1Based,
+      })
+    } else if (hasRoot) {
+      setDialogOpen(true)
+    }
+  }, [
+    isTouch,
+    onTouchPreview,
+    arabic,
+    root,
+    english,
+    meaning,
+    transliteration,
+    word1Based,
+    hasRoot,
+  ])
+
+  // For compact desktop, "details" still resolves to the dialog (only when there's a root).
+  // For touch, "details" surfaces the preview popup which itself can play / open dialog.
+  const canDetail = isTouch ? true : hasRoot
+  const primary =
+    tapAction === 'play' ? playAudio : canDetail ? openDetails : playAudio
+  const secondary =
+    tapAction === 'play' ? (canDetail ? openDetails : null) : playAudio
+
+  const handlers = useTapOrLongPress({
+    primary,
+    secondary,
+    disabled: selectionActive,
+  })
+
+  const arabicEl = (
+    <p
+      role="button"
+      tabIndex={0}
+      aria-label={
+        tapAction === 'play' ? `Play ${arabic}` : `Details for ${arabic}`
+      }
+      title={
+        tapAction === 'play' ? 'Hold for details' : 'Hold to play'
+      }
+      className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer active:scale-95 ${
+        isPlaying
+          ? 'text-primary scale-105'
+          : 'text-foreground/90 hover:text-primary hover:scale-105'
+      }`}
+      onPointerDown={handlers.onPointerDown}
+      onPointerMove={handlers.onPointerMove}
+      onPointerUp={handlers.onPointerUp}
+      onPointerLeave={handlers.onPointerLeave}
+      onPointerCancel={handlers.onPointerCancel}
+      onClick={handlers.onClick}
+      onContextMenu={handlers.onContextMenu}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          primary()
+        }
+      }}
+    >
+      {arabic}
+      {(isPlaying || isLoading) && (
+        <span className="inline-block ml-1 align-middle text-primary">
+          {isLoading ? (
+            <Loader2 className="size-3 inline animate-spin" />
+          ) : (
+            <Volume2 className="size-3 inline" />
+          )}
+        </span>
+      )}
+    </p>
+  )
+
+  if (isTouch) {
+    // No tooltip on touch — preview is delivered via the bottom popup
+    return arabicEl
+  }
+
+  return (
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Tooltip>
+        <TooltipTrigger asChild>{arabicEl}</TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="bg-popover/80 backdrop-blur-sm border-primary/20 px-4 py-2 rounded-xl"
+        >
+          <div className="flex flex-col gap-0.5 space-y-1 py-2 items-center text-center">
+            <p className="text-base text-primary">{english}</p>
+            {transliteration && (
+              <p className="text-xs font-bold text-foreground">
+                {transliteration}
+              </p>
+            )}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+      {hasRoot && root && (
+        <WordOccurrencesDialogContent
+          arabic={arabic}
+          root={root}
+          meaning={meaning}
+          chapter={chapter}
+          verse={verse}
+          word={word1Based}
+        />
+      )}
+    </Dialog>
+  )
+}
+
 const WordByWordView = memo(
   function WordByWordView({
     words,
@@ -156,23 +566,29 @@ const WordByWordView = memo(
     }, [verseKey])
     const verseCoordsValid = Number.isFinite(chapter) && Number.isFinite(verse)
 
-    const { zoomLevel, transliteration: showTransliteration } =
-      useQuranPreferences()
+    const {
+      zoomLevel,
+      transliteration: showTransliteration,
+      wordTapAction,
+    } = useQuranPreferences()
     const arabicClass = ZOOM_FONT[zoomLevel ?? 'comfortable'].arabic
     const isTouch = useIsTouch()
+    const selectionActive = useVerseSelection((s) => s.active)
+    const tapAction: WordTapAction = wordTapAction ?? 'play'
+
     const [activeWord, setActiveWord] = useState<{
       arabic: string
       root?: string
       english: string
       meaning: string
       transliteration?: string
-      word1Based?: number
+      word1Based: number
     } | null>(null)
     const [dialogWord, setDialogWord] = useState<{
       arabic: string
       root: string
       meaning: string
-      word1Based?: number
+      word1Based: number
     } | null>(null)
 
     if (compact) {
@@ -181,81 +597,22 @@ const WordByWordView = memo(
           dir="rtl"
           className="flex flex-wrap text-right justify-start gap-x-4 gap-y-6 py-2"
         >
-          {sorted.map((w) => {
-            const arabic = (w.tx as Record<string, string>)?.['ar']
-            const english = (w.tx as Record<string, string>)?.['en'] ?? ''
-            const transliteration = w.tx?.['tl']
-            const root = w.r
-            const meaning = w.m ?? english
-            const wordIndex = w.wi ?? 0
+          {sorted.map((w) => (
+            <WordCompactItem
+              key={w.wi ?? 0}
+              word={w}
+              chapter={chapter}
+              verse={verse}
+              verseCoordsValid={verseCoordsValid}
+              arabicClass={arabicClass}
+              tapAction={tapAction}
+              isTouch={isTouch}
+              selectionActive={selectionActive}
+              onTouchPreview={setActiveWord}
+            />
+          ))}
 
-            const word1Based = wordIndex + 1
-
-            if (isTouch) {
-              return (
-                <p
-                  key={wordIndex}
-                  className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer active:scale-95 text-foreground/90`}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setActiveWord({
-                      arabic,
-                      root: root ?? undefined,
-                      english,
-                      meaning,
-                      transliteration: transliteration ?? undefined,
-                      word1Based,
-                    })
-                  }}
-                >
-                  {arabic}
-                </p>
-              )
-            }
-
-            return (
-              <Dialog key={wordIndex}>
-                <Tooltip>
-                  <DialogTrigger asChild>
-                    <TooltipTrigger asChild>
-                      <p
-                        className={`font-arabic ${arabicClass} leading-relaxed transition-all cursor-pointer hover:text-primary hover:scale-105 active:scale-95 text-foreground/90`}
-                      >
-                        {arabic}
-                      </p>
-                    </TooltipTrigger>
-                  </DialogTrigger>
-
-                  <TooltipContent
-                    side="top"
-                    className="bg-popover/80 backdrop-blur-sm border-primary/20 px-4 py-2 rounded-xl"
-                  >
-                    <div className="flex flex-col gap-0.5 space-y-1 py-2 items-center text-center">
-                      <p className="text-base text-primary">
-                        {english}
-                      </p>
-                      <p className="text-xs font-bold text-foreground">
-                        {transliteration}
-                      </p>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-
-                {root && (
-                  <WordOccurrencesDialogContent
-                    arabic={arabic}
-                    root={root}
-                    meaning={meaning}
-                    chapter={verseCoordsValid ? chapter : undefined}
-                    verse={verseCoordsValid ? verse : undefined}
-                    word={word1Based}
-                  />
-                )}
-              </Dialog>
-            )
-          })}
-
-          {/* Mobile: shared word popup */}
+          {/* Mobile: shared word preview popup */}
           {isTouch && activeWord && (
             <>
               <div
@@ -289,7 +646,7 @@ const WordByWordView = memo(
                     {activeWord.transliteration}
                   </p>
                 )}
-                {verseCoordsValid && typeof activeWord.word1Based === 'number' && (
+                {verseCoordsValid && (
                   <PlayWordButton
                     chapter={chapter}
                     verse={verse}
@@ -336,61 +693,19 @@ const WordByWordView = memo(
         dir="rtl"
         className="flex flex-wrap justify-start gap-y-4 gap-x-1.5 py-3"
       >
-        {sorted.map((w) => {
-          const arabic = (w.tx as Record<string, string>)?.['ar']
-          const root = w.r
-          const meaning = (w.tx as Record<string, string>)?.['en'] ?? ''
-          const transliteration = (w.tx as Record<string, string>)?.['tl'] ?? ''
-          const wordIndex = w.wi ?? 0
-          const word1Based = wordIndex + 1
-
-          return (
-            <Dialog key={wordIndex}>
-              <DialogTrigger asChild>
-                <div className="group relative flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer transition-all hover:bg-muted/50 rounded-xl border border-transparent hover:border-primary/20">
-                  {verseCoordsValid && (
-                    <PlayWordButton
-                      chapter={chapter}
-                      verse={verse}
-                      word={word1Based}
-                      size="xs"
-                      className="absolute top-0.5 right-0.5"
-                    />
-                  )}
-                  <p
-                    className={`font-arabic ${arabicClass} leading-snug group-hover:text-primary transition-colors`}
-                  >
-                    {arabic}
-                  </p>
-                  <div
-                    className="flex flex-col items-center gap-0.5"
-                    dir="ltr"
-                  >
-                    {showTransliteration && transliteration && (
-                      <p className="text-xs text-muted-foreground italic text-center">
-                        {transliteration}
-                      </p>
-                    )}
-                    <p className="text-xs text-foreground/70 font-medium text-center wrap-break-words max-w-22">
-                      {meaning}
-                    </p>
-                  </div>
-                </div>
-              </DialogTrigger>
-
-              {root && (
-                <WordOccurrencesDialogContent
-                  arabic={arabic}
-                  root={root}
-                  meaning={meaning}
-                  chapter={verseCoordsValid ? chapter : undefined}
-                  verse={verseCoordsValid ? verse : undefined}
-                  word={word1Based}
-                />
-              )}
-            </Dialog>
-          )
-        })}
+        {sorted.map((w) => (
+          <WordCardItem
+            key={w.wi ?? 0}
+            word={w}
+            chapter={chapter}
+            verse={verse}
+            verseCoordsValid={verseCoordsValid}
+            arabicClass={arabicClass}
+            showTransliteration={showTransliteration}
+            tapAction={tapAction}
+            selectionActive={selectionActive}
+          />
+        ))}
       </div>
     )
   },

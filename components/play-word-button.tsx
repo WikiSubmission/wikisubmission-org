@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 interface PlayWordButtonProps {
   chapter: number
   verse: number
-  /** 1-based word index. The data layer stores `wi` 0-based — pass `wi + 1`. */
+  /** 1-based word index within the verse (matches the API's `wi`, which is 1..N). */
   word: number
   size?: 'xs' | 'sm' | 'md'
   className?: string

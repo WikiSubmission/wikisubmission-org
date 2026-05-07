@@ -24,6 +24,12 @@ export type LangCode =
 
 export type DisplayMode = 'verse' | 'reading'
 export type ReadingModeLang = 'translation' | 'arabic'
+/**
+ * Primary action when a word in the verse view is tapped/clicked.
+ * - `play`    — play the word's audio. Long-press (touch) or right-click (mouse) opens the details dialog.
+ * - `details` — open the word details dialog. Long-press (touch) or right-click (mouse) plays the audio.
+ */
+export type WordTapAction = 'play' | 'details'
 
 export type WordLabSections = {
   derivs: boolean
@@ -45,6 +51,7 @@ export type QuranPreferences = {
   secondaryLanguage?: LangCode
   zoomLevel: ZoomLevel
   wordLabSections: WordLabSections
+  wordTapAction: WordTapAction
   setPreferences: (preferences: QuranPreferences) => void
 }
 
@@ -75,16 +82,18 @@ export const useQuranPreferences = create(
         occurrences: true,
         morphology: false,
       },
+      wordTapAction: 'play' as WordTapAction,
       setPreferences: (preferences: QuranPreferences) => set(preferences),
     }),
     {
       name: 'quran-preferences-v4',
       storage: createJSONStorage(() => localStorage),
-      version: 6,
+      version: 7,
       migrate: (state, version) => {
         let next = state as Omit<QuranPreferences, 'displayMode' | 'wordLabSections'> & {
           displayMode?: string
           wordLabSections?: WordLabSections
+          wordTapAction?: WordTapAction
         }
         if (version < 4) {
           next = { ...next, zoomLevel: 'comfortable' as ZoomLevel }
@@ -99,6 +108,9 @@ export const useQuranPreferences = create(
             ...next,
             wordLabSections: { derivs: true, occurrences: true, morphology: false },
           }
+        }
+        if (version < 7) {
+          next = { ...next, wordTapAction: 'play' as WordTapAction }
         }
         return next as QuranPreferences
       },
