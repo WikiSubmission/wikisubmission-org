@@ -243,7 +243,13 @@ export function useChapterReader(
       const opts = lastOpts ?? fallbackOpts
       if (!opts || loading) return
 
-      const windowStart = Math.max(0, targetVerse - 5)
+      // Snap to a 25-verse grid so adjacent target verses (e.g. minimap drag
+      // ticks) collapse to the same cache key instead of firing a fresh
+      // request per pixel. The fetched window is PAGE_SIZE (50) so every
+      // target verse is still covered by its bucket's window.
+      const PREFETCH_GRID = 25
+      const rawStart = Math.max(0, targetVerse - 5)
+      const windowStart = Math.floor(rawStart / PREFETCH_GRID) * PREFETCH_GRID
       const cacheKey = `${chapterNumber}:${windowStart}`
 
       if (prefetchCacheRef.current.has(cacheKey)) return // already in flight
@@ -269,7 +275,10 @@ export function useChapterReader(
 
       const generation = ++fetchGenerationRef.current
       loadMoreInFlightRef.current = false
-      const windowStart = Math.max(0, targetVerse - 5)
+      // Match the snap used in `prefetch` so a hovered window can be reused.
+      const PREFETCH_GRID = 25
+      const rawStart = Math.max(0, targetVerse - 5)
+      const windowStart = Math.floor(rawStart / PREFETCH_GRID) * PREFETCH_GRID
       const cacheKey = `${chapterNumber}:${windowStart}`
 
       setState((prev) => ({ ...prev, loading: true, error: null }))
