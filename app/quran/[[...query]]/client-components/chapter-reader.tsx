@@ -205,20 +205,16 @@ function VirtualizedVerseList({
       (v) => v.vk?.split(':')[1] === seekTarget
     )
     if (targetIndex < 0) return
-
-    virtualizer.scrollToIndex(targetIndex, {
-      align: 'start',
-      behavior: seekBehaviorRef.current,
-    })
-    seekBehaviorRef.current = 'auto'
     seekDoneRef.current = true
+    seekBehaviorRef.current = 'auto'
 
-    // After the virtualizer's initial estimate-based jump, fine-tune by
-    // measuring the verse's actual DOM node and snapping to it. This
-    // suppresses the visible jitter / undershoot that happened when the
-    // estimated row heights drifted from the measured ones (e.g. far down
-    // a chapter). seekActiveRef gates the URL-sync effect so the URL does
-    // not get rewritten to a mid-scroll verse number while we settle.
+    // Anchor the viewport to the verse's actual DOM node. The virtualizer's
+    // scrollToIndex relies on size estimates that can be off — we instead
+    // poll for the rendered element, snap window.scrollY so its top sits
+    // ~120px below the viewport edge (under the fixed header), and re-issue
+    // scrollToIndex while the element is still outside the virtualizer's
+    // window. seekActiveRef gates the URL-sync effect so the address bar
+    // does not lock onto a mid-scroll verse while we settle.
     seekActiveRef.current = true
     const verseId = `${chapterNumber}:${seekTarget}`
     const targetTopFromViewport = 120
@@ -226,8 +222,8 @@ function VirtualizedVerseList({
     let stable = 0
     let rafId = 0
     let cancelled = false
-    const MAX_FRAMES = 60 // ~1s; long enough for fonts/images to settle
-    const STABLE_THRESHOLD = 6 // frames in a row within tolerance to exit
+    const MAX_FRAMES = 90 // ~1.5s ceiling for layout shifts
+    const STABLE_THRESHOLD = 6
     const tick = () => {
       if (cancelled) return
       attempts += 1
@@ -236,14 +232,12 @@ function VirtualizedVerseList({
         const rect = el.getBoundingClientRect()
         const delta = rect.top - targetTopFromViewport
         if (Math.abs(delta) > 0.5) {
-          window.scrollBy(0, delta)
+          window.scrollTo(0, Math.max(0, window.scrollY + delta))
           stable = 0
         } else {
           stable += 1
         }
       } else {
-        // Element not yet measured/rendered — re-issue scrollToIndex so
-        // the virtualizer expands its window toward the target.
         virtualizer.scrollToIndex(targetIndex, {
           align: 'start',
           behavior: 'auto',
@@ -252,7 +246,7 @@ function VirtualizedVerseList({
       }
       const done =
         attempts >= MAX_FRAMES ||
-        (stable >= STABLE_THRESHOLD && attempts >= 6)
+        (stable >= STABLE_THRESHOLD && attempts >= 8)
       if (!done) {
         rafId = requestAnimationFrame(tick)
       } else {
