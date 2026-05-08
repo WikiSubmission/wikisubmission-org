@@ -208,31 +208,34 @@ function VirtualizedVerseList({
     seekDoneRef.current = true
     seekBehaviorRef.current = 'auto'
 
-    // Anchor the viewport to the verse's actual DOM node. The virtualizer's
-    // scrollToIndex relies on size estimates that can be off — we instead
-    // poll for the rendered element, snap window.scrollY so its top sits
-    // ~120px below the viewport edge (under the fixed header), and re-issue
-    // scrollToIndex while the element is still outside the virtualizer's
-    // window. seekActiveRef gates the URL-sync effect so the address bar
-    // does not lock onto a mid-scroll verse while we settle.
+    // Anchor the viewport to the verse's actual DOM node. We poll for the
+    // rendered element and use scrollIntoView (which respects each card's
+    // scroll-margin-top set on the wrapper). While the element is still
+    // outside the virtualizer's window we kick scrollToIndex to expand it.
+    // seekActiveRef gates the URL-sync effect so the address bar does not
+    // lock onto a mid-scroll verse while we settle.
     seekActiveRef.current = true
     const verseId = `${chapterNumber}:${seekTarget}`
-    const targetTopFromViewport = 120
     let attempts = 0
     let stable = 0
     let rafId = 0
     let cancelled = false
     const MAX_FRAMES = 90 // ~1.5s ceiling for layout shifts
-    const STABLE_THRESHOLD = 6
+    const STABLE_THRESHOLD = 8
+    const TARGET_TOP = 120
     const tick = () => {
       if (cancelled) return
       attempts += 1
       const el = document.getElementById(verseId)
       if (el) {
         const rect = el.getBoundingClientRect()
-        const delta = rect.top - targetTopFromViewport
+        const delta = rect.top - TARGET_TOP
         if (Math.abs(delta) > 0.5) {
-          window.scrollTo(0, Math.max(0, window.scrollY + delta))
+          // Use both scrollIntoView (handles initial big jump robustly,
+          // including cases where scrollTo silently no-ops mid-paint) and
+          // a scrollBy fine-tune for the header offset.
+          el.scrollIntoView({ block: 'start' })
+          window.scrollBy(0, -TARGET_TOP)
           stable = 0
         } else {
           stable += 1
@@ -246,7 +249,7 @@ function VirtualizedVerseList({
       }
       const done =
         attempts >= MAX_FRAMES ||
-        (stable >= STABLE_THRESHOLD && attempts >= 8)
+        (stable >= STABLE_THRESHOLD && attempts >= 10)
       if (!done) {
         rafId = requestAnimationFrame(tick)
       } else {

@@ -22,7 +22,7 @@ import {
   ArrowUpRight,
   Bookmark,
   StickyNote,
-  WholeWord,
+  ScanTextIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HighlightText } from '@/components/highlight-text'
@@ -680,7 +680,7 @@ export const VerseCard = memo(
                       prefs.wordByWord ? 'text-primary' : ''
                     }`}
                   >
-                    <WholeWord className="w-4 h-4" />
+                    <ScanTextIcon className="w-4 h-4" />
                   </span>
                 </Button>
               )}
