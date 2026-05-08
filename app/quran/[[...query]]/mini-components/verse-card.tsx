@@ -23,7 +23,6 @@ import {
   Bookmark,
   StickyNote,
   Volume2,
-  BookOpen,
   Maximize2,
   Minimize2,
 } from 'lucide-react'
@@ -99,36 +98,36 @@ function WordDetailsDialogContent({
           </p>
         )}
 
-        {hasCoords && (
-          <div className="mt-2 flex items-center justify-center">
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+          {hasCoords && (
             <PlayWordButton
               chapter={chapter as number}
               verse={verse as number}
               word={word as number}
               size="md"
             />
-          </div>
-        )}
+          )}
+          {root && (
+            <Link
+              href={`/quran/words/${encodeURIComponent(root)}`}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+            >
+              <span className="opacity-70">Root</span>
+              <span className="font-arabic text-sm leading-none">{root}</span>
+              <ArrowUpRight className="size-3" />
+            </Link>
+          )}
+        </div>
       </DialogHeader>
 
       <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
-        {root && (
-          <section>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
-              Root
-            </p>
-            <Link
-              href={`/quran/words/${encodeURIComponent(root)}`}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
-            >
-              <span className="font-arabic text-base leading-none">{root}</span>
-              <ArrowUpRight className="size-3.5" />
-            </Link>
-          </section>
-        )}
-
         {meaning && meaning !== translation && (
           <section>
+            {root && (
+              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/50 mb-0.5">
+                Root
+              </p>
+            )}
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
               Meanings
             </p>
@@ -202,10 +201,8 @@ function WordCardItem({
         role="button"
         tabIndex={0}
         aria-label={`Details for ${arabic}`}
-        className={`group relative flex flex-col items-center gap-1.5 px-3.5 py-2.5 cursor-pointer transition-all rounded-xl border ${
-          isPlaying
-            ? 'bg-primary/10 border-primary/40'
-            : 'border-transparent hover:bg-muted/50 hover:border-primary/20'
+        className={`group relative flex flex-col items-center gap-1 px-3.5 py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
+          isPlaying ? 'bg-primary/10' : 'hover:scale-[1.04]'
         }`}
         onClick={open}
         onKeyDown={(e) => {
@@ -223,27 +220,25 @@ function WordCardItem({
           {arabic}
         </p>
         <div className="flex flex-col items-center gap-0.5" dir="ltr">
+          <p className="text-xs text-foreground/80 font-medium text-center wrap-break-words max-w-22">
+            {translation}
+          </p>
           {showTransliteration && transliteration && (
-            <p className="text-xs text-muted-foreground italic text-center">
+            <p className="text-[11px] text-muted-foreground/70 italic text-center wrap-break-words max-w-22">
               {transliteration}
             </p>
           )}
-          <p className="text-xs text-foreground/70 font-medium text-center wrap-break-words max-w-22">
-            {translation}
-          </p>
         </div>
 
-        <div className="h-3.5 flex items-center justify-center">
-          {isLoading ? (
-            <Loader2 className="size-3 text-primary animate-spin" />
-          ) : isPlaying ? (
-            <Volume2 className="size-3 text-primary" />
-          ) : (
-            <span className="opacity-30 group-hover:opacity-80 text-muted-foreground transition-opacity">
-              <BookOpen className="size-3" />
-            </span>
-          )}
-        </div>
+        {(isLoading || isPlaying) && (
+          <div className="h-3.5 flex items-center justify-center">
+            {isLoading ? (
+              <Loader2 className="size-3 text-primary animate-spin" />
+            ) : (
+              <Volume2 className="size-3 text-primary" />
+            )}
+          </div>
+        )}
       </div>
 
       <WordDetailsDialogContent
@@ -616,7 +611,7 @@ export const VerseCard = memo(
                 target="_blank"
                 className="group flex items-center gap-1 w-fit"
               >
-                <div className="flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full transition-colors">
+                <div className="flex items-start space-x-0.5 px-2.5 py-0.5 bg-muted text-foreground/80 rounded-full transition-colors">
                   <span className="text-lg font-semibold">{chNum}</span>
                   <span>:</span>
                   <span className="text-lg font-semibold">{vNum}</span>
@@ -624,7 +619,7 @@ export const VerseCard = memo(
                 <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
               </Link>
             ) : (
-              <div className="w-fit shrink-0 flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full">
+              <div className="w-fit shrink-0 flex items-start space-x-0.5 px-2.5 py-0.5 bg-muted text-foreground/80 rounded-full">
                 <span className="w-full text-lg font-semibold">{chNum}</span>
                 <span>:</span>
                 <span className="w-full text-lg font-semibold">{vNum}</span>
@@ -666,14 +661,27 @@ export const VerseCard = memo(
                       : 'Expand Arabic word-by-word'
                   }
                   className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
-                  onClick={() =>
+                  onClick={() => {
+                    // Anchor scroll to the clicked verse so the page does not
+                    // jump when the card resizes.
+                    const el = verseId
+                      ? document.getElementById(verseId)
+                      : null
+                    const before = el?.getBoundingClientRect().top ?? 0
                     prefs.setPreferences({
                       ...prefs,
                       wordByWord: !prefs.wordByWord,
-                      // collapsing from WBW shouldn't drop Arabic entirely
                       arabic: prefs.wordByWord ? true : prefs.arabic,
                     })
-                  }
+                    if (!el) return
+                    requestAnimationFrame(() => {
+                      requestAnimationFrame(() => {
+                        const after = el.getBoundingClientRect().top
+                        const delta = after - before
+                        if (Math.abs(delta) > 1) window.scrollBy(0, delta)
+                      })
+                    })
+                  }}
                 >
                   <span
                     key={prefs.wordByWord ? 'min' : 'max'}
