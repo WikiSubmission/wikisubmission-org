@@ -14,19 +14,16 @@ import {
   HashIcon,
   LanguagesIcon,
   MessageSquareTextIcon,
-  PointerIcon,
   ScanTextIcon,
   SettingsIcon,
   TextIcon,
   TypeIcon,
-  Volume2Icon,
   ZoomInIcon,
 } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import type {
   LangCode,
   ReadingModeLang,
-  WordTapAction,
 } from '@/hooks/use-quran-preferences'
 import { ZOOM_LEVELS, type ZoomLevel } from '@/lib/quran-zoom'
 import { LanguageEntry, useLanguagesStore } from '@/hooks/use-languages-store'
@@ -348,55 +345,6 @@ export default function QuranSettings() {
               }
             />
           )}
-
-          {/* Word tap action — verse mode only, and only useful when WBW or Arabic is on */}
-          {quranPreferences.displayMode !== 'reading' &&
-            (quranPreferences.wordByWord || quranPreferences.arabic) && (
-              <div className="px-3 py-2 space-y-1.5">
-                <div className="flex items-start gap-2.5">
-                  <PointerIcon className="size-3.5 mt-0.5 shrink-0 text-muted-foreground" />
-                  <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                    <span className="text-sm font-medium leading-none">
-                      Tap a word to
-                    </span>
-                    <span className="text-xs text-muted-foreground leading-snug">
-                      Long-press (touch) or right-click (mouse) does the other.
-                    </span>
-                  </div>
-                </div>
-                <div className="flex gap-1.5 pl-6">
-                  {(
-                    [
-                      { value: 'play', label: 'Play audio', icon: <Volume2Icon className="size-3" /> },
-                      { value: 'details', label: 'Show details', icon: <BookOpenTextIcon className="size-3" /> },
-                    ] as { value: WordTapAction; label: string; icon: React.ReactNode }[]
-                  ).map((opt) => {
-                    const isActive =
-                      (quranPreferences.wordTapAction ?? 'play') === opt.value
-                    return (
-                      <button
-                        key={opt.value}
-                        onClick={() =>
-                          quranPreferences.setPreferences({
-                            ...quranPreferences,
-                            wordTapAction: opt.value,
-                          })
-                        }
-                        className={cn(
-                          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all border',
-                          isActive
-                            ? 'bg-primary/10 text-primary border-primary/20'
-                            : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-accent hover:text-foreground'
-                        )}
-                      >
-                        {opt.icon}
-                        {opt.label}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
 
           {/* Subtitles — verse + word modes */}
           {quranPreferences.displayMode !== 'reading' && (
