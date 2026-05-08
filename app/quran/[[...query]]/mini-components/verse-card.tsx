@@ -459,7 +459,6 @@ export const VerseCard = memo(
     const primaryCode =
       prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
     const tr = verse.tr?.[primaryCode]
-    const arTr = verse.tr?.['ar']
     const secondaryTr =
       prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl'
         ? verse.tr?.[prefs.secondaryLanguage]
@@ -734,29 +733,24 @@ export const VerseCard = memo(
                 </p>
               )}
 
-              {/* Arabic + word-by-word */}
-              {(prefs.arabic || prefs.wordByWord) && (
-                <div
-                  key={prefs.wordByWord ? 'wbw' : 'compact'}
-                  className="py-2 animate-in fade-in duration-200"
-                >
-                  {verse.w && verse.w.length > 0 ? (
+              {/* Arabic + word-by-word — only render when per-word data is
+                  present so we never fall back to a raw-Arabic string with
+                  awkward tracking. */}
+              {(prefs.arabic || prefs.wordByWord) &&
+                verse.w &&
+                verse.w.length > 0 && (
+                  <div
+                    key={prefs.wordByWord ? 'wbw' : 'compact'}
+                    className="py-2 animate-in fade-in duration-200"
+                  >
                     <WordByWordView
                       words={verse.w}
                       verseKey={verseId}
                       compact={!prefs.wordByWord}
                       optsKey={optsKey}
                     />
-                  ) : arTr?.tx ? (
-                    <p
-                      dir="rtl"
-                      className={`font-arabic ${ZOOM_FONT[prefs.zoomLevel ?? 'comfortable'].arabic} leading-relaxed text-foreground/90 text-right py-2`}
-                    >
-                      {arTr.tx}
-                    </p>
-                  ) : null}
-                </div>
-              )}
+                  </div>
+                )}
 
               {/* Footnotes */}
               {prefs.footnotes && tr?.f && (
