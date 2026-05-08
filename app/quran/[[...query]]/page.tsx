@@ -15,6 +15,10 @@ import { VerseListResult } from './mini-components/verse-list-result'
 import { QuranAccordions } from './mini-components/quran-accordions'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 
+// SSR fetch cache TTL for /quran content. Kept short so backend data
+// updates / corrections show up within an hour without a manual purge.
+const QURAN_REVALIDATE_S = 3600
+
 // Detect query intent: chapter, verse-list, or text search.
 // Single verse refs AND ranges both go to verse-list (VerseListResult).
 // Accepts both canonical "2:255" and space-separated "2 255" forms.
@@ -60,11 +64,11 @@ export default async function QuranPage({
     const [chaptersRes, appendicesRes] = await Promise.all([
       wsApiServer.GET('/chapters', {
         params: { query: { lang: locale } },
-        next: { revalidate: 86400 },
+        next: { revalidate: QURAN_REVALIDATE_S },
       }),
       wsApiServer.GET('/appendices', {
         params: { query: { lang: locale } },
-        next: { revalidate: 86400 },
+        next: { revalidate: QURAN_REVALIDATE_S },
       }),
     ])
     const [tQuran, tNav, tCommon] = await Promise.all([
@@ -269,7 +273,7 @@ export async function generateMetadata({
         const [chaptersRes, verseRes] = await Promise.all([
           wsApiServer.GET('/chapters', {
             params: { query: { lang: locale } },
-            next: { revalidate: 86400 },
+            next: { revalidate: QURAN_REVALIDATE_S },
           }),
           wsApiServer.GET('/quran', {
             params: {
@@ -311,7 +315,7 @@ export async function generateMetadata({
       const [chaptersRes, versesRes] = await Promise.all([
         wsApiServer.GET('/chapters', {
           params: { query: { lang: locale } },
-          next: { revalidate: 86400 },
+          next: { revalidate: QURAN_REVALIDATE_S },
         }),
         wsApiServer.GET('/quran', {
           params: {
