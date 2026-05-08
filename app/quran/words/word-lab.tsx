@@ -361,6 +361,7 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
 
   useEffect(() => {
     if (activeRoot && activeRoot.letters !== activeKey) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveKey(activeRoot.letters)
       setActiveDeriv(0)
     }
@@ -693,6 +694,7 @@ function Detail({
   const [activeSurface, setActiveSurface] = useState<string | null>(null)
   // Reset filter when the root changes.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveSurface(null)
   }, [root.letters])
 
@@ -909,6 +911,8 @@ function VirtualizedOccurrences({
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [loadingAll, setLoadingAll] = useState(false)
 
+  // TanStack Virtual returns non-memoizable functions; that's expected here.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => scrollerRef.current,

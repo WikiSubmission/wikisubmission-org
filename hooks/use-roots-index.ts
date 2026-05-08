@@ -111,6 +111,7 @@ export function useRootsIndex(): UseRootsIndex {
 
     if (status === 'ready' && reloadTick === 0) return
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStatus('loading')
     setError(null)
     void fetchIndex()
@@ -190,13 +191,15 @@ export type UseRootDetail = {
  * Cached in localStorage so revisiting a root is instant.
  */
 export function useRootDetail(letters: string | null): UseRootDetail {
-  const initial = (() => {
+  // Lazy initial state — only runs once on mount, and Date.now() inside a
+  // useState initializer is allowed (it's not the render body).
+  const [initial] = useState(() => {
     if (!letters) return null
     const cache = readDetailCache()
     const c = cache[letters]
     if (c && Date.now() - c.fetchedAt <= CACHE_TTL_MS) return c.detail
     return null
-  })()
+  })
   const [status, setStatus] = useState<Status>(initial ? 'ready' : letters ? 'loading' : 'idle')
   const [derivs, setDerivs] = useState<Derivative[]>(initial?.derivs ?? [])
   const [occ, setOcc] = useState<Occurrence[]>(initial?.occ ?? [])
@@ -205,6 +208,7 @@ export function useRootDetail(letters: string | null): UseRootDetail {
 
   useEffect(() => {
     if (!letters) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus('idle')
       setDerivs([])
       setOcc([])
@@ -327,6 +331,7 @@ export function useRootOccurrences(
 
   useEffect(() => {
     if (!letters) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus('idle')
       setItems([])
       setTotal(0)

@@ -151,7 +151,6 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
     verseSearch.reset()
     if (queryChanged) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setWordMatches([])
       setSearchTab('all')
     }
