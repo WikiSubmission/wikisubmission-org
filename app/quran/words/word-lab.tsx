@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ChevronDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { ChevronDown, ArrowUp, ArrowDown, Keyboard } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useVirtualizer } from '@tanstack/react-virtual'
@@ -27,18 +27,88 @@ import {
 } from '@/hooks/use-roots-index'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { PlayWordButton } from '@/components/play-word-button'
+import { wsApi } from '@/src/api/client'
+import type { components } from '@/src/api/types.gen'
 import './word-lab.css'
 
 type SortMode = 'frequency' | 'abjadi' | 'reverse'
 
 const INDEX_RENDER_CAP = 300
+const ENGLISH_LOOKUP_MIN = 3
+const ENGLISH_LOOKUP_LIMIT = 40
+const ENGLISH_LOOKUP_DEBOUNCE_MS = 220
 
-const CHEAT_PAIRS: ReadonlyArray<readonly [string, string]> = [
-  ['a', 'ا'], ['b', 'ب'], ['t', 'ت'], ['th', 'ث'], ['j', 'ج'], ['H', 'ح'], ['kh', 'خ'],
-  ['d', 'د'], ['dh', 'ذ'], ['r', 'ر'], ['z', 'ز'], ['s', 'س'], ['sh', 'ش'], ['S', 'ص'],
-  ['D', 'ض'], ['T', 'ط'], ['Z', 'ظ'], ['c / `', 'ع'], ['gh', 'غ'], ['f', 'ف'], ['q', 'ق'],
-  ['k', 'ك'], ['l', 'ل'], ['m', 'م'], ['n', 'ن'], ['h', 'ه'], ['w', 'و'], ['y', 'ي'], ["'", 'ء'],
+const CHEAT_PAIRS: ReadonlyArray<{ lat: string; ar: string; insert: string }> = [
+  { lat: 'a', ar: 'ا', insert: 'a' },
+  { lat: 'b', ar: 'ب', insert: 'b' },
+  { lat: 't', ar: 'ت', insert: 't' },
+  { lat: 'th', ar: 'ث', insert: 'th' },
+  { lat: 'j', ar: 'ج', insert: 'j' },
+  { lat: 'H', ar: 'ح', insert: 'H' },
+  { lat: 'kh', ar: 'خ', insert: 'kh' },
+  { lat: 'd', ar: 'د', insert: 'd' },
+  { lat: 'dh', ar: 'ذ', insert: 'dh' },
+  { lat: 'r', ar: 'ر', insert: 'r' },
+  { lat: 'z', ar: 'ز', insert: 'z' },
+  { lat: 's', ar: 'س', insert: 's' },
+  { lat: 'sh', ar: 'ش', insert: 'sh' },
+  { lat: 'S', ar: 'ص', insert: 'S' },
+  { lat: 'D', ar: 'ض', insert: 'D' },
+  { lat: 'T', ar: 'ط', insert: 'T' },
+  { lat: 'Z', ar: 'ظ', insert: 'Z' },
+  { lat: 'c', ar: 'ع', insert: 'c' },
+  { lat: '`', ar: 'ع', insert: '`' },
+  { lat: 'gh', ar: 'غ', insert: 'gh' },
+  { lat: 'f', ar: 'ف', insert: 'f' },
+  { lat: 'q', ar: 'ق', insert: 'q' },
+  { lat: 'k', ar: 'ك', insert: 'k' },
+  { lat: 'l', ar: 'ل', insert: 'l' },
+  { lat: 'm', ar: 'م', insert: 'm' },
+  { lat: 'n', ar: 'ن', insert: 'n' },
+  { lat: 'h', ar: 'ه', insert: 'h' },
+  { lat: 'w', ar: 'و', insert: 'w' },
+  { lat: 'y', ar: 'ي', insert: 'y' },
+  { lat: "'", ar: 'ء', insert: "'" },
 ]
+
+type VerseData = components['schemas']['VerseData']
+
+function normalizeLetters(letters: string): string {
+  return stripDiacritics(letters).replace(/\s+/g, '')
+}
+
+function toSpacedLetters(flatLetters: string): string {
+  return Array.from(flatLetters).join(' ')
+}
+
+function tokenizeEnglish(input: string): string[] {
+  return input
+    .toLowerCase()
+    .split(/[^a-z]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length >= ENGLISH_LOOKUP_MIN)
+}
+
+function extractEnglishRootCandidates(
+  verses: VerseData[],
+  query: string,
+): Map<string, number> {
+  const scores = new Map<string, number>()
+  const terms = tokenizeEnglish(query)
+  const exact = query.trim().toLowerCase()
+  for (const verse of verses) {
+    for (const word of verse.w ?? []) {
+      const rootFlat = normalizeLetters(word.r ?? '')
+      if (!rootFlat) continue
+      const meaning = (word.m ?? '').toLowerCase()
+      let bump = 1
+      if (exact && meaning === exact) bump += 6
+      if (terms.some((term) => meaning.includes(term))) bump += 4
+      scores.set(rootFlat, (scores.get(rootFlat) ?? 0) + bump)
+    }
+  }
+  return scores
+}
 
 /**
  * Word-boundary highlight. Splits the verse on whitespace, finds the token
@@ -130,33 +200,133 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
   const { status, data, error } = useRootsIndex()
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('frequency')
+  const [showKeyboard, setShowKeyboard] = useState(false)
+  const [englishLookupStatus, setEnglishLookupStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
+  const [englishLookupRoots, setEnglishLookupRoots] = useState<Map<string, number>>(new Map())
   const [activeKey, setActiveKey] = useState<string | null>(initialLetters ?? null)
   const [activeDeriv, setActiveDeriv] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const englishLookupCacheRef = useRef(new Map<string, Map<string, number>>())
+  const englishLookupRequestRef = useRef(0)
+
   const arabicTarget = useMemo(() => toArabicLetters(query), [query])
+  const isArabicQuery = useMemo(() => /[؀-ۿ]/.test(query), [query])
+  const queryTerms = useMemo(() => tokenizeEnglish(query), [query])
+  const shouldTryEnglishLookup = useMemo(
+    () => !isArabicQuery && queryTerms.length > 0,
+    [isArabicQuery, queryTerms.length],
+  )
   const showPreview = useMemo(
     () => query.length > 0 && !/[؀-ۿ]/.test(query) && arabicTarget.length > 0,
     [query, arabicTarget],
   )
 
+  useEffect(() => {
+    const key = query.trim().toLowerCase()
+    const requestId = ++englishLookupRequestRef.current
+    const timeout = window.setTimeout(() => {
+      if (!key || !shouldTryEnglishLookup) {
+        setEnglishLookupRoots(new Map())
+        setEnglishLookupStatus('idle')
+        return
+      }
+
+      const cached = englishLookupCacheRef.current.get(key)
+      if (cached) {
+        setEnglishLookupRoots(cached)
+        setEnglishLookupStatus('ready')
+        return
+      }
+
+      setEnglishLookupStatus('loading')
+      void wsApi.GET('/search', {
+        params: {
+          query: {
+            q: key,
+            langs: ['en'],
+            scope: 'verses',
+            limit: ENGLISH_LOOKUP_LIMIT,
+            offset: 0,
+            include_words: true,
+            include_root: true,
+            include_meaning: true,
+            word_langs: ['ar'],
+          },
+        },
+      }).then(({ data: searchData, error: searchError }) => {
+        if (requestId !== englishLookupRequestRef.current) return
+        if (searchError || !searchData) {
+          setEnglishLookupRoots(new Map())
+          setEnglishLookupStatus('error')
+          return
+        }
+        const verses = (searchData.chapters ?? []).flatMap((chapter) => chapter.verses ?? [])
+        const extracted = extractEnglishRootCandidates(verses, key)
+        englishLookupCacheRef.current.set(key, extracted)
+        setEnglishLookupRoots(extracted)
+        setEnglishLookupStatus('ready')
+      }).catch(() => {
+        if (requestId !== englishLookupRequestRef.current) return
+        setEnglishLookupRoots(new Map())
+        setEnglishLookupStatus('error')
+      })
+    }, ENGLISH_LOOKUP_DEBOUNCE_MS)
+
+    return () => {
+      window.clearTimeout(timeout)
+    }
+  }, [query, shouldTryEnglishLookup])
+
   const visible = useMemo(() => {
     if (!data) return []
     const filtered = filterRoots(data, query, arabicTarget)
-    const list = [...filtered]
-    if (sort === 'abjadi') {
-      list.sort((a, b) => abjadiCompare(a.letters, b.letters))
-    } else if (sort === 'reverse') {
-      list.sort((a, b) => abjadiCompare(b.letters, a.letters))
-    } else {
-      list.sort((a, b) => b.count - a.count)
+    const queryFlat = query.toLowerCase().replace(/\s+/g, '').replace(/-/g, '')
+    const arabicFlat = normalizeLetters(arabicTarget)
+
+    const sortByMode = (a: RootRecord, b: RootRecord) => {
+      if (sort === 'abjadi') return abjadiCompare(a.letters, b.letters)
+      if (sort === 'reverse') return abjadiCompare(b.letters, a.letters)
+      return b.count - a.count
     }
-    return list
-  }, [data, query, arabicTarget, sort])
+
+    const strict: RootRecord[] = []
+    const fuzzy: RootRecord[] = []
+    for (const root of filtered) {
+      const rootFlat = normalizeLetters(root.letters)
+      const trFlat = root.tr.toLowerCase().replace(/-/g, '')
+      const exactArabic = arabicFlat.length > 0 && rootFlat === arabicFlat
+      const exactTranslit = queryFlat.length > 0 && trFlat === queryFlat
+      if (exactArabic || exactTranslit) strict.push(root)
+      else fuzzy.push(root)
+    }
+
+    strict.sort(sortByMode)
+    fuzzy.sort(sortByMode)
+
+    const seen = new Set<string>([...strict, ...fuzzy].map((root) => root.letters))
+    const englishInferred = Array.from(englishLookupRoots.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([flatLetters]) => toSpacedLetters(flatLetters))
+      .map((letters) => data.find((r) => r.letters === letters) ?? null)
+      .filter((root): root is RootRecord => !!root && !seen.has(root.letters))
+
+    return [...strict, ...fuzzy, ...englishInferred]
+  }, [data, query, arabicTarget, sort, englishLookupRoots])
 
   const totalRoots = data?.length ?? 0
   const indexRendered = useMemo(() => visible.slice(0, INDEX_RENDER_CAP), [visible])
   const isCapped = visible.length > INDEX_RENDER_CAP
+  const englishInferredSet = useMemo(() => {
+    if (!data) return new Set<string>()
+    const direct = new Set(filterRoots(data, query, arabicTarget).map((root) => root.letters))
+    const out = new Set<string>()
+    for (const rootFlat of englishLookupRoots.keys()) {
+      const spaced = toSpacedLetters(rootFlat)
+      if (!direct.has(spaced)) out.add(spaced)
+    }
+    return out
+  }, [data, query, arabicTarget, englishLookupRoots])
 
   const grouped = useMemo(() => {
     if (sort !== 'abjadi' && sort !== 'reverse') return null
@@ -217,6 +387,31 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
     return () => document.removeEventListener('keydown', onKey, true)
   }, [])
 
+  const onSearchChange = (value: string) => {
+    setQuery(value)
+  }
+
+  const onInsertKey = (token: string) => {
+    const el = inputRef.current
+    if (!el) {
+      setQuery((prev) => `${prev}${token}`)
+      return
+    }
+    const start = el.selectionStart ?? el.value.length
+    const end = el.selectionEnd ?? el.value.length
+    const before = query.slice(0, start)
+    const after = query.slice(end)
+    const needsSpaceBefore = before.length > 0 && !/\s$/.test(before)
+    const insert = needsSpaceBefore ? ` ${token}` : token
+    const nextQuery = `${before}${insert}${after}`
+    setQuery(nextQuery)
+    requestAnimationFrame(() => {
+      el.focus()
+      const nextPos = before.length + insert.length
+      el.setSelectionRange(nextPos, nextPos)
+    })
+  }
+
   if (status === 'loading' || status === 'idle') {
     return (
       <div className="wl-page">
@@ -250,7 +445,7 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
             <input
               ref={inputRef}
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => onSearchChange(e.target.value)}
               placeholder={t('searchPlaceholder')}
               spellCheck={false}
               autoComplete="off"
@@ -264,6 +459,18 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
             )}
             <kbd>⌘K</kbd>
           </div>
+
+          <button
+            type="button"
+            className={`wl-keyboard-toggle ${showKeyboard ? 'on' : ''}`}
+            onClick={() => setShowKeyboard((v) => !v)}
+            aria-expanded={showKeyboard}
+            aria-controls="wl-keyboard"
+          >
+            <Keyboard size={14} aria-hidden />
+            <span>{t('keyboardToggle')}</span>
+            <ChevronDown size={14} className="chevron" aria-hidden />
+          </button>
 
           <div className="wl-sort" role="radiogroup" aria-label={t('sortAria')}>
             <span className="wl-sort-label">{t('sortLabel')}</span>
@@ -285,17 +492,35 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
           </div>
         </div>
 
-        <details className="wl-cheat">
-          <summary>{t('cheatToggle')}</summary>
-          <div className="wl-cheat-grid">
-            {CHEAT_PAIRS.map(([lat, ar]) => (
-              <div key={lat} className="wl-cheat-cell">
-                <span className="lat">{lat}</span>
-                <span className="ar">{ar}</span>
-              </div>
-            ))}
+        {showKeyboard && (
+          <div id="wl-keyboard" className="wl-cheat">
+            <div className="wl-cheat-hint">{t('keyboardHint')}</div>
+            <div className="wl-cheat-grid">
+              {CHEAT_PAIRS.map(({ lat, ar, insert }) => (
+                <button
+                  key={`${lat}-${ar}`}
+                  type="button"
+                  className="wl-cheat-cell"
+                  onClick={() => onInsertKey(insert)}
+                  title={t('keyboardInsertHint', { key: insert })}
+                >
+                  <span className="lat">{lat}</span>
+                  <span className="ar">{ar}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </details>
+        )}
+
+        {query.trim().length >= ENGLISH_LOOKUP_MIN && (
+          <div className="wl-search-meta">
+            {englishLookupStatus === 'loading' && <span>{t('englishLookupLoading')}</span>}
+            {englishLookupStatus === 'error' && <span>{t('englishLookupError')}</span>}
+            {englishLookupStatus === 'ready' && englishLookupRoots.size > 0 && (
+              <span>{t('englishLookupReady', { count: englishLookupRoots.size })}</span>
+            )}
+          </div>
+        )}
       </section>
 
       <div className="wl-lab">
@@ -324,6 +549,7 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
                     <RootRow
                       key={r.letters}
                       root={r}
+                      inferred={englishInferredSet.has(r.letters)}
                       active={activeRoot?.letters === r.letters}
                       onClick={() => {
                         setActiveKey(r.letters)
@@ -339,6 +565,7 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
               <RootRow
                 key={r.letters}
                 root={r}
+                inferred={englishInferredSet.has(r.letters)}
                 active={activeRoot?.letters === r.letters}
                 onClick={() => {
                   setActiveKey(r.letters)
@@ -385,13 +612,16 @@ function Hero() {
 
 function RootRow({
   root,
+  inferred,
   active,
   onClick,
 }: {
   root: RootRecord
+  inferred: boolean
   active: boolean
   onClick: () => void
 }) {
+  const t = useTranslations('wordLab')
   return (
     <button onClick={onClick} className={`wl-row ${active ? 'on' : ''}`}>
       <span className="ar" dir="rtl" lang="ar">
@@ -399,6 +629,7 @@ function RootRow({
       </span>
       <span className="mid">
         <span className="tr">{root.tr}</span>
+        {inferred && <span className="inferred">{t('englishInferredBadge')}</span>}
       </span>
       <span className="num">{root.count.toLocaleString()}</span>
     </button>
