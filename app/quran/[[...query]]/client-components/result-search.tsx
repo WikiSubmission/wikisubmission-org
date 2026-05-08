@@ -102,6 +102,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const [wordLoading, setWordLoading] = useState(false)
 
   const lastQueryRef = useRef<string | null>(null)
+  const lastWbwRef = useRef<boolean>(false)
   const didInitRef = useRef(false)
 
   // Clear any active multi-select when the search query changes.
@@ -114,15 +115,20 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
   // ── Trigger search ────────────────────────────────────────────────────────
   useEffect(() => {
-    if (searchQuery === lastQueryRef.current) return
+    const queryChanged = searchQuery !== lastQueryRef.current
+    const wbwChanged = prefs.wordByWord !== lastWbwRef.current
+    if (!queryChanged && !wbwChanged) return
     lastQueryRef.current = searchQuery
+    lastWbwRef.current = prefs.wordByWord
 
     if (!searchQuery) return
 
     verseSearch.reset()
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setWordMatches([])
-    setSearchTab('all')
+    if (queryChanged) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setWordMatches([])
+      setSearchTab('all')
+    }
 
     const singleRef = parseQuranRef(normalizeQuranInput(searchQuery))
     if (singleRef && singleRef.vs === singleRef.ve) {
