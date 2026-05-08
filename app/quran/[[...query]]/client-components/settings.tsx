@@ -95,11 +95,20 @@ function LangList({
     key: string,
     label: string,
     isActive: boolean,
-    handle: () => void
+    nextValue: string | undefined
   ) => (
     <button
       key={key}
-      onClick={handle}
+      type="button"
+      // Stop the pointerdown so Radix's dismissable-layer doesn't treat the
+      // click as a focus shift and tear the dropdown down before our click
+      // handler runs.
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        onChange(nextValue)
+      }}
       className={cn(
         'flex w-full items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors',
         isActive
@@ -115,14 +124,11 @@ function LangList({
   return (
     <div className="flex flex-col gap-0.5">
       {nullable &&
-        renderRow('__none__', t('none'), value === undefined, () =>
-          onChange(undefined)
-        )}
-      {languages.map(({ code, name }) =>
-        renderRow(code ?? '', name ?? code ?? '', value === code, () =>
-          onChange(code ?? undefined)
-        )
-      )}
+        renderRow('__none__', t('none'), value === undefined, undefined)}
+      {languages.map(({ code, name }) => {
+        if (!code) return null
+        return renderRow(code, name ?? code, value === code, code)
+      })}
     </div>
   )
 }
