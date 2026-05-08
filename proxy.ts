@@ -1,15 +1,13 @@
+import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
 
-export default function middleware(request: NextRequest) {
+export default auth((request) => {
   const { pathname, searchParams } = request.nextUrl
 
-  // Proxy for the Quran section
-  // Force rewrites the URL to avoid complications at client side
+  // Quran URL rewriting: /quran?q=foo → /quran/foo
   if (pathname.startsWith('/quran') && searchParams.has('q')) {
     const query = searchParams.get('q')
     const tab = searchParams.get('tab')
-
     if (query) {
       const url = request.nextUrl.clone()
       url.pathname = `/quran/${query}`
@@ -19,8 +17,15 @@ export default function middleware(request: NextRequest) {
     }
   }
 
+  // Gate /me/* routes — requires an active session
+  if (pathname.startsWith('/me') && !request.auth) {
+    const signInUrl = new URL('/auth/sign-in', request.url)
+    signInUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(signInUrl)
+  }
+
   return NextResponse.next()
-}
+})
 
 export const config = {
   matcher: [
