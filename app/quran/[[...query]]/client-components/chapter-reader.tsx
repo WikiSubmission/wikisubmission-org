@@ -88,6 +88,7 @@ function VirtualizedVerseList({
   const [scrollMargin, setScrollMargin] = useState(0)
   const [viewportWidth, setViewportWidth] = useState<number | null>(null)
   const seekDoneRef = useRef(false)
+  const seekActiveRef = useRef(false)
   const prevFirstVerseRef = useRef('')
   const seekBehaviorRef = useRef<'auto' | 'smooth'>('auto')
 
@@ -212,16 +213,49 @@ function VirtualizedVerseList({
     seekBehaviorRef.current = 'auto'
     seekDoneRef.current = true
 
-    const rafId = requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
+    // After the virtualizer's initial estimate-based jump, fine-tune by
+    // measuring the verse's actual DOM node and snapping to it. This
+    // suppresses the visible jitter / undershoot that happened when the
+    // estimated row heights drifted from the measured ones (e.g. far down
+    // a chapter). seekActiveRef gates the URL-sync effect so the URL does
+    // not get rewritten to a mid-scroll verse number while we settle.
+    seekActiveRef.current = true
+    const verseId = `${chapterNumber}:${seekTarget}`
+    const targetTopFromViewport = 120
+    let attempts = 0
+    let rafId = 0
+    let cancelled = false
+    const tick = () => {
+      if (cancelled) return
+      attempts += 1
+      const el = document.getElementById(verseId)
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        const delta = rect.top - targetTopFromViewport
+        if (Math.abs(delta) > 1) {
+          window.scrollBy(0, delta)
+        }
+      } else {
+        // Element not yet measured/rendered — re-issue scrollToIndex so
+        // the virtualizer expands its window toward the target.
         virtualizer.scrollToIndex(targetIndex, {
           align: 'start',
           behavior: 'auto',
         })
-      })
-    )
-    return () => cancelAnimationFrame(rafId)
-  }, [firstVerseKey, seekTarget, verses, virtualizer])
+      }
+      if (attempts < 14) {
+        rafId = requestAnimationFrame(tick)
+      } else {
+        seekActiveRef.current = false
+      }
+    }
+    rafId = requestAnimationFrame(tick)
+    return () => {
+      cancelled = true
+      seekActiveRef.current = false
+      cancelAnimationFrame(rafId)
+    }
+  }, [firstVerseKey, seekTarget, verses, virtualizer, chapterNumber])
 
   useEffect(() => {
     if (!currentVerseId || !isPlaying) return
@@ -258,7 +292,12 @@ function VirtualizedVerseList({
     if (isRangeMode) return
     if (lastVirtualIndex < 0 || verses.length === 0) return
     if (!userScrolledRef.current) return
+    // Don't rewrite the URL while a seek is still settling — the loop in
+    // the seek effect adjusts scrollY across several frames and the
+    // intermediate centered verses are not where the user wants to land.
+    if (seekActiveRef.current) return
     const timer = setTimeout(() => {
+      if (seekActiveRef.current) return
       const centerY = window.scrollY + window.innerHeight / 2
       const items = virtualizer.getVirtualItems()
       const centerItem =
