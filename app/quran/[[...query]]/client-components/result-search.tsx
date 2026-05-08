@@ -14,7 +14,6 @@ import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import {
   useVerseSearch,
   type ChapterResult,
-  type VerseResult,
 } from '@/hooks/use-verse-search'
 import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'

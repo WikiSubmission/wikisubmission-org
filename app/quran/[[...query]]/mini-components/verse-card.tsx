@@ -665,6 +665,8 @@ export const VerseCard = memo(
                     prefs.setPreferences({
                       ...prefs,
                       wordByWord: !prefs.wordByWord,
+                      // collapsing from WBW shouldn't drop Arabic entirely
+                      arabic: prefs.wordByWord ? true : prefs.arabic,
                     })
                   }
                 >
