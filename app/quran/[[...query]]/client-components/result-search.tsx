@@ -102,7 +102,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const [wordLoading, setWordLoading] = useState(false)
 
   const lastQueryRef = useRef<string | null>(null)
-  const lastWbwRef = useRef<boolean>(false)
+  const lastArabicRef = useRef<boolean>(false)
   const didInitRef = useRef(false)
 
   // Clear any active multi-select when the search query changes.
@@ -115,11 +115,12 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
   // ── Trigger search ────────────────────────────────────────────────────────
   useEffect(() => {
+    const wantArabic = prefs.arabic || prefs.wordByWord
     const queryChanged = searchQuery !== lastQueryRef.current
-    const wbwChanged = prefs.wordByWord !== lastWbwRef.current
-    if (!queryChanged && !wbwChanged) return
+    const arabicChanged = wantArabic !== lastArabicRef.current
+    if (!queryChanged && !arabicChanged) return
     lastQueryRef.current = searchQuery
-    lastWbwRef.current = prefs.wordByWord
+    lastArabicRef.current = wantArabic
 
     if (!searchQuery) return
 
@@ -141,11 +142,14 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     verseSearch.search(searchQuery, {
       primaryLang: prefs.primaryLanguage,
       secondaryLang: prefs.secondaryLanguage,
-      includeArabic: prefs.arabic || prefs.wordByWord,
-      includeWords: prefs.wordByWord,
+      includeArabic: wantArabic,
+      // Always include words when arabic is shown so the verse card renders
+      // a word breakdown (matching the reader) instead of a raw arabic
+      // string with awkward tracking.
+      includeWords: wantArabic,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, prefs.wordByWord])
+  }, [searchQuery, prefs.wordByWord, prefs.arabic])
 
   // ── Word search ───────────────────────────────────────────────────────────
   const runWordByWordQuery = useCallback(async () => {

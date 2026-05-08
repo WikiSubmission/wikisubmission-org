@@ -173,7 +173,6 @@ function WordCardItem({
   const arabic = tx['ar'] ?? ''
   const root = word.r ?? undefined
   const translation = tx['en'] ?? ''
-  const transliteration = tx['tl'] ?? ''
   const meaning = word.m ?? undefined
   const word1Based = word.wi ?? 0
 
@@ -210,22 +209,10 @@ function WordCardItem({
         >
           {arabic}
         </p>
-        {/* The translation grows to fill the available space so the
-            transliteration that follows it sits at a shared baseline
-            across all words in a row, regardless of how long any single
-            translation wraps. */}
-        <div
-          className="flex flex-1 flex-col items-center justify-between gap-1 self-stretch"
-          dir="ltr"
-        >
+        <div className="flex flex-1 flex-col items-center self-stretch" dir="ltr">
           <p className="text-xs text-foreground/80 font-medium text-center wrap-break-words max-w-22">
             {translation}
           </p>
-          {transliteration && (
-            <p className="text-[11px] text-muted-foreground/60 italic text-center wrap-break-words max-w-22">
-              {transliteration}
-            </p>
-          )}
         </div>
 
       </div>
@@ -233,7 +220,7 @@ function WordCardItem({
       <WordDetailsDialogContent
         arabic={arabic}
         translation={translation}
-        transliteration={transliteration}
+        transliteration={tx['tl']}
         root={root}
         meaning={meaning}
         chapter={verseCoordsValid ? chapter : undefined}
