@@ -88,9 +88,7 @@ const CONTENT_CHANNELS: ContentChannel[] = [
     url: '#',
     desc: 'Full archive of khutbahs, lectures, and miracle explainers — subtitled in six languages.',
     bio: "The official Masjid Tucson YouTube channel — the canonical archive of khutbahs, lectures, and explainers from the founding community of the movement. Includes Dr. Rashad Khalifa's original 1980s lectures, contemporary khutbahs from Friday services, and a long-running playlist on the mathematical miracle of 19.",
-    socials: [
-      { label: 'Website', url: '#' },
-    ],
+    socials: [{ label: 'Website', url: '#' }],
   },
   {
     id: 'reflections-blog',
@@ -126,9 +124,7 @@ const CONTENT_CHANNELS: ContentChannel[] = [
     url: '#',
     desc: 'Monthly newsletter on the mathematical structure of the Quran — no technical background required.',
     bio: 'A monthly Substack newsletter by Faisal M. that explores the mathematical structure of the Quran in plain language. Each issue picks one numerical pattern and works through the verses involved without assuming a mathematical background. Past issues have covered the 19-letter Bismillah, the 114-chapter structure, and the frequency of divine names.',
-    socials: [
-      { label: 'Substack', url: '#' },
-    ],
+    socials: [{ label: 'Substack', url: '#' }],
   },
 ]
 
@@ -328,8 +324,7 @@ export default function CommunityClient({
   // Region pills are derived from the data so adding a community in a new
   // region automatically adds a filter pill for it.
   const regionOptions = useMemo(
-    () =>
-      ['All', ...Array.from(new Set(physical.map((l) => l.region))).sort()],
+    () => ['All', ...Array.from(new Set(physical.map((l) => l.region))).sort()],
     [physical]
   )
 
@@ -419,9 +414,16 @@ export default function CommunityClient({
           paddingBottom: 'clamp(32px, 6vw, 56px)',
         }}
       >
-        <SectionHead num="I" title="Communities" sub={`${physical.length} location${physical.length === 1 ? '' : 's'}`} />
+        <SectionHead
+          num="I"
+          title="Communities"
+          sub={`${physical.length} location${physical.length === 1 ? '' : 's'}`}
+        />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr]" style={{ gap: 20 }}>
+        <div
+          className="grid grid-cols-1 lg:grid-cols-[400px_1fr]"
+          style={{ gap: 20 }}
+        >
           {/* Directory */}
           <div
             style={{
@@ -536,7 +538,9 @@ export default function CommunityClient({
                   >
                     <span
                       style={{
-                        color: active ? 'var(--ed-accent)' : 'var(--ed-fg-muted)',
+                        color: active
+                          ? 'var(--ed-accent)'
+                          : 'var(--ed-fg-muted)',
                         display: 'flex',
                         alignItems: 'flex-start',
                         paddingTop: 2,
@@ -544,7 +548,13 @@ export default function CommunityClient({
                     >
                       <PinIcon />
                     </span>
-                    <span style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <span
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 3,
+                      }}
+                    >
                       <span
                         style={{
                           fontFamily: F.display,
@@ -726,7 +736,9 @@ export default function CommunityClient({
                     Location
                   </dt>
                   <dd style={{ color: 'var(--ed-fg)', margin: 0 }}>
-                    {[selected.city, selected.country].filter(Boolean).join(', ')}
+                    {[selected.city, selected.country]
+                      .filter(Boolean)
+                      .join(', ')}
                   </dd>
                   {selected.address && (
                     <>
@@ -762,45 +774,14 @@ export default function CommunityClient({
                   )}
                 </dl>
 
-                {/* Notes */}
-                <div style={{ marginTop: 4 }}>
-                  <label
-                    htmlFor={`note-${selected.id}`}
-                    style={{
-                      display: 'block',
-                      fontFamily: F.mono,
-                      fontSize: 10,
-                      letterSpacing: '0.18em',
-                      textTransform: 'uppercase',
-                      color: 'var(--ed-fg-muted)',
-                      marginBottom: 6,
-                    }}
-                  >
-                    Your notes — saved locally
-                  </label>
-                  <textarea
-                    id={`note-${selected.id}`}
-                    value={note}
-                    onChange={(e) => onNoteChange(e.target.value)}
-                    rows={3}
-                    placeholder="Contact person, meeting time, observations…"
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid var(--ed-rule)',
-                      borderRadius: 2,
-                      background: 'var(--ed-surface)',
-                      color: 'var(--ed-fg)',
-                      fontFamily: F.serif,
-                      fontSize: 13,
-                      lineHeight: 1.55,
-                      resize: 'vertical',
-                      outline: 'none',
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 10,
+                    flexWrap: 'wrap',
+                    marginTop: 4,
+                  }}
+                >
                   {selected.contact && selected.contact.includes('@') && (
                     <Link
                       href={`mailto:${selected.contact}`}
@@ -973,7 +954,8 @@ export default function CommunityClient({
                   <CollapsibleContent className="community-collapse">
                     <div
                       style={{
-                        padding: '0 clamp(18px, 4vw, 24px) clamp(18px, 4vw, 24px) clamp(18px, 4vw, 24px)',
+                        padding:
+                          '0 clamp(18px, 4vw, 24px) clamp(18px, 4vw, 24px) clamp(18px, 4vw, 24px)',
                         marginLeft: 'calc(56px + clamp(14px, 3vw, 24px))',
                         display: 'flex',
                         flexDirection: 'column',
@@ -1066,10 +1048,7 @@ export default function CommunityClient({
           sub="Blogs, podcasts, and YouTube by individual submitters"
         />
 
-        <div
-          className="grid grid-cols-1 md:grid-cols-2"
-          style={{ gap: 16 }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 16 }}>
           {CONTENT_CHANNELS.map((c) => {
             const isOpen = openChannelId === c.id
             return (
