@@ -360,7 +360,12 @@ function VirtualizedVerseList({
     }
 
     window.addEventListener('scroll', computeCurrentVerse, { passive: true })
-    computeCurrentVerse()
+    // Intentionally NOT calling computeCurrentVerse() here. Seeding
+    // centerVerseRef to verses[0] on mount means the opts effect would
+    // later anchor a hydration-triggered reload to that verse (i.e. the
+    // SSR window start, which is targetVerse - 5), overriding the URL's
+    // ?verse=N target. Let scroll events fill it in once the user is
+    // actually navigating around the chapter.
     return () => window.removeEventListener('scroll', computeCurrentVerse)
   }, [centerVerseRef, verses, virtualizer])
 
@@ -519,6 +524,24 @@ export function ChapterReader({
   // listener so any reload (mode switch, language change) can anchor to it without
   // causing the "verses climb to the top" effect.
   const centerVerseRef = useRef(1)
+  // Tracks whether the user has performed a real scroll-input gesture. Pure
+  // scroll events fire for programmatic seeks too, so we listen for the
+  // intent-bearing inputs (wheel, touch, key) to disambiguate. Used to gate
+  // anchor-to-viewport behavior on mode/language change.
+  const userMovedRef = useRef(false)
+  useEffect(() => {
+    const mark = () => {
+      userMovedRef.current = true
+    }
+    window.addEventListener('wheel', mark, { passive: true })
+    window.addEventListener('touchmove', mark, { passive: true })
+    window.addEventListener('keydown', mark)
+    return () => {
+      window.removeEventListener('wheel', mark)
+      window.removeEventListener('touchmove', mark)
+      window.removeEventListener('keydown', mark)
+    }
+  }, [])
   const readingSeekDoneRef = useRef(false)
   const readingPrevFirstVerseRef = useRef('')
 
@@ -558,9 +581,17 @@ export function ChapterReader({
       isFirstMount.current = false
       return
     }
+    // If the user has not made a real navigation gesture yet, we are still
+    // honoring the URL's ?verse=N target — most often this effect fires
+    // because zustand's persist middleware finished hydrating prefs from
+    // localStorage right after first paint, NOT because the user changed
+    // anything. Preserve the seek target so we don't pull the reader back
+    // to wherever the SSR window happened to start.
+    if (!userMovedRef.current && seekTarget) {
+      reader.reload(opts, parseInt(seekTarget))
+      return
+    }
     const anchor = centerVerseRef.current
-    // Anchor to the current viewport centre on mode/language switch so the reader
-    // doesn't jump back to verse 1 or the original seek target.
     if (anchor > 1) {
       readingSeekDoneRef.current = false
       setSeekTarget(String(anchor))
