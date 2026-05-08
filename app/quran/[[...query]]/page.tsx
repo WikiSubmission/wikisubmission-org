@@ -225,7 +225,7 @@ export default async function QuranPage({
 
   // ── Verse ref & text search: client-side via SearchResult ────────────────────
   return (
-    <main className="whitespace-pre-line">
+    <main>
       <section>
         <Suspense fallback={<Spinner />}>
           <SearchResult props={{ query: queryText }} />

@@ -87,16 +87,17 @@ export function useVerseSearch(): UseVerseSearchReturn {
             scope: 'verses',
             limit: SEARCH_LIMIT,
             offset,
-            include_words: opts.includeWords || undefined,
-            include_root: opts.includeWords || undefined,
-            include_meaning: opts.includeWords || undefined,
-            word_langs: opts.includeWords ? ['ar', 'en', 'tl'] : undefined,
           },
         },
       })
 
+      let merged = data ?? null
+      if (merged && opts.includeWords) {
+        merged = await hydrateWords(merged, opts)
+      }
+
       return {
-        data: data ?? null,
+        data: merged,
         error: error ? 'Search failed. Please try again.' : null,
       }
     },
@@ -200,4 +201,61 @@ function mergePages(
   }
 
   return { info: next.info, chapters }
+}
+
+/**
+ * The `/search?scope=verses` endpoint does not populate per-word data even
+ * when `include_words=true` is sent. To make word-by-word render in search
+ * results, we follow up with a `/quran?verses=...` call for the matched
+ * refs and merge the `w` arrays into the search response.
+ */
+async function hydrateWords(
+  resp: QuranSearchResponse,
+  opts: VerseSearchOptions
+): Promise<QuranSearchResponse> {
+  const refs: string[] = []
+  for (const ch of resp.chapters ?? []) {
+    for (const v of ch.verses ?? []) {
+      if (v.vk) refs.push(v.vk)
+    }
+  }
+  if (refs.length === 0) return resp
+
+  const langs: string[] = []
+  if (opts.primaryLang !== 'xl') langs.push(opts.primaryLang)
+  if (!langs.includes('ar')) langs.push('ar')
+
+  const { data } = await wsApi.GET('/quran', {
+    params: {
+      query: {
+        verses: refs.join(','),
+        langs,
+        include_words: true,
+        include_root: true,
+        include_meaning: true,
+        word_langs: ['ar', 'en', 'tl'],
+      },
+    },
+  })
+
+  if (!data) return resp
+
+  const wordsByVk = new Map<string, VerseResult['w']>()
+  for (const ch of data.chapters ?? []) {
+    for (const v of ch.verses ?? []) {
+      if (v.vk && v.w) wordsByVk.set(v.vk, v.w)
+    }
+  }
+  if (wordsByVk.size === 0) return resp
+
+  return {
+    ...resp,
+    chapters: resp.chapters?.map((ch) => ({
+      ...ch,
+      verses: ch.verses?.map((v) => {
+        const w = v.vk ? wordsByVk.get(v.vk) : undefined
+        return w ? { ...v, w } : v
+      }),
+    })),
+  }
 }
