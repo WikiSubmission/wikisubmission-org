@@ -26,6 +26,8 @@ import {
   StickyNote,
   Volume2,
   BookOpen,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HighlightText } from '@/components/highlight-text'
@@ -927,6 +929,35 @@ export const VerseCard = memo(
                   disabled
                 >
                   <StickyNote className="w-4 h-4" />
+                </Button>
+              )}
+              {(prefs.arabic || prefs.wordByWord) && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={
+                    prefs.wordByWord
+                      ? 'Collapse Arabic'
+                      : 'Expand Arabic word-by-word'
+                  }
+                  title={
+                    prefs.wordByWord
+                      ? 'Collapse Arabic'
+                      : 'Expand Arabic word-by-word'
+                  }
+                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+                  onClick={() =>
+                    prefs.setPreferences({
+                      ...prefs,
+                      wordByWord: !prefs.wordByWord,
+                    })
+                  }
+                >
+                  {prefs.wordByWord ? (
+                    <Minimize2 className="w-4 h-4" />
+                  ) : (
+                    <Maximize2 className="w-4 h-4" />
+                  )}
                 </Button>
               )}
               {showCopyButton && (

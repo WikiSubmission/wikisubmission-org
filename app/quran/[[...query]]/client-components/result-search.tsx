@@ -136,10 +136,11 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     verseSearch.search(searchQuery, {
       primaryLang: prefs.primaryLanguage,
       secondaryLang: prefs.secondaryLanguage,
-      includeArabic: prefs.arabic,
+      includeArabic: prefs.arabic || prefs.wordByWord,
+      includeWords: prefs.wordByWord,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery])
+  }, [searchQuery, prefs.wordByWord])
 
   // ── Word search ───────────────────────────────────────────────────────────
   const runWordByWordQuery = useCallback(async () => {

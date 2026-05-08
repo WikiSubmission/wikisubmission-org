@@ -16,6 +16,7 @@ export type VerseSearchOptions = {
   primaryLang: LangCode
   secondaryLang?: LangCode
   includeArabic: boolean
+  includeWords?: boolean
 }
 
 export type UseVerseSearchReturn = {
@@ -80,7 +81,17 @@ export function useVerseSearch(): UseVerseSearchReturn {
 
       const { data, error } = await wsApi.GET('/search', {
         params: {
-          query: { q, langs, scope: 'verses', limit: SEARCH_LIMIT, offset },
+          query: {
+            q,
+            langs,
+            scope: 'verses',
+            limit: SEARCH_LIMIT,
+            offset,
+            include_words: opts.includeWords || undefined,
+            include_root: opts.includeWords || undefined,
+            include_meaning: opts.includeWords || undefined,
+            word_langs: opts.includeWords ? ['ar', 'en', 'tl'] : undefined,
+          },
         },
       })
 
