@@ -18,185 +18,27 @@ import { F, Arrow } from '@/app/(site)/_sections/shared'
 const GEO_URL = '/maps/world-110m.json'
 
 // ─── Data ─────────────────────────────────────────────────────
-// TODO: source from CMS when the schema exists.
-// TODO: Translate the Community page after its planned code/data rewrite.
+// Physical locations and social communities are sourced from the ws-backend
+// `/communities` endpoint (Sanity-backed, see `page.tsx`). Section III
+// ("Content channels") still uses static placeholders since the backend has
+// no equivalent endpoint yet.
 
-type Location = {
+export type Location = {
   id: string
   name: string
   city: string
   /** Free-form region name. Filter pills are derived from the values
-   *  present in LOCATIONS at runtime, so adding a community with a new
-   *  region (e.g. "South Asia") makes that filter pill appear automatically. */
+   *  present in `physical` at runtime — any new region appears automatically. */
   region: string
   country: string
-  founded: string
   lat: number
   lng: number
   contact: string
   desc: string
+  /** Optional fields populated when present on the Sanity entry. */
+  schedule?: string
+  address?: string
 }
-
-/** Suggested taxonomy when adding new communities. Not enforced — `region`
- *  is a plain string and any value will be picked up by the filter pills. */
-export const KNOWN_REGIONS = [
-  'Western Europe',
-  'Eastern Europe',
-  'MENA',
-  'Sub-Saharan Africa',
-  'South Asia',
-  'East & Southeast Asia',
-  'North America',
-  'Latin America',
-  'Oceania',
-] as const
-
-const LOCATIONS: Location[] = [
-  {
-    id: 'tucson',
-    name: 'Masjid Tucson',
-    city: 'Tucson, Arizona',
-    region: 'North America',
-    country: 'USA',
-    founded: '1979',
-    lat: 32.22,
-    lng: -110.97,
-    contact: 'contact@masjidtucson.org',
-    desc: 'The founding community of the movement — home of the original International Community of Submitters, where the mathematical miracle was first documented.',
-  },
-  {
-    id: 'toronto',
-    name: 'Toronto Submitters',
-    city: 'Toronto, Ontario',
-    region: 'North America',
-    country: 'Canada',
-    founded: '1992',
-    lat: 43.65,
-    lng: -79.38,
-    contact: 'toronto@submission.org',
-    desc: 'Weekly Friday congregation and monthly study circles on the Quran, conducted in English and Arabic.',
-  },
-  {
-    id: 'london',
-    name: 'London Submitters',
-    city: 'London',
-    region: 'Europe',
-    country: 'United Kingdom',
-    founded: '1998',
-    lat: 51.5,
-    lng: -0.12,
-    contact: 'london@submitters.uk',
-    desc: 'An active community running interfaith study nights and Quran-first readings. Meets weekly in central London.',
-  },
-  {
-    id: 'frankfurt',
-    name: 'Frankfurt Community',
-    city: 'Frankfurt am Main',
-    region: 'Europe',
-    country: 'Germany',
-    founded: '2001',
-    lat: 50.11,
-    lng: 8.68,
-    contact: 'frankfurt@submission.de',
-    desc: 'German & Turkish-speaking community with monthly open lectures on the Final Testament.',
-  },
-  {
-    id: 'istanbul',
-    name: 'Istanbul Submitters',
-    city: 'Istanbul',
-    region: 'Europe',
-    country: 'Türkiye',
-    founded: '1994',
-    lat: 41.01,
-    lng: 28.98,
-    contact: 'istanbul@teslim.org',
-    desc: 'A large Turkish-speaking community — weekly khutbahs, Arabic classes, and an active publishing wing.',
-  },
-  {
-    id: 'cairo',
-    name: 'Cairo Study Circle',
-    city: 'Cairo',
-    region: 'Middle East & Africa',
-    country: 'Egypt',
-    founded: '2010',
-    lat: 30.04,
-    lng: 31.24,
-    contact: 'cairo@submission.eg',
-    desc: 'A small but growing study circle focused on reading the Quran alone, without hadith.',
-  },
-  {
-    id: 'lagos',
-    name: 'Lagos Submitters',
-    city: 'Lagos',
-    region: 'Middle East & Africa',
-    country: 'Nigeria',
-    founded: '2008',
-    lat: 6.52,
-    lng: 3.38,
-    contact: 'lagos@submission.ng',
-    desc: 'West African hub — monthly gatherings, youth programs, and online Quran classes.',
-  },
-  {
-    id: 'kl',
-    name: 'Kuala Lumpur Circle',
-    city: 'Kuala Lumpur',
-    region: 'Asia & Oceania',
-    country: 'Malaysia',
-    founded: '2003',
-    lat: 3.14,
-    lng: 101.69,
-    contact: 'kl@submission.my',
-    desc: 'Malay & English study group meeting twice monthly. Active in digital outreach across Southeast Asia.',
-  },
-  {
-    id: 'jakarta',
-    name: 'Jakarta Submitters',
-    city: 'Jakarta',
-    region: 'Asia & Oceania',
-    country: 'Indonesia',
-    founded: '2006',
-    lat: -6.21,
-    lng: 106.85,
-    contact: 'jakarta@submission.id',
-    desc: 'Quran-only study community — publishes an Indonesian translation of the Final Testament.',
-  },
-  {
-    id: 'sydney',
-    name: 'Sydney Submitters',
-    city: 'Sydney, NSW',
-    region: 'Asia & Oceania',
-    country: 'Australia',
-    founded: '2012',
-    lat: -33.87,
-    lng: 151.21,
-    contact: 'sydney@submission.au',
-    desc: 'Small community hosting monthly gatherings and a weekly online khutbah broadcast.',
-  },
-  {
-    id: 'saopaulo',
-    name: 'São Paulo Submetidos',
-    city: 'São Paulo',
-    region: 'Latin America',
-    country: 'Brazil',
-    founded: '2015',
-    lat: -23.55,
-    lng: -46.63,
-    contact: 'saopaulo@submissao.br',
-    desc: 'Portuguese-speaking community — publishes study materials and runs an active WhatsApp group.',
-  },
-  {
-    id: 'mexico',
-    name: 'Mexico City Circle',
-    city: 'Mexico City',
-    region: 'Latin America',
-    country: 'Mexico',
-    founded: '2018',
-    lat: 19.43,
-    lng: -99.13,
-    contact: 'mexico@sumision.org',
-    desc: 'Spanish-speaking study group focused on translations of the Final Testament.',
-  },
-]
 
 type ExtraSocial = {
   /** Short visible label, e.g. "Twitter", "Mirror" */
@@ -205,7 +47,7 @@ type ExtraSocial = {
   url: string
 }
 
-type SocialCard = {
+export type SocialCard = {
   id: string
   name: string
   platform: string
@@ -220,98 +62,6 @@ type SocialCard = {
   url: string
   icon: React.ReactNode
 }
-
-// MOCK: shape mirrors the future API payload. Replace with a fetch when the
-// backend endpoint is live. `bio` and `socials` are placeholders to be edited.
-const SOCIAL_COMMUNITIES: SocialCard[] = [
-  {
-    id: 'discord-main',
-    name: 'Submitters Discord',
-    platform: 'Discord',
-    sub: 'discord.gg/submitters',
-    desc: 'Main gathering place — verse-by-verse study, daily reminders, multilingual rooms.',
-    bio: 'Founded in 2019, the Submitters Discord is the largest active server for the global Submission community. Channels are organized by language (English, Arabic, Turkish, French, Spanish, Indonesian) and by topic — verse studies, the mathematical miracle of 19, prayer-time reminders, and an open Q&A room moderated by long-time submitters. Voice rooms host weekly Quran reading circles and informal hangouts.',
-    socials: [
-      { label: 'X / Twitter', url: '#' },
-      { label: 'YouTube', url: '#' },
-    ],
-    color: '#5865F2',
-    url: '#',
-    icon: <IconDiscord />,
-  },
-  {
-    id: 'discord-turkish',
-    name: 'Teslim Turkish Discord',
-    platform: 'Discord',
-    sub: 'discord.gg/teslim',
-    desc: 'Turkish-language server — khutbahs, Quran recitation, and weekly Q&A.',
-    bio: 'Run by submitters based in Istanbul and Ankara, this server caters to Turkish speakers in Türkiye and across the diaspora. Weekly khutbahs are streamed live, with archived recordings posted in the announcements channel. The server also runs an Arabic-recitation tutoring program for members new to reading the Final Testament in the original language.',
-    socials: [
-      { label: 'YouTube', url: '#' },
-    ],
-    color: '#5865F2',
-    url: '#',
-    icon: <IconDiscord />,
-  },
-  {
-    id: 'fb-main',
-    name: 'Submission · Facebook Group',
-    platform: 'Facebook',
-    sub: 'facebook.com/groups/submitters',
-    desc: 'Long-running public group — questions, verse-of-the-day threads, world-wide readings.',
-    bio: 'One of the oldest online gathering points for submitters, established in 2008. The group is moderated 24/7 by volunteers across multiple time zones. Most posts are in English, but threads frequently spawn in Arabic, French, and Spanish. Pinned topics include weekly verse studies and explanatory threads on the mathematical miracle.',
-    color: '#1877F2',
-    url: '#',
-    icon: <IconFacebook />,
-  },
-  {
-    id: 'fb-spanish',
-    name: 'Sumisión a Dios · Grupo FB',
-    platform: 'Facebook',
-    sub: 'facebook.com/groups/sumision',
-    desc: 'Spanish-language Facebook group — translations, commentary, live study rooms.',
-    bio: 'A Spanish-language hub primarily active across Latin America and Spain. Features include a verse-of-the-day post in Spanish, member-led translations of articles from Masjid Tucson, and monthly live audio rooms hosted via Facebook Live where members read and discuss the Final Testament together.',
-    color: '#1877F2',
-    url: '#',
-    icon: <IconFacebook />,
-  },
-  {
-    id: 'reddit',
-    name: 'r/Submitters',
-    platform: 'Reddit',
-    sub: 'reddit.com/r/submitters',
-    desc: 'Open discussion forum — Q&A, comparative readings, weekly miracle-of-19 threads.',
-    bio: 'A small but active Reddit community focused on long-form discussion. The subreddit hosts weekly recurring threads (Verse Tuesday, Miracle Friday) and welcomes critical questions from members of other faiths. Moderation is hands-off — posts are removed only for personal attacks or spam, not for disagreement with the community position.',
-    color: '#FF4500',
-    url: '#',
-    icon: <IconReddit />,
-  },
-  {
-    id: 'whatsapp',
-    name: 'WhatsApp Circles',
-    platform: 'WhatsApp',
-    sub: 'By language & region',
-    desc: 'Private regional circles — English, Arabic, Turkish, Malay, Indonesian, Spanish, Portuguese.',
-    bio: 'A network of small, invite-only WhatsApp groups organized by language and geography. Each circle averages 30–80 members and is run independently by a local moderator. Most groups send a daily verse, prayer-time reminders calibrated to the local timezone, and announce in-person meetups when applicable. Request an invite via any of the public communities listed here.',
-    color: '#25D366',
-    url: '#',
-    icon: <IconWhatsapp />,
-  },
-  {
-    id: 'telegram',
-    name: 'Submission · Telegram',
-    platform: 'Telegram',
-    sub: 't.me/submitters',
-    desc: 'Verse-of-the-day broadcasts, audio recitations, dedicated Arabic learners channel.',
-    bio: 'A broadcast-style Telegram channel with a sister discussion group. The main channel posts verses, audio recitations from Al-Husary and Al-Minshawi, and announcements for online events. The discussion group is open to all and is one of the most active venues for comparative scripture conversations between submitters, traditional Muslims, and curious newcomers.',
-    socials: [
-      { label: 'YouTube', url: '#' },
-    ],
-    color: '#0088CC',
-    url: '#',
-    icon: <IconTelegram />,
-  },
-]
 
 type ContentChannel = {
   id: string
@@ -394,42 +144,6 @@ function PinIcon() {
     >
       <path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" />
       <circle cx="12" cy="10" r="2.4" fill="currentColor" />
-    </svg>
-  )
-}
-
-function IconDiscord() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.2.4a18 18 0 0 0-5.3 0L9.6 3a19.8 19.8 0 0 0-4.9 1.4C1.5 9.1.6 13.7 1 18.2a19.9 19.9 0 0 0 6 3l.5-.7a13.6 13.6 0 0 1-2.3-1.1l.6-.4a14 14 0 0 0 12.4 0l.6.4a13.6 13.6 0 0 1-2.3 1.1l.5.7a19.9 19.9 0 0 0 6-3c.5-5.2-.9-9.7-2.6-13.8ZM8.4 15.5c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Zm7.2 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Z" />
-    </svg>
-  )
-}
-function IconFacebook() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M24 12A12 12 0 1 0 10.1 23.9v-8.4H7v-3.5h3.1V9.4c0-3 1.8-4.7 4.6-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9v2.3h3.4l-.6 3.5h-2.8v8.4A12 12 0 0 0 24 12Z" />
-    </svg>
-  )
-}
-function IconReddit() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M24 12.1a2.6 2.6 0 0 0-2.6-2.6 2.6 2.6 0 0 0-1.8.8 12.7 12.7 0 0 0-6.8-2.2L14 2.4l4.6 1a1.9 1.9 0 1 0 .2-1.2l-5.2-1.1-1.4 6.5A12.7 12.7 0 0 0 5.4 9.9a2.6 2.6 0 0 0-3.6 3.7 5 5 0 0 0-.3 1.8c0 3.8 4.5 6.9 10 6.9s10-3.1 10-6.9a5 5 0 0 0-.3-1.8A2.6 2.6 0 0 0 24 12Zm-18 2a1.7 1.7 0 1 1 3.4 0 1.7 1.7 0 0 1-3.4 0Zm9.6 4.7a6.3 6.3 0 0 1-3.6 1 6.3 6.3 0 0 1-3.6-1 .4.4 0 0 1 .5-.6 5.5 5.5 0 0 0 3.1.8 5.5 5.5 0 0 0 3.1-.8.4.4 0 0 1 .5.6Zm-.3-3a1.7 1.7 0 1 1 1.7-1.7 1.7 1.7 0 0 1-1.7 1.7Z" />
-    </svg>
-  )
-}
-function IconWhatsapp() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0 12 12 0 0 0 .7 17.6L0 24l6.6-.7A12 12 0 0 0 12.1 24c6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.6-8.5ZM12.1 21.8h-.1a10 10 0 0 1-5.1-1.4l-.4-.2-3.9.4.4-3.8-.3-.4A10 10 0 0 1 22 12a10 10 0 0 1-10 9.8Zm5.5-7.4c-.3-.2-1.8-.9-2-.9-.3-.1-.5-.2-.7.1-.2.3-.8.9-1 1.1-.2.2-.4.2-.7.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.5.3-.5c.1-.2 0-.4 0-.5s-.7-1.7-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3 1.9.9 2.6.9 3.6.8.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.1-.3-.2-.6-.3Z" />
-    </svg>
-  )
-}
-function IconTelegram() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M22 2 2 10.5l6.5 2.3L18 5.5l-7.7 8.3.4 6 4-3.8 4.7 3.4L22 2Z" />
     </svg>
   )
 }
@@ -596,8 +310,14 @@ function getAllNotes(): Record<string, string> {
 
 // ─── Main page ─────────────────────────────────────────────────
 
-export default function CommunityClient() {
-  const [selectedId, setSelectedId] = useState<string>(LOCATIONS[0].id)
+export default function CommunityClient({
+  physical,
+  social,
+}: {
+  physical: Location[]
+  social: SocialCard[]
+}) {
+  const [selectedId, setSelectedId] = useState<string>(physical[0]?.id ?? '')
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [region, setRegion] = useState<string>('All')
@@ -606,11 +326,11 @@ export default function CommunityClient() {
   const [openChannelId, setOpenChannelId] = useState<string | null>(null)
 
   // Region pills are derived from the data so adding a community in a new
-  // region (e.g. "South Asia") automatically adds a filter pill for it.
+  // region automatically adds a filter pill for it.
   const regionOptions = useMemo(
     () =>
-      ['All', ...Array.from(new Set(LOCATIONS.map((l) => l.region))).sort()],
-    []
+      ['All', ...Array.from(new Set(physical.map((l) => l.region))).sort()],
+    [physical]
   )
 
   useEffect(() => {
@@ -620,7 +340,7 @@ export default function CommunityClient() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return LOCATIONS.filter((l) => {
+    return physical.filter((l) => {
       if (region !== 'All' && l.region !== region) return false
       if (!q) return true
       return (
@@ -631,16 +351,17 @@ export default function CommunityClient() {
         (notes[l.id] ?? '').toLowerCase().includes(q)
       )
     })
-  }, [query, region, notes])
+  }, [physical, query, region, notes])
 
   const selected = useMemo(
-    () => LOCATIONS.find((l) => l.id === selectedId) ?? LOCATIONS[0],
-    [selectedId]
+    () => physical.find((l) => l.id === selectedId) ?? physical[0] ?? null,
+    [physical, selectedId]
   )
 
-  const [note, setNote] = useLocationNote(selected.id)
+  const [note, setNote] = useLocationNote(selected?.id ?? '')
 
   const onNoteChange = (value: string) => {
+    if (!selected) return
     setNote(value)
     setNotes((prev) => ({ ...prev, [selected.id]: value }))
   }
@@ -698,7 +419,7 @@ export default function CommunityClient() {
           paddingBottom: 'clamp(32px, 6vw, 56px)',
         }}
       >
-        <SectionHead num="I" title="Communities" sub={`${LOCATIONS.length} locations`} />
+        <SectionHead num="I" title="Communities" sub={`${physical.length} location${physical.length === 1 ? '' : 's'}`} />
 
         <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr]" style={{ gap: 20 }}>
           {/* Directory */}
@@ -900,7 +621,7 @@ export default function CommunityClient() {
                   color: 'var(--ed-fg-muted)',
                 }}
               >
-                Atlas · {LOCATIONS.length} communities
+                Atlas · {physical.length} communities
               </span>
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                 {regionOptions.map((r) => (
@@ -938,133 +659,185 @@ export default function CommunityClient() {
               />
             </div>
 
-            <div
-              style={{
-                padding: '20px 24px 24px',
-                borderTop: '1px solid var(--ed-rule)',
-                backgroundColor: 'var(--ed-bg)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 14,
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: F.mono,
-                  fontSize: 10,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  color: 'var(--ed-accent)',
-                }}
-              >
-                {selected.region} · est. {selected.founded}
-              </span>
+            {selected ? (
               <div
                 style={{
-                  fontFamily: F.display,
-                  fontSize: 'clamp(22px, 4vw, 28px)',
-                  fontWeight: 500,
-                  letterSpacing: '-0.015em',
-                  color: 'var(--ed-fg)',
+                  padding: '20px 24px 24px',
+                  borderTop: '1px solid var(--ed-rule)',
+                  backgroundColor: 'var(--ed-bg)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 14,
                 }}
               >
-                {selected.name}
-              </div>
-              <p
-                style={{
-                  fontFamily: F.serif,
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                  color: 'var(--ed-fg-muted)',
-                  margin: 0,
-                }}
-              >
-                {selected.desc}
-              </p>
-              <dl
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '120px 1fr',
-                  rowGap: 8,
-                  fontFamily: F.mono,
-                  fontSize: 11.5,
-                  margin: 0,
-                }}
-              >
-                <dt
+                <span
                   style={{
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    color: 'var(--ed-fg-muted)',
-                  }}
-                >
-                  Location
-                </dt>
-                <dd style={{ color: 'var(--ed-fg)', margin: 0 }}>
-                  {selected.city}, {selected.country}
-                </dd>
-                <dt
-                  style={{
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    color: 'var(--ed-fg-muted)',
-                  }}
-                >
-                  Contact
-                </dt>
-                <dd style={{ color: 'var(--ed-fg)', margin: 0 }}>
-                  {selected.contact}
-                </dd>
-              </dl>
-
-              {/* Notes */}
-              <div style={{ marginTop: 4 }}>
-                <label
-                  htmlFor={`note-${selected.id}`}
-                  style={{
-                    display: 'block',
                     fontFamily: F.mono,
                     fontSize: 10,
                     letterSpacing: '0.18em',
                     textTransform: 'uppercase',
-                    color: 'var(--ed-fg-muted)',
-                    marginBottom: 6,
+                    color: 'var(--ed-accent)',
                   }}
                 >
-                  Your notes — saved locally
-                </label>
-                <textarea
-                  id={`note-${selected.id}`}
-                  value={note}
-                  onChange={(e) => onNoteChange(e.target.value)}
-                  rows={3}
-                  placeholder="Contact person, meeting time, observations…"
+                  {selected.region}
+                  {selected.schedule ? ` · ${selected.schedule}` : ''}
+                </span>
+                <div
                   style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid var(--ed-rule)',
-                    borderRadius: 2,
-                    background: 'var(--ed-surface)',
+                    fontFamily: F.display,
+                    fontSize: 'clamp(22px, 4vw, 28px)',
+                    fontWeight: 500,
+                    letterSpacing: '-0.015em',
                     color: 'var(--ed-fg)',
-                    fontFamily: F.serif,
-                    fontSize: 13,
-                    lineHeight: 1.55,
-                    resize: 'vertical',
-                    outline: 'none',
                   }}
-                />
-              </div>
+                >
+                  {selected.name}
+                </div>
+                {selected.desc && (
+                  <p
+                    style={{
+                      fontFamily: F.serif,
+                      fontSize: 14,
+                      lineHeight: 1.6,
+                      color: 'var(--ed-fg-muted)',
+                      margin: 0,
+                    }}
+                  >
+                    {selected.desc}
+                  </p>
+                )}
+                <dl
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '120px 1fr',
+                    rowGap: 8,
+                    fontFamily: F.mono,
+                    fontSize: 11.5,
+                    margin: 0,
+                  }}
+                >
+                  <dt
+                    style={{
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: 'var(--ed-fg-muted)',
+                    }}
+                  >
+                    Location
+                  </dt>
+                  <dd style={{ color: 'var(--ed-fg)', margin: 0 }}>
+                    {[selected.city, selected.country].filter(Boolean).join(', ')}
+                  </dd>
+                  {selected.address && (
+                    <>
+                      <dt
+                        style={{
+                          letterSpacing: '0.14em',
+                          textTransform: 'uppercase',
+                          color: 'var(--ed-fg-muted)',
+                        }}
+                      >
+                        Address
+                      </dt>
+                      <dd style={{ color: 'var(--ed-fg)', margin: 0 }}>
+                        {selected.address}
+                      </dd>
+                    </>
+                  )}
+                  {selected.contact && (
+                    <>
+                      <dt
+                        style={{
+                          letterSpacing: '0.14em',
+                          textTransform: 'uppercase',
+                          color: 'var(--ed-fg-muted)',
+                        }}
+                      >
+                        Contact
+                      </dt>
+                      <dd style={{ color: 'var(--ed-fg)', margin: 0 }}>
+                        {selected.contact}
+                      </dd>
+                    </>
+                  )}
+                </dl>
 
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
-                <Link href="#" className="ed-btn-primary" style={{ fontFamily: F.serif, padding: '10px 18px' }}>
-                  Visit community
-                  <Arrow />
-                </Link>
-                <Link href="#" className="ed-btn-ghost" style={{ fontFamily: F.serif, padding: '10px 18px' }}>
-                  Directions
-                </Link>
+                {/* Notes */}
+                <div style={{ marginTop: 4 }}>
+                  <label
+                    htmlFor={`note-${selected.id}`}
+                    style={{
+                      display: 'block',
+                      fontFamily: F.mono,
+                      fontSize: 10,
+                      letterSpacing: '0.18em',
+                      textTransform: 'uppercase',
+                      color: 'var(--ed-fg-muted)',
+                      marginBottom: 6,
+                    }}
+                  >
+                    Your notes — saved locally
+                  </label>
+                  <textarea
+                    id={`note-${selected.id}`}
+                    value={note}
+                    onChange={(e) => onNoteChange(e.target.value)}
+                    rows={3}
+                    placeholder="Contact person, meeting time, observations…"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid var(--ed-rule)',
+                      borderRadius: 2,
+                      background: 'var(--ed-surface)',
+                      color: 'var(--ed-fg)',
+                      fontFamily: F.serif,
+                      fontSize: 13,
+                      lineHeight: 1.55,
+                      resize: 'vertical',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
+                  {selected.contact && selected.contact.includes('@') && (
+                    <Link
+                      href={`mailto:${selected.contact}`}
+                      className="ed-btn-primary"
+                      style={{ fontFamily: F.serif, padding: '10px 18px' }}
+                    >
+                      Email community
+                      <Arrow />
+                    </Link>
+                  )}
+                  <Link
+                    href={`https://www.google.com/maps/search/?api=1&query=${selected.lat},${selected.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ed-btn-ghost"
+                    style={{ fontFamily: F.serif, padding: '10px 18px' }}
+                  >
+                    Directions
+                  </Link>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div
+                style={{
+                  padding: '32px 24px',
+                  borderTop: '1px solid var(--ed-rule)',
+                  backgroundColor: 'var(--ed-bg)',
+                  textAlign: 'center',
+                  fontFamily: F.serif,
+                  fontStyle: 'italic',
+                  fontSize: 13,
+                  color: 'var(--ed-fg-muted)',
+                }}
+              >
+                No physical communities to display yet.
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -1082,11 +855,28 @@ export default function CommunityClient() {
         <SectionHead
           num="II"
           title="Social communities"
-          sub={`${SOCIAL_COMMUNITIES.length} channels · all free to join`}
+          sub={`${social.length} channel${social.length === 1 ? '' : 's'} · all free to join`}
         />
 
+        {social.length === 0 && (
+          <div
+            style={{
+              padding: 32,
+              textAlign: 'center',
+              fontFamily: F.serif,
+              fontStyle: 'italic',
+              fontSize: 13,
+              color: 'var(--ed-fg-muted)',
+              border: '1px dashed var(--ed-rule)',
+              borderRadius: 3,
+            }}
+          >
+            No online communities to display yet.
+          </div>
+        )}
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {SOCIAL_COMMUNITIES.map((c) => {
+          {social.map((c) => {
             const isOpen = openSocialId === c.id
             return (
               <Collapsible

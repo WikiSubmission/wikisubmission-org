@@ -313,6 +313,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/communities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List communities (online and physical)
+         * @description Returns active community entries authored in Sanity (online communities on platforms like Discord/Telegram, plus physical meet-up locations). Backed by the Sanity content lake; results are cached server-side and invalidated by webhook on document changes.
+         */
+        get: operations["getCommunities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1011,6 +1031,68 @@ export interface components {
              */
             lyrics?: string | null;
         };
+        /** @description Latitude/longitude pair for a physical community. */
+        GeoPoint: {
+            /**
+             * Format: double
+             * @example 36.7525
+             */
+            lat?: number;
+            /**
+             * Format: double
+             * @example 3.042
+             */
+            lng?: number;
+        };
+        /** @description A community entry sourced from Sanity. The `kind` discriminator determines which optional fields are populated: `online` communities carry `platform`/`url`/`inviteCode`/`memberCount`; `physical` communities carry `address`/`city`/`country`/`geo`/`contactEmail`/ `contactPhone`/`meetingSchedule`. The `imageUrl`, when present, points at the ws-backend image proxy and not directly at Sanity's CDN. */
+        Community: {
+            /**
+             * @description Sanity document ID.
+             * @example drafts.community-foo
+             */
+            _id: string;
+            /**
+             * @example online
+             * @enum {string}
+             */
+            kind: "online" | "physical";
+            /** @example Submitters Discord */
+            name: string;
+            /** @example submitters-discord */
+            slug?: string;
+            /**
+             * @description ISO 639-1 language code.
+             * @example en
+             */
+            language?: string;
+            description?: string;
+            /**
+             * @description Proxied image URL routed through `/sanity/image/...`. Preserves Sanity's image transform query string when present.
+             * @example /sanity/image/abc123-1024x768.jpg
+             */
+            imageUrl?: string;
+            tags?: string[];
+            /** @example true */
+            isActive: boolean;
+            /**
+             * @example discord
+             * @enum {string}
+             */
+            platform?: "discord" | "telegram" | "whatsapp" | "facebook" | "x" | "youtube" | "other";
+            /** Format: uri */
+            url?: string;
+            inviteCode?: string;
+            memberCount?: number;
+            address?: string;
+            city?: string;
+            /** @description ISO 3166-1 alpha-2 country code. */
+            country?: string;
+            geo?: components["schemas"]["GeoPoint"];
+            /** Format: email */
+            contactEmail?: string;
+            contactPhone?: string;
+            meetingSchedule?: string;
+        };
     };
     responses: {
         /** @description The request could not be completed due to a conflict with the current state of the resource. Resolve the conflict and try again. */
@@ -1068,6 +1150,17 @@ export interface components {
                     message: string;
                     /** @example NOT_IMPLEMENTED */
                     code: string;
+                };
+            };
+        };
+        /** @description The upstream content source (Sanity) returned an error or was unreachable. The response is structurally valid but the request could not be fulfilled. */
+        BadGateway: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    message: string;
                 };
             };
         };
@@ -1698,6 +1791,45 @@ export interface operations {
                 };
             };
             500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getCommunities: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Filter by community kind.
+                 * @example online
+                 */
+                kind?: "online" | "physical";
+                /**
+                 * @description ISO 639-1 language code of the community.
+                 * @example en
+                 */
+                language?: string;
+                /**
+                 * @description ISO 3166-1 alpha-2 country code (physical communities only).
+                 * @example US
+                 */
+                country?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Community"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+            502: components["responses"]["BadGateway"];
         };
     };
 }

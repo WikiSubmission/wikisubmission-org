@@ -65,7 +65,7 @@ servers:
     description: Development server
   - url: https://ws-backend.wikisubmission.org/api/v1
     description: Production Server
-  - url: http://ws-backend.railway.internal/api/v1
+  - url: http://ws-backend.internal/api/v1
     description: Internal Production Server
   - url: https://ws-backend-vc.wikisubmission.org/api/v1
     description: railway, temp test
@@ -89,6 +89,11 @@ tags:
       Quranic Arabic roots concordance. Provides a paginated index of roots,
       per-root detail with derived surface forms, and per-root verse occurrences.
       Backed by `word_text.word_root` aggregated into a materialized view.
+  - name: Communities
+    description: >
+      Online and physical community directory sourced from the Sanity content
+      lake. Reads are cached server-side and invalidated by webhook on
+      document changes.
 
 paths:
   /languages:
@@ -887,6 +892,57 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/MusicTrack'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /communities:
+    get:
+      tags: [Communities]
+      operationId: getCommunities
+      summary: List communities (online and physical)
+      description: >
+        Returns active community entries authored in Sanity (online communities
+        on platforms like Discord/Telegram, plus physical meet-up locations).
+        Backed by the Sanity content lake; results are cached server-side and
+        invalidated by webhook on document changes.
+      parameters:
+        - name: kind
+          in: query
+          required: false
+          description: Filter by community kind.
+          schema:
+            type: string
+            enum: [online, physical]
+          example: online
+        - name: language
+          in: query
+          required: false
+          description: ISO 639-1 language code of the community.
+          schema:
+            type: string
+          example: en
+        - name: country
+          in: query
+          required: false
+          description: ISO 3166-1 alpha-2 country code (physical communities only).
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+          example: US
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Community'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '502':
+          $ref: '#/components/responses/BadGateway'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
@@ -1853,6 +1909,99 @@ components:
           description: Full song lyrics (nullable). May contain newlines for line breaks.
           example: null
 
+    # -----------------------------------------------------------------------
+    # Communities (Sanity-backed)
+    # -----------------------------------------------------------------------
+    GeoPoint:
+      type: object
+      description: Latitude/longitude pair for a physical community.
+      properties:
+        lat:
+          type: number
+          format: double
+          example: 36.7525
+        lng:
+          type: number
+          format: double
+          example: 3.0420
+
+    Community:
+      type: object
+      description: >
+        A community entry sourced from Sanity. The `kind` discriminator
+        determines which optional fields are populated: `online` communities
+        carry `platform`/`url`/`inviteCode`/`memberCount`; `physical`
+        communities carry `address`/`city`/`country`/`geo`/`contactEmail`/
+        `contactPhone`/`meetingSchedule`. The `imageUrl`, when present, points
+        at the ws-backend image proxy and not directly at Sanity's CDN.
+      required: [_id, kind, name, isActive]
+      properties:
+        _id:
+          type: string
+          description: Sanity document ID.
+          example: drafts.community-foo
+        kind:
+          type: string
+          enum: [online, physical]
+          example: online
+        name:
+          type: string
+          example: Submitters Discord
+        slug:
+          type: string
+          example: submitters-discord
+        language:
+          type: string
+          description: ISO 639-1 language code.
+          example: en
+        description:
+          type: string
+        imageUrl:
+          type: string
+          description: >
+            Proxied image URL routed through `/sanity/image/...`. Preserves
+            Sanity's image transform query string when present.
+          example: /sanity/image/abc123-1024x768.jpg
+        tags:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+          example: true
+        # Online-only
+        platform:
+          type: string
+          enum: [discord, telegram, whatsapp, facebook, x, youtube, other]
+          example: discord
+        url:
+          type: string
+          format: uri
+        inviteCode:
+          type: string
+        memberCount:
+          type: integer
+          minimum: 0
+        # Physical-only
+        address:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+          description: ISO 3166-1 alpha-2 country code.
+          minLength: 2
+          maxLength: 2
+        geo:
+          $ref: '#/components/schemas/GeoPoint'
+        contactEmail:
+          type: string
+          format: email
+        contactPhone:
+          type: string
+        meetingSchedule:
+          type: string
+
   responses:
     Conflict:
       description: >
@@ -1917,3 +2066,16 @@ components:
               code:
                 type: string
                 example: "NOT_IMPLEMENTED"
+    BadGateway:
+      description: >
+        The upstream content source (Sanity) returned an error or was
+        unreachable. The response is structurally valid but the request could
+        not be fulfilled.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [message]
+            properties:
+              message:
+                type: string
