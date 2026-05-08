@@ -46,7 +46,13 @@ function flattenWords(
 
 const PAGE_LIMIT = 100
 
-export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
+export function RootWordOccurrences({
+  rootWord,
+  onTotalChange,
+}: {
+  rootWord: string
+  onTotalChange?: (total: number) => void
+}) {
   const t = useTranslations('common')
   const tQuran = useTranslations('quran')
   const [occurrences, setOccurrences] = useState<WordOccurrence[]>([])
@@ -83,8 +89,10 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
         if (results.length === 0) {
           console.warn('[RootWordOccurrences] No results for root:', rootWord, 'response:', data)
         }
+        const nextTotal = data?.info?.total ?? 0
         setOccurrences(results)
-        setTotal(data?.info?.total ?? 0)
+        setTotal(nextTotal)
+        onTotalChange?.(nextTotal)
         setLoading(false)
       })
       .catch((err) => {

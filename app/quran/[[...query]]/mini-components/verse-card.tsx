@@ -69,6 +69,7 @@ function WordDetailsDialogContent({
   word?: number
 }) {
   const t = useTranslations('wordLab')
+  const [occurrencesTotal, setOccurrencesTotal] = useState<number | null>(null)
   const hasCoords =
     typeof chapter === 'number' &&
     typeof verse === 'number' &&
@@ -142,8 +143,16 @@ function WordDetailsDialogContent({
           <section>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-3">
               Other Occurrences with Root
+              {occurrencesTotal !== null && (
+                <span className="ml-1 text-muted-foreground/50 normal-case tracking-normal">
+                  ({occurrencesTotal.toLocaleString()})
+                </span>
+              )}
             </p>
-            <RootWordOccurrences rootWord={root} />
+            <RootWordOccurrences
+              rootWord={root}
+              onTotalChange={setOccurrencesTotal}
+            />
           </section>
         )}
 
