@@ -9,8 +9,7 @@ import {
 import {
   BookOpenTextIcon,
   CheckIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
+  ChevronDownIcon,
   HashIcon,
   LanguagesIcon,
   MessageSquareTextIcon,
@@ -32,7 +31,7 @@ import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-type View = 'root' | 'language' | 'display' | 'zoom'
+type Section = 'reading' | 'language' | 'zoom'
 
 const ZOOM_LABEL_KEYS = {
   compact: 'zoomCompact',
@@ -43,36 +42,6 @@ const ZOOM_LABEL_KEYS = {
 } as const
 
 // ── Reusable bits ────────────────────────────────────────────────────────────
-
-function NavRow({
-  icon,
-  label,
-  value,
-  onClick,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex w-full items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent/40 transition-colors text-left"
-    >
-      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
-        {icon}
-      </span>
-      <span className="flex-1 min-w-0">
-        <span className="block text-sm font-medium text-foreground">{label}</span>
-        <span className="block text-xs text-muted-foreground truncate">
-          {value}
-        </span>
-      </span>
-      <ChevronRightIcon className="size-4 text-muted-foreground shrink-0" />
-    </button>
-  )
-}
 
 function SettingTile({
   icon,
@@ -90,7 +59,7 @@ function SettingTile({
   onCheckedChange: (checked: boolean) => void
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-accent/30 transition-colors">
+    <div className="flex items-center justify-between gap-3 px-2 py-2 rounded-lg hover:bg-accent/30 transition-colors">
       <div className="flex items-start gap-2.5 flex-1 min-w-0">
         <span className="text-muted-foreground mt-0.5 shrink-0">{icon}</span>
         <div className="flex flex-col gap-0.5 min-w-0">
@@ -106,24 +75,6 @@ function SettingTile({
         onCheckedChange={onCheckedChange}
         className="shrink-0"
       />
-    </div>
-  )
-}
-
-function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
-  return (
-    <div className="flex items-center gap-1 px-2 py-2 border-b">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-0.5 px-2 py-1 -ml-1 rounded-lg text-sm text-primary hover:bg-accent/40 transition-colors"
-        aria-label="Back"
-      >
-        <ChevronLeftIcon className="size-4" />
-        <span>Settings</span>
-      </button>
-      <span className="flex-1 text-center text-sm font-semibold pr-12">
-        {title}
-      </span>
     </div>
   )
 }
@@ -150,7 +101,7 @@ function LangList({
       key={key}
       onClick={handle}
       className={cn(
-        'flex w-full items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
+        'flex w-full items-center justify-between gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors',
         isActive
           ? 'bg-primary/10 text-primary font-medium'
           : 'text-foreground hover:bg-accent/40'
@@ -176,17 +127,78 @@ function LangList({
   )
 }
 
+function AccordionSection({
+  id,
+  open,
+  onToggle,
+  icon,
+  label,
+  summary,
+  children,
+}: {
+  id: string
+  open: boolean
+  onToggle: () => void
+  icon: React.ReactNode
+  label: string
+  summary: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="border-b last:border-b-0">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={`${id}-panel`}
+        onClick={onToggle}
+        className="flex w-full items-center gap-3 px-3 py-3 hover:bg-accent/30 transition-colors text-left"
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+          {icon}
+        </span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-sm font-medium text-foreground">
+            {label}
+          </span>
+          <span className="block text-xs text-muted-foreground truncate">
+            {summary}
+          </span>
+        </span>
+        <ChevronDownIcon
+          className={cn(
+            'size-4 text-muted-foreground shrink-0 transition-transform duration-200',
+            open && 'rotate-180'
+          )}
+        />
+      </button>
+      <div
+        id={`${id}-panel`}
+        className={cn(
+          'grid transition-[grid-template-rows] duration-200 ease-out',
+          open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="px-3 pb-3 pt-1">{children}</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 export default function QuranSettings() {
   const prefs = useQuranPreferences()
   const languages = useLanguagesStore((s) => s.languages)
   const t = useTranslations('settings')
-  const [view, setView] = useState<View>('root')
-  const [langTab, setLangTab] = useState<'primary' | 'secondary'>('primary')
+  const [openSection, setOpenSection] = useState<Section>('reading')
 
   const set = (patch: Partial<typeof prefs>) =>
     prefs.setPreferences({ ...prefs, ...patch })
+
+  const toggle = (section: Section) =>
+    setOpenSection((cur) => (cur === section ? cur : section))
 
   const primaryName =
     languages.find((l) => l.code === prefs.primaryLanguage)?.name ??
@@ -217,11 +229,15 @@ export default function QuranSettings() {
     .filter(Boolean)
     .join(', ')
 
+  const langSummary = prefs.secondaryLanguage
+    ? `${primaryName} · ${secondaryName}`
+    : primaryName
+
   return (
     <DropdownMenu
       modal={false}
       onOpenChange={(open) => {
-        if (!open) setView('root')
+        if (open) setOpenSection('reading')
       }}
     >
       <DropdownMenuTrigger asChild>
@@ -234,100 +250,22 @@ export default function QuranSettings() {
         align="end"
         sideOffset={6}
       >
-        {view === 'root' && (
-          <div className="p-2">
-            <div className="px-2 pt-1 pb-2">
-              <p className="text-base font-semibold">{t('title')}</p>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <NavRow
-                icon={<LanguagesIcon className="size-4" />}
-                label={t('language')}
-                value={
-                  prefs.secondaryLanguage
-                    ? `${primaryName} · ${secondaryName}`
-                    : primaryName
-                }
-                onClick={() => {
-                  setLangTab('primary')
-                  setView('language')
-                }}
-              />
-              <NavRow
-                icon={<TypeIcon className="size-4" />}
-                label={t('reading')}
-                value={enabledDisplay || '—'}
-                onClick={() => setView('display')}
-              />
-              <NavRow
-                icon={<ZoomInIcon className="size-4" />}
-                label={t('zoom')}
-                value={zoomName}
-                onClick={() => setView('zoom')}
-              />
-            </div>
-          </div>
-        )}
+        <div className="px-3 pt-3 pb-2">
+          <p className="text-base font-semibold">{t('title')}</p>
+        </div>
 
-        {view === 'language' && (
-          <div className="flex flex-col max-h-[28rem]">
-            <SubHeader
-              title={t('language')}
-              onBack={() => setView('root')}
-            />
-            <div className="flex gap-1 px-2 pt-2">
-              {(
-                [
-                  { value: 'primary', label: t('quranTranslation') },
-                  { value: 'secondary', label: t('secondaryTranslation') },
-                ] as const
-              ).map((tab) => {
-                const isActive = langTab === tab.value
-                return (
-                  <button
-                    key={tab.value}
-                    onClick={() => setLangTab(tab.value)}
-                    className={cn(
-                      'flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:bg-accent/40'
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                )
-              })}
-            </div>
-            <div className="overflow-y-auto p-2 flex-1">
-              {langTab === 'primary' ? (
-                <LangList
-                  value={prefs.primaryLanguage}
-                  languages={languages}
-                  onChange={(code) =>
-                    set({ primaryLanguage: code as LangCode })
-                  }
-                />
-              ) : (
-                <LangList
-                  value={prefs.secondaryLanguage}
-                  nullable
-                  languages={languages}
-                  onChange={(code) =>
-                    set({ secondaryLanguage: code as LangCode | undefined })
-                  }
-                />
-              )}
-            </div>
-          </div>
-        )}
-
-        {view === 'display' && (
-          <div className="flex flex-col">
-            <SubHeader title={t('reading')} onBack={() => setView('root')} />
-            <div className="p-2 space-y-0.5 max-h-[28rem] overflow-y-auto">
+        <div>
+          <AccordionSection
+            id="reading"
+            open={openSection === 'reading'}
+            onToggle={() => toggle('reading')}
+            icon={<TypeIcon className="size-4" />}
+            label={t('reading')}
+            summary={enabledDisplay || '—'}
+          >
+            <div className="space-y-0.5 max-h-[24rem] overflow-y-auto">
               {prefs.displayMode === 'reading' && (
-                <div className="px-3 py-2 space-y-2">
+                <div className="px-2 py-2 space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {t('language')}
                   </p>
@@ -417,13 +355,54 @@ export default function QuranSettings() {
                 />
               )}
             </div>
-          </div>
-        )}
+          </AccordionSection>
 
-        {view === 'zoom' && (
-          <div className="flex flex-col">
-            <SubHeader title={t('zoom')} onBack={() => setView('root')} />
-            <div className="p-2 flex flex-col gap-0.5">
+          <AccordionSection
+            id="language"
+            open={openSection === 'language'}
+            onToggle={() => toggle('language')}
+            icon={<LanguagesIcon className="size-4" />}
+            label={t('language')}
+            summary={langSummary}
+          >
+            <div className="space-y-3 max-h-[28rem] overflow-y-auto">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-1">
+                  Primary
+                </p>
+                <LangList
+                  value={prefs.primaryLanguage}
+                  languages={languages}
+                  onChange={(code) =>
+                    set({ primaryLanguage: code as LangCode })
+                  }
+                />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-1">
+                  Secondary
+                </p>
+                <LangList
+                  value={prefs.secondaryLanguage}
+                  nullable
+                  languages={languages}
+                  onChange={(code) =>
+                    set({ secondaryLanguage: code as LangCode | undefined })
+                  }
+                />
+              </div>
+            </div>
+          </AccordionSection>
+
+          <AccordionSection
+            id="zoom"
+            open={openSection === 'zoom'}
+            onToggle={() => toggle('zoom')}
+            icon={<ZoomInIcon className="size-4" />}
+            label={t('zoom')}
+            summary={zoomName}
+          >
+            <div className="flex flex-col gap-0.5">
               {ZOOM_LEVELS.map((level) => {
                 const isActive =
                   (prefs.zoomLevel ?? 'comfortable') === level
@@ -444,8 +423,8 @@ export default function QuranSettings() {
                 )
               })}
             </div>
-          </div>
-        )}
+          </AccordionSection>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   )
