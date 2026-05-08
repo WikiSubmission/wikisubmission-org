@@ -123,13 +123,8 @@ function WordDetailsDialogContent({
       <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
         {meaning && meaning !== translation && (
           <section>
-            {root && (
-              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/50 mb-0.5">
-                Root
-              </p>
-            )}
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
-              Meanings
+              {root ? 'Root Meanings' : 'Meanings'}
             </p>
             <p className="text-sm leading-relaxed text-foreground">{meaning}</p>
           </section>
@@ -138,7 +133,7 @@ function WordDetailsDialogContent({
         {root && (
           <section>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-3">
-              Other Occurrences
+              Other Occurrences with Root
             </p>
             <RootWordOccurrences rootWord={root} />
           </section>
@@ -166,7 +161,6 @@ function WordCardItem({
   verse,
   verseCoordsValid,
   arabicClass,
-  showTransliteration,
   selectionActive,
 }: {
   word: WordData
@@ -174,7 +168,6 @@ function WordCardItem({
   verse: number
   verseCoordsValid: boolean
   arabicClass: string
-  showTransliteration: boolean
   selectionActive: boolean
 }) {
   const tx = (word.tx as Record<string, string>) ?? {}
@@ -201,7 +194,7 @@ function WordCardItem({
         role="button"
         tabIndex={0}
         aria-label={`Details for ${arabic}`}
-        className={`group relative flex flex-col items-center gap-1 px-3.5 py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
+        className={`group relative flex flex-col items-center gap-2 px-3.5 py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
           isPlaying ? 'bg-primary/10' : 'hover:scale-[1.04]'
         }`}
         onClick={open}
@@ -223,8 +216,8 @@ function WordCardItem({
           <p className="text-xs text-foreground/80 font-medium text-center wrap-break-words max-w-22">
             {translation}
           </p>
-          {showTransliteration && transliteration && (
-            <p className="text-[11px] text-muted-foreground/70 italic text-center wrap-break-words max-w-22">
+          {transliteration && (
+            <p className="text-[11px] text-muted-foreground/60 italic text-center wrap-break-words max-w-22">
               {transliteration}
             </p>
           )}
@@ -378,10 +371,7 @@ const WordByWordView = memo(
     }, [verseKey])
     const verseCoordsValid = Number.isFinite(chapter) && Number.isFinite(verse)
 
-    const {
-      zoomLevel,
-      transliteration: showTransliteration,
-    } = useQuranPreferences()
+    const { zoomLevel } = useQuranPreferences()
     const arabicClass = ZOOM_FONT[zoomLevel ?? 'comfortable'].arabic
     const selectionActive = useVerseSelection((s) => s.active)
 
@@ -419,7 +409,6 @@ const WordByWordView = memo(
             verse={verse}
             verseCoordsValid={verseCoordsValid}
             arabicClass={arabicClass}
-            showTransliteration={showTransliteration}
             selectionActive={selectionActive}
           />
         ))}
@@ -611,7 +600,7 @@ export const VerseCard = memo(
                 target="_blank"
                 className="group flex items-center gap-1 w-fit"
               >
-                <div className="flex items-start space-x-0.5 px-2.5 py-0.5 bg-muted text-foreground/80 rounded-full transition-colors">
+                <div className="flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full transition-colors">
                   <span className="text-lg font-semibold">{chNum}</span>
                   <span>:</span>
                   <span className="text-lg font-semibold">{vNum}</span>
@@ -619,7 +608,7 @@ export const VerseCard = memo(
                 <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
               </Link>
             ) : (
-              <div className="w-fit shrink-0 flex items-start space-x-0.5 px-2.5 py-0.5 bg-muted text-foreground/80 rounded-full">
+              <div className="w-fit shrink-0 flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full">
                 <span className="w-full text-lg font-semibold">{chNum}</span>
                 <span>:</span>
                 <span className="w-full text-lg font-semibold">{vNum}</span>
@@ -630,7 +619,7 @@ export const VerseCard = memo(
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
                   disabled
                 >
                   <Bookmark className="w-4 h-4" />
@@ -640,7 +629,7 @@ export const VerseCard = memo(
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
                   disabled
                 >
                   <StickyNote className="w-4 h-4" />
@@ -660,7 +649,7 @@ export const VerseCard = memo(
                       ? 'Collapse Arabic'
                       : 'Expand Arabic word-by-word'
                   }
-                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                   onClick={() => {
                     // Anchor scroll to the clicked verse so the page does not
                     // jump when the card resizes.
@@ -702,7 +691,7 @@ export const VerseCard = memo(
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
                   onClick={handlePlay}
                 >
                   {isCurrentAudio && isPlaying ? (

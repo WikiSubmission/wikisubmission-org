@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-type Section = 'reading' | 'language' | 'zoom'
+type Section = 'reading' | 'language' | 'zoom' | null
 
 const ZOOM_LABEL_KEYS = {
   compact: 'zoomCompact',
@@ -197,8 +197,8 @@ export default function QuranSettings() {
   const set = (patch: Partial<typeof prefs>) =>
     prefs.setPreferences({ ...prefs, ...patch })
 
-  const toggle = (section: Section) =>
-    setOpenSection((cur) => (cur === section ? cur : section))
+  const toggle = (section: Exclude<Section, null>) =>
+    setOpenSection((cur) => (cur === section ? null : section))
 
   const primaryName =
     languages.find((l) => l.code === prefs.primaryLanguage)?.name ??
@@ -220,9 +220,6 @@ export default function QuranSettings() {
       prefs.arabic &&
       !prefs.wordByWord &&
       t('arabic'),
-    prefs.displayMode !== 'reading' &&
-      prefs.transliteration &&
-      t('transliteration'),
     prefs.displayMode !== 'reading' && prefs.subtitles && t('subtitles'),
     prefs.footnotes && t('footnotes'),
   ]
@@ -234,12 +231,7 @@ export default function QuranSettings() {
     : primaryName
 
   return (
-    <DropdownMenu
-      modal={false}
-      onOpenChange={(open) => {
-        if (open) setOpenSection('reading')
-      }}
-    >
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" aria-label="Open settings" size="icon-sm">
           <SettingsIcon />
@@ -322,15 +314,6 @@ export default function QuranSettings() {
                     description="Section titles above verses"
                     checked={prefs.subtitles}
                     onCheckedChange={(checked) => set({ subtitles: checked })}
-                  />
-                  <SettingTile
-                    icon={<LanguagesIcon className="size-3.5" />}
-                    label={t('transliteration')}
-                    description="Romanized pronunciation"
-                    checked={prefs.transliteration}
-                    onCheckedChange={(checked) =>
-                      set({ transliteration: checked })
-                    }
                   />
                 </>
               )}
