@@ -587,16 +587,16 @@ export function AblutionSlideshow() {
       {renderModal && (
         <div
           ref={modalBackdropRef}
-          className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-[var(--ed-bg)]/98 backdrop-blur-xl"
+          className="fixed inset-0 z-[100] overflow-hidden bg-[var(--ed-bg)]/98 backdrop-blur-xl p-3 md:p-4 flex items-stretch justify-center"
           onClick={closeModal}
         >
           <div
             ref={modalContentRef}
-            className="relative w-full max-w-6xl mx-auto min-h-full p-4 py-6 md:p-8 lg:p-10 flex flex-col gap-6"
+            className="relative w-full max-w-6xl h-full max-h-[100dvh] p-3 md:p-4 lg:p-5 flex flex-col gap-4 border border-[var(--ed-rule)] bg-[var(--ed-bg)]"
             onClick={e => e.stopPropagation()}
           >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-[var(--ed-rule)] pb-6">
+              <div className="flex items-center justify-between border-b border-[var(--ed-rule)] pb-3 shrink-0">
                 <div className="space-y-1">
                   <div className="flex items-center gap-3">
                     <span 
@@ -619,11 +619,11 @@ export function AblutionSlideshow() {
               </div>
 
               {/* EXHIBITION DISPLAY */}
-              <div className="flex flex-col gap-10">
+              <div className="flex-1 min-h-0 grid grid-rows-[minmax(0,1fr)_minmax(0,0.9fr)] gap-4">
 
                 {/* The Display Case */}
-                <div className="space-y-6 max-w-4xl mx-auto w-full">
-                  <div className="relative aspect-video bg-black border-[12px] border-[var(--ed-surface)] shadow-2xl ring-1 ring-[var(--ed-rule)] overflow-hidden">
+                <div className="space-y-3 max-w-4xl mx-auto w-full min-h-0">
+                  <div className="relative w-full max-h-[42dvh] bg-black border-[8px] md:border-[10px] border-[var(--ed-surface)] shadow-2xl ring-1 ring-[var(--ed-rule)] overflow-hidden aspect-video">
                     <div id="yt-player" className="w-full h-full" />
 
                     {/* Display Glare Overlay */}
@@ -631,8 +631,8 @@ export function AblutionSlideshow() {
                   </div>
 
                   {/* Status Bar */}
-                  <div className="h-10 px-4 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
+                  <div className="h-10 px-3 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-4 min-w-0">
                       <div className="flex items-center gap-2">
                         <Clock size={12} className="text-[var(--ed-fg-muted)]" />
                         <span 
@@ -643,10 +643,10 @@ export function AblutionSlideshow() {
                         </span>
                       </div>
                       <div className="h-3 w-px bg-[var(--ed-rule)]" />
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
                         <div className={`size-1.5 rounded-full animate-pulse ${showTranscription ? 'bg-green-500' : 'bg-red-500'}`} />
                         <span 
-                          className="text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)]"
+                          className="text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)] truncate"
                           style={{ fontFamily: F.glacial }}
                         >
                           Transcription {showTranscription ? 'Active' : 'Inactive'}
@@ -654,7 +654,7 @@ export function AblutionSlideshow() {
                       </div>
                     </div>
                     <div 
-                      className="text-[9px] uppercase tracking-[0.2em] text-[var(--ed-accent)] font-bold"
+                      className="text-[9px] uppercase tracking-[0.2em] text-[var(--ed-accent)] font-bold shrink-0 hidden sm:block"
                       style={{ fontFamily: F.glacial }}
                     >
                       Exhibition Mode
@@ -663,10 +663,10 @@ export function AblutionSlideshow() {
                 </div>
 
                 {/* Dedicated Caption Display (Directly Under) */}
-                <div className="max-w-4xl mx-auto w-full space-y-6">
-                  <div className="p-8 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 min-h-[140px] flex flex-col justify-center">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between border-b border-[var(--ed-rule)] pb-3">
+                <div className="max-w-4xl mx-auto w-full min-h-0">
+                  <div className="p-4 md:p-6 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 h-full min-h-0 flex flex-col">
+                    <div className="space-y-3 flex-1 min-h-0 flex flex-col">
+                      <div className="flex items-center justify-between border-b border-[var(--ed-rule)] pb-2 shrink-0">
                         <span 
                           className="text-[10px] uppercase tracking-[0.4em] text-[var(--ed-fg)] font-bold"
                           style={{ fontFamily: F.glacial }}
@@ -682,7 +682,7 @@ export function AblutionSlideshow() {
                         </button>
                       </div>
 
-                      <div className="flex items-center justify-center min-h-[80px]">
+                      <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden">
                         {!showTranscription ? (
                           <p
                             ref={captionRef}
@@ -696,7 +696,7 @@ export function AblutionSlideshow() {
                           <p
                             ref={captionRef}
                             key={activeCaption.text}
-                            className="text-2xl md:text-3xl leading-relaxed text-center max-w-3xl italic"
+                            className="text-xl md:text-2xl lg:text-3xl leading-relaxed text-center max-w-3xl italic max-h-[8.5rem] md:max-h-[10rem] overflow-hidden"
                             style={{
                               fontFamily: F.serif,
                               color: activeCaption.isVerse
@@ -726,7 +726,7 @@ export function AblutionSlideshow() {
               </div>
 
               {/* Instructions footer */}
-              <div className="flex items-center gap-4 justify-center pt-4 opacity-30">
+              <div className="flex items-center gap-4 justify-center pt-1 opacity-30 shrink-0">
                 <div className="h-px w-24 bg-[var(--ed-rule)]" />
               </div>
 
