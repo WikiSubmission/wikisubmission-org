@@ -99,33 +99,38 @@ function WordDetailsDialogContent({
           </p>
         )}
 
-        <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
-          {hasCoords && (
+        {hasCoords && (
+          <div className="mt-2 flex items-center justify-center">
             <PlayWordButton
               chapter={chapter as number}
               verse={verse as number}
               word={word as number}
               size="md"
             />
-          )}
-          {root && (
-            <Link
-              href={`/quran/words/${encodeURIComponent(root)}`}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
-            >
-              <span className="opacity-70">Root</span>
-              <span className="font-arabic text-sm leading-none">{root}</span>
-              <ArrowUpRight className="size-3" />
-            </Link>
-          )}
-        </div>
+          </div>
+        )}
       </DialogHeader>
 
       <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+        {root && (
+          <section>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
+              Root
+            </p>
+            <Link
+              href={`/quran/words/${encodeURIComponent(root)}`}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+            >
+              <span className="font-arabic text-base leading-none">{root}</span>
+              <ArrowUpRight className="size-3.5" />
+            </Link>
+          </section>
+        )}
+
         {meaning && meaning !== translation && (
           <section>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
-              Meaning
+              Meanings
             </p>
             <p className="text-sm leading-relaxed text-foreground">{meaning}</p>
           </section>
@@ -660,7 +665,7 @@ export const VerseCard = memo(
                       ? 'Collapse Arabic'
                       : 'Expand Arabic word-by-word'
                   }
-                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary"
+                  className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
                   onClick={() =>
                     prefs.setPreferences({
                       ...prefs,
@@ -670,11 +675,16 @@ export const VerseCard = memo(
                     })
                   }
                 >
-                  {prefs.wordByWord ? (
-                    <Minimize2 className="w-4 h-4" />
-                  ) : (
-                    <Maximize2 className="w-4 h-4" />
-                  )}
+                  <span
+                    key={prefs.wordByWord ? 'min' : 'max'}
+                    className="inline-flex animate-in fade-in zoom-in-90 duration-200"
+                  >
+                    {prefs.wordByWord ? (
+                      <Minimize2 className="w-4 h-4" />
+                    ) : (
+                      <Maximize2 className="w-4 h-4" />
+                    )}
+                  </span>
                 </Button>
               )}
               {showCopyButton && (
@@ -733,7 +743,10 @@ export const VerseCard = memo(
 
               {/* Arabic + word-by-word */}
               {(prefs.arabic || prefs.wordByWord) && (
-                <div className="py-2">
+                <div
+                  key={prefs.wordByWord ? 'wbw' : 'compact'}
+                  className="py-2 animate-in fade-in duration-200"
+                >
                   {verse.w && verse.w.length > 0 ? (
                     <WordByWordView
                       words={verse.w}

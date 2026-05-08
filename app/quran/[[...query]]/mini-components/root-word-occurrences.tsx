@@ -119,8 +119,13 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <Loader2 className="animate-spin size-6 text-primary" />
+      <div className="flex flex-col gap-3 min-h-40 animate-in fade-in duration-300">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-[68px] rounded-2xl bg-muted/30 border border-border/30 animate-pulse"
+          />
+        ))}
       </div>
     )
   }
@@ -134,7 +139,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
   }
 
   return (
-    <div className="max-h-[45vh] overflow-y-auto pr-4 custom-scrollbar">
+    <div className="max-h-[45vh] overflow-y-auto pr-4 custom-scrollbar animate-in fade-in duration-300">
       <div className="flex flex-col gap-3">
         {occurrences.map((occ, i) => (
           <div
