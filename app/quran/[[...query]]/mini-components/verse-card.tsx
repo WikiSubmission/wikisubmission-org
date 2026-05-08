@@ -79,29 +79,35 @@ function WordDetailsDialogContent({
       className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl p-0"
       aria-describedby={undefined}
     >
-      <DialogHeader className="relative items-center text-center pt-10 pb-7 px-6 border-b bg-gradient-to-b from-primary/15 via-primary/5 to-transparent gap-2.5 overflow-hidden">
+      <DialogHeader className="relative items-center text-center px-6 pt-8 pb-6 border-b bg-gradient-to-b from-primary/15 via-primary/5 to-transparent gap-0 overflow-hidden">
         {/* Soft radial glow behind the arabic glyph */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_50%_30%,var(--primary)/12%,transparent_60%)]"
         />
-        <DialogTitle asChild>
-          <span className="relative block font-arabic text-primary text-5xl sm:text-6xl leading-[1.6] py-1 drop-shadow-[0_2px_12px_var(--primary)/25%]">
-            {arabic}
-          </span>
-        </DialogTitle>
-        {translation && (
-          <p className="relative text-lg font-semibold text-foreground">
-            {translation}
-          </p>
-        )}
+
+        {/* Arabic glyph — reserve vertical space for full extent (extenders
+            and diacritics) so the next line is never overlapped. */}
+        <div className="relative flex h-[7rem] sm:h-[8rem] items-center justify-center">
+          <DialogTitle asChild>
+            <span className="font-arabic text-primary text-5xl sm:text-6xl leading-[1.4] drop-shadow-[0_2px_12px_var(--primary)/25%]">
+              {arabic}
+            </span>
+          </DialogTitle>
+        </div>
+
         {transliteration && (
-          <p className="relative text-sm italic text-muted-foreground tracking-wide">
+          <p className="relative mt-1 text-sm italic text-muted-foreground tracking-wide">
             {transliteration}
           </p>
         )}
+        {translation && (
+          <p className="relative mt-2 text-lg font-semibold text-foreground">
+            {translation}
+          </p>
+        )}
 
-        <div className="relative mt-3 flex flex-wrap items-center justify-center gap-2">
+        <div className="relative mt-4 flex flex-wrap items-center justify-center gap-2">
           {hasCoords && (
             <PlayWordButton
               chapter={chapter as number}
