@@ -37,6 +37,7 @@ const INDEX_RENDER_CAP = 300
 const ENGLISH_LOOKUP_MIN = 3
 const ENGLISH_LOOKUP_LIMIT = 40
 const ENGLISH_LOOKUP_DEBOUNCE_MS = 220
+const DERIVED_WORD_LOOKUP_LIMIT = 200
 const SHOW_MORPHOLOGY_SECTION = false
 
 const CHEAT_PAIRS: ReadonlyArray<{ lat: string; ar: string; insert: string }> = [
@@ -712,6 +713,73 @@ function Detail({
     () => parseFormMeanings(meaning),
     [meaning],
   )
+  const [derivedWordsByRoot, setDerivedWordsByRoot] = useState<{ root: string; words: Map<string, string> }>({
+    root: '',
+    words: new Map(),
+  })
+
+  useEffect(() => {
+    let cancelled = false
+    const rootFlat = normalizeLetters(root.letters)
+    if (!rootFlat) return
+
+    void wsApi.GET('/search', {
+      params: {
+        query: {
+          scope: 'words',
+          root: rootFlat,
+          langs: ['en', 'ar'],
+          include_words: true,
+          include_root: true,
+          include_meaning: true,
+          word_langs: ['ar'],
+          limit: DERIVED_WORD_LOOKUP_LIMIT,
+          offset: 0,
+        },
+      },
+    })
+      .then(({ data: searchData, error: searchError }) => {
+        if (cancelled || searchError || !searchData) return
+        const scores = new Map<string, Map<string, number>>()
+        const verses = (searchData.chapters ?? []).flatMap((chapter) => chapter.verses ?? [])
+        for (const verse of verses) {
+          for (const word of verse.w ?? []) {
+            if (normalizeLetters(word.r ?? '') !== rootFlat) continue
+            const surface = stripDiacritics(word.tx?.ar ?? '')
+            if (!surface) continue
+            const englishWord = meaningToEnglishWord(word.m ?? null)
+            if (!englishWord) continue
+            const normalizedWord = englishWord.toLowerCase()
+            const bucket = scores.get(surface) ?? new Map<string, number>()
+            bucket.set(normalizedWord, (bucket.get(normalizedWord) ?? 0) + 1)
+            scores.set(surface, bucket)
+          }
+        }
+
+        const picked = new Map<string, string>()
+        for (const [surface, bucket] of scores.entries()) {
+          let bestWord = ''
+          let bestScore = -1
+          for (const [word, score] of bucket.entries()) {
+            if (score > bestScore || (score === bestScore && word < bestWord)) {
+              bestWord = word
+              bestScore = score
+            }
+          }
+          if (bestWord) picked.set(surface, bestWord)
+        }
+        setDerivedWordsByRoot({ root: root.letters, words: picked })
+      })
+      .catch(() => {
+        if (cancelled) return
+        setDerivedWordsByRoot({ root: root.letters, words: new Map() })
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [root.letters])
+
   const lookupFormMeaning = (ar: string): string | null => {
     if (formMeanings.byForm.size === 0) {
       // No per-form structure — every form shares the root meaning.
@@ -719,6 +787,7 @@ function Detail({
     }
     return formMeanings.byForm.get(stripDiacritics(ar)) ?? null
   }
+  const derivedWords = derivedWordsByRoot.root === root.letters ? derivedWordsByRoot.words : new Map<string, string>()
 
   return (
     <article className="wl-detail">
@@ -749,7 +818,7 @@ function Detail({
           <div className="wl-derivs">
             {derivs.map((d, i) => {
               const formEn = lookupFormMeaning(d.ar)
-              const formWord = meaningToEnglishWord(formEn)
+              const formWord = derivedWords.get(stripDiacritics(d.ar)) ?? meaningToEnglishWord(formEn)
               return (
                 <button
                   key={d.ar}
