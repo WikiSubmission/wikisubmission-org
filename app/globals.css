@@ -564,6 +564,16 @@ html[data-palette='mono'].dark {
     }
   }
 
+  @keyframes search-loading {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(400%);
+    }
+  }
+
   .community-collapse {
     overflow: hidden;
   }

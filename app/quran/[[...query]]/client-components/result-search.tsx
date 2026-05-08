@@ -533,11 +533,15 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
 function SearchHeaderSkeleton({ query }: { query: string }) {
   return (
-    <header className="flex items-baseline gap-3 px-1">
-      <p className="text-3xl sm:text-4xl font-semibold tracking-tight leading-none text-muted-foreground/80">
+    <header className="space-y-3 px-1">
+      <p className="text-3xl sm:text-4xl font-semibold tracking-tight leading-none">
         “{query}”
       </p>
-      <Spinner className="size-3" />
+      {/* Indeterminate progress strip — a subtle primary sliver moves
+          across the bar while the search is in flight. */}
+      <div className="relative h-[2px] w-full overflow-hidden rounded-full bg-border/40">
+        <div className="absolute inset-y-0 w-1/3 rounded-full bg-primary/70 animate-[search-loading_1.2s_ease-in-out_infinite]" />
+      </div>
     </header>
   )
 }
@@ -547,14 +551,11 @@ function SearchResultsSkeleton() {
     <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden divide-y divide-border/30">
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="px-6 py-5 sm:px-8 sm:py-6 space-y-3 animate-pulse">
-          <div className="flex items-center justify-between">
-            <div className="h-6 w-14 rounded-full bg-muted/70" />
-            <div className="h-6 w-20 rounded-full bg-muted/40" />
-          </div>
+          <div className="h-5 w-12 rounded-full bg-muted/60" />
           <div className="space-y-2">
-            <div className="h-3.5 w-11/12 rounded bg-muted/60" />
-            <div className="h-3.5 w-10/12 rounded bg-muted/50" />
-            <div className="h-3.5 w-7/12 rounded bg-muted/40" />
+            <div className="h-3 w-11/12 rounded bg-muted/50" />
+            <div className="h-3 w-10/12 rounded bg-muted/40" />
+            <div className="h-3 w-7/12 rounded bg-muted/30" />
           </div>
         </div>
       ))}
