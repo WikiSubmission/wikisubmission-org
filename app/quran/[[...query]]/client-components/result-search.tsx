@@ -6,15 +6,27 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { SearchHitWordByWord } from 'wikisubmission-sdk/lib/quran/v1/query-result'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsTrigger, TabsContent, TabsList } from '@/components/ui/tabs'
-import { ArrowRightIcon, ChevronRight, SearchIcon } from 'lucide-react'
+import {
+  ArrowDownUp,
+  ArrowRightIcon,
+  CheckIcon,
+  ChevronRight,
+  SearchIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import {
   useVerseSearch,
   type ChapterResult,
-  type VerseResult,
 } from '@/hooks/use-verse-search'
 import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
@@ -99,10 +111,16 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const tCommon = useTranslations('common')
 
   const [searchTab, setSearchTab] = useState<'all' | 'words'>('all')
+  const [sortMode, setSortMode] = useState<'relevance' | 'verse-order'>(
+    'relevance'
+  )
   const [wordMatches, setWordMatches] = useState<SearchHitWordByWord[]>([])
   const [wordLoading, setWordLoading] = useState(false)
 
   const lastQueryRef = useRef<string | null>(null)
+  const lastArabicRef = useRef<boolean>(false)
+  const lastPrimaryRef = useRef<string | null>(null)
+  const lastSecondaryRef = useRef<string | null | undefined>(null)
   const didInitRef = useRef(false)
 
   // Clear any active multi-select when the search query changes.
@@ -115,15 +133,28 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
   // ── Trigger search ────────────────────────────────────────────────────────
   useEffect(() => {
-    if (searchQuery === lastQueryRef.current) return
+    const wantArabic = prefs.arabic || prefs.wordByWord
+    const queryChanged = searchQuery !== lastQueryRef.current
+    const arabicChanged = wantArabic !== lastArabicRef.current
+    const primaryChanged =
+      prefs.primaryLanguage !== lastPrimaryRef.current
+    const secondaryChanged =
+      (prefs.secondaryLanguage ?? null) !== lastSecondaryRef.current
+    if (!queryChanged && !arabicChanged && !primaryChanged && !secondaryChanged)
+      return
     lastQueryRef.current = searchQuery
+    lastArabicRef.current = wantArabic
+    lastPrimaryRef.current = prefs.primaryLanguage
+    lastSecondaryRef.current = prefs.secondaryLanguage ?? null
 
     if (!searchQuery) return
 
     verseSearch.reset()
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setWordMatches([])
-    setSearchTab('all')
+    if (queryChanged) {
+      setWordMatches([])
+      setSearchTab('all')
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0 })
+    }
 
     const singleRef = parseQuranRef(normalizeQuranInput(searchQuery))
     if (singleRef && singleRef.vs === singleRef.ve) {
@@ -136,10 +167,20 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     verseSearch.search(searchQuery, {
       primaryLang: prefs.primaryLanguage,
       secondaryLang: prefs.secondaryLanguage,
-      includeArabic: prefs.arabic,
+      includeArabic: wantArabic,
+      // Always include words when arabic is shown so the verse card renders
+      // a word breakdown (matching the reader) instead of a raw arabic
+      // string with awkward tracking.
+      includeWords: wantArabic,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery])
+  }, [
+    searchQuery,
+    prefs.wordByWord,
+    prefs.arabic,
+    prefs.primaryLanguage,
+    prefs.secondaryLanguage,
+  ])
 
   // ── Word search ───────────────────────────────────────────────────────────
   const runWordByWordQuery = useCallback(async () => {
@@ -197,13 +238,24 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const primaryCode =
     prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const titleMatches = verseSearch.data?.chapters?.filter((ch) => ch.tm) ?? []
-  const allVerses =
+  const rawVerses =
     verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
+  const allVerses =
+    sortMode === 'verse-order'
+      ? [...rawVerses].sort((a, b) => {
+          const [ac, av] = (a.vk ?? '0:0').split(':').map(Number)
+          const [bc, bv] = (b.vk ?? '0:0').split(':').map(Number)
+          return ac === bc ? av - bv : ac - bc
+        })
+      : rawVerses
 
   if (verseSearch.loading && !verseSearch.data) {
     return (
-      <div className="flex justify-center items-center py-16">
-        <Spinner />
+      <div
+        className={`${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full space-y-3`}
+      >
+        <SearchHeaderSkeleton query={searchQuery} />
+        <SearchResultsSkeleton />
       </div>
     )
   }
@@ -221,19 +273,16 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
-      className={`space-y-5 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
+      className={`space-y-3 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
     >
-      {/* Header — query is click-to-copy */}
-      <div className="flex items-baseline gap-3 bg-muted/30 border border-border/40 rounded-2xl px-5 py-4">
+      {/* Minimal header — query stands alone */}
+      <header className="px-1">
         <CopyableText
-          text={searchQuery}
-          className="text-xl font-semibold"
+          text={`“${searchQuery}”`}
+          className="text-3xl sm:text-4xl font-semibold tracking-tight leading-none"
           ariaLabel={`Copy search query ${searchQuery}`}
         />
-        <span className="text-sm text-muted-foreground">
-          {verseSearch.total} results
-        </span>
-      </div>
+      </header>
 
       <Tabs
         value={searchTab}
@@ -247,25 +296,68 @@ export default function SearchResult({ props }: { props: { query: string } }) {
           })
           if (tab === 'words') runWordByWordQuery()
         }}
-        className="space-y-4"
+        className="space-y-2"
       >
-        {/* ── Toolbar ──────────────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center justify-between gap-y-3 gap-x-4 bg-muted/30 border border-border/40 rounded-2xl px-4 py-3">
-          {/* Tabs */}
-          <TabsList className="h-8 *:text-xs gap-0.5">
-            <TabsTrigger value="all" className="h-7">
+        {/* ── Toolbar — flush, sits right above the result list ─────────── */}
+        <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-4 px-1">
+          <TabsList className="h-8 bg-transparent p-0 gap-1 *:text-xs">
+            <TabsTrigger
+              value="all"
+              className="h-7 px-2.5 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none"
+            >
               {t('resultsTab', { count: verseSearch.total })}
             </TabsTrigger>
-            <TabsTrigger value="words" className="h-7 gap-1">
+            <TabsTrigger
+              value="words"
+              className="h-7 gap-1 px-2.5 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none"
+            >
               <SearchIcon className="size-3" />
               {t('wordSearch')}
               {wordMatches.length > 0 && (
-                <span>
-                  ({wordMatches.length > 2999 ? '3k+' : wordMatches.length})
+                <span className="text-muted-foreground">
+                  {wordMatches.length > 2999 ? '3k+' : wordMatches.length}
                 </span>
               )}
             </TabsTrigger>
           </TabsList>
+
+          {searchTab === 'all' && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-accent/30"
+                  aria-label="Sort results"
+                >
+                  <ArrowDownUp className="size-3" />
+                  <span className="tabular-nums">
+                    {sortMode === 'relevance' ? 'Relevance' : 'Verse order'}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={6}>
+                {(
+                  [
+                    { value: 'relevance', label: 'Relevance' },
+                    { value: 'verse-order', label: 'Verse order' },
+                  ] as const
+                ).map((opt) => (
+                  <DropdownMenuItem
+                    key={opt.value}
+                    onSelect={() => setSortMode(opt.value)}
+                    className={cn(
+                      sortMode === opt.value && 'text-primary font-medium'
+                    )}
+                  >
+                    <span className="flex-1">{opt.label}</span>
+                    {sortMode === opt.value && (
+                      <CheckIcon className="size-3.5" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         {/* ── All results ───────────────────────────────────────────────────── */}
@@ -283,24 +375,26 @@ export default function SearchResult({ props }: { props: { query: string } }) {
             </div>
           )}
 
-          {/* Verse list — uses VerseCard directly to match the chapter reader's look */}
-          <div>
-            {allVerses.map((verse, index) => {
-              const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
-              const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
-              return (
-                <VerseCard
-                  key={verse.vk ?? index}
-                  verse={verse}
-                  isLast={index === allVerses.length - 1}
-                  optsKey={optsKey}
-                  showAudio={false}
-                  verseHref={`/quran/${chNum}?verse=${vNum}`}
-                  searchHighlight={tr?.hl ?? undefined}
-                />
-              )
-            })}
-          </div>
+          {/* Verse list — wrap in the reader's rounded surface so cards match */}
+          {allVerses.length > 0 && (
+            <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden">
+              {allVerses.map((verse, index) => {
+                const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
+                const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
+                return (
+                  <VerseCard
+                    key={verse.vk ?? index}
+                    verse={verse}
+                    isLast={index === allVerses.length - 1}
+                    optsKey={optsKey}
+                    showAudio={false}
+                    verseHref={`/quran/${chNum}?verse=${vNum}`}
+                    searchHighlight={tr?.hl ?? undefined}
+                  />
+                )
+              })}
+            </div>
+          )}
 
           {verseSearch.loading && (
             <div className="flex justify-center py-6">
@@ -430,6 +524,41 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       </Tabs>
 
       <MultiSelectBar />
+    </div>
+  )
+}
+
+
+// ─── Loading skeletons ────────────────────────────────────────────────────────
+
+function SearchHeaderSkeleton({ query }: { query: string }) {
+  return (
+    <header className="space-y-3 px-1">
+      <p className="text-3xl sm:text-4xl font-semibold tracking-tight leading-none">
+        “{query}”
+      </p>
+      {/* Indeterminate progress strip — a subtle primary sliver moves
+          across the bar while the search is in flight. */}
+      <div className="relative h-[2px] w-full overflow-hidden rounded-full bg-border/40">
+        <div className="absolute inset-y-0 w-1/3 rounded-full bg-primary/70 animate-[search-loading_1.2s_ease-in-out_infinite]" />
+      </div>
+    </header>
+  )
+}
+
+function SearchResultsSkeleton() {
+  return (
+    <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden divide-y divide-border/30">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="px-6 py-5 sm:px-8 sm:py-6 space-y-3 animate-pulse">
+          <div className="h-5 w-12 rounded-full bg-muted/60" />
+          <div className="space-y-2">
+            <div className="h-3 w-11/12 rounded bg-muted/50" />
+            <div className="h-3 w-10/12 rounded bg-muted/40" />
+            <div className="h-3 w-7/12 rounded bg-muted/30" />
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

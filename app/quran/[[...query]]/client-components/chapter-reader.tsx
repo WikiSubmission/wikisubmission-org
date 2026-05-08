@@ -88,6 +88,7 @@ function VirtualizedVerseList({
   const [scrollMargin, setScrollMargin] = useState(0)
   const [viewportWidth, setViewportWidth] = useState<number | null>(null)
   const seekDoneRef = useRef(false)
+  const seekActiveRef = useRef(false)
   const prevFirstVerseRef = useRef('')
   const seekBehaviorRef = useRef<'auto' | 'smooth'>('auto')
 
@@ -158,6 +159,19 @@ function VirtualizedVerseList({
     virtualizer.measure()
   }, [viewportWidth, virtualizer])
 
+  // Re-measure when rendering-only prefs change (instead of remounting via
+  // a layout key). Remounting mid-seek would reset the virtualizer's scroll
+  // tracking and snap the viewport back to the SSR window.
+  useEffect(() => {
+    virtualizer.measure()
+  }, [
+    virtualizer,
+    prefs.text,
+    prefs.footnotes,
+    prefs.subtitles,
+    prefs.transliteration,
+  ])
+
   const virtualItems = virtualizer.getVirtualItems()
   const lastVirtualIndex = virtualItems[virtualItems.length - 1]?.index ?? -1
   const firstVirtualIndex = virtualItems[0]?.index ?? 0
@@ -192,36 +206,65 @@ function VirtualizedVerseList({
 
   useEffect(() => {
     if (!seekTarget) return
-
-    if (prevFirstVerseRef.current !== firstVerseKey) {
-      prevFirstVerseRef.current = firstVerseKey
-      seekDoneRef.current = false
-    }
-
-    if (seekDoneRef.current) return
-
     const targetIndex = verses.findIndex(
       (v) => v.vk?.split(':')[1] === seekTarget
     )
     if (targetIndex < 0) return
 
-    virtualizer.scrollToIndex(targetIndex, {
-      align: 'start',
-      behavior: seekBehaviorRef.current,
-    })
+    // Track the latest seek target across runs (strict mode runs effects
+    // twice in dev — without this the second run early-returned on a stale
+    // "done" flag and the seek never completed). prevFirstVerseRef now
+    // also keys on seekTarget so a brand new target restarts the loop.
+    prevFirstVerseRef.current = firstVerseKey
+    seekDoneRef.current = false
     seekBehaviorRef.current = 'auto'
-    seekDoneRef.current = true
 
-    const rafId = requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
+    seekActiveRef.current = true
+    const verseId = `${chapterNumber}:${seekTarget}`
+    const TARGET_TOP = 120
+    let attempts = 0
+    let stable = 0
+    let rafId = 0
+    let cancelled = false
+    const MAX_FRAMES = 120 // ~2s ceiling for layout shifts
+    const STABLE_THRESHOLD = 6
+    const tick = () => {
+      if (cancelled) return
+      attempts += 1
+      const el = document.getElementById(verseId)
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        const delta = rect.top - TARGET_TOP
+        if (Math.abs(delta) > 0.5) {
+          window.scrollTo(0, Math.max(0, window.scrollY + delta))
+          stable = 0
+        } else {
+          stable += 1
+        }
+      } else {
         virtualizer.scrollToIndex(targetIndex, {
           align: 'start',
           behavior: 'auto',
         })
-      })
-    )
-    return () => cancelAnimationFrame(rafId)
-  }, [firstVerseKey, seekTarget, verses, virtualizer])
+        stable = 0
+      }
+      const done =
+        attempts >= MAX_FRAMES ||
+        (stable >= STABLE_THRESHOLD && attempts >= 8)
+      if (!done) {
+        rafId = requestAnimationFrame(tick)
+      } else {
+        seekDoneRef.current = true
+        seekActiveRef.current = false
+      }
+    }
+    rafId = requestAnimationFrame(tick)
+    return () => {
+      cancelled = true
+      seekActiveRef.current = false
+      cancelAnimationFrame(rafId)
+    }
+  }, [firstVerseKey, seekTarget, verses, virtualizer, chapterNumber])
 
   useEffect(() => {
     if (!currentVerseId || !isPlaying) return
@@ -258,7 +301,12 @@ function VirtualizedVerseList({
     if (isRangeMode) return
     if (lastVirtualIndex < 0 || verses.length === 0) return
     if (!userScrolledRef.current) return
+    // Don't rewrite the URL while a seek is still settling — the loop in
+    // the seek effect adjusts scrollY across several frames and the
+    // intermediate centered verses are not where the user wants to land.
+    if (seekActiveRef.current) return
     const timer = setTimeout(() => {
+      if (seekActiveRef.current) return
       const centerY = window.scrollY + window.innerHeight / 2
       const items = virtualizer.getVirtualItems()
       const centerItem =
@@ -312,7 +360,12 @@ function VirtualizedVerseList({
     }
 
     window.addEventListener('scroll', computeCurrentVerse, { passive: true })
-    computeCurrentVerse()
+    // Intentionally NOT calling computeCurrentVerse() here. Seeding
+    // centerVerseRef to verses[0] on mount means the opts effect would
+    // later anchor a hydration-triggered reload to that verse (i.e. the
+    // SSR window start, which is targetVerse - 5), overriding the URL's
+    // ?verse=N target. Let scroll events fill it in once the user is
+    // actually navigating around the chapter.
     return () => window.removeEventListener('scroll', computeCurrentVerse)
   }, [centerVerseRef, verses, virtualizer])
 
@@ -471,6 +524,24 @@ export function ChapterReader({
   // listener so any reload (mode switch, language change) can anchor to it without
   // causing the "verses climb to the top" effect.
   const centerVerseRef = useRef(1)
+  // Tracks whether the user has performed a real scroll-input gesture. Pure
+  // scroll events fire for programmatic seeks too, so we listen for the
+  // intent-bearing inputs (wheel, touch, key) to disambiguate. Used to gate
+  // anchor-to-viewport behavior on mode/language change.
+  const userMovedRef = useRef(false)
+  useEffect(() => {
+    const mark = () => {
+      userMovedRef.current = true
+    }
+    window.addEventListener('wheel', mark, { passive: true })
+    window.addEventListener('touchmove', mark, { passive: true })
+    window.addEventListener('keydown', mark)
+    return () => {
+      window.removeEventListener('wheel', mark)
+      window.removeEventListener('touchmove', mark)
+      window.removeEventListener('keydown', mark)
+    }
+  }, [])
   const readingSeekDoneRef = useRef(false)
   const readingPrevFirstVerseRef = useRef('')
 
@@ -482,7 +553,7 @@ export function ChapterReader({
   const opts = useMemo<ChapterReaderOptions>(
     () => ({
       primaryLang: prefs.primaryLanguage,
-      secondaryLang: prefs.wordByWord ? undefined : prefs.secondaryLanguage,
+      secondaryLang: prefs.secondaryLanguage,
       includeArabic: needsArabic,
       includeWords: needsArabic && displayMode !== 'reading',
       includeRoot: needsArabic && displayMode !== 'reading',
@@ -510,9 +581,17 @@ export function ChapterReader({
       isFirstMount.current = false
       return
     }
+    // If the user has not made a real navigation gesture yet, we are still
+    // honoring the URL's ?verse=N target — most often this effect fires
+    // because zustand's persist middleware finished hydrating prefs from
+    // localStorage right after first paint, NOT because the user changed
+    // anything. Preserve the seek target so we don't pull the reader back
+    // to wherever the SSR window happened to start.
+    if (!userMovedRef.current && seekTarget) {
+      reader.reload(opts, parseInt(seekTarget))
+      return
+    }
     const anchor = centerVerseRef.current
-    // Anchor to the current viewport centre on mode/language switch so the reader
-    // doesn't jump back to verse 1 or the original seek target.
     if (anchor > 1) {
       readingSeekDoneRef.current = false
       setSeekTarget(String(anchor))
@@ -616,7 +695,6 @@ export function ChapterReader({
   // Stable key that changes when language prefs change — propagated to VerseCard
   // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
   const optsKey = `v2-${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}-${zoomLevel}`
-  const layoutKey = `${optsKey}-${prefs.text}-${prefs.footnotes}-${prefs.subtitles}-${prefs.transliteration}`
 
   const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const arTitle = reader.chapterTitles?.['ar']
@@ -636,10 +714,18 @@ export function ChapterReader({
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-0.5 min-w-0">
               <h1
-                className="text-xl font-bold"
+                className="text-xl font-bold flex items-center gap-2"
                 dir={getDirection(primaryCode)}
               >
-                {t('chapter', { number: chapterNumber, title: primaryTitle })}
+                <span className="min-w-0">
+                  {t('chapter', { number: chapterNumber, title: primaryTitle })}
+                </span>
+                {reader.loading && reader.verses.length > 0 && (
+                  <Spinner
+                    className="size-3.5 shrink-0 text-muted-foreground"
+                    aria-label={tCommon('loading')}
+                  />
+                )}
               </h1>
               {secondaryTitle && (
                 <p
@@ -647,12 +733,6 @@ export function ChapterReader({
                   dir={prefs.secondaryLanguage ? getDirection(prefs.secondaryLanguage) : undefined}
                 >
                   {secondaryTitle}
-                </p>
-              )}
-              {reader.loading && reader.verses.length > 0 && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Spinner className="size-3" />
-                  {tCommon('loading')}
                 </p>
               )}
             </div>
@@ -719,10 +799,15 @@ export function ChapterReader({
         </div>
       )}
 
-      {/* Verse/Word mode — window virtualizer, page scrolls naturally. */}
+      {/* Verse/Word mode — window virtualizer, page scrolls naturally.
+          Note: we deliberately don't `key={layoutKey}` this. Remounting the
+          virtualizer mid-seek (which happens when zustand hydrates from
+          localStorage right after first paint) would discard the in-flight
+          seek and snap the viewport back to the SSR window. The inner
+          component re-measures via virtualizer.measure() when prefs that
+          affect row height change. */}
       {displayMode !== 'reading' && (
         <VirtualizedVerseList
-          key={layoutKey}
           chapterNumber={chapterNumber}
           verses={reader.verses}
           hasMore={reader.hasMore}

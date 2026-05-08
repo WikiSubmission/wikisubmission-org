@@ -69,9 +69,9 @@ export function buildVersesText(verses: VerseData[], opts: CopyVerseOptions): st
 }
 
 /**
- * Legacy segment markdown used by verse-list-result.tsx:
- *   ## label — title
- *   **[vk]** translation
+ * Plain-text segment used by verse-list-result.tsx:
+ *   label — title
+ *   [vk] translation
  *   arabic
  */
 export function buildSegmentMarkdown(
@@ -80,13 +80,13 @@ export function buildSegmentMarkdown(
   verses: VerseData[],
   opts: CopyVerseOptions
 ): string {
-  const lines: string[] = [`## ${label} — ${title}`, '']
+  const lines: string[] = [`${label} — ${title}`, '']
 
   for (const verse of verses) {
     const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']
     const arTr = verse.tr?.['ar']
 
-    const key = `**[${verse.vk}]**`
+    const key = `[${verse.vk}]`
     if (opts.includeText && tr?.tx) {
       lines.push(`${key} ${tr.tx}`)
     } else {
@@ -122,50 +122,24 @@ export interface CopyMarkdownOptions {
   searchHighlight?: string
 }
 
-function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+/** Strip `<b>..</b>` tags from a highlight snippet — copy output is plain text. */
+function stripHighlight(s: string): string {
+  return s.replace(/<\/?b>/gi, '')
 }
 
-/** Convert `<b>word</b>` spans to markdown `**word**`. */
-function inlineHighlightToMarkdown(s: string): string {
-  return s.replace(/<b>(.*?)<\/b>/gi, '**$1**')
-}
-
-/**
- * Apply highlights from a snippet (containing `<b>..</b>` tags) onto the full
- * translation text. If the snippet is already close to full-length, use it
- * directly; otherwise extract bolded words and mark them in the full text.
- */
-function applyHighlightToText(fullText: string, snippet: string): string {
-  const stripped = snippet.replace(/<\/?b>/g, '')
-  if (stripped.length >= fullText.length * 0.9) {
-    return inlineHighlightToMarkdown(snippet)
-  }
-  const boldedWords = [...snippet.matchAll(/<b>(.*?)<\/b>/g)].map((m) => m[1])
-  if (boldedWords.length === 0) return fullText
-  let result = fullText
-  for (const word of boldedWords) {
-    const escaped = escapeRegExp(word)
-    result = result.replace(new RegExp(`(${escaped})`, 'gi'), '**$1**')
-  }
-  return result
-}
-
-/** Produce the `**[vk]** translation` header line for a verse. */
 function buildHeaderLine(verse: VerseData, opts: CopyMarkdownOptions): string {
   const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']
-  const key = `**[${verse.vk}]**`
+  const key = `[${verse.vk}]`
   if (opts.includeText && tr?.tx) {
-    const text = opts.searchHighlight
-      ? applyHighlightToText(tr.tx, opts.searchHighlight)
-      : tr.tx
+    const stripped = opts.searchHighlight ? stripHighlight(opts.searchHighlight) : ''
+    const text = stripped && stripped.length >= tr.tx.length * 0.9 ? stripped : tr.tx
     return `${key} ${text}`
   }
   return key
 }
 
 /**
- * Full-verse markdown: header → Arabic → secondary → footnote.
+ * Full-verse plain text: header → Arabic → secondary → footnote.
  * Each block is preference-gated.
  */
 export function buildVerseMarkdown(
@@ -179,17 +153,15 @@ export function buildVerseMarkdown(
   const blocks: string[] = [buildHeaderLine(verse, opts)]
 
   if (opts.includeArabic && arTr?.tx) blocks.push(arTr.tx)
-  if (secondary?.tx) blocks.push(`*${secondary.tx}*`)
-  if (opts.includeFootnotes && tr?.f) blocks.push(`> ${tr.f}`)
+  if (secondary?.tx) blocks.push(secondary.tx)
+  if (opts.includeFootnotes && tr?.f) blocks.push(tr.f)
 
   return blocks.join('\n\n')
 }
 
 /**
- * Word-by-word markdown: header (translation line if prefs.text) followed by
- * one bullet per word. Each bullet is `arabic — transliteration — translation`,
- * with each segment conditional on its preference toggle. Meanings (`w.m`)
- * are never included (too long, per product decision).
+ * Word-by-word plain text: header followed by one line per word.
+ * Each line is `arabic — transliteration — translation`, conditional on toggles.
  */
 export function buildWordByWordMarkdown(
   verse: VerseData,
@@ -199,7 +171,6 @@ export function buildWordByWordMarkdown(
 
   const words = verse.w ?? []
   if (words.length === 0) {
-    // No word-level data — fall back to the Arabic verse if available.
     const arTr = verse.tr?.['ar']
     if (opts.includeArabic && arTr?.tx) blocks.push(arTr.tx)
     return blocks.join('\n\n')
@@ -209,29 +180,25 @@ export function buildWordByWordMarkdown(
   const anySegment =
     opts.includeArabic || opts.includeTransliteration || opts.includeText
 
-  const bullets: string[] = []
+  const lines: string[] = []
   for (const w of sorted) {
     const tx = w.tx as Record<string, string> | undefined
     if (!anySegment) {
-      // All toggles off — silent fallback to Arabic so output is never empty.
       const arabic = tx?.['ar']
-      if (arabic) bullets.push(`- ${arabic}`)
+      if (arabic) lines.push(arabic)
       continue
     }
     const parts: string[] = []
     if (opts.includeArabic && tx?.['ar']) parts.push(tx['ar'])
     if (opts.includeTransliteration && tx?.['tl']) parts.push(tx['tl'])
     if (opts.includeText && tx?.['en']) parts.push(tx['en'])
-    if (parts.length > 0) bullets.push(`- ${parts.join(' — ')}`)
+    if (parts.length > 0) lines.push(parts.join(' — '))
   }
 
-  if (bullets.length > 0) blocks.push(bullets.join('\n'))
+  if (lines.length > 0) blocks.push(lines.join('\n'))
   return blocks.join('\n\n')
 }
 
-/**
- * Multiple verses joined with blank lines. Uses `kind` to pick full vs word-by-word.
- */
 export function buildMultiVerseMarkdown(
   verses: VerseData[],
   kind: 'full' | 'wbw',

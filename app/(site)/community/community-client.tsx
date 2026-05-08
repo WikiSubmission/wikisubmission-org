@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   ComposableMap,
@@ -259,34 +259,6 @@ function WorldMap({
 
 const NOTES_PREFIX = 'ws-community-notes:'
 
-function useLocationNote(id: string) {
-  const [note, setNote] = useState('')
-
-  useEffect(() => {
-    try {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setNote(window.localStorage.getItem(NOTES_PREFIX + id) ?? '')
-    } catch {
-      setNote('')
-    }
-  }, [id])
-
-  const persist = useCallback(
-    (value: string) => {
-      setNote(value)
-      try {
-        if (value) window.localStorage.setItem(NOTES_PREFIX + id, value)
-        else window.localStorage.removeItem(NOTES_PREFIX + id)
-      } catch {
-        // storage unavailable — ignore
-      }
-    },
-    [id]
-  )
-
-  return [note, persist] as const
-}
-
 function getAllNotes(): Record<string, string> {
   if (typeof window === 'undefined') return {}
   const out: Record<string, string> = {}
@@ -352,14 +324,6 @@ export default function CommunityClient({
     () => physical.find((l) => l.id === selectedId) ?? physical[0] ?? null,
     [physical, selectedId]
   )
-
-  const [note, setNote] = useLocationNote(selected?.id ?? '')
-
-  const onNoteChange = (value: string) => {
-    if (!selected) return
-    setNote(value)
-    setNotes((prev) => ({ ...prev, [selected.id]: value }))
-  }
 
   return (
     <div style={{ backgroundColor: 'var(--ed-bg)', color: 'var(--ed-fg)' }}>

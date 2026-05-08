@@ -6,7 +6,6 @@ import { ArrowUpRight, ArrowLeft } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -14,61 +13,11 @@ import { Spinner } from '@/components/ui/spinner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useVerseFetch, useBibleFetch } from '@/hooks/use-verse-fetch'
 import { parseQuranRef, parseBibleRef } from '@/lib/scripture-parser'
-import { QuranRefText } from './quran-ref-text'
+import { VerseCard } from '@/app/quran/[[...query]]/mini-components/verse-card'
 import type { components } from '@/src/api/types.gen'
 import type { LangCode } from '@/hooks/use-quran-preferences'
 
-type VerseData = components['schemas']['VerseData']
 type BibleVerseData = components['schemas']['BibleVerseData']
-
-function VersePreview({
-  verse,
-  primaryCode,
-  showArabic,
-  onNavigateRef,
-}: {
-  verse: VerseData
-  primaryCode: string
-  showArabic: boolean
-  onNavigateRef: (ref: string) => void
-}) {
-  const tr = verse.tr?.[primaryCode]
-  const arTr = verse.tr?.['ar']
-  const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
-
-  return (
-    <div className="space-y-2 py-3 border-b last:border-0">
-      <Link
-        href={`/quran/${chNum}?verse=${vNum}`}
-        className="text-xs text-primary hover:text-primary flex items-center gap-1 w-fit transition-colors"
-      >
-        {verse.vk}
-        <ArrowUpRight className="size-3" />
-      </Link>
-      {tr?.s && <p className="text-xs text-primary italic">{tr.s}</p>}
-      {tr?.tx && (
-        <p className="text-sm leading-relaxed">{tr.tx}</p>
-      )}
-      {tr?.f && (
-        <p className="text-sm text-muted-foreground italic">
-          <QuranRefText
-            text={tr.f}
-            from={`footnote of ${verse.vk}`}
-            onNavigateRef={onNavigateRef}
-          />
-        </p>
-      )}
-      {showArabic && arTr?.tx && (
-        <p
-          dir="rtl"
-          className="font-arabic text-xl leading-relaxed text-right pt-1"
-        >
-          {arTr.tx}
-        </p>
-      )}
-    </div>
-  )
-}
 
 function BibleVersePreview({
   verse,
@@ -127,16 +76,12 @@ export function ScriptureRef({
     prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
 
   const doQuranFetch = useCallback(
-    (ref: string) => fetchQuran(ref, primaryCode),
-    [fetchQuran, primaryCode]
-  )
-
-  const handleNavigate = useCallback(
-    (newRef: string) => {
-      setHistory((prev) => [...prev, newRef])
-      doQuranFetch(newRef)
-    },
-    [doQuranFetch]
+    (ref: string) =>
+      fetchQuran(ref, primaryCode, {
+        secondaryLang: prefs.secondaryLanguage,
+        includeWords: prefs.wordByWord,
+      }),
+    [fetchQuran, primaryCode, prefs.secondaryLanguage, prefs.wordByWord]
   )
 
   const handleBack = useCallback(() => {
@@ -202,68 +147,88 @@ export function ScriptureRef({
         {label}
       </button>
 
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            {!isBible && history.length > 1 && (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleBack}
-                aria-label="Go back"
-              >
-                <ArrowLeft className="size-4" />
-              </Button>
-            )}
-            <DialogTitle className="flex items-center gap-2 flex-wrap">
-              <span className="font-glacial font-bold text-primary uppercase tracking-wider">{currentLabel}</span>
-              {from && (isBible || history.length === 1) && (
-                <span className="text-xs text-muted-foreground font-normal">
-                  — from {from}
-                </span>
-              )}
-            </DialogTitle>
-          </div>
-        </DialogHeader>
+      <DialogContent
+        className="max-w-lg p-0 overflow-hidden rounded-3xl gap-0"
+        aria-describedby={undefined}
+      >
+        {/* Required for a11y; visible header is intentionally minimal — the
+            verse-key pill on the rendered card already carries the reference. */}
+        <DialogTitle className="sr-only">
+          {currentLabel}
+          {from ? ` — from ${from}` : ''}
+        </DialogTitle>
 
-        <div className="max-h-[60vh] overflow-y-auto pr-1 -mr-1">
+        {!isBible && history.length > 1 && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleBack}
+            aria-label="Go back"
+            className="absolute top-3 left-3 z-10"
+          >
+            <ArrowLeft className="size-4" />
+          </Button>
+        )}
+
+        <div className="max-h-[65vh] overflow-y-auto">
           {loading && (
-            <div className="flex justify-center py-10">
+            <div className="flex justify-center py-12">
               <Spinner />
             </div>
           )}
           {error && (
-            <p className="text-sm text-destructive text-center py-6">{error}</p>
+            <p className="text-sm text-destructive text-center py-10">
+              {error}
+            </p>
           )}
-          {isBible
-            ? bibleVerses.map((verse, i) => (
+          {isBible ? (
+            <div className="px-6 py-5">
+              {bibleVerses.map((verse, i) => (
                 <BibleVersePreview
                   key={verse.vk ?? i}
                   verse={verse}
                   bookDisplay={bibleRef?.displayBook ?? ''}
                 />
-              ))
-            : quranVerses.map((verse, i) => (
-                <VersePreview
+              ))}
+            </div>
+          ) : (
+            quranVerses.map((verse, i) => {
+              const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
+              return (
+                <VerseCard
                   key={verse.vk ?? i}
                   verse={verse}
-                  primaryCode={primaryCode}
-                  showArabic={prefs.arabic}
-                  onNavigateRef={handleNavigate}
+                  isLast={i === quranVerses.length - 1}
+                  optsKey={`ref-${primaryCode}-${prefs.secondaryLanguage ?? ''}-${prefs.wordByWord}`}
+                  showAudio={false}
+                  showCopyButton={false}
+                  verseHref={`/quran/${chNum}?verse=${vNum}`}
                 />
-              ))}
+              )
+            })
+          )}
         </div>
 
-        {!isBible && quranVerses.length > 0 && currentParsed && (
-          <div className="pt-3 border-t">
-            <Link
-              href={`/quran/${currentParsed.cn}?verse=${currentParsed.vs}`}
-              onClick={() => setOpen(false)}
-              className="text-xs text-primary hover:text-primary flex items-center gap-1 w-fit transition-colors"
-            >
-              Open in Quran reader
-              <ArrowUpRight className="size-3" />
-            </Link>
+        {(from ||
+          (!isBible && quranVerses.length > 0 && currentParsed)) && (
+          <div className="flex items-center justify-between gap-3 px-5 py-3 border-t bg-muted/20">
+            {from ? (
+              <span className="text-xs italic text-muted-foreground truncate">
+                from {from}
+              </span>
+            ) : (
+              <span />
+            )}
+            {!isBible && quranVerses.length > 0 && currentParsed && (
+              <Link
+                href={`/quran/${currentParsed.cn}?verse=${currentParsed.vs}`}
+                onClick={() => setOpen(false)}
+                className="shrink-0 text-xs text-primary hover:text-primary flex items-center gap-1 transition-colors"
+              >
+                Open in Quran reader
+                <ArrowUpRight className="size-3" />
+              </Link>
+            )}
           </div>
         )}
       </DialogContent>

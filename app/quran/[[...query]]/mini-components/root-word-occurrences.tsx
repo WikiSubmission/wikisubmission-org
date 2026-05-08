@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
 import { Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { QuranRef } from '@/components/quran-ref'
 import { useTranslations } from 'next-intl'
 
@@ -45,7 +46,13 @@ function flattenWords(
 
 const PAGE_LIMIT = 100
 
-export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
+export function RootWordOccurrences({
+  rootWord,
+  onTotalChange,
+}: {
+  rootWord: string
+  onTotalChange?: (total: number) => void
+}) {
   const t = useTranslations('common')
   const tQuran = useTranslations('quran')
   const [occurrences, setOccurrences] = useState<WordOccurrence[]>([])
@@ -82,8 +89,10 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
         if (results.length === 0) {
           console.warn('[RootWordOccurrences] No results for root:', rootWord, 'response:', data)
         }
+        const nextTotal = data?.info?.total ?? 0
         setOccurrences(results)
-        setTotal(data?.info?.total ?? 0)
+        setTotal(nextTotal)
+        onTotalChange?.(nextTotal)
         setLoading(false)
       })
       .catch((err) => {
@@ -91,7 +100,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
         setOccurrences([])
         setLoading(false)
       })
-  }, [rootWord])
+  }, [rootWord, onTotalChange])
 
   const loadMore = () => {
     setLoadingMore(true)
@@ -119,8 +128,13 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <Loader2 className="animate-spin size-6 text-primary" />
+      <div className="flex flex-col gap-3 min-h-40 animate-in fade-in duration-300">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-[68px] rounded-2xl bg-muted/30 border border-border/30 animate-pulse"
+          />
+        ))}
       </div>
     )
   }
@@ -134,7 +148,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
   }
 
   return (
-    <div className="max-h-[45vh] overflow-y-auto pr-4 custom-scrollbar">
+    <div className="animate-in fade-in duration-300">
       <div className="flex flex-col gap-3">
         {occurrences.map((occ, i) => (
           <div
@@ -163,17 +177,18 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
         ))}
       </div>
       {occurrences.length < total && (
-        <div className="pt-3 pb-1 flex justify-center">
-          <button
+        <div className="pt-4 flex justify-center">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={loadMore}
             disabled={loadingMore}
-            className="text-xs text-primary hover:underline disabled:opacity-50 flex items-center gap-1"
           >
             {loadingMore && <Loader2 className="animate-spin size-3" />}
             {loadingMore
               ? t('loading')
               : t('loadMore', { shown: occurrences.length, total })}
-          </button>
+          </Button>
         </div>
       )}
     </div>
