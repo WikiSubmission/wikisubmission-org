@@ -152,6 +152,15 @@ function parseFormMeanings(meaning: string | null): FormMeanings {
   return { byForm, fallback: trimmed }
 }
 
+function meaningToEnglishWord(meaning: string | null): string | null {
+  if (!meaning) return null
+  const firstSense = meaning.split(/[;/]/)[0]?.trim() ?? ''
+  if (!firstSense) return null
+  const cleaned = firstSense.replace(/^to\s+/i, '')
+  const match = cleaned.match(/[A-Za-z][A-Za-z'-]*/)
+  return match ? match[0] : null
+}
+
 function highlight(ar: string, hi: string, wi?: number | null): React.ReactNode {
   if (!ar) return ar
   const tokens = ar.split(/(\s+)/)
@@ -739,6 +748,7 @@ function Detail({
           <div className="wl-derivs">
             {derivs.map((d, i) => {
               const formEn = lookupFormMeaning(d.ar)
+              const formWord = meaningToEnglishWord(formEn)
               return (
                 <button
                   key={d.ar}
@@ -750,7 +760,7 @@ function Detail({
                     {d.ar}
                   </div>
                   <div className="tr">{d.tr ?? arabicToLatin(stripDiacritics(d.ar))}</div>
-                  {formEn && <div className="en">{formEn}</div>}
+                  {formWord && <div className="en">{formWord}</div>}
                   <div className="meta">
                     <span className="pos">—</span>
                     <span>{d.count}×</span>
