@@ -6,8 +6,21 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { SearchHitWordByWord } from 'wikisubmission-sdk/lib/quran/v1/query-result'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsTrigger, TabsContent, TabsList } from '@/components/ui/tabs'
-import { ArrowRightIcon, ChevronRight, SearchIcon } from 'lucide-react'
+import {
+  ArrowDownUp,
+  ArrowRightIcon,
+  CheckIcon,
+  ChevronRight,
+  SearchIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
@@ -98,6 +111,9 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const tCommon = useTranslations('common')
 
   const [searchTab, setSearchTab] = useState<'all' | 'words'>('all')
+  const [sortMode, setSortMode] = useState<'relevance' | 'verse-order'>(
+    'relevance'
+  )
   const [wordMatches, setWordMatches] = useState<SearchHitWordByWord[]>([])
   const [wordLoading, setWordLoading] = useState(false)
 
@@ -207,13 +223,24 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const primaryCode =
     prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const titleMatches = verseSearch.data?.chapters?.filter((ch) => ch.tm) ?? []
-  const allVerses =
+  const rawVerses =
     verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
+  const allVerses =
+    sortMode === 'verse-order'
+      ? [...rawVerses].sort((a, b) => {
+          const [ac, av] = (a.vk ?? '0:0').split(':').map(Number)
+          const [bc, bv] = (b.vk ?? '0:0').split(':').map(Number)
+          return ac === bc ? av - bv : ac - bc
+        })
+      : rawVerses
 
   if (verseSearch.loading && !verseSearch.data) {
     return (
-      <div className="flex justify-center items-center py-16">
-        <Spinner />
+      <div
+        className={`${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full space-y-6`}
+      >
+        <SearchHeaderSkeleton query={searchQuery} />
+        <SearchResultsSkeleton />
       </div>
     )
   }
@@ -231,19 +258,25 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
-      className={`space-y-5 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
+      className={`space-y-6 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
     >
-      {/* Header — query is click-to-copy */}
-      <div className="flex items-baseline gap-3 bg-muted/30 border border-border/40 rounded-2xl px-5 py-4">
+      {/* Minimal header — query as a quiet display, count as a hairline badge */}
+      <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-1">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/70">
+          Search
+        </p>
         <CopyableText
           text={searchQuery}
-          className="text-xl font-semibold"
+          className="text-2xl sm:text-3xl font-semibold tracking-tight"
           ariaLabel={`Copy search query ${searchQuery}`}
         />
-        <span className="text-sm text-muted-foreground">
-          {verseSearch.total} results
+        <span className="ms-auto inline-flex items-center gap-1 text-xs text-muted-foreground tabular-nums">
+          <span className="font-medium text-foreground">
+            {verseSearch.total.toLocaleString()}
+          </span>
+          {verseSearch.total === 1 ? 'verse' : 'verses'}
         </span>
-      </div>
+      </header>
 
       <Tabs
         value={searchTab}
@@ -259,23 +292,66 @@ export default function SearchResult({ props }: { props: { query: string } }) {
         }}
         className="space-y-4"
       >
-        {/* ── Toolbar ──────────────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center justify-between gap-y-3 gap-x-4 bg-muted/30 border border-border/40 rounded-2xl px-4 py-3">
-          {/* Tabs */}
-          <TabsList className="h-8 *:text-xs gap-0.5">
-            <TabsTrigger value="all" className="h-7">
+        {/* ── Toolbar — flush, hairline-bordered ─────────────────────────── */}
+        <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-4 border-b border-border/40 px-1 pb-2">
+          <TabsList className="h-8 bg-transparent p-0 gap-1 *:text-xs">
+            <TabsTrigger
+              value="all"
+              className="h-7 px-2.5 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none"
+            >
               {t('resultsTab', { count: verseSearch.total })}
             </TabsTrigger>
-            <TabsTrigger value="words" className="h-7 gap-1">
+            <TabsTrigger
+              value="words"
+              className="h-7 gap-1 px-2.5 data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:shadow-none"
+            >
               <SearchIcon className="size-3" />
               {t('wordSearch')}
               {wordMatches.length > 0 && (
-                <span>
-                  ({wordMatches.length > 2999 ? '3k+' : wordMatches.length})
+                <span className="text-muted-foreground">
+                  {wordMatches.length > 2999 ? '3k+' : wordMatches.length}
                 </span>
               )}
             </TabsTrigger>
           </TabsList>
+
+          {searchTab === 'all' && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-accent/30"
+                  aria-label="Sort results"
+                >
+                  <ArrowDownUp className="size-3" />
+                  <span className="tabular-nums">
+                    {sortMode === 'relevance' ? 'Relevance' : 'Verse order'}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={6}>
+                {(
+                  [
+                    { value: 'relevance', label: 'Relevance' },
+                    { value: 'verse-order', label: 'Verse order' },
+                  ] as const
+                ).map((opt) => (
+                  <DropdownMenuItem
+                    key={opt.value}
+                    onSelect={() => setSortMode(opt.value)}
+                    className={cn(
+                      sortMode === opt.value && 'text-primary font-medium'
+                    )}
+                  >
+                    <span className="flex-1">{opt.label}</span>
+                    {sortMode === opt.value && (
+                      <CheckIcon className="size-3.5" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         {/* ── All results ───────────────────────────────────────────────────── */}
@@ -442,6 +518,46 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       </Tabs>
 
       <MultiSelectBar />
+    </div>
+  )
+}
+
+
+// ─── Loading skeletons ────────────────────────────────────────────────────────
+
+function SearchHeaderSkeleton({ query }: { query: string }) {
+  return (
+    <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-1">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/70">
+        Searching
+      </p>
+      <p className="text-2xl sm:text-3xl font-semibold tracking-tight text-muted-foreground/80">
+        {query}
+      </p>
+      <span className="ms-auto inline-flex items-center gap-2 text-xs text-muted-foreground">
+        <Spinner className="size-3" />
+        <span>Looking</span>
+      </span>
+    </header>
+  )
+}
+
+function SearchResultsSkeleton() {
+  return (
+    <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden divide-y divide-border/30">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="px-6 py-5 sm:px-8 sm:py-6 space-y-3 animate-pulse">
+          <div className="flex items-center justify-between">
+            <div className="h-6 w-14 rounded-full bg-muted/70" />
+            <div className="h-6 w-20 rounded-full bg-muted/40" />
+          </div>
+          <div className="space-y-2">
+            <div className="h-3.5 w-11/12 rounded bg-muted/60" />
+            <div className="h-3.5 w-10/12 rounded bg-muted/50" />
+            <div className="h-3.5 w-7/12 rounded bg-muted/40" />
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

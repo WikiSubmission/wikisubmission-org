@@ -22,8 +22,7 @@ import {
   ArrowUpRight,
   Bookmark,
   StickyNote,
-  Maximize2,
-  Minimize2,
+  WholeWord,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HighlightText } from '@/components/highlight-text'
@@ -625,13 +624,13 @@ export const VerseCard = memo(
                   size="icon"
                   aria-label={
                     prefs.wordByWord
-                      ? 'Collapse Arabic'
-                      : 'Expand Arabic word-by-word'
+                      ? 'Hide word-by-word'
+                      : 'Show word-by-word'
                   }
                   title={
                     prefs.wordByWord
-                      ? 'Collapse Arabic'
-                      : 'Expand Arabic word-by-word'
+                      ? 'Hide word-by-word'
+                      : 'Show word-by-word'
                   }
                   className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                   onClick={() => {
@@ -672,14 +671,12 @@ export const VerseCard = memo(
                   }}
                 >
                   <span
-                    key={prefs.wordByWord ? 'min' : 'max'}
-                    className="inline-flex animate-in fade-in zoom-in-90 duration-200"
+                    key={prefs.wordByWord ? 'on' : 'off'}
+                    className={`inline-flex animate-in fade-in zoom-in-90 duration-200 ${
+                      prefs.wordByWord ? 'text-primary' : ''
+                    }`}
                   >
-                    {prefs.wordByWord ? (
-                      <Minimize2 className="w-4 h-4" />
-                    ) : (
-                      <Maximize2 className="w-4 h-4" />
-                    )}
+                    <WholeWord className="w-4 h-4" />
                   </span>
                 </Button>
               )}
