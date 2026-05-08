@@ -119,6 +119,8 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
   const lastQueryRef = useRef<string | null>(null)
   const lastArabicRef = useRef<boolean>(false)
+  const lastPrimaryRef = useRef<string | null>(null)
+  const lastSecondaryRef = useRef<string | null | undefined>(null)
   const didInitRef = useRef(false)
 
   // Clear any active multi-select when the search query changes.
@@ -134,9 +136,16 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     const wantArabic = prefs.arabic || prefs.wordByWord
     const queryChanged = searchQuery !== lastQueryRef.current
     const arabicChanged = wantArabic !== lastArabicRef.current
-    if (!queryChanged && !arabicChanged) return
+    const primaryChanged =
+      prefs.primaryLanguage !== lastPrimaryRef.current
+    const secondaryChanged =
+      (prefs.secondaryLanguage ?? null) !== lastSecondaryRef.current
+    if (!queryChanged && !arabicChanged && !primaryChanged && !secondaryChanged)
+      return
     lastQueryRef.current = searchQuery
     lastArabicRef.current = wantArabic
+    lastPrimaryRef.current = prefs.primaryLanguage
+    lastSecondaryRef.current = prefs.secondaryLanguage ?? null
 
     if (!searchQuery) return
 
@@ -165,7 +174,13 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       includeWords: wantArabic,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery, prefs.wordByWord, prefs.arabic])
+  }, [
+    searchQuery,
+    prefs.wordByWord,
+    prefs.arabic,
+    prefs.primaryLanguage,
+    prefs.secondaryLanguage,
+  ])
 
   // ── Word search ───────────────────────────────────────────────────────────
   const runWordByWordQuery = useCallback(async () => {
