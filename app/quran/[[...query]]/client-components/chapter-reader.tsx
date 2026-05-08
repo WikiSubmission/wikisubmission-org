@@ -223,8 +223,11 @@ function VirtualizedVerseList({
     const verseId = `${chapterNumber}:${seekTarget}`
     const targetTopFromViewport = 120
     let attempts = 0
+    let stable = 0
     let rafId = 0
     let cancelled = false
+    const MAX_FRAMES = 60 // ~1s; long enough for fonts/images to settle
+    const STABLE_THRESHOLD = 6 // frames in a row within tolerance to exit
     const tick = () => {
       if (cancelled) return
       attempts += 1
@@ -232,8 +235,11 @@ function VirtualizedVerseList({
       if (el) {
         const rect = el.getBoundingClientRect()
         const delta = rect.top - targetTopFromViewport
-        if (Math.abs(delta) > 1) {
+        if (Math.abs(delta) > 0.5) {
           window.scrollBy(0, delta)
+          stable = 0
+        } else {
+          stable += 1
         }
       } else {
         // Element not yet measured/rendered — re-issue scrollToIndex so
@@ -242,8 +248,12 @@ function VirtualizedVerseList({
           align: 'start',
           behavior: 'auto',
         })
+        stable = 0
       }
-      if (attempts < 14) {
+      const done =
+        attempts >= MAX_FRAMES ||
+        (stable >= STABLE_THRESHOLD && attempts >= 6)
+      if (!done) {
         rafId = requestAnimationFrame(tick)
       } else {
         seekActiveRef.current = false
