@@ -643,25 +643,40 @@ export const VerseCard = memo(
                   }
                   className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                   onClick={() => {
-                    // Anchor scroll to the clicked verse so the page does not
-                    // jump when the card resizes.
-                    const el = verseId
-                      ? document.getElementById(verseId)
+                    // Anchor the clicked verse's position across the WBW
+                    // resize. The virtualizer measures cards lazily as they
+                    // re-render, so a single rAF check is not enough — we
+                    // re-correct each frame until the verse's top stabilizes
+                    // (or a short timeout elapses).
+                    const before = verseId
+                      ? document.getElementById(verseId)?.getBoundingClientRect().top
                       : null
-                    const before = el?.getBoundingClientRect().top ?? 0
+
                     prefs.setPreferences({
                       ...prefs,
                       wordByWord: !prefs.wordByWord,
                       arabic: prefs.wordByWord ? true : prefs.arabic,
                     })
-                    if (!el) return
-                    requestAnimationFrame(() => {
-                      requestAnimationFrame(() => {
-                        const after = el.getBoundingClientRect().top
+
+                    if (before == null || !verseId) return
+                    let frames = 0
+                    let stable = 0
+                    const tick = () => {
+                      const node = document.getElementById(verseId)
+                      if (node) {
+                        const after = node.getBoundingClientRect().top
                         const delta = after - before
-                        if (Math.abs(delta) > 1) window.scrollBy(0, delta)
-                      })
-                    })
+                        if (Math.abs(delta) > 0.5) {
+                          window.scrollBy(0, delta)
+                          stable = 0
+                        } else {
+                          stable += 1
+                        }
+                      }
+                      frames += 1
+                      if (stable < 4 && frames < 60) requestAnimationFrame(tick)
+                    }
+                    requestAnimationFrame(tick)
                   }}
                 >
                   <span
