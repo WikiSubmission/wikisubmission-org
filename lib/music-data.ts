@@ -8,6 +8,13 @@ type ApiTrack = components['schemas']['MusicTrack']
 
 type ApiClient = Client<paths>
 
+const fallbackCategory: DBCategory = {
+  id: 'other',
+  name: 'Other',
+  description: null,
+  display_priority: -1,
+}
+
 export interface MusicData {
   tracks: DBTrackRow[]
   categories: DBCategory[]
@@ -47,7 +54,9 @@ function toTrack(
     release_date: t.release_date,
     featured: t.featured,
     artistObj: artistsById.get(artistId),
-    categoryObj: categoryId ? categoriesById.get(categoryId) : undefined,
+    categoryObj: categoryId
+      ? (categoriesById.get(categoryId) ?? fallbackCategory)
+      : fallbackCategory,
   }
 }
 
@@ -74,6 +83,13 @@ export async function fetchMusicData(client: ApiClient): Promise<MusicData> {
   const tracks = (tracksRes.data ?? []).map((t) =>
     toTrack(t, artistsById, categoriesById)
   )
+  const hasFallbackCategory = tracks.some(
+    (track) => track.categoryObj?.id === fallbackCategory.id
+  )
 
-  return { tracks, categories, artists }
+  return {
+    tracks,
+    categories: hasFallbackCategory ? [...categories, fallbackCategory] : categories,
+    artists,
+  }
 }
