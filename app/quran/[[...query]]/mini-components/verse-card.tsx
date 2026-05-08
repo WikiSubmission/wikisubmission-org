@@ -128,7 +128,7 @@ function WordDetailsDialogContent({
         </div>
       </DialogHeader>
 
-      <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+      <div className="px-6 pt-5 pb-10 space-y-5 max-h-[70vh] overflow-y-auto">
         {meaning && meaning !== translation && (
           <section>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
