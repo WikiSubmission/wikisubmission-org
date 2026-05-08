@@ -260,22 +260,24 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     <div
       className={`space-y-6 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
     >
-      {/* Minimal header — query as a quiet display, count as a hairline badge */}
-      <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-1">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/70">
-          Search
+      {/* Minimal header — Results for "<query>"  · N verses */}
+      <header className="px-1 space-y-1">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
+          Results for
         </p>
-        <CopyableText
-          text={searchQuery}
-          className="text-2xl sm:text-3xl font-semibold tracking-tight"
-          ariaLabel={`Copy search query ${searchQuery}`}
-        />
-        <span className="ms-auto inline-flex items-center gap-1 text-xs text-muted-foreground tabular-nums">
-          <span className="font-medium text-foreground">
-            {verseSearch.total.toLocaleString()}
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <CopyableText
+            text={`“${searchQuery}”`}
+            className="text-3xl sm:text-4xl font-semibold tracking-tight leading-none"
+            ariaLabel={`Copy search query ${searchQuery}`}
+          />
+          <span className="text-sm text-muted-foreground tabular-nums">
+            <span className="text-foreground font-medium">
+              {verseSearch.total.toLocaleString()}
+            </span>{' '}
+            {verseSearch.total === 1 ? 'verse' : 'verses'}
           </span>
-          {verseSearch.total === 1 ? 'verse' : 'verses'}
-        </span>
+        </div>
       </header>
 
       <Tabs
@@ -527,17 +529,19 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
 function SearchHeaderSkeleton({ query }: { query: string }) {
   return (
-    <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-1">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/70">
+    <header className="px-1 space-y-1">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
         Searching
       </p>
-      <p className="text-2xl sm:text-3xl font-semibold tracking-tight text-muted-foreground/80">
-        {query}
-      </p>
-      <span className="ms-auto inline-flex items-center gap-2 text-xs text-muted-foreground">
-        <Spinner className="size-3" />
-        <span>Looking</span>
-      </span>
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <p className="text-3xl sm:text-4xl font-semibold tracking-tight leading-none text-muted-foreground/80">
+          “{query}”
+        </p>
+        <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+          <Spinner className="size-3" />
+          <span>Looking…</span>
+        </span>
+      </div>
     </header>
   )
 }
