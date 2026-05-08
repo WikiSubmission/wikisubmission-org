@@ -153,6 +153,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     if (queryChanged) {
       setWordMatches([])
       setSearchTab('all')
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0 })
     }
 
     const singleRef = parseQuranRef(normalizeQuranInput(searchQuery))

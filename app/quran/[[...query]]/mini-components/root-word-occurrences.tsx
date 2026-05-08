@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
 import { Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { QuranRef } from '@/components/quran-ref'
 import { useTranslations } from 'next-intl'
 
@@ -168,17 +169,18 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
         ))}
       </div>
       {occurrences.length < total && (
-        <div className="pt-3 pb-1 flex justify-center">
-          <button
+        <div className="pt-4 flex justify-center">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={loadMore}
             disabled={loadingMore}
-            className="text-xs text-primary hover:underline disabled:opacity-50 flex items-center gap-1"
           >
             {loadingMore && <Loader2 className="animate-spin size-3" />}
             {loadingMore
               ? t('loading')
               : t('loadMore', { shown: occurrences.length, total })}
-          </button>
+          </Button>
         </div>
       )}
     </div>
