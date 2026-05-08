@@ -194,7 +194,7 @@ function WordCardItem({
   const meaning = word.m ?? undefined
   const word1Based = word.wi ?? 0
 
-  const { playingId } = useWordAudio()
+  const { playingId, preload } = useWordAudio()
   const audioId = wordAudioId(chapter, verse, word1Based)
   const isPlaying = playingId === audioId
 
@@ -202,6 +202,9 @@ function WordCardItem({
   const open = useCallback(() => {
     if (!selectionActive) setDialogOpen(true)
   }, [selectionActive])
+  const warm = useCallback(() => {
+    if (verseCoordsValid) preload(chapter, verse, word1Based)
+  }, [preload, chapter, verse, word1Based, verseCoordsValid])
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -212,6 +215,8 @@ function WordCardItem({
         className={`group relative flex h-full flex-col items-center gap-2 px-3.5 py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
           isPlaying ? 'bg-primary/10' : 'hover:scale-[1.04]'
         }`}
+        onPointerEnter={warm}
+        onFocus={warm}
         onClick={open}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -275,7 +280,7 @@ function WordCompactItem({
   const meaning = word.m ?? undefined
   const word1Based = word.wi ?? 0
 
-  const { playingId, loadingId } = useWordAudio()
+  const { playingId, loadingId, preload } = useWordAudio()
   const audioId = wordAudioId(chapter, verse, word1Based)
   const isPlaying = playingId === audioId
   const isLoading = loadingId === audioId
@@ -284,6 +289,9 @@ function WordCompactItem({
   const open = useCallback(() => {
     if (!selectionActive) setDialogOpen(true)
   }, [selectionActive])
+  const warm = useCallback(() => {
+    if (verseCoordsValid) preload(chapter, verse, word1Based)
+  }, [preload, chapter, verse, word1Based, verseCoordsValid])
 
   const arabicEl = (
     <p
@@ -295,6 +303,8 @@ function WordCompactItem({
           ? 'text-primary scale-105'
           : 'text-foreground/90 hover:text-primary hover:scale-105'
       }`}
+      onPointerEnter={warm}
+      onFocus={warm}
       onClick={open}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {

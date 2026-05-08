@@ -32,11 +32,13 @@ import type { components } from '@/src/api/types.gen'
 import './word-lab.css'
 
 type SortMode = 'frequency' | 'abjadi' | 'reverse'
+type SearchMode = 'arabic' | 'transliteration' | 'english'
 
 const INDEX_RENDER_CAP = 300
 const ENGLISH_LOOKUP_MIN = 3
 const ENGLISH_LOOKUP_LIMIT = 40
 const ENGLISH_LOOKUP_DEBOUNCE_MS = 220
+const DERIVED_WORD_LOOKUP_LIMIT = 200
 const SHOW_MORPHOLOGY_SECTION = false
 
 const CHEAT_PAIRS: ReadonlyArray<{ lat: string; ar: string; insert: string }> = [
@@ -90,6 +92,18 @@ function tokenizeEnglish(input: string): string[] {
     .filter((s) => s.length >= ENGLISH_LOOKUP_MIN)
 }
 
+function detectSearchMode(input: string): SearchMode {
+  const q = input.trim()
+  if (!q) return 'transliteration'
+  if (/[؀-ۿ]/.test(q)) return 'arabic'
+  if (/[A-Z'`-]/.test(q)) return 'transliteration'
+  const compact = q.replace(/\s+/g, '')
+  if (/^[a-z]+$/.test(compact) && compact.length <= 4 && !/[aeiou]/.test(compact)) {
+    return 'transliteration'
+  }
+  return 'english'
+}
+
 function extractEnglishRootCandidates(
   verses: VerseData[],
   query: string,
@@ -101,10 +115,17 @@ function extractEnglishRootCandidates(
     for (const word of verse.w ?? []) {
       const rootFlat = normalizeLetters(word.r ?? '')
       if (!rootFlat) continue
+      const highlightValues = Object.values(word.hl ?? {})
+      const matchedByBackend = highlightValues.some((v) => typeof v === 'string' && v.length > 0)
       const meaning = (word.m ?? '').toLowerCase()
-      let bump = 1
-      if (exact && meaning === exact) bump += 6
-      if (terms.some((term) => meaning.includes(term))) bump += 4
+      const normalizedMeaning = meaning.replace(/^to\s+/i, '')
+      const hasTermInMeaning = terms.some((term) => meaning.includes(term))
+      if (!matchedByBackend && !hasTermInMeaning) continue
+
+      let bump = 0
+      if (matchedByBackend) bump += 12
+      if (exact && (meaning === exact || normalizedMeaning === exact)) bump += 16
+      if (hasTermInMeaning) bump += 6
       scores.set(rootFlat, (scores.get(rootFlat) ?? 0) + bump)
     }
   }
@@ -216,25 +237,32 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
   const [activeKey, setActiveKey] = useState<string | null>(initialLetters ?? null)
   const [activeDeriv, setActiveDeriv] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const forceLookupNowRef = useRef(false)
+  const [lookupTick, setLookupTick] = useState(0)
 
   const englishLookupCacheRef = useRef(new Map<string, Map<string, number>>())
   const englishLookupRequestRef = useRef(0)
 
-  const arabicTarget = useMemo(() => toArabicLetters(query), [query])
-  const isArabicQuery = useMemo(() => /[؀-ۿ]/.test(query), [query])
+  const searchMode = useMemo(() => detectSearchMode(query), [query])
+  const arabicTarget = useMemo(
+    () => (searchMode === 'english' ? '' : toArabicLetters(query)),
+    [query, searchMode],
+  )
   const queryTerms = useMemo(() => tokenizeEnglish(query), [query])
   const shouldTryEnglishLookup = useMemo(
-    () => !isArabicQuery && queryTerms.length > 0,
-    [isArabicQuery, queryTerms.length],
+    () => searchMode === 'english' && queryTerms.length > 0,
+    [searchMode, queryTerms.length],
   )
   const showPreview = useMemo(
-    () => query.length > 0 && !/[؀-ۿ]/.test(query) && arabicTarget.length > 0,
-    [query, arabicTarget],
+    () => searchMode === 'transliteration' && query.length > 0 && arabicTarget.length > 0,
+    [query, arabicTarget, searchMode],
   )
 
   useEffect(() => {
     const key = query.trim().toLowerCase()
     const requestId = ++englishLookupRequestRef.current
+    const delay = forceLookupNowRef.current ? 0 : ENGLISH_LOOKUP_DEBOUNCE_MS
+    forceLookupNowRef.current = false
     const timeout = window.setTimeout(() => {
       if (!key || !shouldTryEnglishLookup) {
         setEnglishLookupRoots(new Map())
@@ -255,7 +283,7 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
           query: {
             q: key,
             langs: ['en'],
-            scope: 'verses',
+            scope: 'words',
             limit: ENGLISH_LOOKUP_LIMIT,
             offset: 0,
             include_words: true,
@@ -281,16 +309,16 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
         setEnglishLookupRoots(new Map())
         setEnglishLookupStatus('error')
       })
-    }, ENGLISH_LOOKUP_DEBOUNCE_MS)
+    }, delay)
 
     return () => {
       window.clearTimeout(timeout)
     }
-  }, [query, shouldTryEnglishLookup])
+  }, [query, shouldTryEnglishLookup, lookupTick])
 
   const visible = useMemo(() => {
     if (!data) return []
-    const filtered = filterRoots(data, query, arabicTarget)
+    const filtered = searchMode === 'english' ? [] : filterRoots(data, query, arabicTarget)
     const queryFlat = query.toLowerCase().replace(/\s+/g, '').replace(/-/g, '')
     const arabicFlat = normalizeLetters(arabicTarget)
 
@@ -321,14 +349,21 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
       .map((letters) => data.find((r) => r.letters === letters) ?? null)
       .filter((root): root is RootRecord => !!root && !seen.has(root.letters))
 
+    if (searchMode === 'english' && query.trim().length >= ENGLISH_LOOKUP_MIN) {
+      return englishInferred
+    }
+
     return [...strict, ...fuzzy, ...englishInferred]
-  }, [data, query, arabicTarget, sort, englishLookupRoots])
+  }, [data, query, arabicTarget, sort, englishLookupRoots, searchMode])
 
   const totalRoots = data?.length ?? 0
   const indexRendered = useMemo(() => visible.slice(0, INDEX_RENDER_CAP), [visible])
   const isCapped = visible.length > INDEX_RENDER_CAP
   const englishInferredSet = useMemo(() => {
     if (!data) return new Set<string>()
+    if (searchMode === 'english') {
+      return new Set(Array.from(englishLookupRoots.keys()).map((flat) => toSpacedLetters(flat)))
+    }
     const direct = new Set(filterRoots(data, query, arabicTarget).map((root) => root.letters))
     const out = new Set<string>()
     for (const rootFlat of englishLookupRoots.keys()) {
@@ -336,7 +371,7 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
       if (!direct.has(spaced)) out.add(spaced)
     }
     return out
-  }, [data, query, arabicTarget, englishLookupRoots])
+  }, [data, query, arabicTarget, englishLookupRoots, searchMode])
 
   const grouped = useMemo(() => {
     if (sort !== 'abjadi' && sort !== 'reverse') return null
@@ -457,6 +492,12 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
               ref={inputRef}
               value={query}
               onChange={(e) => onSearchChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && shouldTryEnglishLookup) {
+                  forceLookupNowRef.current = true
+                  setLookupTick((n) => n + 1)
+                }
+              }}
               placeholder={t('searchPlaceholder')}
               spellCheck={false}
               autoComplete="off"
@@ -714,6 +755,73 @@ function Detail({
     () => parseFormMeanings(meaning),
     [meaning],
   )
+  const [derivedWordsByRoot, setDerivedWordsByRoot] = useState<{ root: string; words: Map<string, string> }>({
+    root: '',
+    words: new Map(),
+  })
+
+  useEffect(() => {
+    let cancelled = false
+    const rootFlat = normalizeLetters(root.letters)
+    if (!rootFlat) return
+
+    void wsApi.GET('/search', {
+      params: {
+        query: {
+          scope: 'words',
+          root: rootFlat,
+          langs: ['en', 'ar'],
+          include_words: true,
+          include_root: true,
+          include_meaning: true,
+          word_langs: ['ar'],
+          limit: DERIVED_WORD_LOOKUP_LIMIT,
+          offset: 0,
+        },
+      },
+    })
+      .then(({ data: searchData, error: searchError }) => {
+        if (cancelled || searchError || !searchData) return
+        const scores = new Map<string, Map<string, number>>()
+        const verses = (searchData.chapters ?? []).flatMap((chapter) => chapter.verses ?? [])
+        for (const verse of verses) {
+          for (const word of verse.w ?? []) {
+            if (normalizeLetters(word.r ?? '') !== rootFlat) continue
+            const surface = stripDiacritics(word.tx?.ar ?? '')
+            if (!surface) continue
+            const englishWord = meaningToEnglishWord(word.m ?? null)
+            if (!englishWord) continue
+            const normalizedWord = englishWord.toLowerCase()
+            const bucket = scores.get(surface) ?? new Map<string, number>()
+            bucket.set(normalizedWord, (bucket.get(normalizedWord) ?? 0) + 1)
+            scores.set(surface, bucket)
+          }
+        }
+
+        const picked = new Map<string, string>()
+        for (const [surface, bucket] of scores.entries()) {
+          let bestWord = ''
+          let bestScore = -1
+          for (const [word, score] of bucket.entries()) {
+            if (score > bestScore || (score === bestScore && word < bestWord)) {
+              bestWord = word
+              bestScore = score
+            }
+          }
+          if (bestWord) picked.set(surface, bestWord)
+        }
+        setDerivedWordsByRoot({ root: root.letters, words: picked })
+      })
+      .catch(() => {
+        if (cancelled) return
+        setDerivedWordsByRoot({ root: root.letters, words: new Map() })
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [root.letters])
+
   const lookupFormMeaning = (ar: string): string | null => {
     if (formMeanings.byForm.size === 0) {
       // No per-form structure — every form shares the root meaning.
@@ -721,6 +829,7 @@ function Detail({
     }
     return formMeanings.byForm.get(stripDiacritics(ar)) ?? null
   }
+  const derivedWords = derivedWordsByRoot.root === root.letters ? derivedWordsByRoot.words : new Map<string, string>()
 
   return (
     <article className="wl-detail">
@@ -751,7 +860,7 @@ function Detail({
           <div className="wl-derivs">
             {derivs.map((d, i) => {
               const formEn = lookupFormMeaning(d.ar)
-              const formWord = meaningToEnglishWord(formEn)
+              const formWord = derivedWords.get(stripDiacritics(d.ar)) ?? meaningToEnglishWord(formEn)
               return (
                 <button
                   key={d.ar}
