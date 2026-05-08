@@ -193,6 +193,7 @@ export default function QuranSettings() {
   const languages = useLanguagesStore((s) => s.languages)
   const t = useTranslations('settings')
   const [openSection, setOpenSection] = useState<Section>('reading')
+  const [langTab, setLangTab] = useState<'primary' | 'secondary'>('primary')
 
   const set = (patch: Partial<typeof prefs>) =>
     prefs.setPreferences({ ...prefs, ...patch })
@@ -348,31 +349,45 @@ export default function QuranSettings() {
             label={t('language')}
             summary={langSummary}
           >
-            <div className="space-y-3 max-h-[28rem] overflow-y-auto">
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-1">
-                  Primary
-                </p>
-                <LangList
-                  value={prefs.primaryLanguage}
-                  languages={languages}
-                  onChange={(code) =>
-                    set({ primaryLanguage: code as LangCode })
-                  }
-                />
+            <div className="space-y-2">
+              <div className="flex p-0.5 rounded-lg bg-muted/60">
+                {(['primary', 'secondary'] as const).map((tab) => {
+                  const isActive = langTab === tab
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setLangTab(tab)}
+                      className={cn(
+                        'flex-1 px-2 py-1 rounded-md text-xs font-medium capitalize transition-colors',
+                        isActive
+                          ? 'bg-background text-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground'
+                      )}
+                    >
+                      {tab}
+                    </button>
+                  )
+                })}
               </div>
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-1">
-                  Secondary
-                </p>
-                <LangList
-                  value={prefs.secondaryLanguage}
-                  nullable
-                  languages={languages}
-                  onChange={(code) =>
-                    set({ secondaryLanguage: code as LangCode | undefined })
-                  }
-                />
+              <div className="max-h-[24rem] overflow-y-auto">
+                {langTab === 'primary' ? (
+                  <LangList
+                    value={prefs.primaryLanguage}
+                    languages={languages}
+                    onChange={(code) =>
+                      set({ primaryLanguage: code as LangCode })
+                    }
+                  />
+                ) : (
+                  <LangList
+                    value={prefs.secondaryLanguage}
+                    nullable
+                    languages={languages}
+                    onChange={(code) =>
+                      set({ secondaryLanguage: code as LangCode | undefined })
+                    }
+                  />
+                )}
               </div>
             </div>
           </AccordionSection>
