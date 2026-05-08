@@ -636,10 +636,18 @@ export function ChapterReader({
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-0.5 min-w-0">
               <h1
-                className="text-xl font-bold"
+                className="text-xl font-bold flex items-center gap-2"
                 dir={getDirection(primaryCode)}
               >
-                {t('chapter', { number: chapterNumber, title: primaryTitle })}
+                <span className="min-w-0">
+                  {t('chapter', { number: chapterNumber, title: primaryTitle })}
+                </span>
+                {reader.loading && reader.verses.length > 0 && (
+                  <Spinner
+                    className="size-3.5 shrink-0 text-muted-foreground"
+                    aria-label={tCommon('loading')}
+                  />
+                )}
               </h1>
               {secondaryTitle && (
                 <p
@@ -647,12 +655,6 @@ export function ChapterReader({
                   dir={prefs.secondaryLanguage ? getDirection(prefs.secondaryLanguage) : undefined}
                 >
                   {secondaryTitle}
-                </p>
-              )}
-              {reader.loading && reader.verses.length > 0 && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Spinner className="size-3" />
-                  {tCommon('loading')}
                 </p>
               )}
             </div>

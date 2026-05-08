@@ -230,13 +230,9 @@ function WordCardItem({
           )}
         </div>
 
-        {(isLoading || isPlaying) && (
+        {isLoading && (
           <div className="h-3.5 flex items-center justify-center">
-            {isLoading ? (
-              <Loader2 className="size-3 text-primary animate-spin" />
-            ) : (
-              <Volume2 className="size-3 text-primary" />
-            )}
+            <Loader2 className="size-3 text-primary animate-spin" />
           </div>
         )}
       </div>
