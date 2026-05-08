@@ -193,36 +193,27 @@ function VirtualizedVerseList({
 
   useEffect(() => {
     if (!seekTarget) return
-
-    if (prevFirstVerseRef.current !== firstVerseKey) {
-      prevFirstVerseRef.current = firstVerseKey
-      seekDoneRef.current = false
-    }
-
-    if (seekDoneRef.current) return
-
     const targetIndex = verses.findIndex(
       (v) => v.vk?.split(':')[1] === seekTarget
     )
     if (targetIndex < 0) return
-    seekDoneRef.current = true
+
+    // Track the latest seek target across runs (strict mode runs effects
+    // twice in dev — without this the second run early-returned on a stale
+    // "done" flag and the seek never completed). prevFirstVerseRef now
+    // also keys on seekTarget so a brand new target restarts the loop.
+    prevFirstVerseRef.current = firstVerseKey
+    seekDoneRef.current = false
     seekBehaviorRef.current = 'auto'
 
-    // Anchor the viewport to the verse's actual DOM node. The virtualizer's
-    // scrollToIndex relies on size estimates that can be off — we instead
-    // poll for the rendered element, snap window.scrollY so its top sits
-    // ~120px below the viewport edge (under the fixed header), and re-issue
-    // scrollToIndex while the element is still outside the virtualizer's
-    // window. seekActiveRef gates the URL-sync effect so the address bar
-    // does not lock onto a mid-scroll verse while we settle.
     seekActiveRef.current = true
     const verseId = `${chapterNumber}:${seekTarget}`
-    const targetTopFromViewport = 120
+    const TARGET_TOP = 120
     let attempts = 0
     let stable = 0
     let rafId = 0
     let cancelled = false
-    const MAX_FRAMES = 90 // ~1.5s ceiling for layout shifts
+    const MAX_FRAMES = 120 // ~2s ceiling for layout shifts
     const STABLE_THRESHOLD = 6
     const tick = () => {
       if (cancelled) return
@@ -230,7 +221,7 @@ function VirtualizedVerseList({
       const el = document.getElementById(verseId)
       if (el) {
         const rect = el.getBoundingClientRect()
-        const delta = rect.top - targetTopFromViewport
+        const delta = rect.top - TARGET_TOP
         if (Math.abs(delta) > 0.5) {
           window.scrollTo(0, Math.max(0, window.scrollY + delta))
           stable = 0
@@ -250,6 +241,7 @@ function VirtualizedVerseList({
       if (!done) {
         rafId = requestAnimationFrame(tick)
       } else {
+        seekDoneRef.current = true
         seekActiveRef.current = false
       }
     }
