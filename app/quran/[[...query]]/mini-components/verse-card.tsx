@@ -86,11 +86,11 @@ function WordDetailsDialogContent({
           className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_50%_30%,var(--primary)/12%,transparent_60%)]"
         />
 
-        {/* Generous line-height accommodates the descender/diacritic extent
-            of arabic glyphs without reserving a fixed slot that would leave
-            empty space for shorter words. */}
+        {/* Vertical padding inside the glyph's own box gives diacritics
+            (shadda above, kasra below) room without reserving a fixed slot
+            that would look empty for shorter words. */}
         <DialogTitle asChild>
-          <span className="relative block font-arabic text-primary text-5xl sm:text-6xl leading-[1.9] drop-shadow-[0_2px_12px_var(--primary)/25%]">
+          <span className="relative block font-arabic text-primary text-5xl sm:text-6xl leading-tight pt-4 pb-6 drop-shadow-[0_2px_12px_var(--primary)/25%]">
             {arabic}
           </span>
         </DialogTitle>
