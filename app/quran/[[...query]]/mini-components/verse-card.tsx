@@ -86,7 +86,7 @@ function WordDetailsDialogContent({
           className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_50%_30%,var(--primary)/12%,transparent_60%)]"
         />
         <DialogTitle asChild>
-          <span className="relative block font-arabic text-primary leading-none text-6xl sm:text-7xl pb-2 drop-shadow-[0_2px_12px_var(--primary)/25%]">
+          <span className="relative block font-arabic text-primary text-5xl sm:text-6xl leading-[1.6] py-1 drop-shadow-[0_2px_12px_var(--primary)/25%]">
             {arabic}
           </span>
         </DialogTitle>
