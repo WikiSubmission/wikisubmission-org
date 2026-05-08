@@ -76,7 +76,7 @@ function WordDetailsDialogContent({
 
   return (
     <DialogContent
-      className="max-w-md sm:max-w-xl overflow-hidden rounded-3xl p-0"
+      className="max-w-md sm:max-w-xl rounded-3xl p-0"
       aria-describedby={undefined}
     >
       <DialogHeader className="relative items-center text-center px-6 pt-8 pb-6 border-b bg-gradient-to-b from-primary/15 via-primary/5 to-transparent gap-2 overflow-hidden">
@@ -128,7 +128,7 @@ function WordDetailsDialogContent({
         </div>
       </DialogHeader>
 
-      <div className="px-6 pt-5 pb-10 space-y-5 max-h-[70vh] overflow-y-auto">
+      <div className="px-6 pt-5 pb-10 space-y-5">
         {meaning && meaning !== translation && (
           <section>
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
