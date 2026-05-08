@@ -194,7 +194,7 @@ function WordCardItem({
         role="button"
         tabIndex={0}
         aria-label={`Details for ${arabic}`}
-        className={`group relative flex flex-col items-center gap-2 px-3.5 py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
+        className={`group relative flex h-full flex-col items-center gap-2 px-3.5 py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
           isPlaying ? 'bg-primary/10' : 'hover:scale-[1.04]'
         }`}
         onClick={open}
@@ -212,7 +212,14 @@ function WordCardItem({
         >
           {arabic}
         </p>
-        <div className="flex flex-col items-center gap-0.5" dir="ltr">
+        {/* The translation grows to fill the available space so the
+            transliteration that follows it sits at a shared baseline
+            across all words in a row, regardless of how long any single
+            translation wraps. */}
+        <div
+          className="flex flex-1 flex-col items-center justify-between gap-1 self-stretch"
+          dir="ltr"
+        >
           <p className="text-xs text-foreground/80 font-medium text-center wrap-break-words max-w-22">
             {translation}
           </p>
@@ -399,7 +406,7 @@ const WordByWordView = memo(
     return (
       <div
         dir="rtl"
-        className="flex flex-wrap justify-start gap-y-4 gap-x-1.5 py-3"
+        className="flex flex-wrap items-stretch justify-start gap-y-4 gap-x-1.5 py-3"
       >
         {sorted.map((w) => (
           <WordCardItem

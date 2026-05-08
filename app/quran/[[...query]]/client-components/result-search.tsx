@@ -289,24 +289,26 @@ export default function SearchResult({ props }: { props: { query: string } }) {
             </div>
           )}
 
-          {/* Verse list — uses VerseCard directly to match the chapter reader's look */}
-          <div>
-            {allVerses.map((verse, index) => {
-              const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
-              const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
-              return (
-                <VerseCard
-                  key={verse.vk ?? index}
-                  verse={verse}
-                  isLast={index === allVerses.length - 1}
-                  optsKey={optsKey}
-                  showAudio={false}
-                  verseHref={`/quran/${chNum}?verse=${vNum}`}
-                  searchHighlight={tr?.hl ?? undefined}
-                />
-              )
-            })}
-          </div>
+          {/* Verse list — wrap in the reader's rounded surface so cards match */}
+          {allVerses.length > 0 && (
+            <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden">
+              {allVerses.map((verse, index) => {
+                const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
+                const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
+                return (
+                  <VerseCard
+                    key={verse.vk ?? index}
+                    verse={verse}
+                    isLast={index === allVerses.length - 1}
+                    optsKey={optsKey}
+                    showAudio={false}
+                    verseHref={`/quran/${chNum}?verse=${vNum}`}
+                    searchHighlight={tr?.hl ?? undefined}
+                  />
+                )
+              })}
+            </div>
+          )}
 
           {verseSearch.loading && (
             <div className="flex justify-center py-6">
