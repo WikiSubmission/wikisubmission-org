@@ -16,7 +16,8 @@ import {
   DBArtist,
   DBCategory,
 } from '@/types/music'
-import { ws } from '@/lib/wikisubmission-sdk'
+import { fetchMusicData } from '@/lib/music-data'
+import { wsApi } from '@/src/api/client'
 import useLocalStorage from '@/hooks/use-local-storage'
 
 interface MusicContextType {
@@ -115,29 +116,10 @@ export function MusicProvider({
 
     async function fetchData() {
       try {
-        const { data: tracksData } = await ws.supabase
-          .from('ws_music_tracks')
-          .select(
-            '*, artistObj:ws_music_artists(*), categoryObj:ws_music_categories(*)'
-          )
-          .order('release_date', { ascending: false })
-
-        const { data: catsData } = await ws.supabase
-          .from('ws_music_categories')
-          .select('*')
-          .order('display_priority', { ascending: false })
-
-        const { data: artistsData } = await ws.supabase
-          .from('ws_music_artists')
-          .select('*')
-          .order('display_priority', { ascending: false })
-
-        if (tracksData) {
-          const formattedTracks = formatTracks(tracksData)
-          setAllTracks(formattedTracks)
-        }
-        if (catsData) setCategories(catsData)
-        if (artistsData) setArtists(artistsData)
+        const data = await fetchMusicData(wsApi)
+        setAllTracks(formatTracks(data.tracks))
+        setCategories(data.categories)
+        setArtists(data.artists)
       } catch (err) {
         console.error('Error fetching music data:', err)
       } finally {

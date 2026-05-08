@@ -18,10 +18,7 @@ export interface DBTrackRow {
   name: string
   url: string
   release_date: string | null
-  artist: string
-  category: string
   featured: boolean | null
-  // Joined objects
   artistObj?: DBArtist
   categoryObj?: DBCategory
 }

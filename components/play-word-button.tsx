@@ -30,16 +30,20 @@ export function PlayWordButton({
   ariaLabel,
 }: PlayWordButtonProps) {
   const t = useTranslations('wordLab')
-  const { playingId, loadingId, play } = useWordAudio()
+  const { playingId, loadingId, play, preload } = useWordAudio()
   const id = wordAudioId(chapter, verse, word)
   const isLoading = loadingId === id
   const isPlaying = playingId === id
+
+  const warm = () => preload(chapter, verse, word)
 
   return (
     <button
       type="button"
       aria-label={ariaLabel ?? t('playPronunciation')}
       title={ariaLabel ?? t('playPronunciation')}
+      onPointerEnter={warm}
+      onFocus={warm}
       onClick={(e) => {
         e.stopPropagation()
         e.preventDefault()

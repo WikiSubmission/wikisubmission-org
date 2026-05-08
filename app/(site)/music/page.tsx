@@ -1,5 +1,6 @@
 import MusicClient from './music-client'
-import { ws } from '@/lib/wikisubmission-sdk'
+import { fetchMusicData } from '@/lib/music-data'
+import { wsApiServer } from '@/src/api/server-client'
 import { buildPageMetadata } from '@/constants/metadata'
 import type { Metadata } from 'next'
 
@@ -16,11 +17,8 @@ export async function generateMetadata({
 
   if (trackId) {
     try {
-      const { data: track } = await ws.supabase
-        .from('ws_music_tracks')
-        .select('*, artistObj:ws_music_artists(*)')
-        .eq('id', trackId)
-        .single()
+      const { tracks } = await fetchMusicData(wsApiServer)
+      const track = tracks.find((t) => t.id === trackId)
 
       if (track && track.artistObj) {
         const title = `${track.name} by ${track.artistObj.name} | Zikr | WikiSubmission`
