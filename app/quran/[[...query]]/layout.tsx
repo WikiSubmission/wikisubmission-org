@@ -15,6 +15,10 @@ import { QuranModeSelector } from './client-components/mode-selector'
 import { QuranScrollContainer } from './client-components/scroll-container'
 import { getLocale } from 'next-intl/server'
 
+// SSR fetch cache TTL for /quran content. Kept short so backend data
+// updates / corrections show up within an hour without a manual purge.
+const QURAN_REVALIDATE_S = 3600
+
 export default async function QuranLayout({
   children,
   params,
@@ -26,13 +30,13 @@ export default async function QuranLayout({
   const [chaptersRes, appendicesRes, languagesRes] = await Promise.all([
     wsApiServer.GET('/chapters', {
       params: { query: { lang: locale } },
-      next: { revalidate: 86400 },
+      next: { revalidate: QURAN_REVALIDATE_S },
     }),
     wsApiServer.GET('/appendices', {
       params: { query: { lang: locale } },
-      next: { revalidate: 86400 },
+      next: { revalidate: QURAN_REVALIDATE_S },
     }),
-    wsApiServer.GET('/languages', { next: { revalidate: 86400 } }),
+    wsApiServer.GET('/languages', { next: { revalidate: QURAN_REVALIDATE_S } }),
   ])
 
   const { query } = await params
