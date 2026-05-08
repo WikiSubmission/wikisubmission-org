@@ -32,9 +32,6 @@ Build and run locally:
 docker build -t wikisubmission-org .
 docker run --rm -p 3000:3000 \
   -e NEXT_PUBLIC_SITE_URL=http://localhost:3000 \
-  -e NEXT_PUBLIC_SUPABASE_URL=... \
-  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=... \
-  -e SUPABASE_SERVICE_ROLE_KEY=... \
   -e NEXT_PUBLIC_API_URL=... \
   wikisubmission-org
 ```
@@ -49,9 +46,6 @@ Coolify configuration notes:
 Required environment variables:
 
 - `NEXT_PUBLIC_SITE_URL`
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
 - `NEXT_PUBLIC_API_URL`
 
 Additional environment variables used by optional integrations:

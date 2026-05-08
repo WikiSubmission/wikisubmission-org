@@ -257,13 +257,16 @@ function WordCardItem({
   const word1Based = word.wi ?? 0
   const hasRoot = !!root && verseCoordsValid
 
-  const { playingId, loadingId, play } = useWordAudio()
+  const { playingId, loadingId, play, preload } = useWordAudio()
   const audioId = wordAudioId(chapter, verse, word1Based)
   const isPlaying = playingId === audioId
   const isLoading = loadingId === audioId
 
   const [dialogOpen, setDialogOpen] = useState(false)
 
+  const warm = useCallback(() => {
+    if (verseCoordsValid) preload(chapter, verse, word1Based)
+  }, [preload, chapter, verse, word1Based, verseCoordsValid])
   const playAudio = useCallback(() => {
     if (verseCoordsValid) play(chapter, verse, word1Based)
   }, [play, chapter, verse, word1Based, verseCoordsValid])
@@ -309,6 +312,8 @@ function WordCardItem({
             ? 'bg-primary/10 border-primary/40'
             : 'border-transparent hover:bg-muted/50 hover:border-primary/20'
         }`}
+        onPointerEnter={warm}
+        onFocus={warm}
         onPointerDown={handlers.onPointerDown}
         onPointerMove={handlers.onPointerMove}
         onPointerUp={handlers.onPointerUp}
@@ -413,13 +418,16 @@ function WordCompactItem({
   const word1Based = word.wi ?? 0
   const hasRoot = !!root && verseCoordsValid
 
-  const { playingId, loadingId, play } = useWordAudio()
+  const { playingId, loadingId, play, preload } = useWordAudio()
   const audioId = wordAudioId(chapter, verse, word1Based)
   const isPlaying = playingId === audioId
   const isLoading = loadingId === audioId
 
   const [dialogOpen, setDialogOpen] = useState(false)
 
+  const warm = useCallback(() => {
+    if (verseCoordsValid) preload(chapter, verse, word1Based)
+  }, [preload, chapter, verse, word1Based, verseCoordsValid])
   const playAudio = useCallback(() => {
     if (verseCoordsValid) play(chapter, verse, word1Based)
   }, [play, chapter, verse, word1Based, verseCoordsValid])
@@ -478,6 +486,8 @@ function WordCompactItem({
           ? 'text-primary scale-105'
           : 'text-foreground/90 hover:text-primary hover:scale-105'
       }`}
+      onPointerEnter={warm}
+      onFocus={warm}
       onPointerDown={handlers.onPointerDown}
       onPointerMove={handlers.onPointerMove}
       onPointerUp={handlers.onPointerUp}
