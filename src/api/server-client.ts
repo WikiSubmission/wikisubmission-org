@@ -12,13 +12,22 @@ import createClient from 'openapi-fetch'
 import type { paths } from './types.gen'
 
 const baseUrl = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL
+const internalAuthToken = process.env.INTERNAL_API_TOKEN
 
 // Quran data never changes — cache server-side responses for 24h.
 // Next.js data cache is separate from the page cache, so this works even
 // with force-dynamic pages. Subsequent requests skip the API entirely.
+//
+// X-Internal-Auth, when configured, lets the SSR container bypass the
+// backend's per-IP rate limit — without it, all SSR traffic shares one
+// IP bucket and trips 429s under load.
 const cachedFetch: typeof globalThis.fetch = (url, init) =>
   globalThis.fetch(url, {
     ...init,
+    headers: {
+      ...(init?.headers as Record<string, string> | undefined),
+      ...(internalAuthToken ? { 'X-Internal-Auth': internalAuthToken } : {}),
+    },
     next: { revalidate: 86400 },
   } as RequestInit)
 
