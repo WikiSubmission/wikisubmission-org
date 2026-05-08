@@ -587,12 +587,12 @@ export function AblutionSlideshow() {
       {renderModal && (
         <div
           ref={modalBackdropRef}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--ed-bg)]/98 backdrop-blur-xl"
+          className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-[var(--ed-bg)]/98 backdrop-blur-xl"
           onClick={closeModal}
         >
           <div
             ref={modalContentRef}
-            className="relative w-full max-w-6xl mx-auto p-4 md:p-12 flex flex-col gap-8"
+            className="relative w-full max-w-6xl mx-auto min-h-full p-4 py-6 md:p-8 lg:p-10 flex flex-col gap-6"
             onClick={e => e.stopPropagation()}
           >
               {/* Header */}
