@@ -147,7 +147,10 @@ export function ScriptureRef({
         {label}
       </button>
 
-      <DialogContent className="max-w-lg p-0 overflow-hidden rounded-3xl gap-0">
+      <DialogContent
+        className="max-w-lg p-0 overflow-hidden rounded-3xl gap-0"
+        aria-describedby={undefined}
+      >
         {/* Required for a11y; visible header is intentionally minimal — the
             verse-key pill on the rendered card already carries the reference. */}
         <DialogTitle className="sr-only">

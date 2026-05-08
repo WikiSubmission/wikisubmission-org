@@ -100,7 +100,7 @@ export function RootWordOccurrences({
         setOccurrences([])
         setLoading(false)
       })
-  }, [rootWord])
+  }, [rootWord, onTotalChange])
 
   const loadMore = () => {
     setLoadingMore(true)

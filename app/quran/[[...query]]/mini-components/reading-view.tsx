@@ -181,7 +181,10 @@ function FootnoteButton({
         {index + 1}
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg rounded-3xl">
+        <DialogContent
+          className="max-w-lg rounded-3xl"
+          aria-describedby={undefined}
+        >
           {open && (
             <FootnoteDialogContent
               initialEntry={{ type: 'footnote', verseKey, text }}
