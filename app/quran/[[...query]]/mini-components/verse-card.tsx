@@ -177,10 +177,9 @@ function WordCardItem({
   const meaning = word.m ?? undefined
   const word1Based = word.wi ?? 0
 
-  const { playingId, loadingId } = useWordAudio()
+  const { playingId } = useWordAudio()
   const audioId = wordAudioId(chapter, verse, word1Based)
   const isPlaying = playingId === audioId
-  const isLoading = loadingId === audioId
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const open = useCallback(() => {
@@ -229,11 +228,6 @@ function WordCardItem({
           )}
         </div>
 
-        {isLoading && (
-          <div className="h-3.5 flex items-center justify-center">
-            <Loader2 className="size-3 text-primary animate-spin" />
-          </div>
-        )}
       </div>
 
       <WordDetailsDialogContent
