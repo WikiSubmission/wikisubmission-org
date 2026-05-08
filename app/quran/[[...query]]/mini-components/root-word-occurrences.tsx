@@ -139,7 +139,7 @@ export function RootWordOccurrences({ rootWord }: { rootWord: string }) {
   }
 
   return (
-    <div className="max-h-[45vh] overflow-y-auto pr-4 custom-scrollbar animate-in fade-in duration-300">
+    <div className="animate-in fade-in duration-300">
       <div className="flex flex-col gap-3">
         {occurrences.map((occ, i) => (
           <div
