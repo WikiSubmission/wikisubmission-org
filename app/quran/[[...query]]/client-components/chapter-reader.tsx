@@ -482,7 +482,7 @@ export function ChapterReader({
   const opts = useMemo<ChapterReaderOptions>(
     () => ({
       primaryLang: prefs.primaryLanguage,
-      secondaryLang: prefs.wordByWord ? undefined : prefs.secondaryLanguage,
+      secondaryLang: prefs.secondaryLanguage,
       includeArabic: needsArabic,
       includeWords: needsArabic && displayMode !== 'reading',
       includeRoot: needsArabic && displayMode !== 'reading',
