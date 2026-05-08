@@ -350,7 +350,7 @@ export default function QuranSettings() {
             summary={langSummary}
           >
             <div className="space-y-2">
-              <div className="flex p-0.5 rounded-lg bg-muted/60">
+              <div className="flex gap-1">
                 {(['primary', 'secondary'] as const).map((tab) => {
                   const isActive = langTab === tab
                   return (
@@ -358,10 +358,10 @@ export default function QuranSettings() {
                       key={tab}
                       onClick={() => setLangTab(tab)}
                       className={cn(
-                        'flex-1 px-2 py-1 rounded-md text-xs font-medium capitalize transition-colors',
+                        'flex-1 px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors',
                         isActive
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-muted-foreground hover:bg-accent/40 hover:text-foreground'
                       )}
                     >
                       {tab}
