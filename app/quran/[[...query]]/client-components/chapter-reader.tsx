@@ -159,6 +159,19 @@ function VirtualizedVerseList({
     virtualizer.measure()
   }, [viewportWidth, virtualizer])
 
+  // Re-measure when rendering-only prefs change (instead of remounting via
+  // a layout key). Remounting mid-seek would reset the virtualizer's scroll
+  // tracking and snap the viewport back to the SSR window.
+  useEffect(() => {
+    virtualizer.measure()
+  }, [
+    virtualizer,
+    prefs.text,
+    prefs.footnotes,
+    prefs.subtitles,
+    prefs.transliteration,
+  ])
+
   const virtualItems = virtualizer.getVirtualItems()
   const lastVirtualIndex = virtualItems[virtualItems.length - 1]?.index ?? -1
   const firstVirtualIndex = virtualItems[0]?.index ?? 0
@@ -651,7 +664,6 @@ export function ChapterReader({
   // Stable key that changes when language prefs change — propagated to VerseCard
   // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
   const optsKey = `v2-${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}-${zoomLevel}`
-  const layoutKey = `${optsKey}-${prefs.text}-${prefs.footnotes}-${prefs.subtitles}-${prefs.transliteration}`
 
   const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const arTitle = reader.chapterTitles?.['ar']
@@ -756,10 +768,15 @@ export function ChapterReader({
         </div>
       )}
 
-      {/* Verse/Word mode — window virtualizer, page scrolls naturally. */}
+      {/* Verse/Word mode — window virtualizer, page scrolls naturally.
+          Note: we deliberately don't `key={layoutKey}` this. Remounting the
+          virtualizer mid-seek (which happens when zustand hydrates from
+          localStorage right after first paint) would discard the in-flight
+          seek and snap the viewport back to the SSR window. The inner
+          component re-measures via virtualizer.measure() when prefs that
+          affect row height change. */}
       {displayMode !== 'reading' && (
         <VirtualizedVerseList
-          key={layoutKey}
           chapterNumber={chapterNumber}
           verses={reader.verses}
           hasMore={reader.hasMore}
