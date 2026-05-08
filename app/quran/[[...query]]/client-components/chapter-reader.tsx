@@ -212,16 +212,45 @@ function VirtualizedVerseList({
     seekBehaviorRef.current = 'auto'
     seekDoneRef.current = true
 
-    const rafId = requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
+    // Virtualizer's scrollToIndex relies on size estimates that can be off
+    // until cards are measured. Re-anchor to the actual DOM element across
+    // a few frames so the viewport always lands on the target verse instead
+    // of drifting back toward the top of the chapter.
+    const verseId = `${chapterNumber}:${seekTarget}`
+    const targetTopFromList = 120
+    let cancelled = false
+    const ensureAnchored = () => {
+      if (cancelled) return
+      const el = document.getElementById(verseId)
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        const desiredScroll =
+          window.scrollY + rect.top - targetTopFromList
+        if (Math.abs(rect.top - targetTopFromList) > 4) {
+          window.scrollTo(0, Math.max(0, desiredScroll))
+        }
+      } else {
+        // Element not yet rendered — let virtualizer keep working.
         virtualizer.scrollToIndex(targetIndex, {
           align: 'start',
           behavior: 'auto',
         })
-      })
-    )
-    return () => cancelAnimationFrame(rafId)
-  }, [firstVerseKey, seekTarget, verses, virtualizer])
+      }
+    }
+
+    let rafId = 0
+    let attempts = 0
+    const tick = () => {
+      ensureAnchored()
+      attempts += 1
+      if (!cancelled && attempts < 12) rafId = requestAnimationFrame(tick)
+    }
+    rafId = requestAnimationFrame(tick)
+    return () => {
+      cancelled = true
+      cancelAnimationFrame(rafId)
+    }
+  }, [firstVerseKey, seekTarget, verses, virtualizer, chapterNumber])
 
   useEffect(() => {
     if (!currentVerseId || !isPlaying) return
