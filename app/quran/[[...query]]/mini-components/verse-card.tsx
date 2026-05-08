@@ -304,7 +304,7 @@ function WordCardItem({
           tapAction === 'play' ? `Play ${arabic}` : `Details for ${arabic}`
         }
         title={secondaryLabel}
-        className={`group relative flex flex-col items-center gap-1.5 px-2 py-1.5 cursor-pointer transition-all rounded-xl border ${
+        className={`group relative flex flex-col items-center gap-1.5 px-3.5 py-2.5 cursor-pointer transition-all rounded-xl border ${
           isPlaying
             ? 'bg-primary/10 border-primary/40'
             : 'border-transparent hover:bg-muted/50 hover:border-primary/20'
@@ -869,7 +869,9 @@ export const VerseCard = memo(
         onClickCapture={onCardClickCapture}
         style={{ WebkitUserSelect: selectionActive ? 'none' : undefined }}
         className={`relative transition-colors duration-500 ${
-          isSelected ? 'bg-primary/10 ring-2 ring-primary ring-inset' : ''
+          isSelected
+            ? 'bg-primary/10 before:pointer-events-none before:absolute before:inset-2 before:rounded-2xl before:ring-2 before:ring-primary'
+            : ''
         } ${
           !isSelected && (isScrollTarget || isCurrentAudio) ? 'bg-primary/10' : ''
         } ${selectionActive ? 'cursor-pointer select-none' : ''}`}

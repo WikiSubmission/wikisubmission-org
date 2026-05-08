@@ -202,14 +202,14 @@ export function VerseListResult({
         <button
           onClick={handleCopyAllMarkdown}
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted/60 border border-border/40"
-          aria-label="Copy all results as markdown"
+          aria-label="Copy all results"
         >
           {copiedAll ? (
             <Check size={13} className="text-green-500" />
           ) : (
             <Copy size={13} />
           )}
-          <span>{copiedAll ? 'Copied!' : 'Copy all as markdown'}</span>
+          <span>{copiedAll ? 'Copied!' : 'Copy all'}</span>
         </button>
       </div>
 

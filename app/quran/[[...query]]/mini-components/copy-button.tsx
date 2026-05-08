@@ -162,7 +162,7 @@ export function CopyButton({
       <button
         type="button"
         aria-label={t('aria')}
-        className={`${iconButtonBase} w-8 ${compact ? '' : 'rounded-r-none pr-1'}`}
+        className={`${iconButtonBase} w-8 ${compact ? '' : 'rounded-r-none pr-0'}`}
         disabled={isPending}
         onClick={() => runCopy('full-text')}
       >
@@ -179,7 +179,7 @@ export function CopyButton({
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label={t('more')}
-            className={`${iconButtonBase} w-5 rounded-l-none pl-0.5`}
+            className={`${iconButtonBase} w-4 rounded-l-none pl-0`}
             disabled={isPending}
           >
             <ChevronDown className="w-3 h-3" />
