@@ -22,7 +22,6 @@ import {
   ArrowUpRight,
   Bookmark,
   StickyNote,
-  Volume2,
   Maximize2,
   Minimize2,
 } from 'lucide-react'
@@ -306,13 +305,9 @@ function WordCompactItem({
       }}
     >
       {arabic}
-      {(isPlaying || isLoading) && (
+      {isLoading && (
         <span className="inline-block ml-1 align-middle text-primary">
-          {isLoading ? (
-            <Loader2 className="size-3 inline animate-spin" />
-          ) : (
-            <Volume2 className="size-3 inline" />
-          )}
+          <Loader2 className="size-3 inline animate-spin" />
         </span>
       )}
     </p>
