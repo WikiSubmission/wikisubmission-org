@@ -24,42 +24,61 @@ export function useVerseFetch() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetch = useCallback(async (ref: string, lang: LangCode) => {
-    const parsed = parseQuranRef(ref)
-    if (!parsed) {
-      setError('Invalid reference')
-      return
-    }
+  const fetch = useCallback(
+    async (
+      ref: string,
+      lang: LangCode,
+      opts?: {
+        secondaryLang?: LangCode
+        includeWords?: boolean
+      }
+    ) => {
+      const parsed = parseQuranRef(ref)
+      if (!parsed) {
+        setError('Invalid reference')
+        return
+      }
 
-    setLoading(true)
-    setVerses([])
-    setError(null)
+      setLoading(true)
+      setVerses([])
+      setError(null)
 
-    const langs: string[] = []
-    if (lang !== 'xl') langs.push(lang)
-    if (!langs.includes('ar')) langs.push('ar')
+      const langs: string[] = []
+      if (lang !== 'xl') langs.push(lang)
+      if (!langs.includes('ar')) langs.push('ar')
+      if (
+        opts?.secondaryLang &&
+        opts.secondaryLang !== 'xl' &&
+        !langs.includes(opts.secondaryLang)
+      ) {
+        langs.push(opts.secondaryLang)
+      }
 
-    // verse 0 = Basmallah. Fetch the first 2 verses (0 and 1) and filter,
-    // since some backends don't accept verse_start: 0 as an explicit param.
-    const isBasmallah = parsed.vs === 0
-    const { data, error: err } = await wsApi.GET('/quran', {
-      params: {
-        query: {
-          chapter_number_start: parsed.cn,
-          ...(isBasmallah ? { verse_end: 1 } : { verse_start: parsed.vs, verse_end: parsed.ve }),
-          langs,
+      const isBasmallah = parsed.vs === 0
+      const { data, error: err } = await wsApi.GET('/quran', {
+        params: {
+          query: {
+            chapter_number_start: parsed.cn,
+            ...(isBasmallah ? { verse_end: 1 } : { verse_start: parsed.vs, verse_end: parsed.ve }),
+            langs,
+            include_words: opts?.includeWords || undefined,
+            include_root: opts?.includeWords || undefined,
+            include_meaning: opts?.includeWords || undefined,
+            word_langs: opts?.includeWords ? ['ar', 'en', 'tl'] : undefined,
+          },
         },
-      },
-    })
+      })
 
-    const allVerses = data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
-    const filtered = isBasmallah
-      ? allVerses.filter((v) => v.vk === `${parsed.cn}:0`)
-      : allVerses
-    setVerses(filtered)
-    setError(err ? 'Failed to fetch verse.' : null)
-    setLoading(false)
-  }, [])
+      const allVerses = data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
+      const filtered = isBasmallah
+        ? allVerses.filter((v) => v.vk === `${parsed.cn}:0`)
+        : allVerses
+      setVerses(filtered)
+      setError(err ? 'Failed to fetch verse.' : null)
+      setLoading(false)
+    },
+    []
+  )
 
   return { verses, loading, error, fetch }
 }
