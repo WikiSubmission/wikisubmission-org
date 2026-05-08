@@ -37,6 +37,7 @@ const INDEX_RENDER_CAP = 300
 const ENGLISH_LOOKUP_MIN = 3
 const ENGLISH_LOOKUP_LIMIT = 40
 const ENGLISH_LOOKUP_DEBOUNCE_MS = 220
+const SHOW_MORPHOLOGY_SECTION = false
 
 const CHEAT_PAIRS: ReadonlyArray<{ lat: string; ar: string; insert: string }> = [
   { lat: 'a', ar: 'ا', insert: 'a' },
@@ -783,7 +784,7 @@ function Detail({
         showTranslation={prefs.text}
       />
 
-      {deriv && (
+      {SHOW_MORPHOLOGY_SECTION && deriv && (
         <Section
           num="03"
           title={t.rich('sectionMorphologyOf', {
