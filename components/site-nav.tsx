@@ -10,6 +10,7 @@ import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
 import { useTranslations, useLocale } from 'next-intl'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { SiteBrand } from '@/components/site-brand'
+import { UserMenu } from '@/components/user-menu'
 
 type FlatLink = { kind: 'link'; label: string; href: string }
 type GroupChild = {
@@ -228,6 +229,7 @@ function MobileMenu({
         className="mt-2 pt-2 flex items-center gap-2 flex-wrap"
         style={{ borderTop: '1px solid var(--ed-rule)' }}
       >
+        <UserMenu />
         <LocaleSwitcher currentLocale={locale} onSelect={close} />
         <PaletteThemeSwitcher />
       </div>
@@ -339,6 +341,8 @@ export function SiteNav() {
             <Sparkles size={12} />
             <span>{t('submissionAI')}</span>
           </button>
+
+          <UserMenu />
 
           <div className="flex items-center gap-0.5">
             <LocaleSwitcher currentLocale={locale} />
