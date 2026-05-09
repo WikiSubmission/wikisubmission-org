@@ -1,12 +1,11 @@
 'use client'
 
-import { memo, useMemo, useCallback, useState, useEffect } from 'react'
+import { memo, useMemo, useCallback, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useSession } from 'next-auth/react'
 import { useSignInPromptStore } from '@/store/sign-in-prompt'
 import { useAddBookmarkEntry, useRemoveBookmarkEntry } from '@/hooks/use-bookmarks'
-import { useUpsertNote, useDeleteNote } from '@/hooks/use-notes'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
@@ -28,7 +27,6 @@ import {
   Bookmark,
   StickyNote,
   Plus,
-  Trash2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HighlightText } from '@/components/highlight-text'
@@ -37,7 +35,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import {
   DropdownMenu,
@@ -55,10 +52,8 @@ import {
 import type { components } from '@/src/api/types.gen'
 import { QuranRefText } from '@/components/quran-ref-text'
 import type { BookmarkEntryData, NoteData } from '@/types/bookmarks'
-import { useCreateBlockNote } from '@blocknote/react'
-import { BlockNoteView } from '@blocknote/mantine'
-import '@blocknote/mantine/style.css'
-import '@blocknote/react/style.css'
+import { NoteEditorDialog } from '@/components/me/note-editor-dialog'
+import { CreateCategoryDialog } from '@/components/me/create-category-dialog'
 
 type VerseData = components['schemas']['VerseData']
 type WordData = components['schemas']['WordData']
@@ -454,87 +449,6 @@ const WordByWordView = memo(
     prev.optsKey === next.optsKey
 )
 
-// ─── Note editor dialog ───────────────────────────────────────────────────────
-
-function NoteEditorDialog({
-  note,
-  verseKey,
-  scripture,
-  open,
-  onOpenChange,
-}: {
-  note: NoteData | null
-  verseKey: string
-  scripture: string
-  open: boolean
-  onOpenChange: (v: boolean) => void
-}) {
-  const editor = useCreateBlockNote()
-  const { mutate: upsert, isPending: saving } = useUpsertNote(scripture)
-  const { mutate: remove, isPending: deleting } = useDeleteNote(scripture)
-
-  useEffect(() => {
-    if (!open) return
-    let cancelled = false
-    async function load() {
-      const blocks = note?.content
-        ? await editor.tryParseMarkdownToBlocks(note.content)
-        : [{ type: 'paragraph' as const, content: [] }]
-      if (!cancelled) editor.replaceBlocks(editor.document, blocks)
-    }
-    load()
-    return () => { cancelled = true }
-  }, [open, note?.content, editor])
-
-  async function handleSave() {
-    const markdown = await editor.blocksToMarkdownLossy(editor.document)
-    upsert(
-      { verseKey, content: markdown.trim() },
-      { onSuccess: () => onOpenChange(false) }
-    )
-  }
-
-  function handleDelete() {
-    if (!note) return
-    remove({ id: note.id, verseKey }, { onSuccess: () => onOpenChange(false) })
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg flex flex-col gap-0 p-0 overflow-hidden">
-        <DialogHeader className="px-5 pt-5 pb-3 border-b">
-          <DialogTitle className="text-sm font-mono tracking-wider uppercase text-muted-foreground">
-            Note — {verseKey}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="min-h-[200px] max-h-[60vh] overflow-y-auto px-2 py-3 [&_.bn-editor]:min-h-[180px] [&_.bn-editor]:text-sm">
-          <BlockNoteView editor={editor} theme="light" />
-        </div>
-        <DialogFooter className="px-5 py-3 border-t flex flex-row items-center gap-2">
-          {note && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-destructive hover:text-destructive mr-auto"
-              disabled={deleting}
-              onClick={handleDelete}
-            >
-              <Trash2 className="w-3.5 h-3.5 mr-1" />
-              Delete
-            </Button>
-          )}
-          <Button size="sm" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button size="sm" disabled={saving} onClick={handleSave}>
-            {note ? 'Save' : 'Add note'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 // ─── Verse Card ───────────────────────────────────────────────────────────────
 
 type VerseCardProps = {
@@ -598,6 +512,7 @@ export const VerseCard = memo(
     const { mutate: removeEntry, isPending: removingEntry } = useRemoveBookmarkEntry(scripture)
 
     const [notesOpen, setNotesOpen] = useState(false)
+    const [createCategoryOpen, setCreateCategoryOpen] = useState(false)
 
     const { playFromVerse, togglePlayPause } = useQuranPlayerCallbacks()
 
@@ -795,9 +710,19 @@ export const VerseCard = memo(
                       })
                     )}
                     <DropdownMenuSeparator />
-                    <Link href="/me" className="block">
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer rounded-sm hover:bg-accent"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setCreateCategoryOpen(true)
+                      }}
+                    >
+                      <Plus className="w-3 h-3" />
+                      New category
+                    </button>
+                    <Link href="/me/bookmarks" className="block">
                       <div className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer rounded-sm hover:bg-accent">
-                        <Plus className="w-3 h-3" />
                         Manage categories
                       </div>
                     </Link>
@@ -921,6 +846,13 @@ export const VerseCard = memo(
           scripture={scripture}
           open={notesOpen}
           onOpenChange={setNotesOpen}
+        />
+        <CreateCategoryDialog
+          open={createCategoryOpen}
+          onOpenChange={setCreateCategoryOpen}
+          onCreated={(id) => {
+            addEntry({ categoryId: id, verseKey: verseId })
+          }}
         />
       </div>
     )

@@ -602,3 +602,94 @@ html[data-palette='mono'].dark {
     }
   }
 }
+
+/* ── BlockNote editor theming — match editorial palette ──────────────────── */
+.bn-themed .bn-container,
+.bn-themed .bn-editor {
+  background: transparent !important;
+  color: var(--foreground) !important;
+  font-family: var(--font-body) !important;
+}
+
+.bn-themed [data-content-type="paragraph"],
+.bn-themed [data-content-type="heading"],
+.bn-themed [data-content-type="bulletListItem"],
+.bn-themed [data-content-type="numberedListItem"],
+.bn-themed [data-content-type="checkListItem"] {
+  color: var(--foreground);
+}
+
+.bn-themed .bn-inline-content {
+  color: var(--foreground);
+}
+
+.bn-themed .bn-block-content[data-is-empty-and-focused="true"]
+  .bn-inline-content::before {
+  color: color-mix(in oklab, var(--foreground), transparent 60%);
+}
+
+.bn-themed [data-content-type="heading"][data-level="1"] {
+  font-family: var(--font-headline);
+  font-size: 1.6rem;
+  line-height: 1.25;
+}
+
+.bn-themed [data-content-type="heading"][data-level="2"] {
+  font-family: var(--font-headline);
+  font-size: 1.3rem;
+}
+
+.bn-themed [data-content-type="heading"][data-level="3"] {
+  font-family: var(--font-headline);
+  font-size: 1.1rem;
+}
+
+.bn-themed code {
+  font-family: var(--font-mono) !important;
+  background: var(--muted);
+  color: var(--foreground);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.85em;
+}
+
+.bn-themed [data-content-type="codeBlock"] {
+  background: var(--muted) !important;
+  color: var(--foreground) !important;
+  font-family: var(--font-mono) !important;
+}
+
+.bn-themed blockquote,
+.bn-themed [data-content-type="quote"] {
+  border-left: 3px solid var(--primary);
+  padding-left: 1rem;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.bn-themed .bn-side-menu {
+  color: color-mix(in oklab, var(--foreground), transparent 60%);
+}
+
+.bn-themed .bn-formatting-toolbar,
+.bn-themed .bn-menu,
+.bn-themed [data-floating-ui-portal] [role="menu"] {
+  background: var(--popover) !important;
+  color: var(--popover-foreground) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 8px 28px -8px color-mix(in oklab, var(--foreground), transparent 80%);
+}
+
+.bn-themed .bn-formatting-toolbar button:hover,
+.bn-themed .bn-menu button:hover {
+  background: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+/* Hide the helper hint that appears on empty new lines */
+.bn-themed .bn-block-outer:not([data-prev-depth-changed]):first-child
+  .bn-block-content[data-is-empty-and-focused="true"]
+  .bn-inline-content::before {
+  content: "Write a thought, a quote, a reflection…";
+}
+}
