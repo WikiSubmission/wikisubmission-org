@@ -118,8 +118,12 @@ function VirtualizedVerseList({
     estimateSize: (index) => {
       const verse = verses[index]
       const primaryCode =
-        prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
-      const footnoteLen = verse?.tr?.[primaryCode]?.f?.length ?? 0
+        prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
+          ? prefs.primaryLanguage
+          : undefined
+      const footnoteLen = primaryCode
+        ? (verse?.tr?.[primaryCode]?.f?.length ?? 0)
+        : 0
       const footnoteRows = Math.ceil(footnoteLen / 65)
       const wordCount = verse?.w?.length ?? 8
       // Keep the first client render identical to SSR to avoid hydration mismatch.
@@ -631,13 +635,18 @@ export function ChapterReader({
   // so it always fetches English + Arabic. If the user's stored pref is e.g. French
   // primary or a secondary language, reload immediately so the correct translation shows.
   useEffect(() => {
-    const primaryCode = opts.primaryLang !== 'xl' ? opts.primaryLang : 'en'
+    const primaryCode =
+      opts.primaryLang !== 'xl' && opts.primaryLang !== 'none'
+        ? opts.primaryLang
+        : undefined
     const secondaryCode =
-      opts.secondaryLang && opts.secondaryLang !== 'xl' ? opts.secondaryLang : null
+      opts.secondaryLang && opts.secondaryLang !== 'xl' && opts.secondaryLang !== 'none'
+        ? opts.secondaryLang
+        : null
     const firstVerse = reader.verses[0]
     const needsReload =
       reader.verses.length === 0 ||
-      firstVerse?.tr?.[primaryCode] === undefined ||
+      (primaryCode !== undefined && firstVerse?.tr?.[primaryCode] === undefined) ||
       (secondaryCode !== null && firstVerse?.tr?.[secondaryCode] === undefined)
     if (needsReload) reader.reload(opts, seekTarget ? parseInt(seekTarget) : undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -720,12 +729,18 @@ export function ChapterReader({
   // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
   const optsKey = `v2-${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}-${zoomLevel}`
 
-  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode =
+    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
+      ? prefs.primaryLanguage
+      : undefined
   const arTitle = reader.chapterTitles?.['ar']
   const primaryTitle =
-    reader.chapterTitles?.[primaryCode] ?? t('sura', { number: chapterNumber })
+    (primaryCode ? reader.chapterTitles?.[primaryCode] : undefined) ??
+    t('sura', { number: chapterNumber })
   const secondaryTitle =
-    prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl'
+    prefs.secondaryLanguage &&
+    prefs.secondaryLanguage !== 'xl' &&
+    prefs.secondaryLanguage !== 'none'
       ? reader.chapterTitles?.[prefs.secondaryLanguage]
       : undefined
 
@@ -739,7 +754,7 @@ export function ChapterReader({
             <div className="flex flex-col gap-0.5 min-w-0">
               <h1
                 className="text-xl font-bold flex items-center gap-2"
-                dir={getDirection(primaryCode)}
+                dir={getDirection(primaryCode ?? 'en')}
               >
                 <span className="min-w-0">
                   {t('chapter', { number: chapterNumber, title: primaryTitle })}
@@ -754,7 +769,12 @@ export function ChapterReader({
               {secondaryTitle && (
                 <p
                   className="text-sm text-muted-foreground italic"
-                  dir={prefs.secondaryLanguage ? getDirection(prefs.secondaryLanguage) : undefined}
+                  dir={
+                    prefs.secondaryLanguage &&
+                    prefs.secondaryLanguage !== 'none'
+                      ? getDirection(prefs.secondaryLanguage)
+                      : undefined
+                  }
                 >
                   {secondaryTitle}
                 </p>

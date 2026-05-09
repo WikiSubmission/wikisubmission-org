@@ -15,7 +15,6 @@ import {
   LanguagesIcon,
   MessageSquareTextIcon,
   SettingsIcon,
-  TextIcon,
   TypeIcon,
   ZoomInIcon,
 } from 'lucide-react'
@@ -202,14 +201,16 @@ export default function QuranSettings() {
   const [langTab, setLangTab] = useState<'primary' | 'secondary'>('primary')
 
   const set = (patch: Partial<typeof prefs>) =>
-    prefs.setPreferences({ ...prefs, ...patch })
+    prefs.setPreferences({ ...prefs, ...patch, text: true })
 
   const toggle = (section: Exclude<Section, null>) =>
     setOpenSection((cur) => (cur === section ? null : section))
 
   const primaryName =
-    languages.find((l) => l.code === prefs.primaryLanguage)?.name ??
-    prefs.primaryLanguage
+    prefs.primaryLanguage === 'none'
+      ? t('none')
+      : languages.find((l) => l.code === prefs.primaryLanguage)?.name ??
+        prefs.primaryLanguage
   const secondaryName = prefs.secondaryLanguage
     ? languages.find((l) => l.code === prefs.secondaryLanguage)?.name ??
       prefs.secondaryLanguage
@@ -221,7 +222,7 @@ export default function QuranSettings() {
       ? prefs.readingModeLang === 'arabic'
         ? t('arabic')
         : 'Translation'
-      : prefs.text && 'Translation',
+      : prefs.primaryLanguage !== 'none' && 'Translation',
     prefs.displayMode !== 'reading' &&
       prefs.arabic &&
       !prefs.wordByWord &&
@@ -299,13 +300,6 @@ export default function QuranSettings() {
 
               {prefs.displayMode !== 'reading' && (
                 <>
-                  <SettingTile
-                    icon={<TextIcon className="size-3.5" />}
-                    label="Translation"
-                    description="Verse translation text"
-                    checked={prefs.text}
-                    onCheckedChange={(checked) => set({ text: checked })}
-                  />
                   <SettingTile
                     icon={<TypeIcon className="size-3.5" />}
                     label={t('arabic')}
@@ -387,9 +381,10 @@ export default function QuranSettings() {
                 {langTab === 'primary' ? (
                   <LangList
                     value={prefs.primaryLanguage}
+                    nullable
                     languages={languages}
                     onChange={(code) =>
-                      set({ primaryLanguage: code as LangCode })
+                      set({ primaryLanguage: (code as LangCode | undefined) ?? 'none' })
                     }
                   />
                 ) : (

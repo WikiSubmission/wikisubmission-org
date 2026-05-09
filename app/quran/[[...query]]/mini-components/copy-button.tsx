@@ -49,16 +49,21 @@ interface CopyButtonProps {
 function usePrefsSnapshot() {
   const prefs = useQuranPreferences()
   const primaryCode =
-    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
+      ? prefs.primaryLanguage
+      : 'en'
+  const includeText = prefs.text && prefs.primaryLanguage !== 'none'
   const secondaryCode =
-    prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl'
+    prefs.secondaryLanguage &&
+    prefs.secondaryLanguage !== 'xl' &&
+    prefs.secondaryLanguage !== 'none'
       ? prefs.secondaryLanguage
       : undefined
   return {
     markdown: {
       primaryCode,
       secondaryCode,
-      includeText: prefs.text,
+      includeText,
       includeArabic: prefs.arabic,
       includeTransliteration: prefs.transliteration,
       includeFootnotes: prefs.footnotes,
@@ -67,7 +72,7 @@ function usePrefsSnapshot() {
       prefs: {
         primaryCode,
         secondaryCode,
-        includeText: prefs.text,
+        includeText,
         includeArabic: prefs.arabic,
         includeTransliteration: prefs.transliteration,
         includeFootnotes: prefs.footnotes,

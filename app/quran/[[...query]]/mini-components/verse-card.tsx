@@ -516,10 +516,14 @@ export const VerseCard = memo(
     const { playFromVerse, togglePlayPause } = useQuranPlayerCallbacks()
 
     const primaryCode =
-      prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
-    const tr = verse.tr?.[primaryCode]
+      prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
+        ? prefs.primaryLanguage
+        : undefined
+    const tr = primaryCode ? verse.tr?.[primaryCode] : undefined
     const secondaryTr =
-      prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl'
+      prefs.secondaryLanguage &&
+      prefs.secondaryLanguage !== 'xl' &&
+      prefs.secondaryLanguage !== 'none'
         ? verse.tr?.[prefs.secondaryLanguage]
         : undefined
 
@@ -740,9 +744,9 @@ export const VerseCard = memo(
           <div className="flex gap-4 sm:gap-6">
             <div className="flex-1 min-w-0 space-y-2">
               {/* Primary translation */}
-              {prefs.text && (tr?.tx || highlightedTranslation) && (
+              {prefs.text && primaryCode && (tr?.tx || highlightedTranslation) && (
                 <div
-                  className={isRtl(prefs.primaryLanguage) ? 'text-right' : ''}
+                  className={isRtl(primaryCode) ? 'text-right' : ''}
                 >
                   <p
                     className={`${ZOOM_FONT[prefs.zoomLevel ?? 'comfortable'].translation} leading-relaxed text-foreground select-text font-medium`}
@@ -791,7 +795,7 @@ export const VerseCard = memo(
               {prefs.footnotes && tr?.f && (
                 <p
                   className={`text-sm text-muted-foreground/80 leading-relaxed italic ${
-                    isRtl(prefs.primaryLanguage) ? 'text-right' : 'text-left'
+                    isRtl(primaryCode ?? 'en') ? 'text-right' : 'text-left'
                   }`}
                 >
                   <QuranRefText text={tr.f} from={`footnote of ${verse.vk}`} />
@@ -892,7 +896,7 @@ export const VerseCard = memo(
                   disabled={addingNote || !noteContent.trim() || !!editingNote}
                   onClick={() => {
                     addNote(
-                      { verseKey: verseId, lang: primaryCode, content: noteContent },
+                      { verseKey: verseId, lang: primaryCode ?? 'en', content: noteContent },
                       { onSuccess: () => setNoteContent('') }
                     )
                   }}

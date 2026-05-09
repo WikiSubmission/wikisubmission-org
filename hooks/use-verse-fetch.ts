@@ -44,11 +44,12 @@ export function useVerseFetch() {
       setError(null)
 
       const langs: string[] = []
-      if (lang !== 'xl') langs.push(lang)
+      if (lang !== 'xl' && lang !== 'none') langs.push(lang)
       if (!langs.includes('ar')) langs.push('ar')
       if (
         opts?.secondaryLang &&
         opts.secondaryLang !== 'xl' &&
+        opts.secondaryLang !== 'none' &&
         !langs.includes(opts.secondaryLang)
       ) {
         langs.push(opts.secondaryLang)

@@ -73,19 +73,22 @@ function SegmentBlock({
 }) {
   const prefs = useQuranPreferences()
   const primaryCode =
-    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
+      ? prefs.primaryLanguage
+      : 'en'
+  const includeText = prefs.text && prefs.primaryLanguage !== 'none'
   const [copied, setCopied] = useState(false)
 
   const handleCopySegment = useCallback(() => {
     const text = buildVersesText(verses, {
       primaryCode,
-      includeText: true,
+      includeText,
       includeArabic: prefs.arabic,
     })
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
-  }, [verses, primaryCode, prefs.arabic])
+  }, [verses, primaryCode, includeText, prefs.arabic])
 
   if (verses.length === 0) return null
 
@@ -146,7 +149,10 @@ export function VerseListResult({
   const zoom = prefs.zoomLevel ?? 'comfortable'
   const maxW = ZOOM_WIDTH_CLASS[zoom]
   const primaryCode =
-    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
+      ? prefs.primaryLanguage
+      : 'en'
+  const includeText = prefs.text && prefs.primaryLanguage !== 'none'
 
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${zoom}-${prefs.arabic}-${prefs.wordByWord}`
 
@@ -171,7 +177,7 @@ export function VerseListResult({
   const segments = useMemo(() => parseSegments(queryText), [queryText])
 
   const handleCopyAllMarkdown = useCallback(() => {
-    const opts = { primaryCode, includeText: prefs.text, includeArabic: prefs.arabic }
+    const opts = { primaryCode, includeText, includeArabic: prefs.arabic }
     const parts = segments
       .map((seg) => {
         const verses = getSegmentVerses(seg, byChapter)
@@ -183,7 +189,7 @@ export function VerseListResult({
     navigator.clipboard.writeText(parts.join('\n\n'))
     setCopiedAll(true)
     setTimeout(() => setCopiedAll(false), 1500)
-  }, [segments, byChapter, chapterTitles, primaryCode, prefs.text, prefs.arabic])
+  }, [segments, byChapter, chapterTitles, primaryCode, includeText, prefs.arabic])
 
   if (apiError || !data) {
     return (

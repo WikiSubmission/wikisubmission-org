@@ -40,7 +40,10 @@ function FootnoteDialogContent({
   onClose: () => void
 }) {
   const prefs = useQuranPreferences()
-  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode =
+    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
+      ? prefs.primaryLanguage
+      : 'en'
   const { verses, loading, error, fetch } = useVerseFetch()
   const [history, setHistory] = useState<HistoryEntry[]>([initialEntry])
   const current = history[history.length - 1]
@@ -209,9 +212,13 @@ type Props = {
 
 export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props) {
   const prefs = useQuranPreferences()
-  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode =
+    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
+      ? prefs.primaryLanguage
+      : undefined
   const showArabic = prefs.readingModeLang === 'arabic'
-  const showTranslation = prefs.readingModeLang === 'translation'
+  const showTranslation =
+    prefs.readingModeLang === 'translation' && primaryCode !== undefined
 
   // Auto-load all verses when reading mode is active
   useEffect(() => {
@@ -224,7 +231,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
   const footnoteIndex: { verseKey: string; text: string }[] = []
   if (prefs.footnotes) {
     verses.forEach((v) => {
-      const tr = v.tr?.[primaryCode]
+      const tr = primaryCode ? v.tr?.[primaryCode] : undefined
       if (tr?.f) {
         const [, vNum] = (v.vk ?? '').split(':')
         footnoteIndex.push({ verseKey: vNum, text: tr.f })
@@ -252,7 +259,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
             {verses.map((v) => {
               const arTr = v.tr?.['ar']
               const [, vNum] = (v.vk ?? '').split(':')
-              const primaryTr = v.tr?.[primaryCode]
+              const primaryTr = primaryCode ? v.tr?.[primaryCode] : undefined
               return (
                 <span key={v.vk} id={v.vk ?? undefined}>
                   {prefs.subtitles && primaryTr?.s && (
@@ -276,10 +283,10 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
 
       {/* Translation prose block */}
       {showTranslation && (
-        <div className={isRtl(primaryCode) ? 'text-right' : ''}>
+        <div className={isRtl(primaryCode ?? 'en') ? 'text-right' : ''}>
           <p className={`${zoomFont.reading} leading-[2] text-foreground`}>
             {verses.map((v) => {
-              const tr = v.tr?.[primaryCode]
+              const tr = primaryCode ? v.tr?.[primaryCode] : undefined
               const [, vNum] = (v.vk ?? '').split(':')
               const fnIdx = footnoteIndex.findIndex((f) => f.verseKey === vNum)
               return (
