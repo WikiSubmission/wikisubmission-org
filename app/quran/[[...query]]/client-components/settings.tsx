@@ -19,10 +19,7 @@ import {
   ZoomInIcon,
 } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import type {
-  LangCode,
-  ReadingModeLang,
-} from '@/hooks/use-quran-preferences'
+import type { LangCode, ReadingModeLang } from '@/hooks/use-quran-preferences'
 import { ZOOM_LEVELS, type ZoomLevel } from '@/lib/quran-zoom'
 import { LanguageEntry, useLanguagesStore } from '@/hooks/use-languages-store'
 import { Switch } from '@/components/ui/switch'
@@ -209,11 +206,11 @@ export default function QuranSettings() {
   const primaryName =
     prefs.primaryLanguage === 'none'
       ? t('none')
-      : languages.find((l) => l.code === prefs.primaryLanguage)?.name ??
-        prefs.primaryLanguage
+      : (languages.find((l) => l.code === prefs.primaryLanguage)?.name ??
+        prefs.primaryLanguage)
   const secondaryName = prefs.secondaryLanguage
-    ? languages.find((l) => l.code === prefs.secondaryLanguage)?.name ??
-      prefs.secondaryLanguage
+    ? (languages.find((l) => l.code === prefs.secondaryLanguage)?.name ??
+      prefs.secondaryLanguage)
     : t('none')
   const zoomName = t(ZOOM_LABEL_KEYS[prefs.zoomLevel ?? 'comfortable'])
 
@@ -271,7 +268,7 @@ export default function QuranSettings() {
             label={t('reading')}
             summary={enabledDisplay || '—'}
           >
-            <div className="space-y-0.5 max-h-[24rem] overflow-y-auto">
+            <div className="space-y-0.5 max-h-96 overflow-y-auto">
               {prefs.displayMode === 'reading' && (
                 <div className="px-2 py-2 space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -377,14 +374,17 @@ export default function QuranSettings() {
                   )
                 })}
               </div>
-              <div className="max-h-[24rem] overflow-y-auto">
+              <div className="max-h-96 overflow-y-auto">
                 {langTab === 'primary' ? (
                   <LangList
                     value={prefs.primaryLanguage}
                     nullable
                     languages={languages}
                     onChange={(code) =>
-                      set({ primaryLanguage: (code as LangCode | undefined) ?? 'none' })
+                      set({
+                        primaryLanguage:
+                          (code as LangCode | undefined) ?? 'none',
+                      })
                     }
                   />
                 ) : (
@@ -411,8 +411,7 @@ export default function QuranSettings() {
           >
             <div className="flex flex-col gap-0.5">
               {ZOOM_LEVELS.map((level) => {
-                const isActive =
-                  (prefs.zoomLevel ?? 'comfortable') === level
+                const isActive = (prefs.zoomLevel ?? 'comfortable') === level
                 return (
                   <button
                     key={level}

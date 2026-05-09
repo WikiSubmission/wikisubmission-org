@@ -84,7 +84,7 @@ function WordDetailsDialogContent({
       className="max-w-md sm:max-w-xl rounded-3xl p-0"
       aria-describedby={undefined}
     >
-      <DialogHeader className="relative items-center text-center px-6 pt-8 pb-6 border-b bg-gradient-to-b from-primary/15 via-primary/5 to-transparent gap-2 overflow-hidden">
+      <DialogHeader className="relative items-center text-center px-6 pt-8 pb-6 border-b bg-linear-to-b from-primary/15 via-primary/5 to-transparent gap-2 overflow-hidden">
         {/* Soft radial glow behind the arabic glyph */}
         <div
           aria-hidden
@@ -239,7 +239,10 @@ function WordCardItem({
         >
           {arabic}
         </p>
-        <div className="flex flex-1 flex-col items-center self-stretch gap-0.5" dir="ltr">
+        <div
+          className="flex flex-1 flex-col items-center self-stretch gap-0.5"
+          dir="ltr"
+        >
           {showTransliteration && transliteration && (
             <p className="text-[11px] italic text-muted-foreground text-center wrap-break-words max-w-22">
               {transliteration}
@@ -249,7 +252,6 @@ function WordCardItem({
             {translation}
           </p>
         </div>
-
       </div>
 
       <WordDetailsDialogContent
@@ -502,11 +504,15 @@ export const VerseCard = memo(
     const { isRtl } = useLanguagesStore()
     const { data: session } = useSession()
     const openSignIn = useSignInPromptStore((s) => s.open)
-    const { mutate: addBookmark, isPending: addingBookmark } = useAddBookmark(scripture)
-    const { mutate: deleteBookmark, isPending: deletingBookmark } = useDeleteBookmark(scripture)
+    const { mutate: addBookmark, isPending: addingBookmark } =
+      useAddBookmark(scripture)
+    const { mutate: deleteBookmark, isPending: deletingBookmark } =
+      useDeleteBookmark(scripture)
     const { mutate: addNote, isPending: addingNote } = useAddNote(scripture)
-    const { mutate: updateNote, isPending: updatingNote } = useUpdateNote(scripture)
-    const { mutate: deleteNote, isPending: deletingNote } = useDeleteNote(scripture)
+    const { mutate: updateNote, isPending: updatingNote } =
+      useUpdateNote(scripture)
+    const { mutate: deleteNote, isPending: deletingNote } =
+      useDeleteNote(scripture)
     const [notesOpen, setNotesOpen] = useState(false)
     const [editingNote, setEditingNote] = useState<NoteData | null>(null)
     const [noteContent, setNoteContent] = useState('')
@@ -624,7 +630,9 @@ export const VerseCard = memo(
             ? 'bg-primary/10 before:pointer-events-none before:absolute before:inset-2 before:rounded-2xl before:ring-2 before:ring-primary'
             : ''
         } ${
-          !isSelected && (isScrollTarget || isCurrentAudio) ? 'bg-primary/10' : ''
+          !isSelected && (isScrollTarget || isCurrentAudio)
+            ? 'bg-primary/10'
+            : ''
         } ${selectionActive ? 'cursor-pointer select-none' : ''}`}
       >
         <div className="px-6 py-4 sm:px-8 sm:py-5 space-y-2">
@@ -693,7 +701,11 @@ export const VerseCard = memo(
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label={notes.length > 0 ? `${notes.length} note${notes.length > 1 ? 's' : ''}` : 'Add note'}
+                  aria-label={
+                    notes.length > 0
+                      ? `${notes.length} note${notes.length > 1 ? 's' : ''}`
+                      : 'Add note'
+                  }
                   className={`relative h-8 w-8 rounded-full transition-colors ${
                     notes.length > 0
                       ? 'text-primary hover:bg-primary/10'
@@ -709,7 +721,10 @@ export const VerseCard = memo(
                     setNotesOpen(true)
                   }}
                 >
-                  <StickyNote className="w-4 h-4" fill={notes.length > 0 ? 'currentColor' : 'none'} />
+                  <StickyNote
+                    className="w-4 h-4"
+                    fill={notes.length > 0 ? 'currentColor' : 'none'}
+                  />
                   {notes.length > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground">
                       {notes.length}
@@ -744,21 +759,21 @@ export const VerseCard = memo(
           <div className="flex gap-4 sm:gap-6">
             <div className="flex-1 min-w-0 space-y-2">
               {/* Primary translation */}
-              {prefs.text && primaryCode && (tr?.tx || highlightedTranslation) && (
-                <div
-                  className={isRtl(primaryCode) ? 'text-right' : ''}
-                >
-                  <p
-                    className={`${ZOOM_FONT[prefs.zoomLevel ?? 'comfortable'].translation} leading-relaxed text-foreground select-text font-medium`}
-                  >
-                    {highlightedTranslation ? (
-                      <HighlightText text={highlightedTranslation} />
-                    ) : (
-                      tr?.tx
-                    )}
-                  </p>
-                </div>
-              )}
+              {prefs.text &&
+                primaryCode &&
+                (tr?.tx || highlightedTranslation) && (
+                  <div className={isRtl(primaryCode) ? 'text-right' : ''}>
+                    <p
+                      className={`${ZOOM_FONT[prefs.zoomLevel ?? 'comfortable'].translation} leading-relaxed text-foreground select-text font-medium`}
+                    >
+                      {highlightedTranslation ? (
+                        <HighlightText text={highlightedTranslation} />
+                      ) : (
+                        tr?.tx
+                      )}
+                    </p>
+                  </div>
+                )}
 
               {/* Secondary translation */}
               {secondaryTr?.tx && (
@@ -817,7 +832,10 @@ export const VerseCard = memo(
             </DialogHeader>
             <div className="flex flex-col gap-3">
               {notes.map((n) => (
-                <div key={n.id} className="flex flex-col gap-1 rounded border border-border p-3">
+                <div
+                  key={n.id}
+                  className="flex flex-col gap-1 rounded border border-border p-3"
+                >
                   {editingNote?.id === n.id ? (
                     <div className="flex flex-col gap-2">
                       <textarea
@@ -832,7 +850,11 @@ export const VerseCard = memo(
                           disabled={updatingNote || !noteContent.trim()}
                           onClick={() => {
                             updateNote(
-                              { id: n.id, verseKey: verseId, content: noteContent },
+                              {
+                                id: n.id,
+                                verseKey: verseId,
+                                content: noteContent,
+                              },
                               {
                                 onSuccess: () => {
                                   setEditingNote(null)
@@ -847,7 +869,10 @@ export const VerseCard = memo(
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => { setEditingNote(null); setNoteContent('') }}
+                          onClick={() => {
+                            setEditingNote(null)
+                            setNoteContent('')
+                          }}
                         >
                           Cancel
                         </Button>
@@ -855,13 +880,18 @@ export const VerseCard = memo(
                     </div>
                   ) : (
                     <div className="flex items-start justify-between gap-2">
-                      <p className="flex-1 whitespace-pre-wrap text-sm">{n.content}</p>
+                      <p className="flex-1 whitespace-pre-wrap text-sm">
+                        {n.content}
+                      </p>
                       <div className="flex gap-1 shrink-0">
                         <Button
                           size="icon"
                           variant="ghost"
                           className="h-7 w-7"
-                          onClick={() => { setEditingNote(n); setNoteContent(n.content) }}
+                          onClick={() => {
+                            setEditingNote(n)
+                            setNoteContent(n.content)
+                          }}
                         >
                           <StickyNote className="w-3.5 h-3.5" />
                         </Button>
@@ -870,9 +900,13 @@ export const VerseCard = memo(
                           variant="ghost"
                           className="h-7 w-7 text-destructive hover:text-destructive"
                           disabled={deletingNote}
-                          onClick={() => deleteNote({ id: n.id, verseKey: verseId })}
+                          onClick={() =>
+                            deleteNote({ id: n.id, verseKey: verseId })
+                          }
                         >
-                          <span className="w-3.5 h-3.5 flex items-center justify-center text-xs">✕</span>
+                          <span className="w-3.5 h-3.5 flex items-center justify-center text-xs">
+                            ✕
+                          </span>
                         </Button>
                       </div>
                     </div>
@@ -896,7 +930,11 @@ export const VerseCard = memo(
                   disabled={addingNote || !noteContent.trim() || !!editingNote}
                   onClick={() => {
                     addNote(
-                      { verseKey: verseId, lang: primaryCode ?? 'en', content: noteContent },
+                      {
+                        verseKey: verseId,
+                        lang: primaryCode ?? 'en',
+                        content: noteContent,
+                      },
                       { onSuccess: () => setNoteContent('') }
                     )
                   }}

@@ -85,7 +85,9 @@ function FootnoteDialogContent({
     headerLabel = `v.${current.verseKey}`
   } else {
     const p = parseQuranRef(current.ref)
-    if (p) headerLabel = p.vs === p.ve ? `${p.cn}:${p.vs}` : `${p.cn}:${p.vs}–${p.ve}`
+    if (p)
+      headerLabel =
+        p.vs === p.ve ? `${p.cn}:${p.vs}` : `${p.cn}:${p.vs}–${p.ve}`
   }
 
   return (
@@ -93,11 +95,18 @@ function FootnoteDialogContent({
       <DialogHeader>
         <div className="flex items-center gap-2">
           {showBack && (
-            <Button variant="ghost" size="icon-sm" onClick={handleBack} aria-label="Go back">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={handleBack}
+              aria-label="Go back"
+            >
               <ArrowLeft className="size-4" />
             </Button>
           )}
-          <DialogTitle className="font-glacial font-bold text-primary text-xs uppercase tracking-widest">{headerLabel}</DialogTitle>
+          <DialogTitle className="font-glacial font-bold text-primary text-xs uppercase tracking-widest">
+            {headerLabel}
+          </DialogTitle>
         </div>
       </DialogHeader>
 
@@ -115,10 +124,14 @@ function FootnoteDialogContent({
         {current.type === 'verse' && (
           <>
             {loading && (
-              <div className="flex justify-center py-10"><Spinner /></div>
+              <div className="flex justify-center py-10">
+                <Spinner />
+              </div>
             )}
             {error && (
-              <p className="text-sm text-destructive text-center py-6">{error}</p>
+              <p className="text-sm text-destructive text-center py-6">
+                {error}
+              </p>
             )}
             {verses.map((v, i) => {
               const vd = v as ApiVerseData
@@ -126,7 +139,10 @@ function FootnoteDialogContent({
               const arTr = vd.tr?.['ar']
               const [chNum, vNum] = (v.vk ?? '').split(':').map(Number)
               return (
-                <div key={v.vk ?? i} className="space-y-2 py-2 border-b last:border-0">
+                <div
+                  key={v.vk ?? i}
+                  className="space-y-2 py-2 border-b last:border-0"
+                >
                   <Link
                     href={`/quran/${chNum}?verse=${vNum}`}
                     onClick={onClose}
@@ -134,11 +150,14 @@ function FootnoteDialogContent({
                   >
                     {v.vk} <ArrowUpRight className="size-3" />
                   </Link>
-                    {tr?.tx && (
-                      <p className="text-base leading-relaxed">
-                        <strong className="font-glacial text-xs text-primary mr-2 uppercase tracking-tighter">Verse {v.vk}</strong> {tr.tx}
-                      </p>
-                    )}
+                  {tr?.tx && (
+                    <p className="text-base leading-relaxed">
+                      <strong className="font-glacial text-xs text-primary mr-2 uppercase tracking-tighter">
+                        Verse {v.vk}
+                      </strong>{' '}
+                      {tr.tx}
+                    </p>
+                  )}
                   {tr?.f && (
                     <p className="text-sm text-muted-foreground italic">
                       <QuranRefText
@@ -149,7 +168,10 @@ function FootnoteDialogContent({
                     </p>
                   )}
                   {prefs.arabic && arTr?.tx && (
-                    <p dir="rtl" className="font-arabic text-xl leading-relaxed text-right pt-1">
+                    <p
+                      dir="rtl"
+                      className="font-arabic text-xl leading-relaxed text-right pt-1"
+                    >
                       {arTr.tx}
                     </p>
                   )}
@@ -210,7 +232,13 @@ type Props = {
   opts: ChapterReaderOptions
 }
 
-export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props) {
+export function ReadingView({
+  verses,
+  hasMore,
+  loading,
+  loadMore,
+  opts,
+}: Props) {
   const prefs = useQuranPreferences()
   const primaryCode =
     prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
@@ -255,7 +283,10 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
       {/* Arabic prose block */}
       {showArabic && (
         <div>
-          <p dir="rtl" className={`font-arabic ${zoomFont.readingArabic} leading-[2.2] text-right text-foreground/90`}>
+          <p
+            dir="rtl"
+            className={`font-arabic ${zoomFont.readingArabic} leading-[2.2] text-right text-foreground/90`}
+          >
             {verses.map((v) => {
               const arTr = v.tr?.['ar']
               const [, vNum] = (v.vk ?? '').split(':')
@@ -272,8 +303,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
                     <span className="inline-flex items-center justify-center size-5 rounded-full bg-primary/10 text-primary text-[9px] font-glacial font-bold mx-1 align-middle">
                       {vNum}
                     </span>
-                  )}
-                  {' '}
+                  )}{' '}
                 </span>
               )
             })}
@@ -284,7 +314,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
       {/* Translation prose block */}
       {showTranslation && (
         <div className={isRtl(primaryCode ?? 'en') ? 'text-right' : ''}>
-          <p className={`${zoomFont.reading} leading-[2] text-foreground`}>
+          <p className={`${zoomFont.reading} leading-loose text-foreground`}>
             {verses.map((v) => {
               const tr = primaryCode ? v.tr?.[primaryCode] : undefined
               const [, vNum] = (v.vk ?? '').split(':')
@@ -308,8 +338,7 @@ export function ReadingView({ verses, hasMore, loading, loadMore, opts }: Props)
                       verseKey={footnoteIndex[fnIdx].verseKey}
                       text={footnoteIndex[fnIdx].text}
                     />
-                  )}
-                  {' '}
+                  )}{' '}
                 </span>
               )
             })}
