@@ -8,12 +8,12 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   BookOpenTextIcon,
+  CaseLowerIcon,
   CheckIcon,
   ChevronDownIcon,
   HashIcon,
   LanguagesIcon,
   MessageSquareTextIcon,
-  ScanTextIcon,
   SettingsIcon,
   TextIcon,
   TypeIcon,
@@ -222,11 +222,14 @@ export default function QuranSettings() {
         ? t('arabic')
         : 'Translation'
       : prefs.text && 'Translation',
-    prefs.displayMode !== 'reading' && prefs.wordByWord && t('wordByWord'),
     prefs.displayMode !== 'reading' &&
       prefs.arabic &&
       !prefs.wordByWord &&
       t('arabic'),
+    prefs.displayMode !== 'reading' &&
+      prefs.wordByWord &&
+      prefs.transliteration &&
+      t('transliteration'),
     prefs.displayMode !== 'reading' && prefs.subtitles && t('subtitles'),
     prefs.footnotes && t('footnotes'),
   ]
@@ -238,7 +241,12 @@ export default function QuranSettings() {
     : primaryName
 
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu
+      modal={false}
+      onOpenChange={(open) => {
+        if (open) setOpenSection('reading')
+      }}
+    >
       <DropdownMenuTrigger asChild>
         <Button variant="outline" aria-label="Open settings" size="icon-sm">
           <SettingsIcon />
@@ -307,12 +315,12 @@ export default function QuranSettings() {
                     onCheckedChange={(checked) => set({ arabic: checked })}
                   />
                   <SettingTile
-                    icon={<ScanTextIcon className="size-3.5" />}
-                    label={t('wordByWord')}
-                    description="Per-word Arabic with translation"
-                    checked={prefs.wordByWord}
+                    icon={<CaseLowerIcon className="size-3.5" />}
+                    label={t('transliteration')}
+                    description="In Word mode, show Latin script under each word"
+                    checked={prefs.transliteration}
                     onCheckedChange={(checked) =>
-                      set({ wordByWord: checked })
+                      set({ transliteration: checked })
                     }
                   />
                   <SettingTile

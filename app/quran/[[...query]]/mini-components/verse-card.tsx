@@ -26,7 +26,6 @@ import {
   ArrowUpRight,
   Bookmark,
   StickyNote,
-  ScanTextIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HighlightText } from '@/components/highlight-text'
@@ -184,6 +183,7 @@ function WordCardItem({
   verseCoordsValid,
   arabicClass,
   selectionActive,
+  showTransliteration,
 }: {
   word: WordData
   chapter: number
@@ -191,11 +191,13 @@ function WordCardItem({
   verseCoordsValid: boolean
   arabicClass: string
   selectionActive: boolean
+  showTransliteration: boolean
 }) {
   const tx = (word.tx as Record<string, string>) ?? {}
   const arabic = tx['ar'] ?? ''
   const root = word.r ?? undefined
   const translation = tx['en'] ?? ''
+  const transliteration = tx['tl']
   const meaning = word.m ?? undefined
   const word1Based = word.wi ?? 0
 
@@ -237,7 +239,12 @@ function WordCardItem({
         >
           {arabic}
         </p>
-        <div className="flex flex-1 flex-col items-center self-stretch" dir="ltr">
+        <div className="flex flex-1 flex-col items-center self-stretch gap-0.5" dir="ltr">
+          {showTransliteration && transliteration && (
+            <p className="text-[11px] italic text-muted-foreground text-center wrap-break-words max-w-22">
+              {transliteration}
+            </p>
+          )}
           <p className="text-xs text-foreground/80 font-medium text-center wrap-break-words max-w-22">
             {translation}
           </p>
@@ -248,7 +255,7 @@ function WordCardItem({
       <WordDetailsDialogContent
         arabic={arabic}
         translation={translation}
-        transliteration={tx['tl']}
+        transliteration={transliteration}
         root={root}
         meaning={meaning}
         chapter={verseCoordsValid ? chapter : undefined}
@@ -364,10 +371,12 @@ const WordByWordView = memo(
     words,
     verseKey,
     compact,
+    showTransliteration,
   }: {
     words: WordData[]
     verseKey: string
     compact: boolean
+    showTransliteration: boolean
     /** Forwarded from VerseCard — forces re-render on language reload. */
     optsKey?: string
   }) {
@@ -422,6 +431,7 @@ const WordByWordView = memo(
             verseCoordsValid={verseCoordsValid}
             arabicClass={arabicClass}
             selectionActive={selectionActive}
+            showTransliteration={showTransliteration}
           />
         ))}
       </div>
@@ -430,6 +440,7 @@ const WordByWordView = memo(
   (prev, next) =>
     prev.verseKey === next.verseKey &&
     prev.compact === next.compact &&
+    prev.showTransliteration === next.showTransliteration &&
     prev.optsKey === next.optsKey
 )
 
@@ -702,68 +713,6 @@ export const VerseCard = memo(
                   )}
                 </Button>
               )}
-              {(prefs.arabic || prefs.wordByWord) && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={
-                    prefs.wordByWord
-                      ? 'Hide word-by-word'
-                      : 'Show word-by-word'
-                  }
-                  title={
-                    prefs.wordByWord
-                      ? 'Hide word-by-word'
-                      : 'Show word-by-word'
-                  }
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-                  onClick={() => {
-                    // Anchor the clicked verse's position across the WBW
-                    // resize. The virtualizer measures cards lazily as they
-                    // re-render, so a single rAF check is not enough — we
-                    // re-correct each frame until the verse's top stabilizes
-                    // (or a short timeout elapses).
-                    const before = verseId
-                      ? document.getElementById(verseId)?.getBoundingClientRect().top
-                      : null
-
-                    prefs.setPreferences({
-                      ...prefs,
-                      wordByWord: !prefs.wordByWord,
-                      arabic: prefs.wordByWord ? true : prefs.arabic,
-                    })
-
-                    if (before == null || !verseId) return
-                    let frames = 0
-                    let stable = 0
-                    const tick = () => {
-                      const node = document.getElementById(verseId)
-                      if (node) {
-                        const after = node.getBoundingClientRect().top
-                        const delta = after - before
-                        if (Math.abs(delta) > 0.5) {
-                          window.scrollBy(0, delta)
-                          stable = 0
-                        } else {
-                          stable += 1
-                        }
-                      }
-                      frames += 1
-                      if (stable < 4 && frames < 60) requestAnimationFrame(tick)
-                    }
-                    requestAnimationFrame(tick)
-                  }}
-                >
-                  <span
-                    key={prefs.wordByWord ? 'on' : 'off'}
-                    className={`inline-flex animate-in fade-in zoom-in-90 duration-200 ${
-                      prefs.wordByWord ? 'text-primary' : ''
-                    }`}
-                  >
-                    <ScanTextIcon className="w-4 h-4" />
-                  </span>
-                </Button>
-              )}
               {showCopyButton && (
                 <CopyButton verse={verse} searchHighlight={searchHighlight} />
               )}
@@ -832,6 +781,7 @@ export const VerseCard = memo(
                       words={verse.w}
                       verseKey={verseId}
                       compact={!prefs.wordByWord}
+                      showTransliteration={prefs.transliteration}
                       optsKey={optsKey}
                     />
                   </div>

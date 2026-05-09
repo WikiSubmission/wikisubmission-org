@@ -1,9 +1,8 @@
 'use client'
 
-import { BookOpen, List } from 'lucide-react'
+import { BookOpen, List, ScanText } from 'lucide-react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import type { DisplayMode } from '@/hooks/use-quran-preferences'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { cn } from '@/lib/utils'
 import {
@@ -12,6 +11,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { useTranslations } from 'next-intl'
+
+type ModeId = 'verse' | 'word' | 'reading'
 
 /** Mirrors the server-side parseQueryType from page.tsx. */
 function detectQueryType(raw: string | undefined): 'chapter' | 'verse-list' | 'search' | null {
@@ -39,17 +40,37 @@ export function QuranModeSelector() {
   const queryType = detectQueryType(rawQuery ? decodeURIComponent(rawQuery) : undefined)
   const disabled = queryType === 'search'
 
-  const MODES: { id: DisplayMode; label: string; icon: React.ReactNode }[] = [
+  const MODES: { id: ModeId; label: string; icon: React.ReactNode }[] = [
     { id: 'verse', label: t('modeVerse'), icon: <List className="size-4" /> },
+    { id: 'word', label: t('modeWord'), icon: <ScanText className="size-4" /> },
     { id: 'reading', label: t('modeReading'), icon: <BookOpen className="size-4" /> },
   ]
 
-  const handleModeChange = (mode: DisplayMode) => {
+  const activeMode: ModeId =
+    prefs.displayMode === 'reading'
+      ? 'reading'
+      : prefs.wordByWord
+        ? 'word'
+        : 'verse'
+
+  const handleModeChange = (mode: ModeId) => {
     if (disabled) return
-    prefs.setPreferences({
-      ...prefs,
-      displayMode: mode,
-    })
+    if (mode === 'reading') {
+      prefs.setPreferences({ ...prefs, displayMode: 'reading' })
+    } else if (mode === 'word') {
+      prefs.setPreferences({
+        ...prefs,
+        displayMode: 'verse',
+        wordByWord: true,
+        arabic: true,
+      })
+    } else {
+      prefs.setPreferences({
+        ...prefs,
+        displayMode: 'verse',
+        wordByWord: false,
+      })
+    }
   }
 
   return (
@@ -63,7 +84,7 @@ export function QuranModeSelector() {
           aria-disabled={disabled}
         >
           {MODES.map((mode) => {
-            const isActive = prefs.displayMode === mode.id
+            const isActive = activeMode === mode.id
             return (
               <Tooltip key={mode.id}>
                 <TooltipTrigger asChild>
