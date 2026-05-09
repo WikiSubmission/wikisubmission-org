@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SignJWT } from 'jose'
 import { createHmac, randomInt } from 'crypto'
-import { Resend } from 'resend'
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses'
 import { z } from 'zod'
 
 const schema = z.object({ email: z.string().email() })
+
+function getSESClient() {
+  return new SESClient({
+    region: process.env.AWS_SES_REGION ?? 'us-east-1',
+    credentials: {
+      accessKeyId: process.env.AWS_SES_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SES_SECRET_ACCESS_KEY!,
+    },
+  })
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
@@ -27,16 +37,24 @@ export async function POST(req: NextRequest) {
     .setExpirationTime('10m')
     .sign(secret)
 
-  if (process.env.AUTH_RESEND_KEY) {
-    const resend = new Resend(process.env.AUTH_RESEND_KEY)
-    await resend.emails.send({
-      from: 'WikiSubmission <noreply@wikisubmission.org>',
-      to: email,
-      subject: 'Your sign-in code',
-      text: `Your WikiSubmission sign-in code is: ${code}\n\nThis code expires in 10 minutes.`,
-    })
+  if (process.env.AWS_SES_ACCESS_KEY_ID) {
+    const ses = getSESClient()
+    await ses.send(
+      new SendEmailCommand({
+        Source: process.env.AWS_SES_FROM_ADDRESS ?? 'noreply@wikisubmission.org',
+        Destination: { ToAddresses: [email] },
+        Message: {
+          Subject: { Data: 'Your WikiSubmission sign-in code', Charset: 'UTF-8' },
+          Body: {
+            Text: {
+              Data: `Your WikiSubmission sign-in code is: ${code}\n\nThis code expires in 10 minutes.`,
+              Charset: 'UTF-8',
+            },
+          },
+        },
+      }),
+    )
   } else {
-    // Dev: print to stdout so local testing works without Resend configured
     console.log(`[OTP dev] Code for ${email}: ${code}`)
   }
 
