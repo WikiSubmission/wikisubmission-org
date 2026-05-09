@@ -39,6 +39,7 @@ import { useChapterBorderLoader } from '@/hooks/use-chapter-border-loader'
 import { ZOOM_WIDTH_CLASS, ZOOM_WIDTH_PX } from '@/lib/quran-zoom'
 import { useScriptureState } from '@/hooks/use-scripture-state'
 import { useReadingProgressSync } from '@/hooks/use-reading-progress'
+import { useQuranPrefsSync } from '@/hooks/use-prefs-sync'
 import type { ScriptureState } from '@/types/bookmarks'
 
 type VirtualizedVerseListProps = {
@@ -533,6 +534,7 @@ export function ChapterReader({
 
   const scriptureState = useScriptureState('quran', chapterNumber)
   const reportReadingProgress = useReadingProgressSync('quran')
+  useQuranPrefsSync()
 
   // Read the initial verse from the prop (passed by the Server Component),
   // NOT from useSearchParams(). useSearchParams() subscribes to Next.js router

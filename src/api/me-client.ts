@@ -136,4 +136,10 @@ export const meApi = {
 
   postReadingLog: (body: { scripture: string; verses_read?: number; day?: string }): Promise<void> =>
     mePost('/me/reading-log', body),
+
+  getPreferences: (scripture: string): Promise<{ data: Record<string, unknown> | null }> =>
+    meGet(`/me/preferences?scripture=${scripture}`),
+
+  putPreferences: (body: { scripture: string; payload: Record<string, unknown> }): Promise<void> =>
+    mePut('/me/preferences', body),
 }
