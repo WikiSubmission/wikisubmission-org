@@ -11,6 +11,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { SiteBrand } from '@/components/site-brand'
 import { UserMenu } from '@/components/user-menu'
+import { useSession } from 'next-auth/react'
 
 type FlatLink = { kind: 'link'; label: string; href: string }
 type GroupChild = {
@@ -95,12 +96,14 @@ function MobileMenu({
   t,
   locale,
   close,
+  isAuthed,
 }: {
   open: boolean
   pathname: string | null
   t: (k: string) => string
   locale: string
   close: () => void
+  isAuthed: boolean
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [render, setRender] = useState(open)
@@ -230,8 +233,12 @@ function MobileMenu({
         style={{ borderTop: '1px solid var(--ed-rule)' }}
       >
         <UserMenu />
-        <LocaleSwitcher currentLocale={locale} onSelect={close} />
-        <PaletteThemeSwitcher />
+        {!isAuthed && (
+          <>
+            <LocaleSwitcher currentLocale={locale} onSelect={close} />
+            <PaletteThemeSwitcher />
+          </>
+        )}
       </div>
     </div>
   )
@@ -243,6 +250,8 @@ export function SiteNav() {
   const t = useTranslations('navbar')
   const locale = useLocale()
   const { toggle: toggleAsk, state: askState } = useChatPanel()
+  const { status } = useSession()
+  const isAuthed = status === 'authenticated'
   const close = () => setMobileOpen(false)
 
   return (
@@ -344,10 +353,12 @@ export function SiteNav() {
 
           <UserMenu />
 
-          <div className="flex items-center gap-0.5">
-            <LocaleSwitcher currentLocale={locale} />
-            <PaletteThemeSwitcher />
-          </div>
+          {!isAuthed && (
+            <div className="flex items-center gap-0.5">
+              <LocaleSwitcher currentLocale={locale} />
+              <PaletteThemeSwitcher />
+            </div>
+          )}
 
           <button
             type="button"
@@ -385,6 +396,7 @@ export function SiteNav() {
         t={t}
         locale={locale}
         close={close}
+        isAuthed={isAuthed}
       />
     </nav>
   )

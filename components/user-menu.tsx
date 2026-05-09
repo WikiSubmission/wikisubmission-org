@@ -1,20 +1,67 @@
 'use client'
 
 import { signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useTransition, useEffect, useState } from 'react'
+import { useLocale } from 'next-intl'
+import { useTheme } from 'next-themes'
 import { useUser } from '@/hooks/use-user'
 import { useSignInPromptStore } from '@/store/sign-in-prompt'
+import { setLocale } from '@/app/actions/locale'
+import { PALETTES, usePalette, type PaletteKey } from '@/lib/theme-palette-context'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut, User } from 'lucide-react'
+import { LogOut, User, Globe, Palette } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+const LOCALES = [
+  { code: 'en', label: 'EN', name: 'English' },
+  { code: 'ar', label: 'AR', name: 'العربية' },
+  { code: 'de', label: 'DE', name: 'Deutsch' },
+  { code: 'fr', label: 'FR', name: 'Français' },
+  { code: 'ku', label: 'KU', name: 'کوردی' },
+  { code: 'tr', label: 'TR', name: 'Türkçe' },
+]
+
+type Mode = 'light' | 'dark'
+
+function resolveMode(theme: string | undefined, systemTheme: string | undefined): Mode {
+  const resolved = theme === 'system' ? systemTheme : theme
+  return resolved === 'dark' ? 'dark' : 'light'
+}
 
 export function UserMenu() {
   const { user, isAuthenticated, isLoading } = useUser()
   const openSignIn = useSignInPromptStore((s) => s.open)
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const currentLocale = useLocale()
+  const { palette, setPalette } = usePalette()
+  const { theme, systemTheme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
+  const mode = resolveMode(theme, systemTheme)
+
+  function handleSelectLocale(locale: string) {
+    startTransition(async () => {
+      await setLocale(locale)
+      router.refresh()
+    })
+  }
+
+  function applyTheme(nextPalette: PaletteKey, nextMode: Mode) {
+    setPalette(nextPalette)
+    setTheme(nextMode)
+  }
 
   if (isLoading) {
     return <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
@@ -69,17 +116,13 @@ export function UserMenu() {
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-52">
         <div className="px-2 py-1.5">
           {user?.name && (
-            <p className="text-sm font-medium text-foreground truncate">
-              {user.name}
-            </p>
+            <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
           )}
           {user?.email && (
-            <p className="text-xs text-muted-foreground truncate">
-              {user.email}
-            </p>
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           )}
         </div>
         <DropdownMenuSeparator />
@@ -89,6 +132,83 @@ export function UserMenu() {
             Profile
           </a>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+
+        {/* Language */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center gap-2">
+            <Globe className="w-4 h-4" />
+            <span>Language</span>
+            <span className="ml-auto text-xs text-muted-foreground font-mono uppercase tracking-wide">
+              {currentLocale.toUpperCase()}
+            </span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-44">
+            {LOCALES.map((locale) => (
+              <DropdownMenuItem
+                key={locale.code}
+                disabled={isPending}
+                onClick={() => handleSelectLocale(locale.code)}
+                className={cn(
+                  'flex items-center justify-between gap-3',
+                  locale.code === currentLocale && 'text-primary'
+                )}
+              >
+                <span className="font-mono text-[10px] tracking-widest uppercase">{locale.label}</span>
+                <span className="text-sm">{locale.name}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
+        {/* Theme */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center gap-2">
+            <Palette className="w-4 h-4" />
+            <span>Theme</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-52 p-2">
+            {mounted && (Object.keys(PALETTES) as PaletteKey[]).map((k) => {
+              const entry = PALETTES[k]
+              const isActive = palette === k
+              return (
+                <div key={k} className="flex items-center justify-between gap-2 px-1.5 py-1.5 rounded-sm">
+                  <span className="text-sm" style={{ fontFamily: 'var(--font-cormorant), Georgia, serif', fontWeight: 500 }}>
+                    {entry.label}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    {(['light', 'dark'] as Mode[]).map((m) => {
+                      const p = entry[m]
+                      const active = isActive && mode === m
+                      return (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => applyTheme(k, m)}
+                          title={m}
+                          className={cn(
+                            'inline-flex items-center gap-0.5 px-1.5 py-1 rounded-sm cursor-pointer transition-all',
+                            active ? 'ring-2 ring-offset-1' : 'hover:opacity-80'
+                          )}
+                          style={{
+                            background: p.bg,
+                            border: `1px solid ${p.rule}`,
+                            // @ts-expect-error css var
+                            '--tw-ring-color': p.accent,
+                          }}
+                        >
+                          <span style={{ width: 7, height: 7, borderRadius: 1, background: p.accent, display: 'block' }} />
+                          <span style={{ width: 7, height: 7, borderRadius: 1, background: p.fg, display: 'block' }} />
+                        </button>
+                      )
+                    })}
+                  </span>
+                </div>
+              )
+            })}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => signOut({ callbackUrl: '/' })}
