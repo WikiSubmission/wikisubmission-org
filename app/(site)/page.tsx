@@ -9,6 +9,7 @@ import { PracticesSection } from './_sections/practices'
 import { JournalSection } from './_sections/journal'
 import { ToolsSection } from './_sections/tools'
 import { ClosingSection } from './_sections/closing'
+import { ContinueReadingSection } from './_sections/continue-reading'
 
 export const metadata = buildPageMetadata({
   title: 'WikiSubmission',
@@ -50,6 +51,7 @@ export default async function Home() {
   return (
     <div style={{ backgroundColor: 'var(--ed-bg)', color: 'var(--ed-fg)' }}>
       <HeroManifesto />
+      <ContinueReadingSection />
       <ScriptureSection />
       <MiracleSection />
       <VerseOfTheDaySection />
