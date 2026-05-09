@@ -1,78 +1,32 @@
-import { getSession } from 'next-auth/react'
-import type { BookmarkData, NoteData, ScriptureState, ReadingProgressData, StreakData } from '@/types/bookmarks'
-import type { CollectionData, CollectionDetail, CollectionVerseData } from '@/types/collections'
+import { wsApi } from './client'
+import type { components } from './types.gen'
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL
+type BookmarkData = components['schemas']['Bookmark']
+type NoteData = components['schemas']['Note']
+type ScriptureState = components['schemas']['ScriptureState']
+type ReadingProgressData = components['schemas']['ReadingProgress']
+type StreakData = components['schemas']['Streak']
+type CollectionData = components['schemas']['Collection']
+type CollectionDetail = components['schemas']['CollectionDetail']
+type CollectionVerseData = components['schemas']['CollectionVerse']
 
-async function meGet<T>(path: string): Promise<T> {
-  const session = await getSession()
-  const res = await fetch(`${baseUrl}${path}`, {
-    headers: session?.accessToken
-      ? { Authorization: `Bearer ${session.accessToken}` }
-      : {},
-  })
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
-  return res.json()
+type WsResult<T> = { data?: T; error?: unknown; response: Response }
+
+async function unwrap<T>(p: Promise<WsResult<T>>): Promise<T> {
+  const { data, error, response } = await p
+  if (error || !response.ok || data === undefined) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return data
 }
 
-async function mePost<T>(path: string, body: unknown): Promise<T> {
-  const session = await getSession()
-  const res = await fetch(`${baseUrl}${path}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
-    },
-    body: JSON.stringify(body),
-  })
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
-  return res.json()
+async function callVoid(p: Promise<WsResult<unknown>>): Promise<void> {
+  await unwrap(p)
 }
-
-async function mePatch<T>(path: string, body: unknown): Promise<T> {
-  const session = await getSession()
-  const res = await fetch(`${baseUrl}${path}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
-    },
-    body: JSON.stringify(body),
-  })
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
-  return res.json()
-}
-
-async function mePut<T>(path: string, body: unknown): Promise<T> {
-  const session = await getSession()
-  const res = await fetch(`${baseUrl}${path}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
-    },
-    body: JSON.stringify(body),
-  })
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
-  return res.json()
-}
-
-async function meDelete(path: string): Promise<void> {
-  const session = await getSession()
-  const res = await fetch(`${baseUrl}${path}`, {
-    method: 'DELETE',
-    headers: session?.accessToken
-      ? { Authorization: `Bearer ${session.accessToken}` }
-      : {},
-  })
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
-}
-
-// ── Typed API calls ──────────────────────────────────────────────────────
 
 export const meApi = {
   getBookmarks: (scripture: string): Promise<{ data: BookmarkData[] }> =>
-    meGet(`/me/bookmarks?scripture=${scripture}`),
+    unwrap(wsApi.GET('/me/bookmarks', { params: { query: { scripture } } })),
 
   createBookmark: (body: {
     scripture: string
@@ -80,102 +34,99 @@ export const meApi = {
     name?: string
     color?: string
     kind?: string
-  }): Promise<{ data: BookmarkData }> => mePost('/me/bookmarks', body),
+  }): Promise<{ data: BookmarkData }> =>
+    unwrap(wsApi.POST('/me/bookmarks', { body })),
 
   updateBookmark: (
     id: number,
     body: { name?: string; color?: string }
-  ): Promise<{ data: BookmarkData }> => mePatch(`/me/bookmarks/${id}`, body),
+  ): Promise<{ data: BookmarkData }> =>
+    unwrap(wsApi.PATCH('/me/bookmarks/{id}', { params: { path: { id } }, body })),
 
   deleteBookmark: (id: number): Promise<void> =>
-    meDelete(`/me/bookmarks/${id}`),
+    callVoid(wsApi.DELETE('/me/bookmarks/{id}', { params: { path: { id } } })),
 
   putCoverToCover: (body: {
     scripture: string
     verse_key: string
-  }): Promise<{ data: BookmarkData }> => mePut('/me/cover-to-cover', body),
+  }): Promise<{ data: BookmarkData }> =>
+    unwrap(wsApi.PUT('/me/cover-to-cover', { body })),
 
   getScriptureState: (
     scripture: string,
     chapter: number
   ): Promise<ScriptureState> =>
-    meGet(`/me/scripture-state?scripture=${scripture}&chapter=${chapter}`),
+    unwrap(wsApi.GET('/me/scripture-state', { params: { query: { scripture, chapter } } })),
 
   getNotes: (
     scripture: string,
     verseKey?: string,
     lang?: string
-  ): Promise<{ data: NoteData[] }> => {
-    const params = new URLSearchParams({ scripture })
-    if (verseKey) params.set('verse_key', verseKey)
-    if (lang) params.set('lang', lang)
-    return meGet(`/me/notes?${params}`)
-  },
+  ): Promise<{ data: NoteData[] }> =>
+    unwrap(wsApi.GET('/me/notes', { params: { query: { scripture, verse_key: verseKey, lang } } })),
 
   createNote: (body: {
     scripture: string
     verse_key: string
     lang?: string
     content: string
-  }): Promise<{ data: NoteData }> => mePost('/me/notes', body),
+  }): Promise<{ data: NoteData }> =>
+    unwrap(wsApi.POST('/me/notes', { body })),
 
   updateNote: (
     id: number,
     body: { content: string }
-  ): Promise<{ data: NoteData }> => mePatch(`/me/notes/${id}`, body),
+  ): Promise<{ data: NoteData }> =>
+    unwrap(wsApi.PATCH('/me/notes/{id}', { params: { path: { id } }, body })),
 
-  deleteNote: (id: number): Promise<void> => meDelete(`/me/notes/${id}`),
+  deleteNote: (id: number): Promise<void> =>
+    callVoid(wsApi.DELETE('/me/notes/{id}', { params: { path: { id } } })),
 
   getReadingProgress: (scripture: string): Promise<{ data: ReadingProgressData | null }> =>
-    meGet(`/me/reading-progress?scripture=${scripture}`),
+    unwrap(wsApi.GET('/me/reading-progress', { params: { query: { scripture } } })),
 
   putReadingProgress: (body: { scripture: string; verse_key: string }): Promise<{ data: ReadingProgressData }> =>
-    mePut('/me/reading-progress', body),
+    unwrap(wsApi.PUT('/me/reading-progress', { body })),
 
   getStreak: (scripture: string): Promise<{ data: StreakData }> =>
-    meGet(`/me/streak?scripture=${scripture}`),
+    unwrap(wsApi.GET('/me/streak', { params: { query: { scripture } } })),
 
   postReadingLog: (body: { scripture: string; verses_read?: number; day?: string }): Promise<void> =>
-    mePost('/me/reading-log', body),
+    callVoid(wsApi.POST('/me/reading-log', { body })),
 
   getPreferences: (scripture: string): Promise<{ data: Record<string, unknown> | null }> =>
-    meGet(`/me/preferences?scripture=${scripture}`),
+    unwrap(wsApi.GET('/me/preferences', { params: { query: { scripture } } })),
 
   putPreferences: (body: { scripture: string; payload: Record<string, unknown> }): Promise<void> =>
-    mePut('/me/preferences', body),
+    callVoid(wsApi.PUT('/me/preferences', { body })),
 
   listCollections: (): Promise<{ data: CollectionData[] }> =>
-    meGet('/me/collections'),
+    unwrap(wsApi.GET('/me/collections')),
 
   getCollection: (id: number): Promise<{ data: CollectionDetail }> =>
-    meGet(`/me/collections/${id}`),
+    unwrap(wsApi.GET('/me/collections/{id}', { params: { path: { id } } })),
 
   createCollection: (body: { name: string; description?: string; is_public?: boolean }): Promise<{ data: CollectionData }> =>
-    mePost('/me/collections', body),
+    unwrap(wsApi.POST('/me/collections', { body })),
 
   updateCollection: (
     id: number,
     body: { name: string; description?: string; is_public?: boolean; regenerate_token?: boolean }
   ): Promise<{ data: CollectionData }> =>
-    mePatch(`/me/collections/${id}`, body),
+    unwrap(wsApi.PATCH('/me/collections/{id}', { params: { path: { id } }, body })),
 
   deleteCollection: (id: number): Promise<void> =>
-    meDelete(`/me/collections/${id}`),
+    callVoid(wsApi.DELETE('/me/collections/{id}', { params: { path: { id } } })),
 
   addVerseToCollection: (
     id: number,
     body: { scripture: string; verse_key: string; note?: string }
   ): Promise<{ data: CollectionVerseData }> =>
-    mePost(`/me/collections/${id}/verses`, body),
+    unwrap(wsApi.POST('/me/collections/{id}/verses', { params: { path: { id } }, body })),
 
   removeVerseFromCollection: (id: number, verseId: number): Promise<void> =>
-    meDelete(`/me/collections/${id}/verses/${verseId}`),
+    callVoid(wsApi.DELETE('/me/collections/{id}/verses/{verseId}', { params: { path: { id, verseId } } })),
 
-  getSharedCollection: (token: string): Promise<{ data: CollectionDetail }> => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL
-    return fetch(`${baseUrl}/collections/share/${token}`).then((r) => {
-      if (!r.ok) throw new Error(`${r.status}`)
-      return r.json()
-    })
-  },
+  getSharedCollection: (token: string): Promise<{ data: CollectionDetail }> =>
+    unwrap(wsApi.GET('/collections/share/{token}', { params: { path: { token } } })),
 }

@@ -333,6 +333,270 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/bookmarks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user's bookmarks */
+        get: operations["getMeBookmarks"];
+        put?: never;
+        /** Create a bookmark for the current user */
+        post: operations["createMeBookmark"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/bookmarks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a bookmark */
+        delete: operations["deleteMeBookmark"];
+        options?: never;
+        head?: never;
+        /** Update a bookmark */
+        patch: operations["updateMeBookmark"];
+        trace?: never;
+    };
+    "/me/cover-to-cover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Upsert cover-to-cover bookmark */
+        put: operations["putMeCoverToCover"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/scripture-state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get bookmark and note state for a chapter */
+        get: operations["getMeScriptureState"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user's notes */
+        get: operations["getMeNotes"];
+        put?: never;
+        /** Create a note */
+        post: operations["createMeNote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/notes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a note */
+        delete: operations["deleteMeNote"];
+        options?: never;
+        head?: never;
+        /** Update a note */
+        patch: operations["updateMeNote"];
+        trace?: never;
+    };
+    "/me/reading-progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current reading position */
+        get: operations["getMeReadingProgress"];
+        /** Upsert reading position */
+        put: operations["putMeReadingProgress"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/streak": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get reading streak metrics */
+        get: operations["getMeStreak"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/reading-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Increment daily reading log */
+        post: operations["postMeReadingLog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get per-scripture preferences */
+        get: operations["getMePreferences"];
+        /** Upsert per-scripture preferences */
+        put: operations["putMePreferences"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/collections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user's collections */
+        get: operations["listMeCollections"];
+        put?: never;
+        /** Create a collection */
+        post: operations["createMeCollection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/collections/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get collection with verses */
+        get: operations["getMeCollectionDetail"];
+        put?: never;
+        post?: never;
+        /** Delete a collection */
+        delete: operations["deleteMeCollection"];
+        options?: never;
+        head?: never;
+        /** Update a collection */
+        patch: operations["updateMeCollection"];
+        trace?: never;
+    };
+    "/me/collections/{id}/verses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add or upsert verse in a collection */
+        post: operations["addVerseToMeCollection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/collections/{id}/verses/{verseId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a verse from a collection */
+        delete: operations["removeVerseFromMeCollection"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections/share/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get publicly shared collection by token */
+        get: operations["getSharedCollection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1093,6 +1357,197 @@ export interface components {
             contactPhone?: string;
             meetingSchedule?: string;
         };
+        Bookmark: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            name: string;
+            color: string;
+            /** @enum {string} */
+            kind: "normal" | "cover_to_cover";
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CreateBookmarkRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            name?: string;
+            /** @default amber */
+            color: string;
+            /**
+             * @default normal
+             * @enum {string}
+             */
+            kind: "normal" | "cover_to_cover";
+        };
+        UpdateBookmarkRequest: {
+            name?: string;
+            color?: string;
+        };
+        CoverToCoverRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+        };
+        Note: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            lang: string;
+            content: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CreateNoteRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            /** @default en */
+            lang: string;
+            content: string;
+        };
+        UpdateNoteRequest: {
+            content: string;
+        };
+        ScriptureState: {
+            bookmarks: {
+                [key: string]: components["schemas"]["Bookmark"];
+            };
+            notes: {
+                [key: string]: components["schemas"]["Note"][];
+            };
+        };
+        ReadingProgress: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PutReadingProgressRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+        };
+        Streak: {
+            current_streak: number;
+            longest_streak: number;
+            last_active_day?: string;
+            total_verses_read: number;
+        };
+        PostReadingLogRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            /** @default 1 */
+            verses_read: number;
+            /** Format: date */
+            day?: string;
+        };
+        PutPreferencesRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            payload: {
+                [key: string]: unknown;
+            };
+        };
+        Collection: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            description: string;
+            is_public: boolean;
+            share_token?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CollectionVerse: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            collection_id: number;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            note: string;
+            position: number;
+            /** Format: date-time */
+            created_at: string;
+        };
+        CollectionDetail: components["schemas"]["Collection"] & {
+            verses: components["schemas"]["CollectionVerse"][];
+        };
+        CreateCollectionRequest: {
+            name: string;
+            description?: string;
+            /** @default false */
+            is_public: boolean;
+        };
+        UpdateCollectionRequest: {
+            name: string;
+            description?: string;
+            is_public?: boolean;
+            /** @default false */
+            regenerate_token: boolean;
+        };
+        AddCollectionVerseRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            note?: string;
+        };
+        NullDataEnvelope: {
+            /** @example null */
+            data: Record<string, never> | null;
+        };
+        BookmarkEnvelope: {
+            data: components["schemas"]["Bookmark"];
+        };
+        BookmarkListEnvelope: {
+            data: components["schemas"]["Bookmark"][];
+        };
+        NoteEnvelope: {
+            data: components["schemas"]["Note"];
+        };
+        NoteListEnvelope: {
+            data: components["schemas"]["Note"][];
+        };
+        ReadingProgressEnvelope: {
+            data: components["schemas"]["ReadingProgress"] | null;
+        };
+        ReadingProgressRequiredEnvelope: {
+            data: components["schemas"]["ReadingProgress"];
+        };
+        StreakEnvelope: {
+            data: components["schemas"]["Streak"];
+        };
+        PreferencesEnvelope: {
+            data: {
+                [key: string]: unknown;
+            } | null;
+        };
+        CollectionEnvelope: {
+            data: components["schemas"]["Collection"];
+        };
+        CollectionListEnvelope: {
+            data: components["schemas"]["Collection"][];
+        };
+        CollectionVerseEnvelope: {
+            data: components["schemas"]["CollectionVerse"];
+        };
+        CollectionDetailEnvelope: {
+            data: components["schemas"]["CollectionDetail"];
+        };
     };
     responses: {
         /** @description The request could not be completed due to a conflict with the current state of the resource. Resolve the conflict and try again. */
@@ -1188,6 +1643,11 @@ export interface components {
          * @example false
          */
         IncludeMeaningParam: boolean;
+        /**
+         * @description Scripture scope for user data.
+         * @example quran
+         */
+        MeScriptureParam: "quran" | "bible";
     };
     requestBodies: never;
     headers: never;
@@ -1830,6 +2290,645 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             500: components["responses"]["InternalServerErrror"];
             502: components["responses"]["BadGateway"];
+        };
+    };
+    getMeBookmarks: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkListEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    createMeBookmark: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBookmarkRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    deleteMeBookmark: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    updateMeBookmark: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateBookmarkRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    putMeCoverToCover: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CoverToCoverRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeScriptureState: {
+        parameters: {
+            query: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+                chapter: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScriptureState"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeNotes: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+                verse_key?: string;
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteListEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    createMeNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateNoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    deleteMeNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    updateMeNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateNoteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeReadingProgress: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingProgressEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    putMeReadingProgress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutReadingProgressRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingProgressRequiredEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeStreak: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreakEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    postMeReadingLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostReadingLogRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMePreferences: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    putMePreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutPreferencesRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listMeCollections: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionListEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    createMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCollectionRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeCollectionDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionDetailEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    deleteMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    updateMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCollectionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    addVerseToMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddCollectionVerseRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionVerseEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    removeVerseFromMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                verseId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getSharedCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionDetailEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
         };
     };
 }
