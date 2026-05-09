@@ -38,6 +38,7 @@ import {
 import { useChapterBorderLoader } from '@/hooks/use-chapter-border-loader'
 import { ZOOM_WIDTH_CLASS, ZOOM_WIDTH_PX } from '@/lib/quran-zoom'
 import { useScriptureState } from '@/hooks/use-scripture-state'
+import { useReadingProgressSync } from '@/hooks/use-reading-progress'
 import type { ScriptureState } from '@/types/bookmarks'
 
 type VirtualizedVerseListProps = {
@@ -64,6 +65,7 @@ type VirtualizedVerseListProps = {
   isBuffering: boolean
   chapterLabel: string
   scriptureState?: ScriptureState
+  onVerseVisible?: (verseKey: string) => void
 }
 
 function VirtualizedVerseList({
@@ -87,6 +89,7 @@ function VirtualizedVerseList({
   isBuffering,
   chapterLabel,
   scriptureState,
+  onVerseVisible,
 }: VirtualizedVerseListProps) {
   const listRef = useRef<HTMLDivElement>(null)
   const [scrollMargin, setScrollMargin] = useState(0)
@@ -342,12 +345,15 @@ function VirtualizedVerseList({
       const isAtBottom = scrollY + viewportH >= docH - 8
 
       let vNum: number
+      let visibleVk: string | undefined
       if (isAtTop) {
         const first = verses[0]
         vNum = first ? parseInt(first.vk?.split(':')[1] ?? '1') : 1
+        visibleVk = first?.vk
       } else if (isAtBottom) {
         const last = verses[verses.length - 1]
         vNum = last ? parseInt(last.vk?.split(':')[1] ?? '1') : 1
+        visibleVk = last?.vk
       } else {
         const centerY = scrollY + viewportH / 2
         const items = virtualizer.getVirtualItems()
@@ -358,9 +364,13 @@ function VirtualizedVerseList({
         vNum = centerVerse
           ? parseInt(centerVerse.vk?.split(':')[1] ?? '1')
           : 1
+        visibleVk = centerVerse?.vk
       }
       setCurrentVerseNumber(vNum)
       centerVerseRef.current = vNum
+      if (visibleVk) {
+        onVerseVisible?.(visibleVk)
+      }
     }
 
     window.addEventListener('scroll', computeCurrentVerse, { passive: true })
@@ -522,6 +532,7 @@ export function ChapterReader({
   const { setChapterQueue } = useQuranPlayerCallbacks()
 
   const scriptureState = useScriptureState('quran', chapterNumber)
+  const reportReadingProgress = useReadingProgressSync('quran')
 
   // Read the initial verse from the prop (passed by the Server Component),
   // NOT from useSearchParams(). useSearchParams() subscribes to Next.js router
@@ -839,6 +850,7 @@ export function ChapterReader({
           isBuffering={isBuffering}
           chapterLabel={tCommon('chapter')}
           scriptureState={scriptureState}
+          onVerseVisible={reportReadingProgress}
         />
       )}
 

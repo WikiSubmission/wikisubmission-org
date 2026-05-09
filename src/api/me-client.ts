@@ -1,5 +1,5 @@
 import { getSession } from 'next-auth/react'
-import type { BookmarkData, NoteData, ScriptureState } from '@/types/bookmarks'
+import type { BookmarkData, NoteData, ScriptureState, ReadingProgressData, StreakData } from '@/types/bookmarks'
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL
 
@@ -124,4 +124,16 @@ export const meApi = {
   ): Promise<{ data: NoteData }> => mePatch(`/me/notes/${id}`, body),
 
   deleteNote: (id: number): Promise<void> => meDelete(`/me/notes/${id}`),
+
+  getReadingProgress: (scripture: string): Promise<{ data: ReadingProgressData | null }> =>
+    meGet(`/me/reading-progress?scripture=${scripture}`),
+
+  putReadingProgress: (body: { scripture: string; verse_key: string }): Promise<{ data: ReadingProgressData }> =>
+    mePut('/me/reading-progress', body),
+
+  getStreak: (scripture: string): Promise<{ data: StreakData }> =>
+    meGet(`/me/streak?scripture=${scripture}`),
+
+  postReadingLog: (body: { scripture: string; verses_read?: number; day?: string }): Promise<void> =>
+    mePost('/me/reading-log', body),
 }
