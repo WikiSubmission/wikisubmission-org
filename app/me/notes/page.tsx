@@ -64,7 +64,7 @@ export default function NotesPage() {
                   <StickyNote className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   <span className="text-xs font-mono text-muted-foreground">{n.verse_key}</span>
                   <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/60">
-                    {n.scripture} · {n.lang}
+                    {n.scripture}
                   </span>
                 </Link>
                 <p className="text-sm whitespace-pre-wrap">{n.content}</p>

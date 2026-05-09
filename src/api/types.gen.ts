@@ -333,25 +333,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/me/bookmarks": {
+    "/me/bookmark-categories": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List current user's bookmarks */
-        get: operations["getMeBookmarks"];
+        /** List current user's bookmark categories */
+        get: operations["listMeBookmarkCategories"];
         put?: never;
-        /** Create a bookmark for the current user */
-        post: operations["createMeBookmark"];
+        /** Create a bookmark category */
+        post: operations["createMeBookmarkCategory"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/me/bookmarks/{id}": {
+    "/me/bookmark-categories/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -361,12 +361,63 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Delete a bookmark */
-        delete: operations["deleteMeBookmark"];
+        /** Delete a bookmark category and all its entries */
+        delete: operations["deleteMeBookmarkCategory"];
         options?: never;
         head?: never;
-        /** Update a bookmark */
-        patch: operations["updateMeBookmark"];
+        /** Update a bookmark category name or color */
+        patch: operations["updateMeBookmarkCategory"];
+        trace?: never;
+    };
+    "/me/bookmark-categories/{id}/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all entries in a bookmark category (cross-scripture) */
+        get: operations["listMeBookmarkCategoryEntries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/bookmark-entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a verse to a bookmark category */
+        post: operations["createMeBookmarkEntry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/bookmark-entries/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a verse from a bookmark category */
+        delete: operations["deleteMeBookmarkEntry"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/me/cover-to-cover": {
@@ -412,9 +463,9 @@ export interface paths {
         };
         /** List current user's notes */
         get: operations["getMeNotes"];
-        put?: never;
-        /** Create a note */
-        post: operations["createMeNote"];
+        /** Create or update the note for a verse (one note per verse) */
+        put: operations["upsertMeNote"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -435,8 +486,27 @@ export interface paths {
         delete: operations["deleteMeNote"];
         options?: never;
         head?: never;
-        /** Update a note */
-        patch: operations["updateMeNote"];
+        patch?: never;
+        trace?: never;
+    };
+    "/me/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search verses and personal notes
+         * @description Searches Quran/Bible verses and, for authenticated users, their notes content. Returns merged results with a `source` field distinguishing verse matches from note matches. Note results include a highlighted excerpt. Unauthenticated requests only search verses.
+         */
+        get: operations["getMeSearch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/me/reading-progress": {
@@ -1366,30 +1436,52 @@ export interface components {
             name: string;
             color: string;
             /** @enum {string} */
-            kind: "normal" | "cover_to_cover";
+            kind: "cover_to_cover";
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
             updated_at: string;
         };
-        CreateBookmarkRequest: {
+        CoverToCoverRequest: {
             /** @enum {string} */
             scripture: "quran" | "bible";
             verse_key: string;
-            name?: string;
+        };
+        BookmarkCategory: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            color: string;
+            /** @description Number of entries in this category. */
+            entry_count: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        BookmarkEntry: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            category_id: number;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        CreateBookmarkCategoryRequest: {
+            name: string;
             /** @default amber */
             color: string;
-            /**
-             * @default normal
-             * @enum {string}
-             */
-            kind: "normal" | "cover_to_cover";
         };
-        UpdateBookmarkRequest: {
+        UpdateBookmarkCategoryRequest: {
             name?: string;
             color?: string;
         };
-        CoverToCoverRequest: {
+        CreateBookmarkEntryRequest: {
+            /** Format: int64 */
+            category_id: number;
             /** @enum {string} */
             scripture: "quran" | "bible";
             verse_key: string;
@@ -1400,30 +1492,40 @@ export interface components {
             /** @enum {string} */
             scripture: "quran" | "bible";
             verse_key: string;
-            lang: string;
+            /** @description Markdown content. */
             content: string;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
             updated_at: string;
         };
-        CreateNoteRequest: {
+        UpsertNoteRequest: {
             /** @enum {string} */
             scripture: "quran" | "bible";
             verse_key: string;
-            /** @default en */
-            lang: string;
+            /** @description Markdown content. */
             content: string;
         };
-        UpdateNoteRequest: {
-            content: string;
+        SearchResult: {
+            /**
+             * @description Origin of this result. Only 'note' is returned here; verse results come from the existing /search endpoints.
+             * @enum {string}
+             */
+            source: "note";
+            verse_key: string;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            /** @description Highlighted excerpt from the note content showing the match context. */
+            excerpt: string;
         };
         ScriptureState: {
+            /** @description Map of verse_key to list of bookmark entries for that verse. */
             bookmarks: {
-                [key: string]: components["schemas"]["Bookmark"];
+                [key: string]: components["schemas"]["BookmarkEntry"][];
             };
+            /** @description Map of verse_key to the single note for that verse. */
             notes: {
-                [key: string]: components["schemas"]["Note"][];
+                [key: string]: components["schemas"]["Note"];
             };
         };
         ReadingProgress: {
@@ -1513,8 +1615,20 @@ export interface components {
         BookmarkEnvelope: {
             data: components["schemas"]["Bookmark"];
         };
-        BookmarkListEnvelope: {
-            data: components["schemas"]["Bookmark"][];
+        BookmarkCategoryEnvelope: {
+            data: components["schemas"]["BookmarkCategory"];
+        };
+        BookmarkCategoryListEnvelope: {
+            data: components["schemas"]["BookmarkCategory"][];
+        };
+        BookmarkEntryEnvelope: {
+            data: components["schemas"]["BookmarkEntry"];
+        };
+        BookmarkEntryListEnvelope: {
+            data: components["schemas"]["BookmarkEntry"][];
+        };
+        MeSearchEnvelope: {
+            data: components["schemas"]["SearchResult"][];
         };
         NoteEnvelope: {
             data: components["schemas"]["Note"];
@@ -2292,15 +2406,9 @@ export interface operations {
             502: components["responses"]["BadGateway"];
         };
     };
-    getMeBookmarks: {
+    listMeBookmarkCategories: {
         parameters: {
-            query?: {
-                /**
-                 * @description Scripture scope for user data.
-                 * @example quran
-                 */
-                scripture?: components["parameters"]["MeScriptureParam"];
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -2313,14 +2421,13 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BookmarkListEnvelope"];
+                    "application/json": components["schemas"]["BookmarkCategoryListEnvelope"];
                 };
             };
-            400: components["responses"]["BadRequest"];
             500: components["responses"]["InternalServerErrror"];
         };
     };
-    createMeBookmark: {
+    createMeBookmarkCategory: {
         parameters: {
             query?: never;
             header?: never;
@@ -2329,7 +2436,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateBookmarkRequest"];
+                "application/json": components["schemas"]["CreateBookmarkCategoryRequest"];
             };
         };
         responses: {
@@ -2339,14 +2446,14 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BookmarkEnvelope"];
+                    "application/json": components["schemas"]["BookmarkCategoryEnvelope"];
                 };
             };
             400: components["responses"]["BadRequest"];
             500: components["responses"]["InternalServerErrror"];
         };
     };
-    deleteMeBookmark: {
+    deleteMeBookmarkCategory: {
         parameters: {
             query?: never;
             header?: never;
@@ -2366,12 +2473,11 @@ export interface operations {
                     "application/json": components["schemas"]["NullDataEnvelope"];
                 };
             };
-            400: components["responses"]["BadRequest"];
             404: components["responses"]["NotFound"];
             500: components["responses"]["InternalServerErrror"];
         };
     };
-    updateMeBookmark: {
+    updateMeBookmarkCategory: {
         parameters: {
             query?: never;
             header?: never;
@@ -2382,7 +2488,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateBookmarkRequest"];
+                "application/json": components["schemas"]["UpdateBookmarkCategoryRequest"];
             };
         };
         responses: {
@@ -2392,10 +2498,85 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BookmarkEnvelope"];
+                    "application/json": components["schemas"]["BookmarkCategoryEnvelope"];
                 };
             };
             400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listMeBookmarkCategoryEntries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkEntryListEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    createMeBookmarkEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBookmarkEntryRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkEntryEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    deleteMeBookmarkEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
             404: components["responses"]["NotFound"];
             500: components["responses"]["InternalServerErrror"];
         };
@@ -2464,7 +2645,6 @@ export interface operations {
                  */
                 scripture?: components["parameters"]["MeScriptureParam"];
                 verse_key?: string;
-                lang?: string;
             };
             header?: never;
             path?: never;
@@ -2485,7 +2665,7 @@ export interface operations {
             500: components["responses"]["InternalServerErrror"];
         };
     };
-    createMeNote: {
+    upsertMeNote: {
         parameters: {
             query?: never;
             header?: never;
@@ -2494,12 +2674,12 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateNoteRequest"];
+                "application/json": components["schemas"]["UpsertNoteRequest"];
             };
         };
         responses: {
-            /** @description Created */
-            201: {
+            /** @description OK */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2531,25 +2711,23 @@ export interface operations {
                     "application/json": components["schemas"]["NullDataEnvelope"];
                 };
             };
-            400: components["responses"]["BadRequest"];
             404: components["responses"]["NotFound"];
             500: components["responses"]["InternalServerErrror"];
         };
     };
-    updateMeNote: {
+    getMeSearch: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
+            query: {
+                /** @description Search query string. */
+                q: string;
+                /** @description Limit results to a single scripture. Omit for all. */
+                scripture?: "quran" | "bible";
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateNoteRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description OK */
             200: {
@@ -2557,11 +2735,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NoteEnvelope"];
+                    "application/json": components["schemas"]["MeSearchEnvelope"];
                 };
             };
             400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalServerErrror"];
         };
     };

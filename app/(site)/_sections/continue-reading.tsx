@@ -2,9 +2,8 @@
 
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { BookOpen, Bookmark } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 import { useReadingProgress } from '@/hooks/use-reading-progress'
-import { useBookmarksList } from '@/hooks/use-bookmarks'
 import { F } from './shared'
 
 function ContinueCard({
@@ -89,13 +88,8 @@ export function ContinueReadingSection() {
   const { status } = useSession()
   const quranProgress = useReadingProgress('quran')
   const bibleProgress = useReadingProgress('bible')
-  const quranBookmarks = useBookmarksList('quran')
-  const bibleBookmarks = useBookmarksList('bible')
 
   if (status !== 'authenticated') return null
-
-  const c2cQuran = quranBookmarks.find((b) => b.kind === 'cover_to_cover')
-  const c2cBible = bibleBookmarks.find((b) => b.kind === 'cover_to_cover')
 
   const cards: React.ReactNode[] = []
 
@@ -111,18 +105,6 @@ export function ContinueReadingSection() {
       />
     )
   }
-  if (c2cQuran?.verse_key) {
-    cards.push(
-      <ContinueCard
-        key="quran-c2c"
-        icon={Bookmark}
-        label="Cover-to-cover Quran"
-        verseKey={c2cQuran.verse_key}
-        scripture="quran"
-        tagline="Bookmark"
-      />
-    )
-  }
   if (bibleProgress?.verse_key) {
     cards.push(
       <ContinueCard
@@ -135,25 +117,11 @@ export function ContinueReadingSection() {
       />
     )
   }
-  if (c2cBible?.verse_key) {
-    cards.push(
-      <ContinueCard
-        key="bible-c2c"
-        icon={Bookmark}
-        label="Cover-to-cover Bible"
-        verseKey={c2cBible.verse_key}
-        scripture="bible"
-        tagline="Bookmark"
-      />
-    )
-  }
 
   if (cards.length === 0) return null
 
   return (
-    <section
-      style={{ padding: 'clamp(32px, 5vw, 48px) 0' }}
-    >
+    <section style={{ padding: 'clamp(32px, 5vw, 48px) 0' }}>
       <div className="px-4 sm:px-6 md:px-10" style={{ maxWidth: 1240, margin: '0 auto' }}>
         <div
           style={{

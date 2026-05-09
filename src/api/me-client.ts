@@ -2,7 +2,10 @@ import { wsApi } from './client'
 import type { components } from './types.gen'
 
 type BookmarkData = components['schemas']['Bookmark']
+type BookmarkCategoryData = components['schemas']['BookmarkCategory']
+type BookmarkEntryData = components['schemas']['BookmarkEntry']
 type NoteData = components['schemas']['Note']
+type SearchResultData = components['schemas']['SearchResult']
 type ScriptureState = components['schemas']['ScriptureState']
 type ReadingProgressData = components['schemas']['ReadingProgress']
 type StreakData = components['schemas']['Streak']
@@ -10,16 +13,11 @@ type CollectionData = components['schemas']['Collection']
 type CollectionDetail = components['schemas']['CollectionDetail']
 type CollectionVerseData = components['schemas']['CollectionVerse']
 type Scripture = components['parameters']['MeScriptureParam']
-type BookmarkKind = components['schemas']['CreateBookmarkRequest']['kind']
 
 type WsResult<T> = { data?: T; error?: unknown; response: Response }
 
 function toScripture(scripture: string): Scripture {
   return scripture === 'bible' ? 'bible' : 'quran'
-}
-
-function toBookmarkKind(kind: string | undefined): BookmarkKind {
-  return kind === 'cover_to_cover' ? 'cover_to_cover' : 'normal'
 }
 
 async function unwrap<T>(p: Promise<WsResult<T>>): Promise<T> {
@@ -35,34 +33,48 @@ async function callVoid(p: Promise<WsResult<unknown>>): Promise<void> {
 }
 
 export const meApi = {
-  getBookmarks: (scripture: string): Promise<{ data: BookmarkData[] }> =>
-    unwrap(wsApi.GET('/me/bookmarks', { params: { query: { scripture: toScripture(scripture) } } })),
+  // ── Bookmark categories ──────────────────────────────────────────────────
 
-  createBookmark: (body: {
+  listBookmarkCategories: (): Promise<{ data: BookmarkCategoryData[] }> =>
+    unwrap(wsApi.GET('/me/bookmark-categories')),
+
+  createBookmarkCategory: (body: {
+    name: string
+    color?: string
+  }): Promise<{ data: BookmarkCategoryData }> =>
+    unwrap(wsApi.POST('/me/bookmark-categories', { body: { name: body.name, color: body.color ?? 'amber' } })),
+
+  updateBookmarkCategory: (
+    id: number,
+    body: { name?: string; color?: string }
+  ): Promise<{ data: BookmarkCategoryData }> =>
+    unwrap(wsApi.PATCH('/me/bookmark-categories/{id}', { params: { path: { id } }, body })),
+
+  deleteBookmarkCategory: (id: number): Promise<void> =>
+    callVoid(wsApi.DELETE('/me/bookmark-categories/{id}', { params: { path: { id } } })),
+
+  // ── Bookmark entries ─────────────────────────────────────────────────────
+
+  listBookmarkCategoryEntries: (id: number): Promise<{ data: BookmarkEntryData[] }> =>
+    unwrap(wsApi.GET('/me/bookmark-categories/{id}/entries', { params: { path: { id } } })),
+
+  createBookmarkEntry: (body: {
+    category_id: number
     scripture: string
     verse_key: string
-    name?: string
-    color?: string
-    kind?: string
-  }): Promise<{ data: BookmarkData }> =>
-    unwrap(wsApi.POST('/me/bookmarks', {
+  }): Promise<{ data: BookmarkEntryData }> =>
+    unwrap(wsApi.POST('/me/bookmark-entries', {
       body: {
+        category_id: body.category_id,
         scripture: toScripture(body.scripture),
         verse_key: body.verse_key,
-        name: body.name,
-        color: body.color ?? 'amber',
-        kind: toBookmarkKind(body.kind),
       },
     })),
 
-  updateBookmark: (
-    id: number,
-    body: { name?: string; color?: string }
-  ): Promise<{ data: BookmarkData }> =>
-    unwrap(wsApi.PATCH('/me/bookmarks/{id}', { params: { path: { id } }, body })),
+  deleteBookmarkEntry: (id: number): Promise<void> =>
+    callVoid(wsApi.DELETE('/me/bookmark-entries/{id}', { params: { path: { id } } })),
 
-  deleteBookmark: (id: number): Promise<void> =>
-    callVoid(wsApi.DELETE('/me/bookmarks/{id}', { params: { path: { id } } })),
+  // ── Cover-to-cover (still uses old bookmark row) ─────────────────────────
 
   putCoverToCover: (body: {
     scripture: string
@@ -72,42 +84,51 @@ export const meApi = {
       body: { scripture: toScripture(body.scripture), verse_key: body.verse_key },
     })),
 
+  // ── Scripture state ──────────────────────────────────────────────────────
+
   getScriptureState: (
     scripture: string,
     chapter: number
   ): Promise<ScriptureState> =>
     unwrap(wsApi.GET('/me/scripture-state', { params: { query: { scripture: toScripture(scripture), chapter } } })),
 
+  // ── Notes ────────────────────────────────────────────────────────────────
+
   getNotes: (
     scripture: string,
-    verseKey?: string,
-    lang?: string
+    verseKey?: string
   ): Promise<{ data: NoteData[] }> =>
-    unwrap(wsApi.GET('/me/notes', { params: { query: { scripture: toScripture(scripture), verse_key: verseKey, lang } } })),
+    unwrap(wsApi.GET('/me/notes', { params: { query: { scripture: toScripture(scripture), verse_key: verseKey } } })),
 
-  createNote: (body: {
+  upsertNote: (body: {
     scripture: string
     verse_key: string
-    lang?: string
     content: string
   }): Promise<{ data: NoteData }> =>
-    unwrap(wsApi.POST('/me/notes', {
+    unwrap(wsApi.PUT('/me/notes', {
       body: {
         scripture: toScripture(body.scripture),
         verse_key: body.verse_key,
-        lang: body.lang ?? 'en',
         content: body.content,
       },
     })),
 
-  updateNote: (
-    id: number,
-    body: { content: string }
-  ): Promise<{ data: NoteData }> =>
-    unwrap(wsApi.PATCH('/me/notes/{id}', { params: { path: { id } }, body })),
-
   deleteNote: (id: number): Promise<void> =>
     callVoid(wsApi.DELETE('/me/notes/{id}', { params: { path: { id } } })),
+
+  // ── Personal search ──────────────────────────────────────────────────────
+
+  searchNotes: (q: string, scripture?: string): Promise<{ data: SearchResultData[] }> =>
+    unwrap(wsApi.GET('/me/search', {
+      params: {
+        query: {
+          q,
+          ...(scripture ? { scripture: toScripture(scripture) } : {}),
+        },
+      },
+    })),
+
+  // ── Reading progress ─────────────────────────────────────────────────────
 
   getReadingProgress: (scripture: string): Promise<{ data: ReadingProgressData | null }> =>
     unwrap(wsApi.GET('/me/reading-progress', { params: { query: { scripture: toScripture(scripture) } } })),
@@ -136,6 +157,8 @@ export const meApi = {
     callVoid(wsApi.PUT('/me/preferences', {
       body: { scripture: toScripture(body.scripture), payload: body.payload },
     })),
+
+  // ── Collections ──────────────────────────────────────────────────────────
 
   listCollections: (): Promise<{ data: CollectionData[] }> =>
     unwrap(wsApi.GET('/me/collections')),

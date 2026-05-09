@@ -1,12 +1,13 @@
 'use client'
 
-import { memo, useMemo, useCallback, useState } from 'react'
+import { memo, useMemo, useCallback, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useSession } from 'next-auth/react'
 import { useSignInPromptStore } from '@/store/sign-in-prompt'
-import { useAddBookmark, useDeleteBookmark } from '@/hooks/use-bookmarks'
-import { useAddNote, useUpdateNote, useDeleteNote } from '@/hooks/use-notes'
+import { useAddBookmarkEntry, useRemoveBookmarkEntry } from '@/hooks/use-bookmarks'
+import { useUpsertNote, useDeleteNote } from '@/hooks/use-notes'
+import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -26,6 +27,8 @@ import {
   ArrowUpRight,
   Bookmark,
   StickyNote,
+  Plus,
+  Trash2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HighlightText } from '@/components/highlight-text'
@@ -34,7 +37,16 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
 import {
   Tooltip,
   TooltipContent,
@@ -42,7 +54,11 @@ import {
 } from '@/components/ui/tooltip'
 import type { components } from '@/src/api/types.gen'
 import { QuranRefText } from '@/components/quran-ref-text'
-import type { BookmarkData, NoteData } from '@/types/bookmarks'
+import type { BookmarkEntryData, NoteData } from '@/types/bookmarks'
+import { useCreateBlockNote } from '@blocknote/react'
+import { BlockNoteView } from '@blocknote/mantine'
+import '@blocknote/mantine/style.css'
+import '@blocknote/react/style.css'
 
 type VerseData = components['schemas']['VerseData']
 type WordData = components['schemas']['WordData']
@@ -172,10 +188,6 @@ function WordDetailsDialogContent({
 
 // ─── Word-by-word (Arabic) ────────────────────────────────────────────────────
 
-/**
- * Single word card (non-compact). Tapping always opens the rich details dialog
- * combining audio, root, meaning, and other occurrences.
- */
 function WordCardItem({
   word,
   chapter,
@@ -268,9 +280,6 @@ function WordCardItem({
   )
 }
 
-/**
- * Compact word (Arabic glyph only). Tap always opens the rich details dialog.
- */
 function WordCompactItem({
   word,
   chapter,
@@ -382,7 +391,6 @@ const WordByWordView = memo(
     /** Forwarded from VerseCard — forces re-render on language reload. */
     optsKey?: string
   }) {
-    // Sort once and memoize — words from the API are stable references
     const sorted = useMemo(
       () => [...words].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0)),
       [words]
@@ -446,9 +454,89 @@ const WordByWordView = memo(
     prev.optsKey === next.optsKey
 )
 
+// ─── Note editor dialog ───────────────────────────────────────────────────────
+
+function NoteEditorDialog({
+  note,
+  verseKey,
+  scripture,
+  open,
+  onOpenChange,
+}: {
+  note: NoteData | null
+  verseKey: string
+  scripture: string
+  open: boolean
+  onOpenChange: (v: boolean) => void
+}) {
+  const editor = useCreateBlockNote()
+  const { mutate: upsert, isPending: saving } = useUpsertNote(scripture)
+  const { mutate: remove, isPending: deleting } = useDeleteNote(scripture)
+
+  useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    async function load() {
+      const blocks = note?.content
+        ? await editor.tryParseMarkdownToBlocks(note.content)
+        : [{ type: 'paragraph' as const, content: [] }]
+      if (!cancelled) editor.replaceBlocks(editor.document, blocks)
+    }
+    load()
+    return () => { cancelled = true }
+  }, [open, note?.content, editor])
+
+  async function handleSave() {
+    const markdown = await editor.blocksToMarkdownLossy(editor.document)
+    upsert(
+      { verseKey, content: markdown.trim() },
+      { onSuccess: () => onOpenChange(false) }
+    )
+  }
+
+  function handleDelete() {
+    if (!note) return
+    remove({ id: note.id, verseKey }, { onSuccess: () => onOpenChange(false) })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg flex flex-col gap-0 p-0 overflow-hidden">
+        <DialogHeader className="px-5 pt-5 pb-3 border-b">
+          <DialogTitle className="text-sm font-mono tracking-wider uppercase text-muted-foreground">
+            Note — {verseKey}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="min-h-[200px] max-h-[60vh] overflow-y-auto px-2 py-3 [&_.bn-editor]:min-h-[180px] [&_.bn-editor]:text-sm">
+          <BlockNoteView editor={editor} theme="light" />
+        </div>
+        <DialogFooter className="px-5 py-3 border-t flex flex-row items-center gap-2">
+          {note && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-destructive hover:text-destructive mr-auto"
+              disabled={deleting}
+              onClick={handleDelete}
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-1" />
+              Delete
+            </Button>
+          )}
+          <Button size="sm" variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button size="sm" disabled={saving} onClick={handleSave}>
+            {note ? 'Save' : 'Add note'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // ─── Verse Card ───────────────────────────────────────────────────────────────
 
-// Props type for VerseCard — named so arePropsEqual can reference it cleanly.
 type VerseCardProps = {
   verse: VerseData
   isLast: boolean
@@ -467,14 +555,14 @@ type VerseCardProps = {
   showCopyButton?: boolean
   /** Show the bookmark button. Default: false. */
   showBookmark?: boolean
-  /** Active bookmark for this verse (null = not bookmarked). */
-  bookmark?: BookmarkData | null
-  /** Scripture context for bookmark mutations. Default: 'quran'. */
+  /** Bookmark category entries for this verse. */
+  entries?: BookmarkEntryData[]
+  /** Scripture context for bookmark/note mutations. Default: 'quran'. */
   scripture?: string
   /** Show the notes button. Default: false. */
   showNotes?: boolean
-  /** Notes for this verse (keyed by lang, or just list). */
-  notes?: NoteData[]
+  /** Single note for this verse. */
+  note?: NoteData | null
   /** When set, verse key badge becomes a link (for search results). */
   verseHref?: string
   /** Search highlight (hl field with <b> tags) to display alongside translation. */
@@ -493,10 +581,10 @@ export const VerseCard = memo(
     showAudio = true,
     showCopyButton = true,
     showBookmark = false,
-    bookmark = null,
+    entries = [],
     scripture = 'quran',
     showNotes = false,
-    notes = [],
+    note = null,
     verseHref,
     searchHighlight,
   }: VerseCardProps) {
@@ -504,21 +592,13 @@ export const VerseCard = memo(
     const { isRtl } = useLanguagesStore()
     const { data: session } = useSession()
     const openSignIn = useSignInPromptStore((s) => s.open)
-    const { mutate: addBookmark, isPending: addingBookmark } =
-      useAddBookmark(scripture)
-    const { mutate: deleteBookmark, isPending: deletingBookmark } =
-      useDeleteBookmark(scripture)
-    const { mutate: addNote, isPending: addingNote } = useAddNote(scripture)
-    const { mutate: updateNote, isPending: updatingNote } =
-      useUpdateNote(scripture)
-    const { mutate: deleteNote, isPending: deletingNote } =
-      useDeleteNote(scripture)
+
+    const categories = useBookmarkCategories()
+    const { mutate: addEntry, isPending: addingEntry } = useAddBookmarkEntry(scripture)
+    const { mutate: removeEntry, isPending: removingEntry } = useRemoveBookmarkEntry(scripture)
+
     const [notesOpen, setNotesOpen] = useState(false)
-    const [editingNote, setEditingNote] = useState<NoteData | null>(null)
-    const [noteContent, setNoteContent] = useState('')
-    // Only subscribe to the stable callbacks context — this component never
-    // re-renders due to player STATE changes (currentVerse, isPlaying, etc.)
-    // because those are now passed as props from ChapterReader.
+
     const { playFromVerse, togglePlayPause } = useQuranPlayerCallbacks()
 
     const primaryCode =
@@ -536,16 +616,11 @@ export const VerseCard = memo(
     const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
     const verseId = verse.vk ?? ''
 
-    // Produce a full-text string with <b> highlights for HighlightText.
-    // If the API returned the full text with highlights, use it directly.
-    // If it returned a shorter snippet, extract the highlighted words and
-    // apply them to the full translation text so highlighting always appears inline.
     const highlightedTranslation = useMemo(() => {
       if (!searchHighlight || !tr?.tx) return null
       const stripped = searchHighlight.replace(/<\/?b>/g, '')
       const isFullText = stripped.length >= tr.tx.length * 0.9
       if (isFullText) return searchHighlight
-      // Extract bolded words from the snippet and mark them in the full text
       const boldedWords = [...searchHighlight.matchAll(/<b>(.*?)<\/b>/g)].map(
         (m) => m[1]
       )
@@ -553,8 +628,6 @@ export const VerseCard = memo(
       let result = tr.tx
       for (const word of boldedWords) {
         const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        // Unicode-aware word boundary: only match when the surrounding chars
-        // aren't letters/digits, so "test" won't match inside "testify".
         result = result.replace(
           new RegExp(
             `(?<![\\p{L}\\p{N}_])(${escaped})(?![\\p{L}\\p{N}_])`,
@@ -571,17 +644,12 @@ export const VerseCard = memo(
       [verseId]
     )
 
-    // ─── Multi-select (explicitly entered from the copy menu) ──────────────
     const selectionActive = useVerseSelection((s) => s.active)
     const isSelected = useVerseSelection((s) =>
       verseId ? s.selected.has(verseId) : false
     )
     const toggleSelection = useVerseSelection((s) => s.toggle)
 
-    // Skip selection handling when the interaction starts on an interactive
-    // control (audio/copy/bookmark buttons, dropdown triggers, or menu items).
-    // Links (the verse-key pill) are intentionally NOT skipped — users should
-    // be able to select that verse while multi-select mode is active.
     const isInteractiveTarget = (el: EventTarget | null) => {
       const node = el as HTMLElement | null
       return !!node?.closest(
@@ -591,8 +659,6 @@ export const VerseCard = memo(
 
     const onCardContextMenu = useCallback(
       (e: React.MouseEvent<HTMLDivElement>) => {
-        // Suppress the context menu while selection mode is active; card taps
-        // should only toggle membership until the user exits the mode.
         if (selectionActive) e.preventDefault()
       },
       [selectionActive]
@@ -614,10 +680,11 @@ export const VerseCard = memo(
       if (isCurrentAudio) {
         togglePlayPause()
       } else {
-        // Queue was pre-set in ChapterReader via setChapterQueue; no need to pass it here
         playFromVerse(audioVerse)
       }
     }, [isCurrentAudio, togglePlayPause, playFromVerse, audioVerse])
+
+    const isBookmarked = entries.length > 0
 
     return (
       <div
@@ -645,7 +712,7 @@ export const VerseCard = memo(
             </div>
           )}
 
-          {/* Verse key + play button */}
+          {/* Verse key + action buttons */}
           <div className="flex items-center justify-between gap-2">
             {verseHref ? (
               <Link
@@ -669,45 +736,81 @@ export const VerseCard = memo(
             )}
             <div className="flex items-center gap-1">
               {showBookmark && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={bookmark ? 'Remove bookmark' : 'Add bookmark'}
-                  className={`h-8 w-8 rounded-full transition-colors ${
-                    bookmark
-                      ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-500/10'
-                      : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
-                  }`}
-                  disabled={addingBookmark || deletingBookmark}
-                  onClick={() => {
-                    if (!session?.accessToken) {
-                      openSignIn()
-                      return
-                    }
-                    if (bookmark) {
-                      deleteBookmark({ id: bookmark.id, verseKey: verseId })
-                    } else {
-                      addBookmark({ verseKey: verseId })
-                    }
-                  }}
-                >
-                  <Bookmark
-                    className="w-4 h-4"
-                    fill={bookmark ? 'currentColor' : 'none'}
-                  />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={isBookmarked ? 'Manage bookmarks' : 'Add to category'}
+                      className={`h-8 w-8 rounded-full transition-colors ${
+                        isBookmarked
+                          ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-500/10'
+                          : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                      }`}
+                      onClick={(e) => {
+                        if (!session?.accessToken) {
+                          e.preventDefault()
+                          openSignIn()
+                        }
+                      }}
+                    >
+                      <Bookmark
+                        className="w-4 h-4"
+                        fill={isBookmarked ? 'currentColor' : 'none'}
+                      />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-44">
+                    <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+                      Bookmark categories
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {categories.length === 0 ? (
+                      <div className="px-3 py-2 text-xs text-muted-foreground">
+                        No categories yet
+                      </div>
+                    ) : (
+                      categories.map((cat) => {
+                        const entry = entries.find((e) => e.category_id === cat.id)
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={cat.id}
+                            checked={!!entry}
+                            disabled={addingEntry || removingEntry}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                addEntry({ categoryId: cat.id, verseKey: verseId })
+                              } else if (entry) {
+                                removeEntry({ entryId: entry.id, verseKey: verseId })
+                              }
+                            }}
+                          >
+                            <span
+                              className="mr-1.5 inline-block w-2 h-2 rounded-full flex-shrink-0"
+                              style={{ background: cat.color }}
+                            />
+                            {cat.name}
+                          </DropdownMenuCheckboxItem>
+                        )
+                      })
+                    )}
+                    <DropdownMenuSeparator />
+                    <Link href="/me" className="block">
+                      <div className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer rounded-sm hover:bg-accent">
+                        <Plus className="w-3 h-3" />
+                        Manage categories
+                      </div>
+                    </Link>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
               {showNotes && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label={
-                    notes.length > 0
-                      ? `${notes.length} note${notes.length > 1 ? 's' : ''}`
-                      : 'Add note'
-                  }
+                  aria-label={note ? 'Edit note' : 'Add note'}
                   className={`relative h-8 w-8 rounded-full transition-colors ${
-                    notes.length > 0
+                    note
                       ? 'text-primary hover:bg-primary/10'
                       : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
                   }`}
@@ -716,20 +819,13 @@ export const VerseCard = memo(
                       openSignIn()
                       return
                     }
-                    setNoteContent('')
-                    setEditingNote(null)
                     setNotesOpen(true)
                   }}
                 >
                   <StickyNote
                     className="w-4 h-4"
-                    fill={notes.length > 0 ? 'currentColor' : 'none'}
+                    fill={note ? 'currentColor' : 'none'}
                   />
-                  {notes.length > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground">
-                      {notes.length}
-                    </span>
-                  )}
                 </Button>
               )}
               {showCopyButton && (
@@ -786,9 +882,6 @@ export const VerseCard = memo(
                 </p>
               )}
 
-              {/* Arabic + word-by-word — only render when per-word data is
-                  present so we never fall back to a raw-Arabic string with
-                  awkward tracking. */}
               {(prefs.arabic || prefs.wordByWord) &&
                 verse.w &&
                 verse.w.length > 0 && (
@@ -822,136 +915,17 @@ export const VerseCard = memo(
 
         {!isLast && <hr className="border-border/20 mx-6 sm:mx-8" />}
 
-        {/* Notes dialog */}
-        <Dialog open={notesOpen} onOpenChange={setNotesOpen}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="text-sm font-mono tracking-wider uppercase text-muted-foreground">
-                Notes — {verseId}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col gap-3">
-              {notes.map((n) => (
-                <div
-                  key={n.id}
-                  className="flex flex-col gap-1 rounded border border-border p-3"
-                >
-                  {editingNote?.id === n.id ? (
-                    <div className="flex flex-col gap-2">
-                      <textarea
-                        className="w-full resize-none rounded border border-border bg-background p-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                        rows={3}
-                        value={noteContent}
-                        onChange={(e) => setNoteContent(e.target.value)}
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          disabled={updatingNote || !noteContent.trim()}
-                          onClick={() => {
-                            updateNote(
-                              {
-                                id: n.id,
-                                verseKey: verseId,
-                                content: noteContent,
-                              },
-                              {
-                                onSuccess: () => {
-                                  setEditingNote(null)
-                                  setNoteContent('')
-                                },
-                              }
-                            )
-                          }}
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setEditingNote(null)
-                            setNoteContent('')
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="flex-1 whitespace-pre-wrap text-sm">
-                        {n.content}
-                      </p>
-                      <div className="flex gap-1 shrink-0">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7"
-                          onClick={() => {
-                            setEditingNote(n)
-                            setNoteContent(n.content)
-                          }}
-                        >
-                          <StickyNote className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7 text-destructive hover:text-destructive"
-                          disabled={deletingNote}
-                          onClick={() =>
-                            deleteNote({ id: n.id, verseKey: verseId })
-                          }
-                        >
-                          <span className="w-3.5 h-3.5 flex items-center justify-center text-xs">
-                            ✕
-                          </span>
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/60">
-                    {n.lang}
-                  </span>
-                </div>
-              ))}
-              <div className="flex flex-col gap-2">
-                <textarea
-                  className="w-full resize-none rounded border border-border bg-background p-2 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary"
-                  rows={3}
-                  placeholder="Add a note..."
-                  value={editingNote ? '' : noteContent}
-                  disabled={!!editingNote}
-                  onChange={(e) => setNoteContent(e.target.value)}
-                />
-                <Button
-                  size="sm"
-                  disabled={addingNote || !noteContent.trim() || !!editingNote}
-                  onClick={() => {
-                    addNote(
-                      {
-                        verseKey: verseId,
-                        lang: primaryCode ?? 'en',
-                        content: noteContent,
-                      },
-                      { onSuccess: () => setNoteContent('') }
-                    )
-                  }}
-                >
-                  Add note
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <NoteEditorDialog
+          note={note}
+          verseKey={verseId}
+          scripture={scripture}
+          open={notesOpen}
+          onOpenChange={setNotesOpen}
+        />
       </div>
     )
   },
   (prev: VerseCardProps, next: VerseCardProps) =>
-    // Use reference equality on the verse object: after a reload (same vk, new data),
-    // verse is a new object reference — this lets the card re-render with the new language data.
-    // During normal scroll, the virtualizer passes the same reference → memo skips correctly.
     prev.verse === next.verse &&
     prev.isLast === next.isLast &&
     prev.isScrollTarget === next.isScrollTarget &&
@@ -961,12 +935,11 @@ export const VerseCard = memo(
     prev.showAudio === next.showAudio &&
     prev.showCopyButton === next.showCopyButton &&
     prev.showBookmark === next.showBookmark &&
-    prev.bookmark?.id === next.bookmark?.id &&
+    prev.entries?.length === next.entries?.length &&
     prev.showNotes === next.showNotes &&
-    prev.notes?.length === next.notes?.length &&
+    prev.note?.id === next.note?.id &&
+    prev.note?.updated_at === next.note?.updated_at &&
     prev.isCurrentAudio === next.isCurrentAudio &&
-    // Non-playing cards don't care about isPlaying/isBuffering (they always show Play).
-    // Only check those for the active card to avoid re-rendering all cards on pause/resume.
     (!next.isCurrentAudio ||
       (prev.isPlaying === next.isPlaying &&
         prev.isBuffering === next.isBuffering))

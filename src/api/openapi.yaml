@@ -951,30 +951,26 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
-  /me/bookmarks:
+  /me/bookmark-categories:
     get:
       tags: [Me]
-      operationId: getMeBookmarks
-      summary: List current user's bookmarks
+      operationId: listMeBookmarkCategories
+      summary: List current user's bookmark categories
       security:
         - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/MeScriptureParam'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BookmarkListEnvelope'
-        '400':
-          $ref: '#/components/responses/BadRequest'
+                $ref: '#/components/schemas/BookmarkCategoryListEnvelope'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
     post:
       tags: [Me]
-      operationId: createMeBookmark
-      summary: Create a bookmark for the current user
+      operationId: createMeBookmarkCategory
+      summary: Create a bookmark category
       security:
         - bearerAuth: []
       requestBody:
@@ -982,24 +978,24 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateBookmarkRequest'
+              $ref: '#/components/schemas/CreateBookmarkCategoryRequest'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BookmarkEnvelope'
+                $ref: '#/components/schemas/BookmarkCategoryEnvelope'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
-  /me/bookmarks/{id}:
+  /me/bookmark-categories/{id}:
     patch:
       tags: [Me]
-      operationId: updateMeBookmark
-      summary: Update a bookmark
+      operationId: updateMeBookmarkCategory
+      summary: Update a bookmark category name or color
       security:
         - bearerAuth: []
       parameters:
@@ -1014,14 +1010,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateBookmarkRequest'
+              $ref: '#/components/schemas/UpdateBookmarkCategoryRequest'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BookmarkEnvelope'
+                $ref: '#/components/schemas/BookmarkCategoryEnvelope'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -1030,8 +1026,8 @@ paths:
           $ref: '#/components/responses/InternalServerErrror'
     delete:
       tags: [Me]
-      operationId: deleteMeBookmark
-      summary: Delete a bookmark
+      operationId: deleteMeBookmarkCategory
+      summary: Delete a bookmark category and all its entries
       security:
         - bearerAuth: []
       parameters:
@@ -1048,8 +1044,85 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NullDataEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/bookmark-categories/{id}/entries:
+    get:
+      tags: [Me]
+      operationId: listMeBookmarkCategoryEntries
+      summary: List all entries in a bookmark category (cross-scripture)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkEntryListEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/bookmark-entries:
+    post:
+      tags: [Me]
+      operationId: createMeBookmarkEntry
+      summary: Add a verse to a bookmark category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookmarkEntryRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkEntryEnvelope'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/bookmark-entries/{id}:
+    delete:
+      tags: [Me]
+      operationId: deleteMeBookmarkEntry
+      summary: Remove a verse from a bookmark category
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NullDataEnvelope'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -1121,11 +1194,6 @@ paths:
           required: false
           schema:
             type: string
-        - name: lang
-          in: query
-          required: false
-          schema:
-            type: string
       responses:
         '200':
           description: OK
@@ -1137,10 +1205,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
-    post:
+    put:
       tags: [Me]
-      operationId: createMeNote
-      summary: Create a note
+      operationId: upsertMeNote
+      summary: Create or update the note for a verse (one note per verse)
       security:
         - bearerAuth: []
       requestBody:
@@ -1148,10 +1216,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateNoteRequest'
+              $ref: '#/components/schemas/UpsertNoteRequest'
       responses:
-        '201':
-          description: Created
+        '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -1162,38 +1230,6 @@ paths:
           $ref: '#/components/responses/InternalServerErrror'
 
   /me/notes/{id}:
-    patch:
-      tags: [Me]
-      operationId: updateMeNote
-      summary: Update a note
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateNoteRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NoteEnvelope'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerErrror'
     delete:
       tags: [Me]
       operationId: deleteMeNote
@@ -1214,10 +1250,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NullDataEnvelope'
-        '400':
-          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/search:
+    get:
+      tags: [Me]
+      operationId: getMeSearch
+      summary: Search verses and personal notes
+      description: >
+        Searches Quran/Bible verses and, for authenticated users, their notes
+        content. Returns merged results with a `source` field distinguishing
+        verse matches from note matches. Note results include a highlighted
+        excerpt. Unauthenticated requests only search verses.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query string.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+        - name: scripture
+          in: query
+          required: false
+          description: Limit results to a single scripture. Omit for all.
+          schema:
+            type: string
+            enum: [quran, bible]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeSearchEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
@@ -2645,6 +2719,8 @@ components:
     # -----------------------------------------------------------------------
     # Authenticated /me contract
     # -----------------------------------------------------------------------
+
+    # cover-to-cover still uses the old bookmark row (kind = 'cover_to_cover')
     Bookmark:
       type: object
       required: [id, scripture, verse_key, name, color, kind, created_at, updated_at]
@@ -2663,40 +2739,13 @@ components:
           type: string
         kind:
           type: string
-          enum: [normal, cover_to_cover]
+          enum: [cover_to_cover]
         created_at:
           type: string
           format: date-time
         updated_at:
           type: string
           format: date-time
-
-    CreateBookmarkRequest:
-      type: object
-      required: [scripture, verse_key]
-      properties:
-        scripture:
-          type: string
-          enum: [quran, bible]
-        verse_key:
-          type: string
-        name:
-          type: string
-        color:
-          type: string
-          default: amber
-        kind:
-          type: string
-          enum: [normal, cover_to_cover]
-          default: normal
-
-    UpdateBookmarkRequest:
-      type: object
-      properties:
-        name:
-          type: string
-        color:
-          type: string
 
     CoverToCoverRequest:
       type: object
@@ -2708,9 +2757,80 @@ components:
         verse_key:
           type: string
 
+    BookmarkCategory:
+      type: object
+      required: [id, name, color, entry_count, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        color:
+          type: string
+        entry_count:
+          type: integer
+          description: Number of entries in this category.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BookmarkEntry:
+      type: object
+      required: [id, category_id, scripture, verse_key, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        category_id:
+          type: integer
+          format: int64
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CreateBookmarkCategoryRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+          default: amber
+
+    UpdateBookmarkCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+
+    CreateBookmarkEntryRequest:
+      type: object
+      required: [category_id, scripture, verse_key]
+      properties:
+        category_id:
+          type: integer
+          format: int64
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+
     Note:
       type: object
-      required: [id, scripture, verse_key, lang, content, created_at, updated_at]
+      required: [id, scripture, verse_key, content, created_at, updated_at]
       properties:
         id:
           type: integer
@@ -2720,10 +2840,9 @@ components:
           enum: [quran, bible]
         verse_key:
           type: string
-        lang:
-          type: string
         content:
           type: string
+          description: Markdown content.
         created_at:
           type: string
           format: date-time
@@ -2731,7 +2850,7 @@ components:
           type: string
           format: date-time
 
-    CreateNoteRequest:
+    UpsertNoteRequest:
       type: object
       required: [scripture, verse_key, content]
       properties:
@@ -2740,18 +2859,26 @@ components:
           enum: [quran, bible]
         verse_key:
           type: string
-        lang:
-          type: string
-          default: en
         content:
           type: string
+          description: Markdown content.
 
-    UpdateNoteRequest:
+    SearchResult:
       type: object
-      required: [content]
+      required: [source, verse_key, scripture, excerpt]
       properties:
-        content:
+        source:
           type: string
+          enum: [note]
+          description: Origin of this result. Only 'note' is returned here; verse results come from the existing /search endpoints.
+        verse_key:
+          type: string
+        scripture:
+          type: string
+          enum: [quran, bible]
+        excerpt:
+          type: string
+          description: Highlighted excerpt from the note content showing the match context.
 
     ScriptureState:
       type: object
@@ -2759,14 +2886,16 @@ components:
       properties:
         bookmarks:
           type: object
-          additionalProperties:
-            $ref: '#/components/schemas/Bookmark'
-        notes:
-          type: object
+          description: Map of verse_key to list of bookmark entries for that verse.
           additionalProperties:
             type: array
             items:
-              $ref: '#/components/schemas/Note'
+              $ref: '#/components/schemas/BookmarkEntry'
+        notes:
+          type: object
+          description: Map of verse_key to the single note for that verse.
+          additionalProperties:
+            $ref: '#/components/schemas/Note'
 
     ReadingProgress:
       type: object
@@ -2941,14 +3070,46 @@ components:
         data:
           $ref: '#/components/schemas/Bookmark'
 
-    BookmarkListEnvelope:
+    BookmarkCategoryEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/BookmarkCategory'
+
+    BookmarkCategoryListEnvelope:
       type: object
       required: [data]
       properties:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/Bookmark'
+            $ref: '#/components/schemas/BookmarkCategory'
+
+    BookmarkEntryEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/BookmarkEntry'
+
+    BookmarkEntryListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookmarkEntry'
+
+    MeSearchEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResult'
 
     NoteEnvelope:
       type: object

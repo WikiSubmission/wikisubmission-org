@@ -12,48 +12,42 @@ function stateKey(scripture: string, chapter: number) {
   return ['scripture-state', scripture, chapter]
 }
 
-function mergeNotes(
+function mergeNote(
   old: ScriptureState | undefined,
   verseKey: string,
-  updater: (prev: NoteData[]) => NoteData[]
+  note: NoteData
 ): ScriptureState {
-  const prevNotes = old?.notes ?? {}
   return {
     bookmarks: old?.bookmarks ?? {},
-    notes: { ...prevNotes, [verseKey]: updater(prevNotes[verseKey] ?? []) },
+    notes: { ...(old?.notes ?? {}), [verseKey]: note },
   }
 }
 
-// ── Add note ───────────────────────────────────────────────────────────────
+// ── Upsert note (create or update the single note for a verse) ─────────────
 
-export function useAddNote(scripture: string) {
+export function useUpsertNote(scripture: string) {
   const qc = useQueryClient()
 
   return useMutation({
-    mutationFn: (vars: { verseKey: string; lang: string; content: string }) =>
-      meApi.createNote({
-        scripture,
-        verse_key: vars.verseKey,
-        lang: vars.lang,
-        content: vars.content,
-      }),
-    onMutate: async ({ verseKey, lang, content }) => {
+    mutationFn: (vars: { verseKey: string; content: string }) =>
+      meApi.upsertNote({ scripture, verse_key: vars.verseKey, content: vars.content }),
+    onMutate: async ({ verseKey, content }) => {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
       await qc.cancelQueries({ queryKey: key })
 
       const prev = qc.getQueryData<ScriptureState>(key)
+      const existing = prev?.notes?.[verseKey]
       const optimistic: NoteData = {
-        id: -1,
-        scripture,
+        id: existing?.id ?? -1,
+        scripture: scripture as 'quran' | 'bible',
         verse_key: verseKey,
-        lang,
         content,
-        created_at: new Date().toISOString(),
+        created_at: existing?.created_at ?? new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }
       qc.setQueryData<ScriptureState>(key, (old) =>
-        mergeNotes(old, verseKey, (prev) => [optimistic, ...prev])
+        mergeNote(old, verseKey, optimistic)
       )
       return { prev, key }
     },
@@ -64,30 +58,7 @@ export function useAddNote(scripture: string) {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
       qc.setQueryData<ScriptureState>(key, (old) =>
-        mergeNotes(old, verseKey, (prev) => [
-          res.data,
-          ...prev.filter((n) => n.id !== -1),
-        ])
-      )
-    },
-  })
-}
-
-// ── Update note ────────────────────────────────────────────────────────────
-
-export function useUpdateNote(scripture: string) {
-  const qc = useQueryClient()
-
-  return useMutation({
-    mutationFn: (vars: { id: number; verseKey: string; content: string }) =>
-      meApi.updateNote(vars.id, { content: vars.content }),
-    onSuccess: (res, { verseKey }) => {
-      const chapter = chapterFromVerseKey(verseKey)
-      const key = stateKey(scripture, chapter)
-      qc.setQueryData<ScriptureState>(key, (old) =>
-        mergeNotes(old, verseKey, (prev) =>
-          prev.map((n) => (n.id === res.data.id ? res.data : n))
-        )
+        mergeNote(old, verseKey, res.data)
       )
     },
   })
@@ -101,15 +72,18 @@ export function useDeleteNote(scripture: string) {
   return useMutation({
     mutationFn: (vars: { id: number; verseKey: string }) =>
       meApi.deleteNote(vars.id),
-    onMutate: async ({ id, verseKey }) => {
+    onMutate: async ({ verseKey }) => {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
       await qc.cancelQueries({ queryKey: key })
 
       const prev = qc.getQueryData<ScriptureState>(key)
-      qc.setQueryData<ScriptureState>(key, (old) =>
-        mergeNotes(old, verseKey, (prev) => prev.filter((n) => n.id !== id))
-      )
+      qc.setQueryData<ScriptureState>(key, (old) => {
+        if (!old) return old
+        const rest = { ...old.notes }
+        delete rest[verseKey]
+        return { bookmarks: old.bookmarks, notes: rest }
+      })
       return { prev, key }
     },
     onError: (_err, _vars, ctx) => {

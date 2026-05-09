@@ -1,81 +1,57 @@
 'use client'
 
 import Link from 'next/link'
-import { Bookmark, Trash2 } from 'lucide-react'
-import { useBookmarksList, useDeleteBookmark } from '@/hooks/use-bookmarks'
-import { Button } from '@/components/ui/button'
-import type { BookmarkData } from '@/types/bookmarks'
-
-function BookmarkItem({ bm, onDelete }: { bm: BookmarkData; onDelete: () => void }) {
-  const [chapter, verse] = bm.verse_key.split(':')
-  return (
-    <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border hover:bg-accent/30 transition-colors">
-      <Bookmark
-        className={`w-4 h-4 shrink-0 ${bm.kind === 'cover_to_cover' ? 'text-blue-500' : 'text-amber-500'}`}
-        fill="currentColor"
-      />
-      <Link
-        href={`/quran/${chapter}?verse=${verse}`}
-        className="flex-1 min-w-0"
-      >
-        <p className="text-sm font-medium truncate">{bm.name || bm.verse_key}</p>
-        <p className="text-xs text-muted-foreground font-mono">{bm.verse_key}</p>
-      </Link>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
-        onClick={onDelete}
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-      </Button>
-    </div>
-  )
-}
+import { Bookmark, Plus, Tag } from 'lucide-react'
+import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 
 export default function BookmarksPage() {
-  const quranBookmarks = useBookmarksList('quran')
-  const bibleBookmarks = useBookmarksList('bible')
-  const { mutate: deleteQuran } = useDeleteBookmark('quran')
-  const { mutate: deleteBible } = useDeleteBookmark('bible')
-
-  const sorted = (bms: BookmarkData[]) =>
-    [...bms].sort((a, b) =>
-      a.kind === 'cover_to_cover' ? -1 : b.kind === 'cover_to_cover' ? 1 : 0
-    )
+  const categories = useBookmarkCategories()
 
   return (
     <div className="max-w-lg mx-auto px-4 py-12 flex flex-col gap-8">
-      <h1 className="text-xl font-semibold">Bookmarks</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Bookmark Categories</h1>
+        <Link
+          href="/me"
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Manage in profile
+        </Link>
+      </div>
 
-      {quranBookmarks.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Quran</h2>
-          {sorted(quranBookmarks).map((bm) => (
-            <BookmarkItem
-              key={bm.id}
-              bm={bm}
-              onDelete={() => deleteQuran({ id: bm.id, verseKey: bm.verse_key })}
-            />
+      {categories.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <Tag className="w-8 h-8 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">No categories yet.</p>
+          <Link
+            href="/me"
+            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Create a category
+          </Link>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {categories.map((cat) => (
+            <div
+              key={cat.id}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border hover:bg-accent/30 transition-colors"
+            >
+              <span
+                className="w-3 h-3 rounded-full shrink-0"
+                style={{ background: cat.color }}
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{cat.name}</p>
+              </div>
+              <span className="text-xs text-muted-foreground shrink-0 font-mono">
+                {(cat as { entry_count?: number }).entry_count ?? 0}
+              </span>
+              <Bookmark className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+            </div>
           ))}
-        </section>
-      )}
-
-      {bibleBookmarks.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground">Bible</h2>
-          {sorted(bibleBookmarks).map((bm) => (
-            <BookmarkItem
-              key={bm.id}
-              bm={bm}
-              onDelete={() => deleteBible({ id: bm.id, verseKey: bm.verse_key })}
-            />
-          ))}
-        </section>
-      )}
-
-      {quranBookmarks.length === 0 && bibleBookmarks.length === 0 && (
-        <p className="text-sm text-muted-foreground">No bookmarks yet.</p>
+        </div>
       )}
     </div>
   )

@@ -28,7 +28,7 @@ import {
   CHAPTER_TITLES_EN,
   APPENDIX_TITLES_EN,
 } from '@/lib/quran-titles-en'
-import { useBookmarksList } from '@/hooks/use-bookmarks'
+import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 
 type Chapter = components['schemas']['Chapter']
 type Appendix = components['schemas']['Appendix']
@@ -49,7 +49,7 @@ function NavSheetContent({
   const [chapterSearchQuery, setChapterSearchQuery] = useState('')
   const [appendixSearchQuery, setAppendixSearchQuery] = useState('')
   const { data: session } = useSession()
-  const bookmarks = useBookmarksList('quran')
+  const categories = useBookmarkCategories()
   const [bookmarksOpen, setBookmarksOpen] = useLocalStorage<boolean>(
     'bookmarksOpen',
     true
@@ -147,15 +147,15 @@ function NavSheetContent({
         className="flex-1 overflow-y-auto px-3 py-3 space-y-4"
         style={{ scrollbarWidth: 'none' }}
       >
-        {/* Bookmarks — shown only when signed in and at least one bookmark exists */}
-        {session?.accessToken && bookmarks.length > 0 && (
+        {/* Bookmark categories — shown only when signed in */}
+        {session?.accessToken && categories.length > 0 && (
           <Collapsible open={bookmarksOpen} onOpenChange={setBookmarksOpen}>
             <div className="space-y-2">
               <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 rounded-md text-xs uppercase tracking-wider font-semibold text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors">
                 <div className="flex items-center gap-1.5">
                   <Bookmark className="size-3" />
-                  {bookmarks.length}{' '}
-                  {bookmarks.length === 1 ? 'Bookmark' : 'Bookmarks'}
+                  {categories.length}{' '}
+                  {categories.length === 1 ? 'Category' : 'Categories'}
                 </div>
                 <ChevronRight
                   className={cn(
@@ -167,35 +167,25 @@ function NavSheetContent({
 
               <CollapsibleContent>
                 <div className="space-y-0.5">
-                  {/* Cover-to-cover bookmark pinned at the top */}
-                  {bookmarks
-                    .slice()
-                    .sort((a, b) =>
-                      a.kind === 'cover_to_cover' ? -1 : b.kind === 'cover_to_cover' ? 1 : 0
-                    )
-                    .map((bm) => {
-                      const [chNum, vNum] = bm.verse_key.split(':')
-                      return (
-                        <SheetClose key={bm.id} asChild>
-                          <Link
-                            href={`/quran/${chNum}?verse=${vNum}`}
-                            onClick={() => { document.body.style.top = '0px' }}
-                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-accent/50 transition-colors"
-                          >
-                            <Bookmark
-                              className="size-3.5 shrink-0 text-amber-500"
-                              fill={bm.kind === 'cover_to_cover' ? 'currentColor' : 'none'}
-                            />
-                            <span className="text-xs flex-1 min-w-0 truncate">
-                              {bm.name || bm.verse_key}
-                            </span>
-                            <span className="text-xs text-muted-foreground shrink-0">
-                              {bm.verse_key}
-                            </span>
-                          </Link>
-                        </SheetClose>
-                      )
-                    })}
+                  {categories.map((cat) => (
+                    <SheetClose key={cat.id} asChild>
+                      <Link
+                        href="/me"
+                        className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-accent/50 transition-colors"
+                      >
+                        <span
+                          className="size-2.5 rounded-full shrink-0"
+                          style={{ background: cat.color }}
+                        />
+                        <span className="text-xs flex-1 min-w-0 truncate">
+                          {cat.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground shrink-0 font-mono">
+                          {(cat as { entry_count?: number }).entry_count ?? 0}
+                        </span>
+                      </Link>
+                    </SheetClose>
+                  ))}
                 </div>
               </CollapsibleContent>
             </div>

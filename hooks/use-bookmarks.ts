@@ -1,18 +1,9 @@
+'use client'
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { meApi } from '@/src/api/me-client'
-import type { BookmarkData, ScriptureState } from '@/types/bookmarks'
-
-export function useBookmarksList(scripture: string): BookmarkData[] {
-  const { data: session } = useSession()
-  const { data } = useQuery<{ data: BookmarkData[] }>({
-    queryKey: ['bookmarks', scripture],
-    queryFn: () => meApi.getBookmarks(scripture),
-    enabled: !!session?.accessToken,
-    staleTime: 30_000,
-  })
-  return data?.data ?? []
-}
+import type { BookmarkEntryData, ScriptureState } from '@/types/bookmarks'
 
 function chapterFromVerseKey(verseKey: string): number {
   return parseInt(verseKey.split(':')[0] ?? '0', 10)
@@ -22,48 +13,45 @@ function stateKey(scripture: string, chapter: number) {
   return ['scripture-state', scripture, chapter]
 }
 
-function mergeBookmarks(
+function mergeEntries(
   old: ScriptureState | undefined,
-  patch: Record<string, BookmarkData>
+  verseKey: string,
+  updater: (prev: BookmarkEntryData[]) => BookmarkEntryData[]
 ): ScriptureState {
+  const prev = old?.bookmarks ?? {}
   return {
-    bookmarks: { ...(old?.bookmarks ?? {}), ...patch },
+    bookmarks: { ...prev, [verseKey]: updater(prev[verseKey] ?? []) },
     notes: old?.notes ?? {},
   }
 }
 
-// ── Add bookmark ───────────────────────────────────────────────────────────
+// ── Add entry to category ──────────────────────────────────────────────────
 
-export function useAddBookmark(scripture: string) {
+export function useAddBookmarkEntry(scripture: string) {
   const qc = useQueryClient()
 
   return useMutation({
-    mutationFn: (vars: { verseKey: string; name?: string; color?: string }) =>
-      meApi.createBookmark({
+    mutationFn: (vars: { categoryId: number; verseKey: string }) =>
+      meApi.createBookmarkEntry({
+        category_id: vars.categoryId,
         scripture,
         verse_key: vars.verseKey,
-        name: vars.name ?? '',
-        color: vars.color ?? 'amber',
-        kind: 'normal',
       }),
-    onMutate: async ({ verseKey, name = '', color = 'amber' }) => {
+    onMutate: async ({ categoryId, verseKey }) => {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
       await qc.cancelQueries({ queryKey: key })
 
       const prev = qc.getQueryData<ScriptureState>(key)
-      const optimistic: BookmarkData = {
+      const optimistic: BookmarkEntryData = {
         id: -1,
-        scripture,
+        category_id: categoryId,
+        scripture: scripture as 'quran' | 'bible',
         verse_key: verseKey,
-        name,
-        color,
-        kind: 'normal',
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       }
       qc.setQueryData<ScriptureState>(key, (old) =>
-        mergeBookmarks(old, { [verseKey]: optimistic })
+        mergeEntries(old, verseKey, (entries) => [...entries, optimistic])
       )
       return { prev, key }
     },
@@ -74,54 +62,40 @@ export function useAddBookmark(scripture: string) {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
       qc.setQueryData<ScriptureState>(key, (old) =>
-        mergeBookmarks(old, { [verseKey]: res.data })
+        mergeEntries(old, verseKey, (entries) => [
+          ...entries.filter((e) => e.id !== -1),
+          res.data,
+        ])
       )
+      qc.invalidateQueries({ queryKey: ['bookmark-categories'] })
     },
   })
 }
 
-// ── Delete bookmark ────────────────────────────────────────────────────────
+// ── Remove entry from category ─────────────────────────────────────────────
 
-export function useDeleteBookmark(scripture: string) {
+export function useRemoveBookmarkEntry(scripture: string) {
   const qc = useQueryClient()
 
   return useMutation({
-    mutationFn: (vars: { id: number; verseKey: string }) =>
-      meApi.deleteBookmark(vars.id),
-    onMutate: async ({ verseKey }) => {
+    mutationFn: (vars: { entryId: number; verseKey: string }) =>
+      meApi.deleteBookmarkEntry(vars.entryId),
+    onMutate: async ({ entryId, verseKey }) => {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
       await qc.cancelQueries({ queryKey: key })
 
       const prev = qc.getQueryData<ScriptureState>(key)
-      qc.setQueryData<ScriptureState>(key, (old) => {
-        if (!old) return old
-        const rest = { ...old.bookmarks }
-        delete rest[verseKey]
-        return { bookmarks: rest, notes: old.notes ?? {} }
-      })
+      qc.setQueryData<ScriptureState>(key, (old) =>
+        mergeEntries(old, verseKey, (entries) => entries.filter((e) => e.id !== entryId))
+      )
       return { prev, key }
     },
     onError: (_err, _vars, ctx) => {
       if (ctx) qc.setQueryData<ScriptureState>(ctx.key, ctx.prev)
     },
-  })
-}
-
-// ── Update bookmark ────────────────────────────────────────────────────────
-
-export function useUpdateBookmark(scripture: string) {
-  const qc = useQueryClient()
-
-  return useMutation({
-    mutationFn: (vars: { id: number; verseKey: string; name?: string; color?: string }) =>
-      meApi.updateBookmark(vars.id, { name: vars.name, color: vars.color }),
-    onSuccess: (res, { verseKey }) => {
-      const chapter = chapterFromVerseKey(verseKey)
-      const key = stateKey(scripture, chapter)
-      qc.setQueryData<ScriptureState>(key, (old) =>
-        mergeBookmarks(old, { [verseKey]: res.data })
-      )
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['bookmark-categories'] })
     },
   })
 }
@@ -129,17 +103,21 @@ export function useUpdateBookmark(scripture: string) {
 // ── Cover-to-cover ─────────────────────────────────────────────────────────
 
 export function useUpsertCoverToCover(scripture: string) {
-  const qc = useQueryClient()
-
   return useMutation({
     mutationFn: (verseKey: string) =>
       meApi.putCoverToCover({ scripture, verse_key: verseKey }),
-    onSuccess: (res, verseKey) => {
-      const chapter = chapterFromVerseKey(verseKey)
-      const key = stateKey(scripture, chapter)
-      qc.setQueryData<ScriptureState>(key, (old) =>
-        mergeBookmarks(old, { [verseKey]: res.data })
-      )
-    },
   })
+}
+
+// ── Scripture state (bookmarks + notes for a chapter) ─────────────────────
+
+export function useScriptureState(scripture: string, chapter: number): ScriptureState | undefined {
+  const { data: session } = useSession()
+  const { data } = useQuery<ScriptureState>({
+    queryKey: stateKey(scripture, chapter),
+    queryFn: () => meApi.getScriptureState(scripture, chapter),
+    enabled: !!session?.accessToken && chapter > 0,
+    staleTime: 60_000,
+  })
+  return data
 }
