@@ -63,7 +63,7 @@ export function VerifyForm() {
       redirect: false,
     })
     if (result?.ok) {
-      window.location.href = callbackUrl
+      window.location.assign(callbackUrl)
     } else {
       setError('Invalid or expired code. Please try again.')
       setCode(['', '', '', '', '', ''])

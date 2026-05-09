@@ -386,7 +386,7 @@ function VirtualizedVerseList({
     // ?verse=N target. Let scroll events fill it in once the user is
     // actually navigating around the chapter.
     return () => window.removeEventListener('scroll', computeCurrentVerse)
-  }, [centerVerseRef, verses, virtualizer])
+  }, [centerVerseRef, verses, virtualizer, onVerseVisible])
 
   const showNav = !hasMore && lastVirtualIndex === verses.length - 1
 

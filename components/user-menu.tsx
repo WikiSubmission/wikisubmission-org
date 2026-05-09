@@ -2,7 +2,7 @@
 
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useTransition, useEffect, useState } from 'react'
+import { useTransition, useSyncExternalStore } from 'react'
 import { useLocale } from 'next-intl'
 import { useTheme } from 'next-themes'
 import { useUser } from '@/hooks/use-user'
@@ -46,8 +46,11 @@ export function UserMenu() {
   const currentLocale = useLocale()
   const { palette, setPalette } = usePalette()
   const { theme, systemTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
 
   const mode = resolveMode(theme, systemTheme)
 

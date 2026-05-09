@@ -3,7 +3,7 @@ export interface CollectionData {
   name: string
   description: string
   is_public: boolean
-  share_token?: string
+  share_token?: string | null
   created_at: string
   updated_at: string
 }
@@ -11,7 +11,7 @@ export interface CollectionData {
 export interface CollectionVerseData {
   id: number
   collection_id: number
-  scripture: string
+  scripture: 'quran' | 'bible'
   verse_key: string
   note: string
   position: number

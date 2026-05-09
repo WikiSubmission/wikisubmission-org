@@ -96,7 +96,8 @@ export function useDeleteBookmark(scripture: string) {
       const prev = qc.getQueryData<ScriptureState>(key)
       qc.setQueryData<ScriptureState>(key, (old) => {
         if (!old) return old
-        const { [verseKey]: _removed, ...rest } = old.bookmarks
+        const rest = { ...old.bookmarks }
+        delete rest[verseKey]
         return { bookmarks: rest, notes: old.notes ?? {} }
       })
       return { prev, key }

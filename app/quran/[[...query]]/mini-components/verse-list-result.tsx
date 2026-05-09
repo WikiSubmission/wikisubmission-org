@@ -182,14 +182,13 @@ export function VerseListResult({
       .map((seg) => {
         const verses = getSegmentVerses(seg, byChapter)
         if (verses.length === 0) return null
-        const title = chapterTitles.get(seg.cn) ?? `Chapter ${seg.cn}`
-        return buildSegmentMarkdown(segmentLabel(seg), title, verses, opts)
+        return buildSegmentMarkdown(segmentLabel(seg), verses, opts)
       })
       .filter(Boolean)
     navigator.clipboard.writeText(parts.join('\n\n'))
     setCopiedAll(true)
     setTimeout(() => setCopiedAll(false), 1500)
-  }, [segments, byChapter, chapterTitles, primaryCode, includeText, prefs.arabic])
+  }, [segments, byChapter, primaryCode, includeText, prefs.arabic])
 
   if (apiError || !data) {
     return (

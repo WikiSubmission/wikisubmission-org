@@ -1,6 +1,7 @@
 'use client'
 
 import { BookOpen, List, ScanText } from 'lucide-react'
+import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
@@ -38,7 +39,7 @@ export function QuranModeSelector() {
   const q = searchParams.get('q')
   const rawQuery = q || (params.query as string[] | undefined)?.join(' ')
   const queryType = detectQueryType(rawQuery ? decodeURIComponent(rawQuery) : undefined)
-  const disabled = queryType === 'search'
+  const readingBlocked = queryType === 'search' || queryType === 'verse-list'
 
   const MODES: { id: ModeId; label: string; icon: React.ReactNode }[] = [
     { id: 'verse', label: t('modeVerse'), icon: <List className="size-4" /> },
@@ -53,8 +54,15 @@ export function QuranModeSelector() {
         ? 'word'
         : 'verse'
 
+  useEffect(() => {
+    if (!readingBlocked) return
+    if (prefs.displayMode !== 'reading') return
+    prefs.setPreferences({ ...prefs, displayMode: 'verse' })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readingBlocked, prefs.displayMode])
+
   const handleModeChange = (mode: ModeId) => {
-    if (disabled) return
+    if (mode === 'reading' && readingBlocked) return
     if (mode === 'reading') {
       prefs.setPreferences({ ...prefs, displayMode: 'reading' })
     } else if (mode === 'word') {
@@ -79,18 +87,19 @@ export function QuranModeSelector() {
         <div
           className={cn(
             'flex items-center gap-0.5 p-0.5 rounded-lg bg-muted/50 border border-border/40 transition-opacity',
-            disabled && 'opacity-40 cursor-not-allowed'
+            readingBlocked && activeMode === 'reading' && 'opacity-80'
           )}
-          aria-disabled={disabled}
+          aria-disabled={false}
         >
           {MODES.map((mode) => {
             const isActive = activeMode === mode.id
+            const modeDisabled = mode.id === 'reading' && readingBlocked
             return (
               <Tooltip key={mode.id}>
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => handleModeChange(mode.id)}
-                    disabled={disabled}
+                    disabled={modeDisabled}
                     aria-label={mode.label}
                     className={cn(
                       'flex items-center gap-1.5 h-7 px-2 rounded-md transition-colors disabled:pointer-events-none',
@@ -103,9 +112,14 @@ export function QuranModeSelector() {
                     <span className="hidden md:inline text-xs font-medium">{mode.label}</span>
                   </button>
                 </TooltipTrigger>
-                {!disabled && (
+                {!modeDisabled && (
                   <TooltipContent side="bottom" className="md:hidden">
                     <p>{mode.label}</p>
+                  </TooltipContent>
+                )}
+                {modeDisabled && (
+                  <TooltipContent side="bottom">
+                    <p>Reading mode is disabled for search and verse references</p>
                   </TooltipContent>
                 )}
               </Tooltip>
@@ -113,11 +127,6 @@ export function QuranModeSelector() {
           })}
         </div>
       </TooltipTrigger>
-      {disabled && (
-        <TooltipContent side="bottom">
-          <p>Mode selection is only available for chapter and verse reading</p>
-        </TooltipContent>
-      )}
     </Tooltip>
   )
 }

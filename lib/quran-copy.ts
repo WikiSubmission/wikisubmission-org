@@ -70,17 +70,16 @@ export function buildVersesText(verses: VerseData[], opts: CopyVerseOptions): st
 
 /**
  * Plain-text segment used by verse-list-result.tsx:
- *   label — title
+ *   label
  *   [vk] translation
  *   arabic
  */
 export function buildSegmentMarkdown(
   label: string,
-  title: string,
   verses: VerseData[],
   opts: CopyVerseOptions
 ): string {
-  const lines: string[] = [`${label} — ${title}`, '']
+  const lines: string[] = [label, '']
 
   for (const verse of verses) {
     const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']

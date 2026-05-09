@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { FcGoogle } from 'react-icons/fc'
 import { FaApple } from 'react-icons/fa'
-import { Mail, Loader2, X } from 'lucide-react'
+import { Mail, Loader2 } from 'lucide-react'
 
 export function SignInPrompt() {
   const { isOpen, close } = useSignInPromptStore()
@@ -48,7 +48,9 @@ export function SignInPrompt() {
     }
 
     close()
-    window.location.href = `/auth/verify?email=${encodeURIComponent(email.trim())}&next=${encodeURIComponent(window.location.pathname)}`
+    window.location.assign(
+      `/auth/verify?email=${encodeURIComponent(email.trim())}&next=${encodeURIComponent(window.location.pathname)}`
+    )
   }
 
   return (
