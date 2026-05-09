@@ -15,9 +15,10 @@ import {
 } from '@/components/ui/collapsible'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Book, ChevronRight, MenuIcon, ScrollText, Search } from 'lucide-react'
+import { Bookmark, Book, ChevronRight, MenuIcon, ScrollText, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import type { components } from '@/src/api/types.gen'
 import useLocalStorage from '@/hooks/use-local-storage'
 import { useParams } from 'next/navigation'
@@ -27,6 +28,7 @@ import {
   CHAPTER_TITLES_EN,
   APPENDIX_TITLES_EN,
 } from '@/lib/quran-titles-en'
+import { useBookmarksList } from '@/hooks/use-bookmarks'
 
 type Chapter = components['schemas']['Chapter']
 type Appendix = components['schemas']['Appendix']
@@ -46,6 +48,12 @@ function NavSheetContent({
   const titleDir = RTL_LOCALES.has(locale) ? 'rtl' : 'ltr'
   const [chapterSearchQuery, setChapterSearchQuery] = useState('')
   const [appendixSearchQuery, setAppendixSearchQuery] = useState('')
+  const { data: session } = useSession()
+  const bookmarks = useBookmarksList('quran')
+  const [bookmarksOpen, setBookmarksOpen] = useLocalStorage<boolean>(
+    'bookmarksOpen',
+    true
+  )
   const [chaptersOpen, setChaptersOpen] = useLocalStorage<boolean>(
     'chaptersOpen',
     true
@@ -139,6 +147,61 @@ function NavSheetContent({
         className="flex-1 overflow-y-auto px-3 py-3 space-y-4"
         style={{ scrollbarWidth: 'none' }}
       >
+        {/* Bookmarks — shown only when signed in and at least one bookmark exists */}
+        {session?.accessToken && bookmarks.length > 0 && (
+          <Collapsible open={bookmarksOpen} onOpenChange={setBookmarksOpen}>
+            <div className="space-y-2">
+              <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 rounded-md text-xs uppercase tracking-wider font-semibold text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors">
+                <div className="flex items-center gap-1.5">
+                  <Bookmark className="size-3" />
+                  {bookmarks.length}{' '}
+                  {bookmarks.length === 1 ? 'Bookmark' : 'Bookmarks'}
+                </div>
+                <ChevronRight
+                  className={cn(
+                    'size-3 transition-transform',
+                    bookmarksOpen && 'rotate-90'
+                  )}
+                />
+              </CollapsibleTrigger>
+
+              <CollapsibleContent>
+                <div className="space-y-0.5">
+                  {/* Cover-to-cover bookmark pinned at the top */}
+                  {bookmarks
+                    .slice()
+                    .sort((a, b) =>
+                      a.kind === 'cover_to_cover' ? -1 : b.kind === 'cover_to_cover' ? 1 : 0
+                    )
+                    .map((bm) => {
+                      const [chNum, vNum] = bm.verseKey.split(':')
+                      return (
+                        <SheetClose key={bm.id} asChild>
+                          <Link
+                            href={`/quran/${chNum}?verse=${vNum}`}
+                            onClick={() => { document.body.style.top = '0px' }}
+                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-accent/50 transition-colors"
+                          >
+                            <Bookmark
+                              className="size-3.5 shrink-0 text-amber-500"
+                              fill={bm.kind === 'cover_to_cover' ? 'currentColor' : 'none'}
+                            />
+                            <span className="text-xs flex-1 min-w-0 truncate">
+                              {bm.name || bm.verseKey}
+                            </span>
+                            <span className="text-xs text-muted-foreground shrink-0">
+                              {bm.verseKey}
+                            </span>
+                          </Link>
+                        </SheetClose>
+                      )
+                    })}
+                </div>
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
+        )}
+
         {/* Chapters */}
         <Collapsible open={chaptersOpen} onOpenChange={setChaptersOpen}>
           <div className="space-y-2">

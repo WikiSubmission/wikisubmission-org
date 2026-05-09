@@ -3,6 +3,9 @@
 import { memo, useMemo, useCallback, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { useSession } from 'next-auth/react'
+import { useSignInPromptStore } from '@/store/sign-in-prompt'
+import { useAddBookmark, useDeleteBookmark } from '@/hooks/use-bookmarks'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -39,6 +42,7 @@ import {
 } from '@/components/ui/tooltip'
 import type { components } from '@/src/api/types.gen'
 import { QuranRefText } from '@/components/quran-ref-text'
+import type { BookmarkData } from '@/types/bookmarks'
 
 type VerseData = components['schemas']['VerseData']
 type WordData = components['schemas']['WordData']
@@ -447,8 +451,12 @@ type VerseCardProps = {
   showAudio?: boolean
   /** Hide the copy button. Default: true (show it). */
   showCopyButton?: boolean
-  /** Show the bookmark button (not yet implemented). Default: false. */
+  /** Show the bookmark button. Default: false. */
   showBookmark?: boolean
+  /** Active bookmark for this verse (null = not bookmarked). */
+  bookmark?: BookmarkData | null
+  /** Scripture context for bookmark mutations. Default: 'quran'. */
+  scripture?: string
   /** Show the notes button (not yet implemented). Default: false. */
   showNotes?: boolean
   /** When set, verse key badge becomes a link (for search results). */
@@ -469,12 +477,18 @@ export const VerseCard = memo(
     showAudio = true,
     showCopyButton = true,
     showBookmark = false,
+    bookmark = null,
+    scripture = 'quran',
     showNotes = false,
     verseHref,
     searchHighlight,
   }: VerseCardProps) {
     const prefs = useQuranPreferences()
     const { isRtl } = useLanguagesStore()
+    const { data: session } = useSession()
+    const openSignIn = useSignInPromptStore((s) => s.open)
+    const { mutate: addBookmark, isPending: addingBookmark } = useAddBookmark(scripture)
+    const { mutate: deleteBookmark, isPending: deletingBookmark } = useDeleteBookmark(scripture)
     // Only subscribe to the stable callbacks context — this component never
     // re-renders due to player STATE changes (currentVerse, isPlaying, etc.)
     // because those are now passed as props from ChapterReader.
@@ -625,10 +639,29 @@ export const VerseCard = memo(
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                  disabled
+                  aria-label={bookmark ? 'Remove bookmark' : 'Add bookmark'}
+                  className={`h-8 w-8 rounded-full transition-colors ${
+                    bookmark
+                      ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-500/10'
+                      : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                  }`}
+                  disabled={addingBookmark || deletingBookmark}
+                  onClick={() => {
+                    if (!session?.accessToken) {
+                      openSignIn()
+                      return
+                    }
+                    if (bookmark) {
+                      deleteBookmark({ id: bookmark.id, verseKey: verseId })
+                    } else {
+                      addBookmark({ verseKey: verseId })
+                    }
+                  }}
                 >
-                  <Bookmark className="w-4 h-4" />
+                  <Bookmark
+                    className="w-4 h-4"
+                    fill={bookmark ? 'currentColor' : 'none'}
+                  />
                 </Button>
               )}
               {showNotes && (
@@ -807,6 +840,7 @@ export const VerseCard = memo(
     prev.showAudio === next.showAudio &&
     prev.showCopyButton === next.showCopyButton &&
     prev.showBookmark === next.showBookmark &&
+    prev.bookmark?.id === next.bookmark?.id &&
     prev.showNotes === next.showNotes &&
     prev.isCurrentAudio === next.isCurrentAudio &&
     // Non-playing cards don't care about isPlaying/isBuffering (they always show Play).

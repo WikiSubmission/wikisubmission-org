@@ -37,6 +37,8 @@ import {
 } from '@/lib/quran-audio-context'
 import { useChapterBorderLoader } from '@/hooks/use-chapter-border-loader'
 import { ZOOM_WIDTH_CLASS, ZOOM_WIDTH_PX } from '@/lib/quran-zoom'
+import { useScriptureState } from '@/hooks/use-scripture-state'
+import type { ScriptureState } from '@/types/bookmarks'
 
 type VirtualizedVerseListProps = {
   chapterNumber: number
@@ -61,6 +63,7 @@ type VirtualizedVerseListProps = {
   isPlaying: boolean
   isBuffering: boolean
   chapterLabel: string
+  scriptureState?: ScriptureState
 }
 
 function VirtualizedVerseList({
@@ -83,6 +86,7 @@ function VirtualizedVerseList({
   isPlaying,
   isBuffering,
   chapterLabel,
+  scriptureState,
 }: VirtualizedVerseListProps) {
   const listRef = useRef<HTMLDivElement>(null)
   const [scrollMargin, setScrollMargin] = useState(0)
@@ -412,6 +416,9 @@ function VirtualizedVerseList({
                       isCurrentAudio={currentVerseId === (verse.vk ?? '')}
                       isPlaying={isPlaying}
                       isBuffering={isBuffering}
+                      showBookmark
+                      bookmark={scriptureState?.bookmarks[verse.vk ?? ''] ?? null}
+                      scripture="quran"
                     />
                   </div>
                 )
@@ -511,6 +518,8 @@ export function ChapterReader({
   const { currentVerse, isPlaying, isBuffering } = useQuranPlayer()
   // Callbacks context: stable reference, used for setChapterQueue.
   const { setChapterQueue } = useQuranPlayerCallbacks()
+
+  const scriptureState = useScriptureState('quran', chapterNumber)
 
   // Read the initial verse from the prop (passed by the Server Component),
   // NOT from useSearchParams(). useSearchParams() subscribes to Next.js router
@@ -827,6 +836,7 @@ export function ChapterReader({
           isPlaying={isPlaying}
           isBuffering={isBuffering}
           chapterLabel={tCommon('chapter')}
+          scriptureState={scriptureState}
         />
       )}
 
