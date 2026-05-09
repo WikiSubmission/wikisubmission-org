@@ -24,7 +24,25 @@ export function UserMenu() {
     return (
       <button
         onClick={openSignIn}
-        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        className="inline-flex items-center h-[34px] px-3 rounded-[2px] transition-colors"
+        style={{
+          fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+          fontSize: 10.5,
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          color: 'var(--ed-fg-muted)',
+          border: '1px solid var(--ed-rule)',
+          background: 'transparent',
+          cursor: 'pointer',
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg)'
+          ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-fg)'
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg-muted)'
+          ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-rule)'
+        }}
       >
         Sign in
       </button>

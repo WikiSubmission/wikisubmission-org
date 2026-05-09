@@ -49,13 +49,32 @@ export function LocaleSwitcher({
         <button
           type="button"
           className={cn(
-            'h-[34px] flex items-center px-2 rounded-md transition-colors',
-            'text-muted-foreground hover:text-foreground',
+            'h-[34px] flex items-center gap-1 px-2.5 rounded-[2px] transition-colors',
             isPending && 'opacity-40 pointer-events-none'
           )}
-          style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.18em' }}
+          style={{
+            fontFamily: mono,
+            fontSize: 10.5,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'var(--ed-fg-muted)',
+            border: '1px solid var(--ed-rule)',
+            background: 'transparent',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg)'
+            ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-fg)'
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg-muted)'
+            ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-rule)'
+          }}
           aria-label="Switch language"
         >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+            <circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20M12 2a14.5 14.5 0 0 1 0 20M2 12h20" />
+          </svg>
           {current.label}
         </button>
       </DropdownMenuTrigger>

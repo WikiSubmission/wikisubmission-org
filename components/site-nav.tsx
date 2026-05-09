@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Sparkles } from 'lucide-react'
+import { Menu, X, MessageSquare } from 'lucide-react'
 import gsap from 'gsap'
 import { PaletteThemeSwitcher } from '@/components/toggles/palette-theme-switcher'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
@@ -312,7 +312,7 @@ export function SiteNav() {
             type="button"
             onClick={toggleAsk}
             aria-label={t('submissionAI')}
-            className="hidden sm:inline-flex items-center gap-1 h-[34px] px-2.5 rounded-[2px] transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 h-[34px] px-2.5 rounded-[2px] transition-colors"
             style={{
               fontFamily: F.mono,
               fontSize: 10.5,
@@ -338,8 +338,8 @@ export function SiteNav() {
                 'var(--ed-rule)'
             }}
           >
-            <Sparkles size={12} />
-            <span>{t('submissionAI')}</span>
+            <MessageSquare size={12} />
+            <span>Chat</span>
           </button>
 
           <UserMenu />
@@ -364,7 +364,7 @@ export function SiteNav() {
                   : 'var(--ed-fg-muted)',
             }}
           >
-            <Sparkles size={16} />
+            <MessageSquare size={16} />
           </button>
 
           <button
