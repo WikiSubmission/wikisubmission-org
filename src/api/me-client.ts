@@ -1,5 +1,6 @@
 import { getSession } from 'next-auth/react'
 import type { BookmarkData, NoteData, ScriptureState, ReadingProgressData, StreakData } from '@/types/bookmarks'
+import type { CollectionData, CollectionDetail, CollectionVerseData } from '@/types/collections'
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL
 
@@ -142,4 +143,39 @@ export const meApi = {
 
   putPreferences: (body: { scripture: string; payload: Record<string, unknown> }): Promise<void> =>
     mePut('/me/preferences', body),
+
+  listCollections: (): Promise<{ data: CollectionData[] }> =>
+    meGet('/me/collections'),
+
+  getCollection: (id: number): Promise<{ data: CollectionDetail }> =>
+    meGet(`/me/collections/${id}`),
+
+  createCollection: (body: { name: string; description?: string; is_public?: boolean }): Promise<{ data: CollectionData }> =>
+    mePost('/me/collections', body),
+
+  updateCollection: (
+    id: number,
+    body: { name: string; description?: string; is_public?: boolean; regenerate_token?: boolean }
+  ): Promise<{ data: CollectionData }> =>
+    mePatch(`/me/collections/${id}`, body),
+
+  deleteCollection: (id: number): Promise<void> =>
+    meDelete(`/me/collections/${id}`),
+
+  addVerseToCollection: (
+    id: number,
+    body: { scripture: string; verse_key: string; note?: string }
+  ): Promise<{ data: CollectionVerseData }> =>
+    mePost(`/me/collections/${id}/verses`, body),
+
+  removeVerseFromCollection: (id: number, verseId: number): Promise<void> =>
+    meDelete(`/me/collections/${id}/verses/${verseId}`),
+
+  getSharedCollection: (token: string): Promise<{ data: CollectionDetail }> => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL
+    return fetch(`${baseUrl}/collections/share/${token}`).then((r) => {
+      if (!r.ok) throw new Error(`${r.status}`)
+      return r.json()
+    })
+  },
 }
