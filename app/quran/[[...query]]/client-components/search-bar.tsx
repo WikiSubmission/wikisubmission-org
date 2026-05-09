@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { SearchIcon } from 'lucide-react'
+import { SearchIcon, StickyNote } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
@@ -15,6 +15,7 @@ import {
   parseAllChaptersVerseRef,
   expandAllChaptersVerseRef,
 } from '@/lib/scripture-parser'
+import { useMeSearch } from '@/hooks/use-me-search'
 
 export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const t = useTranslations('search')
@@ -100,8 +101,10 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
         .slice(0, 3)
     : []
 
+  const noteResults = useMeSearch(showDropdown ? query : '', 'quran').slice(0, 4)
+
   const hasSuggestions =
-    matchedChapters.length > 0 || matchedAppendices.length > 0
+    matchedChapters.length > 0 || matchedAppendices.length > 0 || noteResults.length > 0
 
   return (
     <div
@@ -184,6 +187,39 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
               <span className="truncate text-muted-foreground">{ap.title}</span>
             </button>
           ))}
+
+          {noteResults.length > 0 && (matchedChapters.length > 0 || matchedAppendices.length > 0) && (
+            <div className="border-t border-border/20" />
+          )}
+
+          {noteResults.map((n) => {
+            const [chapter, verse] = n.verse_key.split(':')
+            const href =
+              n.scripture === 'quran'
+                ? `/quran/${chapter}?verse=${verse}`
+                : `/bible/${n.verse_key}`
+            return (
+              <button
+                type="button"
+                key={`note-${n.verse_key}`}
+                onMouseDown={() => {
+                  setOpen(false)
+                  router.push(href)
+                }}
+                className="flex items-start gap-2 w-full px-3 py-2 text-sm hover:bg-amber-500/5 text-left"
+              >
+                <StickyNote className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-500/70" />
+                <div className="flex-1 min-w-0">
+                  <span className="font-mono text-xs text-muted-foreground block">
+                    {n.verse_key}
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate block">
+                    {n.excerpt}
+                  </span>
+                </div>
+              </button>
+            )
+          })}
         </div>
       )}
     </div>

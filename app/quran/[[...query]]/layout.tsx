@@ -13,6 +13,7 @@ import { SiteFooter } from '@/components/site-footer'
 import { QuranNavSheet } from './client-components/nav-sheet'
 import { QuranModeSelector } from './client-components/mode-selector'
 import { QuranScrollContainer } from './client-components/scroll-container'
+import { QuranReadingProgressBar } from './mini-components/reading-progress-bar'
 import { getLocale } from 'next-intl/server'
 
 // SSR fetch cache TTL for /quran content. Kept short so backend data
@@ -50,7 +51,7 @@ export default async function QuranLayout({
         <div className="quran-fixed-headers">
           <SiteNav />
           {query && (
-            <header className="h-14 glass-nav bg-background/80 border-b border-border/40">
+            <header className="relative h-14 glass-nav bg-background/80 border-b border-border/40">
               <div className="px-3 h-full flex flex-row items-center gap-2 w-full justify-between">
                 <QuranNavSheet
                   chapters={chaptersRes.data}
@@ -64,6 +65,7 @@ export default async function QuranLayout({
                 </div>
                 <QuranSettings />
               </div>
+              <QuranReadingProgressBar />
             </header>
           )}
         </div>
