@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { useSession } from 'next-auth/react'
 import { useSignInPromptStore } from '@/store/sign-in-prompt'
 import { useAddBookmark, useDeleteBookmark } from '@/hooks/use-bookmarks'
+import { useAddNote, useUpdateNote, useDeleteNote } from '@/hooks/use-notes'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -42,7 +43,7 @@ import {
 } from '@/components/ui/tooltip'
 import type { components } from '@/src/api/types.gen'
 import { QuranRefText } from '@/components/quran-ref-text'
-import type { BookmarkData } from '@/types/bookmarks'
+import type { BookmarkData, NoteData } from '@/types/bookmarks'
 
 type VerseData = components['schemas']['VerseData']
 type WordData = components['schemas']['WordData']
@@ -457,8 +458,10 @@ type VerseCardProps = {
   bookmark?: BookmarkData | null
   /** Scripture context for bookmark mutations. Default: 'quran'. */
   scripture?: string
-  /** Show the notes button (not yet implemented). Default: false. */
+  /** Show the notes button. Default: false. */
   showNotes?: boolean
+  /** Notes for this verse (keyed by lang, or just list). */
+  notes?: NoteData[]
   /** When set, verse key badge becomes a link (for search results). */
   verseHref?: string
   /** Search highlight (hl field with <b> tags) to display alongside translation. */
@@ -480,6 +483,7 @@ export const VerseCard = memo(
     bookmark = null,
     scripture = 'quran',
     showNotes = false,
+    notes = [],
     verseHref,
     searchHighlight,
   }: VerseCardProps) {
@@ -489,6 +493,12 @@ export const VerseCard = memo(
     const openSignIn = useSignInPromptStore((s) => s.open)
     const { mutate: addBookmark, isPending: addingBookmark } = useAddBookmark(scripture)
     const { mutate: deleteBookmark, isPending: deletingBookmark } = useDeleteBookmark(scripture)
+    const { mutate: addNote, isPending: addingNote } = useAddNote(scripture)
+    const { mutate: updateNote, isPending: updatingNote } = useUpdateNote(scripture)
+    const { mutate: deleteNote, isPending: deletingNote } = useDeleteNote(scripture)
+    const [notesOpen, setNotesOpen] = useState(false)
+    const [editingNote, setEditingNote] = useState<NoteData | null>(null)
+    const [noteContent, setNoteContent] = useState('')
     // Only subscribe to the stable callbacks context — this component never
     // re-renders due to player STATE changes (currentVerse, isPlaying, etc.)
     // because those are now passed as props from ChapterReader.
@@ -668,10 +678,28 @@ export const VerseCard = memo(
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                  disabled
+                  aria-label={notes.length > 0 ? `${notes.length} note${notes.length > 1 ? 's' : ''}` : 'Add note'}
+                  className={`relative h-8 w-8 rounded-full transition-colors ${
+                    notes.length > 0
+                      ? 'text-primary hover:bg-primary/10'
+                      : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                  }`}
+                  onClick={() => {
+                    if (!session?.accessToken) {
+                      openSignIn()
+                      return
+                    }
+                    setNoteContent('')
+                    setEditingNote(null)
+                    setNotesOpen(true)
+                  }}
                 >
-                  <StickyNote className="w-4 h-4" />
+                  <StickyNote className="w-4 h-4" fill={notes.length > 0 ? 'currentColor' : 'none'} />
+                  {notes.length > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground">
+                      {notes.length}
+                    </span>
+                  )}
                 </Button>
               )}
               {(prefs.arabic || prefs.wordByWord) && (
@@ -824,6 +852,107 @@ export const VerseCard = memo(
         </div>
 
         {!isLast && <hr className="border-border/20 mx-6 sm:mx-8" />}
+
+        {/* Notes dialog */}
+        <Dialog open={notesOpen} onOpenChange={setNotesOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-sm font-mono tracking-wider uppercase text-muted-foreground">
+                Notes — {verseId}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-3">
+              {notes.map((n) => (
+                <div key={n.id} className="flex flex-col gap-1 rounded border border-border p-3">
+                  {editingNote?.id === n.id ? (
+                    <div className="flex flex-col gap-2">
+                      <textarea
+                        className="w-full resize-none rounded border border-border bg-background p-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                        rows={3}
+                        value={noteContent}
+                        onChange={(e) => setNoteContent(e.target.value)}
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          disabled={updatingNote || !noteContent.trim()}
+                          onClick={() => {
+                            updateNote(
+                              { id: n.id, verseKey: verseId, content: noteContent },
+                              {
+                                onSuccess: () => {
+                                  setEditingNote(null)
+                                  setNoteContent('')
+                                },
+                              }
+                            )
+                          }}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => { setEditingNote(null); setNoteContent('') }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="flex-1 whitespace-pre-wrap text-sm">{n.content}</p>
+                      <div className="flex gap-1 shrink-0">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7"
+                          onClick={() => { setEditingNote(n); setNoteContent(n.content) }}
+                        >
+                          <StickyNote className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-7 w-7 text-destructive hover:text-destructive"
+                          disabled={deletingNote}
+                          onClick={() => deleteNote({ id: n.id, verseKey: verseId })}
+                        >
+                          <span className="w-3.5 h-3.5 flex items-center justify-center text-xs">✕</span>
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/60">
+                    {n.lang}
+                  </span>
+                </div>
+              ))}
+              <div className="flex flex-col gap-2">
+                <textarea
+                  className="w-full resize-none rounded border border-border bg-background p-2 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary"
+                  rows={3}
+                  placeholder="Add a note..."
+                  value={editingNote ? '' : noteContent}
+                  disabled={!!editingNote}
+                  onChange={(e) => setNoteContent(e.target.value)}
+                />
+                <Button
+                  size="sm"
+                  disabled={addingNote || !noteContent.trim() || !!editingNote}
+                  onClick={() => {
+                    addNote(
+                      { verseKey: verseId, lang: primaryCode, content: noteContent },
+                      { onSuccess: () => setNoteContent('') }
+                    )
+                  }}
+                >
+                  Add note
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     )
   },
@@ -842,6 +971,7 @@ export const VerseCard = memo(
     prev.showBookmark === next.showBookmark &&
     prev.bookmark?.id === next.bookmark?.id &&
     prev.showNotes === next.showNotes &&
+    prev.notes?.length === next.notes?.length &&
     prev.isCurrentAudio === next.isCurrentAudio &&
     // Non-playing cards don't care about isPlaying/isBuffering (they always show Play).
     // Only check those for the active card to avoid re-rendering all cards on pause/resume.

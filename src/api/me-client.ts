@@ -1,5 +1,5 @@
 import { getSession } from 'next-auth/react'
-import type { BookmarkData, ScriptureState } from '@/types/bookmarks'
+import type { BookmarkData, NoteData, ScriptureState } from '@/types/bookmarks'
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL
 
@@ -99,4 +99,29 @@ export const meApi = {
     chapter: number
   ): Promise<ScriptureState> =>
     meGet(`/me/scripture-state?scripture=${scripture}&chapter=${chapter}`),
+
+  getNotes: (
+    scripture: string,
+    verseKey?: string,
+    lang?: string
+  ): Promise<{ data: NoteData[] }> => {
+    const params = new URLSearchParams({ scripture })
+    if (verseKey) params.set('verse_key', verseKey)
+    if (lang) params.set('lang', lang)
+    return meGet(`/me/notes?${params}`)
+  },
+
+  createNote: (body: {
+    scripture: string
+    verse_key: string
+    lang?: string
+    content: string
+  }): Promise<{ data: NoteData }> => mePost('/me/notes', body),
+
+  updateNote: (
+    id: number,
+    body: { content: string }
+  ): Promise<{ data: NoteData }> => mePatch(`/me/notes/${id}`, body),
+
+  deleteNote: (id: number): Promise<void> => meDelete(`/me/notes/${id}`),
 }

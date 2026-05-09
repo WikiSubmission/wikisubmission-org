@@ -174,7 +174,7 @@ function NavSheetContent({
                       a.kind === 'cover_to_cover' ? -1 : b.kind === 'cover_to_cover' ? 1 : 0
                     )
                     .map((bm) => {
-                      const [chNum, vNum] = bm.verseKey.split(':')
+                      const [chNum, vNum] = bm.verse_key.split(':')
                       return (
                         <SheetClose key={bm.id} asChild>
                           <Link
@@ -187,10 +187,10 @@ function NavSheetContent({
                               fill={bm.kind === 'cover_to_cover' ? 'currentColor' : 'none'}
                             />
                             <span className="text-xs flex-1 min-w-0 truncate">
-                              {bm.name || bm.verseKey}
+                              {bm.name || bm.verse_key}
                             </span>
                             <span className="text-xs text-muted-foreground shrink-0">
-                              {bm.verseKey}
+                              {bm.verse_key}
                             </span>
                           </Link>
                         </SheetClose>

@@ -418,6 +418,8 @@ function VirtualizedVerseList({
                       isBuffering={isBuffering}
                       showBookmark
                       bookmark={scriptureState?.bookmarks[verse.vk ?? ''] ?? null}
+                      showNotes
+                      notes={scriptureState?.notes[verse.vk ?? ''] ?? []}
                       scripture="quran"
                     />
                   </div>

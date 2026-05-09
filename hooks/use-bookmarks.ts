@@ -22,6 +22,16 @@ function stateKey(scripture: string, chapter: number) {
   return ['scripture-state', scripture, chapter]
 }
 
+function mergeBookmarks(
+  old: ScriptureState | undefined,
+  patch: Record<string, BookmarkData>
+): ScriptureState {
+  return {
+    bookmarks: { ...(old?.bookmarks ?? {}), ...patch },
+    notes: old?.notes ?? {},
+  }
+}
+
 // ── Add bookmark ───────────────────────────────────────────────────────────
 
 export function useAddBookmark(scripture: string) {
@@ -45,16 +55,16 @@ export function useAddBookmark(scripture: string) {
       const optimistic: BookmarkData = {
         id: -1,
         scripture,
-        verseKey,
+        verse_key: verseKey,
         name,
         color,
         kind: 'normal',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       }
-      qc.setQueryData<ScriptureState>(key, (old) => ({
-        bookmarks: { ...(old?.bookmarks ?? {}), [verseKey]: optimistic },
-      }))
+      qc.setQueryData<ScriptureState>(key, (old) =>
+        mergeBookmarks(old, { [verseKey]: optimistic })
+      )
       return { prev, key }
     },
     onError: (_err, _vars, ctx) => {
@@ -63,9 +73,9 @@ export function useAddBookmark(scripture: string) {
     onSuccess: (res, { verseKey }) => {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
-      qc.setQueryData<ScriptureState>(key, (old) => ({
-        bookmarks: { ...(old?.bookmarks ?? {}), [verseKey]: res.data },
-      }))
+      qc.setQueryData<ScriptureState>(key, (old) =>
+        mergeBookmarks(old, { [verseKey]: res.data })
+      )
     },
   })
 }
@@ -87,7 +97,7 @@ export function useDeleteBookmark(scripture: string) {
       qc.setQueryData<ScriptureState>(key, (old) => {
         if (!old) return old
         const { [verseKey]: _removed, ...rest } = old.bookmarks
-        return { bookmarks: rest }
+        return { bookmarks: rest, notes: old.notes ?? {} }
       })
       return { prev, key }
     },
@@ -108,9 +118,9 @@ export function useUpdateBookmark(scripture: string) {
     onSuccess: (res, { verseKey }) => {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
-      qc.setQueryData<ScriptureState>(key, (old) => ({
-        bookmarks: { ...(old?.bookmarks ?? {}), [verseKey]: res.data },
-      }))
+      qc.setQueryData<ScriptureState>(key, (old) =>
+        mergeBookmarks(old, { [verseKey]: res.data })
+      )
     },
   })
 }
@@ -126,9 +136,9 @@ export function useUpsertCoverToCover(scripture: string) {
     onSuccess: (res, verseKey) => {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
-      qc.setQueryData<ScriptureState>(key, (old) => ({
-        bookmarks: { ...(old?.bookmarks ?? {}), [verseKey]: res.data },
-      }))
+      qc.setQueryData<ScriptureState>(key, (old) =>
+        mergeBookmarks(old, { [verseKey]: res.data })
+      )
     },
   })
 }
