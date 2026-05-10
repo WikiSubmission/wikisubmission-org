@@ -12,6 +12,7 @@ import {
   CheckIcon,
   ChevronRight,
   SearchIcon,
+  StickyNote,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,6 +35,7 @@ import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { VerseCard } from '../mini-components/verse-card'
 import { MultiSelectBar } from '../mini-components/multi-select-bar'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
+import { useMeSearch } from '@/hooks/use-me-search'
 import { useTranslations } from 'next-intl'
 
 /** Click-to-copy text — used to let users grab the active search query. */
@@ -240,6 +242,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const titleMatches = verseSearch.data?.chapters?.filter((ch) => ch.tm) ?? []
   const rawVerses =
     verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
+  const noteMatches = useMeSearch(searchQuery, 'quran')
   const allVerses =
     sortMode === 'verse-order'
       ? [...rawVerses].sort((a, b) => {
@@ -362,6 +365,33 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
         {/* ── All results ───────────────────────────────────────────────────── */}
         <TabsContent value="all" className="space-y-4 mt-0">
+          {noteMatches.length > 0 && (
+            <div className="bg-amber-500/5 rounded-2xl border border-amber-500/20 overflow-hidden divide-y divide-amber-500/15">
+              {noteMatches.map((n) => {
+                const [chapter, verse] = n.verse_key.split(':')
+                return (
+                  <Link
+                    key={`note-result:${n.scripture}:${n.verse_key}`}
+                    href={`/quran/${chapter}?verse=${verse}`}
+                    className="block px-4 py-3 hover:bg-amber-500/10 transition-colors"
+                  >
+                    <div className="flex items-start gap-2">
+                      <StickyNote className="size-4 text-amber-500/80 mt-0.5 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-mono text-muted-foreground">
+                          {n.verse_key}
+                        </p>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {n.excerpt}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+
           {/* Chapter title matches */}
           {titleMatches.length > 0 && (
             <div className="space-y-2">

@@ -23,16 +23,13 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const pathname = usePathname()
   const router = useRouter()
   const { replace } = router
-  const [query, setQuery] = useState('')
+  const urlQuery = searchParams.get('q') ?? ''
+  const [query, setQuery] = useState(urlQuery)
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const chapters = useQuranNavStore((s) => s.chapters)
   const appendices = useQuranNavStore((s) => s.appendices)
-
-  // Get query from URL or fall back to local state
-  const urlQuery = searchParams.get('q') ?? ''
-  const displayQuery = urlQuery || query
 
   const performSearch = useCallback(
     (q: string) => {
@@ -131,9 +128,12 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
             'bg-muted/50 border-border/40',
             large ? 'pl-11 h-12 text-base rounded-xl' : 'pl-8 h-8 text-sm'
           )}
-          value={displayQuery}
+          value={open ? query : urlQuery}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            setQuery(urlQuery)
+            setOpen(true)
+          }}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           autoComplete="off"
         />

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTheme } from 'next-themes'
 import { Trash2 } from 'lucide-react'
 import { useCreateBlockNote } from '@blocknote/react'
@@ -34,30 +34,70 @@ export function NoteEditorDialog({
   const editor = useCreateBlockNote()
   const { resolvedTheme } = useTheme()
   const blockNoteTheme = resolvedTheme === 'dark' ? 'dark' : 'light'
-  const { mutate: upsert, isPending: saving } = useUpsertNote(scripture)
+  const { mutateAsync: upsert, isPending: saving } = useUpsertNote(scripture)
   const { mutate: remove, isPending: deleting } = useDeleteNote(scripture)
+  const [changeNonce, setChangeNonce] = useState(0)
+  const [saveState, setSaveState] = useState<
+    'saved' | 'unsaved' | 'saving' | 'error'
+  >('saved')
+  const lastSavedRef = useRef('')
+  const loadingRef = useRef(false)
+  const saveSeqRef = useRef(0)
 
   useEffect(() => {
     if (!open) return
     let cancelled = false
     async function load() {
+      loadingRef.current = true
       const blocks = note?.content
         ? await editor.tryParseMarkdownToBlocks(note.content)
         : [{ type: 'paragraph' as const, content: [] }]
       if (!cancelled) editor.replaceBlocks(editor.document, blocks)
+      if (!cancelled) {
+        lastSavedRef.current = (note?.content ?? '').trim()
+        setSaveState('saved')
+      }
+      loadingRef.current = false
     }
-    load()
+    void load()
     return () => {
       cancelled = true
+      loadingRef.current = false
     }
   }, [open, note?.content, editor])
 
-  async function handleSave() {
+  const persistCurrent = useCallback(async (): Promise<boolean> => {
     const markdown = await editor.blocksToMarkdownLossy(editor.document)
-    upsert(
-      { verseKey, content: markdown.trim() },
-      { onSuccess: () => onOpenChange(false) }
-    )
+    const nextContent = markdown.trim()
+    if (nextContent === lastSavedRef.current) {
+      setSaveState('saved')
+      return true
+    }
+    const seq = ++saveSeqRef.current
+    setSaveState('saving')
+    try {
+      await upsert({ verseKey, content: nextContent })
+      lastSavedRef.current = nextContent
+      if (seq === saveSeqRef.current) setSaveState('saved')
+      return true
+    } catch {
+      if (seq === saveSeqRef.current) setSaveState('error')
+      return false
+    }
+  }, [editor, upsert, verseKey])
+
+  useEffect(() => {
+    if (!open || loadingRef.current || saveState === 'saving') return
+    if (saveState !== 'unsaved') return
+    const timer = window.setTimeout(() => {
+      void persistCurrent()
+    }, 900)
+    return () => window.clearTimeout(timer)
+  }, [changeNonce, open, persistCurrent, saveState])
+
+  async function handleSave() {
+    const ok = await persistCurrent()
+    if (ok) onOpenChange(false)
   }
 
   function handleDelete() {
@@ -105,14 +145,34 @@ export function NoteEditorDialog({
             }
           }}
         >
-          <BlockNoteView editor={editor} theme={blockNoteTheme} />
+          <BlockNoteView
+            editor={editor}
+            theme={blockNoteTheme}
+            onChange={() => {
+              if (!open || loadingRef.current) return
+              setSaveState('unsaved')
+              setChangeNonce((v) => v + 1)
+            }}
+          />
         </div>
         <DialogFooter className="px-5 py-3 border-t flex flex-row items-center gap-2 shrink-0">
+          <div
+            aria-live="polite"
+            className="mr-auto text-xs text-muted-foreground"
+          >
+            {saveState === 'saving'
+              ? 'Saving...'
+              : saveState === 'error'
+                ? 'Save failed'
+                : saveState === 'unsaved'
+                  ? 'Unsaved changes'
+                  : 'Saved'}
+          </div>
           {note && (
             <Button
               size="sm"
               variant="ghost"
-              className="text-destructive hover:text-destructive mr-auto"
+              className="text-destructive hover:text-destructive"
               disabled={deleting}
               onClick={handleDelete}
             >
