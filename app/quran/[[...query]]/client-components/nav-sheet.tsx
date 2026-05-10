@@ -15,10 +15,9 @@ import {
 } from '@/components/ui/collapsible'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Bookmark, Book, ChevronRight, MenuIcon, ScrollText, Search } from 'lucide-react'
+import { Book, ChevronRight, MenuIcon, ScrollText, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { useSession } from 'next-auth/react'
 import type { components } from '@/src/api/types.gen'
 import useLocalStorage from '@/hooks/use-local-storage'
 import { useParams } from 'next/navigation'
@@ -28,7 +27,6 @@ import {
   CHAPTER_TITLES_EN,
   APPENDIX_TITLES_EN,
 } from '@/lib/quran-titles-en'
-import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 
 type Chapter = components['schemas']['Chapter']
 type Appendix = components['schemas']['Appendix']
@@ -48,12 +46,6 @@ function NavSheetContent({
   const titleDir = RTL_LOCALES.has(locale) ? 'rtl' : 'ltr'
   const [chapterSearchQuery, setChapterSearchQuery] = useState('')
   const [appendixSearchQuery, setAppendixSearchQuery] = useState('')
-  const { data: session } = useSession()
-  const categories = useBookmarkCategories()
-  const [bookmarksOpen, setBookmarksOpen] = useLocalStorage<boolean>(
-    'bookmarksOpen',
-    true
-  )
   const [chaptersOpen, setChaptersOpen] = useLocalStorage<boolean>(
     'chaptersOpen',
     true
@@ -147,51 +139,6 @@ function NavSheetContent({
         className="flex-1 overflow-y-auto px-3 py-3 space-y-4"
         style={{ scrollbarWidth: 'none' }}
       >
-        {/* Bookmark categories — shown only when signed in */}
-        {session?.accessToken && categories.length > 0 && (
-          <Collapsible open={bookmarksOpen} onOpenChange={setBookmarksOpen}>
-            <div className="space-y-2">
-              <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-1 rounded-md text-xs uppercase tracking-wider font-semibold text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors">
-                <div className="flex items-center gap-1.5">
-                  <Bookmark className="size-3" />
-                  {categories.length}{' '}
-                  {categories.length === 1 ? 'Category' : 'Categories'}
-                </div>
-                <ChevronRight
-                  className={cn(
-                    'size-3 transition-transform',
-                    bookmarksOpen && 'rotate-90'
-                  )}
-                />
-              </CollapsibleTrigger>
-
-              <CollapsibleContent>
-                <div className="space-y-0.5">
-                  {categories.map((cat) => (
-                    <SheetClose key={cat.id} asChild>
-                      <Link
-                        href="/me"
-                        className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-accent/50 transition-colors"
-                      >
-                        <span
-                          className="size-2.5 rounded-full shrink-0"
-                          style={{ background: cat.color }}
-                        />
-                        <span className="text-xs flex-1 min-w-0 truncate">
-                          {cat.name}
-                        </span>
-                        <span className="text-xs text-muted-foreground shrink-0 font-mono">
-                          {(cat as { entry_count?: number }).entry_count ?? 0}
-                        </span>
-                      </Link>
-                    </SheetClose>
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </div>
-          </Collapsible>
-        )}
-
         {/* Chapters */}
         <Collapsible open={chaptersOpen} onOpenChange={setChaptersOpen}>
           <div className="space-y-2">

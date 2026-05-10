@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { BookOpen } from 'lucide-react'
-import { useReadingProgress } from '@/hooks/use-reading-progress'
+import { useCoverToCoverProgress } from '@/hooks/use-reading-progress'
 import { F } from './shared'
 
 function ContinueCard({
@@ -86,8 +86,8 @@ function ContinueCard({
 
 export function ContinueReadingSection() {
   const { status } = useSession()
-  const quranProgress = useReadingProgress('quran')
-  const bibleProgress = useReadingProgress('bible')
+  const quranProgress = useCoverToCoverProgress('quran')
+  const bibleProgress = useCoverToCoverProgress('bible')
 
   if (status !== 'authenticated') return null
 

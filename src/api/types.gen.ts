@@ -427,7 +427,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Get cover-to-cover bookmark for a scripture */
+        get: operations["getMeCoverToCover"];
         /** Upsert cover-to-cover bookmark */
         put: operations["putMeCoverToCover"];
         post?: never;
@@ -1615,6 +1616,9 @@ export interface components {
         BookmarkEnvelope: {
             data: components["schemas"]["Bookmark"];
         };
+        BookmarkNullableEnvelope: {
+            data: components["schemas"]["Bookmark"] | null;
+        };
         BookmarkCategoryEnvelope: {
             data: components["schemas"]["BookmarkCategory"];
         };
@@ -2578,6 +2582,34 @@ export interface operations {
                 };
             };
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeCoverToCover: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkNullableEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             500: components["responses"]["InternalServerErrror"];
         };
     };

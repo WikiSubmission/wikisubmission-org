@@ -76,6 +76,9 @@ export const meApi = {
 
   // ── Cover-to-cover (still uses old bookmark row) ─────────────────────────
 
+  getCoverToCover: (scripture: string): Promise<{ data: BookmarkData | null }> =>
+    unwrap(wsApi.GET('/me/cover-to-cover', { params: { query: { scripture: toScripture(scripture) } } })),
+
   putCoverToCover: (body: {
     scripture: string
     verse_key: string

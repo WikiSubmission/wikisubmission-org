@@ -15,7 +15,7 @@ import {
   StickyNote,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useReadingProgress } from '@/hooks/use-reading-progress'
+import { useCoverToCoverProgress } from '@/hooks/use-reading-progress'
 import { useStreak } from '@/hooks/use-reading-streak'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 import { useCollections } from '@/hooks/use-collections'
@@ -41,7 +41,7 @@ function ScripturePill({ scripture }: { scripture: 'quran' | 'bible' }) {
 }
 
 function CoverToCoverCard({ scripture }: { scripture: 'quran' | 'bible' }) {
-  const progress = useReadingProgress(scripture)
+  const progress = useCoverToCoverProgress(scripture)
   const streak = useStreak(scripture)
   const chapterNum = chapterFromKey(progress?.verse_key)
 
@@ -367,7 +367,6 @@ export default function MePage() {
       <StatsRow />
       <CoverToCoverSection />
       <CategoriesSection />
-      <CollectionsSection />
 
       <div className="pt-4 border-t border-border">
         <Button

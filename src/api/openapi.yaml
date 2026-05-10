@@ -1129,6 +1129,25 @@ paths:
           $ref: '#/components/responses/InternalServerErrror'
 
   /me/cover-to-cover:
+    get:
+      tags: [Me]
+      operationId: getMeCoverToCover
+      summary: Get cover-to-cover bookmark for a scripture
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MeScriptureParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkNullableEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
     put:
       tags: [Me]
       operationId: putMeCoverToCover
@@ -3069,6 +3088,15 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/Bookmark'
+
+    BookmarkNullableEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          allOf:
+            - $ref: '#/components/schemas/Bookmark'
+          nullable: true
 
     BookmarkCategoryEnvelope:
       type: object

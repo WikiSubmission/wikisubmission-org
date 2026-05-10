@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react'
 import { useSignInPromptStore } from '@/store/sign-in-prompt'
 import { useAddBookmarkEntry, useRemoveBookmarkEntry } from '@/hooks/use-bookmarks'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
-import { useSyncReadingProgress } from '@/hooks/use-reading-progress'
+import { useMarkCoverToCover } from '@/hooks/use-reading-progress'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -512,7 +512,7 @@ export const VerseCard = memo(
     const categories = useBookmarkCategories()
     const { mutate: addEntry, isPending: addingEntry } = useAddBookmarkEntry(scripture)
     const { mutate: removeEntry, isPending: removingEntry } = useRemoveBookmarkEntry(scripture)
-    const markCoverToCover = useSyncReadingProgress('quran')
+    const markCoverToCover = useMarkCoverToCover('quran')
 
     const [notesOpen, setNotesOpen] = useState(false)
     const [createCategoryOpen, setCreateCategoryOpen] = useState(false)

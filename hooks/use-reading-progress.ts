@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import { meApi } from '@/src/api/me-client'
-import type { ReadingProgressData } from '@/types/bookmarks'
+import type { BookmarkData, ReadingProgressData } from '@/types/bookmarks'
 
 export function useReadingProgress(scripture: string): ReadingProgressData | null {
   const { data: session } = useSession()
@@ -22,6 +22,26 @@ export function useSyncReadingProgress(scripture: string) {
   const { mutate } = useMutation({
     mutationFn: (verseKey: string) =>
       meApi.putReadingProgress({ scripture, verse_key: verseKey }),
+  })
+  return session?.accessToken ? mutate : null
+}
+
+export function useCoverToCoverProgress(scripture: string): BookmarkData | null {
+  const { data: session } = useSession()
+  const { data } = useQuery({
+    queryKey: ['cover-to-cover', scripture],
+    queryFn: () => meApi.getCoverToCover(scripture),
+    enabled: !!session?.accessToken,
+    staleTime: 60_000,
+  })
+  return data?.data ?? null
+}
+
+export function useMarkCoverToCover(scripture: string) {
+  const { data: session } = useSession()
+  const { mutate } = useMutation({
+    mutationFn: (verseKey: string) =>
+      meApi.putCoverToCover({ scripture, verse_key: verseKey }),
   })
   return session?.accessToken ? mutate : null
 }

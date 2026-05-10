@@ -61,6 +61,7 @@ export function useUpsertNote(scripture: string) {
       qc.setQueryData<ScriptureState>(key, (old) =>
         mergeNote(old, verseKey, res.data)
       )
+      qc.invalidateQueries({ queryKey: ['notes', scripture] })
     },
   })
 }
@@ -89,6 +90,9 @@ export function useDeleteNote(scripture: string) {
     },
     onError: (_err, _vars, ctx) => {
       if (ctx) qc.setQueryData<ScriptureState>(ctx.key, ctx.prev)
+    },
+    onSuccess: (_res, { verseKey }) => {
+      qc.invalidateQueries({ queryKey: ['notes', scripture] })
     },
   })
 }
