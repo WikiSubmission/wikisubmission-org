@@ -70,10 +70,11 @@ export function NoteEditorDialog({
       <DialogContent
         className="
           flex flex-col gap-0 p-0 overflow-hidden
-          w-[95vw] sm:w-auto
-          sm:max-w-2xl md:max-w-3xl
-          h-[85vh] sm:h-auto sm:max-h-[85vh]
-          rounded-xl
+          w-[98vw] max-w-[98vw]
+          h-[94vh] max-h-[94vh]
+          sm:w-[96vw] sm:max-w-[96vw]
+          sm:h-[92vh] sm:max-h-[92vh]
+          rounded-lg sm:rounded-xl
         "
       >
         <DialogHeader className="px-5 pt-4 pb-3 border-b shrink-0">
@@ -88,8 +89,8 @@ export function NoteEditorDialog({
         <div
           className="
             flex-1 overflow-y-auto
-            px-2 sm:px-4 py-3
-            min-h-[300px] sm:min-h-[420px]
+            px-2.5 sm:px-5 py-3
+            min-h-[360px] sm:min-h-[560px]
             bn-themed
           "
           onKeyDownCapture={(e) => {
