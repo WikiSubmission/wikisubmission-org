@@ -65,7 +65,6 @@ export default async function QuranLayout({
                 </div>
                 <QuranSettings />
               </div>
-              <QuranReadingProgressBar />
             </header>
           )}
         </div>
