@@ -68,6 +68,7 @@ export function useAddBookmarkEntry(scripture: string) {
         ])
       )
       qc.invalidateQueries({ queryKey: ['bookmark-categories'] })
+      qc.invalidateQueries({ queryKey: ['bookmark-category-entries', res.data.category_id] })
     },
   })
 }
@@ -94,10 +95,24 @@ export function useRemoveBookmarkEntry(scripture: string) {
     onError: (_err, _vars, ctx) => {
       if (ctx) qc.setQueryData<ScriptureState>(ctx.key, ctx.prev)
     },
-    onSuccess: () => {
+    onSuccess: (_data, { entryId, verseKey: _vk }) => {
       qc.invalidateQueries({ queryKey: ['bookmark-categories'] })
+      qc.invalidateQueries({ queryKey: ['bookmark-category-entries'] })
     },
   })
+}
+
+// ── Bookmark category entries (for detail page) ───────────────────────────
+
+export function useBookmarkCategoryEntries(categoryId: number) {
+  const { data: session } = useSession()
+  const { data, isLoading } = useQuery({
+    queryKey: ['bookmark-category-entries', categoryId],
+    queryFn: () => meApi.listBookmarkCategoryEntries(categoryId),
+    enabled: !!session?.accessToken && categoryId > 0,
+    staleTime: 30_000,
+  })
+  return { entries: data?.data ?? [], isLoading }
 }
 
 // ── Cover-to-cover ─────────────────────────────────────────────────────────

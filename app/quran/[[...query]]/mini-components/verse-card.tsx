@@ -536,6 +536,21 @@ export const VerseCard = memo(
     const verseId = verse.vk ?? ''
     const isCoverToCover = scripture === 'quran' && coverToCoverData?.verse_key === verseId
 
+    type CategoryData = (typeof categories)[0]
+    const bookmarkedCats = useMemo(
+      () =>
+        entries
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          )
+          .slice(0, 3)
+          .map((e) => categories.find((c) => c.id === e.category_id))
+          .filter((c): c is CategoryData => c != null),
+      [entries, categories]
+    )
+
     const highlightedTranslation = useMemo(() => {
       if (!searchHighlight || !tr?.tx) return null
       const stripped = searchHighlight.replace(/<\/?b>/g, '')
@@ -674,10 +689,27 @@ export const VerseCard = memo(
                         }
                       }}
                     >
-                      <Bookmark
-                        className="w-4 h-4"
-                        fill={isBookmarked ? 'currentColor' : 'none'}
-                      />
+                      {bookmarkedCats.length > 1 ? (
+                        <span className="relative flex items-center justify-center w-4 h-4">
+                          {bookmarkedCats.map((cat, i) => (
+                            <span
+                              key={cat.id}
+                              className="absolute rounded-full ring-[1.5px] ring-background"
+                              style={{
+                                width: 10,
+                                height: 10,
+                                background: cat.color,
+                                right: i * 5,
+                              }}
+                            />
+                          ))}
+                        </span>
+                      ) : (
+                        <Bookmark
+                          className="w-4 h-4"
+                          fill={isBookmarked ? 'currentColor' : 'none'}
+                        />
+                      )}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="min-w-44">
