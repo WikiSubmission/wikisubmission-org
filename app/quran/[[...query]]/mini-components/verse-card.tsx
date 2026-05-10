@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react'
 import { useSignInPromptStore } from '@/store/sign-in-prompt'
 import { useAddBookmarkEntry, useRemoveBookmarkEntry } from '@/hooks/use-bookmarks'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
-import { useMarkCoverToCover } from '@/hooks/use-reading-progress'
+import { useMarkCoverToCover, useCoverToCoverProgress } from '@/hooks/use-reading-progress'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -513,6 +513,7 @@ export const VerseCard = memo(
     const { mutate: addEntry, isPending: addingEntry } = useAddBookmarkEntry(scripture)
     const { mutate: removeEntry, isPending: removingEntry } = useRemoveBookmarkEntry(scripture)
     const markCoverToCover = useMarkCoverToCover('quran')
+    const coverToCoverData = useCoverToCoverProgress('quran')
 
     const [notesOpen, setNotesOpen] = useState(false)
     const [createCategoryOpen, setCreateCategoryOpen] = useState(false)
@@ -533,6 +534,7 @@ export const VerseCard = memo(
 
     const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
     const verseId = verse.vk ?? ''
+    const isCoverToCover = scripture === 'quran' && coverToCoverData?.verse_key === verseId
 
     const highlightedTranslation = useMemo(() => {
       if (!searchHighlight || !tr?.tx) return null
@@ -683,11 +685,18 @@ export const VerseCard = memo(
                       <>
                         <button
                           type="button"
-                          className="flex w-full items-center gap-1.5 px-2 py-1.5 text-xs text-primary hover:text-primary transition-colors cursor-pointer rounded-sm hover:bg-primary/10"
+                          className={`flex w-full items-center gap-1.5 px-2 py-1.5 text-xs transition-colors cursor-pointer rounded-sm ${
+                            isCoverToCover
+                              ? 'text-primary bg-primary/10 font-medium'
+                              : 'text-primary hover:bg-primary/10'
+                          }`}
                           onClick={() => markCoverToCover(verseId)}
                         >
-                          <BookMarked className="w-3 h-3" />
-                          Mark as cover to cover
+                          <BookMarked
+                            className="w-3 h-3"
+                            fill={isCoverToCover ? 'currentColor' : 'none'}
+                          />
+                          {isCoverToCover ? 'Marked as cover to cover' : 'Mark as cover to cover'}
                         </button>
                         <DropdownMenuSeparator />
                       </>
