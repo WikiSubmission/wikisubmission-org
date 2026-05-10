@@ -37,6 +37,7 @@ import { MultiSelectBar } from '../mini-components/multi-select-bar'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useMeSearch } from '@/hooks/use-me-search'
 import { useTranslations } from 'next-intl'
+import { useSession } from 'next-auth/react'
 
 /** Click-to-copy text — used to let users grab the active search query. */
 function CopyableText({
@@ -108,6 +109,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
   const prefs = useQuranPreferences()
   const verseSearch = useVerseSearch()
+  const { data: session } = useSession()
   const t = useTranslations('search')
   const tQuran = useTranslations('quran')
   const tCommon = useTranslations('common')
@@ -263,15 +265,8 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     )
   }
 
-  if (verseSearch.error) {
-    return (
-      <p className="text-sm text-muted-foreground py-8 text-center">
-        {verseSearch.error}
-      </p>
-    )
-  }
-
-  if (!verseSearch.data) return null
+  // Before search starts: nothing to show (data null, no error, notes not yet matched)
+  if (!verseSearch.data && !verseSearch.error && noteMatches.length === 0) return null
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -392,72 +387,82 @@ export default function SearchResult({ props }: { props: { query: string } }) {
             </div>
           )}
 
-          {/* Chapter title matches */}
-          {titleMatches.length > 0 && (
-            <div className="space-y-2">
-              {titleMatches.map((ch) => (
-                <SearchResultChapter
-                  key={`title:${ch.cn}`}
-                  chapter={ch}
-                  primaryCode={primaryCode}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Verse list — wrap in the reader's rounded surface so cards match */}
-          {allVerses.length > 0 && (
-            <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden">
-              {allVerses.map((verse, index) => {
-                const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
-                const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
-                return (
-                  <VerseCard
-                    key={verse.vk ?? index}
-                    verse={verse}
-                    isLast={index === allVerses.length - 1}
-                    optsKey={optsKey}
-                    showAudio={false}
-                    verseHref={`/quran/${chNum}?verse=${vNum}`}
-                    searchHighlight={tr?.hl ?? undefined}
-                  />
-                )
-              })}
-            </div>
-          )}
-
-          {verseSearch.loading && (
-            <div className="flex justify-center py-6">
-              <Spinner />
-            </div>
-          )}
-
-          {verseSearch.hasMore && !verseSearch.loading && (
-            <div className="flex justify-center pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const y = window.scrollY
-                  verseSearch.loadMore().then(() => {
-                    requestAnimationFrame(() =>
-                      window.scrollTo({ top: y, behavior: 'instant' })
-                    )
-                  })
-                }}
-              >
-                {tCommon('loadMore', {
-                  shown: verseSearch.loadedCount,
-                  total: verseSearch.total,
-                })}
-              </Button>
-            </div>
-          )}
-
-          {!verseSearch.hasMore && allVerses.length > 0 && (
-            <p className="text-center text-xs text-muted-foreground py-4">
-              {t('allResultsShown', { count: verseSearch.total })}
+          {verseSearch.error ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">
+              {verseSearch.error}
             </p>
+          ) : (
+            <>
+              {/* Chapter title matches */}
+              {titleMatches.length > 0 && (
+                <div className="space-y-2">
+                  {titleMatches.map((ch) => (
+                    <SearchResultChapter
+                      key={`title:${ch.cn}`}
+                      chapter={ch}
+                      primaryCode={primaryCode}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Verse list — wrap in the reader's rounded surface so cards match */}
+              {allVerses.length > 0 && (
+                <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden">
+                  {allVerses.map((verse, index) => {
+                    const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
+                    const tr = verse.tr?.[primaryCode] ?? verse.tr?.['en']
+                    return (
+                      <VerseCard
+                        key={verse.vk ?? index}
+                        verse={verse}
+                        isLast={index === allVerses.length - 1}
+                        optsKey={optsKey}
+                        showAudio={false}
+                        showBookmark={!!session?.accessToken}
+                        showNotes={!!session?.accessToken}
+                        verseHref={`/quran/${chNum}?verse=${vNum}`}
+                        searchHighlight={tr?.hl ?? undefined}
+                      />
+                    )
+                  })}
+                </div>
+              )}
+
+              {verseSearch.loading && (
+                <div className="flex justify-center py-6">
+                  <Spinner />
+                </div>
+              )}
+
+              {verseSearch.hasMore && !verseSearch.loading && (
+                <div className="flex justify-center pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const y = window.scrollY
+                      verseSearch.loadMore().then(() => {
+                        requestAnimationFrame(() =>
+                          window.scrollTo({ top: y, behavior: 'instant' })
+                        )
+                      })
+                    }}
+                  >
+                    {tCommon('loadMore', {
+                      shown: verseSearch.loadedCount,
+                      total: verseSearch.total,
+                    })}
+                  </Button>
+                </div>
+              )}
+
+              {!verseSearch.hasMore && allVerses.length > 0 && (
+                <p className="text-center text-xs text-muted-foreground py-4">
+                  {t('allResultsShown', { count: verseSearch.total })}
+                </p>
+              )}
+            </>
           )}
         </TabsContent>
 
