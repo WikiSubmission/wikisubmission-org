@@ -14,7 +14,6 @@ import { QuranNavSheet } from './client-components/nav-sheet'
 import { QuranModeSelector } from './client-components/mode-selector'
 import { QuranScrollContainer } from './client-components/scroll-container'
 import { QuranReadingProgressBar } from './mini-components/reading-progress-bar'
-import { QuranPersonalActions } from './mini-components/personal-actions'
 import { getLocale } from 'next-intl/server'
 
 // SSR fetch cache TTL for /quran content. Kept short so backend data
@@ -64,7 +63,6 @@ export default async function QuranLayout({
                 <div className="flex gap-2 shrink-0">
                   <QuranModeSelector />
                 </div>
-                <QuranPersonalActions />
                 <QuranSettings />
               </div>
               <QuranReadingProgressBar />

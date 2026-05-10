@@ -19,6 +19,7 @@ import { useReadingProgress } from '@/hooks/use-reading-progress'
 import { useStreak } from '@/hooks/use-reading-streak'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 import { useCollections } from '@/hooks/use-collections'
+import { useNoteCount } from '@/hooks/use-notes'
 import { CreateCategoryDialog } from '@/components/me/create-category-dialog'
 import { CategoryActions } from '@/components/me/category-actions'
 
@@ -270,6 +271,7 @@ function StatsRow() {
   const quranStreak = useStreak('quran')
   const bibleStreak = useStreak('bible')
   const categories = useBookmarkCategories()
+  const noteCount = useNoteCount()
 
   const totalBookmarks = categories.reduce((s, c) => s + c.entry_count, 0)
   const longest = Math.max(
@@ -306,7 +308,7 @@ function StatsRow() {
       >
         <div className="flex items-center gap-1.5 text-xl font-bold">
           <StickyNote className="w-4 h-4 text-muted-foreground" />
-          —
+          {noteCount}
         </div>
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
           Notes

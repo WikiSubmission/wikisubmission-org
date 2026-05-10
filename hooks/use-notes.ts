@@ -1,6 +1,7 @@
 'use client'
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
 import { meApi } from '@/src/api/me-client'
 import type { NoteData, ScriptureState } from '@/types/bookmarks'
 
@@ -90,4 +91,23 @@ export function useDeleteNote(scripture: string) {
       if (ctx) qc.setQueryData<ScriptureState>(ctx.key, ctx.prev)
     },
   })
+}
+
+// ── Note count (quran + bible) ─────────────────────────────────────────────
+
+function useNotesByScripture(scripture: 'quran' | 'bible') {
+  const { data: session } = useSession()
+  const { data } = useQuery<{ data: NoteData[] }>({
+    queryKey: ['notes', scripture],
+    queryFn: () => meApi.getNotes(scripture),
+    enabled: !!session?.accessToken,
+    staleTime: 30_000,
+  })
+  return data?.data ?? []
+}
+
+export function useNoteCount(): number {
+  const quranNotes = useNotesByScripture('quran')
+  const bibleNotes = useNotesByScripture('bible')
+  return quranNotes.length + bibleNotes.length
 }

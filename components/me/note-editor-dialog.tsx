@@ -92,6 +92,17 @@ export function NoteEditorDialog({
             min-h-[300px] sm:min-h-[420px]
             bn-themed
           "
+          onKeyDownCapture={(e) => {
+            if (
+              e.key === 'Enter' &&
+              typeof window !== 'undefined' &&
+              window.matchMedia('(pointer: coarse)').matches
+            ) {
+              e.preventDefault()
+              e.stopPropagation()
+              handleSave()
+            }
+          }}
         >
           <BlockNoteView editor={editor} theme={blockNoteTheme} />
         </div>
