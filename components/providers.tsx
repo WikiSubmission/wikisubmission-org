@@ -7,6 +7,7 @@ import { ChatPanelProvider } from '@/components/chat-sidebar/panel-context'
 import { ChatSidebar } from '@/components/chat-sidebar/chat-sidebar'
 import { ChatProvider } from '@/components/chat/chat-context'
 import { SignInPrompt } from '@/components/sign-in-prompt'
+import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -23,13 +24,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        <ChatPanelProvider>
-          <ChatProvider>
-            {children}
-            <ChatSidebar />
-            <SignInPrompt />
-          </ChatProvider>
-        </ChatPanelProvider>
+        <QuranPlayerProvider>
+          <ChatPanelProvider>
+            <ChatProvider>
+              {children}
+              <ChatSidebar />
+              <SignInPrompt />
+            </ChatProvider>
+          </ChatPanelProvider>
+        </QuranPlayerProvider>
       </QueryClientProvider>
     </SessionProvider>
   )

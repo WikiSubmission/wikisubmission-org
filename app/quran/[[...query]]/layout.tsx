@@ -44,7 +44,7 @@ export default async function QuranLayout({
 
   if (chaptersRes.data && appendicesRes.data) {
     return (
-      <QuranPlayerProvider>
+      <>
         {/* Fixed header stack — SiteNav + optional sub-header.
             CSS slides this up by 64px on scroll-down (data-nav-hidden),
             so the sub-header rises to top-0 giving more reading space. */}
@@ -83,7 +83,7 @@ export default async function QuranLayout({
           <MetricsCollector />
           <QuranPlayer />
         </div>
-      </QuranPlayerProvider>
+      </>
     )
   } else {
     return (

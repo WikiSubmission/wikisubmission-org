@@ -4,26 +4,8 @@ import Link from 'next/link'
 import { ArrowUp, Loader2, ChevronDown, Trash2, ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import React, { type FormEvent, type KeyboardEvent, useRef, useState } from 'react'
-import { QuranRef } from '@/components/quran-ref'
+import { ScriptureText } from '@/components/scripture-text'
 import type { Message } from './use-chat'
-
-// ── Inline text renderer ───────────────────────────────────────────────────────
-
-export function parseInline(text: string): React.ReactNode[] {
-  const re = /(\*\*.+?\*\*|\b\d{1,3}:\d{1,3}(?:-\d{1,3})?\b)/g
-  const nodes: React.ReactNode[] = []
-  let last = 0, key = 0
-  let m: RegExpExecArray | null
-  while ((m = re.exec(text)) !== null) {
-    if (m.index > last) nodes.push(text.slice(last, m.index))
-    const s = m[0]
-    if (s.startsWith('**')) nodes.push(<strong key={key++}>{s.slice(2, -2)}</strong>)
-    else nodes.push(<QuranRef key={key++} reference={s} />)
-    last = m.index + s.length
-  }
-  if (last < text.length) nodes.push(text.slice(last))
-  return nodes
-}
 
 // ── Answer renderer ────────────────────────────────────────────────────────────
 
@@ -35,16 +17,16 @@ export function AiAnswer({ text }: { text: string }) {
         if (/^\d+\.\s/.test(para))
           return (
             <ol key={i} className="list-decimal list-outside pl-4 space-y-1.5">
-              {lines.map((l, j) => <li key={j}>{parseInline(l.replace(/^\d+\.\s*/, ''))}</li>)}
+              {lines.map((l, j) => <li key={j}><ScriptureText text={l.replace(/^\d+\.\s*/, '')} /></li>)}
             </ol>
           )
         if (/^[-*]\s/.test(para))
           return (
             <ul key={i} className="list-disc list-outside pl-4 space-y-1.5">
-              {lines.map((l, j) => <li key={j}>{parseInline(l.replace(/^[-*]\s*/, ''))}</li>)}
+              {lines.map((l, j) => <li key={j}><ScriptureText text={l.replace(/^[-*]\s*/, '')} /></li>)}
             </ul>
           )
-        return <p key={i}>{parseInline(para)}</p>
+        return <p key={i}><ScriptureText text={para} /></p>
       })}
     </div>
   )

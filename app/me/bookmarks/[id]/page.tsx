@@ -232,8 +232,6 @@ export default function BookmarkDetailPage({
   const categoryId = parseInt(id, 10)
 
   return (
-    <QuranPlayerProvider>
-      <BookmarkDetailContent categoryId={categoryId} />
-    </QuranPlayerProvider>
+    <BookmarkDetailContent categoryId={categoryId} />
   )
 }
