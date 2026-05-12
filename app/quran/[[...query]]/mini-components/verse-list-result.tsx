@@ -7,6 +7,7 @@ import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import { VerseCard } from './verse-card'
 import { buildVersesText, buildSegmentMarkdown } from '@/lib/quran-copy'
+import { SearchHeader } from './search-header'
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']
@@ -202,6 +203,8 @@ export function VerseListResult({
 
   return (
     <div className={`${maxW} mx-auto space-y-4`}>
+      <SearchHeader query={queryText} />
+
       {/* Copy all as markdown */}
       <div className="flex justify-end">
         <button

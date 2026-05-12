@@ -34,41 +34,12 @@ import { QuranRef } from '@/components/quran-ref'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { VerseCard } from '../mini-components/verse-card'
 import { MultiSelectBar } from '../mini-components/multi-select-bar'
+import { SearchHeader } from '../mini-components/search-header'
+import { SearchResultsSkeleton } from '../mini-components/search-results-skeleton'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useMeSearch } from '@/hooks/use-me-search'
 import { useTranslations } from 'next-intl'
 import { useSession } from 'next-auth/react'
-
-/** Click-to-copy text — used to let users grab the active search query. */
-function CopyableText({
-  text,
-  className,
-  ariaLabel,
-}: {
-  text: string
-  className?: string
-  ariaLabel?: string
-}) {
-  return (
-    <button
-      type="button"
-      onClick={async (e) => {
-        e.stopPropagation()
-        try {
-          await navigator.clipboard.writeText(text)
-          toast.success(`Copied: ${text}`)
-        } catch {
-          toast.error('Could not copy to clipboard')
-        }
-      }}
-      className={`text-left cursor-copy hover:text-primary active:scale-[0.98] transition-all ${className ?? ''}`}
-      title={`Copy: ${text}`}
-      aria-label={ariaLabel ?? `Copy ${text}`}
-    >
-      {text}
-    </button>
-  )
-}
 
 // ─── SearchResultChapter ──────────────────────────────────────────────────────
 
@@ -259,7 +230,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       <div
         className={`${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full space-y-3`}
       >
-        <SearchHeaderSkeleton query={searchQuery} />
+        <SearchHeader query={searchQuery} loading />
         <SearchResultsSkeleton />
       </div>
     )
@@ -273,14 +244,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     <div
       className={`space-y-3 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
     >
-      {/* Minimal header — query stands alone */}
-      <header className="px-1">
-        <CopyableText
-          text={`“${searchQuery}”`}
-          className="text-3xl sm:text-4xl font-semibold tracking-tight leading-none"
-          ariaLabel={`Copy search query ${searchQuery}`}
-        />
-      </header>
+      <SearchHeader query={searchQuery} />
 
       <Tabs
         value={searchTab}
@@ -559,41 +523,6 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       </Tabs>
 
       <MultiSelectBar />
-    </div>
-  )
-}
-
-
-// ─── Loading skeletons ────────────────────────────────────────────────────────
-
-function SearchHeaderSkeleton({ query }: { query: string }) {
-  return (
-    <header className="space-y-3 px-1">
-      <p className="text-3xl sm:text-4xl font-semibold tracking-tight leading-none">
-        “{query}”
-      </p>
-      {/* Indeterminate progress strip — a subtle primary sliver moves
-          across the bar while the search is in flight. */}
-      <div className="relative h-[2px] w-full overflow-hidden rounded-full bg-border/40">
-        <div className="absolute inset-y-0 w-1/3 rounded-full bg-primary/70 animate-[search-loading_1.2s_ease-in-out_infinite]" />
-      </div>
-    </header>
-  )
-}
-
-function SearchResultsSkeleton() {
-  return (
-    <div className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden divide-y divide-border/30">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="px-6 py-5 sm:px-8 sm:py-6 space-y-3 animate-pulse">
-          <div className="h-5 w-12 rounded-full bg-muted/60" />
-          <div className="space-y-2">
-            <div className="h-3 w-11/12 rounded bg-muted/50" />
-            <div className="h-3 w-10/12 rounded bg-muted/40" />
-            <div className="h-3 w-7/12 rounded bg-muted/30" />
-          </div>
-        </div>
-      ))}
     </div>
   )
 }
