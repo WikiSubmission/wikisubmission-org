@@ -107,12 +107,14 @@ export const meApi = {
     scripture: string
     verse_key: string
     content: string
+    tags?: string[]
   }): Promise<{ data: NoteData }> =>
     unwrap(wsApi.PUT('/me/notes', {
       body: {
         scripture: toScripture(body.scripture),
         verse_key: body.verse_key,
         content: body.content,
+        ...(body.tags !== undefined ? { tags: body.tags } : {}),
       },
     })),
 

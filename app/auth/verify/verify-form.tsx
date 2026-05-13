@@ -4,13 +4,14 @@ import { useState, useRef, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Loader2, ArrowLeft } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 export function VerifyForm() {
   const [code, setCode] = useState(['', '', '', '', '', ''])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const [activeIndex, setActiveIndex] = useState(0)
 
   const email =
     typeof window !== 'undefined'
@@ -32,6 +33,7 @@ export function VerifyForm() {
     setCode(next)
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus()
+      setActiveIndex(index + 1)
     }
     if (next.every((d) => d !== '')) {
       void submitCode(next.join(''))
@@ -41,6 +43,7 @@ export function VerifyForm() {
   function handleKeyDown(index: number, e: React.KeyboardEvent) {
     if (e.key === 'Backspace' && !code[index] && index > 0) {
       inputRefs.current[index - 1]?.focus()
+      setActiveIndex(index - 1)
     }
   }
 
@@ -67,76 +70,76 @@ export function VerifyForm() {
     } else {
       setError('Invalid or expired code. Please try again.')
       setCode(['', '', '', '', '', ''])
+      setActiveIndex(0)
       setLoading(false)
       inputRefs.current[0]?.focus()
     }
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="flex flex-col items-center gap-8 w-full max-w-sm">
-        <Link
-          href="/"
-          className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
-        >
-          <Image
-            src="/brand-assets/logo-transparent.png"
-            alt="WikiSubmission"
-            width={56}
-            height={56}
-            className="rounded-full shadow-lg"
-          />
-        </Link>
-
-        <div className="w-full bg-card border border-border rounded-xl shadow-xl p-8 flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-xl font-semibold text-foreground">
-              Check your email
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Enter the 6-digit code sent to{' '}
-              <span className="font-medium text-foreground">{email}</span>
-            </p>
-          </div>
-
-          <div
-            className="flex gap-2 justify-center"
-            onPaste={handlePaste}
-          >
-            {code.map((digit, i) => (
-              <input
-                key={i}
-                ref={(el) => { inputRefs.current[i] = el }}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(i, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(i, e)}
-                disabled={loading}
-                className="w-11 h-13 text-center text-xl font-semibold rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-              />
-            ))}
-          </div>
-
-          {loading && (
-            <div className="flex justify-center">
-              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-            </div>
-          )}
-
-          {error && (
-            <p className="text-destructive text-sm text-center">{error}</p>
-          )}
-
-          <Link
-            href="/auth/sign-in"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Use a different method
+    <main className="auth-shell">
+      <div className="auth-card">
+        <div className="auth-mast">
+          <Link href="/" aria-label="WikiSubmission home">
+            <Image
+              src="/brand-assets/logo-transparent.png"
+              alt="WikiSubmission"
+              width={36}
+              height={36}
+              priority
+            />
           </Link>
+          <span className="auth-eyebrow">Check your email</span>
+          <h1>
+            <em>A six-digit</em> code awaits
+          </h1>
+          <p>
+            We sent it to <strong className="text-[var(--ed-fg)]">{email}</strong>.
+            Enter it below to continue.
+          </p>
         </div>
+
+        <div className="otp-row" onPaste={handlePaste}>
+          {code.map((digit, i) => (
+            <input
+              key={i}
+              ref={(el) => {
+                inputRefs.current[i] = el
+              }}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={digit}
+              onChange={(e) => handleChange(i, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(i, e)}
+              onFocus={() => setActiveIndex(i)}
+              disabled={loading}
+              autoComplete={i === 0 ? 'one-time-code' : 'off'}
+              className={`otp-box${activeIndex === i ? ' active' : ''}${digit ? ' filled' : ''}`}
+              aria-label={`Digit ${i + 1}`}
+            />
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center">
+            <Loader2 className="w-5 h-5 animate-spin text-[var(--ed-fg-muted)]" aria-hidden />
+          </div>
+        ) : null}
+
+        {error ? (
+          <p className="text-[var(--ed-accent)] text-[13px] text-center font-[var(--font-source-serif)]">
+            {error}
+          </p>
+        ) : null}
+
+        <p className="otp-resend">
+          Didn&apos;t receive it?{' '}
+          <Link href={`/auth/sign-in${email ? `?email=${encodeURIComponent(email)}` : ''}`}>
+            Resend or use a different method
+          </Link>
+          .
+        </p>
       </div>
     </main>
   )

@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth'
 import Google from 'next-auth/providers/google'
 import Apple from 'next-auth/providers/apple'
+import Discord from 'next-auth/providers/discord'
 import Credentials from 'next-auth/providers/credentials'
 import { SignJWT, jwtVerify } from 'jose'
 import { createHmac } from 'crypto'
@@ -38,6 +39,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Apple({
       clientId: process.env.AUTH_APPLE_ID,
       clientSecret: process.env.AUTH_APPLE_SECRET,
+    }),
+    Discord({
+      clientId: process.env.AUTH_DISCORD_ID,
+      clientSecret: process.env.AUTH_DISCORD_SECRET,
     }),
     Credentials({
       credentials: {

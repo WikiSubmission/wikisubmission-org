@@ -5,12 +5,14 @@ import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { FcGoogle } from 'react-icons/fc'
-import { FaApple } from 'react-icons/fa'
+import { FaApple, FaDiscord } from 'react-icons/fa'
 import { Mail, Loader2 } from 'lucide-react'
+
+type Loading = 'google' | 'apple' | 'discord' | 'email' | null
 
 export function SignInForm() {
   const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState<'google' | 'apple' | 'email' | null>(null)
+  const [loading, setLoading] = useState<Loading>(null)
   const [error, setError] = useState<string | null>(null)
 
   const callbackUrl =
@@ -18,14 +20,9 @@ export function SignInForm() {
       ? (new URLSearchParams(window.location.search).get('next') ?? '/')
       : '/'
 
-  async function handleGoogle() {
-    setLoading('google')
-    await signIn('google', { callbackUrl })
-  }
-
-  async function handleApple() {
-    setLoading('apple')
-    await signIn('apple', { callbackUrl })
+  async function handleProvider(provider: 'google' | 'apple' | 'discord') {
+    setLoading(provider)
+    await signIn(provider, { callbackUrl })
   }
 
   async function handleEmail(e: React.FormEvent) {
@@ -49,86 +46,120 @@ export function SignInForm() {
     window.location.href = `/auth/verify?email=${encodeURIComponent(email.trim())}&next=${encodeURIComponent(callbackUrl)}`
   }
 
+  const disabled = loading !== null
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="flex flex-col items-center gap-8 w-full max-w-sm">
-        <Link
-          href="/"
-          className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
-        >
-          <Image
-            src="/brand-assets/logo-transparent.png"
-            alt="WikiSubmission"
-            width={56}
-            height={56}
-            className="rounded-full shadow-lg"
-          />
-        </Link>
-
-        <div className="w-full bg-card border border-border rounded-xl shadow-xl p-8 flex flex-col gap-4">
-          <h1 className="text-xl font-semibold text-center text-foreground">
-            Sign in
-          </h1>
-
-          <button
-            onClick={handleGoogle}
-            disabled={loading !== null}
-            className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg border border-border bg-background hover:bg-muted transition-colors text-sm font-medium text-foreground disabled:opacity-50"
-          >
-            {loading === 'google' ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <FcGoogle className="w-4 h-4" />
-            )}
-            Continue with Google
-          </button>
-
-          <button
-            onClick={handleApple}
-            disabled={loading !== null}
-            className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg border border-border bg-background hover:bg-muted transition-colors text-sm font-medium text-foreground disabled:opacity-50"
-          >
-            {loading === 'apple' ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <FaApple className="w-4 h-4" />
-            )}
-            Continue with Apple
-          </button>
-
-          <div className="flex items-center gap-2 text-muted-foreground text-xs">
-            <span className="flex-1 h-px bg-border" />
-            or
-            <span className="flex-1 h-px bg-border" />
-          </div>
-
-          <form onSubmit={handleEmail} className="flex flex-col gap-3">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
-              required
-              disabled={loading !== null}
-              className="w-full px-3 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+    <main className="auth-shell">
+      <div className="auth-card">
+        <div className="auth-mast">
+          <Link href="/" aria-label="WikiSubmission home">
+            <Image
+              src="/brand-assets/logo-transparent.png"
+              alt="WikiSubmission"
+              width={36}
+              height={36}
+              priority
             />
-            {error && (
-              <p className="text-destructive text-xs">{error}</p>
-            )}
-            <button
-              type="submit"
-              disabled={loading !== null || !email.trim()}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {loading === 'email' ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Mail className="w-4 h-4" />
-              )}
-              Continue with Email
-            </button>
-          </form>
+          </Link>
+          <span className="auth-eyebrow">Sign in</span>
+          <h1>
+            Return to the <em>commentary</em>
+          </h1>
+          <p>
+            Bookmark verses, write notes in the margin, and keep a streak across
+            the scripture.
+          </p>
         </div>
+
+        <form onSubmit={handleEmail} className="flex flex-col gap-3">
+          <label className="auth-eyebrow" htmlFor="auth-email">
+            Email
+          </label>
+          <input
+            id="auth-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            required
+            disabled={disabled}
+            autoComplete="email"
+            className="auth-input"
+          />
+          {error ? (
+            <p className="text-[var(--ed-accent)] text-[12px] font-[var(--font-source-serif)]">
+              {error}
+            </p>
+          ) : null}
+          <button type="submit" disabled={disabled || !email.trim()} className="auth-primary">
+            {loading === 'email' ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+            ) : (
+              <Mail className="w-4 h-4" aria-hidden />
+            )}
+            Send sign-in code
+          </button>
+        </form>
+
+        <div className="auth-divider">or continue with</div>
+
+        <div className="auth-providers">
+          <button
+            type="button"
+            onClick={() => handleProvider('google')}
+            disabled={disabled}
+            className="auth-provider"
+          >
+            <span className="glyph">
+              {loading === 'google' ? (
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+              ) : (
+                <FcGoogle className="w-4 h-4" aria-hidden />
+              )}
+            </span>
+            Google
+            <span className="arrow">→</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleProvider('apple')}
+            disabled={disabled}
+            className="auth-provider"
+          >
+            <span className="glyph">
+              {loading === 'apple' ? (
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+              ) : (
+                <FaApple className="w-4 h-4" aria-hidden />
+              )}
+            </span>
+            Apple
+            <span className="arrow">→</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleProvider('discord')}
+            disabled={disabled}
+            className="auth-provider"
+          >
+            <span className="glyph">
+              {loading === 'discord' ? (
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+              ) : (
+                <FaDiscord className="w-4 h-4" aria-hidden style={{ color: '#5865F2' }} />
+              )}
+            </span>
+            Discord
+            <span className="arrow">→</span>
+          </button>
+        </div>
+
+        <p className="auth-foot">
+          We will never email you anything other than what you ask for.{' '}
+          <Link href="/legal/privacy">Read the privacy note</Link>.
+        </p>
       </div>
     </main>
   )

@@ -30,9 +30,14 @@ export function useUpsertNote(scripture: string) {
   const qc = useQueryClient()
 
   return useMutation({
-    mutationFn: (vars: { verseKey: string; content: string }) =>
-      meApi.upsertNote({ scripture, verse_key: vars.verseKey, content: vars.content }),
-    onMutate: async ({ verseKey, content }) => {
+    mutationFn: (vars: { verseKey: string; content: string; tags?: string[] }) =>
+      meApi.upsertNote({
+        scripture,
+        verse_key: vars.verseKey,
+        content: vars.content,
+        tags: vars.tags,
+      }),
+    onMutate: async ({ verseKey, content, tags }) => {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
       await qc.cancelQueries({ queryKey: key })
@@ -44,6 +49,7 @@ export function useUpsertNote(scripture: string) {
         scripture: scripture as 'quran' | 'bible',
         verse_key: verseKey,
         content,
+        tags: tags ?? existing?.tags ?? [],
         created_at: existing?.created_at ?? new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }
@@ -99,7 +105,7 @@ export function useDeleteNote(scripture: string) {
 
 // ── Note count (quran + bible) ─────────────────────────────────────────────
 
-function useNotesByScripture(scripture: 'quran' | 'bible') {
+export function useNotesByScripture(scripture: 'quran' | 'bible'): NoteData[] {
   const { data: session } = useSession()
   const { data } = useQuery<{ data: NoteData[] }>({
     queryKey: ['notes', scripture],
@@ -114,4 +120,13 @@ export function useNoteCount(): number {
   const quranNotes = useNotesByScripture('quran')
   const bibleNotes = useNotesByScripture('bible')
   return quranNotes.length + bibleNotes.length
+}
+
+/** All notes across both scriptures, sorted by updated_at desc. */
+export function useAllNotes(): NoteData[] {
+  const quranNotes = useNotesByScripture('quran')
+  const bibleNotes = useNotesByScripture('bible')
+  return [...quranNotes, ...bibleNotes].sort((a, b) =>
+    (b.updated_at ?? '').localeCompare(a.updated_at ?? '')
+  )
 }

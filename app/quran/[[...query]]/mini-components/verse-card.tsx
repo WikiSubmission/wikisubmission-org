@@ -620,14 +620,31 @@ export const VerseCard = memo(
     }, [isCurrentAudio, togglePlayPause, playFromVerse, audioVerse])
 
     const isBookmarked = entries.length > 0
+    const hasNote = !!note
+
+    // First bookmarked category determines the editorial accent bar color.
+    const catColor =
+      bookmarkedCats[0]?.color ?? (isBookmarked ? 'var(--ed-accent)' : undefined)
+
+    const editorialState = [
+      'verse',
+      isBookmarked ? 'is-bookmarked' : '',
+      hasNote ? 'has-note' : '',
+      isSelected ? 'is-selected' : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
 
     return (
       <div
         id={verseId}
         onContextMenu={onCardContextMenu}
         onClickCapture={onCardClickCapture}
-        style={{ WebkitUserSelect: selectionActive ? 'none' : undefined }}
-        className={`relative transition-colors duration-500 ${
+        style={{
+          WebkitUserSelect: selectionActive ? 'none' : undefined,
+          ...(catColor ? ({ ['--cat-color' as string]: catColor } as React.CSSProperties) : {}),
+        }}
+        className={`${editorialState} relative transition-colors duration-500 ${
           isSelected
             ? 'bg-primary/10 before:pointer-events-none before:absolute before:inset-2 before:rounded-2xl before:ring-2 before:ring-primary'
             : ''
@@ -637,7 +654,7 @@ export const VerseCard = memo(
             : ''
         } ${selectionActive ? 'cursor-pointer select-none' : ''}`}
       >
-        <div className="px-6 py-4 sm:px-8 sm:py-5 space-y-2">
+        <div className="verse-body px-6 py-4 sm:px-8 sm:py-5 space-y-2">
           {/* Subtitle */}
           {prefs.subtitles && tr?.s && (
             <div className="flex justify-center">
@@ -669,7 +686,7 @@ export const VerseCard = memo(
                 <span className="w-full text-lg font-semibold">{vNum}</span>
               </div>
             )}
-            <div className="flex items-center gap-1">
+            <div className="verse-actions flex items-center gap-1">
               {showBookmark && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

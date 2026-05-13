@@ -1495,6 +1495,8 @@ export interface components {
             verse_key: string;
             /** @description Markdown content. */
             content: string;
+            /** @description Free-form labels used for filtering on the notes index. */
+            tags: string[];
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -1506,6 +1508,8 @@ export interface components {
             verse_key: string;
             /** @description Markdown content. */
             content: string;
+            /** @description Free-form labels. Omit to leave existing tags unchanged. */
+            tags?: string[];
         };
         SearchResult: {
             /**

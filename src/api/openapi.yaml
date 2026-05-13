@@ -2849,7 +2849,7 @@ components:
 
     Note:
       type: object
-      required: [id, scripture, verse_key, content, created_at, updated_at]
+      required: [id, scripture, verse_key, content, tags, created_at, updated_at]
       properties:
         id:
           type: integer
@@ -2862,6 +2862,11 @@ components:
         content:
           type: string
           description: Markdown content.
+        tags:
+          type: array
+          description: Free-form labels used for filtering on the notes index.
+          items:
+            type: string
         created_at:
           type: string
           format: date-time
@@ -2881,6 +2886,11 @@ components:
         content:
           type: string
           description: Markdown content.
+        tags:
+          type: array
+          description: Free-form labels. Omit to leave existing tags unchanged.
+          items:
+            type: string
 
     SearchResult:
       type: object

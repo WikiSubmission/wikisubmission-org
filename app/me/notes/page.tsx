@@ -1,74 +1,146 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { StickyNote, Search } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
-import { meApi } from '@/src/api/me-client'
-import type { NoteData } from '@/types/bookmarks'
+import { Search } from 'lucide-react'
+import { useAllNotes } from '@/hooks/use-notes'
+import { EditorialMarkdown } from '@/components/editorial/markdown'
+import { TagChip } from '@/components/editorial/tag-chip'
 
-function useAllNotes(scripture: string) {
-  const { data: session } = useSession()
-  const { data } = useQuery<{ data: NoteData[] }>({
-    queryKey: ['notes', scripture],
-    queryFn: () => meApi.getNotes(scripture),
-    enabled: !!session?.accessToken,
-    staleTime: 30_000,
-  })
-  return data?.data ?? []
+function relative(iso: string | undefined): string {
+  if (!iso) return ''
+  const now = Date.now()
+  const then = new Date(iso).getTime()
+  const diff = Math.max(0, now - then)
+  const hour = 3_600_000
+  const day = 24 * hour
+  if (diff < hour) return `${Math.max(1, Math.round(diff / 60_000))}m ago`
+  if (diff < day) return `${Math.round(diff / hour)}h ago`
+  if (diff < 30 * day) return `${Math.round(diff / day)}d ago`
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 export default function NotesPage() {
-  const quranNotes = useAllNotes('quran')
-  const bibleNotes = useAllNotes('bible')
+  const allNotes = useAllNotes()
   const [filter, setFilter] = useState('')
+  const [tagFilter, setTagFilter] = useState<string | null>(null)
 
-  const allNotes = [...quranNotes, ...bibleNotes]
-  const filtered = filter.trim()
-    ? allNotes.filter(
-        (n) =>
-          n.content.toLowerCase().includes(filter.toLowerCase()) ||
-          n.verse_key.includes(filter)
-      )
-    : allNotes
+  const allTags = useMemo(() => {
+    const set = new Set<string>()
+    for (const n of allNotes) {
+      const tags = n.tags ?? []
+      for (const t of tags) set.add(t)
+    }
+    return Array.from(set).sort()
+  }, [allNotes])
+
+  const filtered = useMemo(() => {
+    const needle = filter.trim().toLowerCase()
+    return allNotes.filter((n) => {
+      if (needle) {
+        const hay = `${n.verse_key} ${n.content}`.toLowerCase()
+        if (!hay.includes(needle)) return false
+      }
+      if (tagFilter) {
+        const tags = n.tags ?? []
+        if (!tags.includes(tagFilter)) return false
+      }
+      return true
+    })
+  }, [allNotes, filter, tagFilter])
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-12 flex flex-col gap-6">
-      <h1 className="text-xl font-semibold">Notes</h1>
-
-      <div className="flex items-center gap-2 border border-border rounded-lg px-3 py-2">
-        <Search className="w-4 h-4 text-muted-foreground shrink-0" />
-        <input
-          className="flex-1 bg-transparent text-sm focus:outline-none placeholder:text-muted-foreground/50"
-          placeholder="Search notes..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
+    <div className="ed-page">
+      <div className="profile-mast">
+        <div>
+          <div className="profile-mast-eyebrow">
+            <span className="dot" aria-hidden />
+            <span>§ II · Notes</span>
+          </div>
+          <h1>
+            Marginalia <em>&amp; references</em>
+          </h1>
+          <div className="profile-mast-meta">
+            <span>{allNotes.length} notes</span>
+            <span className="sep">·</span>
+            <span>across both scriptures</span>
+          </div>
+        </div>
+        <div className="profile-mast-side">
+          <label className="flex items-center gap-2 border-b border-[var(--ed-rule)] focus-within:border-[var(--ed-accent)] min-w-[260px]">
+            <Search className="w-4 h-4 text-[var(--ed-fg-muted)]" aria-hidden />
+            <input
+              type="search"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="Search notes…"
+              className="flex-1 bg-transparent outline-none py-2 font-[var(--font-source-serif)] text-[14px] text-[var(--ed-fg)] placeholder:text-[var(--ed-fg-muted)]"
+            />
+            <span className="font-[var(--font-jetbrains)] text-[10px] tracking-[0.04em] text-[var(--ed-fg-muted)] border border-[var(--ed-rule)] px-1.5 py-0.5">
+              ⌘K
+            </span>
+          </label>
+        </div>
       </div>
 
+      {allTags.length > 0 ? (
+        <div className="mt-6 flex items-center gap-3 flex-wrap">
+          <span className="font-[var(--font-glacial)] text-[10.5px] tracking-[0.18em] uppercase text-[var(--ed-fg-muted)]">
+            Filter
+          </span>
+          <TagChip on={tagFilter === null} onClick={() => setTagFilter(null)}>
+            All · {allNotes.length}
+          </TagChip>
+          {allTags.map((t) => (
+            <TagChip key={t} on={tagFilter === t} onClick={() => setTagFilter(t)}>
+              {t}
+            </TagChip>
+          ))}
+        </div>
+      ) : null}
+
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {filter ? 'No notes match your search.' : 'No notes yet.'}
-        </p>
+        <div className="empty mt-8">
+          <span className="empty-glyph">§</span>
+          <p className="empty-verse">
+            {filter || tagFilter ? 'No notes match your filters.' : 'No notes yet.'}
+          </p>
+          {!(filter || tagFilter) ? (
+            <Link href="/quran/1" className="empty-cta">
+              Open chapter one →
+            </Link>
+          ) : null}
+        </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {filtered.map((n) => {
-            const [chapter, verse] = n.verse_key.split(':')
-            const href = n.scripture === 'quran'
-              ? `/quran/${chapter}?verse=${verse}`
-              : `/bible/${n.verse_key}`
+        <div className="notes-index mt-6">
+          {filtered.map((note) => {
+            const [chapter, verse] = note.verse_key.split(':')
+            const href =
+              note.scripture === 'quran'
+                ? `/quran/${chapter}?verse=${verse}`
+                : `/bible/${note.verse_key}`
+            const tags = note.tags ?? []
             return (
-              <div key={n.id} className="flex flex-col gap-1 rounded-lg border border-border p-3">
-                <Link href={href} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
-                  <StickyNote className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                  <span className="text-xs font-mono text-muted-foreground">{n.verse_key}</span>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/60">
-                    {n.scripture}
-                  </span>
-                </Link>
-                <p className="text-sm whitespace-pre-wrap">{n.content}</p>
-              </div>
+              <article key={note.id} className="notes-row">
+                <div className="key">
+                  <Link href={href} className="hover:underline">
+                    {note.verse_key}
+                  </Link>
+                  <b>{relative(note.updated_at)}</b>
+                </div>
+                <div className="body">
+                  <EditorialMarkdown content={note.content} scripture={note.scripture} />
+                  {tags.length > 0 ? (
+                    <div className="tags">
+                      {tags.map((t) => (
+                        <span key={t} className="tag-chip">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </article>
             )
           })}
         </div>
