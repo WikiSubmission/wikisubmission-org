@@ -253,11 +253,11 @@ function WordCardItem({
           dir="ltr"
         >
           {showTransliteration && transliteration && (
-            <p className="text-[11px] italic text-muted-foreground text-center wrap-break-words max-w-22">
+            <p className="text-[12px] italic font-medium text-foreground text-center leading-snug wrap-break-words max-w-22">
               {transliteration}
             </p>
           )}
-          <p className="text-xs text-foreground/80 font-medium text-center wrap-break-words max-w-22">
+          <p className="text-[13px] text-foreground/90 font-medium text-center leading-snug wrap-break-words max-w-22">
             {translation}
           </p>
         </div>
@@ -427,7 +427,7 @@ const WordByWordView = memo(
     return (
       <div
         dir="rtl"
-        className="flex flex-wrap items-stretch justify-start gap-y-4 gap-x-1.5 py-3"
+        className="flex flex-wrap items-stretch justify-start gap-y-4 gap-x-1 py-3"
       >
         {sorted.map((w) => (
           <WordCardItem
