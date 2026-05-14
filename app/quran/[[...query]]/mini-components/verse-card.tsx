@@ -249,17 +249,25 @@ function WordCardItem({
           {arabic}
         </p>
         <div
-          className="flex flex-1 flex-col items-center self-stretch gap-0.5"
+          className="flex flex-1 flex-col items-center self-stretch gap-1"
           dir="ltr"
         >
           {showTransliteration && transliteration && (
-            <p className="text-[12px] italic font-medium text-foreground text-center leading-snug wrap-break-words max-w-22">
+            <p className="text-[13px] italic font-semibold text-primary/75 text-center leading-tight tracking-wide wrap-break-words max-w-22">
               {transliteration}
             </p>
           )}
-          <p className="text-[13px] text-foreground/90 font-medium text-center leading-snug wrap-break-words max-w-22">
-            {translation}
-          </p>
+          <div
+            className={`flex w-full flex-col items-center ${
+              showTransliteration && transliteration
+                ? 'border-t border-border/25 pt-1'
+                : ''
+            }`}
+          >
+            <p className="text-[14px] text-foreground/95 font-semibold text-center leading-tight wrap-break-words max-w-22">
+              {translation}
+            </p>
+          </div>
         </div>
       </div>
 
