@@ -6,7 +6,7 @@ import { ArrowRight, Copy, Check } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import { VerseCard } from './verse-card'
-import { buildVersesText, buildSegmentMarkdown } from '@/lib/quran-copy'
+import { buildMultiVerseMarkdown, type CopyMarkdownOptions } from '@/lib/quran-copy'
 import { SearchHeader } from './search-header'
 import type { components } from '@/src/api/types.gen'
 
@@ -78,18 +78,46 @@ function SegmentBlock({
       ? prefs.primaryLanguage
       : 'en'
   const includeText = prefs.text && prefs.primaryLanguage !== 'none'
+  const secondaryCode =
+    prefs.secondaryLanguage &&
+    prefs.secondaryLanguage !== 'xl' &&
+    prefs.secondaryLanguage !== 'none'
+      ? prefs.secondaryLanguage
+      : undefined
+  const copyPrefs = useMemo(
+    () =>
+      ({
+        primaryCode,
+        secondaryCode,
+        includeText,
+        includeArabic: prefs.arabic,
+        includeSubtitles: prefs.subtitles,
+        includeTransliteration: prefs.transliteration,
+        includeFootnotes: prefs.footnotes,
+      }) satisfies CopyMarkdownOptions,
+    [
+      primaryCode,
+      secondaryCode,
+      includeText,
+      prefs.arabic,
+      prefs.subtitles,
+      prefs.transliteration,
+      prefs.footnotes,
+    ]
+  )
   const [copied, setCopied] = useState(false)
 
   const handleCopySegment = useCallback(() => {
-    const text = buildVersesText(verses, {
-      primaryCode,
-      includeText,
-      includeArabic: prefs.arabic,
-    })
+    const text = buildMultiVerseMarkdown(
+      verses,
+      prefs.wordByWord ? 'wbw' : 'full',
+      copyPrefs,
+      false
+    )
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
-  }, [verses, primaryCode, includeText, prefs.arabic])
+  }, [verses, prefs.wordByWord, copyPrefs])
 
   if (verses.length === 0) return null
 
@@ -154,6 +182,33 @@ export function VerseListResult({
       ? prefs.primaryLanguage
       : 'en'
   const includeText = prefs.text && prefs.primaryLanguage !== 'none'
+  const secondaryCode =
+    prefs.secondaryLanguage &&
+    prefs.secondaryLanguage !== 'xl' &&
+    prefs.secondaryLanguage !== 'none'
+      ? prefs.secondaryLanguage
+      : undefined
+  const copyPrefs = useMemo(
+    () =>
+      ({
+        primaryCode,
+        secondaryCode,
+        includeText,
+        includeArabic: prefs.arabic,
+        includeSubtitles: prefs.subtitles,
+        includeTransliteration: prefs.transliteration,
+        includeFootnotes: prefs.footnotes,
+      }) satisfies CopyMarkdownOptions,
+    [
+      primaryCode,
+      secondaryCode,
+      includeText,
+      prefs.arabic,
+      prefs.subtitles,
+      prefs.transliteration,
+      prefs.footnotes,
+    ]
+  )
 
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${zoom}-${prefs.arabic}-${prefs.wordByWord}`
 
@@ -178,18 +233,22 @@ export function VerseListResult({
   const segments = useMemo(() => parseSegments(queryText), [queryText])
 
   const handleCopyAllMarkdown = useCallback(() => {
-    const opts = { primaryCode, includeText, includeArabic: prefs.arabic }
     const parts = segments
       .map((seg) => {
         const verses = getSegmentVerses(seg, byChapter)
         if (verses.length === 0) return null
-        return buildSegmentMarkdown(segmentLabel(seg), verses, opts)
+        return buildMultiVerseMarkdown(
+          verses,
+          prefs.wordByWord ? 'wbw' : 'full',
+          copyPrefs,
+          false
+        )
       })
       .filter(Boolean)
     navigator.clipboard.writeText(parts.join('\n\n'))
     setCopiedAll(true)
     setTimeout(() => setCopiedAll(false), 1500)
-  }, [segments, byChapter, primaryCode, includeText, prefs.arabic])
+  }, [segments, byChapter, prefs.wordByWord, copyPrefs])
 
   if (apiError || !data) {
     return (

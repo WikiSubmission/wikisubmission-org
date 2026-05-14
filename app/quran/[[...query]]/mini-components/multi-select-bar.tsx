@@ -76,6 +76,7 @@ export function MultiSelectBar() {
         secondaryCode,
         includeText,
         includeArabic: prefs.arabic,
+        includeSubtitles: prefs.subtitles,
         includeTransliteration: prefs.transliteration,
         includeFootnotes: prefs.footnotes,
       }
