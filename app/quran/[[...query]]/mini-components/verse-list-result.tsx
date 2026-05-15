@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Copy, Check } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import { VerseCard } from './verse-card'
-import { buildMultiVerseMarkdown, type CopyMarkdownOptions } from '@/lib/quran-copy'
 import { SearchHeader } from './search-header'
+import { CopyAllDropdown } from './copy-all-dropdown'
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']
@@ -72,53 +72,6 @@ function SegmentBlock({
   chapterTitle: string
   optsKey: string
 }) {
-  const prefs = useQuranPreferences()
-  const primaryCode =
-    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
-      ? prefs.primaryLanguage
-      : 'en'
-  const includeText = prefs.text && prefs.primaryLanguage !== 'none'
-  const secondaryCode =
-    prefs.secondaryLanguage &&
-    prefs.secondaryLanguage !== 'xl' &&
-    prefs.secondaryLanguage !== 'none'
-      ? prefs.secondaryLanguage
-      : undefined
-  const copyPrefs = useMemo(
-    () =>
-      ({
-        primaryCode,
-        secondaryCode,
-        includeText,
-        includeArabic: prefs.arabic,
-        includeSubtitles: prefs.subtitles,
-        includeTransliteration: prefs.transliteration,
-        includeFootnotes: prefs.footnotes,
-      }) satisfies CopyMarkdownOptions,
-    [
-      primaryCode,
-      secondaryCode,
-      includeText,
-      prefs.arabic,
-      prefs.subtitles,
-      prefs.transliteration,
-      prefs.footnotes,
-    ]
-  )
-  const [copied, setCopied] = useState(false)
-
-  const handleCopySegment = useCallback(() => {
-    const text = buildMultiVerseMarkdown(
-      verses,
-      prefs.wordByWord ? 'wbw' : 'full',
-      copyPrefs,
-      false
-    )
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
-  }, [verses, prefs.wordByWord, copyPrefs])
-
   if (verses.length === 0) return null
 
   return (
@@ -134,18 +87,7 @@ function SegmentBlock({
           <span className="text-muted-foreground truncate">{chapterTitle}</span>
           <ArrowRight size={14} className="shrink-0 text-muted-foreground" />
         </Link>
-        <button
-          onClick={handleCopySegment}
-          className="shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted/60"
-          aria-label="Copy segment verses"
-        >
-          {copied ? (
-            <Check size={13} className="text-green-500" />
-          ) : (
-            <Copy size={13} />
-          )}
-          <span>{copied ? 'Copied' : 'Copy'}</span>
-        </button>
+        <CopyAllDropdown verses={verses} label="Copy" />
       </div>
 
       {/* Verses */}
@@ -177,42 +119,8 @@ export function VerseListResult({
   const prefs = useQuranPreferences()
   const zoom = prefs.zoomLevel ?? 'comfortable'
   const maxW = ZOOM_WIDTH_CLASS[zoom]
-  const primaryCode =
-    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
-      ? prefs.primaryLanguage
-      : 'en'
-  const includeText = prefs.text && prefs.primaryLanguage !== 'none'
-  const secondaryCode =
-    prefs.secondaryLanguage &&
-    prefs.secondaryLanguage !== 'xl' &&
-    prefs.secondaryLanguage !== 'none'
-      ? prefs.secondaryLanguage
-      : undefined
-  const copyPrefs = useMemo(
-    () =>
-      ({
-        primaryCode,
-        secondaryCode,
-        includeText,
-        includeArabic: prefs.arabic,
-        includeSubtitles: prefs.subtitles,
-        includeTransliteration: prefs.transliteration,
-        includeFootnotes: prefs.footnotes,
-      }) satisfies CopyMarkdownOptions,
-    [
-      primaryCode,
-      secondaryCode,
-      includeText,
-      prefs.arabic,
-      prefs.subtitles,
-      prefs.transliteration,
-      prefs.footnotes,
-    ]
-  )
 
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${zoom}-${prefs.arabic}-${prefs.wordByWord}`
-
-  const [copiedAll, setCopiedAll] = useState(false)
 
   // Build lookup: cn → (verseNumber → VerseData) and cn → titles
   const { byChapter, chapterTitles } = useMemo(() => {
@@ -232,23 +140,10 @@ export function VerseListResult({
 
   const segments = useMemo(() => parseSegments(queryText), [queryText])
 
-  const handleCopyAllMarkdown = useCallback(() => {
-    const parts = segments
-      .map((seg) => {
-        const verses = getSegmentVerses(seg, byChapter)
-        if (verses.length === 0) return null
-        return buildMultiVerseMarkdown(
-          verses,
-          prefs.wordByWord ? 'wbw' : 'full',
-          copyPrefs,
-          false
-        )
-      })
-      .filter(Boolean)
-    navigator.clipboard.writeText(parts.join('\n\n'))
-    setCopiedAll(true)
-    setTimeout(() => setCopiedAll(false), 1500)
-  }, [segments, byChapter, prefs.wordByWord, copyPrefs])
+  const allVerses = useMemo(
+    () => segments.flatMap((seg) => getSegmentVerses(seg, byChapter)),
+    [segments, byChapter]
+  )
 
   if (apiError || !data) {
     return (
@@ -264,20 +159,8 @@ export function VerseListResult({
     <div className={`${maxW} mx-auto space-y-4`}>
       <SearchHeader query={queryText} />
 
-      {/* Copy all as markdown */}
       <div className="flex justify-end">
-        <button
-          onClick={handleCopyAllMarkdown}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted/60 border border-border/40"
-          aria-label="Copy all results"
-        >
-          {copiedAll ? (
-            <Check size={13} className="text-green-500" />
-          ) : (
-            <Copy size={13} />
-          )}
-          <span>{copiedAll ? 'Copied!' : 'Copy all'}</span>
-        </button>
+        <CopyAllDropdown verses={allVerses} />
       </div>
 
       {segments.map((seg, i) => {

@@ -35,6 +35,7 @@ import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { VerseCard } from '../mini-components/verse-card'
 import { MultiSelectBar } from '../mini-components/multi-select-bar'
 import { SearchHeader } from '../mini-components/search-header'
+import { CopyAllDropdown } from '../mini-components/copy-all-dropdown'
 import { SearchResultsSkeleton } from '../mini-components/search-results-skeleton'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useMeSearch } from '@/hooks/use-me-search'
@@ -284,41 +285,46 @@ export default function SearchResult({ props }: { props: { query: string } }) {
           </TabsList>
 
           {searchTab === 'all' && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-accent/30"
-                  aria-label="Sort results"
-                >
-                  <ArrowDownUp className="size-3" />
-                  <span className="tabular-nums">
-                    {sortMode === 'relevance' ? 'Relevance' : 'Verse order'}
-                  </span>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={6}>
-                {(
-                  [
-                    { value: 'relevance', label: 'Relevance' },
-                    { value: 'verse-order', label: 'Verse order' },
-                  ] as const
-                ).map((opt) => (
-                  <DropdownMenuItem
-                    key={opt.value}
-                    onSelect={() => setSortMode(opt.value)}
-                    className={cn(
-                      sortMode === opt.value && 'text-primary font-medium'
-                    )}
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-accent/30"
+                    aria-label="Sort results"
                   >
-                    <span className="flex-1">{opt.label}</span>
-                    {sortMode === opt.value && (
-                      <CheckIcon className="size-3.5" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <ArrowDownUp className="size-3" />
+                    <span className="tabular-nums">
+                      {sortMode === 'relevance' ? 'Relevance' : 'Verse order'}
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" sideOffset={6}>
+                  {(
+                    [
+                      { value: 'relevance', label: 'Relevance' },
+                      { value: 'verse-order', label: 'Verse order' },
+                    ] as const
+                  ).map((opt) => (
+                    <DropdownMenuItem
+                      key={opt.value}
+                      onSelect={() => setSortMode(opt.value)}
+                      className={cn(
+                        sortMode === opt.value && 'text-primary font-medium'
+                      )}
+                    >
+                      <span className="flex-1">{opt.label}</span>
+                      {sortMode === opt.value && (
+                        <CheckIcon className="size-3.5" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {allVerses.length > 0 && (
+                <CopyAllDropdown verses={allVerses} />
+              )}
+            </div>
           )}
         </div>
 
