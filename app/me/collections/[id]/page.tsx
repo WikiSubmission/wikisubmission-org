@@ -1,8 +1,8 @@
 'use client'
 
-import { use, useState } from 'react'
+import { use, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Download, Trash2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, Download, Plus, Trash2 } from 'lucide-react'
 import {
   useCollectionDetail,
   useRemoveVerseFromCollection,
@@ -16,8 +16,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { meApi } from '@/src/api/me-client'
 import { toast } from 'sonner'
+import { AddFromReferencesDialog } from '@/components/me/add-from-references-dialog'
+import { AddFromCategoryDialog } from '@/components/me/add-from-category-dialog'
 
 function SyncDialog({
   open,
@@ -108,6 +116,12 @@ export default function CollectionDetailPage({
   const { mutate: removeVerse } = useRemoveVerseFromCollection()
   const [syncOpen, setSyncOpen] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  const [addRefsOpen, setAddRefsOpen] = useState(false)
+  const [addCatOpen, setAddCatOpen] = useState(false)
+  const existingKeys = useMemo(
+    () => new Set((data?.data?.verses ?? []).map((v) => v.verse_key)),
+    [data?.data?.verses],
+  )
 
   async function handleSync(categoryId: number) {
     if (!col) return
@@ -144,6 +158,7 @@ export default function CollectionDetailPage({
   }
 
   const col = data?.data
+
   if (!col) {
     return (
       <div className="max-w-lg mx-auto px-4 py-12 text-sm text-muted-foreground">
@@ -172,24 +187,53 @@ export default function CollectionDetailPage({
             {col.verses.length} {col.verses.length === 1 ? 'verse' : 'verses'}
           </p>
         </div>
-        {col.verses.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="shrink-0"
-            onClick={() => setSyncOpen(true)}
-          >
-            <Download className="w-3.5 h-3.5 mr-1.5" />
-            Sync to bookmarks
-          </Button>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Plus className="w-3.5 h-3.5 mr-1.5" />
+                Add verses
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" sideOffset={6}>
+              <DropdownMenuItem onSelect={() => setAddRefsOpen(true)}>
+                <BookOpen className="w-4 h-4" />
+                From references
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setAddCatOpen(true)}>
+                <Download className="w-4 h-4" />
+                From bookmark category
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {col.verses.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSyncOpen(true)}
+            >
+              <Download className="w-3.5 h-3.5 mr-1.5" />
+              Sync to bookmarks
+            </Button>
+          )}
+        </div>
       </div>
 
       {col.verses.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-10 text-center rounded-xl border border-dashed border-border">
+        <div className="flex flex-col items-center gap-3 py-10 text-center rounded-xl border border-dashed border-border">
           <p className="text-sm text-muted-foreground">
-            No verses yet. Add verses from the reader.
+            No verses yet. Add from references or a bookmark category.
           </p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setAddRefsOpen(true)}>
+              <BookOpen className="w-3.5 h-3.5 mr-1.5" />
+              From references
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setAddCatOpen(true)}>
+              <Download className="w-3.5 h-3.5 mr-1.5" />
+              From category
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -236,6 +280,18 @@ export default function CollectionDetailPage({
         onOpenChange={setSyncOpen}
         onSync={handleSync}
         syncing={syncing}
+      />
+      <AddFromReferencesDialog
+        collectionId={collectionId}
+        existingKeys={existingKeys}
+        open={addRefsOpen}
+        onOpenChange={setAddRefsOpen}
+      />
+      <AddFromCategoryDialog
+        collectionId={collectionId}
+        existingKeys={existingKeys}
+        open={addCatOpen}
+        onOpenChange={setAddCatOpen}
       />
     </div>
   )

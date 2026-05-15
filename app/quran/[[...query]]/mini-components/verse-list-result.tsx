@@ -5,31 +5,17 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
+import { parseQuranSegments } from '@/lib/verse-ref-parser'
 import { VerseCard } from './verse-card'
 import { SearchHeader } from './search-header'
 import { CopyAllDropdown } from './copy-all-dropdown'
 import type { components } from '@/src/api/types.gen'
+import type { QuranSegment } from '@/lib/verse-ref-parser'
 
 type VerseData = components['schemas']['VerseData']
 type QuranResponse = components['schemas']['QuranResponse']
 
-// ── Segment types ────────────────────────────────────────────────────────────
-
-type Segment =
-  | { type: 'verse'; cn: number; v: number; raw: string }
-  | { type: 'range'; cn: number; vs: number; ve: number; raw: string }
-
-function parseSegments(q: string): Segment[] {
-  return q.split(',').flatMap((s): Segment[] => {
-    const part = s.trim()
-    const v = part.match(/^(\d+):(\d+)$/)
-    if (v) return [{ type: 'verse', cn: +v[1], v: +v[2], raw: part }]
-    const r = part.match(/^(\d+):(\d+)-(\d+)$/)
-    if (r)
-      return [{ type: 'range', cn: +r[1], vs: +r[2], ve: +r[3], raw: part }]
-    return []
-  })
-}
+type Segment = QuranSegment
 
 function getSegmentVerses(
   seg: Segment,
@@ -51,7 +37,7 @@ function getSegmentVerses(
 
 function segmentLabel(seg: Segment): string {
   if (seg.type === 'verse') return `${seg.cn}:${seg.v}`
-  return `${seg.cn}:${seg.vs}–${seg.ve}`
+  return `${seg.cn}:${seg.vs}-${seg.ve}`
 }
 
 function segmentHref(seg: Segment): string {
@@ -138,7 +124,7 @@ export function VerseListResult({
     return { byChapter, chapterTitles }
   }, [data])
 
-  const segments = useMemo(() => parseSegments(queryText), [queryText])
+  const segments = useMemo(() => parseQuranSegments(queryText), [queryText])
 
   const allVerses = useMemo(
     () => segments.flatMap((seg) => getSegmentVerses(seg, byChapter)),
