@@ -150,8 +150,6 @@ function buildVerseBodyMarkdown(
 
   const blocks: string[] = []
 
-  if (opts.includeSubtitles && tr?.s) blocks.push(tr.s)
-
   if (kind === 'full') {
     if (opts.includeArabic && arTr?.tx) blocks.push(arTr.tx)
   } else {
@@ -180,28 +178,34 @@ function buildVerseBodyMarkdown(
 }
 
 /**
- * Full-verse plain text: header → subtitle → Arabic → secondary → footnote.
+ * Full-verse plain text: subtitle → header → Arabic → secondary → footnote.
  * Each block is preference-gated.
  */
 export function buildVerseMarkdown(
   verse: VerseData,
   opts: CopyMarkdownOptions
 ): string {
-  const blocks: string[] = [buildHeaderLine(verse, opts)]
+  const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']
+  const blocks: string[] = []
+  if (opts.includeSubtitles && tr?.s) blocks.push(tr.s)
+  blocks.push(buildHeaderLine(verse, opts))
   const body = buildVerseBodyMarkdown(verse, opts, 'full')
   if (body) blocks.push(body)
   return blocks.join('\n\n')
 }
 
 /**
- * Word-by-word plain text: header → subtitle → per-word lines → secondary → footnote.
+ * Word-by-word plain text: subtitle → header → per-word lines → secondary → footnote.
  * Each line is `arabic — transliteration — translation`, conditional on toggles.
  */
 export function buildWordByWordMarkdown(
   verse: VerseData,
   opts: CopyMarkdownOptions
 ): string {
-  const blocks: string[] = [buildHeaderLine(verse, opts)]
+  const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']
+  const blocks: string[] = []
+  if (opts.includeSubtitles && tr?.s) blocks.push(tr.s)
+  blocks.push(buildHeaderLine(verse, opts))
   const body = buildVerseBodyMarkdown(verse, opts, 'wbw')
   if (body) blocks.push(body)
   return blocks.join('\n\n')
