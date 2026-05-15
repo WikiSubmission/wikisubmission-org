@@ -1,0 +1,344 @@
+/* =========================================================
+   WikiSubmission · Colors + Type
+   Editorial, scripture-first. Three palettes × two modes.
+   Always reference --ed-* semantic tokens, never raw hex.
+   ========================================================= */
+
+/* ---------- Fonts (Google Fonts) ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400;1,8..60,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap');
+
+@font-face {
+  font-family: 'Glacial Indifference';
+  src: url('fonts/GlacialIndifference-Regular.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- Type variables ---------- */
+:root {
+  --font-cormorant: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-source-serif: 'Source Serif 4', Georgia, serif;
+  --font-jetbrains: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-amiri: 'Amiri', 'Cormorant Garamond', serif;
+  --font-glacial: 'Glacial Indifference', system-ui, -apple-system, sans-serif;
+}
+
+/* =========================================================
+   Palette A — Ink on Parchment (DEFAULT)
+   ========================================================= */
+:root,
+[data-palette='ink'][data-mode='light'],
+[data-palette='ink']:not([data-mode='dark']) {
+  --ed-bg:           #F6F2EA;
+  --ed-fg:           #1A1715;
+  --ed-fg-muted:     #6E6557;
+  --ed-accent:       #6B3410;  /* burnt sienna ink */
+  --ed-accent-soft:  #EFE4D1;
+  --ed-rule:         #D9CFB9;
+  --ed-bg-alt:       #EFE9DC;
+  --ed-surface:      #FBF8F1;
+}
+
+[data-palette='ink'][data-mode='dark'] {
+  --ed-bg:           #14110E;
+  --ed-fg:           #EEE4D0;
+  --ed-fg-muted:     #9A8C75;
+  --ed-accent:       #D4A373;
+  --ed-accent-soft:  #1F1A14;
+  --ed-rule:         #2A241E;
+  --ed-bg-alt:       #1A1612;
+  --ed-surface:      #1E1813;
+}
+
+/* =========================================================
+   Palette B — Sharpened Violet
+   ========================================================= */
+[data-palette='violet'][data-mode='light'],
+[data-palette='violet']:not([data-mode='dark']) {
+  --ed-bg:           #FAFAFA;
+  --ed-fg:           #121214;
+  --ed-fg-muted:     #6B6B72;
+  --ed-accent:       #5A1FD4;
+  --ed-accent-soft:  #ECE4FF;
+  --ed-rule:         #E5E5EA;
+  --ed-bg-alt:       #F4F4F6;
+  --ed-surface:      #FFFFFF;
+}
+
+[data-palette='violet'][data-mode='dark'] {
+  --ed-bg:           #0C0C0E;
+  --ed-fg:           #F4F4F5;
+  --ed-fg-muted:     #8A8A92;
+  --ed-accent:       #B48CFF;
+  --ed-accent-soft:  #1A1530;
+  --ed-rule:         #27272C;
+  --ed-bg-alt:       #131318;
+  --ed-surface:      #16161B;
+}
+
+/* =========================================================
+   Palette C — Monochrome
+   ========================================================= */
+[data-palette='mono'][data-mode='light'] {
+  --ed-bg:           #F4F4F2;
+  --ed-fg:           #0E0E0D;
+  --ed-fg-muted:     #6B6B68;
+  --ed-accent:       #0E0E0D;
+  --ed-accent-soft:  #E6E6E2;
+  --ed-rule:         #D8D8D4;
+  --ed-bg-alt:       #ECECE8;
+  --ed-surface:      #FFFFFF;
+}
+
+[data-palette='mono'][data-mode='dark'] {
+  --ed-bg:           #0A0A09;
+  --ed-fg:           #F1F1EC;
+  --ed-fg-muted:     #8C8C86;
+  --ed-accent:       #F1F1EC;
+  --ed-accent-soft:  #1A1A18;
+  --ed-rule:         #23231F;
+  --ed-bg-alt:       #131312;
+  --ed-surface:      #161614;
+}
+
+/* =========================================================
+   Geometry tokens
+   ========================================================= */
+:root {
+  --ed-radius-sm: 2px;   /* buttons */
+  --ed-radius:    3px;   /* cards */
+  --ed-hairline:  1px;
+  --ed-max:       1240px;
+
+  /* vertical rhythm — 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96 */
+  --ed-1: 8px;
+  --ed-2: 12px;
+  --ed-3: 16px;
+  --ed-4: 24px;
+  --ed-5: 32px;
+  --ed-6: 48px;
+  --ed-7: 64px;
+  --ed-8: 96px;
+
+  /* tracking */
+  --ed-track-eyebrow: 0.18em;
+}
+
+/* =========================================================
+   Base
+   ========================================================= */
+html, body {
+  background-color: var(--ed-bg);
+  color: var(--ed-fg);
+  font-family: var(--font-source-serif);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* =========================================================
+   Semantic type styles
+   ========================================================= */
+.ed-display {
+  font-family: var(--font-cormorant);
+  font-weight: 500;
+  font-size: clamp(56px, 10vw, 96px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--ed-fg);
+}
+
+.ed-h1 {
+  font-family: var(--font-cormorant);
+  font-weight: 500;
+  font-size: clamp(40px, 6vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--ed-fg);
+}
+
+.ed-h2 {
+  font-family: var(--font-cormorant);
+  font-weight: 500;
+  font-size: clamp(28px, 3.5vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ed-fg);
+}
+
+.ed-h3 {
+  font-family: var(--font-cormorant);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--ed-fg);
+}
+
+.ed-kicker {
+  font-family: var(--font-cormorant);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--ed-fg-muted);
+  letter-spacing: -0.01em;
+}
+
+.ed-eyebrow {
+  font-family: var(--font-glacial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ed-accent);
+}
+
+.ed-eyebrow-muted {
+  font-family: var(--font-glacial);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ed-fg-muted);
+}
+
+.ed-body {
+  font-family: var(--font-source-serif);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ed-fg);
+}
+
+.ed-lede {
+  font-family: var(--font-source-serif);
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--ed-fg-muted);
+  max-width: 60ch;
+}
+
+.ed-caption {
+  font-family: var(--font-source-serif);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ed-fg-muted);
+}
+
+.ed-mono {
+  font-family: var(--font-jetbrains);
+  font-size: 12.5px;
+  color: var(--ed-fg);
+}
+
+.ed-arabic {
+  font-family: var(--font-amiri);
+  font-size: 32px;
+  line-height: 1.7;
+  direction: rtl;
+  color: var(--ed-fg);
+}
+
+.ed-section-num {
+  font-family: var(--font-cormorant);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--ed-accent);
+}
+
+/* =========================================================
+   Component utilities
+   ========================================================= */
+.ed-link {
+  color: var(--ed-fg-muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 180ms ease, border-color 180ms ease;
+}
+.ed-link:hover {
+  color: var(--ed-fg);
+  border-bottom-color: var(--ed-rule);
+}
+
+.ed-cta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--ed-fg);
+  text-decoration: none;
+  font-family: var(--font-source-serif);
+  transition: gap 200ms ease;
+}
+.ed-cta:hover { gap: 14px; }
+.ed-cta::after {
+  content: '→';
+  display: inline-block;
+  color: var(--ed-accent);
+}
+
+.ed-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ed-fg);
+  color: var(--ed-bg);
+  padding: 10px 18px;
+  border: 1px solid var(--ed-fg);
+  border-radius: var(--ed-radius-sm);
+  font-family: var(--font-source-serif);
+  font-size: 14px;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: opacity 180ms ease;
+  text-decoration: none;
+}
+.ed-btn-primary:hover { opacity: 0.85; }
+
+.ed-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--ed-fg);
+  padding: 10px 18px;
+  border: 1px solid var(--ed-rule);
+  border-radius: var(--ed-radius-sm);
+  font-family: var(--font-source-serif);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease;
+  text-decoration: none;
+}
+.ed-btn-ghost:hover {
+  border-color: var(--ed-fg);
+  color: var(--ed-fg);
+}
+
+.ed-card {
+  border: 1px solid var(--ed-rule);
+  border-radius: var(--ed-radius);
+  background: var(--ed-surface);
+  padding: 24px;
+  transition: transform 220ms ease, border-color 220ms ease;
+}
+.ed-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ed-fg-muted);
+}
+
+.ed-hairline {
+  height: 1px;
+  background: var(--ed-rule);
+  border: 0;
+  width: 100%;
+}
+
+.ed-rule-vert {
+  width: 1px;
+  background: var(--ed-rule);
+  align-self: stretch;
+}

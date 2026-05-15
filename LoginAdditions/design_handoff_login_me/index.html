@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" data-palette="ink" data-mode="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>WikiSubmission · /me &amp; login features</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="colors_and_type.css" />
+<link rel="stylesheet" href="me.css" />
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="components/icons.jsx"></script>
+<script type="text/babel" src="components/shared.jsx"></script>
+<script type="text/babel" src="components/auth.jsx"></script>
+<script type="text/babel" src="components/profile.jsx"></script>
+<script type="text/babel" src="components/quran-screens.jsx"></script>
+
+<script type="text/babel">
+const { useEffect } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "palette": "mono",
+  "mode": "light",
+  "density": "spacious",
+  "userState": "new",
+  "stats_layout": "broadsheet",
+  "categories_layout": "rows"
+}/*EDITMODE-END*/;
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-palette', t.palette);
+    document.documentElement.setAttribute('data-mode', t.mode);
+  }, [t.palette, t.mode]);
+
+  // sample for /me artboards
+  const meDesktop = (
+    <div data-screen-label="01 /me · desktop · heavy user">
+      <SiteNav active="me" avatarInitial="A" />
+      <MePage state={t.userState} mobile={false} density={t.density} />
+    </div>
+  );
+  const meMobile = (
+    <div data-screen-label="02 /me · mobile · heavy user" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{
+        flex: '0 0 auto',
+        padding: '14px 18px 12px',
+        borderBottom: '1px solid var(--ed-rule)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        background: 'var(--ed-bg)',
+      }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: 17 }}>
+          <img src="assets/logo-transparent.png" style={{ width: 18, height: 18 }} />
+          WikiSubmission
+        </span>
+        <span style={{ color: 'var(--ed-fg-muted)' }}><IMenu size={16} /></span>
+      </div>
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <div className="frame-scroll" style={{ height: '100%' }}>
+          <div className="frame-scroll-inner">
+            <MePage state={t.userState} mobile={true} density={t.density} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <DesignCanvas>
+      <DCSection id="auth" title="Authentication" subtitle="Sign-in · magic link · OAuth · OTP verify">
+        <DCArtboard id="signin-desktop" label="Sign in · desktop" width={1280} height={840}>
+          <MiniBrowser url="wikisubmission.org/auth/sign-in">
+            <div className="frame-surface" data-screen-label="03 Sign in · desktop">
+              <AuthSignIn />
+            </div>
+          </MiniBrowser>
+        </DCArtboard>
+
+        <DCArtboard id="signin-mobile" label="Sign in · iPhone" width={400} height={840}>
+          <MiniPhone>
+            <div className="frame-surface" data-screen-label="04 Sign in · mobile">
+              <AuthSignIn />
+            </div>
+          </MiniPhone>
+        </DCArtboard>
+
+        <DCArtboard id="verify-mobile" label="Verify code · iPhone" width={400} height={840}>
+          <MiniPhone>
+            <div className="frame-surface" data-screen-label="05 Verify · mobile">
+              <AuthVerify />
+            </div>
+          </MiniPhone>
+        </DCArtboard>
+
+        <DCArtboard id="verify-desktop" label="Verify code · desktop" width={900} height={840}>
+          <MiniBrowser url="wikisubmission.org/auth/verify">
+            <div className="frame-surface" data-screen-label="06 Verify · desktop">
+              <AuthVerify />
+            </div>
+          </MiniBrowser>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="profile" title="/me profile" subtitle="Editorial masthead, broadsheet stats, § sectioning">
+        <DCArtboard id="me-desktop" label="/me · desktop" width={1280} height={1640}>
+          <MiniBrowser url="wikisubmission.org/me">
+            <div className="frame-surface">{meDesktop}</div>
+          </MiniBrowser>
+        </DCArtboard>
+
+        <DCArtboard id="me-mobile" label="/me · iPhone" width={400} height={1280}>
+          <MiniPhone>
+            <div className="frame-surface">{meMobile}</div>
+          </MiniPhone>
+        </DCArtboard>
+
+        <DCArtboard id="me-empty-desktop" label="New user · desktop" width={1080} height={1240}>
+          <MiniBrowser url="wikisubmission.org/me">
+            <div className="frame-surface" data-screen-label="07 /me · new user · desktop">
+              <SiteNav active="me" avatarInitial="A" />
+              <NewUserStarter mobile={false} />
+            </div>
+          </MiniBrowser>
+        </DCArtboard>
+
+        <DCArtboard id="me-empty-mobile" label="New user · iPhone" width={400} height={1080}>
+          <MiniPhone>
+            <div className="frame-surface" data-screen-label="08 /me · new user · mobile">
+              <div style={{
+                flex: '0 0 auto',
+                padding: '14px 18px 12px',
+                borderBottom: '1px solid var(--ed-rule)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: 'var(--ed-bg)',
+              }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-cormorant)', fontWeight: 500, fontSize: 17 }}>
+                  <img src="assets/logo-transparent.png" style={{ width: 18, height: 18 }} />
+                  WikiSubmission
+                </span>
+                <span style={{ color: 'var(--ed-fg-muted)' }}><IMenu size={16} /></span>
+              </div>
+              <div style={{ flex: 1, minHeight: 0 }}>
+                <div className="frame-scroll" style={{ height: '100%' }}>
+                  <div className="frame-scroll-inner">
+                    <NewUserStarter mobile={true} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </MiniPhone>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="bookmarks" title="Bookmarks in /quran" subtitle="Inline action, side sheet, multi-select bar, category page">
+        <DCArtboard id="bm-sheet" label="Adding to a category · desktop" width={1280} height={920}>
+          <MiniBrowser url="wikisubmission.org/quran/36">
+            <div className="frame-surface" data-screen-label="09 Bookmark · category picker">
+              <QuranWithBookmarkSheet />
+            </div>
+          </MiniBrowser>
+        </DCArtboard>
+
+        <DCArtboard id="bm-multi" label="Multi-select bar · desktop" width={1280} height={920}>
+          <MiniBrowser url="wikisubmission.org/quran/36">
+            <div className="frame-surface" data-screen-label="10 Bookmark · multi-select">
+              <QuranWithMultiSelect />
+            </div>
+          </MiniBrowser>
+        </DCArtboard>
+
+        <DCArtboard id="bm-cat-page" label="Category detail · desktop" width={1280} height={1080}>
+          <MiniBrowser url="wikisubmission.org/me/bookmarks/monotheism">
+            <div className="frame-surface" data-screen-label="11 Bookmark category page">
+              <SiteNav active="me" avatarInitial="A" />
+              <BookmarkCategoryPage />
+            </div>
+          </MiniBrowser>
+        </DCArtboard>
+
+        <DCArtboard id="bm-mobile" label="Bottom sheet · iPhone" width={400} height={840}>
+          <MiniPhone>
+            <div className="frame-surface" data-screen-label="12 Bookmark sheet · mobile">
+              <PhoneBookmarkSheet />
+            </div>
+          </MiniPhone>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="notes" title="Notes in /quran" subtitle="Centered dialog editor · margin notes · /me/notes index">
+        <DCArtboard id="notes-dialog" label="Dialog editor · desktop" width={1280} height={920}>
+          <MiniBrowser url="wikisubmission.org/quran/36?note=36:5">
+            <div className="frame-surface" data-screen-label="13 Notes · dialog editor">
+              <QuranWithNotesDialog />
+            </div>
+          </MiniBrowser>
+        </DCArtboard>
+
+        <DCArtboard id="notes-mobile" label="Margin notes · iPhone" width={400} height={840}>
+          <MiniPhone>
+            <div className="frame-surface" data-screen-label="14 Notes · mobile margin">
+              <PhoneReaderWithNotes />
+            </div>
+          </MiniPhone>
+        </DCArtboard>
+
+        <DCArtboard id="notes-index" label="/me/notes index · desktop" width={1280} height={1240}>
+          <MiniBrowser url="wikisubmission.org/me/notes">
+            <div className="frame-surface" data-screen-label="15 Notes · index page">
+              <SiteNav active="me" avatarInitial="A" />
+              <NotesIndexPage />
+            </div>
+          </MiniBrowser>
+        </DCArtboard>
+      </DCSection>
+
+      <TweaksPanel>
+        <TweakSection label="Theme" />
+        <TweakRadio label="Palette" value={t.palette} options={['ink','violet','mono']} onChange={v=>setTweak('palette',v)} />
+        <TweakRadio label="Mode" value={t.mode} options={['light','dark']} onChange={v=>setTweak('mode',v)} />
+        <TweakSection label="/me page" />
+        <TweakRadio label="User state" value={t.userState} options={['heavy','new']} onChange={v=>setTweak('userState',v)} />
+        <TweakRadio label="Density" value={t.density} options={['compact','comfy','spacious']} onChange={v=>setTweak('density',v)} />
+      </TweaksPanel>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
