@@ -1,16 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { signOut, useSession } from 'next-auth/react'
+import { signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { Flame, Plus, Share2 } from 'lucide-react'
+import { Flame, Info, Plus, Share2 } from 'lucide-react'
 import { useCoverToCoverProgress } from '@/hooks/use-reading-progress'
 import { useStreak } from '@/hooks/use-reading-streak'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 import { useCollections } from '@/hooks/use-collections'
 import { useAllNotes, useNoteCount } from '@/hooks/use-notes'
 import { CreateCategoryDialog } from '@/components/me/create-category-dialog'
+import { ProfileNavMinimal } from '@/components/me/profile-nav'
 import { italicizeLast } from '@/components/editorial/section-header'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import type { NoteData } from '@/types/bookmarks'
 
 const QURAN_TOTAL_CHAPTERS = 114
@@ -20,12 +26,6 @@ function chapterFromKey(key: string | undefined | null): number {
   if (!key) return 0
   const n = parseInt(key.split(':')[0] ?? '0', 10)
   return Number.isFinite(n) ? n : 0
-}
-
-function formatMonth(iso: string | undefined): string {
-  if (!iso) return ''
-  const d = new Date(iso)
-  return d.toLocaleString('en-US', { month: 'long' })
 }
 
 function relativeTime(iso: string | undefined): string {
@@ -102,7 +102,7 @@ function CoverToCoverSection() {
   return (
     <section className="section" id="cover-to-cover">
       <div className="section-head">
-        <span className="section-roman">§ I</span>
+        <span className="section-roman">I</span>
         <span className="section-eyebrow">Cover</span>
         <h2 className="section-title">
           Cover <em>to cover</em>
@@ -126,7 +126,7 @@ function CategoriesSection() {
   return (
     <section className="section" id="bookmarks">
       <div className="section-head">
-        <span className="section-roman">§ II</span>
+        <span className="section-roman">II</span>
         <span className="section-eyebrow">Bookmarks</span>
         <h2 className="section-title">
           Bookmarks <em>by category</em>
@@ -170,7 +170,7 @@ function NotesPreviewSection() {
   return (
     <section className="section" id="notes">
       <div className="section-head">
-        <span className="section-roman">§ III</span>
+        <span className="section-roman">III</span>
         <span className="section-eyebrow">Notes · {notes.length} total</span>
         <h2 className="section-title">
           Notes <em>&amp; marginalia</em>
@@ -224,7 +224,7 @@ function CollectionsSection() {
   return (
     <section className="section" id="collections">
       <div className="section-head">
-        <span className="section-roman">§ IV</span>
+        <span className="section-roman">IV</span>
         <span className="section-eyebrow">Collections</span>
         <h2 className="section-title">
           Curated <em>collections</em>
@@ -237,7 +237,7 @@ function CollectionsSection() {
       <div className="coll-list">
         {collections.slice(0, 4).map((col, idx) => (
           <Link key={col.id} href={`/me/collections/${col.id}`} className="coll-row">
-            <span className="coll-num">§ {roman(idx + 1)}</span>
+            <span className="coll-num">{roman(idx + 1)}</span>
             <div>
               <h3 className="coll-title">{col.name}</h3>
               {col.description ? <p className="coll-desc">{col.description}</p> : null}
@@ -276,14 +276,35 @@ function roman(n: number): string {
   return out || 'I'
 }
 
+function StreakInfoIcon() {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label="How streaks are updated"
+          className="stat-info"
+          onClick={(e) => e.preventDefault()}
+        >
+          <Info className="w-3 h-3" aria-hidden />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[240px] text-[11px] leading-snug">
+        Streaks update when you advance your cover-to-cover position through the
+        reader.
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 function StatsGrid({
   quranStreak,
-  longest,
+  bibleStreak,
   noteCount,
   totalBookmarks,
 }: {
   quranStreak: number
-  longest: number
+  bibleStreak: number
   noteCount: number
   totalBookmarks: number
 }) {
@@ -291,17 +312,27 @@ function StatsGrid({
     <>
       <Link href="/me/streak">
         <Flame className="stat-flame" aria-hidden />
-        <p className="stat-eyebrow">Quran streak</p>
+        <p className="stat-eyebrow">
+          Quran streak
+          <StreakInfoIcon />
+        </p>
         <div className="stat-num">
           {quranStreak}
           <span className="unit">days</span>
         </div>
-        <p className="stat-sub">Today&apos;s reading</p>
+        <p className="stat-sub">Final Testament</p>
       </Link>
       <Link href="/me/streak">
-        <p className="stat-eyebrow">Longest streak</p>
-        <div className="stat-num">{longest}</div>
-        <p className="stat-sub">All-time</p>
+        <Flame className="stat-flame" aria-hidden />
+        <p className="stat-eyebrow">
+          Bible streak
+          <StreakInfoIcon />
+        </p>
+        <div className="stat-num">
+          {bibleStreak}
+          <span className="unit">days</span>
+        </div>
+        <p className="stat-sub">Old &amp; New Testament</p>
       </Link>
       <Link href="/me/notes">
         <p className="stat-eyebrow">Notes</p>
@@ -324,15 +355,10 @@ function StatsGrid({
 }
 
 function ProfileMast({ name, email }: { name?: string | null; email?: string | null }) {
-  const memberSince = useSession().data?.user?.email ? formatMonth(new Date().toISOString()) : ''
   return (
     <>
       <div className="profile-mast">
         <div>
-          <div className="profile-mast-eyebrow">
-            <span className="dot" aria-hidden />
-            <span>Vol. IV · MMXXVI · Reader&apos;s Edition</span>
-          </div>
           <h1>{name ? italicizeLast(name) : <em>Reader</em>}</h1>
           {email ? (
             <div className="profile-mast-meta">
@@ -342,15 +368,8 @@ function ProfileMast({ name, email }: { name?: string | null; email?: string | n
             </div>
           ) : null}
         </div>
-        <div className="profile-mast-side">
-          {memberSince ? <span className="profile-mast-vol">— Member since {memberSince} —</span> : null}
-        </div>
       </div>
       <div className="profile-mast-mobile">
-        <div className="profile-mast-eyebrow">
-          <span className="dot" aria-hidden />
-          <span>Vol. IV · MMXXVI</span>
-        </div>
         <h1>{name ? italicizeLast(name) : <em>Reader</em>}</h1>
         {email ? (
           <div className="profile-mast-meta">
@@ -367,7 +386,7 @@ function NewUserStarter() {
     <>
       <section className="section">
         <div className="section-head">
-          <span className="section-roman">§ I</span>
+          <span className="section-roman">I</span>
           <span className="section-eyebrow">Welcome</span>
           <h2 className="section-title">
             Begin <em>to read</em>
@@ -389,7 +408,7 @@ function NewUserStarter() {
 
       <section className="section">
         <div className="section-head">
-          <span className="section-roman">§ II</span>
+          <span className="section-roman">II</span>
           <span className="section-eyebrow">Three first steps</span>
           <h2 className="section-title">
             Three <em>first steps</em>
@@ -397,21 +416,21 @@ function NewUserStarter() {
         </div>
         <div className="c2c-grid">
           <div className="c2c-card">
-            <span className="c2c-mono">§ I</span>
+            <span className="c2c-mono">I</span>
             <h3 className="c2c-title">Open a chapter</h3>
             <p className="text-[var(--ed-fg-muted)] text-[14px]">
               Pick any of the 114 suras and start reading. Your place is saved automatically.
             </p>
           </div>
           <div className="c2c-card">
-            <span className="c2c-mono">§ II</span>
+            <span className="c2c-mono">II</span>
             <h3 className="c2c-title">Bookmark a verse</h3>
             <p className="text-[var(--ed-fg-muted)] text-[14px]">
               Tap the bookmark icon on any verse to add it to a category.
             </p>
           </div>
           <div className="c2c-card">
-            <span className="c2c-mono">§ III</span>
+            <span className="c2c-mono">III</span>
             <h3 className="c2c-title">Write a note</h3>
             <p className="text-[var(--ed-fg-muted)] text-[14px]">
               Add your own thoughts. Notes appear in the margin of the verse, and in your profile.
@@ -436,12 +455,9 @@ export default function MePageClient({
   const noteCount = useNoteCount()
 
   const totalBookmarks = categories.reduce((s, c) => s + c.entry_count, 0)
-  const longest = Math.max(
-    quranStreak?.longest_streak ?? 0,
-    bibleStreak?.longest_streak ?? 0
-  )
   const isNewUser =
     (quranStreak?.current_streak ?? 0) === 0 &&
+    (bibleStreak?.current_streak ?? 0) === 0 &&
     categories.length === 0 &&
     noteCount === 0
 
@@ -449,11 +465,12 @@ export default function MePageClient({
 
   return (
     <div className="ed-page">
+      <ProfileNavMinimal />
       <ProfileMast name={name} email={email} />
       {isNewUser ? null : (
         <StatsGrid
           quranStreak={quranStreak?.current_streak ?? 0}
-          longest={longest}
+          bibleStreak={bibleStreak?.current_streak ?? 0}
           noteCount={noteCount}
           totalBookmarks={totalBookmarks}
         />

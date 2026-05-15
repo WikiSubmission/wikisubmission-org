@@ -778,6 +778,46 @@ html[data-palette='mono'].dark {
   margin: 8px 0 0;
 }
 
+/* ── Profile nav ────────────────────────────────────────────────────────── */
+.profile-nav {
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 18px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--ed-rule);
+}
+.profile-nav-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-jetbrains);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ed-fg-muted);
+  background: none; border: none; cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 2px;
+  transition: color 150ms ease;
+}
+.profile-nav-back:hover { color: var(--ed-fg); }
+.profile-nav-spacer { flex: 1; }
+.profile-nav-toggles { display: flex; align-items: center; gap: 2px; }
+.profile-nav-items {
+  display: flex; align-items: center; gap: 1px;
+  flex: 1; justify-content: center;
+}
+.profile-nav-link {
+  font-family: var(--font-glacial);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ed-fg-muted);
+  text-decoration: none;
+  padding: 5px 12px;
+  border-radius: 0;
+  transition: color 150ms ease;
+}
+.profile-nav-link:hover, .profile-nav-link[data-active="true"] { color: var(--ed-fg); }
+
 /* ── Stats grid ────────────────────────────────────────────────────────── */
 .stats {
   display: grid;
@@ -829,6 +869,16 @@ html[data-palette='mono'].dark {
   margin-top: 8px;
   line-height: 1.4;
 }
+.stat-info {
+  display: inline-flex; align-items: center;
+  background: none; border: none; cursor: pointer;
+  padding: 0 2px;
+  color: var(--ed-fg-muted);
+  opacity: 0.6;
+  transition: opacity 150ms ease;
+  vertical-align: middle;
+}
+.stat-info:hover { opacity: 1; }
 .stat-flame {
   position: absolute;
   top: 24px; right: 20px;
@@ -867,9 +917,10 @@ html[data-palette='mono'].dark {
 .section-roman {
   font-family: var(--font-cormorant);
   font-style: italic;
-  font-size: 18px;
+  font-size: 14px;
   color: var(--ed-accent);
   font-weight: 500;
+  letter-spacing: 0.1em;
 }
 .section-eyebrow {
   font-family: var(--font-glacial);
