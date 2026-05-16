@@ -27,18 +27,35 @@ const NAV_ITEMS: { label: string; href: string }[] = [
   { label: 'archive', href: '/archive' },
 ]
 
+// Matches /me and locale-prefixed variants like /en/me — but NOT /me/collections etc.
+const ME_ROOT_RE = /^(\/[a-z]{2}(-[A-Z]{2})?)?\/me$/
+
 function BackButton() {
   const router = useRouter()
+  const pathname = usePathname()
+  const isRoot = ME_ROOT_RE.test(pathname)
+
+  function handleBack() {
+    if (isRoot) {
+      // Exit the profile area: return to wherever the user came from, or home.
+      const stored =
+        typeof window !== 'undefined'
+          ? sessionStorage.getItem('me.preReferrer')
+          : null
+      router.push(stored ?? '/')
+    } else {
+      if (typeof window !== 'undefined' && window.history.length > 1) {
+        router.back()
+      } else {
+        router.push('/')
+      }
+    }
+  }
+
   return (
     <button
       type="button"
-      onClick={() => {
-        if (typeof window !== 'undefined' && window.history.length > 1) {
-          router.back()
-        } else {
-          router.push('/')
-        }
-      }}
+      onClick={handleBack}
       aria-label="Back"
       className="profile-nav-back"
     >

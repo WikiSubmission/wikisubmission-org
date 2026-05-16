@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { Flame, Info, Plus, Share2 } from 'lucide-react'
+import { Flame, Info, Plus, Search, Share2 } from 'lucide-react'
 import { useCoverToCoverProgress } from '@/hooks/use-reading-progress'
 import { useStreak } from '@/hooks/use-reading-streak'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
@@ -120,8 +120,13 @@ function CoverToCoverSection() {
 function CategoriesSection() {
   const categories = useBookmarkCategories()
   const [createOpen, setCreateOpen] = useState(false)
+  const [query, setQuery] = useState('')
 
   if (categories.length === 0) return null
+
+  const filtered = query.trim()
+    ? categories.filter((c) => c.name.toLowerCase().includes(query.toLowerCase()))
+    : categories
 
   return (
     <section className="section" id="bookmarks">
@@ -129,7 +134,9 @@ function CategoriesSection() {
         <span className="section-roman">II</span>
         <span className="section-eyebrow">Bookmarks</span>
         <h2 className="section-title">
-          Bookmarks <em>by category</em>
+          <Link href="/me/bookmarks" className="hover:text-[var(--ed-accent)] transition-colors">
+            Bookmarks <em>by category</em>
+          </Link>
         </h2>
         <span className="section-spacer" />
         <button type="button" className="section-action" onClick={() => setCreateOpen(true)}>
@@ -137,8 +144,20 @@ function CategoriesSection() {
           New category
         </button>
       </div>
+      {categories.length > 4 && (
+        <label className="flex items-center gap-2 border-b border-[var(--ed-rule)] focus-within:border-[var(--ed-accent)] max-w-md mb-4">
+          <Search className="w-4 h-4 text-[var(--ed-fg-muted)]" aria-hidden />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search categories…"
+            className="flex-1 bg-transparent outline-none py-2 font-[var(--font-source-serif)] text-[14px] text-[var(--ed-fg)] placeholder:text-[var(--ed-fg-muted)]"
+          />
+        </label>
+      )}
       <div className="cat-grid">
-        {categories.map((cat) => (
+        {filtered.map((cat) => (
           <Link
             key={cat.id}
             href={`/me/bookmarks/${cat.id}`}
@@ -155,6 +174,9 @@ function CategoriesSection() {
             <span className="cat-action">Open →</span>
           </Link>
         ))}
+        {filtered.length === 0 && (
+          <p className="text-[var(--ed-fg-muted)] text-sm py-2">No categories match.</p>
+        )}
       </div>
       <CreateCategoryDialog open={createOpen} onOpenChange={setCreateOpen} />
     </section>
@@ -227,7 +249,9 @@ function CollectionsSection() {
         <span className="section-roman">IV</span>
         <span className="section-eyebrow">Collections</span>
         <h2 className="section-title">
-          Curated <em>collections</em>
+          <Link href="/me/collections" className="hover:text-[var(--ed-accent)] transition-colors">
+            Curated <em>collections</em>
+          </Link>
         </h2>
         <span className="section-spacer" />
         <Link href="/me/collections" className="section-action-link">

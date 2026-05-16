@@ -5,9 +5,15 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useSession } from 'next-auth/react'
 import { useSignInPromptStore } from '@/store/sign-in-prompt'
-import { useAddBookmarkEntry, useRemoveBookmarkEntry } from '@/hooks/use-bookmarks'
+import {
+  useAddBookmarkEntry,
+  useRemoveBookmarkEntry,
+} from '@/hooks/use-bookmarks'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
-import { useMarkCoverToCover, useCoverToCoverProgress } from '@/hooks/use-reading-progress'
+import {
+  useMarkCoverToCover,
+  useCoverToCoverProgress,
+} from '@/hooks/use-reading-progress'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -518,8 +524,10 @@ export const VerseCard = memo(
     const openSignIn = useSignInPromptStore((s) => s.open)
 
     const categories = useBookmarkCategories()
-    const { mutate: addEntry, isPending: addingEntry } = useAddBookmarkEntry(scripture)
-    const { mutate: removeEntry, isPending: removingEntry } = useRemoveBookmarkEntry(scripture)
+    const { mutate: addEntry, isPending: addingEntry } =
+      useAddBookmarkEntry(scripture)
+    const { mutate: removeEntry, isPending: removingEntry } =
+      useRemoveBookmarkEntry(scripture)
     const markCoverToCover = useMarkCoverToCover('quran')
     const coverToCoverData = useCoverToCoverProgress('quran')
 
@@ -542,7 +550,8 @@ export const VerseCard = memo(
 
     const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
     const verseId = verse.vk ?? ''
-    const isCoverToCover = scripture === 'quran' && coverToCoverData?.verse_key === verseId
+    const isCoverToCover =
+      scripture === 'quran' && coverToCoverData?.verse_key === verseId
 
     type CategoryData = (typeof categories)[0]
     const bookmarkedCats = useMemo(
@@ -551,7 +560,8 @@ export const VerseCard = memo(
           .slice()
           .sort(
             (a, b) =>
-              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
           )
           .slice(0, 3)
           .map((e) => categories.find((c) => c.id === e.category_id))
@@ -632,7 +642,8 @@ export const VerseCard = memo(
 
     // First bookmarked category determines the editorial accent bar color.
     const catColor =
-      bookmarkedCats[0]?.color ?? (isBookmarked ? 'var(--ed-accent)' : undefined)
+      bookmarkedCats[0]?.color ??
+      (isBookmarked ? 'var(--ed-accent)' : undefined)
 
     const editorialState = [
       'verse',
@@ -650,7 +661,9 @@ export const VerseCard = memo(
         onClickCapture={onCardClickCapture}
         style={{
           WebkitUserSelect: selectionActive ? 'none' : undefined,
-          ...(catColor ? ({ ['--cat-color' as string]: catColor } as React.CSSProperties) : {}),
+          ...(catColor
+            ? ({ ['--cat-color' as string]: catColor } as React.CSSProperties)
+            : {}),
         }}
         className={`${editorialState} relative transition-colors duration-500 ${
           isSelected
@@ -701,7 +714,9 @@ export const VerseCard = memo(
                     <Button
                       variant="ghost"
                       size="icon"
-                      aria-label={isBookmarked ? 'Manage bookmarks' : 'Add to category'}
+                      aria-label={
+                        isBookmarked ? 'Manage bookmarks' : 'Add to category'
+                      }
                       className={`h-8 w-8 rounded-full transition-colors ${
                         isBookmarked
                           ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-500/10'
@@ -753,7 +768,9 @@ export const VerseCard = memo(
                             className="w-3 h-3"
                             fill={isCoverToCover ? 'currentColor' : 'none'}
                           />
-                          {isCoverToCover ? 'Marked as cover to cover' : 'Mark as cover to cover'}
+                          {isCoverToCover
+                            ? 'Marked as cover to cover'
+                            : 'Mark as cover to cover'}
                         </button>
                         <DropdownMenuSeparator />
                       </>
@@ -768,7 +785,9 @@ export const VerseCard = memo(
                       </div>
                     ) : (
                       categories.map((cat) => {
-                        const entry = entries.find((e) => e.category_id === cat.id)
+                        const entry = entries.find(
+                          (e) => e.category_id === cat.id
+                        )
                         return (
                           <DropdownMenuCheckboxItem
                             key={cat.id}
@@ -776,9 +795,15 @@ export const VerseCard = memo(
                             disabled={addingEntry || removingEntry}
                             onCheckedChange={(checked) => {
                               if (checked) {
-                                addEntry({ categoryId: cat.id, verseKey: verseId })
+                                addEntry({
+                                  categoryId: cat.id,
+                                  verseKey: verseId,
+                                })
                               } else if (entry) {
-                                removeEntry({ entryId: entry.id, verseKey: verseId })
+                                removeEntry({
+                                  entryId: entry.id,
+                                  verseKey: verseId,
+                                })
                               }
                             }}
                           >

@@ -59,6 +59,7 @@ export function useMarkCoverToCover(scripture: string) {
     },
     onSuccess: (res) => {
       qc.setQueryData(['cover-to-cover', scripture], { data: res.data })
+      qc.invalidateQueries({ queryKey: ['streak', scripture] })
     },
   })
   return session?.accessToken ? mutate : null

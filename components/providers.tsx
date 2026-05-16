@@ -8,6 +8,7 @@ import { ChatSidebar } from '@/components/chat-sidebar/chat-sidebar'
 import { ChatProvider } from '@/components/chat/chat-context'
 import { SignInPrompt } from '@/components/sign-in-prompt'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
+import { NavigationReferrerTracker } from '@/components/navigation-referrer-tracker'
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -27,6 +28,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <QuranPlayerProvider>
           <ChatPanelProvider>
             <ChatProvider>
+              <NavigationReferrerTracker />
               {children}
               <ChatSidebar />
               <SignInPrompt />

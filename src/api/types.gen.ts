@@ -651,6 +651,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/collection-subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Subscribe (grab) a public collection by share token */
+        post: operations["subscribeMeCollection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/collection-subscriptions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Unsubscribe from a collection */
+        delete: operations["unsubscribeMeCollection"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/collections/share/{token}": {
         parameters: {
             query?: never;
@@ -1572,6 +1606,18 @@ export interface components {
             name: string;
             description: string;
             is_public: boolean;
+            /**
+             * @default owner_only
+             * @enum {string}
+             */
+            edit_policy: "owner_only" | "everyone";
+            /**
+             * @description Whether the current user owns this collection or subscribed to it.
+             * @enum {string}
+             */
+            relation: "owner" | "subscriber";
+            /** @description Display name of the owner; populated for subscriber rows. */
+            owner_display_name: string;
             share_token?: string | null;
             /** Format: date-time */
             created_at: string;
@@ -1593,6 +1639,8 @@ export interface components {
         };
         CollectionDetail: components["schemas"]["Collection"] & {
             verses: components["schemas"]["CollectionVerse"][];
+            /** @description Whether the current authenticated user is subscribed. Null if unauthenticated. */
+            is_subscribed?: boolean | null;
         };
         CreateCollectionRequest: {
             name: string;
@@ -1604,8 +1652,19 @@ export interface components {
             name: string;
             description?: string;
             is_public?: boolean;
+            /** @enum {string} */
+            edit_policy?: "owner_only" | "everyone";
             /** @default false */
             regenerate_token: boolean;
+        };
+        CollectionSubscribeRequest: {
+            share_token: string;
+        };
+        CollectionSubscribeResponse: {
+            data: {
+                /** Format: int64 */
+                collection_id: number;
+            };
         };
         AddCollectionVerseRequest: {
             /** @enum {string} */
@@ -3116,6 +3175,56 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    subscribeMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CollectionSubscribeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionSubscribeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    unsubscribeMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
             404: components["responses"]["NotFound"];
             500: components["responses"]["InternalServerErrror"];
         };

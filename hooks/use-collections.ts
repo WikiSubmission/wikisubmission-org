@@ -25,6 +25,7 @@ export function useCollectionDetail(id: number) {
     queryFn: () => meApi.getCollection(id),
     enabled: !!session?.accessToken && id > 0,
     staleTime: 30_000,
+    refetchOnWindowFocus: true,
   })
 }
 
@@ -54,18 +55,36 @@ export function useUpdateCollection() {
       name: string
       description?: string
       is_public?: boolean
+      edit_policy?: 'owner_only' | 'everyone'
       regenerate_token?: boolean
     }) =>
       meApi.updateCollection(vars.id, {
         name: vars.name,
         description: vars.description,
         is_public: vars.is_public,
+        edit_policy: vars.edit_policy,
         regenerate_token: vars.regenerate_token,
       }),
     onSuccess: (_res, { id }) => {
       qc.invalidateQueries({ queryKey: COLLECTIONS_KEY })
       qc.invalidateQueries({ queryKey: ['collection', id] })
     },
+  })
+}
+
+export function useSubscribeCollection() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (shareToken: string) => meApi.subscribeCollection(shareToken),
+    onSuccess: () => qc.invalidateQueries({ queryKey: COLLECTIONS_KEY }),
+  })
+}
+
+export function useUnsubscribeCollection() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (collectionId: number) => meApi.unsubscribeCollection(collectionId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: COLLECTIONS_KEY }),
   })
 }
 

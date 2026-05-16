@@ -182,7 +182,7 @@ export const meApi = {
 
   updateCollection: (
     id: number,
-    body: { name: string; description?: string; is_public?: boolean; regenerate_token?: boolean }
+    body: { name: string; description?: string; is_public?: boolean; edit_policy?: 'owner_only' | 'everyone'; regenerate_token?: boolean }
   ): Promise<{ data: CollectionData }> =>
     unwrap(wsApi.PATCH('/me/collections/{id}', {
       params: { path: { id } },
@@ -190,6 +190,7 @@ export const meApi = {
         name: body.name,
         description: body.description,
         is_public: body.is_public,
+        edit_policy: body.edit_policy,
         regenerate_token: body.regenerate_token ?? false,
       },
     })),
@@ -215,4 +216,10 @@ export const meApi = {
 
   getSharedCollection: (token: string): Promise<{ data: CollectionDetail }> =>
     unwrap(wsApi.GET('/collections/share/{token}', { params: { path: { token } } })),
+
+  subscribeCollection: (shareToken: string): Promise<{ data: { collection_id: number } }> =>
+    unwrap(wsApi.POST('/me/collection-subscriptions', { body: { share_token: shareToken } })),
+
+  unsubscribeCollection: (id: number): Promise<void> =>
+    callVoid(wsApi.DELETE('/me/collection-subscriptions/{id}', { params: { path: { id } } })),
 }
