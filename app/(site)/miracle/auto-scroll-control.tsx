@@ -7,6 +7,7 @@ interface AutoScrollControlProps {
   isPlaying: boolean
   speedIndex: number
   speedCount: number
+  multiplier: number
   onToggle: () => void
   onSpeedUp: () => void
   onSpeedDown: () => void
@@ -16,6 +17,7 @@ export function AutoScrollControl({
   isPlaying,
   speedIndex,
   speedCount,
+  multiplier,
   onToggle,
   onSpeedUp,
   onSpeedDown,
@@ -51,7 +53,7 @@ export function AutoScrollControl({
           {isPlaying ? t('autoScrollPause') : t('autoScrollResume')}
         </span>
         <span className="font-mono text-[9px] text-[var(--ed-accent)] opacity-60 tabular-nums">
-          {speedIndex + 1}/{speedCount}
+          {multiplier}x
         </span>
       </button>
 

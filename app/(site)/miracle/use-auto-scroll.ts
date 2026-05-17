@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const SPEED_LEVELS: number[] = [80, 130, 200, 300]
-const DEFAULT_SPEED_INDEX = 1
+const MULTIPLIERS: number[] = [0.5, 1, 2, 3]
+const DEFAULT_MULTIPLIER_INDEX = 1
+const STORAGE_KEY = 'miracle-auto-scroll-multiplier'
 
 interface UseAutoScrollOptions {
   startDelayMs?: number
+  defaultVelocity?: number
+  getVelocity?: (scrollY: number) => number
 }
 
 interface UseAutoScrollReturn {
@@ -14,6 +17,7 @@ interface UseAutoScrollReturn {
   hasStarted: boolean
   speedIndex: number
   speedCount: number
+  multiplier: number
   pause: () => void
   resume: () => void
   toggle: () => void
@@ -21,19 +25,59 @@ interface UseAutoScrollReturn {
   speedDown: () => void
 }
 
+function readStoredIndex(): number {
+  if (typeof window === 'undefined') return DEFAULT_MULTIPLIER_INDEX
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    if (raw === null) return DEFAULT_MULTIPLIER_INDEX
+    const parsed = Number(raw)
+    if (!Number.isInteger(parsed)) return DEFAULT_MULTIPLIER_INDEX
+    if (parsed < 0 || parsed >= MULTIPLIERS.length) {
+      return DEFAULT_MULTIPLIER_INDEX
+    }
+    return parsed
+  } catch {
+    return DEFAULT_MULTIPLIER_INDEX
+  }
+}
+
+function writeStoredIndex(index: number) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(STORAGE_KEY, String(index))
+  } catch {
+    // ignore (storage disabled / quota)
+  }
+}
+
 export function useAutoScroll({
   startDelayMs = 1000,
+  defaultVelocity = 220,
+  getVelocity,
 }: UseAutoScrollOptions = {}): UseAutoScrollReturn {
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
-  const [speedIndex, setSpeedIndex] = useState(DEFAULT_SPEED_INDEX)
+  const [speedIndex, setSpeedIndex] = useState(DEFAULT_MULTIPLIER_INDEX)
 
   const isPlayingRef = useRef(false)
   const userPausedRef = useRef(false)
-  const velocityRef = useRef(SPEED_LEVELS[DEFAULT_SPEED_INDEX])
+  const multiplierRef = useRef(MULTIPLIERS[DEFAULT_MULTIPLIER_INDEX])
+  const getVelocityRef = useRef(getVelocity)
+  const defaultVelocityRef = useRef(defaultVelocity)
   const rafIdRef = useRef<number | null>(null)
   const lastTimestampRef = useRef<number | null>(null)
   const isTicking = useRef(false)
+
+  getVelocityRef.current = getVelocity
+  defaultVelocityRef.current = defaultVelocity
+
+  useEffect(() => {
+    const stored = readStoredIndex()
+    if (stored !== DEFAULT_MULTIPLIER_INDEX) {
+      multiplierRef.current = MULTIPLIERS[stored]
+      setSpeedIndex(stored)
+    }
+  }, [])
 
   const stop = useCallback(() => {
     if (rafIdRef.current !== null) {
@@ -52,7 +96,9 @@ export function useAutoScroll({
 
     if (lastTimestampRef.current !== null) {
       const dt = Math.min((timestamp - lastTimestampRef.current) / 1000, 0.1)
-      const delta = velocityRef.current * dt
+      const base =
+        getVelocityRef.current?.(window.scrollY) ?? defaultVelocityRef.current
+      const delta = base * multiplierRef.current * dt
 
       const atBottom =
         window.scrollY + window.innerHeight >=
@@ -104,8 +150,9 @@ export function useAutoScroll({
 
   const speedUp = useCallback(() => {
     setSpeedIndex((prev) => {
-      const next = Math.min(prev + 1, SPEED_LEVELS.length - 1)
-      velocityRef.current = SPEED_LEVELS[next]
+      const next = Math.min(prev + 1, MULTIPLIERS.length - 1)
+      multiplierRef.current = MULTIPLIERS[next]
+      writeStoredIndex(next)
       return next
     })
   }, [])
@@ -113,7 +160,8 @@ export function useAutoScroll({
   const speedDown = useCallback(() => {
     setSpeedIndex((prev) => {
       const next = Math.max(prev - 1, 0)
-      velocityRef.current = SPEED_LEVELS[next]
+      multiplierRef.current = MULTIPLIERS[next]
+      writeStoredIndex(next)
       return next
     })
   }, [])
@@ -174,7 +222,8 @@ export function useAutoScroll({
     isPlaying,
     hasStarted,
     speedIndex,
-    speedCount: SPEED_LEVELS.length,
+    speedCount: MULTIPLIERS.length,
+    multiplier: MULTIPLIERS[speedIndex],
     pause,
     resume,
     toggle,
