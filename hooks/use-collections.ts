@@ -41,8 +41,11 @@ export function useSharedCollection(token: string) {
 export function useCreateCollection() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (body: { name: string; description?: string; is_public?: boolean }) =>
-      meApi.createCollection(body),
+    mutationFn: (body: {
+      name: string
+      description?: string
+      is_public?: boolean
+    }) => meApi.createCollection(body),
     onSuccess: () => qc.invalidateQueries({ queryKey: COLLECTIONS_KEY }),
   })
 }
@@ -83,7 +86,8 @@ export function useSubscribeCollection() {
 export function useUnsubscribeCollection() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (collectionId: number) => meApi.unsubscribeCollection(collectionId),
+    mutationFn: (collectionId: number) =>
+      meApi.unsubscribeCollection(collectionId),
     onSuccess: () => qc.invalidateQueries({ queryKey: COLLECTIONS_KEY }),
   })
 }
