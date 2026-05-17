@@ -3,11 +3,17 @@ import { NextRequest, NextResponse } from 'next/server'
 // ── Allowlist ──────────────────────────────────────────────────────────────────
 // Only permit fetching from known CDN hostnames. This prevents SSRF against
 // internal services, cloud metadata endpoints, and arbitrary third-party hosts.
+//
+// To add a new CDN, set DOWNLOAD_ALLOWED_HOSTS in your environment:
+//   DOWNLOAD_ALLOWED_HOSTS=cdn.wikisubmission.org,audio.qurancdn.com,new-cdn.example.com
 
-const ALLOWED_HOSTS = new Set([
-  'cdn.wikisubmission.org',
-  'audio.qurancdn.com',
-])
+const DEFAULT_ALLOWED_HOSTS = ['cdn.wikisubmission.org', 'audio.qurancdn.com']
+
+const ALLOWED_HOSTS = new Set(
+  process.env.DOWNLOAD_ALLOWED_HOSTS
+    ? process.env.DOWNLOAD_ALLOWED_HOSTS.split(',').map((h) => h.trim()).filter(Boolean)
+    : DEFAULT_ALLOWED_HOSTS,
+)
 
 const ALLOWED_CONTENT_TYPES = new Set([
   'audio/mpeg',
@@ -34,7 +40,9 @@ function validateUrl(raw: string): URL {
   }
   if (parsed.protocol !== 'https:') throw new Error('https only')
   if (!ALLOWED_HOSTS.has(parsed.hostname)) {
-    throw new Error(`host not permitted: ${parsed.hostname}`)
+    throw new Error(
+      `host not permitted: ${parsed.hostname}. Add it to DOWNLOAD_ALLOWED_HOSTS to enable.`,
+    )
   }
   return parsed
 }
