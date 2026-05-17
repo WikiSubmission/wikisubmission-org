@@ -427,7 +427,10 @@
     "visualMiracleDiscovered": "مۆعجیزە دۆزرایەوە",
     "visualLunarYears": "ساڵی مانگی",
     "visualSurah7430": "سوورەتی ٧٤:٣٠",
-    "visualOverItIsNineteen": "«لەسەری نۆزدە هەیە.»"
+    "visualOverItIsNineteen": "«لەسەری نۆزدە هەیە.»",
+    "autoScrollPause": "راwestاندنی سکرۆڵ",
+    "autoScrollResume": "دەستپێکردنەوەی سکرۆڵ",
+    "autoScrollLabel": "گۆڕینی سکرۆڵی ئۆتۆماتیکی"
   },
   "blog": {
     "heading": "بلۆگ",

@@ -427,7 +427,10 @@
     "visualMiracleDiscovered": "Miracle découvert",
     "visualLunarYears": "Années lunaires",
     "visualSurah7430": "Sourate 74:30",
-    "visualOverItIsNineteen": "« Sur elle, il y a dix-neuf. »"
+    "visualOverItIsNineteen": "« Sur elle, il y a dix-neuf. »",
+    "autoScrollPause": "Pause défilement",
+    "autoScrollResume": "Reprendre défilement",
+    "autoScrollLabel": "Activer/désactiver le défilement automatique"
   },
   "blog": {
     "heading": "Blog",

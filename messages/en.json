@@ -428,7 +428,10 @@
     "visualMiracleDiscovered": "Miracle Discovered",
     "visualLunarYears": "Lunar Years",
     "visualSurah7430": "Surah 74:30",
-    "visualOverItIsNineteen": "\"Over it is nineteen.\""
+    "visualOverItIsNineteen": "\"Over it is nineteen.\"",
+    "autoScrollPause": "Pause scroll",
+    "autoScrollResume": "Resume scroll",
+    "autoScrollLabel": "Toggle auto-scroll"
   },
   "blog": {
     "heading": "Blog",

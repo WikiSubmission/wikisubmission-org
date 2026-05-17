@@ -427,7 +427,10 @@
     "visualMiracleDiscovered": "اكتشاف المعجزة",
     "visualLunarYears": "سنوات قمرية",
     "visualSurah7430": "سورة 74:30",
-    "visualOverItIsNineteen": "«عليها تسعة عشر.»"
+    "visualOverItIsNineteen": "«عليها تسعة عشر.»",
+    "autoScrollPause": "إيقاف التمرير",
+    "autoScrollResume": "استئناف التمرير",
+    "autoScrollLabel": "تبديل التمرير التلقائي"
   },
   "blog": {
     "heading": "المدونة",

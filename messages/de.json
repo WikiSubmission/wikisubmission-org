@@ -427,7 +427,10 @@
     "visualMiracleDiscovered": "Wunder entdeckt",
     "visualLunarYears": "Mondjahre",
     "visualSurah7430": "Sure 74:30",
-    "visualOverItIsNineteen": "„Darüber sind neunzehn.“"
+    “visualOverItIsNineteen”: “„Darüber sind neunzehn.””,
+    “autoScrollPause”: “Scrollen pausieren”,
+    “autoScrollResume”: “Scrollen fortsetzen”,
+    “autoScrollLabel”: “Autoscroll umschalten”
   },
   "blog": {
     "heading": "Blog",

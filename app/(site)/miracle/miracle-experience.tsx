@@ -14,6 +14,8 @@ import {
   Database,
   ShieldCheck,
 } from 'lucide-react'
+import { useAutoScroll } from './use-auto-scroll'
+import { AutoScrollControl } from './auto-scroll-control'
 import { FaYoutube } from 'react-icons/fa'
 
 let scrollTriggerRegistered = false
@@ -158,6 +160,7 @@ function CornerMarkers({ label, sub }: { label: string; sub: string }) {
 export function MiracleExperience() {
   const t = useTranslations('miracle')
   const rootRef = useRef<HTMLDivElement | null>(null)
+  const { isPlaying, toggle } = useAutoScroll({ velocity: 40, startDelayMs: 1000 })
 
   const heroRef = useRef<HTMLElement | null>(null)
   const heroBgRef = useRef<HTMLDivElement | null>(null)
@@ -590,6 +593,7 @@ export function MiracleExperience() {
 
   return (
     <div ref={rootRef} className="bg-[var(--ed-bg)] text-[var(--ed-fg)]">
+      <AutoScrollControl isPlaying={isPlaying} onToggle={toggle} />
       {/* ─── Scene 1: Hero ─── */}
       <section
         ref={heroRef}
