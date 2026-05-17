@@ -1378,19 +1378,19 @@ html[data-palette='mono'].dark {
 
 /* ── OTP cells ─────────────────────────────────────────────────────────── */
 .otp-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
   gap: 6px;
-  width: 100%;
 }
 .otp-box {
-  aspect-ratio: 1 / 1.2;
+  width: 44px;
+  height: 52px;
+  flex-shrink: 0;
   border: 1px solid var(--ed-rule);
   background: var(--ed-bg);
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-cormorant);
   font-weight: 500;
-  font-size: 28px;
+  font-size: 24px;
   color: var(--ed-fg);
   letter-spacing: -0.02em;
   transition: border-color 180ms;
