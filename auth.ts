@@ -4,8 +4,37 @@ import Apple from 'next-auth/providers/apple'
 import Discord from 'next-auth/providers/discord'
 import Credentials from 'next-auth/providers/credentials'
 import { SignJWT, jwtVerify } from 'jose'
-import { createHmac } from 'crypto'
+import { createHmac, timingSafeEqual } from 'crypto'
 import { z } from 'zod'
+
+// Startup validation — fail fast rather than silently minting invalid tokens
+const authSecret = process.env.AUTH_SECRET
+const backendSecret = process.env.WS_BACKEND_JWT_SECRET
+if (!authSecret || authSecret.length < 32) {
+  throw new Error('AUTH_SECRET must be set and at least 32 characters')
+}
+if (!backendSecret || backendSecret.length < 32) {
+  throw new Error('WS_BACKEND_JWT_SECRET must be set and at least 32 characters')
+}
+
+// Dedicated key for OTP HMAC — separate from the session signing key (key separation).
+// Set AUTH_OTP_SECRET independently; falls back to AUTH_SECRET only if not provided.
+const otpHmacKey = process.env.AUTH_OTP_SECRET ?? authSecret
+
+// Track consumed OTP JTIs to prevent replay within the 10-minute TTL window.
+// Map<jti, expiry> — entries are pruned lazily on each access.
+// For multi-instance deployments this should be backed by a shared Redis store.
+const usedOtpJtis = new Map<string, number>()
+
+function consumeOtpJti(jti: string, expiryMs: number): boolean {
+  const now = Date.now()
+  for (const [k, exp] of usedOtpJtis) {
+    if (exp < now) usedOtpJtis.delete(k)
+  }
+  if (usedOtpJtis.has(jti)) return false
+  usedOtpJtis.set(jti, expiryMs)
+  return true
+}
 
 const otpSchema = z.object({
   email: z.string().email(),
@@ -27,10 +56,12 @@ async function mintBackendToken({
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('1h')
-    .sign(new TextEncoder().encode(process.env.WS_BACKEND_JWT_SECRET))
+    .sign(new TextEncoder().encode(backendSecret))
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
+
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -54,6 +85,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null
 
         const { email, code } = parsed.data
+
+        // JWT values are base64url-encoded (no semicolons), so manual split is safe.
         const cookieHeader = request.headers.get('cookie') ?? ''
         const otpCookie = cookieHeader
           .split(';')
@@ -65,20 +98,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           const { payload } = await jwtVerify(
             otpCookie,
-            new TextEncoder().encode(process.env.AUTH_SECRET),
+            new TextEncoder().encode(authSecret),
           )
+
           if (payload.email !== email) return null
 
-          const codeHash = createHmac('sha256', process.env.AUTH_SECRET!)
-            .update(code)
-            .digest('hex')
+          // Enforce single-use: consume the JTI or reject if already used
+          const jti = payload.jti
+          const expiryMs =
+            typeof payload.exp === 'number' ? payload.exp * 1000 : Date.now() + 600_000
+          if (typeof jti !== 'string' || !consumeOtpJti(jti, expiryMs)) return null
 
-          if (payload.codeHash !== codeHash) return null
+          // Constant-time comparison to prevent timing attacks
+          const expected = createHmac('sha256', otpHmacKey).update(code).digest()
+          const stored = Buffer.from(payload.codeHash as string, 'hex')
+          if (
+            expected.length !== stored.length ||
+            !timingSafeEqual(expected, stored)
+          ) {
+            return null
+          }
 
           return {
             id: `email:${email}`,
             email,
-            name: (email.split('@')[0] ?? email),
+            name: email.split('@')[0] ?? email,
           }
         } catch {
           return null
@@ -124,6 +168,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
 
     async session({ session, token }) {
+      // accessToken is included in the session so client-side hooks can authenticate
+      // requests to ws-backend. Migrating to a server-side proxy would eliminate this
+      // exposure but requires refactoring all /me/* hooks to server actions.
       session.accessToken = (token.accessToken as string | undefined) ?? ''
       return session
     },

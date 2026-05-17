@@ -15,10 +15,11 @@ export function SignInForm() {
   const [loading, setLoading] = useState<Loading>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const callbackUrl =
-    typeof window !== 'undefined'
-      ? (new URLSearchParams(window.location.search).get('next') ?? '/')
-      : '/'
+  const callbackUrl = (() => {
+    if (typeof window === 'undefined') return '/'
+    const raw = new URLSearchParams(window.location.search).get('next') ?? '/'
+    return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
+  })()
 
   async function handleProvider(provider: 'google' | 'apple' | 'discord') {
     setLoading(provider)

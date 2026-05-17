@@ -17,10 +17,12 @@ export function VerifyForm() {
     typeof window !== 'undefined'
       ? (new URLSearchParams(window.location.search).get('email') ?? '')
       : ''
-  const callbackUrl =
-    typeof window !== 'undefined'
-      ? (new URLSearchParams(window.location.search).get('next') ?? '/')
-      : '/'
+  const callbackUrl = (() => {
+    if (typeof window === 'undefined') return '/'
+    const raw = new URLSearchParams(window.location.search).get('next') ?? '/'
+    // Only allow relative paths — reject protocol-relative and external URLs
+    return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
+  })()
 
   useEffect(() => {
     inputRefs.current[0]?.focus()

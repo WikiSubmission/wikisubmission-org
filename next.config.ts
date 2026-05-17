@@ -2,10 +2,49 @@ import type { NextConfig } from 'next'
 import bundleAnalyzer from '@next/bundle-analyzer'
 import createNextIntlPlugin from 'next-intl/plugin'
 
+const securityHeaders = [
+  {
+    key: 'X-Content-Type-Options',
+    value: 'nosniff',
+  },
+  {
+    key: 'X-Frame-Options',
+    value: 'DENY',
+  },
+  {
+    key: 'Referrer-Policy',
+    value: 'strict-origin-when-cross-origin',
+  },
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+  },
+  {
+    key: 'Strict-Transport-Security',
+    value: 'max-age=31536000; includeSubDomains; preload',
+  },
+  {
+    // unsafe-inline / unsafe-eval are required by Next.js App Router without
+    // nonce configuration. frame-ancestors and object-src are the high-value
+    // protections here (clickjacking and plugin injection).
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://cdn.wikisubmission.org https://cdn.sanity.io https://img.youtube.com https://www.masjidtucson.org https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
+      "font-src 'self'",
+      "connect-src 'self' https://ws-backend.wikisubmission.org https://cdn.sanity.io",
+      "media-src 'self' blob: https://cdn.wikisubmission.org https://audio.qurancdn.com",
+      "worker-src 'self' blob:",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+    ].join('; '),
+  },
+]
+
 const nextConfig: NextConfig = {
-  // turbopack: {
-  //   root: "./",
-  // },
   output: 'standalone',
   experimental: {
     serverActions: {
@@ -33,6 +72,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: securityHeaders,
+      },
+    ]
+  },
   async redirects() {
     return [
       {
@@ -56,7 +103,6 @@ const nextConfig: NextConfig = {
         destination: 'https://library.wikisubmission.org/:path*',
         permanent: true,
       },
-      // /appendix/0 → introduction
       {
         source: '/appendices',
         destination: '/quran#appendices',

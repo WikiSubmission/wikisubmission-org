@@ -8,7 +8,6 @@ export interface UserState {
     email?: string | null
     image?: string | null
   } | null
-  accessToken: string | null
   isLoading: boolean
   isAuthenticated: boolean
 }
@@ -17,7 +16,6 @@ export function useUser(): UserState {
   const { data: session, status } = useSession()
   return {
     user: session?.user ?? null,
-    accessToken: session?.accessToken ?? null,
     isLoading: status === 'loading',
     isAuthenticated: status === 'authenticated',
   }
