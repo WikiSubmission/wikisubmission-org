@@ -431,7 +431,9 @@
     "visualOverItIsNineteen": "\"Over it is nineteen.\"",
     "autoScrollPause": "Pause scroll",
     "autoScrollResume": "Resume scroll",
-    "autoScrollLabel": "Toggle auto-scroll"
+    "autoScrollLabel": "Toggle auto-scroll",
+    "autoScrollSlower": "Slower",
+    "autoScrollFaster": "Faster"
   },
   "blog": {
     "heading": "Blog",

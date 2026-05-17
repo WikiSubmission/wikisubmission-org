@@ -430,7 +430,9 @@
     "visualOverItIsNineteen": "« Sur elle, il y a dix-neuf. »",
     "autoScrollPause": "Pause défilement",
     "autoScrollResume": "Reprendre défilement",
-    "autoScrollLabel": "Activer/désactiver le défilement automatique"
+    "autoScrollLabel": "Activer/désactiver le défilement automatique",
+    "autoScrollSlower": "Ralentir",
+    "autoScrollFaster": "Accélérer"
   },
   "blog": {
     "heading": "Blog",

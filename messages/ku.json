@@ -430,7 +430,9 @@
     "visualOverItIsNineteen": "«لەسەری نۆزدە هەیە.»",
     "autoScrollPause": "راwestاندنی سکرۆڵ",
     "autoScrollResume": "دەستپێکردنەوەی سکرۆڵ",
-    "autoScrollLabel": "گۆڕینی سکرۆڵی ئۆتۆماتیکی"
+    "autoScrollLabel": "گۆڕینی سکرۆڵی ئۆتۆماتیکی",
+    "autoScrollSlower": "هێواشتر",
+    "autoScrollFaster": "خێراتر"
   },
   "blog": {
     "heading": "بلۆگ",

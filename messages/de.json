@@ -430,7 +430,9 @@
     "visualOverItIsNineteen": "„Darüber sind neunzehn.“",
     "autoScrollPause": "Scrollen pausieren",
     "autoScrollResume": "Scrollen fortsetzen",
-    "autoScrollLabel": "Autoscroll umschalten"
+    "autoScrollLabel": "Autoscroll umschalten",
+    "autoScrollSlower": "Langsamer",
+    "autoScrollFaster": "Schneller"
   },
   "blog": {
     "heading": "Blog",

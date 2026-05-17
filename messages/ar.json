@@ -430,7 +430,9 @@
     "visualOverItIsNineteen": "«عليها تسعة عشر.»",
     "autoScrollPause": "إيقاف التمرير",
     "autoScrollResume": "استئناف التمرير",
-    "autoScrollLabel": "تبديل التمرير التلقائي"
+    "autoScrollLabel": "تبديل التمرير التلقائي",
+    "autoScrollSlower": "أبطأ",
+    "autoScrollFaster": "أسرع"
   },
   "blog": {
     "heading": "المدونة",

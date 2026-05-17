@@ -160,7 +160,7 @@ function CornerMarkers({ label, sub }: { label: string; sub: string }) {
 export function MiracleExperience() {
   const t = useTranslations('miracle')
   const rootRef = useRef<HTMLDivElement | null>(null)
-  const { isPlaying, toggle } = useAutoScroll({ velocity: 40, startDelayMs: 1000 })
+  const { isPlaying, speedIndex, speedCount, toggle, speedUp, speedDown } = useAutoScroll({ startDelayMs: 1000 })
 
   const heroRef = useRef<HTMLElement | null>(null)
   const heroBgRef = useRef<HTMLDivElement | null>(null)
@@ -593,7 +593,14 @@ export function MiracleExperience() {
 
   return (
     <div ref={rootRef} className="bg-[var(--ed-bg)] text-[var(--ed-fg)]">
-      <AutoScrollControl isPlaying={isPlaying} onToggle={toggle} />
+      <AutoScrollControl
+        isPlaying={isPlaying}
+        speedIndex={speedIndex}
+        speedCount={speedCount}
+        onToggle={toggle}
+        onSpeedUp={speedUp}
+        onSpeedDown={speedDown}
+      />
       {/* ─── Scene 1: Hero ─── */}
       <section
         ref={heroRef}

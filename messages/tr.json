@@ -430,7 +430,9 @@
     "visualOverItIsNineteen": "“Üzerinde on dokuz vardır.”",
     "autoScrollPause": "Kaydırmayı durdur",
     "autoScrollResume": "Kaydırmayı sürdür",
-    "autoScrollLabel": "Otomatik kaydırmayı aç/kapat"
+    "autoScrollLabel": "Otomatik kaydırmayı aç/kapat",
+    "autoScrollSlower": "Yavaşla",
+    "autoScrollFaster": "Hızlan"
   },
   "blog": {
     "heading": "Blog",

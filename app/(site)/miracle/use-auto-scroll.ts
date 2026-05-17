@@ -2,28 +2,35 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+const SPEED_LEVELS: number[] = [80, 130, 200, 300]
+const DEFAULT_SPEED_INDEX = 1
+
 interface UseAutoScrollOptions {
-  velocity?: number
   startDelayMs?: number
 }
 
 interface UseAutoScrollReturn {
   isPlaying: boolean
   hasStarted: boolean
+  speedIndex: number
+  speedCount: number
   pause: () => void
   resume: () => void
   toggle: () => void
+  speedUp: () => void
+  speedDown: () => void
 }
 
 export function useAutoScroll({
-  velocity = 40,
   startDelayMs = 1000,
 }: UseAutoScrollOptions = {}): UseAutoScrollReturn {
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [speedIndex, setSpeedIndex] = useState(DEFAULT_SPEED_INDEX)
 
   const isPlayingRef = useRef(false)
   const userPausedRef = useRef(false)
+  const velocityRef = useRef(SPEED_LEVELS[DEFAULT_SPEED_INDEX])
   const rafIdRef = useRef<number | null>(null)
   const lastTimestampRef = useRef<number | null>(null)
   const isTicking = useRef(false)
@@ -37,37 +44,34 @@ export function useAutoScroll({
     isTicking.current = false
   }, [])
 
-  const tick = useCallback(
-    (timestamp: number) => {
-      if (!isPlayingRef.current) {
+  const tick = useCallback((timestamp: number) => {
+    if (!isPlayingRef.current) {
+      isTicking.current = false
+      return
+    }
+
+    if (lastTimestampRef.current !== null) {
+      const dt = Math.min((timestamp - lastTimestampRef.current) / 1000, 0.1)
+      const delta = velocityRef.current * dt
+
+      const atBottom =
+        window.scrollY + window.innerHeight >=
+        document.documentElement.scrollHeight - 2
+
+      if (atBottom) {
+        isPlayingRef.current = false
+        setIsPlaying(false)
         isTicking.current = false
         return
       }
 
-      if (lastTimestampRef.current !== null) {
-        const dt = Math.min((timestamp - lastTimestampRef.current) / 1000, 0.1)
-        const delta = velocity * dt
+      isTicking.current = true
+      window.scrollBy({ top: delta, behavior: 'auto' })
+    }
 
-        const atBottom =
-          window.scrollY + window.innerHeight >=
-          document.documentElement.scrollHeight - 2
-
-        if (atBottom) {
-          isPlayingRef.current = false
-          setIsPlaying(false)
-          isTicking.current = false
-          return
-        }
-
-        isTicking.current = true
-        window.scrollBy({ top: delta, behavior: 'auto' })
-      }
-
-      lastTimestampRef.current = timestamp
-      rafIdRef.current = requestAnimationFrame(tick)
-    },
-    [velocity],
-  )
+    lastTimestampRef.current = timestamp
+    rafIdRef.current = requestAnimationFrame(tick)
+  }, [])
 
   const startLoop = useCallback(() => {
     if (isTicking.current) return
@@ -97,6 +101,22 @@ export function useAutoScroll({
       resume()
     }
   }, [pause, resume])
+
+  const speedUp = useCallback(() => {
+    setSpeedIndex((prev) => {
+      const next = Math.min(prev + 1, SPEED_LEVELS.length - 1)
+      velocityRef.current = SPEED_LEVELS[next]
+      return next
+    })
+  }, [])
+
+  const speedDown = useCallback(() => {
+    setSpeedIndex((prev) => {
+      const next = Math.max(prev - 1, 0)
+      velocityRef.current = SPEED_LEVELS[next]
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -150,5 +170,15 @@ export function useAutoScroll({
     }
   }, [startDelayMs, startLoop, stop, hasStarted])
 
-  return { isPlaying, hasStarted, pause, resume, toggle }
+  return {
+    isPlaying,
+    hasStarted,
+    speedIndex,
+    speedCount: SPEED_LEVELS.length,
+    pause,
+    resume,
+    toggle,
+    speedUp,
+    speedDown,
+  }
 }
