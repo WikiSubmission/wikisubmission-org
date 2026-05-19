@@ -117,7 +117,7 @@ function extractEnglishRootCandidates(
       if (!rootFlat) continue
       const highlightValues = Object.values(word.hl ?? {})
       const matchedByBackend = highlightValues.some((v) => typeof v === 'string' && v.length > 0)
-      const meaning = (word.m ?? '').toLowerCase()
+      const meaning = ((word.tx?.['en'] ?? word.m) ?? '').toLowerCase()
       const normalizedMeaning = meaning.replace(/^to\s+/i, '')
       const hasTermInMeaning = terms.some((term) => meaning.includes(term))
       if (!matchedByBackend && !hasTermInMeaning) continue
@@ -141,48 +141,6 @@ function extractEnglishRootCandidates(
  * If `wi` is provided (1-based word_index from the backend), highlights the
  * token at that exact position — the most accurate path.
  */
-type FormMeanings = {
-  /** Map of diacritic-stripped surface form → its English gloss. */
-  byForm: Map<string, string>
-  /** Whole-root meaning to use when the string isn't structured per form. */
-  fallback: string | null
-}
-
-/**
- * The corpus stores the root meaning denormalized as a single string. When a
- * root has multiple distinct surface forms with different meanings, the string
- * encodes them as `surface = meaning [/ surface = meaning ...]` (e.g.
- * `مَن = he; she; who / مِن = from; of`). For roots with one shared meaning
- * the string is just the gloss with no `=` separator. Parse both shapes so the
- * derivative cards can show the form-specific gloss when available.
- */
-function parseFormMeanings(meaning: string | null): FormMeanings {
-  if (!meaning) return { byForm: new Map(), fallback: null }
-  const trimmed = meaning.trim()
-  if (!trimmed) return { byForm: new Map(), fallback: null }
-
-  const byForm = new Map<string, string>()
-  const segments = trimmed.split(/\s*\/\s*(?=\S+\s*=)/)
-  for (const segment of segments) {
-    const eqIdx = segment.indexOf('=')
-    if (eqIdx <= 0) continue
-    const surface = segment.slice(0, eqIdx).trim()
-    const text = segment.slice(eqIdx + 1).trim()
-    if (!surface || !text) continue
-    byForm.set(stripDiacritics(surface), text)
-  }
-  return { byForm, fallback: trimmed }
-}
-
-function meaningToEnglishWord(meaning: string | null): string | null {
-  if (!meaning) return null
-  const firstSense = meaning.split(/[;/]/)[0]?.trim() ?? ''
-  if (!firstSense) return null
-  const cleaned = firstSense.replace(/^to\s+/i, '')
-  const match = cleaned.match(/[A-Za-z][A-Za-z'-]*/)
-  return match ? match[0] : null
-}
-
 function highlight(ar: string, hi: string, wi?: number | null): React.ReactNode {
   if (!ar) return ar
   const tokens = ar.split(/(\s+)/)
@@ -288,8 +246,7 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
             offset: 0,
             include_words: true,
             include_root: true,
-            include_meaning: true,
-            word_langs: ['ar'],
+            word_langs: ['ar', 'en'],
           },
         },
       }).then(({ data: searchData, error: searchError }) => {
@@ -751,10 +708,6 @@ function Detail({
     setActiveSurface((prev) => (prev === surface ? null : surface))
   }
 
-  const formMeanings = useMemo(
-    () => parseFormMeanings(meaning),
-    [meaning],
-  )
   const [derivedWordsByRoot, setDerivedWordsByRoot] = useState<{ root: string; words: Map<string, string> }>({
     root: '',
     words: new Map(),
@@ -773,8 +726,7 @@ function Detail({
           langs: ['en', 'ar'],
           include_words: true,
           include_root: true,
-          include_meaning: true,
-          word_langs: ['ar'],
+          word_langs: ['ar', 'en'],
           limit: DERIVED_WORD_LOOKUP_LIMIT,
           offset: 0,
         },
@@ -789,7 +741,7 @@ function Detail({
             if (normalizeLetters(word.r ?? '') !== rootFlat) continue
             const surface = stripDiacritics(word.tx?.ar ?? '')
             if (!surface) continue
-            const englishWord = meaningToEnglishWord(word.m ?? null)
+            const englishWord = (word.tx?.['en'] ?? word.m ?? '').trim()
             if (!englishWord) continue
             const normalizedWord = englishWord.toLowerCase()
             const bucket = scores.get(surface) ?? new Map<string, number>()
@@ -822,13 +774,6 @@ function Detail({
     }
   }, [root.letters])
 
-  const lookupFormMeaning = (ar: string): string | null => {
-    if (formMeanings.byForm.size === 0) {
-      // No per-form structure — every form shares the root meaning.
-      return formMeanings.fallback
-    }
-    return formMeanings.byForm.get(stripDiacritics(ar)) ?? null
-  }
   const derivedWords = derivedWordsByRoot.root === root.letters ? derivedWordsByRoot.words : new Map<string, string>()
 
   return (
@@ -859,8 +804,7 @@ function Detail({
         ) : (
           <div className="wl-derivs">
             {derivs.map((d, i) => {
-              const formEn = lookupFormMeaning(d.ar)
-              const formWord = derivedWords.get(stripDiacritics(d.ar)) ?? meaningToEnglishWord(formEn)
+              const formWord = derivedWords.get(stripDiacritics(d.ar))
               return (
                 <button
                   key={d.ar}
@@ -908,7 +852,7 @@ function Detail({
           <div className="wl-morph-grid">
             <Cell k={t('morphLemma')} v={deriv.ar} ar />
             <Cell k={t('morphTranslit')} v={deriv.tr ?? arabicToLatin(stripDiacritics(deriv.ar))} />
-            <Cell k={t('morphGloss')} v={lookupFormMeaning(deriv.ar) ?? '—'} />
+            <Cell k={t('morphGloss')} v={derivedWords.get(stripDiacritics(deriv.ar)) ?? '—'} />
             <Cell k={t('morphPos')} v="—" />
             <Cell k={t('morphRoot')} v={root.letters} ar />
             <Cell k={t('morphCount')} v={`${deriv.count}×`} />
