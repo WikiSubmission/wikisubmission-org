@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { SearchIcon, StickyNote } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -27,6 +27,12 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const [query, setQuery] = useState(urlQuery)
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Sync the input from URL changes (e.g. back/forward nav, programmatic
+  // navigation) without clobbering text the user is currently typing.
+  useEffect(() => {
+    if (urlQuery) setQuery(urlQuery)
+  }, [urlQuery])
 
   const chapters = useQuranNavStore((s) => s.chapters)
   const appendices = useQuranNavStore((s) => s.appendices)
@@ -128,12 +134,9 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
             'bg-muted/50 border-border/40',
             large ? 'pl-11 h-12 text-base rounded-xl' : 'pl-8 h-8 text-sm'
           )}
-          value={open ? query : urlQuery}
+          value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => {
-            setQuery(urlQuery)
-            setOpen(true)
-          }}
+          onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           autoComplete="off"
         />
