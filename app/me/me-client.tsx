@@ -334,7 +334,7 @@ function StatsGrid({
 }) {
   const cells = (
     <>
-      <Link href="/me/streak">
+      <div>
         <Flame className="stat-flame" aria-hidden />
         <p className="stat-eyebrow">
           Quran streak
@@ -345,8 +345,8 @@ function StatsGrid({
           <span className="unit">days</span>
         </div>
         <p className="stat-sub">Final Testament</p>
-      </Link>
-      <Link href="/me/streak">
+      </div>
+      <div>
         <Flame className="stat-flame" aria-hidden />
         <p className="stat-eyebrow">
           Bible streak
@@ -357,7 +357,7 @@ function StatsGrid({
           <span className="unit">days</span>
         </div>
         <p className="stat-sub">Old &amp; New Testament</p>
-      </Link>
+      </div>
       <Link href="/me/notes">
         <p className="stat-eyebrow">Notes</p>
         <div className="stat-num">{noteCount}</div>
