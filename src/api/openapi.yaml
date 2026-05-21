@@ -2082,7 +2082,7 @@ components:
         endpoint. `r` is the storage form (space-separated Arabic letters);
         `tr` is the server-computed Latin Buckwalter transliteration joined
         with hyphens (e.g. `k-t-b`). `s` is reserved for an editorial sense
-        gloss and is always `null` until Phase 2 morphology data lands.
+        gloss and is currently always `null`.
       required: [r, tr, c]
       properties:
         r:
@@ -2154,7 +2154,9 @@ components:
         occurrence count. `tr` is the Latin transliteration of the surface
         form, sourced from `word_text` rows tagged with the `tl` language
         (most-common value when multiple readings exist). `en` and `p` (POS)
-        remain reserved for Phase 2 morphology data and are still `null`.
+        is sourced from `word_text` rows tagged with the `en` language (most-common
+        value when multiple readings exist). `p` (POS) remains reserved for
+        morphology data and is still `null`.
       required: [ar, c]
       properties:
         ar:
@@ -2172,8 +2174,11 @@ components:
         en:
           type: string
           nullable: true
-          description: English gloss for this surface form (Phase 2; always `null`).
-          example: null
+          description: >
+            Most common English gloss for this surface form, drawn from the
+            per-word `en` entry in `word_text`. `null` if no English row exists
+            for that word.
+          example: "book"
         c:
           type: integer
           description: Number of occurrences of this exact surface form.

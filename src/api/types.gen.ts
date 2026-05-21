@@ -901,7 +901,7 @@ export interface components {
              */
             meta?: Record<string, never> | null;
         };
-        /** @description Compact record for one Quranic Arabic root, returned by the index endpoint. `r` is the storage form (space-separated Arabic letters); `tr` is the server-computed Latin Buckwalter transliteration joined with hyphens (e.g. `k-t-b`). `s` is reserved for an editorial sense gloss and is always `null` until Phase 2 morphology data lands. */
+        /** @description Compact record for one Quranic Arabic root, returned by the index endpoint. `r` is the storage form (space-separated Arabic letters); `tr` is the server-computed Latin Buckwalter transliteration joined with hyphens (e.g. `k-t-b`). `s` is reserved for an editorial sense gloss and is currently always `null`. */
         RootSummary: {
             /**
              * @description Root letters, space-separated Arabic (storage form).
@@ -941,7 +941,7 @@ export interface components {
              */
             m?: string | null;
         };
-        /** @description A distinct surface form (token spelling) of a root, with its occurrence count. `tr` is the Latin transliteration of the surface form, sourced from `word_text` rows tagged with the `tl` language (most-common value when multiple readings exist). `en` and `p` (POS) remain reserved for Phase 2 morphology data and are still `null`. */
+        /** @description A distinct surface form (token spelling) of a root, with its occurrence count. `tr` is the Latin transliteration of the surface form, sourced from `word_text` rows tagged with the `tl` language (most-common value when multiple readings exist). `en` and `p` (POS) is sourced from `word_text` rows tagged with the `en` language (most-common value when multiple readings exist). `p` (POS) remains reserved for morphology data and is still `null`. */
         Derivative: {
             /**
              * @description Surface form (Arabic word as it appears in the corpus).
@@ -954,8 +954,8 @@ export interface components {
              */
             tr?: string | null;
             /**
-             * @description English gloss for this surface form (Phase 2; always `null`).
-             * @example null
+             * @description Most common English gloss for this surface form, drawn from the per-word `en` entry in `word_text`. `null` if no English row exists for that word.
+             * @example book
              */
             en?: string | null;
             /**
