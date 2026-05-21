@@ -53,17 +53,13 @@ export default function NotesPage() {
     <div className="ed-page">
       <div className="profile-mast">
         <div>
-          <div className="profile-mast-eyebrow">
-            <span className="dot" aria-hidden />
-            <span>§ II · Notes</span>
-          </div>
           <h1>
             Marginalia <em>&amp; references</em>
           </h1>
           <div className="profile-mast-meta">
             <span>{allNotes.length} notes</span>
             <span className="sep">·</span>
-            <span>across both scriptures</span>
+            <span>Reflections in the margins</span>
           </div>
         </div>
         <div className="profile-mast-side">
@@ -80,6 +76,16 @@ export default function NotesPage() {
               ⌘K
             </span>
           </label>
+        </div>
+      </div>
+      <div className="profile-mast-mobile">
+        <h1>
+          Marginalia <em>&amp; references</em>
+        </h1>
+        <div className="profile-mast-meta">
+          <span>{allNotes.length} notes</span>
+          <span className="sep">·</span>
+          <span>Reflections in the margins</span>
         </div>
       </div>
 
