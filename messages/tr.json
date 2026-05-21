@@ -806,5 +806,17 @@
     "morphCount": "Adet",
     "openInWordLab": "Kelime laboratuvarında aç",
     "playPronunciation": "Telaffuzu dinle"
+  },
+  "meNotes": {
+    "title": "Notlar",
+    "titleEm": "& referanslar",
+    "subtitle": "Açıklamalar & tefekkürler",
+    "count": "{count, plural, =1 {# not} other {# not}}",
+    "searchPlaceholder": "Notlarda ara…",
+    "filterLabel": "Filtrele",
+    "filterAll": "Tümü",
+    "emptyFiltered": "Filtrelerinize uyan not yok.",
+    "empty": "Henüz not yok.",
+    "emptyCta": "Birinci sureyi aç →"
   }
 }

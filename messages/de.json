@@ -806,5 +806,17 @@
     "morphCount": "Anzahl",
     "openInWordLab": "Im Wortlabor öffnen",
     "playPronunciation": "Aussprache abspielen"
+  },
+  "meNotes": {
+    "title": "Marginalien",
+    "titleEm": "& Verweise",
+    "subtitle": "Anmerkungen & Reflexionen",
+    "count": "{count, plural, =1 {# Notiz} other {# Notizen}}",
+    "searchPlaceholder": "Notizen durchsuchen…",
+    "filterLabel": "Filter",
+    "filterAll": "Alle",
+    "emptyFiltered": "Keine Notizen entsprechen deinen Filtern.",
+    "empty": "Noch keine Notizen.",
+    "emptyCta": "Kapitel eins öffnen →"
   }
 }

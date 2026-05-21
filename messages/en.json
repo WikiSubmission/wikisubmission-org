@@ -819,5 +819,17 @@
     "morphCount": "Count",
     "openInWordLab": "Open in Word Lab",
     "playPronunciation": "Play pronunciation"
+  },
+  "meNotes": {
+    "title": "Marginalia",
+    "titleEm": "& references",
+    "subtitle": "Annotations & reflections",
+    "count": "{count, plural, =1 {# note} other {# notes}}",
+    "searchPlaceholder": "Search notes…",
+    "filterLabel": "Filter",
+    "filterAll": "All",
+    "emptyFiltered": "No notes match your filters.",
+    "empty": "No notes yet.",
+    "emptyCta": "Open chapter one →"
   }
 }

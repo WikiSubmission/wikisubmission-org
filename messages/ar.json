@@ -806,5 +806,17 @@
     "morphCount": "العدد",
     "openInWordLab": "افتح في مختبر الكلمات",
     "playPronunciation": "استمع إلى النطق"
+  },
+  "meNotes": {
+    "title": "هوامش",
+    "titleEm": "ومراجع",
+    "subtitle": "تعليقات وتأمّلات",
+    "count": "{count} ملاحظات",
+    "searchPlaceholder": "ابحث في الملاحظات…",
+    "filterLabel": "تصفية",
+    "filterAll": "الكل",
+    "emptyFiltered": "لا توجد ملاحظات تطابق التصفية.",
+    "empty": "لا توجد ملاحظات بعد.",
+    "emptyCta": "افتح السورة الأولى ←"
   }
 }

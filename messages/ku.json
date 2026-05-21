@@ -806,5 +806,17 @@
     "morphCount": "ژمارە",
     "openInWordLab": "لە تاقیگەی وشە بکەرەوە",
     "playPronunciation": "گوێ بگرە لە دەنگدان"
+  },
+  "meNotes": {
+    "title": "تێبینی",
+    "titleEm": "و سەرچاوەکان",
+    "subtitle": "تێبینی و ڕامان",
+    "count": "{count} تێبینی",
+    "searchPlaceholder": "گەڕان بەدوای تێبینی…",
+    "filterLabel": "پاڵاوتن",
+    "filterAll": "هەموو",
+    "emptyFiltered": "هیچ تێبینییەک نییە کە بگونجێت لەگەڵ پاڵاوتنەکانت.",
+    "empty": "هێشتا تێبینی نییە.",
+    "emptyCta": "سورەی یەکەم بکەرەوە ←"
   }
 }

@@ -806,5 +806,17 @@
     "morphCount": "Nombre",
     "openInWordLab": "Ouvrir dans le Labo des mots",
     "playPronunciation": "Écouter la prononciation"
+  },
+  "meNotes": {
+    "title": "Marginalia",
+    "titleEm": "& références",
+    "subtitle": "Annotations & réflexions",
+    "count": "{count, plural, =1 {# note} other {# notes}}",
+    "searchPlaceholder": "Rechercher dans les notes…",
+    "filterLabel": "Filtrer",
+    "filterAll": "Tout",
+    "emptyFiltered": "Aucune note ne correspond à vos filtres.",
+    "empty": "Aucune note pour le moment.",
+    "emptyCta": "Ouvrir le chapitre un →"
   }
 }

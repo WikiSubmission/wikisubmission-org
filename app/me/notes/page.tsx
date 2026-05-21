@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useAllNotes } from '@/hooks/use-notes'
 import { EditorialMarkdown } from '@/components/editorial/markdown'
 import { TagChip } from '@/components/editorial/tag-chip'
@@ -21,6 +22,7 @@ function relative(iso: string | undefined): string {
 }
 
 export default function NotesPage() {
+  const t = useTranslations('meNotes')
   const allNotes = useAllNotes()
   const [filter, setFilter] = useState('')
   const [tagFilter, setTagFilter] = useState<string | null>(null)
@@ -54,12 +56,12 @@ export default function NotesPage() {
       <div className="profile-mast">
         <div>
           <h1>
-            Marginalia <em>&amp; references</em>
+            {t('title')} <em>{t('titleEm')}</em>
           </h1>
           <div className="profile-mast-meta">
-            <span>{allNotes.length} notes</span>
+            <span>{t('count', { count: allNotes.length })}</span>
             <span className="sep">·</span>
-            <span>Reflections in the margins</span>
+            <span>{t('subtitle')}</span>
           </div>
         </div>
         <div className="profile-mast-side">
@@ -69,7 +71,7 @@ export default function NotesPage() {
               type="search"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder="Search notes…"
+              placeholder={t('searchPlaceholder')}
               className="flex-1 bg-transparent outline-none py-2 font-[var(--font-source-serif)] text-[14px] text-[var(--ed-fg)] placeholder:text-[var(--ed-fg-muted)]"
             />
             <span className="font-[var(--font-jetbrains)] text-[10px] tracking-[0.04em] text-[var(--ed-fg-muted)] border border-[var(--ed-rule)] px-1.5 py-0.5">
@@ -80,26 +82,26 @@ export default function NotesPage() {
       </div>
       <div className="profile-mast-mobile">
         <h1>
-          Marginalia <em>&amp; references</em>
+          {t('title')} <em>{t('titleEm')}</em>
         </h1>
         <div className="profile-mast-meta">
-          <span>{allNotes.length} notes</span>
+          <span>{t('count', { count: allNotes.length })}</span>
           <span className="sep">·</span>
-          <span>Reflections in the margins</span>
+          <span>{t('subtitle')}</span>
         </div>
       </div>
 
       {allTags.length > 0 ? (
         <div className="mt-6 flex items-center gap-3 flex-wrap">
           <span className="font-[var(--font-glacial)] text-[10.5px] tracking-[0.18em] uppercase text-[var(--ed-fg-muted)]">
-            Filter
+            {t('filterLabel')}
           </span>
           <TagChip on={tagFilter === null} onClick={() => setTagFilter(null)}>
-            All · {allNotes.length}
+            {t('filterAll')} · {allNotes.length}
           </TagChip>
-          {allTags.map((t) => (
-            <TagChip key={t} on={tagFilter === t} onClick={() => setTagFilter(t)}>
-              {t}
+          {allTags.map((tag) => (
+            <TagChip key={tag} on={tagFilter === tag} onClick={() => setTagFilter(tag)}>
+              {tag}
             </TagChip>
           ))}
         </div>
@@ -107,13 +109,12 @@ export default function NotesPage() {
 
       {filtered.length === 0 ? (
         <div className="empty mt-8">
-          <span className="empty-glyph">§</span>
           <p className="empty-verse">
-            {filter || tagFilter ? 'No notes match your filters.' : 'No notes yet.'}
+            {filter || tagFilter ? t('emptyFiltered') : t('empty')}
           </p>
           {!(filter || tagFilter) ? (
             <Link href="/quran/1" className="empty-cta">
-              Open chapter one →
+              {t('emptyCta')}
             </Link>
           ) : null}
         </div>
