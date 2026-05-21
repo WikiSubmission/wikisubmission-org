@@ -30,11 +30,11 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://cdn.wikisubmission.org https://cdn.sanity.io https://img.youtube.com https://www.masjidtucson.org https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
       "font-src 'self'",
-      "connect-src 'self' https://ws-backend.wikisubmission.org https://cdn.sanity.io https://audio.qurancdn.com",
+      "connect-src 'self' https://ws-backend.wikisubmission.org https://cdn.sanity.io https://audio.qurancdn.com https://cloudflareinsights.com",
       "media-src 'self' blob: https://cdn.wikisubmission.org https://audio.qurancdn.com",
       "worker-src 'self' blob:",
       "frame-ancestors 'none'",
