@@ -10,7 +10,6 @@ import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 import { useCollections } from '@/hooks/use-collections'
 import { useAllNotes, useNoteCount } from '@/hooks/use-notes'
 import { CreateCategoryDialog } from '@/components/me/create-category-dialog'
-import { ProfileNavMinimal } from '@/components/me/profile-nav'
 import { italicizeLast } from '@/components/editorial/section-header'
 import {
   Tooltip,
@@ -488,8 +487,7 @@ export default function MePageClient({
   const provider = 'Magic link'
 
   return (
-    <div className="ed-page">
-      <ProfileNavMinimal />
+    <>
       <ProfileMast name={name} email={email} />
       {isNewUser ? null : (
         <StatsGrid
@@ -517,6 +515,6 @@ export default function MePageClient({
         </button>
         <span className="signout-meta">Signed in via {provider}</span>
       </div>
-    </div>
+    </>
   )
 }

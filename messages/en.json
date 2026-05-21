@@ -831,5 +831,13 @@
     "emptyFiltered": "No notes match your filters.",
     "empty": "No notes yet.",
     "emptyCta": "Open chapter one →"
+  },
+  "meHeader": {
+    "back": "Back",
+    "profile": "Profile",
+    "notes": "Notes",
+    "collections": "Collections",
+    "bookmarks": "Bookmarks",
+    "untitled": "Untitled"
   }
 }

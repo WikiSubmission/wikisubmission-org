@@ -818,5 +818,13 @@
     "emptyFiltered": "Filtrelerinize uyan not yok.",
     "empty": "Henüz not yok.",
     "emptyCta": "Birinci sureyi aç →"
+  },
+  "meHeader": {
+    "back": "Geri",
+    "profile": "Profil",
+    "notes": "Notlar",
+    "collections": "Koleksiyonlar",
+    "bookmarks": "Yer imleri",
+    "untitled": "Adsız"
   }
 }

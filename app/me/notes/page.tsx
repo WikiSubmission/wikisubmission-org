@@ -52,7 +52,7 @@ export default function NotesPage() {
   }, [allNotes, filter, tagFilter])
 
   return (
-    <div className="ed-page">
+    <>
       <div className="profile-mast">
         <div>
           <h1>
@@ -152,6 +152,6 @@ export default function NotesPage() {
           })}
         </div>
       )}
-    </div>
+    </>
   )
 }

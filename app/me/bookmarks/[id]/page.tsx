@@ -39,17 +39,7 @@ function CategoryDetail({ categoryId }: { categoryId: number }) {
     : ''
 
   return (
-    <div className="ed-page">
-      <p className="font-[var(--font-glacial)] text-[10.5px] tracking-[0.18em] uppercase text-[var(--ed-fg-muted)] mb-3">
-        <Link href="/me" className="hover:text-[var(--ed-fg)]">
-          ← Profile
-        </Link>
-        <span className="mx-2 text-[var(--ed-rule)]">·</span>
-        <Link href="/me#bookmarks" className="hover:text-[var(--ed-fg)]">
-          Bookmarks
-        </Link>
-      </p>
-
+    <>
       <div className="profile-mast">
         <div>
           <div className="profile-mast-eyebrow">
@@ -115,7 +105,7 @@ function CategoryDetail({ categoryId }: { categoryId: number }) {
           categoryName={category.name}
         />
       ) : null}
-    </div>
+    </>
   )
 }
 

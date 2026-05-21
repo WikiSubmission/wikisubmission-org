@@ -31,14 +31,6 @@ export default async function MePage() {
       queryFn: () => api.getCoverToCover('bible'),
     }),
     queryClient.prefetchQuery({
-      queryKey: ['bookmark-categories'],
-      queryFn: () => api.listBookmarkCategories(),
-    }),
-    queryClient.prefetchQuery({
-      queryKey: ['collections'],
-      queryFn: () => api.listCollections(),
-    }),
-    queryClient.prefetchQuery({
       queryKey: ['notes', 'quran'],
       queryFn: () => api.getNotes('quran'),
     }),

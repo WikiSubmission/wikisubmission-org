@@ -818,5 +818,13 @@
     "emptyFiltered": "Keine Notizen entsprechen deinen Filtern.",
     "empty": "Noch keine Notizen.",
     "emptyCta": "Kapitel eins öffnen →"
+  },
+  "meHeader": {
+    "back": "Zurück",
+    "profile": "Profil",
+    "notes": "Notizen",
+    "collections": "Sammlungen",
+    "bookmarks": "Lesezeichen",
+    "untitled": "Ohne Titel"
   }
 }

@@ -818,5 +818,13 @@
     "emptyFiltered": "Aucune note ne correspond à vos filtres.",
     "empty": "Aucune note pour le moment.",
     "emptyCta": "Ouvrir le chapitre un →"
+  },
+  "meHeader": {
+    "back": "Retour",
+    "profile": "Profil",
+    "notes": "Notes",
+    "collections": "Collections",
+    "bookmarks": "Signets",
+    "untitled": "Sans titre"
   }
 }
