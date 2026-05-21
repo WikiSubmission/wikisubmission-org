@@ -10,22 +10,16 @@ import { PaletteThemeSwitcher } from '@/components/toggles/palette-theme-switche
 import { useCollections } from '@/hooks/use-collections'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 
-const ME_ROOT_RE = /^(\/[a-z]{2}(-[A-Z]{2})?)?\/me\/?$/
-const LOCALE_PREFIX_RE = /^\/[a-z]{2}(-[A-Z]{2})?(?=\/)/
+const ME_ROOT_RE = /^\/me\/?$/
 
 type Crumb = { label: string; href?: string }
-
-function stripLocale(pathname: string): string {
-  return pathname.replace(LOCALE_PREFIX_RE, '') || '/'
-}
 
 function useCrumbs(pathname: string): Crumb[] {
   const t = useTranslations('meHeader')
   const collections = useCollections()
   const categories = useBookmarkCategories()
 
-  const path = stripLocale(pathname)
-  const segments = path.split('/').filter(Boolean)
+  const segments = pathname.split('/').filter(Boolean)
   if (segments[0] !== 'me') return []
 
   const crumbs: Crumb[] = [{ label: t('profile'), href: '/me' }]
