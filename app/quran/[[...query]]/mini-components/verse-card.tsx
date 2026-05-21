@@ -234,7 +234,7 @@ function WordCardItem({
         role="button"
         tabIndex={0}
         aria-label={`Details for ${arabic}`}
-        className={`group relative flex h-full flex-col items-center gap-2 px-3.5 py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
+        className={`group relative flex h-full flex-col items-center gap-2 px-1.5 py-2 sm:px-3.5 sm:py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
           isPlaying ? 'bg-primary/10' : 'hover:scale-[1.04]'
         }`}
         onPointerEnter={warm}
@@ -441,7 +441,7 @@ const WordByWordView = memo(
     return (
       <div
         dir="rtl"
-        className="flex flex-wrap items-stretch justify-start gap-y-4 gap-x-1 py-3"
+        className="flex flex-wrap items-stretch justify-start gap-y-3 gap-x-0 sm:gap-x-1 -mx-4 sm:mx-0 py-3"
       >
         {sorted.map((w) => (
           <WordCardItem
