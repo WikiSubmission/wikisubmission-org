@@ -224,7 +224,14 @@ export default function SearchResult({ props }: { props: { query: string } }) {
           const [bc, bv] = (b.vk ?? '0:0').split(':').map(Number)
           return ac === bc ? av - bv : ac - bc
         })
-      : rawVerses
+      : [...rawVerses].sort((a, b) => {
+          const sa = a.sc ?? 0
+          const sb = b.sc ?? 0
+          if (sa !== sb) return sb - sa
+          const [ac, av] = (a.vk ?? '0:0').split(':').map(Number)
+          const [bc, bv] = (b.vk ?? '0:0').split(':').map(Number)
+          return ac === bc ? av - bv : ac - bc
+        })
 
   if (verseSearch.loading && !verseSearch.data) {
     return (
