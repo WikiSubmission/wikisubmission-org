@@ -151,6 +151,7 @@ function MobileMenu({
             href={item.href}
             onClick={close}
             style={{
+              position: 'relative',
               fontFamily: F.mono,
               fontSize: 11,
               textTransform: 'uppercase',
@@ -159,11 +160,27 @@ function MobileMenu({
                 ? 'var(--ed-fg)'
                 : 'var(--ed-fg-muted)',
               padding: '10px 12px',
-              display: 'block',
+              display: 'flex',
+              alignItems: 'center',
               textDecoration: 'none',
               borderRadius: 4,
+              fontWeight: isActive(pathname, item.href) ? 600 : 500,
             }}
           >
+            {isActive(pathname, item.href) && (
+              <span
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 8,
+                  bottom: 8,
+                  width: 2,
+                  background: 'var(--ed-accent)',
+                  borderRadius: 2,
+                }}
+              />
+            )}
             {t(item.label)}
           </Link>
         ) : (
@@ -173,58 +190,146 @@ function MobileMenu({
                 fontFamily: F.mono,
                 fontSize: 10,
                 textTransform: 'uppercase',
-                letterSpacing: '0.18em',
+                letterSpacing: '0.2em',
                 color: 'var(--ed-fg-muted)',
-                padding: '10px 12px 4px',
+                padding: '12px 12px 6px',
+                opacity: 0.8,
               }}
             >
               {t(item.label)}
             </div>
-            {item.children.map((c) => (
-              <div key={c.label} className="flex flex-col">
-                <Link
-                  href={c.href}
-                  onClick={close}
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 11,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.16em',
-                    color: isActive(pathname, c.href)
-                      ? 'var(--ed-fg)'
-                      : 'var(--ed-fg-muted)',
-                    padding: '8px 24px',
-                    display: 'block',
-                    textDecoration: 'none',
-                    borderRadius: 4,
-                  }}
-                >
-                  {t(c.label)}
-                </Link>
-                {c.children?.map((g) => (
-                  <Link
-                    key={g.label}
-                    href={g.href}
-                    onClick={close}
-                    style={{
-                      fontFamily: F.mono,
-                      fontSize: 10.5,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.16em',
-                      color: isActive(pathname, g.href)
-                        ? 'var(--ed-fg)'
-                        : 'var(--ed-fg-muted)',
-                      padding: '6px 36px',
-                      display: 'block',
-                      textDecoration: 'none',
-                      borderRadius: 4,
-                    }}
-                  >
-                    {t(g.label)}
-                  </Link>
-                ))}
-              </div>
-            ))}
+            <div
+              style={{
+                marginLeft: 18,
+                paddingLeft: 0,
+                borderLeft: '1px solid var(--ed-rule)',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {item.children.map((c) => {
+                const childActive = isActive(pathname, c.href)
+                return (
+                  <div key={c.label} className="flex flex-col">
+                    <Link
+                      href={c.href}
+                      onClick={close}
+                      style={{
+                        position: 'relative',
+                        fontFamily: F.mono,
+                        fontSize: 11,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.16em',
+                        color: childActive
+                          ? 'var(--ed-fg)'
+                          : 'var(--ed-fg-muted)',
+                        padding: '9px 12px 9px 18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        textDecoration: 'none',
+                        borderRadius: 4,
+                        fontWeight: childActive ? 600 : 500,
+                      }}
+                    >
+                      <span
+                        aria-hidden
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: '50%',
+                          width: 10,
+                          height: 1,
+                          background: childActive
+                            ? 'var(--ed-accent)'
+                            : 'var(--ed-rule)',
+                        }}
+                      />
+                      {childActive && (
+                        <span
+                          aria-hidden
+                          style={{
+                            position: 'absolute',
+                            left: -1,
+                            top: 8,
+                            bottom: 8,
+                            width: 2,
+                            background: 'var(--ed-accent)',
+                            borderRadius: 2,
+                          }}
+                        />
+                      )}
+                      {t(c.label)}
+                    </Link>
+                    {c.children && c.children.length > 0 && (
+                      <div
+                        style={{
+                          marginLeft: 16,
+                          borderLeft: '1px solid var(--ed-rule)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        {c.children.map((g) => {
+                          const gActive = isActive(pathname, g.href)
+                          return (
+                            <Link
+                              key={g.label}
+                              href={g.href}
+                              onClick={close}
+                              style={{
+                                position: 'relative',
+                                fontFamily: F.mono,
+                                fontSize: 10.5,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.16em',
+                                color: gActive
+                                  ? 'var(--ed-fg)'
+                                  : 'var(--ed-fg-muted)',
+                                padding: '8px 12px 8px 18px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                textDecoration: 'none',
+                                borderRadius: 4,
+                                fontWeight: gActive ? 600 : 500,
+                              }}
+                            >
+                              <span
+                                aria-hidden
+                                style={{
+                                  position: 'absolute',
+                                  left: 0,
+                                  top: '50%',
+                                  width: 10,
+                                  height: 1,
+                                  background: gActive
+                                    ? 'var(--ed-accent)'
+                                    : 'var(--ed-rule)',
+                                }}
+                              />
+                              {gActive && (
+                                <span
+                                  aria-hidden
+                                  style={{
+                                    position: 'absolute',
+                                    left: -1,
+                                    top: 6,
+                                    bottom: 6,
+                                    width: 2,
+                                    background: 'var(--ed-accent)',
+                                    borderRadius: 2,
+                                  }}
+                                />
+                              )}
+                              {t(g.label)}
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         ),
       )}
