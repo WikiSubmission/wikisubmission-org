@@ -239,4 +239,131 @@ export const meApi = {
 
   unsubscribeCollection: (id: number): Promise<void> =>
     callVoid(wsApi.DELETE('/me/collection-subscriptions/{id}', { params: { path: { id } } })),
+
+  // ── Games (ws-backend endpoints pending — see app/quran/games) ───────────
+  // gamesApi is declared below. Once backend ships, regenerate types via
+  // `npm run sync-api && npm run generate` and swap each call to typed
+  // `wsApi.GET/POST` invocations matching the patterns above. The getter
+  // defers resolution until first access, avoiding the temporal-dead-zone
+  // reference while letting callers use `meApi.games.startVariant(...)`.
+  get games() {
+    return gamesApi
+  },
+}
+
+// ── Games contract (frontend-side stubs) ───────────────────────────────────
+
+export type GameLanguage = 'en' | 'ar'
+export type GameDifficulty = 'easy' | 'medium' | 'hard' | 'professional'
+export type GameRoundSize = 'short' | 'medium' | 'long'
+export type GameLeaderboardScope = 'global' | 'weekly' | 'variant'
+
+export interface GamePassage {
+  id: number
+  chapter_start: number
+  verse_start: number
+  chapter_end: number
+  verse_end: number
+  label: string
+}
+
+export interface GameBlank {
+  index: number
+  // For 'easy' (multiple choice): server returns four options, shuffled per variant.
+  // For all other tiers: server omits options; client submits a typed guess.
+  options?: string[]
+}
+
+export interface GameVariant {
+  variant_id: string
+  passage: GamePassage
+  language: GameLanguage
+  difficulty: GameDifficulty
+  size: GameRoundSize
+  // Verses rendered with blanks substituted (e.g. text contains __BLANK_0__ tokens).
+  rendered_verses: Array<{ verse_key: string; text: string }>
+  blanks: GameBlank[]
+}
+
+export interface GameSubmitResult {
+  attempt_id: string
+  score: number
+  correct_count: number
+  total_count: number
+  per_blank: Array<{ index: number; correct: boolean; accepted_answer?: string }>
+  difficulty_multiplier: number
+  hint_penalty: number
+}
+
+export interface GameLeaderboardEntry {
+  rank: number
+  user_id: string
+  display_name: string
+  score: number
+  size: GameRoundSize
+  difficulty: GameDifficulty
+  attempted_at: string
+}
+
+export interface GameHistoryEntry {
+  attempt_id: string
+  variant_id: string
+  score: number
+  size: GameRoundSize
+  difficulty: GameDifficulty
+  completed_at: string
+}
+
+export interface GameStats {
+  total_attempts: number
+  best_score: number
+  variants_completed: number
+  by_difficulty: Record<GameDifficulty, { attempts: number; best_score: number }>
+}
+
+function notImplemented(endpoint: string, args?: unknown): never {
+  const argsStr = args === undefined ? '' : ` (args: ${JSON.stringify(args)})`
+  throw new Error(`games:${endpoint} — backend endpoint not implemented yet${argsStr}`)
+}
+
+const gamesApi = {
+  listPassages: (opts?: { language?: GameLanguage }): Promise<{ data: GamePassage[] }> => {
+    notImplemented('GET /games/fill-blank/passages', opts)
+  },
+
+  startVariant: (body: {
+    passage_id: number
+    language: GameLanguage
+    difficulty: GameDifficulty
+    size: GameRoundSize
+    variant_id?: string
+  }): Promise<{ data: GameVariant }> => {
+    notImplemented('POST /games/fill-blank/variants', body)
+  },
+
+  submitVariant: (body: {
+    variant_id: string
+    guesses: Array<{ index: number; value: string }>
+    hints_used: number
+  }): Promise<{ data: GameSubmitResult }> => {
+    notImplemented('POST /games/fill-blank/submit', body)
+  },
+
+  getLeaderboard: (opts: {
+    scope: GameLeaderboardScope
+    size?: GameRoundSize
+    difficulty?: GameDifficulty
+    variant_id?: string
+    limit?: number
+  }): Promise<{ data: GameLeaderboardEntry[] }> => {
+    notImplemented('GET /games/fill-blank/leaderboard', opts)
+  },
+
+  getHistory: (opts?: { limit?: number; cursor?: string }): Promise<{ data: GameHistoryEntry[] }> => {
+    notImplemented('GET /me/games/history', opts)
+  },
+
+  getStats: (): Promise<{ data: GameStats }> => {
+    notImplemented('GET /me/games/stats')
+  },
 }

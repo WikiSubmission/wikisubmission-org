@@ -338,7 +338,8 @@
     "chat": "Chat",
     "community": "Topluluk",
     "signIn": "Giriş yap",
-    "submissionAI": "Submission AI"
+    "submissionAI": "Submission AI",
+    "games": "Games"
   },
   "miracle": {
     "metadataTitle": "Matematiksel Mucize | WikiSubmission",
@@ -827,5 +828,23 @@
     "collections": "Koleksiyonlar",
     "bookmarks": "Yer imleri",
     "untitled": "Adsız"
+  },
+  "games": {
+    "lobbyTitle": "Quran",
+    "lobbyTitleAccent": "games",
+    "lobbyLede": "Practice and memorize through procedurally generated rounds. Every round has a deterministic variant ID, so leaderboards stay fair and rounds are shareable.",
+    "fillBlankTitle": "Fill the Missing Word",
+    "fillBlankSub": "Read a passage with words removed. Pick or type the missing ones.",
+    "fillBlankIntro": "Pick a passage, choose your difficulty and round size, then fill in the blanks. Your score depends on accuracy, difficulty, and hints used.",
+    "comingSoonPickers": "Passage / difficulty / size picker coming soon.",
+    "comingSoonRound": "Round runner coming soon.",
+    "comingSoonResult": "Result summary coming soon.",
+    "comingSoonLeaderboard": "Leaderboard coming soon.",
+    "leaderboardLink": "View leaderboard",
+    "leaderboardTitle": "Leaderboard",
+    "playKicker": "Variant #{variantId}",
+    "playTitle": "Fill the blanks",
+    "resultKicker": "Attempt #{attemptId}",
+    "resultTitle": "Round complete"
   }
 }

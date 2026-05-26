@@ -13,17 +13,20 @@ import { SiteBrand } from '@/components/site-brand'
 import { UserMenu } from '@/components/user-menu'
 import { useSession } from 'next-auth/react'
 
-type FlatLink = { kind: 'link'; label: string; href: string }
+type FlatLink = { kind: 'link'; label: string; href: string; requiresAuth?: boolean }
+type GroupGrandchild = { label: string; sub: string; href: string; requiresAuth?: boolean }
 type GroupChild = {
   label: string
   sub: string
   href: string
-  children?: { label: string; sub: string; href: string }[]
+  requiresAuth?: boolean
+  children?: GroupGrandchild[]
 }
 type GroupLink = {
   kind: 'group'
   label: string
   href: string
+  requiresAuth?: boolean
   children: GroupChild[]
 }
 type NavItem = FlatLink | GroupLink
@@ -40,6 +43,7 @@ const NAV_ITEMS: NavItem[] = [
         href: '/quran',
         children: [
           { label: 'wordLab', sub: 'Roots & concordance', href: '/quran/words' },
+          { label: 'games', sub: 'Memorization games', href: '/quran/games', requiresAuth: true },
         ],
       },
       { label: 'bible', sub: 'Old & New Testaments', href: '/bible' },
@@ -56,6 +60,21 @@ const F = {
   display: 'var(--font-cormorant), Georgia, serif',
   mono: 'var(--font-jetbrains), ui-monospace, monospace',
   glacial: 'var(--font-glacial), sans-serif',
+}
+
+function filterNavItems(items: NavItem[], isAuthed: boolean): NavItem[] {
+  const allow = <T extends { requiresAuth?: boolean }>(node: T): boolean =>
+    isAuthed || !node.requiresAuth
+  return items.filter(allow).map((item) => {
+    if (item.kind === 'link') return item
+    return {
+      ...item,
+      children: item.children.filter(allow).map((c) => ({
+        ...c,
+        children: c.children?.filter(allow),
+      })),
+    }
+  })
 }
 
 function isActive(pathname: string | null, href: string): boolean {
@@ -95,11 +114,13 @@ function MobileMenu({
   pathname,
   t,
   close,
+  items,
 }: {
   open: boolean
   pathname: string | null
   t: (k: string) => string
   close: () => void
+  items: NavItem[]
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [render, setRender] = useState(open)
@@ -140,7 +161,7 @@ function MobileMenu({
       }}
       className="lg:hidden px-4 py-4 flex flex-col gap-0.5 sm:px-6"
     >
-      {NAV_ITEMS.map((item) =>
+      {items.map((item) =>
         item.kind === 'link' ? (
           <Link
             key={item.label}
@@ -355,6 +376,7 @@ export function SiteNav() {
   const { toggle: toggleAsk, state: askState } = useChatPanel()
   const { status } = useSession()
   const isAuthed = status === 'authenticated'
+  const navItems = filterNavItems(NAV_ITEMS, isAuthed)
   const close = () => setMobileOpen(false)
 
   return (
@@ -398,7 +420,7 @@ export function SiteNav() {
               gap: '1px',
             }}
           >
-            {NAV_ITEMS.map((item) =>
+            {navItems.map((item) =>
               item.kind === 'link' ? (
                 <NavTabLink
                   key={item.label}
@@ -502,6 +524,7 @@ export function SiteNav() {
         pathname={pathname}
         t={t}
         close={close}
+        items={navItems}
       />
     </nav>
   )
