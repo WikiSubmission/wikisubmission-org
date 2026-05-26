@@ -347,18 +347,15 @@ function MobileMenu({
           </div>
         ),
       )}
-      <div
-        className="mt-2 pt-2 flex items-center gap-2 flex-wrap"
-        style={{ borderTop: '1px solid var(--ed-rule)' }}
-      >
-        <UserMenu />
-        {!isAuthed && (
-          <>
-            <LocaleSwitcher currentLocale={locale} onSelect={close} />
-            <PaletteThemeSwitcher />
-          </>
-        )}
-      </div>
+      {!isAuthed && (
+        <div
+          className="mt-2 pt-2 flex items-center gap-2 flex-wrap"
+          style={{ borderTop: '1px solid var(--ed-rule)' }}
+        >
+          <LocaleSwitcher currentLocale={locale} onSelect={close} />
+          <PaletteThemeSwitcher />
+        </div>
+      )}
     </div>
   )
 }
