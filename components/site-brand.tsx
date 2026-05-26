@@ -117,7 +117,7 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
       <span
         data-brand-wordmark
         aria-hidden="true"
-        className="max-[380px]:hidden sm:inline-block"
+        className="max-[480px]:hidden sm:inline-block"
         style={{
           display: 'inline-block',
           fontFamily: F.display,

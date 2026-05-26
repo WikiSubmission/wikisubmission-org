@@ -94,16 +94,12 @@ function MobileMenu({
   open,
   pathname,
   t,
-  locale,
   close,
-  isAuthed,
 }: {
   open: boolean
   pathname: string | null
   t: (k: string) => string
-  locale: string
   close: () => void
-  isAuthed: boolean
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [render, setRender] = useState(open)
@@ -347,15 +343,6 @@ function MobileMenu({
           </div>
         ),
       )}
-      {!isAuthed && (
-        <div
-          className="mt-2 pt-2 flex items-center gap-2 flex-wrap"
-          style={{ borderTop: '1px solid var(--ed-rule)' }}
-        >
-          <LocaleSwitcher currentLocale={locale} onSelect={close} />
-          <PaletteThemeSwitcher />
-        </div>
-      )}
     </div>
   )
 }
@@ -433,39 +420,41 @@ export function SiteNav() {
         </div>
 
         <div className="flex-none flex items-center justify-end gap-1">
-          <button
-            type="button"
-            onClick={toggleAsk}
-            aria-label={t('submissionAI')}
-            className="hidden sm:inline-flex items-center gap-1.5 h-[34px] px-2.5 rounded-[2px] transition-colors"
-            style={{
-              fontFamily: F.mono,
-              fontSize: 10.5,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              color:
-                askState !== 'closed'
-                  ? 'var(--ed-accent)'
-                  : 'var(--ed-fg-muted)',
-              border: '1px solid var(--ed-rule)',
-              background:
-                askState !== 'closed'
-                  ? 'color-mix(in oklab, var(--ed-accent), transparent 88%)'
-                  : 'transparent',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.borderColor =
-                'var(--ed-fg)'
-            }}
-            onMouseLeave={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.borderColor =
-                'var(--ed-rule)'
-            }}
-          >
-            <MessageSquare size={12} />
-            <span>Chat</span>
-          </button>
+          {isAuthed && (
+            <button
+              type="button"
+              onClick={toggleAsk}
+              aria-label={t('submissionAI')}
+              className="hidden sm:inline-flex items-center gap-1.5 h-[34px] px-2.5 rounded-[2px] transition-colors"
+              style={{
+                fontFamily: F.mono,
+                fontSize: 10.5,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color:
+                  askState !== 'closed'
+                    ? 'var(--ed-accent)'
+                    : 'var(--ed-fg-muted)',
+                border: '1px solid var(--ed-rule)',
+                background:
+                  askState !== 'closed'
+                    ? 'color-mix(in oklab, var(--ed-accent), transparent 88%)'
+                    : 'transparent',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor =
+                  'var(--ed-fg)'
+              }}
+              onMouseLeave={(e) => {
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor =
+                  'var(--ed-rule)'
+              }}
+            >
+              <MessageSquare size={12} />
+              <span>Chat</span>
+            </button>
+          )}
 
           <UserMenu />
 
@@ -476,23 +465,25 @@ export function SiteNav() {
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={toggleAsk}
-            aria-label={t('submissionAI')}
-            className="sm:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md"
-            style={{
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              color:
-                askState !== 'closed'
-                  ? 'var(--ed-accent)'
-                  : 'var(--ed-fg-muted)',
-            }}
-          >
-            <MessageSquare size={16} />
-          </button>
+          {isAuthed && (
+            <button
+              type="button"
+              onClick={toggleAsk}
+              aria-label={t('submissionAI')}
+              className="sm:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md"
+              style={{
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                color:
+                  askState !== 'closed'
+                    ? 'var(--ed-accent)'
+                    : 'var(--ed-fg-muted)',
+              }}
+            >
+              <MessageSquare size={16} />
+            </button>
+          )}
 
           <button
             type="button"
@@ -510,9 +501,7 @@ export function SiteNav() {
         open={mobileOpen}
         pathname={pathname}
         t={t}
-        locale={locale}
         close={close}
-        isAuthed={isAuthed}
       />
     </nav>
   )
