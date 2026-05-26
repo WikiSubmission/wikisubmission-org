@@ -44,17 +44,21 @@ export function NoteEditorDialog({
   const loadingRef = useRef(false)
   const saveSeqRef = useRef(0)
 
+  const noteContentRef = useRef(note?.content ?? '')
+  noteContentRef.current = note?.content ?? ''
+
   useEffect(() => {
     if (!open) return
     let cancelled = false
+    const initialContent = noteContentRef.current
     async function load() {
       loadingRef.current = true
-      const blocks = note?.content
-        ? await editor.tryParseMarkdownToBlocks(note.content)
+      const blocks = initialContent
+        ? await editor.tryParseMarkdownToBlocks(initialContent)
         : [{ type: 'paragraph' as const, content: [] }]
       if (!cancelled) editor.replaceBlocks(editor.document, blocks)
       if (!cancelled) {
-        lastSavedRef.current = (note?.content ?? '').trim()
+        lastSavedRef.current = initialContent.trim()
         setSaveState('saved')
       }
       loadingRef.current = false
@@ -64,7 +68,7 @@ export function NoteEditorDialog({
       cancelled = true
       loadingRef.current = false
     }
-  }, [open, note?.content, editor])
+  }, [open, editor])
 
   const persistCurrent = useCallback(async (): Promise<boolean> => {
     const markdown = await editor.blocksToMarkdownLossy(editor.document)

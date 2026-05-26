@@ -1472,9 +1472,16 @@ html[data-palette='mono'].dark {
   background: var(--cat-color, var(--ed-accent));
 }
 .verse.has-note .verse-body {
-  border-left: 1px solid var(--ed-accent);
-  padding-left: 14px;
-  margin-left: -14px;
+  position: relative;
+}
+.verse.has-note .verse-body::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 1rem;
+  bottom: 1rem;
+  width: 1px;
+  background: var(--ed-accent);
 }
 .verse-actions {
   opacity: 0;
