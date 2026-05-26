@@ -9,6 +9,8 @@ type SearchResultData = components['schemas']['SearchResult']
 type ScriptureState = components['schemas']['ScriptureState']
 type ReadingProgressData = components['schemas']['ReadingProgress']
 type StreakData = components['schemas']['Streak']
+type ReadingStatsData = components['schemas']['ReadingStats']
+type ReadingStatsRange = '7d' | '30d' | '90d' | '1y' | 'all'
 type CollectionData = components['schemas']['Collection']
 type CollectionDetail = components['schemas']['CollectionDetail']
 type CollectionVerseData = components['schemas']['CollectionVerse']
@@ -145,6 +147,21 @@ export const meApi = {
 
   getStreak: (scripture: string): Promise<{ data: StreakData }> =>
     unwrap(wsApi.GET('/me/streak', { params: { query: { scripture: toScripture(scripture) } } })),
+
+  getReadingStats: (
+    scripture: string,
+    range: ReadingStatsRange = '30d',
+    tz?: string,
+  ): Promise<{ data: ReadingStatsData }> =>
+    unwrap(wsApi.GET('/me/reading-stats', {
+      params: {
+        query: {
+          scripture: toScripture(scripture),
+          range,
+          ...(tz ? { tz } : {}),
+        },
+      },
+    })),
 
   postReadingLog: (body: { scripture: string; verses_read?: number; day?: string }): Promise<void> =>
     callVoid(wsApi.POST('/me/reading-log', {

@@ -62,5 +62,22 @@ export function meApiServer(token: string) {
           params: { query: { scripture: toScripture(scripture) } },
         })
       ),
+
+    getReadingStats: (
+      scripture: string,
+      range: '7d' | '30d' | '90d' | '1y' | 'all' = '30d',
+      tz?: string,
+    ) =>
+      unwrap(
+        client.GET('/me/reading-stats', {
+          params: {
+            query: {
+              scripture: toScripture(scripture),
+              range,
+              ...(tz ? { tz } : {}),
+            },
+          },
+        })
+      ),
   }
 }

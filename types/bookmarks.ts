@@ -13,3 +13,5 @@ export interface ScriptureState {
 
 export type ReadingProgressData = components['schemas']['ReadingProgress']
 export type StreakData = components['schemas']['Streak']
+export type ReadingStatsData = components['schemas']['ReadingStats']
+export type ReadingStatsRange = '7d' | '30d' | '90d' | '1y' | 'all'

@@ -1379,6 +1379,40 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+  /me/reading-stats:
+    get:
+      tags: [Me]
+      operationId: getMeReadingStats
+      summary: Get aggregated reading stats (daily, hourly, weekday, cumulative)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MeScriptureParam'
+        - in: query
+          name: range
+          schema:
+            type: string
+            enum: [7d, 30d, 90d, 1y, all]
+            default: 30d
+          description: Time range relative to now. `all` returns full history.
+        - in: query
+          name: tz
+          schema:
+            type: string
+            default: UTC
+          description: IANA timezone used to bucket day/hour/weekday (e.g. `Asia/Tokyo`).
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingStatsEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
   /me/reading-log:
     post:
       tags: [Me]
@@ -3280,6 +3314,74 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/Streak'
+
+    ReadingStatsDaily:
+      type: object
+      required: [day, verses_read]
+      properties:
+        day:
+          type: string
+          format: date
+        verses_read:
+          type: integer
+
+    ReadingStatsHourly:
+      type: object
+      required: [hour, verses_read]
+      properties:
+        hour:
+          type: integer
+          minimum: 0
+          maximum: 23
+        verses_read:
+          type: integer
+
+    ReadingStatsWeekday:
+      type: object
+      required: [weekday, verses_read]
+      properties:
+        weekday:
+          type: integer
+          description: ISO weekday (1=Mon … 7=Sun).
+          minimum: 1
+          maximum: 7
+        verses_read:
+          type: integer
+
+    ReadingStats:
+      type: object
+      required: [total, active_days, daily, hourly, weekday, cumulative]
+      properties:
+        total:
+          type: integer
+        active_days:
+          type: integer
+        best_day:
+          $ref: '#/components/schemas/ReadingStatsDaily'
+          nullable: true
+        daily:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadingStatsDaily'
+        hourly:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadingStatsHourly'
+        weekday:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadingStatsWeekday'
+        cumulative:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadingStatsDaily'
+
+    ReadingStatsEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ReadingStats'
 
     PreferencesEnvelope:
       type: object

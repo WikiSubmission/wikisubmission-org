@@ -9,8 +9,11 @@ import { useStreak } from '@/hooks/use-reading-streak'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 import { useCollections } from '@/hooks/use-collections'
 import { useAllNotes, useNoteCount } from '@/hooks/use-notes'
+import { useReadingStats } from '@/hooks/use-reading-stats'
 import { CreateCategoryDialog } from '@/components/me/create-category-dialog'
 import { italicizeLast } from '@/components/editorial/section-header'
+import { ParentSize } from '@visx/responsive'
+import { Sparkline } from '@/components/me/stats/sparkline'
 import {
   Tooltip,
   TooltipContent,
@@ -116,6 +119,61 @@ function CoverToCoverSection() {
   )
 }
 
+function RhythmTeaser({ scripture, label }: { scripture: 'quran' | 'bible'; label: string }) {
+  const { data } = useReadingStats(scripture, '30d')
+  const daily = data?.daily ?? []
+  const total = data?.total ?? 0
+  return (
+    <Link href={`/me/stats?scripture=${scripture}`} className="c2c-card" aria-label={`${label} reading rhythm`}>
+      <div className="c2c-head">
+        <span className="c2c-title">{label}</span>
+        <span className="c2c-mono">{label.toUpperCase()} · 30 DAYS</span>
+      </div>
+      <div style={{ height: 48 }}>
+        {daily.length > 0 ? (
+          <ParentSize>
+            {({ width }) =>
+              width ? (
+                <Sparkline width={width} height={48} scripture={scripture} data={daily} />
+              ) : null
+            }
+          </ParentSize>
+        ) : (
+          <div className="rs-card-empty" style={{ padding: '12px 0', border: 'none' }}>
+            No readings yet
+          </div>
+        )}
+      </div>
+      <div className="c2c-foot">
+        <span>{total.toLocaleString()} verses in last 30 days</span>
+        <span className="c2c-continue">View breakdown →</span>
+      </div>
+    </Link>
+  )
+}
+
+function RhythmSection() {
+  return (
+    <section className="section" id="rhythm">
+      <div className="section-head">
+        <span className="section-roman">II</span>
+        <span className="section-eyebrow">Rhythm</span>
+        <h2 className="section-title">
+          Reading <em>rhythm</em>
+        </h2>
+        <span className="section-spacer" />
+        <Link href="/me/stats" className="section-action-link">
+          Full breakdown →
+        </Link>
+      </div>
+      <div className="c2c-grid">
+        <RhythmTeaser scripture="quran" label="Quran" />
+        <RhythmTeaser scripture="bible" label="Bible" />
+      </div>
+    </section>
+  )
+}
+
 function CategoriesSection() {
   const categories = useBookmarkCategories()
   const [createOpen, setCreateOpen] = useState(false)
@@ -130,7 +188,7 @@ function CategoriesSection() {
   return (
     <section className="section" id="bookmarks">
       <div className="section-head">
-        <span className="section-roman">II</span>
+        <span className="section-roman">III</span>
         <span className="section-eyebrow">Bookmarks</span>
         <h2 className="section-title">
           <Link href="/me/bookmarks" className="hover:text-[var(--ed-accent)] transition-colors">
@@ -191,7 +249,7 @@ function NotesPreviewSection() {
   return (
     <section className="section" id="notes">
       <div className="section-head">
-        <span className="section-roman">III</span>
+        <span className="section-roman">IV</span>
         <span className="section-eyebrow">Notes · {notes.length} total</span>
         <h2 className="section-title">
           Notes <em>&amp; marginalia</em>
@@ -245,7 +303,7 @@ function CollectionsSection() {
   return (
     <section className="section" id="collections">
       <div className="section-head">
-        <span className="section-roman">IV</span>
+        <span className="section-roman">V</span>
         <span className="section-eyebrow">Collections</span>
         <h2 className="section-title">
           <Link href="/me/collections" className="hover:text-[var(--ed-accent)] transition-colors">
@@ -503,6 +561,7 @@ export default function MePageClient({
       ) : (
         <>
           <CoverToCoverSection />
+          <RhythmSection />
           <CategoriesSection />
           <NotesPreviewSection />
           <CollectionsSection />

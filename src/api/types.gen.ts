@@ -545,6 +545,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/reading-stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get aggregated reading stats (daily, hourly, weekday, cumulative) */
+        get: operations["getMeReadingStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/reading-log": {
         parameters: {
             query?: never;
@@ -1711,6 +1728,32 @@ export interface components {
         };
         StreakEnvelope: {
             data: components["schemas"]["Streak"];
+        };
+        ReadingStatsDaily: {
+            /** Format: date */
+            day: string;
+            verses_read: number;
+        };
+        ReadingStatsHourly: {
+            hour: number;
+            verses_read: number;
+        };
+        ReadingStatsWeekday: {
+            /** @description ISO weekday (1=Mon … 7=Sun). */
+            weekday: number;
+            verses_read: number;
+        };
+        ReadingStats: {
+            total: number;
+            active_days: number;
+            best_day?: components["schemas"]["ReadingStatsDaily"];
+            daily: components["schemas"]["ReadingStatsDaily"][];
+            hourly: components["schemas"]["ReadingStatsHourly"][];
+            weekday: components["schemas"]["ReadingStatsWeekday"][];
+            cumulative: components["schemas"]["ReadingStatsDaily"][];
+        };
+        ReadingStatsEnvelope: {
+            data: components["schemas"]["ReadingStats"];
         };
         PreferencesEnvelope: {
             data: {
@@ -2913,6 +2956,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StreakEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeReadingStats: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+                /** @description Time range relative to now. `all` returns full history. */
+                range?: "7d" | "30d" | "90d" | "1y" | "all";
+                /** @description IANA timezone used to bucket day/hour/weekday (e.g. `Asia/Tokyo`). */
+                tz?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingStatsEnvelope"];
                 };
             };
             400: components["responses"]["BadRequest"];

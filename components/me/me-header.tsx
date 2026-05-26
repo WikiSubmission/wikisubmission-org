@@ -33,6 +33,11 @@ function useCrumbs(pathname: string): Crumb[] {
     return crumbs
   }
 
+  if (section === 'stats') {
+    crumbs.push({ label: t('stats') })
+    return crumbs
+  }
+
   if (section === 'collections') {
     crumbs.push({ label: t('collections'), href: id ? '/me/collections' : undefined })
     if (id) {
