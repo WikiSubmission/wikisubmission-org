@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useMemo, useCallback, useState } from 'react'
+import { memo, useMemo, useCallback, useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useSession } from 'next-auth/react'
@@ -320,15 +320,61 @@ function WordCompactItem({
   const isLoading = loadingId === audioId
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const open = useCallback(() => {
-    if (!selectionActive) setDialogOpen(true)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+  const isTouchRef = useRef(false)
+  const triggerRef = useRef<HTMLParagraphElement | null>(null)
+
+  const openDialog = useCallback(() => {
+    if (selectionActive) return
+    setTooltipOpen(false)
+    setDialogOpen(true)
   }, [selectionActive])
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    isTouchRef.current = e.pointerType !== 'mouse'
+  }, [])
+
+  const handleClick = useCallback(() => {
+    if (selectionActive) return
+    if (isTouchRef.current) {
+      if (tooltipOpen) {
+        setTooltipOpen(false)
+        setDialogOpen(true)
+      } else {
+        setTooltipOpen(true)
+      }
+    } else {
+      setDialogOpen(true)
+    }
+  }, [selectionActive, tooltipOpen])
+
+  // Dismiss the tooltip when the user taps anywhere else on touch devices.
+  useEffect(() => {
+    if (!tooltipOpen) return
+    const onDocPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node | null
+      if (triggerRef.current && target && triggerRef.current.contains(target)) {
+        return
+      }
+      // Tooltip content lives in a portal — keep it open when tapped inside it.
+      const inTooltipContent = (target as HTMLElement | null)?.closest(
+        '[data-slot="tooltip-content"]'
+      )
+      if (inTooltipContent) return
+      setTooltipOpen(false)
+    }
+    document.addEventListener('pointerdown', onDocPointerDown, true)
+    return () =>
+      document.removeEventListener('pointerdown', onDocPointerDown, true)
+  }, [tooltipOpen])
+
   const warm = useCallback(() => {
     if (verseCoordsValid) preload(chapter, verse, word1Based)
   }, [preload, chapter, verse, word1Based, verseCoordsValid])
 
   const arabicEl = (
     <p
+      ref={triggerRef}
       role="button"
       tabIndex={0}
       aria-label={`Details for ${arabic}`}
@@ -339,11 +385,12 @@ function WordCompactItem({
       }`}
       onPointerEnter={warm}
       onFocus={warm}
-      onClick={open}
+      onPointerDown={handlePointerDown}
+      onClick={handleClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          open()
+          openDialog()
         }
       }}
     >
@@ -358,11 +405,20 @@ function WordCompactItem({
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <Tooltip>
+      <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
         <TooltipTrigger asChild>{arabicEl}</TooltipTrigger>
         <TooltipContent
           side="top"
-          className="bg-popover/80 backdrop-blur-sm border-primary/20 px-4 py-2 rounded-xl"
+          role="button"
+          tabIndex={0}
+          onClick={openDialog}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              openDialog()
+            }
+          }}
+          className="bg-popover/80 backdrop-blur-sm border-primary/20 px-4 py-2 rounded-xl cursor-pointer"
         >
           <div className="flex flex-col gap-0.5 py-1 items-center text-center">
             <p className="text-base text-primary">{translation}</p>
