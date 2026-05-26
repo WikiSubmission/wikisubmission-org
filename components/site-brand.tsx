@@ -85,20 +85,24 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
         display: 'inline-flex',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        gap: 'clamp(6px, 1.6vw, 10px)',
         direction: 'ltr',
         unicodeBidi: 'isolate',
         color: 'var(--ed-fg)',
         textDecoration: 'none',
         lineHeight: 1,
+        minWidth: 0,
       }}
     >
       <span
         data-brand-mark
         style={{
           display: 'inline-flex',
+          width: 'clamp(22px, 5vw, 30px)',
+          height: 'clamp(22px, 5vw, 30px)',
           transformOrigin: '50% 55%',
           willChange: 'transform',
+          flexShrink: 0,
         }}
       >
         <Image
@@ -106,6 +110,7 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
           alt=""
           width={30}
           height={30}
+          style={{ width: '100%', height: '100%' }}
         />
       </span>
 
@@ -116,12 +121,13 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
         style={{
           display: 'inline-block',
           fontFamily: F.display,
-          fontSize: 24,
+          fontSize: 'clamp(16px, 4.2vw, 24px)',
           fontWeight: 600,
           letterSpacing: '-0.015em',
           color: 'var(--ed-fg)',
           lineHeight: 1,
-          paddingTop: 3,
+          paddingTop: 'clamp(1px, 0.4vw, 3px)',
+          whiteSpace: 'nowrap',
           willChange: 'transform, opacity',
         }}
       >

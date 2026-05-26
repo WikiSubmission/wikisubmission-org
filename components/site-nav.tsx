@@ -198,19 +198,24 @@ function MobileMenu({
             >
               {t(item.label)}
             </div>
-            <div
-              style={{
-                marginLeft: 18,
-                paddingLeft: 0,
-                borderLeft: '1px solid var(--ed-rule)',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
+            <div style={{ position: 'relative' }}>
+              {/* Outer vertical rail spanning all children + grandchildren */}
+              <span
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  left: 14,
+                  top: 8,
+                  bottom: 8,
+                  width: 1,
+                  background: 'var(--ed-rule)',
+                }}
+              />
               {item.children.map((c) => {
                 const childActive = isActive(pathname, c.href)
+                const hasGrand = !!c.children && c.children.length > 0
                 return (
-                  <div key={c.label} className="flex flex-col">
+                  <div key={c.label}>
                     <Link
                       href={c.href}
                       onClick={close}
@@ -223,7 +228,7 @@ function MobileMenu({
                         color: childActive
                           ? 'var(--ed-fg)'
                           : 'var(--ed-fg-muted)',
-                        padding: '9px 12px 9px 18px',
+                        padding: '9px 12px 9px 30px',
                         display: 'flex',
                         alignItems: 'center',
                         textDecoration: 'none',
@@ -231,13 +236,14 @@ function MobileMenu({
                         fontWeight: childActive ? 600 : 500,
                       }}
                     >
+                      {/* Horizontal tick connecting rail (x=14) to text (x=30) */}
                       <span
                         aria-hidden
                         style={{
                           position: 'absolute',
-                          left: 0,
+                          left: 14,
                           top: '50%',
-                          width: 10,
+                          width: 14,
                           height: 1,
                           background: childActive
                             ? 'var(--ed-accent)'
@@ -249,9 +255,9 @@ function MobileMenu({
                           aria-hidden
                           style={{
                             position: 'absolute',
-                            left: -1,
-                            top: 8,
-                            bottom: 8,
+                            left: 26,
+                            top: 6,
+                            bottom: 6,
                             width: 2,
                             background: 'var(--ed-accent)',
                             borderRadius: 2,
@@ -260,16 +266,23 @@ function MobileMenu({
                       )}
                       {t(c.label)}
                     </Link>
-                    {c.children && c.children.length > 0 && (
-                      <div
-                        style={{
-                          marginLeft: 16,
-                          borderLeft: '1px solid var(--ed-rule)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                        }}
-                      >
-                        {c.children.map((g) => {
+                    {hasGrand && (
+                      <div style={{ position: 'relative' }}>
+                        {/* Sub-rail for grandchildren level (offset 24px from outer rail) */}
+                        {c.children!.length > 1 && (
+                          <span
+                            aria-hidden
+                            style={{
+                              position: 'absolute',
+                              left: 38,
+                              top: 4,
+                              bottom: 4,
+                              width: 1,
+                              background: 'var(--ed-rule)',
+                            }}
+                          />
+                        )}
+                        {c.children!.map((g) => {
                           const gActive = isActive(pathname, g.href)
                           return (
                             <Link
@@ -285,7 +298,7 @@ function MobileMenu({
                                 color: gActive
                                   ? 'var(--ed-fg)'
                                   : 'var(--ed-fg-muted)',
-                                padding: '8px 12px 8px 18px',
+                                padding: '8px 12px 8px 54px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 textDecoration: 'none',
@@ -293,13 +306,14 @@ function MobileMenu({
                                 fontWeight: gActive ? 600 : 500,
                               }}
                             >
+                              {/* Horizontal tick from sub-rail (x=38) to text (x=54) */}
                               <span
                                 aria-hidden
                                 style={{
                                   position: 'absolute',
-                                  left: 0,
+                                  left: 38,
                                   top: '50%',
-                                  width: 10,
+                                  width: 14,
                                   height: 1,
                                   background: gActive
                                     ? 'var(--ed-accent)'
@@ -311,7 +325,7 @@ function MobileMenu({
                                   aria-hidden
                                   style={{
                                     position: 'absolute',
-                                    left: -1,
+                                    left: 50,
                                     top: 6,
                                     bottom: 6,
                                     width: 2,
