@@ -702,6 +702,7 @@ html[data-palette='mono'].dark {
   left: 0;
   top: 0;
   pointer-events: none;
+  white-space: nowrap;
   color: color-mix(in oklab, var(--foreground), transparent 60%);
   font-style: italic;
 }
