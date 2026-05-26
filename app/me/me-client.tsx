@@ -444,8 +444,6 @@ function ProfileMast({ name, email }: { name?: string | null; email?: string | n
           {email ? (
             <div className="profile-mast-meta">
               <span>{email}</span>
-              <span className="sep">·</span>
-              <Link href="/me/settings">Settings</Link>
             </div>
           ) : null}
         </div>
