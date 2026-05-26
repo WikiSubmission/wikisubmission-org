@@ -686,11 +686,24 @@ html[data-palette='mono'].dark {
   color: var(--accent-foreground) !important;
 }
 
-/* First block: custom prompt via ::before on the inline content */
+/* First block: custom prompt via ::before on the inline content.
+   Positioned absolutely and muted so the caret sits at the start of the line
+   while the placeholder text sits behind it (pointer-events disabled). */
+.bn-themed .bn-block-outer:not([data-prev-depth-changed]):first-child
+  .bn-block-content[data-is-empty-and-focused="true"]
+  .bn-inline-content {
+  position: relative;
+}
 .bn-themed .bn-block-outer:not([data-prev-depth-changed]):first-child
   .bn-block-content[data-is-empty-and-focused="true"]
   .bn-inline-content::before {
   content: "Write a thought, a quote, a reflection…";
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  color: color-mix(in oklab, var(--foreground), transparent 60%);
+  font-style: italic;
 }
 
 /* Suppress BlockNote's ::after slash-command hint on the first block only —
