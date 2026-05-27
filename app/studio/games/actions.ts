@@ -1,7 +1,7 @@
 'use server'
 
 import { auth } from '@/auth'
-import { gamesAdminClient } from '@/lib/games-admin-client'
+import { AdminApiError, gamesAdminClient } from '@/lib/games-admin-client'
 import { isEditor, type ReviewPassage, type ReviewStatus } from '@/lib/games-editor'
 
 export type ActionResult<T> = { ok: true; data: T } | { ok: false; error: string }
@@ -23,12 +23,29 @@ async function editorClient() {
 }
 
 function describe(err: unknown): string {
-  const code = err instanceof Error ? err.message : ''
-  if (code === '401') return 'Your session expired. Please sign in again.'
-  if (code === '403') return 'You are not on the editor allowlist.'
-  if (code === '404') return 'Passage not found.'
-  if (code === '503') return 'Curation is not configured on the server (missing GROQ_API_KEY).'
-  if (code === '502') return 'The model could not curate this chapter. Try again.'
+  // Gating failures from editorClient() arrive as plain string codes.
+  if (err === 'not_authenticated') return 'Your session expired. Please sign in again.'
+  if (err === 'not_authorized') return 'You are not on the editor allowlist.'
+
+  if (err instanceof AdminApiError) {
+    switch (err.status) {
+      case 401:
+        return 'Your session expired. Please sign in again.'
+      case 403:
+        return 'You are not on the editor allowlist.'
+      case 404:
+        return 'Not found.'
+      case 503:
+        return 'Curation is not configured on the server (missing GROQ_API_KEY).'
+      case 400:
+        return err.serverMessage ?? 'Invalid request.'
+      case 502:
+        // Pass through the upstream reason (rate limit, timeout, etc.).
+        return err.serverMessage ?? 'The model could not curate this chapter. Try again.'
+      default:
+        return err.serverMessage ?? 'The request failed. Please try again.'
+    }
+  }
   return 'The request failed. Please try again.'
 }
 
@@ -40,6 +57,27 @@ export async function listPassagesAction(filters: {
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
   try {
     const data = await ctx.client.listPassages(filters)
+    return { ok: true, data }
+  } catch (err) {
+    return { ok: false, error: describe(err) }
+  }
+}
+
+export type ProposedChapter = { chapter: number; count: number }
+
+/** Distinct chapters that currently have proposed passages, with counts. */
+export async function proposedSummaryAction(): Promise<ActionResult<ProposedChapter[]>> {
+  const ctx = await editorClient()
+  if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
+  try {
+    const rows = await ctx.client.listPassages({ status: 'proposed' })
+    const counts = new Map<number, number>()
+    for (const p of rows) {
+      counts.set(p.chapter_start, (counts.get(p.chapter_start) ?? 0) + 1)
+    }
+    const data = [...counts.entries()]
+      .map(([chapter, count]) => ({ chapter, count }))
+      .sort((a, b) => a.chapter - b.chapter)
     return { ok: true, data }
   } catch (err) {
     return { ok: false, error: describe(err) }

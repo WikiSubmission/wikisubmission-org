@@ -26,7 +26,8 @@ export default async function StudioGamesPage() {
     )
   }
 
-  // Default view mirrors the CLI: passages awaiting review.
+  // Default view mirrors the CLI: passages awaiting review. The proposed list
+  // also seeds the "chapters with proposals" summary (no extra request).
   let initial: ReviewPassage[] = []
   let initialError: string | null = null
   try {
@@ -35,7 +36,19 @@ export default async function StudioGamesPage() {
     initialError = 'Could not load passages. Use the filters to retry.'
   }
 
-  return <GamesReview initialPassages={initial} initialError={initialError} />
+  const counts = new Map<number, number>()
+  for (const p of initial) counts.set(p.chapter_start, (counts.get(p.chapter_start) ?? 0) + 1)
+  const initialProposedChapters = [...counts.entries()]
+    .map(([chapter, count]) => ({ chapter, count }))
+    .sort((a, b) => a.chapter - b.chapter)
+
+  return (
+    <GamesReview
+      initialPassages={initial}
+      initialError={initialError}
+      initialProposedChapters={initialProposedChapters}
+    />
+  )
 }
 
 const notAuthorizedWrap: React.CSSProperties = {

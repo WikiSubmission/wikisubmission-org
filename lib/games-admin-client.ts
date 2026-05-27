@@ -39,6 +39,18 @@ interface CurateResult {
   skipped: boolean
 }
 
+/** Error carrying the backend status code and `message` body, for the UI. */
+export class AdminApiError extends Error {
+  readonly status: number
+  readonly serverMessage?: string
+  constructor(status: number, serverMessage?: string) {
+    super(serverMessage ? `${status}: ${serverMessage}` : `${status}`)
+    this.name = 'AdminApiError'
+    this.status = status
+    this.serverMessage = serverMessage
+  }
+}
+
 /**
  * Calls an `/admin/games` endpoint and unwraps the `{ data }` envelope.
  * Throws with the backend status code prefix so callers can map 401/403/500.
@@ -66,7 +78,14 @@ async function call<T>(
   })
 
   if (!res.ok) {
-    throw new Error(`${res.status}`)
+    let serverMessage: string | undefined
+    try {
+      const body = (await res.json()) as { message?: string }
+      serverMessage = body?.message
+    } catch {
+      // non-JSON error body; status alone will have to do
+    }
+    throw new AdminApiError(res.status, serverMessage)
   }
 
   const json = (await res.json()) as { data: T }

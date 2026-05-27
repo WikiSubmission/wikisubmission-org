@@ -8,6 +8,8 @@ import {
   seedFrequencyAction,
   loadLemmasAction,
   curateAction,
+  proposedSummaryAction,
+  type ProposedChapter,
 } from './actions'
 
 const STATUS_OPTIONS = ['proposed', 'approved', 'needs_refinement', 'rejected', 'all'] as const
@@ -24,9 +26,11 @@ const STATUS_LABELS: Record<string, string> = {
 export function GamesReview({
   initialPassages,
   initialError,
+  initialProposedChapters,
 }: {
   initialPassages: ReviewPassage[]
   initialError: string | null
+  initialProposedChapters: ProposedChapter[]
 }) {
   const [passages, setPassages] = useState<ReviewPassage[]>(initialPassages)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('proposed')
@@ -34,6 +38,13 @@ export function GamesReview({
   const [error, setError] = useState<string | null>(initialError)
   const [rowPending, setRowPending] = useState<number | null>(null)
   const [isFetching, startFetch] = useTransition()
+  const [proposedChapters, setProposedChapters] =
+    useState<ProposedChapter[]>(initialProposedChapters)
+
+  async function refreshProposedSummary() {
+    const res = await proposedSummaryAction()
+    if (res.ok) setProposedChapters(res.data)
+  }
 
   const [seedMsg, setSeedMsg] = useState<string | null>(null)
   const [lemmaMsg, setLemmaMsg] = useState<string | null>(null)
@@ -68,6 +79,8 @@ export function GamesReview({
           ? prev.filter((p) => p.id !== id)
           : prev.map((p) => (p.id === id ? { ...p, status } : p)),
       )
+      // Moving a passage out of 'proposed' changes the summary counts.
+      void refreshProposedSummary()
     } else {
       setError(res.error)
     }
@@ -108,6 +121,7 @@ export function GamesReview({
       setStatusFilter('proposed')
       setChapterFilter('')
       applyFilters('proposed', '')
+      void refreshProposedSummary()
     } else {
       setCurateMsg(res.error)
     }
@@ -154,8 +168,32 @@ export function GamesReview({
         </div>
         <p style={maintNote}>
           Runs the GROQ model over the chapter and adds new proposed passages for review. This calls
-          the model and may take a few seconds.
+          the model and may take a while for long chapters.
         </p>
+        <div style={{ marginTop: 4 }}>
+          <span style={mono}>Chapters with proposals:</span>{' '}
+          {proposedChapters.length === 0 ? (
+            <span style={{ ...mono, opacity: 0.7 }}>none yet</span>
+          ) : (
+            <span style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
+              {proposedChapters.map((pc) => (
+                <button
+                  key={pc.chapter}
+                  type="button"
+                  onClick={() => {
+                    setStatusFilter('proposed')
+                    setChapterFilter(String(pc.chapter))
+                    applyFilters('proposed', String(pc.chapter))
+                  }}
+                  style={chapterChip}
+                  title={`View chapter ${pc.chapter} proposals`}
+                >
+                  {pc.chapter} · {pc.count}
+                </button>
+              ))}
+            </span>
+          )}
+        </div>
       </section>
 
       <section style={filterBar}>
@@ -370,6 +408,18 @@ const curatePanel: React.CSSProperties = {
   background: 'var(--ed-surface)',
   display: 'grid',
   gap: 8,
+}
+
+const chapterChip: React.CSSProperties = {
+  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+  fontSize: 11,
+  letterSpacing: '0.04em',
+  padding: '3px 9px',
+  borderRadius: 2,
+  border: '1px solid var(--ed-rule)',
+  background: 'transparent',
+  color: 'var(--ed-fg)',
+  cursor: 'pointer',
 }
 
 const filterBar: React.CSSProperties = {
