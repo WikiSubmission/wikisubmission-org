@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { FillBlankPicker } from './fill-blank-picker'
 
 export const metadata = {
   title: 'Fill the Missing Word — WikiSubmission',
@@ -37,20 +38,7 @@ export default async function FillBlankEntryPage() {
         {t('fillBlankIntro')}
       </p>
 
-      <div
-        style={{
-          marginTop: 32,
-          padding: 24,
-          border: '1px dashed var(--ed-rule)',
-          borderRadius: 2,
-          color: 'var(--ed-fg-muted)',
-          fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
-          fontSize: 12,
-          letterSpacing: '0.08em',
-        }}
-      >
-        {t('comingSoonPickers')}
-      </div>
+      <FillBlankPicker />
     </section>
   )
 }

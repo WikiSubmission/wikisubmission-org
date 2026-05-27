@@ -99,6 +99,11 @@ tags:
     description: >
       Authenticated per-user endpoints for bookmarks, notes, reading progress,
       streaks, preferences, and collections.
+  - name: Games
+    description: >
+      Quran games. v1 ships "Fill the Missing Word" with curated passages,
+      deterministic per-variant generation, and global/weekly/per-variant
+      leaderboards. All endpoints require authentication.
 
 paths:
   /languages:
@@ -1745,6 +1750,217 @@ paths:
                 $ref: '#/components/schemas/CollectionDetailEnvelope'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  # -------------------------------------------------------------------------
+  # Games — Fill the Missing Word
+  # -------------------------------------------------------------------------
+  /games/fill-blank/passages:
+    get:
+      tags: [Games]
+      operationId: listGameFillBlankPassages
+      summary: List approved Fill-the-Blank passages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: language
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [en]
+            default: en
+        - name: theme
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: chapter
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 114
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GamePassageListEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /games/fill-blank/variants:
+    post:
+      tags: [Games]
+      operationId: startGameFillBlankVariant
+      summary: Start (or resume) a Fill-the-Blank round
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartGameVariantRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameVariantEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+        '501':
+          $ref: '#/components/responses/NotImplementedError'
+
+  /games/fill-blank/submit:
+    post:
+      tags: [Games]
+      operationId: submitGameFillBlankAttempt
+      summary: Submit a completed Fill-the-Blank round
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitGameAttemptRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSubmitResultEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          description: Rate-limited.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+        '501':
+          $ref: '#/components/responses/NotImplementedError'
+
+  /games/fill-blank/leaderboard:
+    get:
+      tags: [Games]
+      operationId: getGameFillBlankLeaderboard
+      summary: Get global, weekly, or per-variant leaderboard
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [global, weekly, variant]
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [short, medium, long]
+        - name: difficulty
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [easy, medium, hard, professional]
+        - name: variant_id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameLeaderboardEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/games/history:
+    get:
+      tags: [Games]
+      operationId: listMeGameHistory
+      summary: List current user's game attempts (newest first)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameHistoryEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/games/stats:
+    get:
+      tags: [Games]
+      operationId: getMeGameStats
+      summary: Aggregate game stats for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameStatsEnvelope'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
@@ -3421,6 +3637,339 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/CollectionDetail'
+
+    # -----------------------------------------------------------------------
+    # Games — Fill the Missing Word
+    # -----------------------------------------------------------------------
+    GamePassage:
+      type: object
+      required: [id, chapter_start, verse_start, chapter_end, verse_end, label, themes]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 42
+        chapter_start:
+          type: integer
+          example: 1
+        verse_start:
+          type: integer
+          example: 1
+        chapter_end:
+          type: integer
+          example: 1
+        verse_end:
+          type: integer
+          example: 7
+        label:
+          type: string
+          example: "The Key — opening prayer"
+        themes:
+          type: array
+          items:
+            type: string
+          example: ["worship", "guidance"]
+
+    GamePassageListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GamePassage'
+
+    StartGameVariantRequest:
+      type: object
+      required: [passage_id, language, difficulty, size]
+      properties:
+        passage_id:
+          type: integer
+          format: int64
+          example: 42
+        language:
+          type: string
+          enum: [en]
+          example: en
+        difficulty:
+          type: string
+          enum: [easy, medium, hard, professional]
+          example: hard
+        size:
+          type: string
+          enum: [short, medium, long]
+          example: medium
+        variant_id:
+          type: string
+          description: >
+            When provided, resume the exact variant referenced. Returns 404 if
+            the variant does not exist. Without this field the server returns
+            the lowest-counter variant the caller has not yet attempted,
+            minting a new one if all existing variants are consumed.
+          example: "p42-en-hard-medium-7"
+
+    GameRenderedVerse:
+      type: object
+      required: [verse_key, text]
+      properties:
+        verse_key:
+          type: string
+          example: "1:2"
+        text:
+          type: string
+          description: >
+            Verse text with each removed word replaced by a
+            `__BLANK_<index>__` token. Indices match the corresponding entries
+            in the `blanks` array.
+          example: "__BLANK_0__ be to GOD, Lord of the universe."
+
+    GameBlank:
+      type: object
+      required: [index, verse_key, word_position]
+      properties:
+        index:
+          type: integer
+          description: 0-based blank index within the variant.
+          example: 0
+        verse_key:
+          type: string
+          example: "1:2"
+        word_position:
+          type: integer
+          description: 0-based word index of the blank inside its verse.
+          example: 0
+        options:
+          type: array
+          description: >
+            Only present for `difficulty = easy`. Shuffled deterministically;
+            exactly one is the answer.
+          items:
+            type: string
+
+    GameVariant:
+      type: object
+      required: [variant_id, passage, language, difficulty, size, rendered_verses, blanks, replay]
+      properties:
+        variant_id:
+          type: string
+          example: "p42-en-hard-medium-7"
+        passage:
+          $ref: '#/components/schemas/GamePassage'
+        language:
+          type: string
+          enum: [en]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard, professional]
+        size:
+          type: string
+          enum: [short, medium, long]
+        rendered_verses:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameRenderedVerse'
+        blanks:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameBlank'
+        replay:
+          type: boolean
+          description: >
+            True when this variant has already been played by the caller and
+            the server cycled back because every other variant in the group
+            has also been played.
+
+    GameVariantEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/GameVariant'
+
+    GameGuess:
+      type: object
+      required: [index, value]
+      properties:
+        index:
+          type: integer
+          example: 0
+        value:
+          type: string
+          example: "Praise"
+
+    SubmitGameAttemptRequest:
+      type: object
+      required: [variant_id, guesses, hints_used]
+      properties:
+        variant_id:
+          type: string
+          example: "p42-en-hard-medium-7"
+        guesses:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameGuess'
+        hints_used:
+          type: integer
+          minimum: 0
+          example: 1
+        elapsed_ms:
+          type: integer
+          description: Time taken in milliseconds. Tiebreaker only.
+          minimum: 0
+          example: 73214
+
+    GamePerBlankResult:
+      type: object
+      required: [index, correct]
+      properties:
+        index:
+          type: integer
+        correct:
+          type: boolean
+        accepted_answer:
+          type: string
+          description: >
+            Returned only when `correct = true`. Incorrect blanks omit this
+            field so the user must replay to see the truth.
+
+    GameSubmitResult:
+      type: object
+      required: [attempt_id, score, correct_count, total_count, per_blank, difficulty_multiplier, hint_penalty]
+      properties:
+        attempt_id:
+          type: string
+          example: "01HBJV5Z6Q5T7B5W2J4N8Q3X9F"
+        score:
+          type: integer
+          example: 1485
+        correct_count:
+          type: integer
+          example: 7
+        total_count:
+          type: integer
+          example: 8
+        per_blank:
+          type: array
+          items:
+            $ref: '#/components/schemas/GamePerBlankResult'
+        difficulty_multiplier:
+          type: number
+          format: double
+          example: 2.0
+        hint_penalty:
+          type: integer
+          example: 25
+
+    GameSubmitResultEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/GameSubmitResult'
+
+    GameLeaderboardEntry:
+      type: object
+      required: [rank, user_id, score, size, difficulty, attempted_at]
+      properties:
+        rank:
+          type: integer
+        user_id:
+          type: integer
+          format: int64
+        display_name:
+          type: string
+          nullable: true
+        score:
+          type: integer
+        size:
+          type: string
+        difficulty:
+          type: string
+        elapsed_ms:
+          type: integer
+          nullable: true
+        variant_id:
+          type: string
+        attempted_at:
+          type: string
+          format: date-time
+
+    GameLeaderboardEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameLeaderboardEntry'
+
+    GameHistoryEntry:
+      type: object
+      required: [attempt_id, variant_id, score, size, difficulty, completed_at]
+      properties:
+        attempt_id:
+          type: string
+        variant_id:
+          type: string
+        score:
+          type: integer
+        size:
+          type: string
+        difficulty:
+          type: string
+        completed_at:
+          type: string
+          format: date-time
+
+    GameHistoryEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameHistoryEntry'
+        next_cursor:
+          type: string
+          nullable: true
+
+    GameStatsByDifficulty:
+      type: object
+      required: [attempts, best_score]
+      properties:
+        attempts:
+          type: integer
+        best_score:
+          type: integer
+
+    GameStats:
+      type: object
+      required: [total_attempts, best_score, variants_completed, by_difficulty]
+      properties:
+        total_attempts:
+          type: integer
+        best_score:
+          type: integer
+        variants_completed:
+          type: integer
+        by_difficulty:
+          type: object
+          properties:
+            easy:
+              $ref: '#/components/schemas/GameStatsByDifficulty'
+            medium:
+              $ref: '#/components/schemas/GameStatsByDifficulty'
+            hard:
+              $ref: '#/components/schemas/GameStatsByDifficulty'
+            professional:
+              $ref: '#/components/schemas/GameStatsByDifficulty'
+
+    GameStatsEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/GameStats'
 
   responses:
     Conflict:

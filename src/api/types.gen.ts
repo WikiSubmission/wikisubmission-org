@@ -719,6 +719,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/games/fill-blank/passages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List approved Fill-the-Blank passages */
+        get: operations["listGameFillBlankPassages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/games/fill-blank/variants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start (or resume) a Fill-the-Blank round */
+        post: operations["startGameFillBlankVariant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/games/fill-blank/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit a completed Fill-the-Blank round */
+        post: operations["submitGameFillBlankAttempt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/games/fill-blank/leaderboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get global, weekly, or per-variant leaderboard */
+        get: operations["getGameFillBlankLeaderboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/games/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user's game attempts (newest first) */
+        get: operations["listMeGameHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/games/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Aggregate game stats for the current user */
+        get: operations["getMeGameStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1771,6 +1873,195 @@ export interface components {
         };
         CollectionDetailEnvelope: {
             data: components["schemas"]["CollectionDetail"];
+        };
+        GamePassage: {
+            /**
+             * Format: int64
+             * @example 42
+             */
+            id: number;
+            /** @example 1 */
+            chapter_start: number;
+            /** @example 1 */
+            verse_start: number;
+            /** @example 1 */
+            chapter_end: number;
+            /** @example 7 */
+            verse_end: number;
+            /** @example The Key — opening prayer */
+            label: string;
+            /**
+             * @example [
+             *       "worship",
+             *       "guidance"
+             *     ]
+             */
+            themes: string[];
+        };
+        GamePassageListEnvelope: {
+            data: components["schemas"]["GamePassage"][];
+        };
+        StartGameVariantRequest: {
+            /**
+             * Format: int64
+             * @example 42
+             */
+            passage_id: number;
+            /**
+             * @example en
+             * @enum {string}
+             */
+            language: "en";
+            /**
+             * @example hard
+             * @enum {string}
+             */
+            difficulty: "easy" | "medium" | "hard" | "professional";
+            /**
+             * @example medium
+             * @enum {string}
+             */
+            size: "short" | "medium" | "long";
+            /**
+             * @description When provided, resume the exact variant referenced. Returns 404 if the variant does not exist. Without this field the server returns the lowest-counter variant the caller has not yet attempted, minting a new one if all existing variants are consumed.
+             * @example p42-en-hard-medium-7
+             */
+            variant_id?: string;
+        };
+        GameRenderedVerse: {
+            /** @example 1:2 */
+            verse_key: string;
+            /**
+             * @description Verse text with each removed word replaced by a `__BLANK_<index>__` token. Indices match the corresponding entries in the `blanks` array.
+             * @example __BLANK_0__ be to GOD, Lord of the universe.
+             */
+            text: string;
+        };
+        GameBlank: {
+            /**
+             * @description 0-based blank index within the variant.
+             * @example 0
+             */
+            index: number;
+            /** @example 1:2 */
+            verse_key: string;
+            /**
+             * @description 0-based word index of the blank inside its verse.
+             * @example 0
+             */
+            word_position: number;
+            /** @description Only present for `difficulty = easy`. Shuffled deterministically; exactly one is the answer. */
+            options?: string[];
+        };
+        GameVariant: {
+            /** @example p42-en-hard-medium-7 */
+            variant_id: string;
+            passage: components["schemas"]["GamePassage"];
+            /** @enum {string} */
+            language: "en";
+            /** @enum {string} */
+            difficulty: "easy" | "medium" | "hard" | "professional";
+            /** @enum {string} */
+            size: "short" | "medium" | "long";
+            rendered_verses: components["schemas"]["GameRenderedVerse"][];
+            blanks: components["schemas"]["GameBlank"][];
+            /** @description True when this variant has already been played by the caller and the server cycled back because every other variant in the group has also been played. */
+            replay: boolean;
+        };
+        GameVariantEnvelope: {
+            data: components["schemas"]["GameVariant"];
+        };
+        GameGuess: {
+            /** @example 0 */
+            index: number;
+            /** @example Praise */
+            value: string;
+        };
+        SubmitGameAttemptRequest: {
+            /** @example p42-en-hard-medium-7 */
+            variant_id: string;
+            guesses: components["schemas"]["GameGuess"][];
+            /** @example 1 */
+            hints_used: number;
+            /**
+             * @description Time taken in milliseconds. Tiebreaker only.
+             * @example 73214
+             */
+            elapsed_ms?: number;
+        };
+        GamePerBlankResult: {
+            index: number;
+            correct: boolean;
+            /** @description Returned only when `correct = true`. Incorrect blanks omit this field so the user must replay to see the truth. */
+            accepted_answer?: string;
+        };
+        GameSubmitResult: {
+            /** @example 01HBJV5Z6Q5T7B5W2J4N8Q3X9F */
+            attempt_id: string;
+            /** @example 1485 */
+            score: number;
+            /** @example 7 */
+            correct_count: number;
+            /** @example 8 */
+            total_count: number;
+            per_blank: components["schemas"]["GamePerBlankResult"][];
+            /**
+             * Format: double
+             * @example 2
+             */
+            difficulty_multiplier: number;
+            /** @example 25 */
+            hint_penalty: number;
+        };
+        GameSubmitResultEnvelope: {
+            data: components["schemas"]["GameSubmitResult"];
+        };
+        GameLeaderboardEntry: {
+            rank: number;
+            /** Format: int64 */
+            user_id: number;
+            display_name?: string | null;
+            score: number;
+            size: string;
+            difficulty: string;
+            elapsed_ms?: number | null;
+            variant_id?: string;
+            /** Format: date-time */
+            attempted_at: string;
+        };
+        GameLeaderboardEnvelope: {
+            data: components["schemas"]["GameLeaderboardEntry"][];
+        };
+        GameHistoryEntry: {
+            attempt_id: string;
+            variant_id: string;
+            score: number;
+            size: string;
+            difficulty: string;
+            /** Format: date-time */
+            completed_at: string;
+        };
+        GameHistoryEnvelope: {
+            data: components["schemas"]["GameHistoryEntry"][];
+            next_cursor?: string | null;
+        };
+        GameStatsByDifficulty: {
+            attempts: number;
+            best_score: number;
+        };
+        GameStats: {
+            total_attempts: number;
+            best_score: number;
+            variants_completed: number;
+            by_difficulty: {
+                easy?: components["schemas"]["GameStatsByDifficulty"];
+                medium?: components["schemas"]["GameStatsByDifficulty"];
+                hard?: components["schemas"]["GameStatsByDifficulty"];
+                professional?: components["schemas"]["GameStatsByDifficulty"];
+            };
+        };
+        GameStatsEnvelope: {
+            data: components["schemas"]["GameStats"];
         };
     };
     responses: {
@@ -3325,6 +3616,173 @@ export interface operations {
                 };
             };
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listGameFillBlankPassages: {
+        parameters: {
+            query?: {
+                language?: "en";
+                theme?: string;
+                chapter?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GamePassageListEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    startGameFillBlankVariant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartGameVariantRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameVariantEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+            501: components["responses"]["NotImplementedError"];
+        };
+    };
+    submitGameFillBlankAttempt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitGameAttemptRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameSubmitResultEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            /** @description Rate-limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message: string;
+                    };
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+            501: components["responses"]["NotImplementedError"];
+        };
+    };
+    getGameFillBlankLeaderboard: {
+        parameters: {
+            query: {
+                scope: "global" | "weekly" | "variant";
+                size?: "short" | "medium" | "long";
+                difficulty?: "easy" | "medium" | "hard" | "professional";
+                variant_id?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameLeaderboardEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listMeGameHistory: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameHistoryEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeGameStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameStatsEnvelope"];
+                };
+            };
             500: components["responses"]["InternalServerErrror"];
         };
     };

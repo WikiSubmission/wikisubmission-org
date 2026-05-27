@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { FillBlankRound } from './fill-blank-round'
 
 type Params = Promise<{ variantId: string }>
 
@@ -28,6 +29,7 @@ export default async function FillBlankPlayPage({ params }: { params: Params }) 
       <h1
         style={{
           marginTop: 8,
+          marginBottom: 24,
           fontFamily: 'var(--font-cormorant), Georgia, serif',
           fontSize: 'clamp(28px, 4vw, 40px)',
           lineHeight: 1.1,
@@ -35,9 +37,7 @@ export default async function FillBlankPlayPage({ params }: { params: Params }) 
       >
         {t('playTitle')}
       </h1>
-      <p style={{ color: 'var(--ed-fg-muted)', marginTop: 12 }}>
-        {t('comingSoonRound')}
-      </p>
+      <FillBlankRound variantId={variantId} />
     </section>
   )
 }

@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { FillBlankResult } from './fill-blank-result'
 
 type Params = Promise<{ attemptId: string }>
 
@@ -35,9 +36,9 @@ export default async function FillBlankResultPage({ params }: { params: Params }
       >
         {t('resultTitle')}
       </h1>
-      <p style={{ color: 'var(--ed-fg-muted)', marginTop: 12 }}>
-        {t('comingSoonResult')}
-      </p>
+      <div style={{ marginTop: 24 }}>
+        <FillBlankResult attemptId={attemptId} />
+      </div>
     </section>
   )
 }

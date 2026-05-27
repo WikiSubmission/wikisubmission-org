@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { GamesLeaderboard } from './games-leaderboard'
 
 export const metadata = {
   title: 'Leaderboard — Quran Games — WikiSubmission',
@@ -25,9 +26,7 @@ export default async function GamesLeaderboardPage() {
       >
         {t('leaderboardTitle')}
       </h1>
-      <p style={{ color: 'var(--ed-fg-muted)', marginTop: 12 }}>
-        {t('comingSoonLeaderboard')}
-      </p>
+      <GamesLeaderboard />
     </section>
   )
 }

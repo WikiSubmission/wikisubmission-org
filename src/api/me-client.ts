@@ -1,5 +1,5 @@
 import { wsApi } from './client'
-import type { components } from './types.gen'
+import type { components, paths } from './types.gen'
 
 type BookmarkData = components['schemas']['Bookmark']
 type BookmarkCategoryData = components['schemas']['BookmarkCategory']
@@ -240,130 +240,64 @@ export const meApi = {
   unsubscribeCollection: (id: number): Promise<void> =>
     callVoid(wsApi.DELETE('/me/collection-subscriptions/{id}', { params: { path: { id } } })),
 
-  // ── Games (ws-backend endpoints pending — see app/quran/games) ───────────
-  // gamesApi is declared below. Once backend ships, regenerate types via
-  // `npm run sync-api && npm run generate` and swap each call to typed
-  // `wsApi.GET/POST` invocations matching the patterns above. The getter
-  // defers resolution until first access, avoiding the temporal-dead-zone
-  // reference while letting callers use `meApi.games.startVariant(...)`.
+  // ── Games (Fill-the-Blank) ───────────────────────────────────────────────
+  // gamesApi is declared below. The getter defers resolution until first
+  // access, avoiding the temporal-dead-zone reference while letting callers
+  // use `meApi.games.startVariant(...)`.
   get games() {
     return gamesApi
   },
 }
 
-// ── Games contract (frontend-side stubs) ───────────────────────────────────
+// ── Games contract (types derived from the generated OpenAPI schemas) ───────
 
-export type GameLanguage = 'en' | 'ar'
-export type GameDifficulty = 'easy' | 'medium' | 'hard' | 'professional'
-export type GameRoundSize = 'short' | 'medium' | 'long'
-export type GameLeaderboardScope = 'global' | 'weekly' | 'variant'
+export type GameLanguage = StartGameVariantRequest['language']
+export type GameDifficulty = StartGameVariantRequest['difficulty']
+export type GameRoundSize = StartGameVariantRequest['size']
+export type GameLeaderboardScope = GameLeaderboardQuery['scope']
 
-export interface GamePassage {
-  id: number
-  chapter_start: number
-  verse_start: number
-  chapter_end: number
-  verse_end: number
-  label: string
-}
+export type GamePassage = components['schemas']['GamePassage']
+export type GameBlank = components['schemas']['GameBlank']
+export type GameRenderedVerse = components['schemas']['GameRenderedVerse']
+export type GameVariant = components['schemas']['GameVariant']
+export type GameSubmitResult = components['schemas']['GameSubmitResult']
+export type GamePerBlankResult = components['schemas']['GamePerBlankResult']
+export type GameLeaderboardEntry = components['schemas']['GameLeaderboardEntry']
+export type GameHistoryEntry = components['schemas']['GameHistoryEntry']
+export type GameStats = components['schemas']['GameStats']
 
-export interface GameBlank {
-  index: number
-  // For 'easy' (multiple choice): server returns four options, shuffled per variant.
-  // For all other tiers: server omits options; client submits a typed guess.
-  options?: string[]
-}
+type StartGameVariantRequest = components['schemas']['StartGameVariantRequest']
+type SubmitGameAttemptRequest = components['schemas']['SubmitGameAttemptRequest']
+type GameLeaderboardQuery = NonNullable<
+  paths['/games/fill-blank/leaderboard']['get']['parameters']['query']
+>
 
-export interface GameVariant {
-  variant_id: string
-  passage: GamePassage
-  language: GameLanguage
-  difficulty: GameDifficulty
-  size: GameRoundSize
-  // Verses rendered with blanks substituted (e.g. text contains __BLANK_0__ tokens).
-  rendered_verses: Array<{ verse_key: string; text: string }>
-  blanks: GameBlank[]
-}
-
-export interface GameSubmitResult {
-  attempt_id: string
-  score: number
-  correct_count: number
-  total_count: number
-  per_blank: Array<{ index: number; correct: boolean; accepted_answer?: string }>
-  difficulty_multiplier: number
-  hint_penalty: number
-}
-
-export interface GameLeaderboardEntry {
-  rank: number
-  user_id: string
-  display_name: string
-  score: number
-  size: GameRoundSize
-  difficulty: GameDifficulty
-  attempted_at: string
-}
-
-export interface GameHistoryEntry {
-  attempt_id: string
-  variant_id: string
-  score: number
-  size: GameRoundSize
-  difficulty: GameDifficulty
-  completed_at: string
-}
-
-export interface GameStats {
-  total_attempts: number
-  best_score: number
-  variants_completed: number
-  by_difficulty: Record<GameDifficulty, { attempts: number; best_score: number }>
-}
-
-function notImplemented(endpoint: string, args?: unknown): never {
-  const argsStr = args === undefined ? '' : ` (args: ${JSON.stringify(args)})`
-  throw new Error(`games:${endpoint} — backend endpoint not implemented yet${argsStr}`)
-}
+type GamePassageListEnvelope = components['schemas']['GamePassageListEnvelope']
+type GameVariantEnvelope = components['schemas']['GameVariantEnvelope']
+type GameSubmitResultEnvelope = components['schemas']['GameSubmitResultEnvelope']
+type GameLeaderboardEnvelope = components['schemas']['GameLeaderboardEnvelope']
+type GameHistoryEnvelope = components['schemas']['GameHistoryEnvelope']
+type GameStatsEnvelope = components['schemas']['GameStatsEnvelope']
 
 const gamesApi = {
-  listPassages: (opts?: { language?: GameLanguage }): Promise<{ data: GamePassage[] }> => {
-    notImplemented('GET /games/fill-blank/passages', opts)
-  },
+  listPassages: (
+    opts?: { language?: GameLanguage; theme?: string; chapter?: number }
+  ): Promise<GamePassageListEnvelope> =>
+    unwrap(wsApi.GET('/games/fill-blank/passages', { params: { query: opts ?? {} } })),
 
-  startVariant: (body: {
-    passage_id: number
-    language: GameLanguage
-    difficulty: GameDifficulty
-    size: GameRoundSize
-    variant_id?: string
-  }): Promise<{ data: GameVariant }> => {
-    notImplemented('POST /games/fill-blank/variants', body)
-  },
+  startVariant: (body: StartGameVariantRequest): Promise<GameVariantEnvelope> =>
+    unwrap(wsApi.POST('/games/fill-blank/variants', { body })),
 
-  submitVariant: (body: {
-    variant_id: string
-    guesses: Array<{ index: number; value: string }>
-    hints_used: number
-  }): Promise<{ data: GameSubmitResult }> => {
-    notImplemented('POST /games/fill-blank/submit', body)
-  },
+  submitVariant: (body: SubmitGameAttemptRequest): Promise<GameSubmitResultEnvelope> =>
+    unwrap(wsApi.POST('/games/fill-blank/submit', { body })),
 
-  getLeaderboard: (opts: {
-    scope: GameLeaderboardScope
-    size?: GameRoundSize
-    difficulty?: GameDifficulty
-    variant_id?: string
-    limit?: number
-  }): Promise<{ data: GameLeaderboardEntry[] }> => {
-    notImplemented('GET /games/fill-blank/leaderboard', opts)
-  },
+  getLeaderboard: (query: GameLeaderboardQuery): Promise<GameLeaderboardEnvelope> =>
+    unwrap(wsApi.GET('/games/fill-blank/leaderboard', { params: { query } })),
 
-  getHistory: (opts?: { limit?: number; cursor?: string }): Promise<{ data: GameHistoryEntry[] }> => {
-    notImplemented('GET /me/games/history', opts)
-  },
+  getHistory: (
+    opts?: { limit?: number; cursor?: string }
+  ): Promise<GameHistoryEnvelope> =>
+    unwrap(wsApi.GET('/me/games/history', { params: { query: opts ?? {} } })),
 
-  getStats: (): Promise<{ data: GameStats }> => {
-    notImplemented('GET /me/games/stats')
-  },
+  getStats: (): Promise<GameStatsEnvelope> => unwrap(wsApi.GET('/me/games/stats')),
 }
