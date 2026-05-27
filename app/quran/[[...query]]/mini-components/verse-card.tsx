@@ -32,7 +32,8 @@ import {
   Loader2,
   ArrowUpRight,
   Bookmark,
-  StickyNote,
+  BookmarkCheck,
+  NotebookPen,
   Plus,
   BookMarked,
 } from 'lucide-react'
@@ -743,26 +744,40 @@ export const VerseCard = memo(
 
           {/* Verse key + action buttons */}
           <div className="flex items-center justify-between gap-2">
-            {verseHref ? (
-              <Link
-                href={verseHref}
-                target="_blank"
-                className="group flex items-center gap-1 w-fit"
-              >
-                <div className="flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full transition-colors">
-                  <span className="text-lg font-semibold">{chNum}</span>
+            <div className="flex min-w-0 items-center gap-1.5">
+              {verseHref ? (
+                <Link
+                  href={verseHref}
+                  target="_blank"
+                  className="group flex w-fit items-center gap-1"
+                >
+                  <div className="flex items-start space-x-0.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-primary transition-colors">
+                    <span className="text-lg font-semibold">{chNum}</span>
+                    <span>:</span>
+                    <span className="text-lg font-semibold">{vNum}</span>
+                  </div>
+                  <ArrowUpRight className="size-3.5 text-muted-foreground transition-colors group-hover:text-primary" />
+                </Link>
+              ) : (
+                <div className="flex w-fit shrink-0 items-start space-x-0.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-primary">
+                  <span className="w-full text-lg font-semibold">{chNum}</span>
                   <span>:</span>
-                  <span className="text-lg font-semibold">{vNum}</span>
+                  <span className="w-full text-lg font-semibold">{vNum}</span>
                 </div>
-                <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
-              </Link>
-            ) : (
-              <div className="w-fit shrink-0 flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full">
-                <span className="w-full text-lg font-semibold">{chNum}</span>
-                <span>:</span>
-                <span className="w-full text-lg font-semibold">{vNum}</span>
-              </div>
-            )}
+              )}
+              {isCoverToCover && (
+                <span
+                  title="Marked as cover to cover"
+                  className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/20"
+                >
+                  <BookmarkCheck
+                    aria-hidden="true"
+                    className="size-3.5"
+                  />
+                  <span className="sr-only">Marked as cover to cover</span>
+                </span>
+              )}
+            </div>
             <div className="verse-actions flex items-center gap-1">
               {showBookmark && (
                 <DropdownMenu>
@@ -910,10 +925,7 @@ export const VerseCard = memo(
                     setNotesOpen(true)
                   }}
                 >
-                  <StickyNote
-                    className="w-4 h-4"
-                    fill={note ? 'currentColor' : 'none'}
-                  />
+                  <NotebookPen className="w-4 h-4" />
                 </Button>
               )}
               {showCopyButton && (
