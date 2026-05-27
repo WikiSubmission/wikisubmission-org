@@ -128,7 +128,14 @@ export async function curateAction(
   chapter: number,
   refine?: boolean,
 ): Promise<
-  ActionResult<{ chapter: number; proposed: number; dropped: number; refine: boolean; skipped: boolean }>
+  ActionResult<{
+    chapter: number
+    proposed: number
+    dropped: number
+    refine: boolean
+    skipped: boolean
+    partial: boolean
+  }>
 > {
   const ctx = await editorClient()
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }

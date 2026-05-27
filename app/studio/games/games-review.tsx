@@ -115,8 +115,16 @@ export function GamesReview({
     setCurateMsg(null)
     const res = await curateAction(chapter)
     if (res.ok) {
-      const dropped = res.data.dropped > 0 ? `, ${res.data.dropped} dropped` : ''
-      setCurateMsg(`Proposed ${res.data.proposed} passage(s) for chapter ${res.data.chapter}${dropped}.`)
+      const { proposed, dropped, partial, chapter: ch } = res.data
+      const droppedNote = dropped > 0 ? `, ${dropped} dropped` : ''
+      if (proposed === 0 && !partial) {
+        setCurateMsg(`Chapter ${ch} has no remaining verses to curate${droppedNote}.`)
+      } else {
+        const partialNote = partial
+          ? ' Hit the rate limit before finishing; click again in a minute to continue.'
+          : ''
+        setCurateMsg(`Proposed ${proposed} passage(s) for chapter ${ch}${droppedNote}.${partialNote}`)
+      }
       // Surface the freshly proposed passages: switch to that view and refetch.
       setStatusFilter('proposed')
       setChapterFilter('')

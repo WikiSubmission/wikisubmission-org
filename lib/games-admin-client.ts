@@ -37,6 +37,7 @@ interface CurateResult {
   dropped: number
   refine: boolean
   skipped: boolean
+  partial: boolean
 }
 
 /** Error carrying the backend status code and `message` body, for the UI. */
