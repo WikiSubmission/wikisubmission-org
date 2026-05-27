@@ -7,9 +7,11 @@ import {
   type GameLeaderboardEntry,
   type GameLeaderboardScope,
   type GameDifficulty,
+  type GameRoundSize,
 } from '@/src/api/me-client'
 
 const DIFFICULTIES: GameDifficulty[] = ['easy', 'medium', 'hard', 'professional']
+const SIZES: GameRoundSize[] = ['short', 'medium', 'long']
 
 type Board =
   | { status: 'loading' }
@@ -19,17 +21,16 @@ type Board =
 export function GamesLeaderboard() {
   const t = useTranslations('games')
   const [scope, setScope] = useState<Extract<GameLeaderboardScope, 'global' | 'weekly'>>('global')
-  const [difficulty, setDifficulty] = useState<GameDifficulty | 'all'>('all')
+  // Global/weekly boards are bucketed by (size, difficulty), so both are
+  // always sent — there is no "all" board.
+  const [size, setSize] = useState<GameRoundSize>('short')
+  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy')
   const [board, setBoard] = useState<Board>({ status: 'loading' })
 
   useEffect(() => {
     let active = true
     meApi.games
-      .getLeaderboard({
-        scope,
-        limit: 50,
-        ...(difficulty !== 'all' ? { difficulty } : {}),
-      })
+      .getLeaderboard({ scope, size, difficulty, limit: 50 })
       .then(({ data }) => {
         if (active) setBoard({ status: 'ready', entries: data })
       })
@@ -39,14 +40,19 @@ export function GamesLeaderboard() {
     return () => {
       active = false
     }
-  }, [scope, difficulty])
+  }, [scope, size, difficulty])
 
   function changeScope(next: Extract<GameLeaderboardScope, 'global' | 'weekly'>) {
     setBoard({ status: 'loading' })
     setScope(next)
   }
 
-  function changeDifficulty(next: GameDifficulty | 'all') {
+  function changeSize(next: GameRoundSize) {
+    setBoard({ status: 'loading' })
+    setSize(next)
+  }
+
+  function changeDifficulty(next: GameDifficulty) {
     setBoard({ status: 'loading' })
     setDifficulty(next)
   }
@@ -57,20 +63,23 @@ export function GamesLeaderboard() {
         <Tab active={scope === 'global'} onClick={() => changeScope('global')} label={t('tabGlobal')} />
         <Tab active={scope === 'weekly'} onClick={() => changeScope('weekly')} label={t('tabWeekly')} />
         <select
-          value={difficulty}
-          onChange={(e) => changeDifficulty(e.target.value as GameDifficulty | 'all')}
-          aria-label={t('pickerDifficultyLabel')}
-          style={{
-            marginLeft: 'auto',
-            padding: '8px 12px',
-            borderRadius: 2,
-            border: '1px solid var(--ed-rule)',
-            background: 'var(--ed-surface)',
-            color: 'var(--ed-fg)',
-            fontSize: 13,
-          }}
+          value={size}
+          onChange={(e) => changeSize(e.target.value as GameRoundSize)}
+          aria-label={t('pickerSizeLabel')}
+          style={{ ...selectStyle, marginLeft: 'auto' }}
         >
-          <option value="all">{t('pickerDifficultyLabel')}</option>
+          {SIZES.map((s) => (
+            <option key={s} value={s}>
+              {t(`size${s.charAt(0).toUpperCase()}${s.slice(1)}` as Parameters<typeof t>[0])}
+            </option>
+          ))}
+        </select>
+        <select
+          value={difficulty}
+          onChange={(e) => changeDifficulty(e.target.value as GameDifficulty)}
+          aria-label={t('pickerDifficultyLabel')}
+          style={selectStyle}
+        >
           {DIFFICULTIES.map((d) => (
             <option key={d} value={d}>
               {t(`difficulty${d.charAt(0).toUpperCase()}${d.slice(1)}` as Parameters<typeof t>[0])}
@@ -130,6 +139,15 @@ function Tab({ active, onClick, label }: { active: boolean; onClick: () => void;
 }
 
 const muted: React.CSSProperties = { color: 'var(--ed-fg-muted)' }
+
+const selectStyle: React.CSSProperties = {
+  padding: '8px 12px',
+  borderRadius: 2,
+  border: '1px solid var(--ed-rule)',
+  background: 'var(--ed-surface)',
+  color: 'var(--ed-fg)',
+  fontSize: 13,
+}
 
 const th: React.CSSProperties = {
   fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
