@@ -1,5 +1,28 @@
+import { getSession } from 'next-auth/react'
 import { wsApi } from './client'
 import type { components, paths } from './types.gen'
+
+// Base URL for out-of-contract endpoints that are not in the OpenAPI surface
+// (and so are not reachable through the typed wsApi client).
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '')
+
+// rawPost calls an endpoint outside the generated contract, injecting the same
+// session bearer token the typed client uses.
+async function rawPost<T>(path: string, body: unknown): Promise<T> {
+  const session = await getSession()
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
+    },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    throw new Error(`${res.status} ${res.statusText}`)
+  }
+  return res.json() as Promise<T>
+}
 
 type BookmarkData = components['schemas']['Bookmark']
 type BookmarkCategoryData = components['schemas']['BookmarkCategory']
@@ -301,4 +324,12 @@ const gamesApi = {
     unwrap(wsApi.GET('/me/games/history', { params: { query: opts ?? {} } })),
 
   getStats: (): Promise<GameStatsEnvelope> => unwrap(wsApi.GET('/me/games/stats')),
+
+  // Validate a single blank for instant feedback. Returns only correct/incorrect
+  // — never the answer — so the leaderboard stays cheat-resistant.
+  checkBlank: (body: {
+    variant_id: string
+    index: number
+    guess: string
+  }): Promise<{ correct: boolean }> => rawPost('/games/fill-blank/check', body),
 }

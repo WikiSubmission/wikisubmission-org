@@ -19,11 +19,17 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
 
   const [load, setLoad] = useState<LoadState>({ status: 'loading' })
   const [guesses, setGuesses] = useState<Record<number, string>>({})
+  // Per-blank instant feedback. Reflects whether the current guess is correct,
+  // checked server-side without ever exposing the answer. The correct answer is
+  // only revealed on the result page after final submit.
+  const [feedback, setFeedback] = useState<Record<number, 'correct' | 'wrong'>>({})
   // Per-blank count of hints revealed (0..3 — first letter, length, first two).
   const [hintsRevealed, setHintsRevealed] = useState<Record<number, number>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const startedAt = useRef<number>(0)
+  // DOM refs for each blank, keyed by index, so Enter can advance focus.
+  const inputRefs = useRef<Map<number, HTMLInputElement | HTMLSelectElement>>(new Map())
 
   useEffect(() => {
     let active = true
@@ -68,6 +74,63 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   const revealHint = useCallback((index: number, max: number) => {
     setHintsRevealed((prev) => ({ ...prev, [index]: Math.min((prev[index] ?? 0) + 1, max) }))
   }, [])
+
+  // Update a guess and invalidate any prior feedback for that blank until it is
+  // re-checked, so a stale green/red marker never lingers while editing.
+  function setGuess(index: number, value: string) {
+    setGuesses((prev) => ({ ...prev, [index]: value }))
+    setFeedback((prev) => {
+      if (!(index in prev)) return prev
+      const next = { ...prev }
+      delete next[index]
+      return next
+    })
+  }
+
+  // Check one blank for instant feedback. Advisory only; never reveals answers.
+  async function checkOne(index: number) {
+    if (!variant) return
+    const value = (guesses[index] ?? '').trim()
+    if (value === '') {
+      setFeedback((prev) => {
+        if (!(index in prev)) return prev
+        const next = { ...prev }
+        delete next[index]
+        return next
+      })
+      return
+    }
+    try {
+      const { correct } = await meApi.games.checkBlank({
+        variant_id: variant.variant_id,
+        index,
+        guess: value,
+      })
+      setFeedback((prev) => ({ ...prev, [index]: correct ? 'correct' : 'wrong' }))
+    } catch {
+      // Swallow — feedback is advisory; final submit is authoritative.
+    }
+  }
+
+  const registerRef = useCallback((index: number, el: HTMLInputElement | HTMLSelectElement | null) => {
+    if (el) inputRefs.current.set(index, el)
+    else inputRefs.current.delete(index)
+  }, [])
+
+  // Enter moves to the next blank; on the last blank it submits the round.
+  function advanceFrom(index: number) {
+    if (!variant) return
+    const order = variant.blanks.map((b) => b.index)
+    const pos = order.indexOf(index)
+    for (let i = pos + 1; i < order.length; i += 1) {
+      const el = inputRefs.current.get(order[i])
+      if (el) {
+        el.focus()
+        return
+      }
+    }
+    submit()
+  }
 
   async function submit() {
     if (!variant || submitting) return
@@ -121,9 +184,13 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
               text: v.text,
               blanks: blanksByIndex,
               guesses,
+              feedback,
               hintsRevealed,
-              onChange: (index, value) => setGuesses((prev) => ({ ...prev, [index]: value })),
+              onChange: setGuess,
+              onCheck: checkOne,
+              onEnter: advanceFrom,
               onReveal: revealHint,
+              registerRef,
             })}
           </p>
         ))}
@@ -141,13 +208,19 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   )
 }
 
+type BlankFeedback = 'correct' | 'wrong'
+
 interface RenderContext {
   text: string
   blanks: Map<number, GameBlank>
   guesses: Record<number, string>
+  feedback: Record<number, BlankFeedback>
   hintsRevealed: Record<number, number>
   onChange: (index: number, value: string) => void
+  onCheck: (index: number) => void
+  onEnter: (index: number) => void
   onReveal: (index: number, max: number) => void
+  registerRef: (index: number, el: HTMLInputElement | HTMLSelectElement | null) => void
 }
 
 function renderVerse(ctx: RenderContext): React.ReactNode[] {
@@ -168,9 +241,13 @@ function renderVerse(ctx: RenderContext): React.ReactNode[] {
         blank={blank}
         index={index}
         value={ctx.guesses[index] ?? ''}
+        feedback={ctx.feedback[index]}
         revealed={ctx.hintsRevealed[index] ?? 0}
         onChange={(value) => ctx.onChange(index, value)}
+        onCheck={() => ctx.onCheck(index)}
+        onEnter={() => ctx.onEnter(index)}
         onReveal={() => ctx.onReveal(index, MAX_HINTS_PER_BLANK)}
+        registerRef={(el) => ctx.registerRef(index, el)}
       />,
     )
     lastIndex = match.index + match[0].length
@@ -189,26 +266,45 @@ function BlankInput({
   blank,
   index,
   value,
+  feedback,
   revealed,
   onChange,
+  onCheck,
+  onEnter,
   onReveal,
+  registerRef,
 }: {
   blank: GameBlank | undefined
   index: number
   value: string
+  feedback: BlankFeedback | undefined
   revealed: number
   onChange: (value: string) => void
+  onCheck: () => void
+  onEnter: () => void
   onReveal: () => void
+  registerRef: (el: HTMLInputElement | HTMLSelectElement | null) => void
 }) {
   const t = useTranslations('games')
+  const feedbackStyle = feedback === 'correct' ? correctStyle : feedback === 'wrong' ? wrongStyle : null
 
   if (blank?.options && blank.options.length > 0) {
     return (
       <select
+        ref={registerRef}
         aria-label={t('optionsLabel')}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{ ...blankBase, paddingRight: 24 }}
+        onChange={(e) => {
+          onChange(e.target.value)
+          if (e.target.value) onCheck()
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            onEnter()
+          }
+        }}
+        style={{ ...blankBase, ...feedbackStyle, paddingRight: 24 }}
       >
         <option value="">—</option>
         {blank.options.map((opt) => (
@@ -224,6 +320,7 @@ function BlankInput({
   return (
     <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}>
       <input
+        ref={registerRef}
         type="text"
         autoComplete="off"
         spellCheck={false}
@@ -231,8 +328,16 @@ function BlankInput({
         placeholder={t('blankPlaceholder')}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onCheck}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            onCheck()
+            onEnter()
+          }
+        }}
         size={Math.max(8, value.length + 1)}
-        style={blankBase}
+        style={{ ...blankBase, ...feedbackStyle }}
       />
       {hint && (
         <>
@@ -294,6 +399,18 @@ const blankBase: React.CSSProperties = {
   color: 'var(--ed-fg)',
   font: 'inherit',
   fontSize: '0.85em',
+}
+
+const correctStyle: React.CSSProperties = {
+  borderBottomColor: '#15803d',
+  background: 'rgba(21, 128, 61, 0.12)',
+  color: '#15803d',
+}
+
+const wrongStyle: React.CSSProperties = {
+  borderBottomColor: '#b91c1c',
+  background: 'rgba(185, 28, 28, 0.12)',
+  color: '#b91c1c',
 }
 
 const hintCaption: React.CSSProperties = {
