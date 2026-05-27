@@ -8,7 +8,13 @@
  */
 import type { ReviewPassage, ReviewStatus } from './games-editor'
 
-const baseUrl = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL
+// Trim any trailing slash so path concatenation never produces a double slash
+// (e.g. ".../api/v1/" + "/admin/games" -> ".../api/v1//admin/games"), which the
+// backend router treats as an unregistered path and 404s.
+const baseUrl = (process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? '').replace(
+  /\/+$/,
+  '',
+)
 
 interface SeedFrequencyResult {
   language: string
