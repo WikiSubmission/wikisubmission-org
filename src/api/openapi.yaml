@@ -3745,6 +3745,31 @@ components:
             exactly one is the answer.
           items:
             type: string
+        hint:
+          $ref: '#/components/schemas/GameBlankHint'
+
+    GameBlankHint:
+      type: object
+      description: >
+        Toggleable hints for a blank. Present only for `difficulty = medium`.
+        Each revealed hint costs a flat penalty (see the score formula); the
+        client tracks how many it reveals and reports the total via
+        `hints_used` on submit. Fields are derived from the answer and never
+        contain the full answer.
+      required: [first_letter, first_two, length]
+      properties:
+        first_letter:
+          type: string
+          description: First character of the answer, preserving source case.
+          example: "P"
+        first_two:
+          type: string
+          description: First two characters of the answer (or the whole answer if it is a single character).
+          example: "Pr"
+        length:
+          type: integer
+          description: Character count of the answer.
+          example: 6
 
     GameVariant:
       type: object

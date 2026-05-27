@@ -907,6 +907,7 @@
     "statBestScore": "Best score",
     "statVariantsCompleted": "Variants completed",
     "historyTitle": "Recent rounds",
-    "historyEmpty": "No rounds played yet."
+    "historyEmpty": "No rounds played yet.",
+    "hintLength": "{count} letters"
   }
 }

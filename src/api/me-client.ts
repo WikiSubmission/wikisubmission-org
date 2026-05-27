@@ -258,6 +258,7 @@ export type GameLeaderboardScope = GameLeaderboardQuery['scope']
 
 export type GamePassage = components['schemas']['GamePassage']
 export type GameBlank = components['schemas']['GameBlank']
+export type GameBlankHint = components['schemas']['GameBlankHint']
 export type GameRenderedVerse = components['schemas']['GameRenderedVerse']
 export type GameVariant = components['schemas']['GameVariant']
 export type GameSubmitResult = components['schemas']['GameSubmitResult']

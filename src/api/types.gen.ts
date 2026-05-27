@@ -1952,6 +1952,25 @@ export interface components {
             word_position: number;
             /** @description Only present for `difficulty = easy`. Shuffled deterministically; exactly one is the answer. */
             options?: string[];
+            hint?: components["schemas"]["GameBlankHint"];
+        };
+        /** @description Toggleable hints for a blank. Present only for `difficulty = medium`. Each revealed hint costs a flat penalty (see the score formula); the client tracks how many it reveals and reports the total via `hints_used` on submit. Fields are derived from the answer and never contain the full answer. */
+        GameBlankHint: {
+            /**
+             * @description First character of the answer, preserving source case.
+             * @example P
+             */
+            first_letter: string;
+            /**
+             * @description First two characters of the answer (or the whole answer if it is a single character).
+             * @example Pr
+             */
+            first_two: string;
+            /**
+             * @description Character count of the answer.
+             * @example 6
+             */
+            length: number;
         };
         GameVariant: {
             /** @example p42-en-hard-medium-7 */
