@@ -2,12 +2,17 @@
  * Server-only editorial allowlist + shared editor-facing passage type.
  *
  * The real security boundary is the backend's RequireEditor middleware. This
- * soft check only controls whether the studio page renders the UI or a
- * "not authorized" message — never rely on it for security.
+ * soft check only controls whether the studio page renders the UI (and whether
+ * the nav shows the link) — never rely on it for security.
  *
- * Never import this in a Client Component: GAMES_EDITOR_EMAILS is not exposed
- * to the browser.
+ * The allowlist env var is GAMES_EDITOR_EMAILS (plaintext, shared with the
+ * backend gate). Comparison is done on SHA-256 hashes computed in-app, so the
+ * raw email is never logged or compared directly.
+ *
+ * Never import this in a Client Component: the env var is not exposed to the
+ * browser.
  */
+import { createHash } from 'node:crypto'
 
 // Editor-facing passage shape — mirrors the backend `reviewPassage` JSON in
 // api/handlers/games_admin.go. These endpoints live outside the OpenAPI
@@ -33,22 +38,33 @@ export interface ReviewPassage {
 
 export type ReviewStatus = 'approved' | 'rejected' | 'needs_refinement'
 
-/** Parse GAMES_EDITOR_EMAILS (comma-separated, trimmed, lowercased). */
-export function parseEditorEmails(raw: string | undefined): Set<string> {
+/** SHA-256 hex of a normalized (trimmed, lowercased) email. */
+function hashEmail(email: string): string {
+  return createHash('sha256').update(email.trim().toLowerCase()).digest('hex')
+}
+
+/**
+ * Parse GAMES_EDITOR_EMAILS (comma-separated plaintext emails) into a set of
+ * SHA-256 hashes. Hashing in-app keeps the raw emails out of comparisons and
+ * logs while letting the env var stay the same plaintext value the backend
+ * uses.
+ */
+export function parseEditorHashes(raw: string | undefined): Set<string> {
   if (!raw) return new Set()
   return new Set(
     raw
       .split(',')
-      .map((e) => e.trim().toLowerCase())
-      .filter((e) => e.length > 0),
+      .map((e) => e.trim())
+      .filter((e) => e.length > 0)
+      .map(hashEmail),
   )
 }
 
 /**
- * True when the email is on the GAMES_EDITOR_EMAILS allowlist. An empty or
- * unset allowlist denies everyone, matching the backend.
+ * True when the email is on the GAMES_EDITOR_EMAILS allowlist (compared by
+ * hash). An empty or unset allowlist denies everyone, matching the backend.
  */
 export function isEditor(email: string | null | undefined): boolean {
   if (!email) return false
-  return parseEditorEmails(process.env.GAMES_EDITOR_EMAILS).has(email.trim().toLowerCase())
+  return parseEditorHashes(process.env.GAMES_EDITOR_EMAILS).has(hashEmail(email))
 }

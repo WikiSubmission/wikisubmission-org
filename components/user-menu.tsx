@@ -1,6 +1,6 @@
 'use client'
 
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useTransition, useSyncExternalStore } from 'react'
 import { useLocale } from 'next-intl'
@@ -19,7 +19,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut, User, Globe, Palette } from 'lucide-react'
+import { LogOut, User, Globe, Palette, Gamepad2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const LOCALES = [
@@ -40,6 +40,8 @@ function resolveMode(theme: string | undefined, systemTheme: string | undefined)
 
 export function UserMenu() {
   const { user, isAuthenticated, isLoading } = useUser()
+  const { data: session } = useSession()
+  const isEditor = session?.isEditor === true
   const openSignIn = useSignInPromptStore((s) => s.open)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -135,6 +137,14 @@ export function UserMenu() {
             Profile
           </a>
         </DropdownMenuItem>
+        {isEditor && (
+          <DropdownMenuItem asChild>
+            <a href="/studio/games" className="flex items-center gap-2">
+              <Gamepad2 className="w-4 h-4" />
+              Games studio
+            </a>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
 
         {/* Language */}

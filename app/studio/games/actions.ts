@@ -27,6 +27,8 @@ function describe(err: unknown): string {
   if (code === '401') return 'Your session expired. Please sign in again.'
   if (code === '403') return 'You are not on the editor allowlist.'
   if (code === '404') return 'Passage not found.'
+  if (code === '503') return 'Curation is not configured on the server (missing GROQ_API_KEY).'
+  if (code === '502') return 'The model could not curate this chapter. Try again.'
   return 'The request failed. Please try again.'
 }
 
@@ -78,6 +80,25 @@ export async function loadLemmasAction(): Promise<
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
   try {
     const data = await ctx.client.loadLemmas()
+    return { ok: true, data }
+  } catch (err) {
+    return { ok: false, error: describe(err) }
+  }
+}
+
+export async function curateAction(
+  chapter: number,
+  refine?: boolean,
+): Promise<
+  ActionResult<{ chapter: number; proposed: number; dropped: number; refine: boolean; skipped: boolean }>
+> {
+  const ctx = await editorClient()
+  if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
+  if (!Number.isInteger(chapter) || chapter < 1 || chapter > 114) {
+    return { ok: false, error: 'Chapter must be between 1 and 114.' }
+  }
+  try {
+    const data = await ctx.client.curate(chapter, refine)
     return { ok: true, data }
   } catch (err) {
     return { ok: false, error: describe(err) }

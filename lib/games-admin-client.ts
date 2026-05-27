@@ -25,6 +25,14 @@ interface SetStatusResult {
   status: string
 }
 
+interface CurateResult {
+  chapter: number
+  proposed: number
+  dropped: number
+  refine: boolean
+  skipped: boolean
+}
+
 /**
  * Calls an `/admin/games` endpoint and unwraps the `{ data }` envelope.
  * Throws with the backend status code prefix so callers can map 401/403/500.
@@ -80,5 +88,11 @@ export function gamesAdminClient(token: string) {
 
     loadLemmas: (): Promise<LoadLemmasResult> =>
       call<LoadLemmasResult>(token, '/maintenance/load-lemmas', { method: 'POST' }),
+
+    curate: (chapter: number, refine?: boolean): Promise<CurateResult> =>
+      call<CurateResult>(token, '/curate', {
+        method: 'POST',
+        body: { chapter, ...(refine ? { refine: true } : {}) },
+      }),
   }
 }

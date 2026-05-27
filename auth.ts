@@ -6,6 +6,7 @@ import Credentials from 'next-auth/providers/credentials'
 import { SignJWT, jwtVerify } from 'jose'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { z } from 'zod'
+import { isEditor } from '@/lib/games-editor'
 
 // Startup validation — fail fast rather than silently minting invalid tokens
 const authSecret = process.env.AUTH_SECRET
@@ -172,6 +173,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // requests to ws-backend. Migrating to a server-side proxy would eliminate this
       // exposure but requires refactoring all /me/* hooks to server actions.
       session.accessToken = (token.accessToken as string | undefined) ?? ''
+      // Expose a soft editor flag (not the email) so the client nav can show
+      // the studio link without leaking the allowlist. Real access is enforced
+      // by the backend RequireEditor middleware.
+      session.isEditor = isEditor(token.email as string | null | undefined)
       return session
     },
   },

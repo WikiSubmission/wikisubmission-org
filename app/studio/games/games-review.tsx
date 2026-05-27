@@ -7,6 +7,7 @@ import {
   setStatusAction,
   seedFrequencyAction,
   loadLemmasAction,
+  curateAction,
 } from './actions'
 
 const STATUS_OPTIONS = ['proposed', 'approved', 'needs_refinement', 'rejected', 'all'] as const
@@ -37,6 +38,10 @@ export function GamesReview({
   const [seedMsg, setSeedMsg] = useState<string | null>(null)
   const [lemmaMsg, setLemmaMsg] = useState<string | null>(null)
   const [maintPending, setMaintPending] = useState<'seed' | 'lemma' | null>(null)
+
+  const [curateChapter, setCurateChapter] = useState('')
+  const [curateMsg, setCurateMsg] = useState<string | null>(null)
+  const [curatePending, setCuratePending] = useState(false)
 
   function applyFilters(status: StatusFilter, chapter: string) {
     startFetch(async () => {
@@ -91,6 +96,24 @@ export function GamesReview({
     setMaintPending(null)
   }
 
+  async function runCurate() {
+    const chapter = Number(curateChapter)
+    setCuratePending(true)
+    setCurateMsg(null)
+    const res = await curateAction(chapter)
+    if (res.ok) {
+      const dropped = res.data.dropped > 0 ? `, ${res.data.dropped} dropped` : ''
+      setCurateMsg(`Proposed ${res.data.proposed} passage(s) for chapter ${res.data.chapter}${dropped}.`)
+      // Surface the freshly proposed passages: switch to that view and refetch.
+      setStatusFilter('proposed')
+      setChapterFilter('')
+      applyFilters('proposed', '')
+    } else {
+      setCurateMsg(res.error)
+    }
+    setCuratePending(false)
+  }
+
   return (
     <main style={wrap}>
       <header style={{ marginBottom: 32 }}>
@@ -101,6 +124,39 @@ export function GamesReview({
           passages become playable immediately.
         </p>
       </header>
+
+      <section style={curatePanel}>
+        <div style={maintRow}>
+          <label style={fieldLabel}>
+            Curate chapter
+            <input
+              type="number"
+              min={1}
+              max={114}
+              placeholder="1-114"
+              value={curateChapter}
+              onChange={(e) => setCurateChapter(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && curateChapter.trim()) runCurate()
+              }}
+              style={{ ...control, width: 90 }}
+            />
+          </label>
+          <button
+            type="button"
+            onClick={runCurate}
+            disabled={curatePending || !curateChapter.trim()}
+            style={approveButton}
+          >
+            {curatePending ? 'Curating…' : 'Generate passages'}
+          </button>
+          {curateMsg && <span style={maintMsg}>{curateMsg}</span>}
+        </div>
+        <p style={maintNote}>
+          Runs the GROQ model over the chapter and adds new proposed passages for review. This calls
+          the model and may take a few seconds.
+        </p>
+      </section>
 
       <section style={filterBar}>
         <label style={fieldLabel}>
@@ -304,6 +360,16 @@ const mono: React.CSSProperties = {
   fontSize: 11,
   letterSpacing: '0.06em',
   color: 'var(--ed-fg-muted)',
+}
+
+const curatePanel: React.CSSProperties = {
+  border: '1px solid var(--ed-rule)',
+  borderRadius: 4,
+  padding: '16px 20px',
+  marginBottom: 28,
+  background: 'var(--ed-surface)',
+  display: 'grid',
+  gap: 8,
 }
 
 const filterBar: React.CSSProperties = {
