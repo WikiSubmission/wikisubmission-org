@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import type { ReviewPassage, ReviewStatus } from '@/lib/games-editor'
 import {
   listPassagesAction,
@@ -11,6 +11,11 @@ import {
   proposedSummaryAction,
   type ProposedChapter,
 } from './actions'
+
+// Curation runs one verse window per request; pause between windows to respect
+// Groq's per-minute token budget, and back off the same amount on a rate limit.
+const INTER_WINDOW_PAUSE_MS = 60_000
+const RATE_LIMIT_BACKOFF_MS = 60_000
 
 const STATUS_OPTIONS = ['proposed', 'approved', 'needs_refinement', 'rejected', 'all'] as const
 type StatusFilter = (typeof STATUS_OPTIONS)[number]
@@ -53,6 +58,7 @@ export function GamesReview({
   const [curateChapter, setCurateChapter] = useState('')
   const [curateMsg, setCurateMsg] = useState<string | null>(null)
   const [curatePending, setCuratePending] = useState(false)
+  const cancelCurateRef = useRef(false)
 
   function applyFilters(status: StatusFilter, chapter: string) {
     startFetch(async () => {
@@ -109,31 +115,85 @@ export function GamesReview({
     setMaintPending(null)
   }
 
+  // Sleep that surfaces a live countdown and resolves early when cancelled.
+  function pause(ms: number, label: string): Promise<void> {
+    return new Promise((resolve) => {
+      let remaining = Math.ceil(ms / 1000)
+      setCurateMsg(`${label} ${remaining}s…`)
+      const id = setInterval(() => {
+        remaining -= 1
+        if (cancelCurateRef.current || remaining <= 0) {
+          clearInterval(id)
+          resolve()
+          return
+        }
+        setCurateMsg(`${label} ${remaining}s…`)
+      }, 1000)
+    })
+  }
+
+  // Curate a chapter one verse window at a time, reporting progress between
+  // windows. Long chapters span several windows paced under the token budget;
+  // the run is resumable, so Stop (or a closed tab) loses nothing.
   async function runCurate() {
+    if (curatePending) return
     const chapter = Number(curateChapter)
-    setCuratePending(true)
-    setCurateMsg(null)
-    const res = await curateAction(chapter)
-    if (res.ok) {
-      const { proposed, dropped, partial, chapter: ch } = res.data
-      const droppedNote = dropped > 0 ? `, ${dropped} dropped` : ''
-      if (proposed === 0 && !partial) {
-        setCurateMsg(`Chapter ${ch} has no remaining verses to curate${droppedNote}.`)
-      } else {
-        const partialNote = partial
-          ? ' Hit the rate limit before finishing; click again in a minute to continue.'
-          : ''
-        setCurateMsg(`Proposed ${proposed} passage(s) for chapter ${ch}${droppedNote}.${partialNote}`)
-      }
-      // Surface the freshly proposed passages: switch to that view and refetch.
-      setStatusFilter('proposed')
-      setChapterFilter('')
-      applyFilters('proposed', '')
-      void refreshProposedSummary()
-    } else {
-      setCurateMsg(res.error)
+    if (!Number.isInteger(chapter) || chapter < 1 || chapter > 114) {
+      setCurateMsg('Enter a chapter between 1 and 114.')
+      return
     }
-    setCuratePending(false)
+
+    setCuratePending(true)
+    cancelCurateRef.current = false
+    setStatusFilter('proposed')
+    setChapterFilter(String(chapter))
+
+    let proposedTotal = 0
+    let afterVerse = 0
+    try {
+      for (;;) {
+        if (cancelCurateRef.current) {
+          setCurateMsg(`Stopped. ${proposedTotal} passage(s) proposed for chapter ${chapter} so far.`)
+          break
+        }
+
+        const res = await curateAction(chapter, afterVerse)
+        if (!res.ok) {
+          if (res.rateLimited) {
+            await pause(RATE_LIMIT_BACKOFF_MS, `Chapter ${chapter}: Groq rate limit, retrying in`)
+            continue // same cursor; the window was not consumed
+          }
+          setCurateMsg(res.error)
+          break
+        }
+
+        proposedTotal += res.data.proposed
+        afterVerse = res.data.next_verse
+        const total = res.data.verses_total
+        // Show passages as they land.
+        applyFilters('proposed', String(chapter))
+        void refreshProposedSummary()
+
+        if (res.data.done) {
+          setCurateMsg(
+            proposedTotal > 0
+              ? `Done. Proposed ${proposedTotal} passage(s) for chapter ${chapter}.`
+              : `Chapter ${chapter} has no remaining verses to curate.`,
+          )
+          break
+        }
+
+        const pct = total > 0 ? Math.round((afterVerse / total) * 100) : 0
+        await pause(
+          INTER_WINDOW_PAUSE_MS,
+          `Chapter ${chapter}: ${proposedTotal} proposed, verse ${afterVerse}/${total} (${pct}%) — next window in`,
+        )
+      }
+    } finally {
+      cancelCurateRef.current = false
+      setCuratePending(false)
+      void refreshProposedSummary()
+    }
   }
 
   return (
@@ -172,6 +232,17 @@ export function GamesReview({
           >
             {curatePending ? 'Curating…' : 'Generate passages'}
           </button>
+          {curatePending && (
+            <button
+              type="button"
+              onClick={() => {
+                cancelCurateRef.current = true
+              }}
+              style={ghostButton}
+            >
+              Stop
+            </button>
+          )}
           {curateMsg && <span style={maintMsg}>{curateMsg}</span>}
         </div>
         <p style={maintNote}>

@@ -4,7 +4,9 @@ import { auth } from '@/auth'
 import { AdminApiError, gamesAdminClient } from '@/lib/games-admin-client'
 import { isEditor, type ReviewPassage, type ReviewStatus } from '@/lib/games-editor'
 
-export type ActionResult<T> = { ok: true; data: T } | { ok: false; error: string }
+export type ActionResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string; rateLimited?: boolean }
 
 /**
  * Resolves an authenticated editor session and returns a bound admin client.
@@ -35,6 +37,8 @@ function describe(err: unknown): string {
         return 'You are not on the editor allowlist.'
       case 404:
         return 'Not found.'
+      case 429:
+        return 'Groq rate limit reached. Pausing before the next window.'
       case 503:
         return 'Curation is not configured on the server (missing GROQ_API_KEY).'
       case 400:
@@ -124,28 +128,32 @@ export async function loadLemmasAction(): Promise<
   }
 }
 
+export type CurateWindowResult = {
+  chapter: number
+  proposed: number
+  dropped: number
+  window_start: number
+  window_end: number
+  next_verse: number
+  done: boolean
+  verses_total: number
+}
+
+/** Curates a single verse window of a chapter, starting after `afterVerse`. */
 export async function curateAction(
   chapter: number,
-  refine?: boolean,
-): Promise<
-  ActionResult<{
-    chapter: number
-    proposed: number
-    dropped: number
-    refine: boolean
-    skipped: boolean
-    partial: boolean
-  }>
-> {
+  afterVerse: number,
+): Promise<ActionResult<CurateWindowResult>> {
   const ctx = await editorClient()
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
   if (!Number.isInteger(chapter) || chapter < 1 || chapter > 114) {
     return { ok: false, error: 'Chapter must be between 1 and 114.' }
   }
   try {
-    const data = await ctx.client.curate(chapter, refine)
+    const data = await ctx.client.curate(chapter, afterVerse)
     return { ok: true, data }
   } catch (err) {
-    return { ok: false, error: describe(err) }
+    const rateLimited = err instanceof AdminApiError && err.status === 429
+    return { ok: false, error: describe(err), rateLimited }
   }
 }

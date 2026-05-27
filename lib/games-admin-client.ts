@@ -35,9 +35,11 @@ interface CurateResult {
   chapter: number
   proposed: number
   dropped: number
-  refine: boolean
-  skipped: boolean
-  partial: boolean
+  window_start: number
+  window_end: number
+  next_verse: number
+  done: boolean
+  verses_total: number
 }
 
 /** Error carrying the backend status code and `message` body, for the UI. */
@@ -115,10 +117,10 @@ export function gamesAdminClient(token: string) {
     loadLemmas: (): Promise<LoadLemmasResult> =>
       call<LoadLemmasResult>(token, '/maintenance/load-lemmas', { method: 'POST' }),
 
-    curate: (chapter: number, refine?: boolean): Promise<CurateResult> =>
+    curate: (chapter: number, afterVerse: number): Promise<CurateResult> =>
       call<CurateResult>(token, '/curate', {
         method: 'POST',
-        body: { chapter, ...(refine ? { refine: true } : {}) },
+        body: { chapter, after_verse: afterVerse },
       }),
   }
 }
