@@ -30,6 +30,7 @@ import { PlayWordButton } from '@/components/play-word-button'
 import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
 import './word-lab.css'
+import { logFrontendEvent } from '@/lib/frontend-logger'
 
 type SortMode = 'frequency' | 'abjadi' | 'reverse'
 type SearchMode = 'arabic' | 'transliteration' | 'english'
@@ -492,7 +493,15 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
                 role="radio"
                 aria-checked={sort === k}
                 className={`wl-sort-btn ${sort === k ? 'on' : ''}`}
-                onClick={() => setSort(k)}
+                onClick={() => {
+                  if (sort === k) return
+                  logFrontendEvent('sort_changed', window.location.pathname, {
+                    scope: 'word_lab',
+                    from: sort,
+                    to: k,
+                  })
+                  setSort(k)
+                }}
               >
                 {l}
               </button>

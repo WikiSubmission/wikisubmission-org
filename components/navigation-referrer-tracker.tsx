@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
+import { logFrontendEvent } from '@/lib/frontend-logger'
 
 const ME_PATH_RE = /^(\/[a-z]{2}(-[A-Z]{2})?)?\/me(\/|$)/
 
@@ -16,6 +17,9 @@ export function NavigationReferrerTracker() {
 
   useEffect(() => {
     const prev = prevRef.current
+    if (prev !== null && prev !== pathname) {
+      logFrontendEvent('path_accessed', pathname, { from: prev })
+    }
     if (
       prev !== null &&
       !ME_PATH_RE.test(prev) &&

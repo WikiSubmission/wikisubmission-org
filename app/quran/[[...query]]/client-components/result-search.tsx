@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { logFrontendEvent } from '@/lib/frontend-logger'
 import { toast } from 'sonner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
@@ -315,7 +316,15 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                   ).map((opt) => (
                     <DropdownMenuItem
                       key={opt.value}
-                      onSelect={() => setSortMode(opt.value)}
+                      onSelect={() => {
+                        if (sortMode === opt.value) return
+                        logFrontendEvent('sort_changed', window.location.pathname, {
+                          scope: 'quran_search_results',
+                          from: sortMode,
+                          to: opt.value,
+                        })
+                        setSortMode(opt.value)
+                      }}
                       className={cn(
                         sortMode === opt.value && 'text-primary font-medium'
                       )}
