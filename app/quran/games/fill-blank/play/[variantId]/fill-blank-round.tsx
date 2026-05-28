@@ -1,11 +1,27 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { ThemedSelect } from '@/components/ui/themed-select'
-import { meApi, type GameVariant, type GameBlank } from '@/src/api/me-client'
-import { readVariant, stashVariant, stashResult, parseVariantId } from '@/lib/games-session'
+import {
+  meApi,
+  type GameVariant,
+  type GameBlank,
+  type GameSubmitResult,
+  type GamePerBlankResult,
+} from '@/src/api/me-client'
+import { readVariant, stashVariant, parseVariantId } from '@/lib/games-session'
+import { encodeSharePayload } from '@/lib/games-share'
 
 const BLANK_TOKEN = /__BLANK_(\d+)__/g
 
@@ -28,6 +44,11 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   const [hintsRevealed, setHintsRevealed] = useState<Record<number, number>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  // Round result is held in-place and shown inline + as a dialog. The verse
+  // text becomes a review pane (correct guesses in green, wrong guesses with
+  // the accepted answer revealed in red).
+  const [result, setResult] = useState<GameSubmitResult | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const startedAt = useRef<number>(0)
   // DOM refs for each blank, keyed by index, so Enter can advance focus.
   const inputRefs = useRef<Map<number, HTMLInputElement | HTMLButtonElement>>(new Map())
@@ -134,7 +155,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   }
 
   async function submit() {
-    if (!variant || submitting) return
+    if (!variant || submitting || result) return
     setSubmitting(true)
     setSubmitError(null)
     try {
@@ -144,11 +165,46 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
         hints_used: hintsUsed,
         elapsed_ms: Math.max(0, Date.now() - startedAt.current),
       })
-      stashResult(data)
-      router.push(`/quran/games/fill-blank/result/${encodeURIComponent(data.attempt_id)}`)
+      setResult(data)
+      setDialogOpen(true)
+      // Drop focus off any input so the review styling is what the player sees.
+      if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur()
+      }
     } catch (err) {
       setSubmitError(err instanceof Error && err.message.startsWith('429') ? t('rateLimited') : t('submitError'))
+    } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function shareResult() {
+    if (!result) return
+    const token = encodeSharePayload({
+      score: result.score,
+      correct: result.correct_count,
+      total: result.total_count,
+      difficulty: result.difficulty_multiplier,
+    })
+    const url = `${window.location.origin}/share/games/fill-blank/${token}`
+    const shareText = t('shareText', {
+      score: result.score,
+      correct: result.correct_count,
+      total: result.total_count,
+    })
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: t('shareTitle'), text: shareText, url })
+        return
+      } catch (err) {
+        if ((err as DOMException)?.name === 'AbortError') return
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success(t('shareCopied'))
+    } catch {
+      toast.error(t('shareFailed'))
     }
   }
 
@@ -167,6 +223,9 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   }
 
   const blanksByIndex = new Map(variant.blanks.map((b) => [b.index, b]))
+  const resultByIndex = result
+    ? new Map(result.per_blank.map((r) => [r.index, r]))
+    : null
 
   return (
     <div>
@@ -187,6 +246,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
               guesses,
               feedback,
               hintsRevealed,
+              resultByIndex,
               onChange: setGuess,
               onCheck: checkOne,
               onEnter: advanceFrom,
@@ -197,14 +257,84 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
         ))}
       </div>
 
-      <div style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-        <button type="button" onClick={submit} disabled={submitting} style={primaryButton}>
-          {submitting ? t('submitting') : t('submitRound')}
-        </button>
-        <span style={monoLabel}>{t('progress', { filled: filledCount, total: totalBlanks })}</span>
-        {hintsUsed > 0 && <span style={monoLabel}>{t('hintsUsed', { count: hintsUsed })}</span>}
-      </div>
+      {result ? (
+        <div style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <button type="button" onClick={() => setDialogOpen(true)} style={primaryButton}>
+            {t('viewResult')}
+          </button>
+          <Link href="/quran/games/fill-blank" style={ghostButtonLink}>
+            {t('playAgain')}
+          </Link>
+          <span style={monoLabel}>
+            {t('correctOf', { correct: result.correct_count, total: result.total_count })}
+          </span>
+        </div>
+      ) : (
+        <div style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <button type="button" onClick={submit} disabled={submitting} style={primaryButton}>
+            {submitting ? t('submitting') : t('submitRound')}
+          </button>
+          <span style={monoLabel}>{t('progress', { filled: filledCount, total: totalBlanks })}</span>
+          {hintsUsed > 0 && <span style={monoLabel}>{t('hintsUsed', { count: hintsUsed })}</span>}
+        </div>
+      )}
       {submitError && <p style={{ marginTop: 12, color: 'var(--ed-accent, #b91c1c)' }}>{submitError}</p>}
+
+      {result && (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('resultTitle')}</DialogTitle>
+              <DialogDescription>
+                {t('correctOf', { correct: result.correct_count, total: result.total_count })}
+              </DialogDescription>
+            </DialogHeader>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: 16,
+                flexWrap: 'wrap',
+                paddingBottom: 12,
+                borderBottom: '1px solid var(--ed-rule)',
+              }}
+            >
+              <div>
+                <div style={monoLabel}>{t('scoreLabel')}</div>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-cormorant), Georgia, serif',
+                    fontSize: 'clamp(40px, 7vw, 64px)',
+                    lineHeight: 1,
+                    color: 'var(--ed-accent)',
+                  }}
+                >
+                  {result.score}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, ...monoLabel }}>
+                <span>
+                  {t('difficultyMultiplierLabel')}: ×{result.difficulty_multiplier}
+                </span>
+                <span>
+                  {t('hintPenaltyLabel')}: −{result.hint_penalty}
+                </span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
+              <Link href="/quran/games/fill-blank" style={primaryLink}>
+                {t('playAgain')}
+              </Link>
+              <Link href="/quran/games/leaderboard" style={ghostLink}>
+                {t('leaderboardLink')}
+              </Link>
+              <button type="button" onClick={shareResult} style={ghostLink}>
+                {t('share')}
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
@@ -217,6 +347,7 @@ interface RenderContext {
   guesses: Record<number, string>
   feedback: Record<number, BlankFeedback>
   hintsRevealed: Record<number, number>
+  resultByIndex: Map<number, GamePerBlankResult> | null
   onChange: (index: number, value: string) => void
   onCheck: (index: number) => void
   onEnter: (index: number) => void
@@ -236,20 +367,29 @@ function renderVerse(ctx: RenderContext): React.ReactNode[] {
     }
     const index = Number(match[1])
     const blank = ctx.blanks.get(index)
+    const blankResult = ctx.resultByIndex?.get(index) ?? null
     nodes.push(
-      <BlankInput
-        key={`b${index}`}
-        blank={blank}
-        index={index}
-        value={ctx.guesses[index] ?? ''}
-        feedback={ctx.feedback[index]}
-        revealed={ctx.hintsRevealed[index] ?? 0}
-        onChange={(value) => ctx.onChange(index, value)}
-        onCheck={() => ctx.onCheck(index)}
-        onEnter={() => ctx.onEnter(index)}
-        onReveal={() => ctx.onReveal(index, MAX_HINTS_PER_BLANK)}
-        registerRef={(el) => ctx.registerRef(index, el)}
-      />,
+      blankResult ? (
+        <BlankReview
+          key={`b${index}`}
+          guess={ctx.guesses[index] ?? ''}
+          result={blankResult}
+        />
+      ) : (
+        <BlankInput
+          key={`b${index}`}
+          blank={blank}
+          index={index}
+          value={ctx.guesses[index] ?? ''}
+          feedback={ctx.feedback[index]}
+          revealed={ctx.hintsRevealed[index] ?? 0}
+          onChange={(value) => ctx.onChange(index, value)}
+          onCheck={() => ctx.onCheck(index)}
+          onEnter={() => ctx.onEnter(index)}
+          onReveal={() => ctx.onReveal(index, MAX_HINTS_PER_BLANK)}
+          registerRef={(el) => ctx.registerRef(index, el)}
+        />
+      ),
     )
     lastIndex = match.index + match[0].length
     key += 1
@@ -262,6 +402,28 @@ function renderVerse(ctx: RenderContext): React.ReactNode[] {
 
 // first letter → length → first two letters
 const MAX_HINTS_PER_BLANK = 3
+
+// Read-only review pill shown in place of an input after the round is
+// submitted. Correct guesses turn green; wrong guesses show the player's
+// answer struck through alongside the accepted word in red.
+function BlankReview({
+  guess,
+  result,
+}: {
+  guess: string
+  result: GamePerBlankResult
+}) {
+  if (result.correct) {
+    return <span style={reviewCorrect}>{result.accepted_answer}</span>
+  }
+  const trimmed = guess.trim()
+  return (
+    <span style={reviewWrong}>
+      {trimmed && <span style={reviewWrongGuess}>{trimmed}</span>}
+      <span style={reviewWrongAnswer}>{result.accepted_answer}</span>
+    </span>
+  )
+}
 
 function BlankInput({
   blank,
@@ -447,4 +609,73 @@ const ghostButton: React.CSSProperties = {
   color: 'var(--ed-fg)',
   fontSize: 14,
   cursor: 'pointer',
+}
+
+const ghostButtonLink: React.CSSProperties = {
+  padding: '12px 22px',
+  borderRadius: 2,
+  border: '1px solid var(--ed-rule)',
+  background: 'var(--ed-surface)',
+  color: 'var(--ed-fg)',
+  fontSize: 14,
+  textDecoration: 'none',
+}
+
+const primaryLink: React.CSSProperties = {
+  padding: '10px 22px',
+  borderRadius: 2,
+  border: '1px solid var(--ed-fg)',
+  background: 'var(--ed-fg)',
+  color: 'var(--ed-bg)',
+  fontSize: 14,
+  fontWeight: 500,
+  textDecoration: 'none',
+}
+
+const ghostLink: React.CSSProperties = {
+  padding: '10px 22px',
+  borderRadius: 2,
+  border: '1px solid var(--ed-rule)',
+  background: 'var(--ed-surface)',
+  color: 'var(--ed-fg)',
+  fontSize: 14,
+  textDecoration: 'none',
+  cursor: 'pointer',
+}
+
+const reviewCorrect: React.CSSProperties = {
+  display: 'inline-block',
+  margin: '0 2px',
+  padding: '0 6px',
+  borderRadius: 2,
+  background: 'rgba(21, 128, 61, 0.15)',
+  color: '#15803d',
+  fontSize: '0.85em',
+  fontWeight: 600,
+}
+
+const reviewWrong: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'baseline',
+  gap: 4,
+  margin: '0 2px',
+}
+
+const reviewWrongGuess: React.CSSProperties = {
+  padding: '0 4px',
+  borderRadius: 2,
+  background: 'rgba(185, 28, 28, 0.10)',
+  color: '#b91c1c',
+  fontSize: '0.85em',
+  textDecoration: 'line-through',
+  textDecorationColor: '#b91c1c',
+}
+
+const reviewWrongAnswer: React.CSSProperties = {
+  padding: '0 6px',
+  borderRadius: 2,
+  background: 'rgba(21, 128, 61, 0.15)',
+  color: '#15803d',
+  fontSize: '0.85em',
+  fontWeight: 600,
 }

@@ -1,22 +1,20 @@
-// Client-side hand-off between the Fill-the-Blank picker → play → result routes.
+// Client-side hand-off between the Fill-the-Blank picker and the play route.
 //
-// A round is started in the picker, played on /play/[variantId], and scored on
-// /result/[attemptId]. The variant and the submit result are passed across these
-// client navigations via sessionStorage so a refresh inside the same tab keeps
-// working. When the variant is missing (e.g. a shared link opened cold), the
-// play route reconstructs the start request from the variant-id slug and resumes
-// the round — the generator is deterministic, so the regenerated blanks are
-// identical.
+// A round is started in the picker and played on /play/[variantId]. The variant
+// is stashed in sessionStorage so a refresh inside the same tab keeps working.
+// When the stash is missing (e.g. a shared link opened cold), the play route
+// reconstructs the start request from the variant-id slug and resumes the
+// round — the generator is deterministic, so the regenerated blanks are
+// identical. The submit result lives in component state only; there is no
+// separate result page.
 import type {
   GameVariant,
-  GameSubmitResult,
   GameLanguage,
   GameDifficulty,
   GameRoundSize,
 } from '@/src/api/me-client'
 
 const VARIANT_PREFIX = 'ws.game.variant.'
-const RESULT_PREFIX = 'ws.game.result.'
 
 function canUseStorage(): boolean {
   return typeof window !== 'undefined' && 'sessionStorage' in window
@@ -47,14 +45,6 @@ export function stashVariant(variant: GameVariant): void {
 
 export function readVariant(variantId: string): GameVariant | null {
   return read<GameVariant>(VARIANT_PREFIX + variantId)
-}
-
-export function stashResult(result: GameSubmitResult): void {
-  write(RESULT_PREFIX + result.attempt_id, result)
-}
-
-export function readResult(attemptId: string): GameSubmitResult | null {
-  return read<GameSubmitResult>(RESULT_PREFIX + attemptId)
 }
 
 export interface ParsedVariantId {

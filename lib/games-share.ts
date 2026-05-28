@@ -17,25 +17,27 @@ export interface ShareablePayload {
   difficulty?: number
 }
 
+// Works in both Node and the browser without relying on Buffer's 'base64url'
+// encoding (the Next.js client bundle ships a Buffer polyfill that lacks it).
+// Use TextEncoder/TextDecoder + btoa/atob so the same code runs everywhere.
+
 function base64UrlEncode(input: string): string {
-  if (typeof Buffer !== 'undefined') {
-    return Buffer.from(input, 'utf8').toString('base64url')
-  }
-  // Browser fallback — btoa is binary-safe only for Latin-1, so URI-encode first.
-  const b64 = btoa(unescape(encodeURIComponent(input)))
-  return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  const bytes = new TextEncoder().encode(input)
+  let binary = ''
+  for (const b of bytes) binary += String.fromCharCode(b)
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
 function base64UrlDecode(input: string): string | null {
   try {
-    if (typeof Buffer !== 'undefined') {
-      return Buffer.from(input, 'base64url').toString('utf8')
-    }
-    const b64 = input.replace(/-/g, '+').replace(/_/g, '/').padEnd(
+    const padded = input.replace(/-/g, '+').replace(/_/g, '/').padEnd(
       input.length + ((4 - (input.length % 4)) % 4),
       '=',
     )
-    return decodeURIComponent(escape(atob(b64)))
+    const binary = atob(padded)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+    return new TextDecoder().decode(bytes)
   } catch {
     return null
   }

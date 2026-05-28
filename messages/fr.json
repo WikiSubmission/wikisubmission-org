@@ -895,6 +895,7 @@
     "replayToReveal": "Replay to reveal",
     "playAgain": "Play again",
     "viewHistory": "View history",
+    "viewResult": "View result",
     "share": "Share",
     "shareTitle": "Fill the Blank",
     "shareText": "I scored {score} on Fill the Blank ({correct}/{total} correct).",
