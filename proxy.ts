@@ -4,6 +4,9 @@ import { NextResponse } from 'next/server'
 export default auth((request) => {
   const { pathname, searchParams } = request.nextUrl
 
+  // Let Auth.js handle its own API routes (csrf, signout, callbacks) untouched.
+  if (pathname.startsWith('/api/auth')) return NextResponse.next()
+
   // Quran URL rewriting: /quran?q=foo → /quran/foo
   if (pathname.startsWith('/quran') && searchParams.has('q')) {
     const query = searchParams.get('q')

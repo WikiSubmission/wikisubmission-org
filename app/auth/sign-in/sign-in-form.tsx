@@ -5,10 +5,10 @@ import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { FcGoogle } from 'react-icons/fc'
-import { FaApple, FaDiscord } from 'react-icons/fa'
+import { FaApple } from 'react-icons/fa'
 import { Mail, Loader2 } from 'lucide-react'
 
-type Loading = 'google' | 'apple' | 'discord' | 'email' | null
+type Loading = 'google' | 'apple' | 'email' | null
 
 export function SignInForm() {
   const [email, setEmail] = useState('')
@@ -21,7 +21,7 @@ export function SignInForm() {
     return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
   })()
 
-  async function handleProvider(provider: 'google' | 'apple' | 'discord') {
+  async function handleProvider(provider: 'google' | 'apple') {
     setLoading(provider)
     await signIn(provider, { callbackUrl })
   }
@@ -136,23 +136,6 @@ export function SignInForm() {
               )}
             </span>
             Apple
-            <span className="arrow">→</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleProvider('discord')}
-            disabled={disabled}
-            className="auth-provider"
-          >
-            <span className="glyph">
-              {loading === 'discord' ? (
-                <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-              ) : (
-                <FaDiscord className="w-4 h-4" aria-hidden style={{ color: '#5865F2' }} />
-              )}
-            </span>
-            Discord
             <span className="arrow">→</span>
           </button>
         </div>
