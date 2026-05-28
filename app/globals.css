@@ -2191,3 +2191,12 @@ html[data-palette='mono'].dark {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.zakat-currency-select .themed-select-trigger {
+  height: 3rem;
+  border-radius: 0.75rem;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  background: color-mix(in oklab, var(--ed-surface) 50%, transparent);
+}

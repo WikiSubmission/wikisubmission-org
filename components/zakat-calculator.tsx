@@ -67,12 +67,14 @@ export function ZakatCalculator() {
           <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">
             {t('currency')}
           </label>
-          <ThemedSelect
+          <div className="zakat-currency-select">
+            <ThemedSelect
             value={currency}
             onChange={setCurrency}
             options={['USD', 'EUR', 'GBP', 'SAR', 'AED', 'TRY'].map((c) => ({ value: c, label: c }))}
             aria-label={t('currency')}
           />
+          </div>
         </div>
         <div className="md:col-span-3">
           <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">
