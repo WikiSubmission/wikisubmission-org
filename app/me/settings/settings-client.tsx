@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { meApi } from '@/src/api/me-client'
+import { getSession } from 'next-auth/react'
+import { resolveBrowserApiBaseUrl } from '@/src/api/base-url'
 
 type ConsentState =
   | { status: 'loading' }
@@ -15,13 +17,53 @@ export function SettingsClient() {
   const [saving, setSaving] = useState(false)
   const [clearing, setClearing] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [exportMsg, setExportMsg] = useState<string | null>(null)
+  const [exportState, setExportState] = useState<any>(null)
+  const [requestingExport, setRequestingExport] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
 
   useEffect(() => {
+    getSession().then((s) => setUserEmail(s?.user?.email ?? ''))
+    refreshExportStatus()
     meApi.activity
       .getConsent()
       .then(({ consent }) => setConsent({ status: 'ready', consent }))
       .catch(() => setConsent({ status: 'error' }))
   }, [])
+
+  async function authFetch(path: string, init?: RequestInit) {
+    const session = await getSession()
+    const headers = new Headers(init?.headers ?? {})
+    if (session?.accessToken) headers.set('Authorization', `Bearer ${session.accessToken}`)
+    return fetch(`${resolveBrowserApiBaseUrl()}${path}`, { ...init, headers })
+  }
+
+  async function refreshExportStatus() {
+    const res = await authFetch('/me/export/status')
+    if (!res.ok) return
+    const body = await res.json()
+    setExportState(body.data ?? null)
+  }
+
+  async function requestExport() {
+    if (requestingExport) return
+    setRequestingExport(true)
+    setExportMsg(null)
+    try {
+      const res = await authFetch('/me/export', { method: 'POST' })
+      if (res.status === 429) {
+        const body = await res.json()
+        setExportMsg(t('export.nextAvailable', { eta: formatHHMM(Number(body.retry_after_seconds ?? 0)) }))
+        return
+      }
+      if (res.ok) {
+        setExportMsg(t('export.queued', { email: userEmail || 'your email' }))
+        await refreshExportStatus()
+      }
+    } finally {
+      setRequestingExport(false)
+    }
+  }
 
   async function toggle() {
     if (consent.status !== 'ready' || saving) return
@@ -77,14 +119,26 @@ export function SettingsClient() {
           </section>
 
           <section style={cardStyle}>
+            <h2 style={h2Style}>{t('export.heading')}</h2>
+            <p style={bodyStyle}>{t('export.disclosure', { email: userEmail || 'your email' })}</p>
+            {(exportState == null || exportState.status === 'failed') && (
+              <button type="button" onClick={requestExport} disabled={requestingExport} style={{ ...buttonStyle, marginTop: 16 }}>
+                {t('export.button')}
+              </button>
+            )}
+            {(exportState?.status === 'queued' || exportState?.status === 'running') && (
+              <p style={bodyStyle}>{t('export.queued', { email: userEmail || 'your email' })}</p>
+            )}
+            {exportState?.status === 'sent' && within24h(exportState.sent_at) && (
+              <p style={bodyStyle}>{t('export.sent', { when: relative(exportState.sent_at), eta: formatHHMM(secondsUntil24h(exportState.sent_at)) })}</p>
+            )}
+            {exportMsg && <p style={bodyStyle}>{exportMsg}</p>}
+          </section>
+
+          <section style={cardStyle}>
             <h2 style={h2Style}>{t('clearHeading')}</h2>
             <p style={bodyStyle}>{t('clearBody')}</p>
-            <button
-              type="button"
-              onClick={clearAll}
-              disabled={clearing}
-              style={{ ...buttonStyle, marginTop: 16 }}
-            >
+            <button type="button" onClick={clearAll} disabled={clearing} style={{ ...buttonStyle, marginTop: 16 }}>
               {t('clearButton')}
             </button>
           </section>
@@ -160,4 +214,29 @@ const toastStyle: React.CSSProperties = {
   borderRadius: 2,
   fontSize: 13,
   zIndex: 100,
+}
+
+function formatHHMM(totalSeconds: number): string {
+  const clamped = Math.max(0, Math.floor(totalSeconds))
+  const h = Math.floor(clamped / 3600)
+  const m = Math.floor((clamped % 3600) / 60)
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
+function within24h(sentAt?: string): boolean {
+  if (!sentAt) return false
+  return Date.now() - new Date(sentAt).getTime() < 24 * 3600 * 1000
+}
+
+function secondsUntil24h(sentAt?: string): number {
+  if (!sentAt) return 0
+  const end = new Date(sentAt).getTime() + 24 * 3600 * 1000
+  return Math.max(0, Math.floor((end - Date.now()) / 1000))
+}
+
+function relative(sentAt?: string): string {
+  if (!sentAt) return ''
+  const diffMin = Math.floor((Date.now() - new Date(sentAt).getTime()) / 60000)
+  if (diffMin < 60) return `${diffMin}m ago`
+  return `${Math.floor(diffMin / 60)}h ago`
 }
