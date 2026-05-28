@@ -102,6 +102,50 @@ export async function setStatusAction(
   }
 }
 
+export type BulkStatusResult = {
+  updated: number
+  failed: { id: number; error: string }[]
+}
+
+/**
+ * Applies the same status to many passages. Runs in small concurrent batches
+ * against the per-row endpoint (no bulk endpoint exists upstream). Returns
+ * per-id failures so the UI can keep selection of anything that did not stick.
+ */
+export async function bulkSetStatusAction(
+  ids: number[],
+  status: ReviewStatus,
+): Promise<ActionResult<BulkStatusResult>> {
+  const ctx = await editorClient()
+  if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
+  if (ids.length === 0) {
+    return { ok: false, error: 'No passages selected.' }
+  }
+
+  const result: BulkStatusResult = { updated: 0, failed: [] }
+  const concurrency = 5
+
+  for (let i = 0; i < ids.length; i += concurrency) {
+    const chunk = ids.slice(i, i + concurrency)
+    const outcomes = await Promise.all(
+      chunk.map(async (id) => {
+        try {
+          await ctx.client.setStatus(id, status)
+          return { id, ok: true as const }
+        } catch (err) {
+          return { id, ok: false as const, error: describe(err) }
+        }
+      }),
+    )
+    for (const o of outcomes) {
+      if (o.ok) result.updated += 1
+      else result.failed.push({ id: o.id, error: o.error })
+    }
+  }
+
+  return { ok: true, data: result }
+}
+
 export async function seedFrequencyAction(): Promise<
   ActionResult<{ language: string; tokens: number }>
 > {

@@ -6,6 +6,7 @@ import type { ReviewPassage, ReviewStatus } from '@/lib/games-editor'
 import {
   listPassagesAction,
   setStatusAction,
+  bulkSetStatusAction,
   seedFrequencyAction,
   loadLemmasAction,
   curateAction,
@@ -46,6 +47,9 @@ export function GamesReview({
   const [isFetching, startFetch] = useTransition()
   const [proposedChapters, setProposedChapters] =
     useState<ProposedChapter[]>(initialProposedChapters)
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [bulkPending, setBulkPending] = useState<ReviewStatus | null>(null)
+  const [bulkMsg, setBulkMsg] = useState<string | null>(null)
 
   async function refreshProposedSummary() {
     const res = await proposedSummaryAction()
@@ -70,10 +74,63 @@ export function GamesReview({
       if (res.ok) {
         setPassages(res.data)
         setError(null)
+        // Clear selection on every refetch — IDs may no longer be visible and
+        // keeping ghost selections would mislead the bulk counter.
+        setSelectedIds(new Set())
+        setBulkMsg(null)
       } else {
         setError(res.error)
       }
     })
+  }
+
+  function toggleSelected(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function selectAllVisible() {
+    setSelectedIds(new Set(passages.map((p) => p.id)))
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set())
+  }
+
+  async function runBulk(status: ReviewStatus) {
+    if (bulkPending || selectedIds.size === 0) return
+    const ids = [...selectedIds]
+    setBulkPending(status)
+    setBulkMsg(`Updating ${ids.length}…`)
+    try {
+      const res = await bulkSetStatusAction(ids, status)
+      if (!res.ok) {
+        setBulkMsg(res.error)
+        return
+      }
+      const { updated, failed } = res.data
+      const failedIds = new Set(failed.map((f) => f.id))
+      setPassages((prev) =>
+        statusFilter !== 'all' && status !== statusFilter
+          ? prev.filter((p) => failedIds.has(p.id) || !selectedIds.has(p.id))
+          : prev.map((p) =>
+              selectedIds.has(p.id) && !failedIds.has(p.id) ? { ...p, status } : p,
+            ),
+      )
+      setSelectedIds(failedIds)
+      if (failed.length > 0) {
+        setBulkMsg(`Updated ${updated}. ${failed.length} failed — selection kept.`)
+      } else {
+        setBulkMsg(`Updated ${updated} passage(s) to ${STATUS_LABELS[status] ?? status}.`)
+      }
+      void refreshProposedSummary()
+    } finally {
+      setBulkPending(null)
+    }
   }
 
   async function changeStatus(id: number, status: ReviewStatus) {
@@ -316,6 +373,51 @@ export function GamesReview({
 
       {error && <p style={errorText}>{error}</p>}
 
+      {passages.length > 0 && (
+        <section style={bulkBar}>
+          <div style={maintRow}>
+            <span style={mono}>
+              {selectedIds.size > 0
+                ? `${selectedIds.size} of ${passages.length} selected`
+                : `${passages.length} visible`}
+            </span>
+            <button
+              type="button"
+              onClick={selectedIds.size === passages.length ? clearSelection : selectAllVisible}
+              disabled={bulkPending !== null}
+              style={ghostButton}
+            >
+              {selectedIds.size === passages.length ? 'Clear selection' : 'Select all visible'}
+            </button>
+            <button
+              type="button"
+              onClick={() => runBulk('approved')}
+              disabled={bulkPending !== null || selectedIds.size === 0}
+              style={approveButton}
+            >
+              {bulkPending === 'approved' ? 'Approving…' : 'Approve selected'}
+            </button>
+            <button
+              type="button"
+              onClick={() => runBulk('needs_refinement')}
+              disabled={bulkPending !== null || selectedIds.size === 0}
+              style={ghostButton}
+            >
+              {bulkPending === 'needs_refinement' ? 'Flagging…' : 'Needs refinement'}
+            </button>
+            <button
+              type="button"
+              onClick={() => runBulk('rejected')}
+              disabled={bulkPending !== null || selectedIds.size === 0}
+              style={rejectButton}
+            >
+              {bulkPending === 'rejected' ? 'Rejecting…' : 'Reject selected'}
+            </button>
+            {bulkMsg && <span style={maintMsg}>{bulkMsg}</span>}
+          </div>
+        </section>
+      )}
+
       {passages.length === 0 && !error ? (
         <p style={muted}>No passages match this filter.</p>
       ) : (
@@ -324,7 +426,9 @@ export function GamesReview({
             <PassageCard
               key={p.id}
               passage={p}
-              pending={rowPending === p.id}
+              pending={rowPending === p.id || (bulkPending !== null && selectedIds.has(p.id))}
+              selected={selectedIds.has(p.id)}
+              onToggleSelected={() => toggleSelected(p.id)}
               onSetStatus={(status) => changeStatus(p.id, status)}
             />
           ))}
@@ -423,10 +527,14 @@ export function GamesReview({
 function PassageCard({
   passage,
   pending,
+  selected,
+  onToggleSelected,
   onSetStatus,
 }: {
   passage: ReviewPassage
   pending: boolean
+  selected: boolean
+  onToggleSelected: () => void
   onSetStatus: (status: ReviewStatus) => void
 }) {
   const range =
@@ -435,9 +543,17 @@ function PassageCard({
       : `${passage.chapter_start}:${passage.verse_start} – ${passage.chapter_end}:${passage.verse_end}`
 
   return (
-    <li style={card}>
+    <li style={selected ? { ...card, ...cardSelected } : card}>
       <div style={cardTop}>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelected}
+            disabled={pending}
+            aria-label={`Select passage ${passage.id}`}
+            style={checkbox}
+          />
           <span style={verseRange}>{range}</span>
           <span style={statusBadge(passage.status)}>{STATUS_LABELS[passage.status] ?? passage.status}</span>
         </div>
@@ -599,6 +715,29 @@ const card: React.CSSProperties = {
   borderRadius: 4,
   padding: 20,
   background: 'var(--ed-surface)',
+}
+
+const cardSelected: React.CSSProperties = {
+  borderColor: 'var(--ed-fg)',
+  boxShadow: 'inset 0 0 0 1px var(--ed-fg)',
+}
+
+const checkbox: React.CSSProperties = {
+  width: 16,
+  height: 16,
+  accentColor: 'var(--ed-fg)',
+  cursor: 'pointer',
+}
+
+const bulkBar: React.CSSProperties = {
+  border: '1px solid var(--ed-rule)',
+  borderRadius: 4,
+  padding: '12px 16px',
+  marginBottom: 16,
+  background: 'var(--ed-surface)',
+  position: 'sticky',
+  top: 0,
+  zIndex: 2,
 }
 
 const cardTop: React.CSSProperties = {
