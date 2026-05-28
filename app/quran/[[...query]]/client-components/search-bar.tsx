@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { SearchIcon, StickyNote } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -28,12 +28,6 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Sync the input from URL changes (e.g. back/forward nav, programmatic
-  // navigation) without clobbering text the user is currently typing.
-  useEffect(() => {
-    if (urlQuery) setQuery(urlQuery)
-  }, [urlQuery])
-
   const chapters = useQuranNavStore((s) => s.chapters)
   const appendices = useQuranNavStore((s) => s.appendices)
 
@@ -43,8 +37,6 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
         replace(`${pathname}`)
         return
       }
-      // All-chapters verse form (e.g. ":50" or ":50-55") — expand to every
-      // chapter that has the requested verse, then navigate as a verse list.
       const allChapters = parseAllChaptersVerseRef(q.trim())
       if (allChapters) {
         const expanded = expandAllChaptersVerseRef(allChapters, chapters)
@@ -53,8 +45,6 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           return
         }
       }
-      // Comma-separated verse refs (e.g. "1:1,2:255-257" or "1 1,2 255-257")
-      // Normalize each part to canonical colon form before navigating.
       if (q.includes(',')) {
         const parts = q.split(',').map((s) => normalizeQuranInput(s.trim()))
         if (parts.every((p) => parseQuranRef(p) !== null)) {
@@ -62,7 +52,6 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           return
         }
       }
-      // Normalize single verse ref ("3 5" → "3:5") before placing in the URL
       const normalized = normalizeQuranInput(q.trim())
       const params = new URLSearchParams(searchParams.toString())
       params.set('q', decodeURIComponent(normalized))
@@ -71,8 +60,9 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
     [pathname, replace, router, searchParams, chapters]
   )
 
-  // Autocomplete: skip verse-ref patterns (colon or space-separated)
-  const showDropdown = open && query.length >= 1 && !isQuranRefInput(query)
+  const displayQuery = open ? query : urlQuery
+
+  const showDropdown = open && displayQuery.length >= 1 && !isQuranRefInput(displayQuery)
 
   const matchedChapters = showDropdown
     ? chapters
@@ -81,11 +71,11 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           const n = c.chapter_number?.toString() ?? ''
           const transliteration =
             CHAPTER_TRANSLITERATIONS[(c.chapter_number ?? 1) - 1] ?? ''
-          const q = query.toLowerCase()
+          const q = displayQuery.toLowerCase()
           return (
             title.toLowerCase().includes(q) ||
             transliteration.toLowerCase().includes(q) ||
-            n.startsWith(query)
+            n.startsWith(displayQuery)
           )
         })
         .slice(0, 5)
@@ -97,14 +87,14 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           const title = a.title ?? ''
           const n = a.code?.toString() ?? ''
           return (
-            title.toLowerCase().includes(query.toLowerCase()) ||
-            n.startsWith(query)
+            title.toLowerCase().includes(displayQuery.toLowerCase()) ||
+            n.startsWith(displayQuery)
           )
         })
         .slice(0, 3)
     : []
 
-  const noteResults = useMeSearch(showDropdown ? query : '', 'quran').slice(0, 4)
+  const noteResults = useMeSearch(showDropdown ? displayQuery : '', 'quran').slice(0, 4)
 
   const hasSuggestions =
     matchedChapters.length > 0 || matchedAppendices.length > 0 || noteResults.length > 0
@@ -134,9 +124,12 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
             'bg-muted/50 border-border/40',
             large ? 'pl-11 h-12 text-base rounded-xl' : 'pl-8 h-8 text-sm'
           )}
-          value={query}
+          value={displayQuery}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            setQuery(urlQuery)
+            setOpen(true)
+          }}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           autoComplete="off"
         />

@@ -57,27 +57,34 @@ export function useAutoScroll({
 }: UseAutoScrollOptions = {}): UseAutoScrollReturn {
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
-  const [speedIndex, setSpeedIndex] = useState(DEFAULT_MULTIPLIER_INDEX)
+  const [speedIndex, setSpeedIndex] = useState(() => readStoredIndex())
 
   const isPlayingRef = useRef(false)
   const userPausedRef = useRef(false)
-  const multiplierRef = useRef(MULTIPLIERS[DEFAULT_MULTIPLIER_INDEX])
+  const multiplierRef = useRef(MULTIPLIERS[speedIndex])
   const getVelocityRef = useRef(getVelocity)
   const defaultVelocityRef = useRef(defaultVelocity)
   const rafIdRef = useRef<number | null>(null)
   const lastTimestampRef = useRef<number | null>(null)
   const isTicking = useRef(false)
-
-  getVelocityRef.current = getVelocity
-  defaultVelocityRef.current = defaultVelocity
+  const hasStartedRef = useRef(false)
+  const tickRef = useRef<(timestamp: number) => void>(() => {})
 
   useEffect(() => {
-    const stored = readStoredIndex()
-    if (stored !== DEFAULT_MULTIPLIER_INDEX) {
-      multiplierRef.current = MULTIPLIERS[stored]
-      setSpeedIndex(stored)
-    }
-  }, [])
+    getVelocityRef.current = getVelocity
+  }, [getVelocity])
+
+  useEffect(() => {
+    defaultVelocityRef.current = defaultVelocity
+  }, [defaultVelocity])
+
+  useEffect(() => {
+    multiplierRef.current = MULTIPLIERS[speedIndex]
+  }, [speedIndex])
+
+  useEffect(() => {
+    hasStartedRef.current = hasStarted
+  }, [hasStarted])
 
   const stop = useCallback(() => {
     if (rafIdRef.current !== null) {
@@ -88,43 +95,45 @@ export function useAutoScroll({
     isTicking.current = false
   }, [])
 
-  const tick = useCallback((timestamp: number) => {
-    if (!isPlayingRef.current) {
-      isTicking.current = false
-      return
-    }
-
-    if (lastTimestampRef.current !== null) {
-      const dt = Math.min((timestamp - lastTimestampRef.current) / 1000, 0.1)
-      const base =
-        getVelocityRef.current?.(window.scrollY) ?? defaultVelocityRef.current
-      const delta = base * multiplierRef.current * dt
-
-      const atBottom =
-        window.scrollY + window.innerHeight >=
-        document.documentElement.scrollHeight - 2
-
-      if (atBottom) {
-        isPlayingRef.current = false
-        setIsPlaying(false)
-        isTicking.current = false
-        return
-      }
-
-      isTicking.current = true
-      window.scrollBy({ top: delta, behavior: 'auto' })
-    }
-
-    lastTimestampRef.current = timestamp
-    rafIdRef.current = requestAnimationFrame(tick)
-  }, [])
-
   const startLoop = useCallback(() => {
     if (isTicking.current) return
     lastTimestampRef.current = null
     isTicking.current = true
-    rafIdRef.current = requestAnimationFrame(tick)
-  }, [tick])
+    rafIdRef.current = requestAnimationFrame((ts) => tickRef.current(ts))
+  }, [])
+
+  useEffect(() => {
+    tickRef.current = (timestamp: number) => {
+      if (!isPlayingRef.current) {
+        isTicking.current = false
+        return
+      }
+
+      if (lastTimestampRef.current !== null) {
+        const dt = Math.min((timestamp - lastTimestampRef.current) / 1000, 0.1)
+        const base =
+          getVelocityRef.current?.(window.scrollY) ?? defaultVelocityRef.current
+        const delta = base * multiplierRef.current * dt
+
+        const atBottom =
+          window.scrollY + window.innerHeight >=
+          document.documentElement.scrollHeight - 2
+
+        if (atBottom) {
+          isPlayingRef.current = false
+          setIsPlaying(false)
+          isTicking.current = false
+          return
+        }
+
+        isTicking.current = true
+        window.scrollBy({ top: delta, behavior: 'auto' })
+      }
+
+      lastTimestampRef.current = timestamp
+      rafIdRef.current = requestAnimationFrame((ts) => tickRef.current(ts))
+    }
+  }, [])
 
   const pause = useCallback(() => {
     userPausedRef.current = true
@@ -151,7 +160,6 @@ export function useAutoScroll({
   const speedUp = useCallback(() => {
     setSpeedIndex((prev) => {
       const next = Math.min(prev + 1, MULTIPLIERS.length - 1)
-      multiplierRef.current = MULTIPLIERS[next]
       writeStoredIndex(next)
       return next
     })
@@ -160,7 +168,6 @@ export function useAutoScroll({
   const speedDown = useCallback(() => {
     setSpeedIndex((prev) => {
       const next = Math.max(prev - 1, 0)
-      multiplierRef.current = MULTIPLIERS[next]
       writeStoredIndex(next)
       return next
     })
@@ -196,7 +203,7 @@ export function useAutoScroll({
         isPlayingRef.current = false
         setIsPlaying(false)
         stop()
-      } else if (!document.hidden && !userPausedRef.current && hasStarted) {
+      } else if (!document.hidden && !userPausedRef.current && hasStartedRef.current) {
         isPlayingRef.current = true
         setIsPlaying(true)
         startLoop()
@@ -216,7 +223,7 @@ export function useAutoScroll({
       window.removeEventListener('keydown', onUserInterrupt)
       document.removeEventListener('visibilitychange', onVisibilityChange)
     }
-  }, [startDelayMs, startLoop, stop, hasStarted])
+  }, [startDelayMs, startLoop, stop])
 
   return {
     isPlaying,

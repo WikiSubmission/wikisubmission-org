@@ -44,13 +44,10 @@ export function NoteEditorDialog({
   const loadingRef = useRef(false)
   const saveSeqRef = useRef(0)
 
-  const noteContentRef = useRef(note?.content ?? '')
-  noteContentRef.current = note?.content ?? ''
-
   useEffect(() => {
     if (!open) return
     let cancelled = false
-    const initialContent = noteContentRef.current
+    const initialContent = note?.content ?? ''
     async function load() {
       loadingRef.current = true
       const blocks = initialContent
@@ -68,7 +65,7 @@ export function NoteEditorDialog({
       cancelled = true
       loadingRef.current = false
     }
-  }, [open, editor])
+  }, [open, editor, note?.content])
 
   const persistCurrent = useCallback(async (): Promise<boolean> => {
     const markdown = await editor.blocksToMarkdownLossy(editor.document)

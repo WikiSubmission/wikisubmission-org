@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { meApi } from '@/src/api/me-client'
 import { getSession } from 'next-auth/react'
@@ -11,6 +11,13 @@ type ConsentState =
   | { status: 'error' }
   | { status: 'ready'; consent: boolean }
 
+type ExportStatus = 'queued' | 'running' | 'sent' | 'failed'
+
+type ExportState = {
+  status: ExportStatus
+  sent_at?: string
+}
+
 export function SettingsClient() {
   const t = useTranslations('meSettings')
   const [consent, setConsent] = useState<ConsentState>({ status: 'loading' })
@@ -18,32 +25,36 @@ export function SettingsClient() {
   const [clearing, setClearing] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [exportMsg, setExportMsg] = useState<string | null>(null)
-  const [exportState, setExportState] = useState<any>(null)
+  const [exportState, setExportState] = useState<ExportState | null>(null)
   const [requestingExport, setRequestingExport] = useState(false)
   const [userEmail, setUserEmail] = useState('')
 
-  useEffect(() => {
-    getSession().then((s) => setUserEmail(s?.user?.email ?? ''))
-    refreshExportStatus()
-    meApi.activity
-      .getConsent()
-      .then(({ consent }) => setConsent({ status: 'ready', consent }))
-      .catch(() => setConsent({ status: 'error' }))
-  }, [])
-
-  async function authFetch(path: string, init?: RequestInit) {
+  const authFetch = useCallback(async (path: string, init?: RequestInit) => {
     const session = await getSession()
     const headers = new Headers(init?.headers ?? {})
     if (session?.accessToken) headers.set('Authorization', `Bearer ${session.accessToken}`)
     return fetch(`${resolveBrowserApiBaseUrl()}${path}`, { ...init, headers })
-  }
+  }, [])
 
-  async function refreshExportStatus() {
+  const refreshExportStatus = useCallback(async () => {
     const res = await authFetch('/me/export/status')
     if (!res.ok) return
-    const body = await res.json()
+    const body = (await res.json()) as { data?: ExportState | null }
     setExportState(body.data ?? null)
-  }
+  }, [authFetch])
+
+  useEffect(() => {
+    getSession().then((s) => setUserEmail(s?.user?.email ?? ''))
+    const exportTimer = window.setTimeout(() => {
+      void refreshExportStatus()
+    }, 0)
+    meApi.activity
+      .getConsent()
+      .then(({ consent }) => setConsent({ status: 'ready', consent }))
+      .catch(() => setConsent({ status: 'error' }))
+
+    return () => window.clearTimeout(exportTimer)
+  }, [refreshExportStatus])
 
   async function requestExport() {
     if (requestingExport) return

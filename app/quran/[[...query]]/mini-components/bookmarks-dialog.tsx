@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ArrowLeft, Plus, Search } from 'lucide-react'
 import {
   Dialog,
@@ -26,20 +26,20 @@ export function BookmarksDialog({
   const [view, setView] = useState<View>({ kind: 'list' })
   const [search, setSearch] = useState('')
 
-  // Reset to category list whenever the dialog re-opens.
-  useEffect(() => {
-    if (!open) {
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
       setView({ kind: 'list' })
       setSearch('')
     }
-  }, [open])
+    onOpenChange(nextOpen)
+  }
 
   const activeCategory =
     view.kind === 'detail' ? categories.find((c) => c.id === view.categoryId) : null
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
           className="max-w-2xl w-full p-0 gap-0 bg-[var(--ed-surface)] border-[var(--ed-rule)] rounded-[3px]"
           aria-describedby={undefined}
