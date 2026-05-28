@@ -334,42 +334,87 @@ export function GamesReview({
       <section style={maintPanel}>
         <h2 style={maintHeading}>Maintenance</h2>
         <p style={muted}>
-          These replace the shell commands the editor cannot run in production. Both are safe to
-          re-run.
+          Both buttons are safe to click any time. Read the notes under each so you know when it
+          actually changes something.
         </p>
-        <div style={maintRow}>
-          <button type="button" onClick={runSeed} disabled={maintPending !== null} style={ghostButton}>
-            {maintPending === 'seed' ? 'Rebuilding…' : 'Rebuild word frequencies'}
-          </button>
-          {seedMsg && <span style={maintMsg}>{seedMsg}</span>}
+
+        <div style={maintBlock}>
+          <div style={maintRow}>
+            <button type="button" onClick={runSeed} disabled={maintPending !== null} style={ghostButton}>
+              {maintPending === 'seed' ? 'Rebuilding…' : 'Rebuild word frequencies'}
+            </button>
+            {seedMsg && <span style={maintMsg}>{seedMsg}</span>}
+          </div>
+          <p style={maintNote}>
+            <strong style={maintLabel}>What this does.</strong> Counts how often each word appears
+            in the English (Rashad Khalifa) translation and stores the totals. The game uses those
+            totals to decide whether a word is Easy, Medium, or Hard when it picks blanks.
+          </p>
+          <p style={maintNote}>
+            <strong style={maintLabel}>When to run it.</strong> Once, after the site is first set
+            up (already done). Run again only if the translation text itself is corrected, or when
+            a new language is added. It is not affected by curating, approving, or rejecting
+            passages — those never change word counts.
+          </p>
+          <p style={maintNote}>
+            <strong style={maintLabel}>If you forget after a translation change.</strong> Difficulty
+            tiers go stale: common words may show up as Hard, rare words as Easy, and any newly
+            introduced words simply never appear as blanks. The game still runs, but its sense of
+            difficulty drifts away from the actual text. Clicking the button at any later point
+            fixes it instantly.
+          </p>
+          <p style={maintNote}>
+            <strong style={maintLabel}>Cost.</strong> A few seconds of database work. No external
+            calls, no money spent, no risk to existing passages. The operation replaces the table
+            atomically — players in the middle of a round are unaffected.
+          </p>
         </div>
-        <div style={maintRow}>
-          <button type="button" onClick={runLemmas} disabled={maintPending !== null} style={ghostButton}>
-            {maintPending === 'lemma' ? 'Loading…' : 'Load lemma data'}
-          </button>
-          {lemmaMsg && <span style={maintMsg}>{lemmaMsg}</span>}
+
+        <div style={maintBlock}>
+          <div style={maintRow}>
+            <button type="button" onClick={runLemmas} disabled={maintPending !== null} style={ghostButton}>
+              {maintPending === 'lemma' ? 'Loading…' : 'Load lemma data'}
+            </button>
+            {lemmaMsg && <span style={maintMsg}>{lemmaMsg}</span>}
+          </div>
+          <p style={maintNote}>
+            <strong style={maintLabel}>What this does.</strong> Teaches the game which words share
+            the same root form — for example, that <em>worshipped</em>, <em>worshipping</em>, and
+            <em>{' '}worships</em> all come from <em>worship</em>. Hard rounds use this to accept a
+            close conjugation when a player types one.
+          </p>
+          <p style={maintNote}>
+            <strong style={maintLabel}>What it does NOT do.</strong> It does not analyze the text
+            here and now. It only loads a prepared list of word-pairs that was generated offline
+            and shipped inside the current deploy. The analysis itself happens on a developer
+            machine, not on the live server.
+          </p>
+          <p style={maintNote}>
+            <strong style={maintLabel}>When the prepared list needs refreshing.</strong> Only when
+            the translation text changes, when a new language is added, or when a developer
+            decides to use a better word-analysis tool. Curation work never requires it. Until a
+            fresh list ships, Hard rounds simply fall back to exact matches — the game stays fully
+            playable, just stricter.
+          </p>
+          <p style={maintNote}>
+            <strong style={maintLabel}>If you forget after a translation change.</strong> Players
+            on Hard would need to type the exact word from the verse; a perfectly reasonable
+            conjugation would be marked wrong. Nothing breaks, but Hard feels unfair until the
+            list is refreshed and reloaded.
+          </p>
+          <p style={maintNote}>
+            <strong style={maintLabel}>How a developer refreshes the list.</strong> In the
+            backend repo (<code style={inlineCode}>ws-backend</code>), they run
+            {' '}<code style={inlineCode}>just games-refresh-lemmas &lt;target&gt; &lt;lang&gt;</code>{' '}
+            — for example <code style={inlineCode}>just games-refresh-lemmas hetzner en</code> for
+            English on the Hetzner database, or
+            {' '}<code style={inlineCode}>just games-refresh-lemmas hetzner ar</code> once Arabic
+            ships. The command bootstraps everything on first use, then writes
+            {' '}<code style={inlineCode}>db/seeds/games_lemma_&lt;lang&gt;.sql</code>. They commit
+            the file, push, wait for the redeploy, and you finish the job by clicking Load lemma
+            data here.
+          </p>
         </div>
-        <p style={maintNote}>
-          Load lemma data only loads the fixture shipped inside the current deploy. The fixture
-          itself is generated offline (spaCy is not part of the production image).
-        </p>
-        <p style={maintNote}>
-          The fixture is a function of the scripture vocabulary, not of curated passages, so it is
-          a one-time job per language. Regenerate only when: the source translation changes, the
-          lemmatizer is bumped, or a new language ships. Curating, approving, or rejecting passages
-          never requires regenerating it.
-        </p>
-        <p style={maintNote}>
-          To regenerate: in <code style={inlineCode}>ws-backend</code>, run
-          {' '}<code style={inlineCode}>just games-refresh-lemmas &lt;target&gt; &lt;lang&gt;</code>{' '}
-          (defaults <code style={inlineCode}>local en</code>). Examples:
-          {' '}<code style={inlineCode}>just games-refresh-lemmas hetzner en</code> reads vocabulary
-          from prod and writes <code style={inlineCode}>db/seeds/games_lemma_en.sql</code>;
-          {' '}<code style={inlineCode}>just games-refresh-lemmas hetzner ar</code> would write the
-          Arabic fixture once that language ships (also requires wiring it into
-          {' '}<code style={inlineCode}>db/seeds.go</code>). Commit the resulting SQL file, push,
-          let the deploy roll, then click Load lemma data here.
-        </p>
       </section>
     </main>
   )
@@ -695,14 +740,27 @@ const maintMsg: React.CSSProperties = {
 const maintNote: React.CSSProperties = {
   ...muted,
   fontSize: 13,
-  fontStyle: 'italic',
-  marginTop: 8,
-  lineHeight: 1.55,
+  marginTop: 6,
+  lineHeight: 1.6,
+}
+
+const maintLabel: React.CSSProperties = {
+  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+  fontSize: 11,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: 'var(--ed-fg)',
+  marginRight: 6,
+}
+
+const maintBlock: React.CSSProperties = {
+  marginTop: 20,
+  paddingTop: 16,
+  borderTop: '1px solid var(--ed-rule)',
 }
 
 const inlineCode: React.CSSProperties = {
   fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
-  fontStyle: 'normal',
   fontSize: 12,
   background: 'var(--ed-surface-alt, rgba(0,0,0,0.04))',
   padding: '1px 5px',
