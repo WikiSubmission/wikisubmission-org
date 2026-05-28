@@ -2,17 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { ThemedSelect } from '@/components/ui/themed-select'
 import {
   meApi,
   type GameLeaderboardEntry,
   type GameLeaderboardScope,
-  type GameDifficulty,
-  type GameRoundSize,
 } from '@/src/api/me-client'
-
-const DIFFICULTIES: GameDifficulty[] = ['easy', 'medium', 'hard', 'professional']
-const SIZES: GameRoundSize[] = ['short', 'medium', 'long']
 
 type Board =
   | { status: 'loading' }
@@ -22,14 +16,12 @@ type Board =
 export function GamesLeaderboard() {
   const t = useTranslations('games')
   const [scope, setScope] = useState<Extract<GameLeaderboardScope, 'global' | 'weekly'>>('global')
-  const [size, setSize] = useState<GameRoundSize>('short')
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('easy')
   const [board, setBoard] = useState<Board>({ status: 'loading' })
 
   useEffect(() => {
     let active = true
     meApi.games
-      .getLeaderboard({ scope, size, difficulty, limit: 50 })
+      .getLeaderboard({ scope, limit: 50 })
       .then(({ data }) => {
         if (active) setBoard({ status: 'ready', entries: data })
       })
@@ -39,21 +31,11 @@ export function GamesLeaderboard() {
     return () => {
       active = false
     }
-  }, [scope, size, difficulty])
+  }, [scope])
 
   function changeScope(next: Extract<GameLeaderboardScope, 'global' | 'weekly'>) {
     setBoard({ status: 'loading' })
     setScope(next)
-  }
-
-  function changeSize(next: GameRoundSize) {
-    setBoard({ status: 'loading' })
-    setSize(next)
-  }
-
-  function changeDifficulty(next: GameDifficulty) {
-    setBoard({ status: 'loading' })
-    setDifficulty(next)
   }
 
   return (
@@ -61,26 +43,6 @@ export function GamesLeaderboard() {
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <Tab active={scope === 'global'} onClick={() => changeScope('global')} label={t('tabGlobal')} />
         <Tab active={scope === 'weekly'} onClick={() => changeScope('weekly')} label={t('tabWeekly')} />
-        <div style={{ marginLeft: 'auto' }}>
-          <ThemedSelect
-            value={size}
-            onChange={(next) => changeSize(next as GameRoundSize)}
-            aria-label={t('pickerSizeLabel')}
-            options={SIZES.map((s) => ({
-              value: s,
-              label: t(`size${s.charAt(0).toUpperCase()}${s.slice(1)}` as Parameters<typeof t>[0]),
-            }))}
-          />
-        </div>
-        <ThemedSelect
-          value={difficulty}
-          onChange={(next) => changeDifficulty(next as GameDifficulty)}
-          aria-label={t('pickerDifficultyLabel')}
-          options={DIFFICULTIES.map((d) => ({
-            value: d,
-            label: t(`difficulty${d.charAt(0).toUpperCase()}${d.slice(1)}` as Parameters<typeof t>[0]),
-          }))}
-        />
       </div>
 
       <div style={{ marginTop: 20 }}>
