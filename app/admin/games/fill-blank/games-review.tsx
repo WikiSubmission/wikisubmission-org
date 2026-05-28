@@ -350,8 +350,25 @@ export function GamesReview({
           {lemmaMsg && <span style={maintMsg}>{lemmaMsg}</span>}
         </div>
         <p style={maintNote}>
-          Load lemma data loads the fixture shipped with the current deploy. It does not run the
-          offline spaCy step.
+          Load lemma data only loads the fixture shipped inside the current deploy. The fixture
+          itself is generated offline (spaCy is not part of the production image).
+        </p>
+        <p style={maintNote}>
+          The fixture is a function of the scripture vocabulary, not of curated passages, so it is
+          a one-time job per language. Regenerate only when: the source translation changes, the
+          lemmatizer is bumped, or a new language ships. Curating, approving, or rejecting passages
+          never requires regenerating it.
+        </p>
+        <p style={maintNote}>
+          To regenerate: in <code style={inlineCode}>ws-backend</code>, run
+          {' '}<code style={inlineCode}>just games-refresh-lemmas &lt;target&gt; &lt;lang&gt;</code>{' '}
+          (defaults <code style={inlineCode}>local en</code>). Examples:
+          {' '}<code style={inlineCode}>just games-refresh-lemmas hetzner en</code> reads vocabulary
+          from prod and writes <code style={inlineCode}>db/seeds/games_lemma_en.sql</code>;
+          {' '}<code style={inlineCode}>just games-refresh-lemmas hetzner ar</code> would write the
+          Arabic fixture once that language ships (also requires wiring it into
+          {' '}<code style={inlineCode}>db/seeds.go</code>). Commit the resulting SQL file, push,
+          let the deploy roll, then click Load lemma data here.
         </p>
       </section>
     </main>
@@ -679,4 +696,15 @@ const maintNote: React.CSSProperties = {
   ...muted,
   fontSize: 13,
   fontStyle: 'italic',
+  marginTop: 8,
+  lineHeight: 1.55,
+}
+
+const inlineCode: React.CSSProperties = {
+  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+  fontStyle: 'normal',
+  fontSize: 12,
+  background: 'var(--ed-surface-alt, rgba(0,0,0,0.04))',
+  padding: '1px 5px',
+  borderRadius: 2,
 }
