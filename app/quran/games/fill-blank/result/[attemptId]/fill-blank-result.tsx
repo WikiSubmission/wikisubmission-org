@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
 import { readResult } from '@/lib/games-session'
+import { encodeSharePayload } from '@/lib/games-share'
 import type { GameSubmitResult } from '@/src/api/me-client'
 
 export function FillBlankResult({ attemptId }: { attemptId: string }) {
@@ -118,9 +120,47 @@ export function FillBlankResult({ attemptId }: { attemptId: string }) {
         <Link href="/quran/games/leaderboard" style={ghostLink}>
           {t('leaderboardLink')}
         </Link>
+        <button type="button" onClick={() => shareResult(result, t)} style={ghostLink}>
+          {t('share')}
+        </button>
       </div>
     </div>
   )
+}
+
+type T = ReturnType<typeof useTranslations<'games'>>
+
+async function shareResult(result: GameSubmitResult, t: T): Promise<void> {
+  const token = encodeSharePayload({
+    score: result.score,
+    correct: result.correct_count,
+    total: result.total_count,
+    difficulty: result.difficulty_multiplier,
+  })
+  const url = `${window.location.origin}/share/games/fill-blank/${token}`
+  const shareText = t('shareText', {
+    score: result.score,
+    correct: result.correct_count,
+    total: result.total_count,
+  })
+
+  // Web Share API on mobile gives a native sheet; everywhere else, copy.
+  if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+    try {
+      await navigator.share({ title: t('shareTitle'), text: shareText, url })
+      return
+    } catch (err) {
+      // User cancellation is silent; an actual failure falls through to copy.
+      if ((err as DOMException)?.name === 'AbortError') return
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(url)
+    toast.success(t('shareCopied'))
+  } catch {
+    toast.error(t('shareFailed'))
+  }
 }
 
 const monoLabel: React.CSSProperties = {
