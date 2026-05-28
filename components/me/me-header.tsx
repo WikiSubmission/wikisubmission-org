@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Fragment } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
+import { ChevronLeft } from 'lucide-react'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
 import { PaletteThemeSwitcher } from '@/components/toggles/palette-theme-switcher'
 import { useCollections } from '@/hooks/use-collections'
@@ -12,6 +13,12 @@ import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 const ME_ROOT_RE = /^\/me\/?$/
 
 type Crumb = { label: string; href?: string }
+
+function normalizeMePath(pathname: string, locale: string): string {
+  if (pathname === `/${locale}` || pathname === `/${locale}/`) return '/'
+  if (pathname.startsWith(`/${locale}/`)) return pathname.slice(locale.length + 1)
+  return pathname
+}
 
 function useCrumbs(pathname: string): Crumb[] {
   const t = useTranslations('meHeader')
@@ -75,14 +82,20 @@ function useCrumbs(pathname: string): Crumb[] {
   return crumbs
 }
 
-function RootLinks() {
-  const t = useTranslations("meHeader")
+function RootNav() {
+  const t = useTranslations('meHeader')
+  const router = useRouter()
 
   return (
-    <nav className="me-breadcrumb" aria-label="Profile links">
-      <Link href="/me/settings">{t("settings")}</Link>
-      <span className="sep" aria-hidden>/</span>
-      <Link href="/me/activity">{t("activity")}</Link>
+    <nav className="me-breadcrumb" aria-label="Profile navigation">
+      <button type="button" className="me-header-back" onClick={() => router.back()}>
+        <ChevronLeft size={14} aria-hidden />
+        <span>{t('back')}</span>
+      </button>
+      <span className="sep" aria-hidden>|</span>
+      <Link href="/me/settings">{t('settings')}</Link>
+      <span className="sep" aria-hidden>|</span>
+      <Link href="/me/activity">{t('activity')}</Link>
     </nav>
   )
 }
@@ -114,12 +127,13 @@ function Breadcrumb({ crumbs }: { crumbs: Crumb[] }) {
 export function MeHeader() {
   const pathname = usePathname() ?? '/me'
   const locale = useLocale()
-  const isRoot = ME_ROOT_RE.test(pathname)
-  const crumbs = useCrumbs(pathname)
+  const normalizedPath = normalizeMePath(pathname, locale)
+  const isRoot = ME_ROOT_RE.test(normalizedPath)
+  const crumbs = useCrumbs(normalizedPath)
 
   return (
     <div className="me-header">
-      {isRoot ? <RootLinks /> : <Breadcrumb crumbs={crumbs} />}
+      {isRoot ? <RootNav /> : <Breadcrumb crumbs={crumbs} />}
       <div className="me-header-spacer" />
       <div className="me-header-toggles">
         <LocaleSwitcher currentLocale={locale} />
