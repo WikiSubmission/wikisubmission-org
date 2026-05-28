@@ -46,12 +46,29 @@ interface CurateResult {
 export class AdminApiError extends Error {
   readonly status: number
   readonly serverMessage?: string
-  constructor(status: number, serverMessage?: string) {
+  /** Seconds the server suggested waiting before retry, parsed from
+   * `Retry-After` on 429 responses. `undefined` when not provided. */
+  readonly retryAfterSeconds?: number
+  constructor(status: number, serverMessage?: string, retryAfterSeconds?: number) {
     super(serverMessage ? `${status}: ${serverMessage}` : `${status}`)
     this.name = 'AdminApiError'
     this.status = status
     this.serverMessage = serverMessage
+    this.retryAfterSeconds = retryAfterSeconds
   }
+}
+
+function parseRetryAfterHeader(value: string | null): number | undefined {
+  if (!value) return undefined
+  const trimmed = value.trim()
+  const asNumber = Number(trimmed)
+  if (Number.isFinite(asNumber) && asNumber > 0) return asNumber
+  const asDate = Date.parse(trimmed)
+  if (!Number.isNaN(asDate)) {
+    const delta = Math.ceil((asDate - Date.now()) / 1000)
+    if (delta > 0) return delta
+  }
+  return undefined
 }
 
 /**
@@ -88,7 +105,9 @@ async function call<T>(
     } catch {
       // non-JSON error body; status alone will have to do
     }
-    throw new AdminApiError(res.status, serverMessage)
+    const retryAfter =
+      res.status === 429 ? parseRetryAfterHeader(res.headers.get('Retry-After')) : undefined
+    throw new AdminApiError(res.status, serverMessage, retryAfter)
   }
 
   const json = (await res.json()) as { data: T }

@@ -6,7 +6,7 @@ import { type ReviewPassage, type ReviewStatus } from '@/lib/games-editor'
 
 export type ActionResult<T> =
   | { ok: true; data: T }
-  | { ok: false; error: string; rateLimited?: boolean }
+  | { ok: false; error: string; rateLimited?: boolean; retryAfterSeconds?: number }
 
 /**
  * Resolves an authenticated editor session and returns a bound admin client.
@@ -198,6 +198,7 @@ export async function curateAction(
     return { ok: true, data }
   } catch (err) {
     const rateLimited = err instanceof AdminApiError && err.status === 429
-    return { ok: false, error: describe(err), rateLimited }
+    const retryAfterSeconds = err instanceof AdminApiError ? err.retryAfterSeconds : undefined
+    return { ok: false, error: describe(err), rateLimited, retryAfterSeconds }
   }
 }

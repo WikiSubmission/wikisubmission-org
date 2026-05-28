@@ -15,9 +15,11 @@ import {
 } from './actions'
 
 // Curation runs one verse window per request; pause between windows to respect
-// Groq's per-minute token budget, and back off the same amount on a rate limit.
+// Groq's per-minute token budget. On a rate limit, prefer the server's
+// Retry-After hint and fall back to exponential backoff (30s, 60s, 120s, …).
 const INTER_WINDOW_PAUSE_MS = 60_000
-const RATE_LIMIT_BACKOFF_MS = 60_000
+const BACKOFF_INITIAL_MS = 30_000
+const BACKOFF_MAX_MS = 600_000
 
 const STATUS_OPTIONS = ['proposed', 'approved', 'needs_refinement', 'rejected', 'all'] as const
 type StatusFilter = (typeof STATUS_OPTIONS)[number]
@@ -208,6 +210,7 @@ export function GamesReview({
 
     let proposedTotal = 0
     let afterVerse = 0
+    let backoffMs = BACKOFF_INITIAL_MS
     try {
       for (;;) {
         if (cancelCurateRef.current) {
@@ -218,13 +221,24 @@ export function GamesReview({
         const res = await curateAction(chapter, afterVerse)
         if (!res.ok) {
           if (res.rateLimited) {
-            await pause(RATE_LIMIT_BACKOFF_MS, `Chapter ${chapter}: Groq rate limit, retrying in`)
+            // Server's hint wins when present; otherwise grow exponentially up
+            // to BACKOFF_MAX_MS so repeated denials stretch the wait out.
+            const hintMs = res.retryAfterSeconds ? res.retryAfterSeconds * 1000 : 0
+            const waitMs = hintMs > 0 ? hintMs : backoffMs
+            const label =
+              hintMs > 0
+                ? `Chapter ${chapter}: Groq asked us to wait, retrying in`
+                : `Chapter ${chapter}: Groq rate limit, retrying in`
+            await pause(waitMs, label)
+            backoffMs = Math.min(backoffMs * 2, BACKOFF_MAX_MS)
             continue // same cursor; the window was not consumed
           }
           setCurateMsg(res.error)
           break
         }
 
+        // Reset exponential backoff on any successful window.
+        backoffMs = BACKOFF_INITIAL_MS
         proposedTotal += res.data.proposed
         afterVerse = res.data.next_verse
         const total = res.data.verses_total
