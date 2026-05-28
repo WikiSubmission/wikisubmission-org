@@ -19,7 +19,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut, User, Globe, Palette, Gamepad2 } from 'lucide-react'
+import { LogOut, User, Globe, Palette, Gamepad2, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const LOCALES = [
@@ -41,6 +41,7 @@ function resolveMode(theme: string | undefined, systemTheme: string | undefined)
 export function UserMenu() {
   const { user, isAuthenticated, isLoading } = useUser()
   const { data: session } = useSession()
+  const isAdmin = session?.isAdmin === true
   const isEditor = session?.isEditor === true
   const openSignIn = useSignInPromptStore((s) => s.open)
   const router = useRouter()
@@ -137,14 +138,21 @@ export function UserMenu() {
             Profile
           </a>
         </DropdownMenuItem>
-        {isEditor && (
+        {isAdmin ? (
           <DropdownMenuItem asChild>
-            <a href="/studio/games" className="flex items-center gap-2">
+            <a href="/admin" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Admin
+            </a>
+          </DropdownMenuItem>
+        ) : isEditor ? (
+          <DropdownMenuItem asChild>
+            <a href="/admin/games/fill-blank" className="flex items-center gap-2">
               <Gamepad2 className="w-4 h-4" />
               Games studio
             </a>
           </DropdownMenuItem>
-        )}
+        ) : null}
         <DropdownMenuSeparator />
 
         {/* Language */}

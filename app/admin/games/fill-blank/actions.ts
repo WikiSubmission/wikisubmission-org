@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth'
 import { AdminApiError, gamesAdminClient } from '@/lib/games-admin-client'
-import { isEditor, type ReviewPassage, type ReviewStatus } from '@/lib/games-editor'
+import { type ReviewPassage, type ReviewStatus } from '@/lib/games-editor'
 
 export type ActionResult<T> =
   | { ok: true; data: T }
@@ -10,15 +10,15 @@ export type ActionResult<T> =
 
 /**
  * Resolves an authenticated editor session and returns a bound admin client.
- * Every action re-checks the session and the soft allowlist; the backend
- * RequireEditor middleware is still the real gate.
+ * Every action re-checks the session flags (set from DB role + permissions);
+ * the backend RequireEditor middleware is still the real gate.
  */
 async function editorClient() {
   const session = await auth()
   if (!session?.accessToken) {
     return { error: 'not_authenticated' as const }
   }
-  if (!isEditor(session.user?.email)) {
+  if (!session.isAdmin && !session.isEditor) {
     return { error: 'not_authorized' as const }
   }
   return { client: gamesAdminClient(session.accessToken) }
@@ -27,14 +27,14 @@ async function editorClient() {
 function describe(err: unknown): string {
   // Gating failures from editorClient() arrive as plain string codes.
   if (err === 'not_authenticated') return 'Your session expired. Please sign in again.'
-  if (err === 'not_authorized') return 'You are not on the editor allowlist.'
+  if (err === 'not_authorized') return 'You do not have games editor access.'
 
   if (err instanceof AdminApiError) {
     switch (err.status) {
       case 401:
         return 'Your session expired. Please sign in again.'
       case 403:
-        return 'You are not on the editor allowlist.'
+        return 'You do not have games editor access.'
       case 404:
         return 'Not found.'
       case 429:

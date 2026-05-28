@@ -1,26 +1,25 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { gamesAdminClient } from '@/lib/games-admin-client'
-import { isEditor, type ReviewPassage } from '@/lib/games-editor'
+import { type ReviewPassage } from '@/lib/games-editor'
 import { GamesReview } from './games-review'
 
-// Editorial review console for the Quran Games catalog. Intentionally not
-// linked from public navigation; the soft check below is UX only, the backend
-// RequireEditor middleware enforces the real gate.
+// Editorial review console for the Quran Games catalog. Soft check below is
+// UX only; the backend RequireEditor middleware enforces the real gate.
 export const dynamic = 'force-dynamic'
 
-export default async function StudioGamesPage() {
+export default async function GamesFillBlankStudioPage() {
   const session = await auth()
-  if (!session?.accessToken) redirect('/auth/sign-in?next=/studio/games')
+  if (!session?.accessToken) redirect('/auth/sign-in?next=/admin/games/fill-blank')
 
-  if (!isEditor(session.user?.email)) {
+  if (!session.isAdmin && !session.isEditor) {
     return (
       <main style={notAuthorizedWrap}>
         <p style={kicker}>Studio</p>
         <h1 style={heading}>Not authorized</h1>
         <p style={muted}>
-          This page is restricted to the games editorial team. If you should have access, ask an
-          administrator to add your email to the editor allowlist.
+          This page is restricted to the games editorial team. Ask an administrator to grant
+          you the games_editor permission from the admin access page.
         </p>
       </main>
     )
