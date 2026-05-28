@@ -19,7 +19,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ThemedSelect } from '@/components/ui/themed-select'
 import { LogOut, User, Globe, Palette, Gamepad2, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -156,22 +155,31 @@ export function UserMenu() {
         ) : null}
         <DropdownMenuSeparator />
 
-        <div className="px-2 py-1.5">
-          <div className="flex items-center gap-2 text-sm text-foreground mb-2">
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center gap-2">
             <Globe className="w-4 h-4" />
             <span>Language</span>
-          </div>
-          <ThemedSelect
-            value={currentLocale}
-            onChange={handleSelectLocale}
-            disabled={isPending}
-            options={LOCALES.map((locale) => ({
-              value: locale.code,
-              label: `${locale.label} · ${locale.name}`,
-            }))}
-            aria-label="Language"
-          />
-        </div>
+            <span className="ml-auto text-xs text-muted-foreground font-mono uppercase tracking-wide">
+              {currentLocale.toUpperCase()}
+            </span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-44">
+            {LOCALES.map((locale) => (
+              <DropdownMenuItem
+                key={locale.code}
+                disabled={isPending}
+                onClick={() => handleSelectLocale(locale.code)}
+                className={cn(
+                  'flex items-center justify-between gap-3',
+                  locale.code === currentLocale && 'text-primary',
+                )}
+              >
+                <span className="font-mono text-[10px] tracking-widest uppercase">{locale.label}</span>
+                <span className="text-sm">{locale.name}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center gap-2">
