@@ -6,22 +6,38 @@ import type { components, paths } from './types.gen'
 // (and so are not reachable through the typed wsApi client).
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '')
 
-// rawPost calls an endpoint outside the generated contract, injecting the same
+// raw* calls hit endpoints outside the generated contract, injecting the same
 // session bearer token the typed client uses.
-async function rawPost<T>(path: string, body: unknown): Promise<T> {
+async function rawCall<T>(method: string, path: string, body?: unknown): Promise<T> {
   const session = await getSession()
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: 'POST',
+  const init: RequestInit = {
+    method,
     headers: {
-      'Content-Type': 'application/json',
+      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
       ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
     },
-    body: JSON.stringify(body),
-  })
+  }
+  if (body !== undefined) {
+    init.body = JSON.stringify(body)
+  }
+  const res = await fetch(`${API_BASE}${path}`, init)
   if (!res.ok) {
     throw new Error(`${res.status} ${res.statusText}`)
   }
   return res.json() as Promise<T>
+}
+
+function rawPost<T>(path: string, body: unknown): Promise<T> {
+  return rawCall<T>('POST', path, body)
+}
+function rawGet<T>(path: string): Promise<T> {
+  return rawCall<T>('GET', path)
+}
+function rawPut<T>(path: string, body: unknown): Promise<T> {
+  return rawCall<T>('PUT', path, body)
+}
+function rawDelete<T>(path: string): Promise<T> {
+  return rawCall<T>('DELETE', path)
 }
 
 type BookmarkData = components['schemas']['Bookmark']
@@ -270,6 +286,51 @@ export const meApi = {
   get games() {
     return gamesApi
   },
+
+  // ── Activity + consent ───────────────────────────────────────────────────
+  get activity() {
+    return activityApi
+  },
+}
+
+// ── Activity feed (out-of-contract) ────────────────────────────────────────
+
+export type ActivityKind = 'search' | 'browse_chapter' | 'browse_verse' | 'browse_verse_range'
+
+export interface ActivityEntry {
+  id: number
+  kind: ActivityKind
+  scripture: 'quran' | 'bible'
+  verse_key?: string
+  query?: string
+  created_at: string
+}
+
+interface RecordActivityBody {
+  kind: ActivityKind
+  scripture: 'quran' | 'bible'
+  verse_key?: string
+  query?: string
+}
+
+const activityApi = {
+  record: (body: RecordActivityBody): Promise<{ stored: boolean }> =>
+    rawPost('/me/activity', body),
+
+  list: (opts?: { limit?: number; offset?: number }): Promise<{ data: ActivityEntry[] }> => {
+    const params = new URLSearchParams()
+    if (opts?.limit != null) params.set('limit', String(opts.limit))
+    if (opts?.offset != null) params.set('offset', String(opts.offset))
+    const qs = params.toString()
+    return rawGet(`/me/activity${qs ? `?${qs}` : ''}`)
+  },
+
+  clear: (): Promise<{ deleted: number }> => rawDelete('/me/activity'),
+
+  getConsent: (): Promise<{ consent: boolean }> => rawGet('/me/consent'),
+
+  setConsent: (consent: boolean): Promise<{ consent: boolean }> =>
+    rawPut('/me/consent', { consent }),
 }
 
 // ── Games contract (types derived from the generated OpenAPI schemas) ───────

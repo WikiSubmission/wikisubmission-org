@@ -921,6 +921,37 @@
     "stats": "Stats",
     "collections": "Collections",
     "bookmarks": "Bookmarks",
-    "untitled": "Untitled"
+    "untitled": "Untitled",
+    "settings": "Settings",
+    "activity": "Activity"
+  },
+  "meActivity": {
+    "title": "Activity",
+    "lede": "Recent searches and verses you have browsed. Stored only with your consent and removed when you revoke it or clear this page.",
+    "empty": "No activity recorded yet.",
+    "loading": "Loading…",
+    "kindSearch": "Search",
+    "kindBrowseChapter": "Browse chapter",
+    "kindBrowseVerse": "Browse verse",
+    "kindBrowseVerseRange": "Browse verses",
+    "clear": "Clear all activity",
+    "clearConfirm": "Delete all your recorded activity?",
+    "error": "Could not load activity."
+  },
+  "meSettings": {
+    "title": "Settings",
+    "consentHeading": "Activity tracking",
+    "consentBody": "We record the chapters you browse, the verse ranges you open, and the text you search for. This data powers your activity page and nothing else. It is never shared or used to identify you across services.",
+    "consentToggleOn": "Recording is on",
+    "consentToggleOff": "Recording is off",
+    "consentEnable": "Enable recording",
+    "consentDisable": "Disable recording",
+    "clearHeading": "Clear activity",
+    "clearBody": "Delete every activity event we have recorded for your account.",
+    "clearButton": "Clear all activity",
+    "clearedToast": "Activity cleared.",
+    "loading": "Loading…",
+    "saved": "Saved.",
+    "error": "Could not load settings."
   }
 }
