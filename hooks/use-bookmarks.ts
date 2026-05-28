@@ -95,7 +95,7 @@ export function useRemoveBookmarkEntry(scripture: string) {
     onError: (_err, _vars, ctx) => {
       if (ctx) qc.setQueryData<ScriptureState>(ctx.key, ctx.prev)
     },
-    onSuccess: (_data, { entryId, verseKey: _vk }) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bookmark-categories'] })
       qc.invalidateQueries({ queryKey: ['bookmark-category-entries'] })
     },

@@ -14,10 +14,6 @@ import { useLocale, useTranslations } from 'next-intl'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
 import { PaletteThemeSwitcher } from '@/components/toggles/palette-theme-switcher'
 
-const F = {
-  mono: 'var(--font-jetbrains), ui-monospace, monospace',
-  glacial: 'var(--font-glacial), sans-serif',
-}
 
 const NAV_ITEMS: { label: string; href: string }[] = [
   { label: 'quran', href: '/quran' },

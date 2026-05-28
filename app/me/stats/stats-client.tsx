@@ -57,7 +57,7 @@ export default function StatsPageClient() {
       arr.push({ scripture: focused, data: focusedStats.daily })
     }
     return arr
-  }, [view, focused, focusedStats, quran.data, bible.data])
+  }, [view, focused, focusedStats, quran, bible.data])
 
   const total = focusedStats?.total ?? 0
   const activeDays = focusedStats?.active_days ?? 0

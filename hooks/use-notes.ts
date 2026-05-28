@@ -97,7 +97,7 @@ export function useDeleteNote(scripture: string) {
     onError: (_err, _vars, ctx) => {
       if (ctx) qc.setQueryData<ScriptureState>(ctx.key, ctx.prev)
     },
-    onSuccess: (_res, { verseKey }) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notes', scripture] })
     },
   })

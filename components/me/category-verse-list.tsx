@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { useQueries } from '@tanstack/react-query'
 import { useBookmarkCategoryEntries } from '@/hooks/use-bookmarks'
@@ -106,14 +106,17 @@ export function CategoryVerseList({
   }, [entries])
 
   const needle = search.trim().toLowerCase()
-  const matchVerse = (verseKey: string, verse: VerseData | undefined): boolean => {
-    if (!needle) return true
-    if (verseKey.toLowerCase().includes(needle)) return true
-    if (!verse?.tr) return false
-    return Object.values(verse.tr).some((t) =>
-      typeof t?.tx === 'string' && t.tx.toLowerCase().includes(needle),
-    )
-  }
+  const matchVerse = useCallback(
+    (verseKey: string, verse: VerseData | undefined): boolean => {
+      if (!needle) return true
+      if (verseKey.toLowerCase().includes(needle)) return true
+      if (!verse?.tr) return false
+      return Object.values(verse.tr).some((t) =>
+        typeof t?.tx === 'string' && t.tx.toLowerCase().includes(needle),
+      )
+    },
+    [needle],
+  )
 
   const sortedQuranEntries = useMemo(
     () =>
@@ -125,7 +128,7 @@ export function CategoryVerseList({
           const [bCn, bVn] = b.verse_key.split(':').map(Number)
           return aCn !== bCn ? (aCn ?? 0) - (bCn ?? 0) : (aVn ?? 0) - (bVn ?? 0)
         }),
-    [entries, verseMap, needle],
+    [entries, verseMap, matchVerse],
   )
 
   const filteredBibleEntries = bibleEntries.filter((e) =>
