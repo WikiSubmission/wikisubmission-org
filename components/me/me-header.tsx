@@ -11,6 +11,7 @@ import { useCollections } from '@/hooks/use-collections'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 
 const ME_ROOT_RE = /^\/me\/?$/
+const ME_PATH_RE = /^(\/[a-z]{2}(-[A-Z]{2})?)?\/me(\/|$)/
 
 type Crumb = { label: string; href?: string }
 
@@ -58,9 +59,7 @@ function useCrumbs(pathname: string): Crumb[] {
     crumbs.push({ label: t('collections'), href: id ? '/me/collections' : undefined })
     if (id) {
       const numericId = Number.parseInt(id, 10)
-      const item = Number.isFinite(numericId)
-        ? collections.find((c) => c.id === numericId)
-        : null
+      const item = Number.isFinite(numericId) ? collections.find((c) => c.id === numericId) : null
       crumbs.push({ label: item?.name ?? t('untitled') })
     }
     return crumbs
@@ -70,9 +69,7 @@ function useCrumbs(pathname: string): Crumb[] {
     crumbs.push({ label: t('bookmarks'), href: id ? '/me#bookmarks' : undefined })
     if (id) {
       const numericId = Number.parseInt(id, 10)
-      const item = Number.isFinite(numericId)
-        ? categories.find((c) => c.id === numericId)
-        : null
+      const item = Number.isFinite(numericId) ? categories.find((c) => c.id === numericId) : null
       crumbs.push({ label: item?.name ?? t('untitled') })
     }
     return crumbs
@@ -86,9 +83,18 @@ function RootNav() {
   const t = useTranslations('meHeader')
   const router = useRouter()
 
+  function handleBack() {
+    const stored = typeof window !== 'undefined' ? sessionStorage.getItem('me.preReferrer') : null
+    if (stored && !ME_PATH_RE.test(stored)) {
+      router.push(stored)
+      return
+    }
+    router.push('/')
+  }
+
   return (
     <nav className="me-breadcrumb" aria-label="Profile navigation">
-      <button type="button" className="me-header-back" onClick={() => router.back()}>
+      <button type="button" className="me-header-back" onClick={handleBack}>
         <ChevronLeft size={14} aria-hidden />
         <span>{t('back')}</span>
       </button>
