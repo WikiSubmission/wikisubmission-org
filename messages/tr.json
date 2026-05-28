@@ -822,14 +822,14 @@
   },
   "meHeader": {
     "back": "Geri",
-    "profile": "Profil",
+    "profile": "Me",
     "notes": "Notlar",
     "stats": "İstatistik",
     "collections": "Koleksiyonlar",
     "bookmarks": "Yer imleri",
     "untitled": "Adsız",
     "settings": "Settings",
-    "activity": "Data collection"
+    "activity": "Activity"
   },
   "games": {
     "lobbyTitle": "Quran",

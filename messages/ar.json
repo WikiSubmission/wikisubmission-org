@@ -822,14 +822,14 @@
   },
   "meHeader": {
     "back": "رجوع",
-    "profile": "الملف الشخصي",
+    "profile": "Me",
     "notes": "الملاحظات",
     "stats": "الإحصاءات",
     "collections": "المجموعات",
     "bookmarks": "المرجعيات",
     "untitled": "بدون عنوان",
     "settings": "Settings",
-    "activity": "Data collection"
+    "activity": "Activity"
   },
   "games": {
     "lobbyTitle": "Quran",

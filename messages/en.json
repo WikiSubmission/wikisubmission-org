@@ -916,14 +916,14 @@
   },
   "meHeader": {
     "back": "Back",
-    "profile": "Profile",
+    "profile": "Me",
     "notes": "Notes",
     "stats": "Stats",
     "collections": "Collections",
     "bookmarks": "Bookmarks",
     "untitled": "Untitled",
     "settings": "Settings",
-    "activity": "Data collection"
+    "activity": "Activity"
   },
   "meActivity": {
     "title": "Activity",

@@ -822,14 +822,14 @@
   },
   "meHeader": {
     "back": "گەڕانەوە",
-    "profile": "پرۆفایل",
+    "profile": "Me",
     "notes": "تێبینییەکان",
     "stats": "ئاماری خوێندنەوە",
     "collections": "کۆکراوەکان",
     "bookmarks": "نیشانەکان",
     "untitled": "بێ ناونیشان",
     "settings": "Settings",
-    "activity": "Data collection"
+    "activity": "Activity"
   },
   "games": {
     "lobbyTitle": "Quran",

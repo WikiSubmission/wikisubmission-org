@@ -822,14 +822,14 @@
   },
   "meHeader": {
     "back": "Retour",
-    "profile": "Profil",
+    "profile": "Me",
     "notes": "Notes",
     "stats": "Statistiques",
     "collections": "Collections",
     "bookmarks": "Signets",
     "untitled": "Sans titre",
     "settings": "Settings",
-    "activity": "Data collection"
+    "activity": "Activity"
   },
   "games": {
     "lobbyTitle": "Quran",
