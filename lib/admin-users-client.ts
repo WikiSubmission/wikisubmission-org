@@ -40,18 +40,23 @@ function extractMessage(err: unknown, fallback: string): string {
   return maybe.message || fallback
 }
 
+function makeAuthedFetch(token: string) {
+  return async (request: Request): Promise<Response> => {
+    const headers = new Headers(request.headers)
+    headers.set('Authorization', `Bearer ${token}`)
+    return globalThis.fetch(
+      new Request(request, {
+        headers,
+        cache: 'no-store',
+      }),
+    )
+  }
+}
+
 export function adminUsersClient(token: string) {
   const client = createClient<paths>({
     baseUrl: API_BASE,
-    fetch: (url, init) =>
-      globalThis.fetch(url, {
-        ...init,
-        headers: {
-          ...(init?.headers as Record<string, string> | undefined),
-          Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-      } as RequestInit),
+    fetch: makeAuthedFetch(token),
   })
 
   return {
@@ -67,7 +72,7 @@ export function adminUsersClient(token: string) {
 
     update: async (
       id: number,
-      patch: { role?: string; permissions?: Record<string, unknown>; is_active?: boolean },
+      patch: { role?: 'admin' | 'editor' | 'member'; permissions?: Record<string, unknown>; is_active?: boolean },
     ): Promise<AdminUser> => {
       const { data, error, response } = await client.PATCH('/users/{id}', {
         params: { path: { id } },

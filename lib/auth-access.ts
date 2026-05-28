@@ -23,20 +23,25 @@ export interface UserAccess {
 
 const DENY_ALL: UserAccess = { isAdmin: false, isEditor: false }
 
+function makeAuthedFetch(token: string) {
+  return async (request: Request): Promise<Response> => {
+    const headers = new Headers(request.headers)
+    headers.set('Authorization', `Bearer ${token}`)
+    return globalThis.fetch(
+      new Request(request, {
+        headers,
+        cache: 'no-store',
+      }),
+    )
+  }
+}
+
 export async function fetchUserAccess(token: string): Promise<UserAccess> {
   if (!API_BASE || !token) return DENY_ALL
   try {
     const client = createClient<paths>({
       baseUrl: API_BASE,
-      fetch: (url, init) =>
-        globalThis.fetch(url, {
-          ...init,
-          headers: {
-            ...(init?.headers as Record<string, string> | undefined),
-            Authorization: `Bearer ${token}`,
-          },
-          cache: 'no-store',
-        } as RequestInit),
+      fetch: makeAuthedFetch(token),
     })
 
     const { data, error, response } = await client.GET('/users/me')
