@@ -5,10 +5,11 @@
  */
 import createClient from 'openapi-fetch'
 import type { paths, components } from './types.gen'
+import { resolveServerApiBaseUrl } from './base-url'
 
 type Scripture = components['parameters']['MeScriptureParam']
 
-const baseUrl = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL
+const baseUrl = resolveServerApiBaseUrl()
 
 function toScripture(s: string): Scripture {
   return s === 'bible' ? 'bible' : 'quran'

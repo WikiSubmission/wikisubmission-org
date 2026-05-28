@@ -1,9 +1,10 @@
 import createClient, { type Middleware } from 'openapi-fetch'
 import { getSession } from 'next-auth/react'
 import type { paths } from './types.gen'
+import { resolveBrowserApiBaseUrl } from './base-url'
 
 export const wsApi = createClient<paths>({
-  baseUrl: process.env.NEXT_PUBLIC_API_URL,
+  baseUrl: resolveBrowserApiBaseUrl(),
 })
 
 const authMiddleware: Middleware = {

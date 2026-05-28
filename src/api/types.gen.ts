@@ -821,6 +821,111 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/games/fill-blank/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Validate one guessed blank without revealing the answer */
+        post: operations["checkGameFillBlankAnswer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the current user's activity feed */
+        get: operations["listMeActivity"];
+        put?: never;
+        /** Record one user activity event */
+        post: operations["recordMeActivity"];
+        /** Clear the current user's activity feed */
+        delete: operations["clearMeActivity"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current user's activity-consent flag */
+        get: operations["getMeConsent"];
+        /** Update current user's activity-consent flag */
+        put: operations["setMeConsent"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current user's account and access flags */
+        get: operations["getCurrentUserAccess"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List users (admin only) */
+        get: operations["listUsersAdmin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update role/permissions/active state for one user (admin only) */
+        patch: operations["updateUserAdmin"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1873,6 +1978,81 @@ export interface components {
         };
         CollectionDetailEnvelope: {
             data: components["schemas"]["CollectionDetail"];
+        };
+        User: {
+            /** Format: int64 */
+            id: number;
+            auth_id: string;
+            /** Format: email */
+            email: string;
+            display_name?: string | null;
+            /** @enum {string} */
+            role: "admin" | "editor" | "member";
+            permissions: {
+                [key: string]: unknown;
+            } | null;
+            is_active: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        UpdateUserRequest: {
+            /** @enum {string} */
+            role?: "admin" | "editor" | "member";
+            permissions?: {
+                [key: string]: unknown;
+            };
+            is_active?: boolean;
+        };
+        UserEnvelope: {
+            data: components["schemas"]["User"];
+        };
+        UserListEnvelope: {
+            data: components["schemas"]["User"][];
+        };
+        ActivityEntry: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            kind: "search" | "browse_chapter" | "browse_verse" | "browse_verse_range";
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key?: string;
+            query?: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        RecordActivityRequest: {
+            /** @enum {string} */
+            kind: "search" | "browse_chapter" | "browse_verse" | "browse_verse_range";
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key?: string;
+            query?: string;
+        };
+        ActivityListEnvelope: {
+            data: components["schemas"]["ActivityEntry"][];
+        };
+        ActivityRecordResponse: {
+            stored: boolean;
+        };
+        ActivityClearResponse: {
+            deleted: number;
+        };
+        SetConsentRequest: {
+            consent: boolean;
+        };
+        ConsentEnvelope: {
+            consent: boolean;
+        };
+        CheckBlankRequest: {
+            variant_id: string;
+            index: number;
+            guess: string;
+        };
+        CheckBlankResponse: {
+            correct: boolean;
         };
         GamePassage: {
             /**
@@ -3802,6 +3982,229 @@ export interface operations {
                     "application/json": components["schemas"]["GameStatsEnvelope"];
                 };
             };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    checkGameFillBlankAnswer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckBlankRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckBlankResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listMeActivity: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityListEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    recordMeActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordActivityRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityRecordResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    clearMeActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityClearResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    setMeConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetConsentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getCurrentUserAccess: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserEnvelope"];
+                };
+            };
+            401: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listUsersAdmin: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserListEnvelope"];
+                };
+            };
+            401: components["responses"]["BadRequest"];
+            403: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    updateUserAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserEnvelope"];
+                };
+            };
+            401: components["responses"]["BadRequest"];
+            403: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalServerErrror"];
         };
     };

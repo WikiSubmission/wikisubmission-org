@@ -9,12 +9,11 @@
  * flags returned here only drive UI gating.
  */
 
-const API_BASE = (
-  process.env.INTERNAL_API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  ''
-).replace(/\/+$/, '')
+import createClient from 'openapi-fetch'
+import { resolveServerApiBaseUrl } from '@/src/api/base-url'
+import type { paths } from '@/src/api/types.gen'
 
+const API_BASE = resolveServerApiBaseUrl()
 const PERMISSION_GAMES_EDITOR = 'games_editor'
 
 export interface UserAccess {
@@ -24,28 +23,32 @@ export interface UserAccess {
 
 const DENY_ALL: UserAccess = { isAdmin: false, isEditor: false }
 
-interface MeResponse {
-  data?: {
-    role?: string
-    permissions?: Record<string, unknown> | null
-    is_active?: boolean
-  } | null
-}
-
 export async function fetchUserAccess(token: string): Promise<UserAccess> {
   if (!API_BASE || !token) return DENY_ALL
   try {
-    const res = await fetch(`${API_BASE}/users/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
+    const client = createClient<paths>({
+      baseUrl: API_BASE,
+      fetch: (url, init) =>
+        globalThis.fetch(url, {
+          ...init,
+          headers: {
+            ...(init?.headers as Record<string, string> | undefined),
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
+        } as RequestInit),
     })
-    if (!res.ok) return DENY_ALL
-    const body = (await res.json()) as MeResponse
-    const user = body.data
-    if (!user || user.is_active === false) return DENY_ALL
+
+    const { data, error, response } = await client.GET('/users/me')
+    if (error || !response.ok || !data?.data) return DENY_ALL
+
+    const user = data.data
+    if (user.is_active === false) return DENY_ALL
+
     const isAdmin = user.role === 'admin'
     const permGranted =
       !!user.permissions && user.permissions[PERMISSION_GAMES_EDITOR] === true
+
     return { isAdmin, isEditor: isAdmin || permGranted }
   } catch {
     return DENY_ALL

@@ -5,22 +5,16 @@
  * token must stay server-side).
  */
 
-const API_BASE = (
-  process.env.INTERNAL_API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  ''
-).replace(/\/+$/, '')
+import createClient from 'openapi-fetch'
+import { resolveServerApiBaseUrl } from '@/src/api/base-url'
+import type { components, paths } from '@/src/api/types.gen'
 
-export interface AdminUser {
-  id: number
-  auth_id: string
-  email: string
-  display_name?: string | null
-  role: 'admin' | 'editor' | 'member' | string
+const API_BASE = resolveServerApiBaseUrl()
+
+type AdminUserSchema = components['schemas']['User']
+
+export interface AdminUser extends Omit<AdminUserSchema, 'permissions'> {
   permissions: Record<string, unknown> | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
 }
 
 export class AdminUsersError extends Error {
@@ -33,44 +27,56 @@ export class AdminUsersError extends Error {
   }
 }
 
-async function call<T>(token: string, method: string, path: string, body?: unknown): Promise<T> {
-  const init: RequestInit = {
-    method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
-    },
-    cache: 'no-store',
+function toAdminUser(user: AdminUserSchema): AdminUser {
+  return {
+    ...user,
+    permissions: (user.permissions as Record<string, unknown> | null) ?? null,
   }
-  if (body !== undefined) init.body = JSON.stringify(body)
-  const res = await fetch(`${API_BASE}${path}`, init)
-  if (!res.ok) {
-    let message = res.statusText
-    try {
-      const data = (await res.json()) as { error?: string }
-      if (data?.error) message = data.error
-    } catch {
-      // ignore non-JSON error bodies
-    }
-    throw new AdminUsersError(res.status, message)
-  }
-  const data = (await res.json()) as { data: T }
-  return data.data
+}
+
+function extractMessage(err: unknown, fallback: string): string {
+  if (!err || typeof err !== 'object') return fallback
+  const maybe = err as { message?: string }
+  return maybe.message || fallback
 }
 
 export function adminUsersClient(token: string) {
+  const client = createClient<paths>({
+    baseUrl: API_BASE,
+    fetch: (url, init) =>
+      globalThis.fetch(url, {
+        ...init,
+        headers: {
+          ...(init?.headers as Record<string, string> | undefined),
+          Authorization: `Bearer ${token}`,
+        },
+        cache: 'no-store',
+      } as RequestInit),
+  })
+
   return {
-    list: (opts?: { limit?: number; offset?: number }): Promise<AdminUser[]> => {
-      const params = new URLSearchParams()
-      if (opts?.limit != null) params.set('limit', String(opts.limit))
-      if (opts?.offset != null) params.set('offset', String(opts.offset))
-      const qs = params.toString()
-      return call(token, 'GET', `/users${qs ? `?${qs}` : ''}`)
+    list: async (opts?: { limit?: number; offset?: number }): Promise<AdminUser[]> => {
+      const { data, error, response } = await client.GET('/users', {
+        params: { query: { limit: opts?.limit, offset: opts?.offset } },
+      })
+      if (error || !response.ok || !data?.data) {
+        throw new AdminUsersError(response.status, extractMessage(error, response.statusText))
+      }
+      return data.data.map(toAdminUser)
     },
 
-    update: (
+    update: async (
       id: number,
       patch: { role?: string; permissions?: Record<string, unknown>; is_active?: boolean },
-    ): Promise<AdminUser> => call(token, 'PATCH', `/users/${id}`, patch),
+    ): Promise<AdminUser> => {
+      const { data, error, response } = await client.PATCH('/users/{id}', {
+        params: { path: { id } },
+        body: patch,
+      })
+      if (error || !response.ok || !data?.data) {
+        throw new AdminUsersError(response.status, extractMessage(error, response.statusText))
+      }
+      return toAdminUser(data.data)
+    },
   }
 }

@@ -1,44 +1,5 @@
-import { getSession } from 'next-auth/react'
 import { wsApi } from './client'
 import type { components, paths } from './types.gen'
-
-// Base URL for out-of-contract endpoints that are not in the OpenAPI surface
-// (and so are not reachable through the typed wsApi client).
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '')
-
-// raw* calls hit endpoints outside the generated contract, injecting the same
-// session bearer token the typed client uses.
-async function rawCall<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const session = await getSession()
-  const init: RequestInit = {
-    method,
-    headers: {
-      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
-      ...(session?.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}),
-    },
-  }
-  if (body !== undefined) {
-    init.body = JSON.stringify(body)
-  }
-  const res = await fetch(`${API_BASE}${path}`, init)
-  if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText}`)
-  }
-  return res.json() as Promise<T>
-}
-
-function rawPost<T>(path: string, body: unknown): Promise<T> {
-  return rawCall<T>('POST', path, body)
-}
-function rawGet<T>(path: string): Promise<T> {
-  return rawCall<T>('GET', path)
-}
-function rawPut<T>(path: string, body: unknown): Promise<T> {
-  return rawCall<T>('PUT', path, body)
-}
-function rawDelete<T>(path: string): Promise<T> {
-  return rawCall<T>('DELETE', path)
-}
 
 type BookmarkData = components['schemas']['Bookmark']
 type BookmarkCategoryData = components['schemas']['BookmarkCategory']
@@ -315,22 +276,17 @@ interface RecordActivityBody {
 
 const activityApi = {
   record: (body: RecordActivityBody): Promise<{ stored: boolean }> =>
-    rawPost('/me/activity', body),
+    unwrap(wsApi.POST('/me/activity', { body })),
 
-  list: (opts?: { limit?: number; offset?: number }): Promise<{ data: ActivityEntry[] }> => {
-    const params = new URLSearchParams()
-    if (opts?.limit != null) params.set('limit', String(opts.limit))
-    if (opts?.offset != null) params.set('offset', String(opts.offset))
-    const qs = params.toString()
-    return rawGet(`/me/activity${qs ? `?${qs}` : ''}`)
-  },
+  list: (opts?: { limit?: number; offset?: number }): Promise<{ data: ActivityEntry[] }> =>
+    unwrap(wsApi.GET('/me/activity', { params: { query: { limit: opts?.limit, offset: opts?.offset } } })),
 
-  clear: (): Promise<{ deleted: number }> => rawDelete('/me/activity'),
+  clear: (): Promise<{ deleted: number }> => unwrap(wsApi.DELETE('/me/activity')),
 
-  getConsent: (): Promise<{ consent: boolean }> => rawGet('/me/consent'),
+  getConsent: (): Promise<{ consent: boolean }> => unwrap(wsApi.GET('/me/consent')),
 
   setConsent: (consent: boolean): Promise<{ consent: boolean }> =>
-    rawPut('/me/consent', { consent }),
+    unwrap(wsApi.PUT('/me/consent', { body: { consent } })),
 }
 
 // ── Games contract (types derived from the generated OpenAPI schemas) ───────
@@ -392,5 +348,5 @@ const gamesApi = {
     variant_id: string
     index: number
     guess: string
-  }): Promise<{ correct: boolean }> => rawPost('/games/fill-blank/check', body),
+  }): Promise<{ correct: boolean }> => unwrap(wsApi.POST('/games/fill-blank/check', { body })),
 }
