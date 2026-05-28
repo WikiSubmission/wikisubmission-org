@@ -2171,26 +2171,23 @@ html[data-palette='mono'].dark {
 .themed-select-option.is-selected {
   color: var(--ed-accent);
 }
-
-.me-profile-links {
-  margin-top: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.themed-select-group-wrap {
+  margin: 2px 0;
+}
+.themed-select-group-label {
+  padding: 4px 8px;
   font-family: var(--font-jetbrains);
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-size: 10px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ed-fg-muted);
 }
-.me-profile-links a {
-  border-bottom: 1px solid transparent;
-  transition: color 150ms ease, border-color 150ms ease;
+.themed-select-group-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
-.me-profile-links a:hover {
-  color: var(--ed-fg);
-  border-bottom-color: var(--ed-rule);
-}
-.me-profile-links .sep {
-  color: var(--ed-rule);
+.themed-select-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

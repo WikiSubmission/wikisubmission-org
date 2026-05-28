@@ -1,9 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { Fragment } from 'react'
-import { ArrowLeft } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
 import { PaletteThemeSwitcher } from '@/components/toggles/palette-theme-switcher'
@@ -76,26 +75,15 @@ function useCrumbs(pathname: string): Crumb[] {
   return crumbs
 }
 
-function BackButton() {
-  const router = useRouter()
-  const t = useTranslations('meHeader')
-
-  function handleBack() {
-    const stored =
-      typeof window !== 'undefined' ? sessionStorage.getItem('me.preReferrer') : null
-    router.push(stored ?? '/')
-  }
+function RootLinks() {
+  const t = useTranslations("meHeader")
 
   return (
-    <button
-      type="button"
-      onClick={handleBack}
-      aria-label={t('back')}
-      className="me-header-back"
-    >
-      <ArrowLeft size={14} aria-hidden />
-      <span>{t('back')}</span>
-    </button>
+    <nav className="me-breadcrumb" aria-label="Profile links">
+      <Link href="/me/settings">{t("settings")}</Link>
+      <span className="sep" aria-hidden>/</span>
+      <Link href="/me/activity">{t("activity")}</Link>
+    </nav>
   )
 }
 
@@ -131,7 +119,7 @@ export function MeHeader() {
 
   return (
     <div className="me-header">
-      {isRoot ? <BackButton /> : <Breadcrumb crumbs={crumbs} />}
+      {isRoot ? <RootLinks /> : <Breadcrumb crumbs={crumbs} />}
       <div className="me-header-spacer" />
       <div className="me-header-toggles">
         <LocaleSwitcher currentLocale={locale} />

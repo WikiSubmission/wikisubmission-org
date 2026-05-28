@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, useTransition } from 'react'
+import { ThemedSelect } from '@/components/ui/themed-select'
 import type { ReviewPassage, ReviewStatus } from '@/lib/games-editor'
 import {
   listPassagesAction,
@@ -278,21 +279,15 @@ export function GamesReview({
       <section style={filterBar}>
         <label style={fieldLabel}>
           Status
-          <select
+          <ThemedSelect
             value={statusFilter}
-            onChange={(e) => {
-              const next = e.target.value as StatusFilter
+            onChange={(value) => {
+              const next = value as StatusFilter
               setStatusFilter(next)
               applyFilters(next, chapterFilter)
             }}
-            style={control}
-          >
-            {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABELS[s]}
-              </option>
-            ))}
-          </select>
+            options={STATUS_OPTIONS.map((s) => ({ value: s, label: STATUS_LABELS[s] }))}
+          />
         </label>
         <label style={fieldLabel}>
           Chapter

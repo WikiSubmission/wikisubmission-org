@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { ThemedSelect } from '@/components/ui/themed-select'
 import {
   meApi,
   type GamePassage,
@@ -103,17 +104,11 @@ export function FillBlankPicker() {
   return (
     <div style={{ marginTop: 32, display: 'grid', gap: 28 }}>
       <Field label={t('pickerPassageLabel')}>
-        <select
-          value={passageId ?? ''}
-          onChange={(e) => setPassageId(Number(e.target.value))}
-          style={selectStyle}
-        >
-          {passages.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.label}
-            </option>
-          ))}
-        </select>
+        <ThemedSelect
+          value={String(passageId ?? '')}
+          onChange={(next) => setPassageId(Number(next))}
+          options={passages.map((p) => ({ value: String(p.id), label: p.label }))}
+        />
       </Field>
 
       <Field label={t('pickerDifficultyLabel')}>
@@ -200,16 +195,6 @@ function Choice({
 
 function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
-}
-
-const selectStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '12px 14px',
-  borderRadius: 2,
-  border: '1px solid var(--ed-rule)',
-  background: 'var(--ed-surface)',
-  color: 'var(--ed-fg)',
-  fontSize: 15,
 }
 
 const optionGrid: React.CSSProperties = {

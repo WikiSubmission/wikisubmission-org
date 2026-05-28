@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { ThemedSelect } from '@/components/ui/themed-select'
 import {
   meApi,
   type GameLeaderboardEntry,
@@ -21,8 +22,6 @@ type Board =
 export function GamesLeaderboard() {
   const t = useTranslations('games')
   const [scope, setScope] = useState<Extract<GameLeaderboardScope, 'global' | 'weekly'>>('global')
-  // Global/weekly boards are bucketed by (size, difficulty), so both are
-  // always sent — there is no "all" board.
   const [size, setSize] = useState<GameRoundSize>('short')
   const [difficulty, setDifficulty] = useState<GameDifficulty>('easy')
   const [board, setBoard] = useState<Board>({ status: 'loading' })
@@ -62,30 +61,26 @@ export function GamesLeaderboard() {
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <Tab active={scope === 'global'} onClick={() => changeScope('global')} label={t('tabGlobal')} />
         <Tab active={scope === 'weekly'} onClick={() => changeScope('weekly')} label={t('tabWeekly')} />
-        <select
-          value={size}
-          onChange={(e) => changeSize(e.target.value as GameRoundSize)}
-          aria-label={t('pickerSizeLabel')}
-          style={{ ...selectStyle, marginLeft: 'auto' }}
-        >
-          {SIZES.map((s) => (
-            <option key={s} value={s}>
-              {t(`size${s.charAt(0).toUpperCase()}${s.slice(1)}` as Parameters<typeof t>[0])}
-            </option>
-          ))}
-        </select>
-        <select
+        <div style={{ marginLeft: 'auto' }}>
+          <ThemedSelect
+            value={size}
+            onChange={(next) => changeSize(next as GameRoundSize)}
+            aria-label={t('pickerSizeLabel')}
+            options={SIZES.map((s) => ({
+              value: s,
+              label: t(`size${s.charAt(0).toUpperCase()}${s.slice(1)}` as Parameters<typeof t>[0]),
+            }))}
+          />
+        </div>
+        <ThemedSelect
           value={difficulty}
-          onChange={(e) => changeDifficulty(e.target.value as GameDifficulty)}
+          onChange={(next) => changeDifficulty(next as GameDifficulty)}
           aria-label={t('pickerDifficultyLabel')}
-          style={selectStyle}
-        >
-          {DIFFICULTIES.map((d) => (
-            <option key={d} value={d}>
-              {t(`difficulty${d.charAt(0).toUpperCase()}${d.slice(1)}` as Parameters<typeof t>[0])}
-            </option>
-          ))}
-        </select>
+          options={DIFFICULTIES.map((d) => ({
+            value: d,
+            label: t(`difficulty${d.charAt(0).toUpperCase()}${d.slice(1)}` as Parameters<typeof t>[0]),
+          }))}
+        />
       </div>
 
       <div style={{ marginTop: 20 }}>
@@ -139,15 +134,6 @@ function Tab({ active, onClick, label }: { active: boolean; onClick: () => void;
 }
 
 const muted: React.CSSProperties = { color: 'var(--ed-fg-muted)' }
-
-const selectStyle: React.CSSProperties = {
-  padding: '8px 12px',
-  borderRadius: 2,
-  border: '1px solid var(--ed-rule)',
-  background: 'var(--ed-surface)',
-  color: 'var(--ed-fg)',
-  fontSize: 13,
-}
 
 const th: React.CSSProperties = {
   fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',

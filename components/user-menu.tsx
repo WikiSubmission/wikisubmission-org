@@ -19,6 +19,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { ThemedSelect } from '@/components/ui/themed-select'
 import { LogOut, User, Globe, Palette, Gamepad2, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -52,7 +53,7 @@ export function UserMenu() {
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false
+    () => false,
   )
 
   const mode = resolveMode(theme, systemTheme)
@@ -155,34 +156,23 @@ export function UserMenu() {
         ) : null}
         <DropdownMenuSeparator />
 
-        {/* Language */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center gap-2">
+        <div className="px-2 py-1.5">
+          <div className="flex items-center gap-2 text-sm text-foreground mb-2">
             <Globe className="w-4 h-4" />
             <span>Language</span>
-            <span className="ml-auto text-xs text-muted-foreground font-mono uppercase tracking-wide">
-              {currentLocale.toUpperCase()}
-            </span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-44">
-            {LOCALES.map((locale) => (
-              <DropdownMenuItem
-                key={locale.code}
-                disabled={isPending}
-                onClick={() => handleSelectLocale(locale.code)}
-                className={cn(
-                  'flex items-center justify-between gap-3',
-                  locale.code === currentLocale && 'text-primary'
-                )}
-              >
-                <span className="font-mono text-[10px] tracking-widest uppercase">{locale.label}</span>
-                <span className="text-sm">{locale.name}</span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+          </div>
+          <ThemedSelect
+            value={currentLocale}
+            onChange={handleSelectLocale}
+            disabled={isPending}
+            options={LOCALES.map((locale) => ({
+              value: locale.code,
+              label: `${locale.label} · ${locale.name}`,
+            }))}
+            aria-label="Language"
+          />
+        </div>
 
-        {/* Theme */}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center gap-2">
             <Palette className="w-4 h-4" />
@@ -209,7 +199,7 @@ export function UserMenu() {
                           title={m}
                           className={cn(
                             'inline-flex items-center gap-0.5 px-1.5 py-1 rounded-sm cursor-pointer transition-all',
-                            active ? 'ring-2 ring-offset-1' : 'hover:opacity-80'
+                            active ? 'ring-2 ring-offset-1' : 'hover:opacity-80',
                           )}
                           style={{
                             background: p.bg,

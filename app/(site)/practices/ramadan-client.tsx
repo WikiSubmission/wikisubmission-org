@@ -1,6 +1,7 @@
 'use client'
 
 import { Input } from '@/components/ui/input'
+import { ThemedSelect } from '@/components/ui/themed-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   SearchIcon,
@@ -124,14 +125,12 @@ function RamadanContent() {
             />
           </div>
           <div className="relative w-32">
-            <select
+            <ThemedSelect
               value={year}
-              onChange={(e) => handleYearChange(e.target.value)}
-              className="w-full h-11 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 rounded-xl px-4 text-[11px] appearance-none cursor-pointer uppercase tracking-widest text-[var(--ed-fg-muted)] font-bold focus:outline-none focus:border-[var(--ed-accent)]/50 transition-all"
-              style={{ fontFamily: F.glacial }}
-            >
-              {years.map((y) => <option key={y} value={y}>{y}</option>)}
-            </select>
+              onChange={handleYearChange}
+              options={years.map((y) => ({ value: y, label: y }))}
+              aria-label={t('schedule', { year })}
+            />
             <CalendarIcon size={12} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--ed-fg-muted)] opacity-20" />
           </div>
         </form>

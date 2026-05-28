@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { ThemedSelect } from '@/components/ui/themed-select'
 import { meApi, type GameVariant, type GameBlank } from '@/src/api/me-client'
 import { readVariant, stashVariant, stashResult, parseVariantId } from '@/lib/games-session'
 
@@ -29,7 +30,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const startedAt = useRef<number>(0)
   // DOM refs for each blank, keyed by index, so Enter can advance focus.
-  const inputRefs = useRef<Map<number, HTMLInputElement | HTMLSelectElement>>(new Map())
+  const inputRefs = useRef<Map<number, HTMLInputElement | HTMLButtonElement>>(new Map())
 
   useEffect(() => {
     let active = true
@@ -112,7 +113,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     }
   }
 
-  const registerRef = useCallback((index: number, el: HTMLInputElement | HTMLSelectElement | null) => {
+  const registerRef = useCallback((index: number, el: HTMLInputElement | HTMLButtonElement | null) => {
     if (el) inputRefs.current.set(index, el)
     else inputRefs.current.delete(index)
   }, [])
@@ -220,7 +221,7 @@ interface RenderContext {
   onCheck: (index: number) => void
   onEnter: (index: number) => void
   onReveal: (index: number, max: number) => void
-  registerRef: (index: number, el: HTMLInputElement | HTMLSelectElement | null) => void
+  registerRef: (index: number, el: HTMLInputElement | HTMLButtonElement | null) => void
 }
 
 function renderVerse(ctx: RenderContext): React.ReactNode[] {
@@ -283,36 +284,28 @@ function BlankInput({
   onCheck: () => void
   onEnter: () => void
   onReveal: () => void
-  registerRef: (el: HTMLInputElement | HTMLSelectElement | null) => void
+  registerRef: (el: HTMLInputElement | HTMLButtonElement | null) => void
 }) {
   const t = useTranslations('games')
   const feedbackStyle = feedback === 'correct' ? correctStyle : feedback === 'wrong' ? wrongStyle : null
 
   if (blank?.options && blank.options.length > 0) {
     return (
-      <select
-        ref={registerRef}
-        aria-label={t('optionsLabel')}
-        value={value}
-        onChange={(e) => {
-          onChange(e.target.value)
-          if (e.target.value) onCheck()
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault()
-            onEnter()
-          }
-        }}
-        style={{ ...blankBase, ...feedbackStyle, paddingRight: 24 }}
-      >
-        <option value="">—</option>
-        {blank.options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
+      <span style={{ display: 'inline-block', minWidth: 120 }}>
+        <ThemedSelect
+          triggerRef={registerRef}
+          value={value}
+          onChange={(next) => {
+            onChange(next)
+            if (next) onCheck()
+          }}
+          aria-label={t('optionsLabel')}
+          options={[
+            { value: '', label: '—' },
+            ...(blank.options ?? []).map((opt) => ({ value: opt, label: opt })),
+          ]}
+        />
+      </span>
     )
   }
 
