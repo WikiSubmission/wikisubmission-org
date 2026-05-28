@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { Flame, Info, Plus, Search, Share2 } from 'lucide-react'
@@ -435,6 +436,18 @@ function StatsGrid({
   )
 }
 
+function ProfileQuickLinks() {
+  const t = useTranslations("meHeader")
+
+  return (
+    <nav className="me-profile-links" aria-label="Profile links">
+      <Link href="/me/settings">{t("settings")}</Link>
+      <span className="sep" aria-hidden>/</span>
+      <Link href="/me/activity">{t("activity")}</Link>
+    </nav>
+  )
+}
+
 function ProfileMast({ name, email }: { name?: string | null; email?: string | null }) {
   return (
     <>
@@ -446,6 +459,7 @@ function ProfileMast({ name, email }: { name?: string | null; email?: string | n
               <span>{email}</span>
             </div>
           ) : null}
+          <ProfileQuickLinks />
         </div>
       </div>
       <div className="profile-mast-mobile">
@@ -455,6 +469,7 @@ function ProfileMast({ name, email }: { name?: string | null; email?: string | n
             <span>{email}</span>
           </div>
         ) : null}
+        <ProfileQuickLinks />
       </div>
     </>
   )
