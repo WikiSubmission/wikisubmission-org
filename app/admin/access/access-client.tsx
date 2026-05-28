@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { AdminUser } from '@/lib/admin-users-client'
+import { ThemedSelect } from '@/components/ui/themed-select'
 import { setGamesEditorAction, setRoleAction } from './actions'
 
 interface AccessClientProps {
@@ -10,6 +11,12 @@ interface AccessClientProps {
 }
 
 type Pending = { kind: 'role' | 'games'; userId: number } | null
+
+const ROLE_OPTIONS = [
+  { value: 'member', label: 'member' },
+  { value: 'editor', label: 'editor' },
+  { value: 'admin', label: 'admin' },
+] as const
 
 export function AccessClient({ initialUsers, initialError }: AccessClientProps) {
   const [users, setUsers] = useState<AdminUser[]>(initialUsers)
@@ -75,16 +82,15 @@ export function AccessClient({ initialUsers, initialError }: AccessClientProps) 
                     {!user.is_active && <div style={subStyle}>inactive</div>}
                   </td>
                   <td style={td}>
-                    <select
+                    <ThemedSelect
                       value={user.role}
                       disabled={isPendingRole}
-                      onChange={(e) => changeRole(user, e.target.value as 'admin' | 'editor' | 'member')}
-                      style={selectStyle}
-                    >
-                      <option value="member">member</option>
-                      <option value="editor">editor</option>
-                      <option value="admin">admin</option>
-                    </select>
+                      onChange={(nextRole) =>
+                        changeRole(user, nextRole as 'admin' | 'editor' | 'member')
+                      }
+                      options={ROLE_OPTIONS.map((opt) => ({ ...opt }))}
+                      aria-label={`Set role for ${user.email}`}
+                    />
                   </td>
                   <td style={td}>
                     <button
@@ -169,15 +175,6 @@ const subStyle: React.CSSProperties = {
   color: 'var(--ed-fg-muted)',
   fontSize: 12,
   marginTop: 2,
-}
-
-const selectStyle: React.CSSProperties = {
-  padding: '6px 10px',
-  border: '1px solid var(--ed-rule)',
-  background: 'var(--ed-bg)',
-  color: 'var(--ed-fg)',
-  fontSize: 13,
-  borderRadius: 2,
 }
 
 const buttonBase: React.CSSProperties = {
