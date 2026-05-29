@@ -1965,142 +1965,6 @@ paths:
           $ref: '#/components/responses/InternalServerErrror'
 
 
-  /games/fill-blank/check:
-    post:
-      tags: [Games]
-      operationId: checkGameFillBlankAnswer
-      summary: Validate one guessed blank without revealing the answer
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CheckBlankRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CheckBlankResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerErrror'
-
-  /me/activity:
-    get:
-      tags: [Me]
-      operationId: listMeActivity
-      summary: List the current user's activity feed
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 200
-        - name: offset
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 0
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ActivityListEnvelope'
-        '500':
-          $ref: '#/components/responses/InternalServerErrror'
-    post:
-      tags: [Me]
-      operationId: recordMeActivity
-      summary: Record one user activity event
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RecordActivityRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ActivityRecordResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalServerErrror'
-    delete:
-      tags: [Me]
-      operationId: clearMeActivity
-      summary: Clear the current user's activity feed
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ActivityClearResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrror'
-
-  /me/consent:
-    get:
-      tags: [Me]
-      operationId: getMeConsent
-      summary: Get current user's activity-consent flag
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ConsentEnvelope'
-        '500':
-          $ref: '#/components/responses/InternalServerErrror'
-    put:
-      tags: [Me]
-      operationId: setMeConsent
-      summary: Update current user's activity-consent flag
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SetConsentRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ConsentEnvelope'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalServerErrror'
-
   /users/me:
     get:
       tags: [Me]
@@ -2115,8 +1979,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserEnvelope'
-        '401':
-          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
@@ -2148,9 +2012,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserListEnvelope'
-        '401':
-          $ref: '#/components/responses/BadRequest'
-        '403':
+        '400':
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
@@ -2182,9 +2044,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserEnvelope'
-        '401':
-          $ref: '#/components/responses/BadRequest'
-        '403':
+        '400':
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
@@ -3924,98 +3784,6 @@ components:
           items:
             $ref: '#/components/schemas/User'
 
-    ActivityEntry:
-      type: object
-      required: [id, kind, scripture, created_at]
-      properties:
-        id:
-          type: integer
-          format: int64
-        kind:
-          type: string
-          enum: [search, browse_chapter, browse_verse, browse_verse_range]
-        scripture:
-          type: string
-          enum: [quran, bible]
-        verse_key:
-          type: string
-        query:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-
-    RecordActivityRequest:
-      type: object
-      required: [kind, scripture]
-      properties:
-        kind:
-          type: string
-          enum: [search, browse_chapter, browse_verse, browse_verse_range]
-        scripture:
-          type: string
-          enum: [quran, bible]
-        verse_key:
-          type: string
-        query:
-          type: string
-
-    ActivityListEnvelope:
-      type: object
-      required: [data]
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/ActivityEntry'
-
-    ActivityRecordResponse:
-      type: object
-      required: [stored]
-      properties:
-        stored:
-          type: boolean
-
-    ActivityClearResponse:
-      type: object
-      required: [deleted]
-      properties:
-        deleted:
-          type: integer
-
-    SetConsentRequest:
-      type: object
-      required: [consent]
-      properties:
-        consent:
-          type: boolean
-
-    ConsentEnvelope:
-      type: object
-      required: [consent]
-      properties:
-        consent:
-          type: boolean
-
-    CheckBlankRequest:
-      type: object
-      required: [variant_id, index, guess]
-      properties:
-        variant_id:
-          type: string
-        index:
-          type: integer
-          minimum: 0
-        guess:
-          type: string
-
-    CheckBlankResponse:
-      type: object
-      required: [correct]
-      properties:
-        correct:
-          type: boolean
-
 
     # -----------------------------------------------------------------------
     # Games — Fill the Missing Word
@@ -4182,6 +3950,13 @@ components:
             True when this variant has already been played by the caller and
             the server cycled back because every other variant in the group
             has also been played.
+        skill_band:
+          type: string
+          enum: [easy, medium, hard]
+          description: >
+            The adaptive difficulty band used when selecting blanks for this
+            variant. Derived from the player's recent accuracy at this tier;
+            not settable by the client.
 
     GameVariantEnvelope:
       type: object
