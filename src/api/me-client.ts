@@ -17,6 +17,13 @@ type CollectionVerseData = components['schemas']['CollectionVerse']
 type Scripture = components['parameters']['MeScriptureParam']
 
 type WsResult<T> = { data?: T; error?: unknown; response: Response }
+type LooseWsApi = {
+  GET: <T = unknown>(path: string, init?: unknown) => Promise<WsResult<T>>
+  POST: <T = unknown>(path: string, init?: unknown) => Promise<WsResult<T>>
+  PUT: <T = unknown>(path: string, init?: unknown) => Promise<WsResult<T>>
+  DELETE: <T = unknown>(path: string, init?: unknown) => Promise<WsResult<T>>
+}
+const wsApiLoose = wsApi as unknown as LooseWsApi
 
 function toScripture(scripture: string): Scripture {
   return scripture === 'bible' ? 'bible' : 'quran'
@@ -276,17 +283,17 @@ interface RecordActivityBody {
 
 const activityApi = {
   record: (body: RecordActivityBody): Promise<{ stored: boolean }> =>
-    unwrap(wsApi.POST('/me/activity', { body })),
+    unwrap(wsApiLoose.POST('/me/activity', { body })),
 
   list: (opts?: { limit?: number; offset?: number }): Promise<{ data: ActivityEntry[] }> =>
-    unwrap(wsApi.GET('/me/activity', { params: { query: { limit: opts?.limit, offset: opts?.offset } } })),
+    unwrap(wsApiLoose.GET('/me/activity', { params: { query: { limit: opts?.limit, offset: opts?.offset } } })),
 
-  clear: (): Promise<{ deleted: number }> => unwrap(wsApi.DELETE('/me/activity')),
+  clear: (): Promise<{ deleted: number }> => unwrap(wsApiLoose.DELETE('/me/activity')),
 
-  getConsent: (): Promise<{ consent: boolean }> => unwrap(wsApi.GET('/me/consent')),
+  getConsent: (): Promise<{ consent: boolean }> => unwrap(wsApiLoose.GET('/me/consent')),
 
   setConsent: (consent: boolean): Promise<{ consent: boolean }> =>
-    unwrap(wsApi.PUT('/me/consent', { body: { consent } })),
+    unwrap(wsApiLoose.PUT('/me/consent', { body: { consent } })),
 }
 
 // ── Games contract (types derived from the generated OpenAPI schemas) ───────
@@ -348,5 +355,5 @@ const gamesApi = {
     variant_id: string
     index: number
     guess: string
-  }): Promise<{ correct: boolean }> => unwrap(wsApi.POST('/games/fill-blank/check', { body })),
+  }): Promise<{ correct: boolean }> => unwrap(wsApiLoose.POST('/games/fill-blank/check', { body })),
 }
