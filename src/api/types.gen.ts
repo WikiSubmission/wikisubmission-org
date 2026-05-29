@@ -1987,9 +1987,10 @@ export interface components {
         StartGameVariantRequest: {
             /**
              * Format: int64
+             * @description When omitted the server selects a passage automatically based on the player's adaptive skill band. When provided the exact passage is used regardless of skill band.
              * @example 42
              */
-            passage_id: number;
+            passage_id?: number;
             /**
              * @example en
              * @enum {string}

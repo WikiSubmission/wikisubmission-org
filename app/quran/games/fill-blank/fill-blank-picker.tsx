@@ -1,15 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ThemedSelect } from '@/components/ui/themed-select'
-import {
-  meApi,
-  type GamePassage,
-  type GameDifficulty,
-  type GameRoundSize,
-} from '@/src/api/me-client'
+import { meApi, type GameDifficulty, type GameRoundSize } from '@/src/api/me-client'
 import { stashVariant } from '@/lib/games-session'
 
 const DIFFICULTIES: GameDifficulty[] = ['easy', 'medium', 'hard', 'professional']
@@ -27,51 +21,17 @@ export function FillBlankPicker() {
   const t = useTranslations('games')
   const router = useRouter()
 
-  const [passages, setPassages] = useState<GamePassage[] | null>(null)
-  const [loadFailed, setLoadFailed] = useState(false)
-  const [reloadKey, setReloadKey] = useState(0)
-
-  const [passageId, setPassageId] = useState<number | null>(null)
   const [difficulty, setDifficulty] = useState<GameDifficulty>('medium')
   const [size, setSize] = useState<GameRoundSize>('short')
-
   const [starting, setStarting] = useState(false)
   const [startFailed, setStartFailed] = useState(false)
 
-  useEffect(() => {
-    let active = true
-    meApi.games
-      .listPassages({ language: 'en' })
-      .then(({ data }) => {
-        if (!active) return
-        setPassages(data)
-        setPassageId((prev) => prev ?? data[0]?.id ?? null)
-      })
-      .catch(() => {
-        if (active) setLoadFailed(true)
-      })
-    return () => {
-      active = false
-    }
-  }, [reloadKey])
-
-  function retry() {
-    setPassages(null)
-    setLoadFailed(false)
-    setReloadKey((k) => k + 1)
-  }
-
   async function start() {
-    if (passageId == null || starting) return
+    if (starting) return
     setStarting(true)
     setStartFailed(false)
     try {
-      const { data } = await meApi.games.startVariant({
-        passage_id: passageId,
-        language: 'en',
-        difficulty,
-        size,
-      })
+      const { data } = await meApi.games.startVariant({ language: 'en', difficulty, size })
       stashVariant(data)
       router.push(`/quran/games/fill-blank/play/${encodeURIComponent(data.variant_id)}`)
     } catch {
@@ -80,37 +40,8 @@ export function FillBlankPicker() {
     }
   }
 
-  if (loadFailed) {
-    return (
-      <div style={{ marginTop: 32 }}>
-        <p style={{ color: 'var(--ed-fg-muted)' }}>{t('loadError')}</p>
-        <button type="button" onClick={retry} style={primaryButton}>
-          {t('retry')}
-        </button>
-      </div>
-    )
-  }
-
-  if (passages === null) {
-    return (
-      <p style={{ marginTop: 32, color: 'var(--ed-fg-muted)' }}>{t('loadingPassages')}</p>
-    )
-  }
-
-  if (passages.length === 0) {
-    return <p style={{ marginTop: 32, color: 'var(--ed-fg-muted)' }}>{t('noPassages')}</p>
-  }
-
   return (
     <div style={{ marginTop: 32, display: 'grid', gap: 28 }}>
-      <Field label={t('pickerPassageLabel')}>
-        <ThemedSelect
-          value={String(passageId ?? '')}
-          onChange={(next) => setPassageId(Number(next))}
-          options={passages.map((p) => ({ value: String(p.id), label: p.label }))}
-        />
-      </Field>
-
       <Field label={t('pickerDifficultyLabel')}>
         <div style={optionGrid}>
           {DIFFICULTIES.map((d) => (
@@ -140,7 +71,7 @@ export function FillBlankPicker() {
       </Field>
 
       <div>
-        <button type="button" onClick={start} disabled={starting || passageId == null} style={primaryButton}>
+        <button type="button" onClick={start} disabled={starting} style={primaryButton}>
           {starting ? t('starting') : t('startRound')}
         </button>
         {startFailed && (

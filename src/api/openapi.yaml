@@ -3828,11 +3828,15 @@ components:
 
     StartGameVariantRequest:
       type: object
-      required: [passage_id, language, difficulty, size]
+      required: [language, difficulty, size]
       properties:
         passage_id:
           type: integer
           format: int64
+          description: >
+            When omitted the server selects a passage automatically based on
+            the player's adaptive skill band. When provided the exact passage
+            is used regardless of skill band.
           example: 42
         language:
           type: string
