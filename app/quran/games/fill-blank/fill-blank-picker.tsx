@@ -6,8 +6,8 @@ import { useTranslations } from 'next-intl'
 import { meApi, type GameDifficulty, type GameRoundSize } from '@/src/api/me-client'
 import { stashVariant } from '@/lib/games-session'
 
-const DIFFICULTIES: GameDifficulty[] = ['easy', 'medium', 'hard', 'professional', 'adaptive']
-const SIZES: GameRoundSize[] = ['short', 'medium', 'long', 'adaptive']
+const DIFFICULTIES: GameDifficulty[] = ['adaptive', 'easy', 'medium', 'hard', 'professional']
+const SIZES: GameRoundSize[] = ['adaptive', 'short', 'medium', 'long']
 
 const monoLabel: React.CSSProperties = {
   fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
@@ -21,8 +21,8 @@ export function FillBlankPicker() {
   const t = useTranslations('games')
   const router = useRouter()
 
-  const [difficulty, setDifficulty] = useState<GameDifficulty>('medium')
-  const [size, setSize] = useState<GameRoundSize>('short')
+  const [difficulty, setDifficulty] = useState<GameDifficulty>('adaptive')
+  const [size, setSize] = useState<GameRoundSize>('adaptive')
   const [starting, setStarting] = useState(false)
   const [startFailed, setStartFailed] = useState(false)
 

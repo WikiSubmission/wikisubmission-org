@@ -554,7 +554,7 @@ function BlankInput({
   // attemptsRemaining is defined). Each bar represents one attempt slot.
   const healthBars =
     attemptsRemaining !== undefined ? (
-      <span style={healthBarRow} aria-label={t('attemptsRemainingLabel', { count: attemptsRemaining })}>
+      <span style={healthBarRow}>
         {Array.from({ length: MAX_BLANK_ATTEMPTS }, (_, i) => (
           <span
             key={i}
@@ -564,8 +564,10 @@ function BlankInput({
                 i < attemptsRemaining
                   ? feedback === 'correct'
                     ? '#15803d'
-                    : 'var(--ed-fg)'
-                  : 'var(--ed-rule)',
+                    : 'var(--ed-fg-muted)'
+                  : locked
+                    ? 'rgba(185,28,28,0.35)'
+                    : 'var(--ed-rule)',
             }}
           />
         ))}
@@ -594,9 +596,8 @@ function BlankInput({
 
   const hint = blank?.hint
   return (
-    <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', verticalAlign: 'middle', gap: 2, margin: '0 2px' }}>
-      {healthBars}
-      <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}>
+    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}>
+      <span style={{ display: 'inline-block', position: 'relative', margin: '0 2px' }}>
         <input
           ref={registerRef as React.Ref<HTMLInputElement>}
           type="text"
@@ -618,22 +619,23 @@ function BlankInput({
           size={Math.max(8, value.length + 1)}
           style={{ ...blankBase, ...feedbackStyle, ...(locked ? { cursor: 'not-allowed', opacity: 0.5 } : {}) }}
         />
-        {hint && !locked && (
-          <>
-            {revealed > 0 && (
-              <span style={hintCaption}>
-                {(revealed >= 3 ? hint.first_two : hint.first_letter) + '…'}
-                {revealed >= 2 && ` · ${t('hintLength', { count: hint.length })}`}
-              </span>
-            )}
-            {revealed < MAX_HINTS_PER_BLANK && (
-              <button type="button" onClick={onReveal} style={hintButton} title={t('hint')}>
-                {t('hint')}
-              </button>
-            )}
-          </>
-        )}
+        {healthBars}
       </span>
+      {hint && !locked && (
+        <>
+          {revealed > 0 && (
+            <span style={hintCaption}>
+              {(revealed >= 3 ? hint.first_two : hint.first_letter) + '…'}
+              {revealed >= 2 && ` · ${t('hintLength', { count: hint.length })}`}
+            </span>
+          )}
+          {revealed < MAX_HINTS_PER_BLANK && (
+            <button type="button" onClick={onReveal} style={hintButton} title={t('hint')}>
+              {t('hint')}
+            </button>
+          )}
+        </>
+      )}
     </span>
   )
 }
@@ -700,16 +702,19 @@ const lockedStyle: React.CSSProperties = {
 }
 
 const healthBarRow: React.CSSProperties = {
-  display: 'inline-flex',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  display: 'flex',
   gap: 2,
-  marginBottom: 1,
+  pointerEvents: 'none',
 }
 
 const healthBar: React.CSSProperties = {
-  display: 'inline-block',
-  width: 14,
+  flex: 1,
   height: 3,
-  borderRadius: 2,
+  borderRadius: 1,
   transition: 'background 120ms ease',
 }
 
