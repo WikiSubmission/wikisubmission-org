@@ -1,5 +1,7 @@
+import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { FillBlankPicker } from './fill-blank-picker'
+import { GamesOverview } from '../games-overview'
 
 export const metadata = {
   title: 'Fill the Missing Word — WikiSubmission',
@@ -17,6 +19,23 @@ export default async function FillBlankEntryPage() {
         padding: 'clamp(32px, 6vw, 64px) clamp(16px, 3vw, 24px)',
       }}
     >
+      <Link
+        href="/quran/games"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          marginBottom: 24,
+          fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+          fontSize: 11,
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          color: 'var(--ed-fg-muted)',
+          textDecoration: 'none',
+        }}
+      >
+        ← {t('backToGames')}
+      </Link>
       <h1
         style={{
           fontFamily: 'var(--font-cormorant), Georgia, serif',
@@ -39,6 +58,7 @@ export default async function FillBlankEntryPage() {
       </p>
 
       <FillBlankPicker />
+      <GamesOverview />
     </section>
   )
 }

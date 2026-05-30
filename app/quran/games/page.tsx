@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { GamesOverview } from './games-overview'
 
 export const metadata = {
   title: 'Quran Games — WikiSubmission',
@@ -137,8 +136,6 @@ export default async function GamesLobbyPage() {
           </li>
         ))}
       </ul>
-
-      <GamesOverview />
     </section>
   )
 }

@@ -44,6 +44,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   const [hintsRevealed, setHintsRevealed] = useState<Record<number, number>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [quitting, setQuitting] = useState(false)
   // Round result is held in-place and shown inline + as a dialog. The verse
   // text becomes a review pane (correct guesses in green, wrong guesses with
   // the accepted answer revealed in red).
@@ -270,12 +271,28 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
           </span>
         </div>
       ) : (
-        <div style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <button type="button" onClick={submit} disabled={submitting} style={primaryButton}>
-            {submitting ? t('submitting') : t('submitRound')}
-          </button>
-          <span style={monoLabel}>{t('progress', { filled: filledCount, total: totalBlanks })}</span>
-          {hintsUsed > 0 && <span style={monoLabel}>{t('hintsUsed', { count: hintsUsed })}</span>}
+        <div style={{ marginTop: 32, display: 'grid', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <button type="button" onClick={submit} disabled={submitting} style={primaryButton}>
+              {submitting ? t('submitting') : t('submitRound')}
+            </button>
+            <span style={monoLabel}>{t('progress', { filled: filledCount, total: totalBlanks })}</span>
+            {hintsUsed > 0 && <span style={monoLabel}>{t('hintsUsed', { count: hintsUsed })}</span>}
+            <button type="button" onClick={() => setQuitting(true)} style={quitButton}>
+              {t('quitRound')}
+            </button>
+          </div>
+          {quitting && (
+            <div style={quitConfirm}>
+              <span style={{ fontSize: 14, color: 'var(--ed-fg)' }}>{t('quitConfirm')}</span>
+              <Link href="/quran/games/fill-blank" style={quitConfirmYes}>
+                {t('quitConfirmYes')}
+              </Link>
+              <button type="button" onClick={() => setQuitting(false)} style={quitConfirmNo}>
+                {t('quitConfirmNo')}
+              </button>
+            </div>
+          )}
         </div>
       )}
       {submitError && <p style={{ marginTop: 12, color: 'var(--ed-accent, #b91c1c)' }}>{submitError}</p>}
@@ -678,4 +695,46 @@ const reviewWrongAnswer: React.CSSProperties = {
   color: '#15803d',
   fontSize: '0.85em',
   fontWeight: 600,
+}
+
+const quitButton: React.CSSProperties = {
+  marginLeft: 'auto',
+  padding: '10px 18px',
+  borderRadius: 2,
+  border: '1px solid var(--ed-rule)',
+  background: 'transparent',
+  color: 'var(--ed-fg-muted)',
+  fontSize: 13,
+  cursor: 'pointer',
+}
+
+const quitConfirm: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 12,
+  padding: '12px 14px',
+  border: '1px solid var(--ed-rule)',
+  borderRadius: 2,
+  flexWrap: 'wrap',
+}
+
+const quitConfirmYes: React.CSSProperties = {
+  padding: '6px 14px',
+  borderRadius: 2,
+  border: '1px solid var(--ed-accent, #b91c1c)',
+  background: 'transparent',
+  color: 'var(--ed-accent, #b91c1c)',
+  fontSize: 13,
+  textDecoration: 'none',
+  cursor: 'pointer',
+}
+
+const quitConfirmNo: React.CSSProperties = {
+  padding: '6px 14px',
+  borderRadius: 2,
+  border: '1px solid var(--ed-rule)',
+  background: 'transparent',
+  color: 'var(--ed-fg-muted)',
+  fontSize: 13,
+  cursor: 'pointer',
 }
