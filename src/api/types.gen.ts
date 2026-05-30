@@ -1997,15 +1997,17 @@ export interface components {
              */
             language: "en";
             /**
+             * @description Difficulty tier for the round. Use `adaptive` to let the server pick the tier based on the player's recent accuracy across all tiers. The resolved tier is always returned in the GameVariant.
              * @example hard
              * @enum {string}
              */
-            difficulty: "easy" | "medium" | "hard" | "professional";
+            difficulty: "easy" | "medium" | "hard" | "professional" | "adaptive";
             /**
+             * @description Round size (number of blanks). Use `adaptive` to let the server pick based on the player's total attempt history. The resolved size is always returned in the GameVariant.
              * @example medium
              * @enum {string}
              */
-            size: "short" | "medium" | "long";
+            size: "short" | "medium" | "long" | "adaptive";
             /**
              * @description When provided, resume the exact variant referenced. Returns 404 if the variant does not exist. Without this field the server returns the lowest-counter variant the caller has not yet attempted, minting a new one if all existing variants are consumed.
              * @example p42-en-hard-medium-7
@@ -2100,7 +2102,7 @@ export interface components {
         GamePerBlankResult: {
             index: number;
             correct: boolean;
-            /** @description Returned only when `correct = true`. Incorrect blanks omit this field so the user must replay to see the truth. */
+            /** @description Always present on submit. The correct answer for this blank, shown after the round ends regardless of whether the guess was right. */
             accepted_answer?: string;
         };
         GameSubmitResult: {

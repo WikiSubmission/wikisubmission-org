@@ -3844,11 +3844,19 @@ components:
           example: en
         difficulty:
           type: string
-          enum: [easy, medium, hard, professional]
+          enum: [easy, medium, hard, professional, adaptive]
+          description: >
+            Difficulty tier for the round. Use `adaptive` to let the server
+            pick the tier based on the player's recent accuracy across all
+            tiers. The resolved tier is always returned in the GameVariant.
           example: hard
         size:
           type: string
-          enum: [short, medium, long]
+          enum: [short, medium, long, adaptive]
+          description: >
+            Round size (number of blanks). Use `adaptive` to let the server
+            pick based on the player's total attempt history. The resolved
+            size is always returned in the GameVariant.
           example: medium
         variant_id:
           type: string
@@ -4012,8 +4020,8 @@ components:
         accepted_answer:
           type: string
           description: >
-            Returned only when `correct = true`. Incorrect blanks omit this
-            field so the user must replay to see the truth.
+            Always present on submit. The correct answer for this blank,
+            shown after the round ends regardless of whether the guess was right.
 
     GameSubmitResult:
       type: object

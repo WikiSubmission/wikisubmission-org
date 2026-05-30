@@ -6,8 +6,8 @@ import { useTranslations } from 'next-intl'
 import { meApi, type GameDifficulty, type GameRoundSize } from '@/src/api/me-client'
 import { stashVariant } from '@/lib/games-session'
 
-const DIFFICULTIES: GameDifficulty[] = ['easy', 'medium', 'hard', 'professional']
-const SIZES: GameRoundSize[] = ['short', 'medium', 'long']
+const DIFFICULTIES: GameDifficulty[] = ['easy', 'medium', 'hard', 'professional', 'adaptive']
+const SIZES: GameRoundSize[] = ['short', 'medium', 'long', 'adaptive']
 
 const monoLabel: React.CSSProperties = {
   fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
