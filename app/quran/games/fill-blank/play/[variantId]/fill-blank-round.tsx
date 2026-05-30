@@ -170,7 +170,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
       if (!res.correct) {
         setWrongAttempts((prev) => ({ ...prev, [index]: [...(prev[index] ?? []), value] }))
       }
-      if (res.attempts_remaining !== undefined) {
+      if (!res.correct && res.attempts_remaining !== undefined) {
         setAttemptsRemaining((prev) => ({ ...prev, [index]: res.attempts_remaining! }))
       }
     } catch {
