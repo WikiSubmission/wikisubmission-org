@@ -240,12 +240,12 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
         }
       }
     }
-    // Find first blank anywhere that is unfilled and not done.
-    const firstNeedsFill = order.find(
-      (bi) => !isDone(bi) && (g[bi] ?? '').trim() === '',
-    )
-    if (firstNeedsFill !== undefined) {
-      const el = inputRefs.current.get(firstNeedsFill)
+    // Only submit when every blank is done (correct or all attempts exhausted).
+    // Any non-done blank — whether empty or wrong with attempts remaining —
+    // gets focus instead.
+    const firstNeedsWork = order.find((bi) => !isDone(bi))
+    if (firstNeedsWork !== undefined) {
+      const el = inputRefs.current.get(firstNeedsWork)
       if (el) {
         el.focus()
         return
