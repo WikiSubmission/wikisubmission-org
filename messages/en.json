@@ -851,6 +851,7 @@
     "resultKicker": "Attempt #{attemptId}",
     "resultTitle": "Round complete",
     "pickerPassageLabel": "Passage",
+    "pickerLanguageLabel": "Language",
     "pickerDifficultyLabel": "Difficulty",
     "pickerSizeLabel": "Round size",
     "loadingPassages": "Loading passages…",

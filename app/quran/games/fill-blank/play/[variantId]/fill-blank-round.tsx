@@ -285,13 +285,13 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     }
   }
 
-  // Start a new round with the same resolved difficulty and size.
+  // Start a new round with the same language, difficulty, and size.
   async function startAgain() {
     if (!variant || restarting) return
     setRestarting(true)
     try {
       const { data } = await meApi.games.startVariant({
-        language: 'en',
+        language: variant.language,
         difficulty: variant.difficulty,
         size: variant.size,
       })
@@ -351,6 +351,8 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     ? new Map(result.per_blank.map((r) => [r.index, r]))
     : null
   const isEasy = variant.difficulty === 'easy'
+  const isRtl = ['ar', 'ac', 'fa', 'ur'].includes(variant.language)
+  const dir = isRtl ? 'rtl' : 'ltr'
 
   return (
     <div>
@@ -364,7 +366,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
 
       <div style={{ marginTop: 24, display: 'grid', gap: 18 }}>
         {variant.rendered_verses.map((v) => (
-          <p key={v.verse_key} style={verseStyle}>
+          <p key={v.verse_key} dir={dir} style={verseStyle}>
             <span style={verseKeyStyle}>{v.verse_key}</span>{' '}
             {renderVerse({
               text: v.text,
@@ -375,6 +377,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
               attemptsRemaining,
               checking,
               resultByIndex,
+              dir,
               onChange: setGuess,
               onCheck: checkOne,
               onEnter: advanceFrom,
@@ -593,6 +596,7 @@ interface RenderContext {
   attemptsRemaining: Record<number, number>
   checking: Record<number, boolean>
   resultByIndex: Map<number, GamePerBlankResult> | null
+  dir: 'ltr' | 'rtl'
   onChange: (index: number, value: string) => void
   onCheck: (index: number) => Promise<void>
   onEnter: (index: number) => void
@@ -619,6 +623,7 @@ function renderVerse(ctx: RenderContext): React.ReactNode[] {
           key={`b${index}`}
           guess={ctx.guesses[index] ?? ''}
           result={blankResult}
+          dir={ctx.dir}
         />
       ) : (
         <BlankInput
@@ -630,6 +635,7 @@ function renderVerse(ctx: RenderContext): React.ReactNode[] {
           revealed={ctx.hintsRevealed[index] ?? 0}
           attemptsRemaining={ctx.attemptsRemaining[index]}
           checking={ctx.checking[index] ?? false}
+          dir={ctx.dir}
           onChange={(value) => ctx.onChange(index, value)}
           onCheck={() => ctx.onCheck(index)}
           onEnter={() => ctx.onEnter(index)}
@@ -656,16 +662,18 @@ const MAX_HINTS_PER_BLANK = 3
 function BlankReview({
   guess,
   result,
+  dir,
 }: {
   guess: string
   result: GamePerBlankResult
+  dir: 'ltr' | 'rtl'
 }) {
   if (result.correct) {
-    return <span style={reviewCorrect}>{result.accepted_answer}</span>
+    return <span dir={dir} style={reviewCorrect}>{result.accepted_answer}</span>
   }
   const trimmed = guess.trim()
   return (
-    <span style={reviewWrong}>
+    <span dir={dir} style={reviewWrong}>
       {trimmed && <span style={reviewWrongGuess}>{trimmed}</span>}
       <span style={reviewWrongAnswer}>{result.accepted_answer}</span>
     </span>
@@ -680,6 +688,7 @@ function BlankInput({
   revealed,
   attemptsRemaining,
   checking,
+  dir,
   onChange,
   onCheck,
   onEnter,
@@ -693,6 +702,7 @@ function BlankInput({
   revealed: number
   attemptsRemaining: number | undefined
   checking: boolean
+  dir: 'ltr' | 'rtl'
   onChange: (value: string) => void
   onCheck: () => Promise<void>
   onEnter: () => void
@@ -767,6 +777,7 @@ function BlankInput({
           autoComplete="off"
           spellCheck={false}
           disabled={disabled}
+          dir={dir}
           aria-label={locked ? t('blankLocked') : `${t('blankPlaceholder')} ${index + 1}`}
           placeholder={locked ? t('blankLocked') : t('blankPlaceholder')}
           value={value}
@@ -787,7 +798,7 @@ function BlankInput({
       {hint && !disabled && (
         <>
           {revealed > 0 && (
-            <span style={hintCaption}>
+            <span dir={dir} style={hintCaption}>
               {(revealed >= 3 ? hint.first_two : hint.first_letter) + '…'}
               {revealed >= 2 && ` · ${t('hintLength', { count: hint.length })}`}
             </span>

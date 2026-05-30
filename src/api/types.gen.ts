@@ -1995,7 +1995,7 @@ export interface components {
              * @example en
              * @enum {string}
              */
-            language: "en";
+            language: "en" | "ar" | "ac" | "fa" | "ur" | "fr" | "de" | "es" | "sv" | "tr" | "id" | "tl" | "ru" | "bn" | "ta";
             /**
              * @description Difficulty tier for the round. Use `adaptive` to let the server pick the tier based on the player's recent accuracy across all tiers. The resolved tier is always returned in the GameVariant.
              * @example hard
@@ -2068,7 +2068,7 @@ export interface components {
             session_id: string;
             passage: components["schemas"]["GamePassage"];
             /** @enum {string} */
-            language: "en";
+            language: "en" | "ar" | "ac" | "fa" | "ur" | "fr" | "de" | "es" | "sv" | "tr" | "id" | "tl" | "ru" | "bn" | "ta";
             /** @enum {string} */
             difficulty: "easy" | "medium" | "hard" | "professional";
             /** @enum {string} */
@@ -3747,7 +3747,7 @@ export interface operations {
     listGameFillBlankPassages: {
         parameters: {
             query?: {
-                language?: "en";
+                language?: "en" | "ar" | "ac" | "fa" | "ur" | "fr" | "de" | "es" | "sv" | "tr" | "id" | "tl" | "ru" | "bn" | "ta";
                 theme?: string;
                 chapter?: number;
             };

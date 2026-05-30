@@ -1769,7 +1769,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [en]
+            enum: [en, ar, ac, fa, ur, fr, de, es, sv, tr, id, tl, ru, bn, ta]
             default: en
         - name: theme
           in: query
@@ -3840,7 +3840,7 @@ components:
           example: 42
         language:
           type: string
-          enum: [en]
+          enum: [en, ar, ac, fa, ur, fr, de, es, sv, tr, id, tl, ru, bn, ta]
           example: en
         difficulty:
           type: string
@@ -3947,7 +3947,7 @@ components:
           $ref: '#/components/schemas/GamePassage'
         language:
           type: string
-          enum: [en]
+          enum: [en, ar, ac, fa, ur, fr, de, es, sv, tr, id, tl, ru, bn, ta]
         difficulty:
           type: string
           enum: [easy, medium, hard, professional]
