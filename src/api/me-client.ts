@@ -349,11 +349,13 @@ const gamesApi = {
 
   getStats: (): Promise<GameStatsEnvelope> => unwrap(wsApi.GET('/me/games/stats')),
 
-  // Validate a single blank for instant feedback. Returns only correct/incorrect
-  // — never the answer — so the leaderboard stays cheat-resistant.
+  // Validate a single blank for instant feedback. Returns correctness and, for
+  // non-easy difficulties, the remaining attempts for that blank in the session.
   checkBlank: (body: {
     variant_id: string
+    session_id: string
     index: number
     guess: string
-  }): Promise<{ correct: boolean }> => unwrap(wsApiLoose.POST('/games/fill-blank/check', { body })),
+  }): Promise<{ correct: boolean; attempts_remaining?: number }> =>
+    unwrap(wsApiLoose.POST('/games/fill-blank/check', { body })),
 }

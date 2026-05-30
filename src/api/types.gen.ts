@@ -2061,6 +2061,11 @@ export interface components {
         GameVariant: {
             /** @example p42-en-hard-medium-7 */
             variant_id: string;
+            /**
+             * @description Unique ID for this play session. Pass back on every checkBlank and submit call so the server can track per-blank wrong attempts.
+             * @example 01HBJV5Z6Q5T7B5W2J4N8Q3X9F
+             */
+            session_id: string;
             passage: components["schemas"]["GamePassage"];
             /** @enum {string} */
             language: "en";
@@ -2090,6 +2095,11 @@ export interface components {
         SubmitGameAttemptRequest: {
             /** @example p42-en-hard-medium-7 */
             variant_id: string;
+            /**
+             * @description Session ID returned by startVariant. When provided the server reads per-blank wrong-attempt counts and applies a graduated penalty. Omitting it (e.g. resumed from a shared link) skips the wrong-attempt penalty.
+             * @example 01HBJV5Z6Q5T7B5W2J4N8Q3X9F
+             */
+            session_id?: string;
             guesses: components["schemas"]["GameGuess"][];
             /** @example 1 */
             hints_used: number;
@@ -2122,6 +2132,11 @@ export interface components {
             difficulty_multiplier: number;
             /** @example 25 */
             hint_penalty: number;
+            /**
+             * @description Total score deduction from wrong attempts across all blanks. Each additional wrong attempt on the same blank costs progressively more: attempt N costs N×10 points.
+             * @example 30
+             */
+            wrong_penalty: number;
         };
         GameSubmitResultEnvelope: {
             data: components["schemas"]["GameSubmitResult"];

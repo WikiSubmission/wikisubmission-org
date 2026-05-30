@@ -24,6 +24,7 @@ import { readVariant, stashVariant, parseVariantId } from '@/lib/games-session'
 import { encodeSharePayload } from '@/lib/games-share'
 
 const BLANK_TOKEN = /__BLANK_(\d+)__/g
+const MAX_BLANK_ATTEMPTS = 3
 
 type LoadState =
   | { status: 'loading' }
@@ -42,6 +43,12 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   const [feedback, setFeedback] = useState<Record<number, 'correct' | 'wrong'>>({})
   // Per-blank count of hints revealed (0..3 — first letter, length, first two).
   const [hintsRevealed, setHintsRevealed] = useState<Record<number, number>>({})
+  // Remaining attempts per blank. Only tracked for non-easy difficulties.
+  // Undefined for easy (no limit). 0 = locked.
+  const [attemptsRemaining, setAttemptsRemaining] = useState<Record<number, number>>({})
+  // Tracks the last guess value that was sent to checkBlank per blank, so we
+  // don't consume an attempt when the same wrong guess is re-checked on blur.
+  const lastCheckedRef = useRef<Record<number, string>>({})
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [quitting, setQuitting] = useState(false)
@@ -73,7 +80,17 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     }
     resolve()
       .then((variant) => {
-        if (active) setLoad(variant ? { status: 'ready', variant } : { status: 'error' })
+        if (!active) return
+        if (variant) {
+          setLoad({ status: 'ready', variant })
+          if (variant.difficulty !== 'easy') {
+            const init: Record<number, number> = {}
+            for (const b of variant.blanks) init[b.index] = MAX_BLANK_ATTEMPTS
+            setAttemptsRemaining(init)
+          }
+        } else {
+          setLoad({ status: 'error' })
+        }
       })
       .catch(() => {
         if (active) setLoad({ status: 'error' })
@@ -123,13 +140,20 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
       })
       return
     }
+    // Don't consume an attempt for the same guess value re-checked on blur.
+    if (lastCheckedRef.current[index] === value) return
+    lastCheckedRef.current[index] = value
     try {
-      const { correct } = await meApi.games.checkBlank({
+      const res = await meApi.games.checkBlank({
         variant_id: variant.variant_id,
+        session_id: variant.session_id,
         index,
         guess: value,
       })
-      setFeedback((prev) => ({ ...prev, [index]: correct ? 'correct' : 'wrong' }))
+      setFeedback((prev) => ({ ...prev, [index]: res.correct ? 'correct' : 'wrong' }))
+      if (res.attempts_remaining !== undefined) {
+        setAttemptsRemaining((prev) => ({ ...prev, [index]: res.attempts_remaining! }))
+      }
     } catch {
       // Swallow — feedback is advisory; final submit is authoritative.
     }
@@ -162,6 +186,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     try {
       const { data } = await meApi.games.submitVariant({
         variant_id: variant.variant_id,
+        session_id: variant.session_id,
         guesses: variant.blanks.map((b) => ({ index: b.index, value: (guesses[b.index] ?? '').trim() })),
         hints_used: hintsUsed,
         elapsed_ms: Math.max(0, Date.now() - startedAt.current),
@@ -247,6 +272,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
               guesses,
               feedback,
               hintsRevealed,
+              attemptsRemaining,
               resultByIndex,
               onChange: setGuess,
               onCheck: checkOne,
@@ -336,6 +362,11 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
                 <span>
                   {t('hintPenaltyLabel')}: −{result.hint_penalty}
                 </span>
+                {result.wrong_penalty > 0 && (
+                  <span>
+                    {t('wrongPenaltyLabel')}: −{result.wrong_penalty}
+                  </span>
+                )}
               </div>
             </div>
             {result.per_blank.length > 0 && (
@@ -404,6 +435,7 @@ interface RenderContext {
   guesses: Record<number, string>
   feedback: Record<number, BlankFeedback>
   hintsRevealed: Record<number, number>
+  attemptsRemaining: Record<number, number>
   resultByIndex: Map<number, GamePerBlankResult> | null
   onChange: (index: number, value: string) => void
   onCheck: (index: number) => void
@@ -440,6 +472,7 @@ function renderVerse(ctx: RenderContext): React.ReactNode[] {
           value={ctx.guesses[index] ?? ''}
           feedback={ctx.feedback[index]}
           revealed={ctx.hintsRevealed[index] ?? 0}
+          attemptsRemaining={ctx.attemptsRemaining[index]}
           onChange={(value) => ctx.onChange(index, value)}
           onCheck={() => ctx.onCheck(index)}
           onEnter={() => ctx.onEnter(index)}
@@ -488,6 +521,7 @@ function BlankInput({
   value,
   feedback,
   revealed,
+  attemptsRemaining,
   onChange,
   onCheck,
   onEnter,
@@ -499,6 +533,7 @@ function BlankInput({
   value: string
   feedback: BlankFeedback | undefined
   revealed: number
+  attemptsRemaining: number | undefined
   onChange: (value: string) => void
   onCheck: () => void
   onEnter: () => void
@@ -506,7 +541,36 @@ function BlankInput({
   registerRef: (el: HTMLInputElement | HTMLButtonElement | null) => void
 }) {
   const t = useTranslations('games')
-  const feedbackStyle = feedback === 'correct' ? correctStyle : feedback === 'wrong' ? wrongStyle : null
+  const locked = attemptsRemaining === 0
+  const feedbackStyle = locked
+    ? lockedStyle
+    : feedback === 'correct'
+      ? correctStyle
+      : feedback === 'wrong'
+        ? wrongStyle
+        : null
+
+  // Health bars: shown above the input for non-easy difficulties (when
+  // attemptsRemaining is defined). Each bar represents one attempt slot.
+  const healthBars =
+    attemptsRemaining !== undefined ? (
+      <span style={healthBarRow} aria-label={t('attemptsRemainingLabel', { count: attemptsRemaining })}>
+        {Array.from({ length: MAX_BLANK_ATTEMPTS }, (_, i) => (
+          <span
+            key={i}
+            style={{
+              ...healthBar,
+              background:
+                i < attemptsRemaining
+                  ? feedback === 'correct'
+                    ? '#15803d'
+                    : 'var(--ed-fg)'
+                  : 'var(--ed-rule)',
+            }}
+          />
+        ))}
+      </span>
+    ) : null
 
   if (blank?.options && blank.options.length > 0) {
     return (
@@ -530,42 +594,46 @@ function BlankInput({
 
   const hint = blank?.hint
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}>
-      <input
-        ref={registerRef}
-        type="text"
-        autoComplete="off"
-        spellCheck={false}
-        aria-label={`${t('blankPlaceholder')} ${index + 1}`}
-        placeholder={t('blankPlaceholder')}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={onCheck}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault()
-            onCheck()
-            onEnter()
-          }
-        }}
-        size={Math.max(8, value.length + 1)}
-        style={{ ...blankBase, ...feedbackStyle }}
-      />
-      {hint && (
-        <>
-          {revealed > 0 && (
-            <span style={hintCaption}>
-              {(revealed >= 3 ? hint.first_two : hint.first_letter) + '…'}
-              {revealed >= 2 && ` · ${t('hintLength', { count: hint.length })}`}
-            </span>
-          )}
-          {revealed < MAX_HINTS_PER_BLANK && (
-            <button type="button" onClick={onReveal} style={hintButton} title={t('hint')}>
-              {t('hint')}
-            </button>
-          )}
-        </>
-      )}
+    <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', verticalAlign: 'middle', gap: 2, margin: '0 2px' }}>
+      {healthBars}
+      <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4 }}>
+        <input
+          ref={registerRef as React.Ref<HTMLInputElement>}
+          type="text"
+          autoComplete="off"
+          spellCheck={false}
+          disabled={locked}
+          aria-label={locked ? t('blankLocked') : `${t('blankPlaceholder')} ${index + 1}`}
+          placeholder={locked ? t('blankLocked') : t('blankPlaceholder')}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onCheck}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              onCheck()
+              onEnter()
+            }
+          }}
+          size={Math.max(8, value.length + 1)}
+          style={{ ...blankBase, ...feedbackStyle, ...(locked ? { cursor: 'not-allowed', opacity: 0.5 } : {}) }}
+        />
+        {hint && !locked && (
+          <>
+            {revealed > 0 && (
+              <span style={hintCaption}>
+                {(revealed >= 3 ? hint.first_two : hint.first_letter) + '…'}
+                {revealed >= 2 && ` · ${t('hintLength', { count: hint.length })}`}
+              </span>
+            )}
+            {revealed < MAX_HINTS_PER_BLANK && (
+              <button type="button" onClick={onReveal} style={hintButton} title={t('hint')}>
+                {t('hint')}
+              </button>
+            )}
+          </>
+        )}
+      </span>
     </span>
   )
 }
@@ -623,6 +691,26 @@ const wrongStyle: React.CSSProperties = {
   borderBottomColor: '#b91c1c',
   background: 'rgba(185, 28, 28, 0.12)',
   color: '#b91c1c',
+}
+
+const lockedStyle: React.CSSProperties = {
+  borderBottomColor: 'var(--ed-rule)',
+  background: 'rgba(128,128,128,0.08)',
+  color: 'var(--ed-fg-muted)',
+}
+
+const healthBarRow: React.CSSProperties = {
+  display: 'inline-flex',
+  gap: 2,
+  marginBottom: 1,
+}
+
+const healthBar: React.CSSProperties = {
+  display: 'inline-block',
+  width: 14,
+  height: 3,
+  borderRadius: 2,
+  transition: 'background 120ms ease',
 }
 
 const hintCaption: React.CSSProperties = {
