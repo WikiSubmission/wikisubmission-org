@@ -2,31 +2,18 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { meApi, type GameDifficulty, type GameRoundSize, type GameLanguage } from '@/src/api/me-client'
 import { stashVariant } from '@/lib/games-session'
 
 const DIFFICULTIES: GameDifficulty[] = ['adaptive', 'easy', 'medium', 'hard', 'professional']
 const SIZES: GameRoundSize[] = ['adaptive', 'short', 'medium', 'long']
 
-type LangEntry = { code: GameLanguage; name: string; dir: 'ltr' | 'rtl' }
-const LANGUAGES: LangEntry[] = [
-  { code: 'en', name: 'English',        dir: 'ltr' },
-  { code: 'ar', name: 'Arabic',         dir: 'rtl' },
-  { code: 'ac', name: 'Arabic Clean',   dir: 'rtl' },
-  { code: 'fr', name: 'French',         dir: 'ltr' },
-  { code: 'de', name: 'German',         dir: 'ltr' },
-  { code: 'es', name: 'Spanish',        dir: 'ltr' },
-  { code: 'fa', name: 'Persian',        dir: 'rtl' },
-  { code: 'ur', name: 'Urdu',           dir: 'rtl' },
-  { code: 'tr', name: 'Turkish',        dir: 'ltr' },
-  { code: 'id', name: 'Bahasa',         dir: 'ltr' },
-  { code: 'tl', name: 'Transliterated', dir: 'ltr' },
-  { code: 'ru', name: 'Russian',        dir: 'ltr' },
-  { code: 'bn', name: 'Bengali',        dir: 'ltr' },
-  { code: 'ta', name: 'Tamil',          dir: 'ltr' },
-  { code: 'sv', name: 'Swedish',        dir: 'ltr' },
-]
+// UI locales that don't map directly to a game language fall back to 'en'.
+function toGameLanguage(locale: string): GameLanguage {
+  const supported: GameLanguage[] = ['en','ar','ac','fa','ur','fr','de','es','sv','tr','id','tl','ru','bn','ta']
+  return (supported as string[]).includes(locale) ? (locale as GameLanguage) : 'en'
+}
 
 const monoLabel: React.CSSProperties = {
   fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
@@ -39,8 +26,8 @@ const monoLabel: React.CSSProperties = {
 export function FillBlankPicker() {
   const t = useTranslations('games')
   const router = useRouter()
+  const language = toGameLanguage(useLocale())
 
-  const [language, setLanguage] = useState<GameLanguage>('en')
   const [difficulty, setDifficulty] = useState<GameDifficulty>('adaptive')
   const [size, setSize] = useState<GameRoundSize>('adaptive')
   const [starting, setStarting] = useState(false)
@@ -62,21 +49,6 @@ export function FillBlankPicker() {
 
   return (
     <div style={{ marginTop: 32, display: 'grid', gap: 28 }}>
-      <Field label={t('pickerLanguageLabel')}>
-        <div style={optionGrid}>
-          {LANGUAGES.map((l) => (
-            <Choice
-              key={l.code}
-              selected={language === l.code}
-              onClick={() => setLanguage(l.code)}
-              title={l.name}
-              hint={l.dir === 'rtl' ? '← right to left' : ''}
-              dir={l.dir}
-            />
-          ))}
-        </div>
-      </Field>
-
       <Field label={t('pickerDifficultyLabel')}>
         <div style={optionGrid}>
           {DIFFICULTIES.map((d) => (
@@ -131,13 +103,11 @@ function Choice({
   onClick,
   title,
   hint,
-  dir,
 }: {
   selected: boolean
   onClick: () => void
   title: string
   hint: string
-  dir?: 'ltr' | 'rtl'
 }) {
   return (
     <button
@@ -155,7 +125,7 @@ function Choice({
         transition: 'background 120ms ease, border-color 120ms ease, color 120ms ease',
       }}
     >
-      <div style={{ fontWeight: 500, fontSize: 15 }} dir={dir}>{title}</div>
+      <div style={{ fontWeight: 500, fontSize: 15 }}>{title}</div>
       {hint && <div style={{ fontSize: 12, marginTop: 2, opacity: 0.7 }}>{hint}</div>}
     </button>
   )

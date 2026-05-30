@@ -24,7 +24,16 @@ export default async function AdminGamesHubPage() {
           <Link href="/admin/games/fill-blank" style={tileStyle}>
             <div style={tileTitle}>Fill the Missing Word</div>
             <p style={tileBody}>
-              Curate passages, review proposals, run maintenance (frequency, lemma data).
+              Curate passages and review GROQ proposals. Approve, reject, or flag for refinement.
+            </p>
+          </Link>
+        </li>
+        <li>
+          <Link href="/admin/games/fill-blank/maintenance" style={tileStyle}>
+            <div style={tileTitle}>Maintenance</div>
+            <p style={tileBody}>
+              Word frequency tables and lemma data for all languages. Rebuild after adding a
+              language or correcting translation text.
             </p>
           </Link>
         </li>

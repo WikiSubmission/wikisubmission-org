@@ -26,6 +26,11 @@ interface LoadLemmasResult {
   lemma_rows: number
 }
 
+export interface LanguageStat {
+  language: string
+  count: number
+}
+
 interface SetStatusResult {
   id: number
   status: string
@@ -130,8 +135,17 @@ export function gamesAdminClient(token: string) {
         body: { status },
       }),
 
-    seedFrequency: (): Promise<SeedFrequencyResult> =>
-      call<SeedFrequencyResult>(token, '/maintenance/seed-frequency', { method: 'POST' }),
+    frequencyStats: (): Promise<LanguageStat[]> =>
+      call<LanguageStat[]>(token, '/maintenance/frequency-stats'),
+
+    lemmaStats: (): Promise<LanguageStat[]> =>
+      call<LanguageStat[]>(token, '/maintenance/lemma-stats'),
+
+    seedFrequency: (language: string): Promise<SeedFrequencyResult> =>
+      call<SeedFrequencyResult>(token, '/maintenance/seed-frequency', {
+        method: 'POST',
+        query: { language },
+      }),
 
     loadLemmas: (): Promise<LoadLemmasResult> =>
       call<LoadLemmasResult>(token, '/maintenance/load-lemmas', { method: 'POST' }),

@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRef, useState, useTransition } from 'react'
 import { ThemedSelect } from '@/components/ui/themed-select'
 import type { ReviewPassage, ReviewStatus } from '@/lib/games-editor'
@@ -7,8 +8,6 @@ import {
   listPassagesAction,
   setStatusAction,
   bulkSetStatusAction,
-  seedFrequencyAction,
-  loadLemmasAction,
   curateAction,
   proposedSummaryAction,
   type ProposedChapter,
@@ -57,10 +56,6 @@ export function GamesReview({
     const res = await proposedSummaryAction()
     if (res.ok) setProposedChapters(res.data)
   }
-
-  const [seedMsg, setSeedMsg] = useState<string | null>(null)
-  const [lemmaMsg, setLemmaMsg] = useState<string | null>(null)
-  const [maintPending, setMaintPending] = useState<'seed' | 'lemma' | null>(null)
 
   const [curateChapter, setCurateChapter] = useState('')
   const [curateMsg, setCurateMsg] = useState<string | null>(null)
@@ -151,28 +146,6 @@ export function GamesReview({
       setError(res.error)
     }
     setRowPending(null)
-  }
-
-  async function runSeed() {
-    setMaintPending('seed')
-    setSeedMsg(null)
-    const res = await seedFrequencyAction()
-    setSeedMsg(res.ok ? `Rebuilt frequencies for ${res.data.tokens} tokens.` : res.error)
-    setMaintPending(null)
-  }
-
-  async function runLemmas() {
-    setMaintPending('lemma')
-    setLemmaMsg(null)
-    const res = await loadLemmasAction()
-    setLemmaMsg(
-      res.ok
-        ? res.data.lemma_rows > 0
-          ? `Loaded ${res.data.lemma_rows} lemma rows.`
-          : 'No lemma fixture shipped with this deploy (Hard tier still works via exact match).'
-        : res.error,
-    )
-    setMaintPending(null)
   }
 
   // Sleep that surfaces a live countdown and resolves early when cancelled.
@@ -277,6 +250,11 @@ export function GamesReview({
           Approve, reject, or flag GROQ-proposed passages for the Fill-the-Blank catalog. Approved
           passages become playable immediately.
         </p>
+        <div style={{ marginTop: 12 }}>
+          <Link href="/admin/games/fill-blank/maintenance" style={maintLink}>
+            Maintenance (frequency &amp; lemma)
+          </Link>
+        </div>
       </header>
 
       <section style={curatePanel}>
@@ -449,91 +427,6 @@ export function GamesReview({
         </ul>
       )}
 
-      <section style={maintPanel}>
-        <h2 style={maintHeading}>Maintenance</h2>
-        <p style={muted}>
-          Both buttons are safe to click any time. Read the notes under each so you know when it
-          actually changes something.
-        </p>
-
-        <div style={maintBlock}>
-          <div style={maintRow}>
-            <button type="button" onClick={runSeed} disabled={maintPending !== null} style={ghostButton}>
-              {maintPending === 'seed' ? 'Rebuilding…' : 'Rebuild word frequencies'}
-            </button>
-            {seedMsg && <span style={maintMsg}>{seedMsg}</span>}
-          </div>
-          <p style={maintNote}>
-            <strong style={maintLabel}>What this does.</strong> Counts how often each word appears
-            in the English (Rashad Khalifa) translation and stores the totals. The game uses those
-            totals to decide whether a word is Easy, Medium, or Hard when it picks blanks.
-          </p>
-          <p style={maintNote}>
-            <strong style={maintLabel}>When to run it.</strong> Once, after the site is first set
-            up (already done). Run again only if the translation text itself is corrected, or when
-            a new language is added. It is not affected by curating, approving, or rejecting
-            passages — those never change word counts.
-          </p>
-          <p style={maintNote}>
-            <strong style={maintLabel}>If you forget after a translation change.</strong> Difficulty
-            tiers go stale: common words may show up as Hard, rare words as Easy, and any newly
-            introduced words simply never appear as blanks. The game still runs, but its sense of
-            difficulty drifts away from the actual text. Clicking the button at any later point
-            fixes it instantly.
-          </p>
-          <p style={maintNote}>
-            <strong style={maintLabel}>Cost.</strong> A few seconds of database work. No external
-            calls, no money spent, no risk to existing passages. The operation replaces the table
-            atomically — players in the middle of a round are unaffected.
-          </p>
-        </div>
-
-        <div style={maintBlock}>
-          <div style={maintRow}>
-            <button type="button" onClick={runLemmas} disabled={maintPending !== null} style={ghostButton}>
-              {maintPending === 'lemma' ? 'Loading…' : 'Load lemma data'}
-            </button>
-            {lemmaMsg && <span style={maintMsg}>{lemmaMsg}</span>}
-          </div>
-          <p style={maintNote}>
-            <strong style={maintLabel}>What this does.</strong> Teaches the game which words share
-            the same root form — for example, that <em>worshipped</em>, <em>worshipping</em>, and
-            <em>{' '}worships</em> all come from <em>worship</em>. Hard rounds use this to accept a
-            close conjugation when a player types one.
-          </p>
-          <p style={maintNote}>
-            <strong style={maintLabel}>What it does NOT do.</strong> It does not analyze the text
-            here and now. It only loads a prepared list of word-pairs that was generated offline
-            and shipped inside the current deploy. The analysis itself happens on a developer
-            machine, not on the live server.
-          </p>
-          <p style={maintNote}>
-            <strong style={maintLabel}>When the prepared list needs refreshing.</strong> Only when
-            the translation text changes, when a new language is added, or when a developer
-            decides to use a better word-analysis tool. Curation work never requires it. Until a
-            fresh list ships, Hard rounds simply fall back to exact matches — the game stays fully
-            playable, just stricter.
-          </p>
-          <p style={maintNote}>
-            <strong style={maintLabel}>If you forget after a translation change.</strong> Players
-            on Hard would need to type the exact word from the verse; a perfectly reasonable
-            conjugation would be marked wrong. Nothing breaks, but Hard feels unfair until the
-            list is refreshed and reloaded.
-          </p>
-          <p style={maintNote}>
-            <strong style={maintLabel}>How a developer refreshes the list.</strong> In the
-            backend repo (<code style={inlineCode}>ws-backend</code>), they run
-            {' '}<code style={inlineCode}>just games-refresh-lemmas &lt;target&gt; &lt;lang&gt;</code>{' '}
-            — for example <code style={inlineCode}>just games-refresh-lemmas hetzner en</code> for
-            English on the Hetzner database, or
-            {' '}<code style={inlineCode}>just games-refresh-lemmas hetzner ar</code> once Arabic
-            ships. The command bootstraps everything on first use, then writes
-            {' '}<code style={inlineCode}>db/seeds/games_lemma_&lt;lang&gt;.sql</code>. They commit
-            the file, push, wait for the redeploy, and you finish the job by clicking Load lemma
-            data here.
-          </p>
-        </div>
-      </section>
     </main>
   )
 }
@@ -862,19 +755,13 @@ const errorText: React.CSSProperties = {
   marginBottom: 16,
 }
 
-const maintPanel: React.CSSProperties = {
-  marginTop: 48,
-  paddingTop: 24,
-  borderTop: '1px solid var(--ed-rule)',
-  display: 'grid',
-  gap: 12,
-}
-
-const maintHeading: React.CSSProperties = {
-  fontFamily: 'var(--font-cormorant), Georgia, serif',
-  fontSize: 24,
-  color: 'var(--ed-fg)',
-  margin: 0,
+const maintLink: React.CSSProperties = {
+  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+  fontSize: 11,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: 'var(--ed-fg-muted)',
+  textDecoration: 'none',
 }
 
 const maintRow: React.CSSProperties = {
@@ -891,31 +778,8 @@ const maintMsg: React.CSSProperties = {
 }
 
 const maintNote: React.CSSProperties = {
-  ...muted,
+  color: 'var(--ed-fg-muted)',
   fontSize: 13,
   marginTop: 6,
   lineHeight: 1.6,
-}
-
-const maintLabel: React.CSSProperties = {
-  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
-  fontSize: 11,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
-  color: 'var(--ed-fg)',
-  marginRight: 6,
-}
-
-const maintBlock: React.CSSProperties = {
-  marginTop: 20,
-  paddingTop: 16,
-  borderTop: '1px solid var(--ed-rule)',
-}
-
-const inlineCode: React.CSSProperties = {
-  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
-  fontSize: 12,
-  background: 'var(--ed-surface-alt, rgba(0,0,0,0.04))',
-  padding: '1px 5px',
-  borderRadius: 2,
 }

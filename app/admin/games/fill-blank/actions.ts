@@ -146,32 +146,6 @@ export async function bulkSetStatusAction(
   return { ok: true, data: result }
 }
 
-export async function seedFrequencyAction(): Promise<
-  ActionResult<{ language: string; tokens: number }>
-> {
-  const ctx = await editorClient()
-  if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
-  try {
-    const data = await ctx.client.seedFrequency()
-    return { ok: true, data }
-  } catch (err) {
-    return { ok: false, error: describe(err) }
-  }
-}
-
-export async function loadLemmasAction(): Promise<
-  ActionResult<{ language: string; lemma_rows: number }>
-> {
-  const ctx = await editorClient()
-  if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
-  try {
-    const data = await ctx.client.loadLemmas()
-    return { ok: true, data }
-  } catch (err) {
-    return { ok: false, error: describe(err) }
-  }
-}
-
 export type CurateWindowResult = {
   chapter: number
   proposed: number
