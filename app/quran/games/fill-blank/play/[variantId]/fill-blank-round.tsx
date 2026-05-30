@@ -219,6 +219,14 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   // attempts remain. Also prevents submitting with unfilled gaps.
   function advanceFrom(index: number) {
     if (!variant) return
+    // Read post-check state from the ref — updated synchronously inside
+    // checkOne before the setState calls, so this is always fresh.
+    const { feedback: fb, attemptsRemaining: ar, guesses: g } = stateRef.current
+    // If the just-checked blank is wrong and still has attempts left, keep
+    // focus here regardless of position in the round.
+    if (fb[index] === 'wrong' && ar[index] !== undefined && ar[index] > 0) {
+      return
+    }
     const order = variant.blanks.map((b) => b.index)
     const pos = order.indexOf(index)
     // Move to the next non-done blank in text order.
@@ -231,13 +239,6 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
           return
         }
       }
-    }
-    // No later active blank. Read fresh state from ref (updated by awaited
-    // checkOne when this is the last blank and Enter triggered the chain).
-    const { feedback: fb, attemptsRemaining: ar, guesses: g } = stateRef.current
-    // Current blank is wrong with attempts remaining — stay here.
-    if (fb[index] === 'wrong' && ar[index] !== undefined && ar[index] > 0) {
-      return
     }
     // Find first blank anywhere that is unfilled and not done.
     const firstNeedsFill = order.find(
