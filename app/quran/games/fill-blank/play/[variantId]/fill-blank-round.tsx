@@ -26,6 +26,14 @@ import { encodeSharePayload } from '@/lib/games-share'
 const BLANK_TOKEN = /__BLANK_(\d+)__/g
 const MAX_BLANK_ATTEMPTS = 3
 
+const pulseKeyframes = `
+@keyframes blank-checking-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.blank-checking-bars { animation: blank-checking-pulse 700ms ease-in-out infinite; }
+`
+
 type LoadState =
   | { status: 'loading' }
   | { status: 'error' }
@@ -46,6 +54,10 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   // Remaining attempts per blank. Only tracked for non-easy difficulties.
   // Undefined for easy (no limit). 0 = locked.
   const [attemptsRemaining, setAttemptsRemaining] = useState<Record<number, number>>({})
+  // All wrong guesses per blank, in order of submission — shown in result table.
+  const [wrongAttempts, setWrongAttempts] = useState<Record<number, string[]>>({})
+  // True while the checkBlank API call is in-flight for that blank index.
+  const [checking, setChecking] = useState<Record<number, boolean>>({})
   // Tracks the last guess value that was sent to checkBlank per blank, so we
   // don't consume an attempt when the same wrong guess is re-checked on blur.
   const lastCheckedRef = useRef<Record<number, string>>({})
@@ -57,6 +69,9 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   // the accepted answer revealed in red).
   const [result, setResult] = useState<GameSubmitResult | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  // Split "Play Again" dropdown open state.
+  const [playAgainOpen, setPlayAgainOpen] = useState(false)
+  const [restarting, setRestarting] = useState(false)
   const startedAt = useRef<number>(0)
   // DOM refs for each blank, keyed by index, so Enter can advance focus.
   const inputRefs = useRef<Map<number, HTMLInputElement | HTMLButtonElement>>(new Map())
@@ -143,6 +158,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     // Don't consume an attempt for the same guess value re-checked on blur.
     if (lastCheckedRef.current[index] === value) return
     lastCheckedRef.current[index] = value
+    setChecking((prev) => ({ ...prev, [index]: true }))
     try {
       const res = await meApi.games.checkBlank({
         variant_id: variant.variant_id,
@@ -151,11 +167,20 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
         guess: value,
       })
       setFeedback((prev) => ({ ...prev, [index]: res.correct ? 'correct' : 'wrong' }))
+      if (!res.correct) {
+        setWrongAttempts((prev) => ({ ...prev, [index]: [...(prev[index] ?? []), value] }))
+      }
       if (res.attempts_remaining !== undefined) {
         setAttemptsRemaining((prev) => ({ ...prev, [index]: res.attempts_remaining! }))
       }
     } catch {
       // Swallow — feedback is advisory; final submit is authoritative.
+    } finally {
+      setChecking((prev) => {
+        const next = { ...prev }
+        delete next[index]
+        return next
+      })
     }
   }
 
@@ -164,13 +189,28 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     else inputRefs.current.delete(index)
   }, [])
 
-  // Enter moves to the next blank; on the last blank it submits the round.
+  // Enter advances to the next blank. When on the last blank, if any blank is
+  // still unfilled and unlocked, focus the first such blank rather than
+  // submitting — prevents accidental submission with gaps.
   function advanceFrom(index: number) {
     if (!variant) return
     const order = variant.blanks.map((b) => b.index)
     const pos = order.indexOf(index)
     for (let i = pos + 1; i < order.length; i += 1) {
       const el = inputRefs.current.get(order[i])
+      if (el) {
+        el.focus()
+        return
+      }
+    }
+    // No later blank exists. Check if any blank is still unfilled and unlocked.
+    const firstEmpty = order.find(
+      (bi) =>
+        (guesses[bi] ?? '').trim() === '' &&
+        attemptsRemaining[bi] !== 0,
+    )
+    if (firstEmpty !== undefined) {
+      const el = inputRefs.current.get(firstEmpty)
       if (el) {
         el.focus()
         return
@@ -201,6 +241,24 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
       setSubmitError(err instanceof Error && err.message.startsWith('429') ? t('rateLimited') : t('submitError'))
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  // Start a new round with the same resolved difficulty and size.
+  async function startAgain() {
+    if (!variant || restarting) return
+    setRestarting(true)
+    setPlayAgainOpen(false)
+    try {
+      const { data } = await meApi.games.startVariant({
+        language: 'en',
+        difficulty: variant.difficulty,
+        size: variant.size,
+      })
+      stashVariant(data)
+      router.push(`/quran/games/fill-blank/play/${encodeURIComponent(data.variant_id)}`)
+    } catch {
+      setRestarting(false)
     }
   }
 
@@ -252,9 +310,11 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   const resultByIndex = result
     ? new Map(result.per_blank.map((r) => [r.index, r]))
     : null
+  const isEasy = variant.difficulty === 'easy'
 
   return (
     <div>
+      <style>{pulseKeyframes}</style>
       <div style={{ ...monoLabel, display: 'flex', gap: 12, alignItems: 'center' }}>
         <span>
           {t('referenceLabel')}: {variant.passage.label}
@@ -273,6 +333,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
               feedback,
               hintsRevealed,
               attemptsRemaining,
+              checking,
               resultByIndex,
               onChange: setGuess,
               onCheck: checkOne,
@@ -289,9 +350,6 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
           <button type="button" onClick={() => setDialogOpen(true)} style={primaryButton}>
             {t('viewResult')}
           </button>
-          <Link href="/quran/games/fill-blank" style={ghostButtonLink}>
-            {t('playAgain')}
-          </Link>
           <span style={monoLabel}>
             {t('correctOf', { correct: result.correct_count, total: result.total_count })}
           </span>
@@ -375,44 +433,96 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
                   <thead>
                     <tr>
                       <th style={resultTh}>#</th>
-                      <th style={resultTh}>{t('yourAnswer')}</th>
+                      <th style={resultTh}>{t('attemptsCol')}</th>
                       <th style={resultTh}>{t('acceptedAnswer')}</th>
+                      {!isEasy && <th style={resultTh}>{t('penaltyCol')}</th>}
                     </tr>
                   </thead>
                   <tbody>
-                    {result.per_blank.map((r) => (
-                      <tr
-                        key={r.index}
-                        style={{
-                          borderTop: '1px solid var(--ed-rule)',
-                          background: r.correct ? 'rgba(21,128,61,0.05)' : 'rgba(185,28,28,0.05)',
-                        }}
-                      >
-                        <td style={{ ...resultTd, color: 'var(--ed-fg-muted)', width: 32 }}>
-                          {r.index + 1}
-                        </td>
-                        <td
+                    {result.per_blank.map((r) => {
+                      const wrongs = wrongAttempts[r.index] ?? []
+                      const wc = wrongs.length
+                      const penalty = !isEasy ? (wc * (wc + 1)) / 2 * 10 : 0
+                      return (
+                        <tr
+                          key={r.index}
                           style={{
-                            ...resultTd,
-                            color: r.correct ? '#15803d' : '#b91c1c',
-                            textDecoration: r.correct ? 'none' : 'line-through',
+                            borderTop: '1px solid var(--ed-rule)',
+                            background: r.correct ? 'rgba(21,128,61,0.05)' : 'rgba(185,28,28,0.05)',
                           }}
                         >
-                          {(guesses[r.index] ?? '').trim() || '—'}
-                        </td>
-                        <td style={{ ...resultTd, color: '#15803d', fontWeight: 600 }}>
-                          {r.accepted_answer ?? ''}
-                        </td>
-                      </tr>
-                    ))}
+                          <td style={{ ...resultTd, color: 'var(--ed-fg-muted)', width: 32 }}>
+                            {r.index + 1}
+                          </td>
+                          <td style={resultTd}>
+                            <span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
+                              {wrongs.map((w, i) => (
+                                <span
+                                  key={i}
+                                  style={{
+                                    color: '#b91c1c',
+                                    textDecoration: 'line-through',
+                                    textDecorationColor: '#b91c1c',
+                                  }}
+                                >
+                                  {w}
+                                </span>
+                              ))}
+                              {r.correct && (
+                                <span style={{ color: '#15803d', fontWeight: 600 }}>
+                                  {(guesses[r.index] ?? '').trim() || r.accepted_answer}
+                                </span>
+                              )}
+                              {!r.correct && wrongs.length === 0 && (
+                                <span style={{ color: 'var(--ed-fg-muted)' }}>—</span>
+                              )}
+                            </span>
+                          </td>
+                          <td style={{ ...resultTd, color: '#15803d', fontWeight: 600 }}>
+                            {r.accepted_answer ?? ''}
+                          </td>
+                          {!isEasy && (
+                            <td style={{ ...resultTd, color: penalty > 0 ? '#b91c1c' : 'var(--ed-fg-muted)' }}>
+                              {penalty > 0 ? `−${penalty}` : '—'}
+                            </td>
+                          )}
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
-              <Link href="/quran/games/fill-blank" style={primaryLink}>
-                {t('playAgain')}
-              </Link>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4, alignItems: 'center' }}>
+              <div style={{ position: 'relative', display: 'inline-flex' }}>
+                <button
+                  type="button"
+                  onClick={startAgain}
+                  disabled={restarting}
+                  style={splitButtonMain}
+                >
+                  {restarting ? t('starting') : t('playAgain')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPlayAgainOpen((o) => !o)}
+                  aria-label={t('playAgainDropdown')}
+                  style={splitButtonArrow}
+                >
+                  ▾
+                </button>
+                {playAgainOpen && (
+                  <div style={splitButtonDropdown}>
+                    <Link
+                      href="/quran/games/fill-blank"
+                      style={splitButtonDropdownItem}
+                      onClick={() => setPlayAgainOpen(false)}
+                    >
+                      {t('playAgainChange')}
+                    </Link>
+                  </div>
+                )}
+              </div>
               <Link href="/quran/games/leaderboard" style={ghostLink}>
                 {t('leaderboardLink')}
               </Link>
@@ -436,6 +546,7 @@ interface RenderContext {
   feedback: Record<number, BlankFeedback>
   hintsRevealed: Record<number, number>
   attemptsRemaining: Record<number, number>
+  checking: Record<number, boolean>
   resultByIndex: Map<number, GamePerBlankResult> | null
   onChange: (index: number, value: string) => void
   onCheck: (index: number) => void
@@ -473,6 +584,7 @@ function renderVerse(ctx: RenderContext): React.ReactNode[] {
           feedback={ctx.feedback[index]}
           revealed={ctx.hintsRevealed[index] ?? 0}
           attemptsRemaining={ctx.attemptsRemaining[index]}
+          checking={ctx.checking[index] ?? false}
           onChange={(value) => ctx.onChange(index, value)}
           onCheck={() => ctx.onCheck(index)}
           onEnter={() => ctx.onEnter(index)}
@@ -522,6 +634,7 @@ function BlankInput({
   feedback,
   revealed,
   attemptsRemaining,
+  checking,
   onChange,
   onCheck,
   onEnter,
@@ -534,6 +647,7 @@ function BlankInput({
   feedback: BlankFeedback | undefined
   revealed: number
   attemptsRemaining: number | undefined
+  checking: boolean
   onChange: (value: string) => void
   onCheck: () => void
   onEnter: () => void
@@ -550,11 +664,12 @@ function BlankInput({
         ? wrongStyle
         : null
 
-  // Health bars: shown above the input for non-easy difficulties (when
-  // attemptsRemaining is defined). Each bar represents one attempt slot.
   const healthBars =
     attemptsRemaining !== undefined ? (
-      <span style={healthBarRow}>
+      <span
+        className={checking ? 'blank-checking-bars' : undefined}
+        style={healthBarRow}
+      >
         {Array.from({ length: MAX_BLANK_ATTEMPTS }, (_, i) => (
           <span
             key={i}
@@ -761,27 +876,6 @@ const ghostButton: React.CSSProperties = {
   cursor: 'pointer',
 }
 
-const ghostButtonLink: React.CSSProperties = {
-  padding: '12px 22px',
-  borderRadius: 2,
-  border: '1px solid var(--ed-rule)',
-  background: 'var(--ed-surface)',
-  color: 'var(--ed-fg)',
-  fontSize: 14,
-  textDecoration: 'none',
-}
-
-const primaryLink: React.CSSProperties = {
-  padding: '10px 22px',
-  borderRadius: 2,
-  border: '1px solid var(--ed-fg)',
-  background: 'var(--ed-fg)',
-  color: 'var(--ed-bg)',
-  fontSize: 14,
-  fontWeight: 500,
-  textDecoration: 'none',
-}
-
 const ghostLink: React.CSSProperties = {
   padding: '10px 22px',
   borderRadius: 2,
@@ -887,4 +981,50 @@ const resultTd: React.CSSProperties = {
   padding: '8px 8px',
   fontFamily: 'var(--font-cormorant), Georgia, serif',
   fontSize: 15,
+}
+
+const splitButtonMain: React.CSSProperties = {
+  padding: '10px 22px',
+  borderRadius: '2px 0 0 2px',
+  border: '1px solid var(--ed-fg)',
+  borderRight: 'none',
+  background: 'var(--ed-fg)',
+  color: 'var(--ed-bg)',
+  fontSize: 14,
+  fontWeight: 500,
+  cursor: 'pointer',
+}
+
+const splitButtonArrow: React.CSSProperties = {
+  padding: '10px 10px',
+  borderRadius: '0 2px 2px 0',
+  border: '1px solid var(--ed-fg)',
+  borderLeft: '1px solid rgba(128,128,128,0.3)',
+  background: 'var(--ed-fg)',
+  color: 'var(--ed-bg)',
+  cursor: 'pointer',
+  fontSize: 12,
+  lineHeight: 1,
+}
+
+const splitButtonDropdown: React.CSSProperties = {
+  position: 'absolute',
+  top: '100%',
+  left: 0,
+  marginTop: 4,
+  background: 'var(--ed-surface)',
+  border: '1px solid var(--ed-rule)',
+  borderRadius: 2,
+  minWidth: '100%',
+  zIndex: 10,
+  boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+}
+
+const splitButtonDropdownItem: React.CSSProperties = {
+  display: 'block',
+  padding: '10px 16px',
+  fontSize: 14,
+  color: 'var(--ed-fg)',
+  textDecoration: 'none',
+  whiteSpace: 'nowrap',
 }
