@@ -338,6 +338,46 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
                 </span>
               </div>
             </div>
+            {result.per_blank.length > 0 && (
+              <div style={{ overflowX: 'auto', marginTop: 8 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
+                    <tr>
+                      <th style={resultTh}>#</th>
+                      <th style={resultTh}>{t('yourAnswer')}</th>
+                      <th style={resultTh}>{t('acceptedAnswer')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {result.per_blank.map((r) => (
+                      <tr
+                        key={r.index}
+                        style={{
+                          borderTop: '1px solid var(--ed-rule)',
+                          background: r.correct ? 'rgba(21,128,61,0.05)' : 'rgba(185,28,28,0.05)',
+                        }}
+                      >
+                        <td style={{ ...resultTd, color: 'var(--ed-fg-muted)', width: 32 }}>
+                          {r.index + 1}
+                        </td>
+                        <td
+                          style={{
+                            ...resultTd,
+                            color: r.correct ? '#15803d' : '#b91c1c',
+                            textDecoration: r.correct ? 'none' : 'line-through',
+                          }}
+                        >
+                          {(guesses[r.index] ?? '').trim() || '—'}
+                        </td>
+                        <td style={{ ...resultTd, color: '#15803d', fontWeight: 600 }}>
+                          {r.accepted_answer ?? ''}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4 }}>
               <Link href="/quran/games/fill-blank" style={primaryLink}>
                 {t('playAgain')}
@@ -737,4 +777,21 @@ const quitConfirmNo: React.CSSProperties = {
   color: 'var(--ed-fg-muted)',
   fontSize: 13,
   cursor: 'pointer',
+}
+
+const resultTh: React.CSSProperties = {
+  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+  fontSize: 10,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: 'var(--ed-fg-muted)',
+  padding: '4px 8px 8px',
+  fontWeight: 400,
+  textAlign: 'left',
+}
+
+const resultTd: React.CSSProperties = {
+  padding: '8px 8px',
+  fontFamily: 'var(--font-cormorant), Georgia, serif',
+  fontSize: 15,
 }
