@@ -12,6 +12,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { ThemedSelect } from '@/components/ui/themed-select'
 import {
   meApi,
@@ -538,12 +544,30 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
               )
             })()}
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4, alignItems: 'center' }}>
-              <button type="button" onClick={startAgain} disabled={restarting} style={primaryLink}>
-                {restarting ? t('starting') : t('playAgain')}
-              </button>
-              <Link href="/quran/games/fill-blank" style={ghostLink}>
-                {t('playAgainChange')}
-              </Link>
+              <div style={{ display: 'inline-flex' }}>
+                <button
+                  type="button"
+                  onClick={startAgain}
+                  disabled={restarting}
+                  style={splitButtonMain}
+                >
+                  {restarting ? t('starting') : t('playAgain')}
+                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button type="button" style={splitButtonArrow} aria-label={t('playAgainOptions')}>
+                      ▾
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href="/quran/games/fill-blank" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        {t('playAgainChange')}
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               <Link href="/quran/games/leaderboard" style={ghostLink}>
                 {t('leaderboardLink')}
               </Link>
@@ -1013,14 +1037,26 @@ const resultTd: React.CSSProperties = {
   fontSize: 15,
 }
 
-const primaryLink: React.CSSProperties = {
-  padding: '10px 22px',
-  borderRadius: 2,
+const splitButtonMain: React.CSSProperties = {
+  padding: '10px 20px',
+  borderRadius: '2px 0 0 2px',
   border: '1px solid var(--ed-fg)',
+  borderRight: 'none',
   background: 'var(--ed-fg)',
   color: 'var(--ed-bg)',
   fontSize: 14,
   fontWeight: 500,
   cursor: 'pointer',
-  textDecoration: 'none',
+}
+
+const splitButtonArrow: React.CSSProperties = {
+  padding: '10px 9px',
+  borderRadius: '0 2px 2px 0',
+  border: '1px solid var(--ed-fg)',
+  borderLeft: '1px solid rgba(128,128,128,0.3)',
+  background: 'var(--ed-fg)',
+  color: 'var(--ed-bg)',
+  cursor: 'pointer',
+  fontSize: 11,
+  lineHeight: 1,
 }
