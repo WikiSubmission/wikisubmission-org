@@ -62,13 +62,13 @@ export async function seedFrequencyAction(
   }
 }
 
-export async function loadLemmasAction(): Promise<
-  ActionResult<{ language: string; lemma_rows: number }>
-> {
+export async function loadLemmasAction(
+  language: string,
+): Promise<ActionResult<{ language: string; lemma_rows: number }>> {
   const ctx = await editorClient()
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
   try {
-    const data = await ctx.client.loadLemmas()
+    const data = await ctx.client.loadLemmas(language)
     return { ok: true, data }
   } catch (err) {
     return { ok: false, error: describe(err) }

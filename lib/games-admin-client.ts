@@ -147,8 +147,11 @@ export function gamesAdminClient(token: string) {
         query: { language },
       }),
 
-    loadLemmas: (): Promise<LoadLemmasResult> =>
-      call<LoadLemmasResult>(token, '/maintenance/load-lemmas', { method: 'POST' }),
+    loadLemmas: (language: string): Promise<LoadLemmasResult> =>
+      call<LoadLemmasResult>(token, '/maintenance/load-lemmas', {
+        method: 'POST',
+        query: { language },
+      }),
 
     curate: (chapter: number, afterVerse: number): Promise<CurateResult> =>
       call<CurateResult>(token, '/curate', {

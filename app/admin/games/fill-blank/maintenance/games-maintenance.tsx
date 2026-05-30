@@ -11,22 +11,24 @@ import {
 import type { ActionResult } from './actions'
 import type { LanguageStat } from '@/lib/games-admin-client'
 
+// hasFixture mirrors which db/seeds/games_lemma_<code>.sql files are shipped.
+// Requires a dedicated spaCy model — ar/ac/fa/ur/tr/id/tl/bn/ta have none yet.
 const ALL_LANGUAGES: { code: string; name: string; hasFixture: boolean }[] = [
   { code: 'en', name: 'English',        hasFixture: true  },
   { code: 'ar', name: 'Arabic',         hasFixture: false },
   { code: 'ac', name: 'Arabic Clean',   hasFixture: false },
-  { code: 'fr', name: 'French',         hasFixture: false },
-  { code: 'de', name: 'German',         hasFixture: false },
-  { code: 'es', name: 'Spanish',        hasFixture: false },
+  { code: 'fr', name: 'French',         hasFixture: true  },
+  { code: 'de', name: 'German',         hasFixture: true  },
+  { code: 'es', name: 'Spanish',        hasFixture: true  },
   { code: 'fa', name: 'Persian',        hasFixture: false },
   { code: 'ur', name: 'Urdu',           hasFixture: false },
   { code: 'tr', name: 'Turkish',        hasFixture: false },
   { code: 'id', name: 'Bahasa',         hasFixture: false },
   { code: 'tl', name: 'Transliterated', hasFixture: false },
-  { code: 'ru', name: 'Russian',        hasFixture: false },
+  { code: 'ru', name: 'Russian',        hasFixture: true  },
   { code: 'bn', name: 'Bengali',        hasFixture: false },
   { code: 'ta', name: 'Tamil',          hasFixture: false },
-  { code: 'sv', name: 'Swedish',        hasFixture: false },
+  { code: 'sv', name: 'Swedish',        hasFixture: true  },
 ]
 
 export function GamesMaintenance() {
@@ -39,8 +41,8 @@ export function GamesMaintenance() {
 
   // Per-language seed state: null = idle, 'seeding' = in flight, string = result message
   const [seedState, setSeedState] = useState<Map<string, string | 'seeding'>>(new Map())
-  const [lemmaMsg, setLemmaMsg] = useState<string | null>(null)
-  const [lemmaPending, setLemmaPending] = useState(false)
+  // Per-language lemma load state: null = idle, 'loading' = in flight, string = result
+  const [lemmaState, setLemmaState] = useState<Map<string, string | 'loading'>>(new Map())
 
   useEffect(() => {
     frequencyStatsAction().then((res) => {
@@ -70,21 +72,19 @@ export function GamesMaintenance() {
     }
   }
 
-  async function runLoadLemmas() {
-    setLemmaPending(true)
-    setLemmaMsg(null)
-    const res = await loadLemmasAction()
+  async function runLoadLemmas(code: string) {
+    setLemmaState((prev) => new Map(prev).set(code, 'loading'))
+    const res = await loadLemmasAction(code)
     if (res.ok) {
       if (res.data.lemma_rows > 0) {
-        setLemmaStats((prev) => new Map(prev).set('en', res.data.lemma_rows))
-        setLemmaMsg(`Loaded ${res.data.lemma_rows.toLocaleString()} rows.`)
+        setLemmaStats((prev) => new Map(prev).set(code, res.data.lemma_rows))
+        setLemmaState((prev) => new Map(prev).set(code, `${res.data.lemma_rows.toLocaleString()} rows loaded`))
       } else {
-        setLemmaMsg('No fixture shipped with this deploy. Hard tier falls back to exact match.')
+        setLemmaState((prev) => new Map(prev).set(code, 'No fixture in this deploy'))
       }
     } else {
-      setLemmaMsg(res.error)
+      setLemmaState((prev) => new Map(prev).set(code, res.error ?? 'failed'))
     }
-    setLemmaPending(false)
   }
 
   return (
@@ -201,15 +201,24 @@ export function GamesMaintenance() {
                   <td style={{ ...td, textAlign: 'right' }}>
                     {lang.hasFixture ? (
                       <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'flex-end' }}>
-                        {lemmaMsg && <span style={resultMsg}>{lemmaMsg}</span>}
-                        <button
-                          type="button"
-                          onClick={runLoadLemmas}
-                          disabled={lemmaPending}
-                          style={actionButton}
-                        >
-                          {lemmaPending ? 'Loading…' : rows > 0 ? 'Reload' : 'Load'}
-                        </button>
+                        {(() => {
+                          const state = lemmaState.get(lang.code)
+                          const loading = state === 'loading'
+                          const msg = state && state !== 'loading' ? state : null
+                          return (
+                            <>
+                              {msg && <span style={resultMsg}>{msg}</span>}
+                              <button
+                                type="button"
+                                onClick={() => runLoadLemmas(lang.code)}
+                                disabled={loading}
+                                style={actionButton}
+                              >
+                                {loading ? 'Loading…' : rows > 0 ? 'Reload' : 'Load'}
+                              </button>
+                            </>
+                          )
+                        })()}
                       </div>
                     ) : (
                       <span style={dimText}>No fixture</span>
