@@ -69,12 +69,21 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   // the accepted answer revealed in red).
   const [result, setResult] = useState<GameSubmitResult | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
-  // Split "Play Again" dropdown open state.
-  const [playAgainOpen, setPlayAgainOpen] = useState(false)
   const [restarting, setRestarting] = useState(false)
   const startedAt = useRef<number>(0)
   // DOM refs for each blank, keyed by index, so Enter can advance focus.
   const inputRefs = useRef<Map<number, HTMLInputElement | HTMLButtonElement>>(new Map())
+  // Mirrors feedback/attemptsRemaining/guesses so that advanceFrom, invoked
+  // after an awaited checkOne, can read post-check values before React
+  // re-renders and refreshes the closed-over state variables.
+  const stateRef = useRef<{
+    feedback: Record<number, 'correct' | 'wrong'>
+    attemptsRemaining: Record<number, number>
+    guesses: Record<number, string>
+  }>({ feedback: {}, attemptsRemaining: {}, guesses: {} })
+  // Keep stateRef in sync on every render so stable callbacks always have
+  // the latest values without stale closure issues.
+  stateRef.current = { feedback, attemptsRemaining, guesses }
 
   useEffect(() => {
     let active = true
@@ -166,6 +175,15 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
         index,
         guess: value,
       })
+      // Update stateRef synchronously so advanceFrom (awaiting this promise)
+      // can read the fresh result before React re-renders.
+      stateRef.current = {
+        ...stateRef.current,
+        feedback: { ...stateRef.current.feedback, [index]: res.correct ? 'correct' : 'wrong' },
+        ...((!res.correct && res.attempts_remaining !== undefined) ? {
+          attemptsRemaining: { ...stateRef.current.attemptsRemaining, [index]: res.attempts_remaining },
+        } : {}),
+      }
       setFeedback((prev) => ({ ...prev, [index]: res.correct ? 'correct' : 'wrong' }))
       if (!res.correct) {
         setWrongAttempts((prev) => ({ ...prev, [index]: [...(prev[index] ?? []), value] }))
@@ -189,28 +207,44 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     else inputRefs.current.delete(index)
   }, [])
 
-  // Enter advances to the next blank. When on the last blank, if any blank is
-  // still unfilled and unlocked, focus the first such blank rather than
-  // submitting — prevents accidental submission with gaps.
+  // Returns true when a blank is finished: already correct or all attempts gone.
+  // Uses stateRef so it's always fresh even when called after an awaited check.
+  function isDone(bi: number): boolean {
+    const { feedback: fb, attemptsRemaining: ar } = stateRef.current
+    return fb[bi] === 'correct' || ar[bi] === 0
+  }
+
+  // Enter advances to the next blank that still needs work. When on the last
+  // active blank, guards against submitting if the current answer is wrong but
+  // attempts remain. Also prevents submitting with unfilled gaps.
   function advanceFrom(index: number) {
     if (!variant) return
     const order = variant.blanks.map((b) => b.index)
     const pos = order.indexOf(index)
+    // Move to the next non-done blank in text order.
     for (let i = pos + 1; i < order.length; i += 1) {
-      const el = inputRefs.current.get(order[i])
-      if (el) {
-        el.focus()
-        return
+      const bi = order[i]
+      if (!isDone(bi)) {
+        const el = inputRefs.current.get(bi)
+        if (el) {
+          el.focus()
+          return
+        }
       }
     }
-    // No later blank exists. Check if any blank is still unfilled and unlocked.
-    const firstEmpty = order.find(
-      (bi) =>
-        (guesses[bi] ?? '').trim() === '' &&
-        attemptsRemaining[bi] !== 0,
+    // No later active blank. Read fresh state from ref (updated by awaited
+    // checkOne when this is the last blank and Enter triggered the chain).
+    const { feedback: fb, attemptsRemaining: ar, guesses: g } = stateRef.current
+    // Current blank is wrong with attempts remaining — stay here.
+    if (fb[index] === 'wrong' && ar[index] !== undefined && ar[index] > 0) {
+      return
+    }
+    // Find first blank anywhere that is unfilled and not done.
+    const firstNeedsFill = order.find(
+      (bi) => !isDone(bi) && (g[bi] ?? '').trim() === '',
     )
-    if (firstEmpty !== undefined) {
-      const el = inputRefs.current.get(firstEmpty)
+    if (firstNeedsFill !== undefined) {
+      const el = inputRefs.current.get(firstNeedsFill)
       if (el) {
         el.focus()
         return
@@ -248,7 +282,6 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   async function startAgain() {
     if (!variant || restarting) return
     setRestarting(true)
-    setPlayAgainOpen(false)
     try {
       const { data } = await meApi.games.startVariant({
         language: 'en',
@@ -427,102 +460,89 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
                 )}
               </div>
             </div>
-            {result.per_blank.length > 0 && (
-              <div style={{ overflowX: 'auto', marginTop: 8 }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead>
-                    <tr>
-                      <th style={resultTh}>#</th>
-                      <th style={resultTh}>{t('attemptsCol')}</th>
-                      <th style={resultTh}>{t('acceptedAnswer')}</th>
-                      {!isEasy && <th style={resultTh}>{t('penaltyCol')}</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {result.per_blank.map((r) => {
-                      const wrongs = wrongAttempts[r.index] ?? []
-                      const wc = wrongs.length
-                      const penalty = !isEasy ? (wc * (wc + 1)) / 2 * 10 : 0
-                      return (
-                        <tr
-                          key={r.index}
-                          style={{
-                            borderTop: '1px solid var(--ed-rule)',
-                            background: r.correct ? 'rgba(21,128,61,0.05)' : 'rgba(185,28,28,0.05)',
-                          }}
-                        >
-                          <td style={{ ...resultTd, color: 'var(--ed-fg-muted)', width: 32 }}>
-                            {r.index + 1}
-                          </td>
-                          <td style={resultTd}>
-                            <span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
-                              {wrongs.map((w, i) => (
-                                <span
-                                  key={i}
-                                  style={{
-                                    color: '#b91c1c',
-                                    textDecoration: 'line-through',
-                                    textDecorationColor: '#b91c1c',
-                                  }}
-                                >
-                                  {w}
-                                </span>
-                              ))}
-                              {r.correct && (
-                                <span style={{ color: '#15803d', fontWeight: 600 }}>
-                                  {(guesses[r.index] ?? '').trim() || r.accepted_answer}
-                                </span>
-                              )}
-                              {!r.correct && wrongs.length === 0 && (
-                                <span style={{ color: 'var(--ed-fg-muted)' }}>—</span>
-                              )}
-                            </span>
-                          </td>
-                          <td style={{ ...resultTd, color: '#15803d', fontWeight: 600 }}>
-                            {r.accepted_answer ?? ''}
-                          </td>
-                          {!isEasy && (
-                            <td style={{ ...resultTd, color: penalty > 0 ? '#b91c1c' : 'var(--ed-fg-muted)' }}>
-                              {penalty > 0 ? `−${penalty}` : '—'}
+            {result.per_blank.length > 0 && (() => {
+              // Base pts per correct blank = total earned before multiplier effects
+              // divided by correct count. Derived from: score = base*mult*band - hints - wrongs
+              const basePerBlank = result.correct_count > 0
+                ? Math.round((result.score + result.hint_penalty + result.wrong_penalty) / result.correct_count)
+                : 0
+              return (
+                <div style={{ overflowX: 'auto', marginTop: 8 }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <thead>
+                      <tr>
+                        <th style={resultTh}>#</th>
+                        <th style={resultTh}>{t('attemptsCol')}</th>
+                        <th style={resultTh}>{t('acceptedAnswer')}</th>
+                        <th style={resultTh}>{t('scoreCol')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.per_blank.map((r) => {
+                        const wrongs = wrongAttempts[r.index] ?? []
+                        const wc = wrongs.length
+                        const penalty = !isEasy ? (wc * (wc + 1)) / 2 * 10 : 0
+                        const net = r.correct ? basePerBlank - penalty : -penalty
+                        return (
+                          <tr
+                            key={r.index}
+                            style={{
+                              borderTop: '1px solid var(--ed-rule)',
+                              background: r.correct ? 'rgba(21,128,61,0.05)' : 'rgba(185,28,28,0.05)',
+                            }}
+                          >
+                            <td style={{ ...resultTd, color: 'var(--ed-fg-muted)', width: 32 }}>
+                              {r.index + 1}
                             </td>
-                          )}
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                            <td style={resultTd}>
+                              <span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
+                                {wrongs.map((w, i) => (
+                                  <span
+                                    key={i}
+                                    style={{
+                                      color: '#b91c1c',
+                                      textDecoration: 'line-through',
+                                      textDecorationColor: '#b91c1c',
+                                    }}
+                                  >
+                                    {w}
+                                  </span>
+                                ))}
+                                {r.correct && (
+                                  <span style={{ color: '#15803d', fontWeight: 600 }}>
+                                    {(guesses[r.index] ?? '').trim() || r.accepted_answer}
+                                  </span>
+                                )}
+                                {!r.correct && wrongs.length === 0 && (
+                                  <span style={{ color: 'var(--ed-fg-muted)' }}>—</span>
+                                )}
+                              </span>
+                            </td>
+                            <td style={{ ...resultTd, color: '#15803d', fontWeight: 600 }}>
+                              {r.accepted_answer ?? ''}
+                            </td>
+                            <td style={{
+                              ...resultTd,
+                              color: net > 0 ? '#15803d' : net < 0 ? '#b91c1c' : 'var(--ed-fg-muted)',
+                              fontWeight: net !== 0 ? 600 : 400,
+                            }}>
+                              {net > 0 ? `+${net}` : net < 0 ? `−${Math.abs(net)}` : '—'}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )
+            })()}
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4, alignItems: 'center' }}>
-              <div style={{ position: 'relative', display: 'inline-flex' }}>
-                <button
-                  type="button"
-                  onClick={startAgain}
-                  disabled={restarting}
-                  style={splitButtonMain}
-                >
-                  {restarting ? t('starting') : t('playAgain')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPlayAgainOpen((o) => !o)}
-                  aria-label={t('playAgainDropdown')}
-                  style={splitButtonArrow}
-                >
-                  ▾
-                </button>
-                {playAgainOpen && (
-                  <div style={splitButtonDropdown}>
-                    <Link
-                      href="/quran/games/fill-blank"
-                      style={splitButtonDropdownItem}
-                      onClick={() => setPlayAgainOpen(false)}
-                    >
-                      {t('playAgainChange')}
-                    </Link>
-                  </div>
-                )}
-              </div>
+              <button type="button" onClick={startAgain} disabled={restarting} style={primaryLink}>
+                {restarting ? t('starting') : t('playAgain')}
+              </button>
+              <Link href="/quran/games/fill-blank" style={ghostLink}>
+                {t('playAgainChange')}
+              </Link>
               <Link href="/quran/games/leaderboard" style={ghostLink}>
                 {t('leaderboardLink')}
               </Link>
@@ -549,7 +569,7 @@ interface RenderContext {
   checking: Record<number, boolean>
   resultByIndex: Map<number, GamePerBlankResult> | null
   onChange: (index: number, value: string) => void
-  onCheck: (index: number) => void
+  onCheck: (index: number) => Promise<void>
   onEnter: (index: number) => void
   onReveal: (index: number, max: number) => void
   registerRef: (index: number, el: HTMLInputElement | HTMLButtonElement | null) => void
@@ -649,16 +669,19 @@ function BlankInput({
   attemptsRemaining: number | undefined
   checking: boolean
   onChange: (value: string) => void
-  onCheck: () => void
+  onCheck: () => Promise<void>
   onEnter: () => void
   onReveal: () => void
   registerRef: (el: HTMLInputElement | HTMLButtonElement | null) => void
 }) {
   const t = useTranslations('games')
   const locked = attemptsRemaining === 0
+  const correct = feedback === 'correct'
+  // Disable input when locked (no attempts left) or already correct.
+  const disabled = locked || correct
   const feedbackStyle = locked
     ? lockedStyle
-    : feedback === 'correct'
+    : correct
       ? correctStyle
       : feedback === 'wrong'
         ? wrongStyle
@@ -718,25 +741,25 @@ function BlankInput({
           type="text"
           autoComplete="off"
           spellCheck={false}
-          disabled={locked}
+          disabled={disabled}
           aria-label={locked ? t('blankLocked') : `${t('blankPlaceholder')} ${index + 1}`}
           placeholder={locked ? t('blankLocked') : t('blankPlaceholder')}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          onBlur={onCheck}
+          onBlur={() => void onCheck()}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault()
-              onCheck()
-              onEnter()
+              // Await the check so advanceFrom reads fresh state from stateRef.
+              void onCheck().then(() => onEnter())
             }
           }}
           size={Math.max(8, value.length + 1)}
-          style={{ ...blankBase, ...feedbackStyle, ...(locked ? { cursor: 'not-allowed', opacity: 0.5 } : {}) }}
+          style={{ ...blankBase, ...feedbackStyle, ...(disabled ? { cursor: 'not-allowed', opacity: correct ? 1 : 0.5 } : {}) }}
         />
         {healthBars}
       </span>
-      {hint && !locked && (
+      {hint && !disabled && (
         <>
           {revealed > 0 && (
             <span style={hintCaption}>
@@ -745,7 +768,13 @@ function BlankInput({
             </span>
           )}
           {revealed < MAX_HINTS_PER_BLANK && (
-            <button type="button" onClick={onReveal} style={hintButton} title={t('hint')}>
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={onReveal}
+              style={hintButton}
+              title={t('hint')}
+            >
               {t('hint')}
             </button>
           )}
@@ -983,48 +1012,14 @@ const resultTd: React.CSSProperties = {
   fontSize: 15,
 }
 
-const splitButtonMain: React.CSSProperties = {
+const primaryLink: React.CSSProperties = {
   padding: '10px 22px',
-  borderRadius: '2px 0 0 2px',
+  borderRadius: 2,
   border: '1px solid var(--ed-fg)',
-  borderRight: 'none',
   background: 'var(--ed-fg)',
   color: 'var(--ed-bg)',
   fontSize: 14,
   fontWeight: 500,
   cursor: 'pointer',
-}
-
-const splitButtonArrow: React.CSSProperties = {
-  padding: '10px 10px',
-  borderRadius: '0 2px 2px 0',
-  border: '1px solid var(--ed-fg)',
-  borderLeft: '1px solid rgba(128,128,128,0.3)',
-  background: 'var(--ed-fg)',
-  color: 'var(--ed-bg)',
-  cursor: 'pointer',
-  fontSize: 12,
-  lineHeight: 1,
-}
-
-const splitButtonDropdown: React.CSSProperties = {
-  position: 'absolute',
-  top: '100%',
-  left: 0,
-  marginTop: 4,
-  background: 'var(--ed-surface)',
-  border: '1px solid var(--ed-rule)',
-  borderRadius: 2,
-  minWidth: '100%',
-  zIndex: 10,
-  boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-}
-
-const splitButtonDropdownItem: React.CSSProperties = {
-  display: 'block',
-  padding: '10px 16px',
-  fontSize: 14,
-  color: 'var(--ed-fg)',
   textDecoration: 'none',
-  whiteSpace: 'nowrap',
 }
