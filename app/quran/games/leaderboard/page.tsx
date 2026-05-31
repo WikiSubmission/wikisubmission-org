@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { GamesLeaderboard } from './games-leaderboard'
 
 export const metadata = {
@@ -8,6 +8,8 @@ export const metadata = {
 
 export default async function GamesLeaderboardPage() {
   const t = await getTranslations('games')
+  const locale = await getLocale()
+  const isRtl = ['ar', 'ac', 'fa', 'ur'].includes(locale)
 
   return (
     <section
@@ -32,7 +34,7 @@ export default async function GamesLeaderboardPage() {
           textDecoration: 'none',
         }}
       >
-        ← {t('backToGames')}
+        {isRtl ? '→' : '←'} {t('backToGames')}
       </Link>
       <h1
         style={{

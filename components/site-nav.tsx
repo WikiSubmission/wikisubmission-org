@@ -31,30 +31,32 @@ type GroupLink = {
 }
 type NavItem = FlatLink | GroupLink
 
-const NAV_ITEMS: NavItem[] = [
-  {
-    kind: 'group',
-    label: 'scripture',
-    href: '/quran',
-    children: [
-      {
-        label: 'quran',
-        sub: 'Final Testament',
-        href: '/quran',
-        children: [
-          { label: 'wordLab', sub: 'Roots & concordance', href: '/quran/words' },
-          { label: 'games', sub: 'Memorization games', href: '/quran/games', requiresAuth: true },
-        ],
-      },
-      { label: 'bible', sub: 'Old & New Testaments', href: '/bible' },
-    ],
-  },
-  { kind: 'link', label: 'miracle', href: '/miracle' },
-  { kind: 'link', label: 'practices', href: '/practices' },
-  { kind: 'link', label: 'archive', href: '/archive' },
-  { kind: 'link', label: 'music', href: '/music' },
-  { kind: 'link', label: 'blog', href: '/blog' },
-]
+function getNavItems(t: (k: string) => string): NavItem[] {
+  return [
+    {
+      kind: 'group',
+      label: 'scripture',
+      href: '/quran',
+      children: [
+        {
+          label: 'quran',
+          sub: t('quranSub'),
+          href: '/quran',
+          children: [
+            { label: 'wordLab', sub: t('wordLabSub'), href: '/quran/words' },
+            { label: 'games', sub: t('gamesSub'), href: '/quran/games', requiresAuth: true },
+          ],
+        },
+        { label: 'bible', sub: t('bibleSub'), href: '/bible' },
+      ],
+    },
+    { kind: 'link', label: 'miracle', href: '/miracle' },
+    { kind: 'link', label: 'practices', href: '/practices' },
+    { kind: 'link', label: 'archive', href: '/archive' },
+    { kind: 'link', label: 'music', href: '/music' },
+    { kind: 'link', label: 'blog', href: '/blog' },
+  ]
+}
 
 const F = {
   display: 'var(--font-cormorant), Georgia, serif',
@@ -376,7 +378,7 @@ export function SiteNav() {
   const { toggle: toggleAsk, state: askState } = useChatPanel()
   const { status } = useSession()
   const isAuthed = status === 'authenticated'
-  const navItems = filterNavItems(NAV_ITEMS, isAuthed)
+  const navItems = filterNavItems(getNavItems(t), isAuthed)
   const close = () => setMobileOpen(false)
 
   return (

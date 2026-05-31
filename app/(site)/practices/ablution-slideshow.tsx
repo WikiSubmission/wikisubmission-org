@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import gsap from 'gsap'
 import {
@@ -43,21 +44,6 @@ declare global {
   }
 }
 
-
-const STEPS = [
-  { title: 'The Intention', description: 'Before beginning, silently state your intention to perform ablution in preparation for the Contact Prayer.', details: 'Pure intention (Niyyah) is the spiritual foundation of all worship in Submission.', icon: Heart, arabic: 'النِّيَّة' },
-  { title: 'Wash Face', description: 'The first physical step is to wash your face completely.', details: 'Ensure water reaches all parts of the face, from hairline to chin and ear to ear.', icon: Droplets, arabic: 'غَسْلُ الْوَجْه', image: '/images/ablution/step-face.png' },
-  { title: 'Wash Arms to Elbows', description: 'Wash your right arm up to and including the elbow, then repeat with the left arm.', details: 'The Quranic command specifies "your arms to the elbows" [5:6].', icon: Droplets, arabic: 'غَسْلُ الْيَدَيْن', image: '/images/ablution/step-arms.png' },
-  { title: 'Wipe the Head', description: 'Wipe your head with wet hands.', details: 'The head is to be "wiped" (Masah) with wet hands, not washed under running water.', icon: User, arabic: 'مَسْحُ الرَّأْس', image: '/images/ablution/step-head.png' },
-  { title: 'Wash Feet to Ankles', description: 'Wash your right foot up to the ankle, then repeat with the left foot.', details: 'This final step completes the physical purification required for the Contact Prayer.', icon: Droplets, arabic: 'غَسْلُ الرِّجْلَيْن', image: '/images/ablution/step-feet.png' },
-]
-
-
-const FOOTNOTES = [
-  { title: 'Major Ablution (Ghusl)', text: 'If you were unclean due to sexual orgasm, you shall bathe.', icon: Waves },
-  { title: 'Dry Ablution (Tayammum)', text: 'If you are ill, or traveling, or had any digestive excretion (urinary, fecal, or gas), or had (sexual) contact with the women, and you cannot find water, you shall observe the dry ablution (Tayammum) by touching clean dry soil, then rubbing your faces and hands.', icon: Wind },
-  { title: 'Purpose of Purification', text: 'GOD does not wish to make the religion difficult for you; He wishes to cleanse you and to perfect His blessing upon you, that you may be appreciative.', icon: Heart },
-]
 
 const VIDEO_CAPTIONS = [
   { start: 0.0, end: 3.7, text: "We find this commandment in Sura number 5, verse number 6." },
@@ -116,6 +102,22 @@ const VIDEO_CAPTIONS = [
 // ── COMPONENT ─────────────────────────────────────────────────────────
 
 export function AblutionSlideshow() {
+  const t = useTranslations('ablution')
+
+  const STEPS = [
+    { title: t('step1Title'), description: t('step1Desc'), details: t('step1Detail'), icon: Heart, arabic: 'النِّيَّة' },
+    { title: t('step2Title'), description: t('step2Desc'), details: t('step2Detail'), icon: Droplets, arabic: 'غَسْلُ الْوَجْه', image: '/images/ablution/step-face.png' },
+    { title: t('step3Title'), description: t('step3Desc'), details: t('step3Detail'), icon: Droplets, arabic: 'غَسْلُ الْيَدَيْن', image: '/images/ablution/step-arms.png' },
+    { title: t('step4Title'), description: t('step4Desc'), details: t('step4Detail'), icon: User, arabic: 'مَسْحُ الرَّأْس', image: '/images/ablution/step-head.png' },
+    { title: t('step5Title'), description: t('step5Desc'), details: t('step5Detail'), icon: Droplets, arabic: 'غَسْلُ الرِّجْلَيْن', image: '/images/ablution/step-feet.png' },
+  ]
+
+  const FOOTNOTES = [
+    { title: t('footnote1Title'), text: t('footnote1Text'), icon: Waves },
+    { title: t('footnote2Title'), text: t('footnote2Text'), icon: Wind },
+    { title: t('footnote3Title'), text: t('footnote3Text'), icon: Heart },
+  ]
+
   const [slide, setSlide] = useState(0)
   const [open, setOpen] = useState(false)
   const [renderModal, setRenderModal] = useState(false)
@@ -287,13 +289,13 @@ export function AblutionSlideshow() {
                 className="text-[11px] tracking-[0.2em] uppercase text-[var(--ed-accent)] font-bold"
                 style={{ fontFamily: F.glacial }}
               >
-                Purification Ritual
+                {t('sectionKicker')}
               </span>
-              <h2 
+              <h2
                 className="text-4xl md:text-6xl font-medium text-[var(--ed-fg)] leading-[1.1] tracking-tight"
                 style={{ fontFamily: F.serif }}
               >
-                The Ablution
+                {t('sectionTitle')}
               </h2>
             </div>
             <div className="flex items-center gap-6">
@@ -302,7 +304,7 @@ export function AblutionSlideshow() {
                   className="text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)]"
                   style={{ fontFamily: F.glacial }}
                 >
-                  Instruction
+                  {t('instructionLabel')}
                 </span>
                 <div className="flex items-center gap-3">
                   <span 
@@ -336,7 +338,7 @@ export function AblutionSlideshow() {
                   className="text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg)] font-bold"
                   style={{ fontFamily: F.glacial }}
                 >
-                  DECREE
+                  {t('scriptureDecree')}
                 </span>
                 <div className="h-3 w-px bg-[var(--ed-rule)]" />
                 <span 
@@ -378,7 +380,7 @@ export function AblutionSlideshow() {
                           className="text-[9px] uppercase tracking-[0.3em] text-[var(--ed-accent)] font-bold"
                           style={{ fontFamily: F.glacial }}
                         >
-                          Scriptural Detail
+                          {t('scriptureDetail')}
                         </div>
                         <p 
                           className="text-sm italic text-[var(--ed-fg-muted)] leading-relaxed text-center px-4"
@@ -437,7 +439,7 @@ export function AblutionSlideshow() {
                                className="text-[10px] uppercase tracking-[0.5em] text-[var(--ed-fg-muted)] font-bold"
                                style={{ fontFamily: F.glacial }}
                              >
-                               OR
+                               {t('orLabel')}
                              </span>
                             <div className="h-px w-8 bg-[var(--ed-rule)]" />
                           </div>
@@ -501,14 +503,14 @@ export function AblutionSlideshow() {
                                   className="text-[10px] uppercase tracking-[0.5em] text-[var(--ed-accent)] font-bold"
                                   style={{ fontFamily: F.glacial }}
                                 >
-                                  Visual Study
+                                  {t('visualStudy')}
                                 </div>
                                 <div className="h-px w-24 bg-[var(--ed-rule)] mx-auto" />
-                                <p 
+                                <p
                                   className="text-[10px] text-[var(--ed-fg-muted)] uppercase tracking-widest"
                                   style={{ fontFamily: F.glacial }}
                                 >
-                                  Awaiting Demonstration
+                                  {t('awaitingDemo')}
                                 </p>
                               </div>
                             </div>
@@ -529,7 +531,7 @@ export function AblutionSlideshow() {
                 className="text-[11px] uppercase tracking-[0.3em] font-bold"
                 style={{ fontFamily: F.glacial }}
               >
-                Watch Video Guide
+                {t('watchVideo')}
               </span>
             </button>
             <div className="flex flex-wrap justify-center gap-3">
@@ -560,20 +562,20 @@ export function AblutionSlideshow() {
               className="text-[10px] uppercase tracking-[0.4em] text-[var(--ed-accent)] font-bold"
               style={{ fontFamily: F.glacial }}
             >
-              Scriptural Compliance
+              {t('scripturalCompliance')}
             </span>
             <p 
               className="text-sm text-[var(--ed-fg-muted)] leading-relaxed italic opacity-80"
               style={{ fontFamily: F.serif }}
             >
-              &ldquo;O you who believe, when you observe the Contact Prayers (Salat), you shall: (1) wash your faces, (2) wash your arms to the elbows, (3) wipe your heads, and (4) wash your feet to the ankles. If you were unclean due to sexual orgasm, you shall bathe. If you are ill, or traveling, or had any digestive excretion (urinary, fecal, or gas), or had (sexual) contact with the women, and you cannot find water, you shall observe the dry ablution (Tayammum) by touching clean dry soil, then rubbing your faces and hands. GOD does not wish to make the religion difficult for you; He wishes to cleanse you and to perfect His blessing upon you, that you may be appreciative.&rdquo;
+              {t('verse56Full')}
             </p>
             <Link 
               href="/quran/5:6"
               className="group flex items-center gap-2 text-[10px] uppercase tracking-widest text-[var(--ed-fg)] hover:text-[var(--ed-accent)] transition-colors"
               style={{ fontFamily: F.glacial }}
             >
-              <span>Examine Verse 5:6</span>
+              <span>{t('examineVerse')}</span>
               <ChevronRight size={12} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
@@ -603,14 +605,14 @@ export function AblutionSlideshow() {
                       className="text-[10px] uppercase tracking-[0.3em] text-[var(--ed-fg)] font-bold"
                       style={{ fontFamily: F.glacial }}
                     >
-                      Ablution Guide
+                      {t('videoTitle')}
                     </span>
                   </div>
-                  <h3 
+                  <h3
                     className="text-2xl text-[var(--ed-fg)] italic"
                     style={{ fontFamily: F.serif }}
                   >
-                    Visual Demonstration
+                    {t('videoSubtitle')}
                   </h3>
                 </div>
                 <button onClick={closeModal} className="size-12 bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all border-none">
@@ -657,7 +659,7 @@ export function AblutionSlideshow() {
                       className="text-[9px] uppercase tracking-[0.2em] text-[var(--ed-accent)] font-bold shrink-0 hidden sm:block"
                       style={{ fontFamily: F.glacial }}
                     >
-                      Exhibition Mode
+                      {t('exhibitionMode')}
                     </div>
                   </div>
                 </div>
@@ -671,14 +673,14 @@ export function AblutionSlideshow() {
                           className="text-[10px] uppercase tracking-[0.4em] text-[var(--ed-fg)] font-bold"
                           style={{ fontFamily: F.glacial }}
                         >
-                          Transcription
+                          {t('transcription')}
                         </span>
                         <button
                           onClick={() => setShowTranscription(!showTranscription)}
                           className={`px-3 py-1 text-[9px] uppercase tracking-widest transition-all ${showTranscription ? 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white'}`}
                           style={{ fontFamily: F.glacial }}
                         >
-                          Toggle {showTranscription ? 'Off' : 'On'}
+                          {showTranscription ? t('toggleOff') : t('toggleOn')}
                         </button>
                       </div>
 
@@ -690,7 +692,7 @@ export function AblutionSlideshow() {
                             className="text-sm uppercase tracking-widest text-center"
                             style={{ fontFamily: F.glacial, opacity: 0.3 }}
                           >
-                            Transcription Disabled
+                            {t('transcriptionDisabled')}
                           </p>
                         ) : activeCaption ? (
                           <p
@@ -715,7 +717,7 @@ export function AblutionSlideshow() {
                             className="text-sm uppercase tracking-widest text-center"
                             style={{ fontFamily: F.glacial, opacity: 0.3 }}
                           >
-                            Awaiting Audio Signal...
+                            {t('awaitingSignal')}
                           </p>
                         )}
                       </div>

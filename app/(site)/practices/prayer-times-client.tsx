@@ -138,12 +138,12 @@ function PrayerTimesContent() {
   }
 
   const prayerOrder = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']
-  const prayerLabels: Record<string, string> = {
-    fajr: 'Dawn',
-    dhuhr: 'Noon',
-    asr: 'Afternoon',
-    maghrib: 'Sunset',
-    isha: 'Night',
+  const prayerDisplayNames: Record<string, string> = {
+    fajr: t('fajrLabel'),
+    dhuhr: t('dhuhrLabel'),
+    asr: t('asrLabel'),
+    maghrib: t('maghribLabel'),
+    isha: t('ishaLabel'),
   }
   const prayerArabic: Record<string, string> = {
     fajr: t('fajr'),
@@ -272,7 +272,7 @@ function PrayerTimesContent() {
                   className="text-3xl md:text-4xl font-medium text-[var(--ed-accent)] capitalize tracking-tight leading-none"
                   style={{ fontFamily: F.serif }}
                 >
-                  {prayerLabels[data.current_prayer.toLowerCase()] ?? data.current_prayer}
+                  {prayerDisplayNames[data.current_prayer.toLowerCase()] ?? data.current_prayer}
                 </span>
               )}
               {data.upcoming_prayer && data.upcoming_prayer_time_left && (
@@ -281,7 +281,7 @@ function PrayerTimesContent() {
                   style={{ fontFamily: F.serif }}
                 >
                   <span className="opacity-60 mx-1">→</span>
-                  <span className="capitalize text-[var(--ed-fg)]"> {prayerLabels[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}</span>
+                  <span className="capitalize text-[var(--ed-fg)]"> {prayerDisplayNames[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}</span>
                   <span className="font-mono text-[var(--ed-accent)]"> {data.upcoming_prayer_time_left}</span>
                 </span>
               )}
@@ -290,7 +290,7 @@ function PrayerTimesContent() {
 
           {/* Day progress timeline */}
           {data.times && (
-            <DayTimeline data={data} prayerLabels={prayerLabels} />
+            <DayTimeline data={data} prayerDisplayNames={prayerDisplayNames} />
           )}
 
           {/* Inline schedule (today + monthly) */}
@@ -298,7 +298,7 @@ function PrayerTimesContent() {
             <SchedulePanel
               data={data}
               prayerOrder={prayerOrder}
-              prayerLabels={prayerLabels}
+              prayerDisplayNames={prayerDisplayNames}
               t={t}
             />
             {/* English → Arabic name mapping, right under the card */}
@@ -308,7 +308,7 @@ function PrayerTimesContent() {
             >
               {prayerOrder.map((prayer) => (
                 <span key={prayer}>
-                  <span className="text-[var(--ed-fg)]/80">{prayerLabels[prayer]}</span>
+                  <span className="text-[var(--ed-fg)]/80">{prayerDisplayNames[prayer]}</span>
                   <span className="opacity-60"> · {prayerArabic[prayer]}</span>
                 </span>
               ))}
@@ -365,12 +365,12 @@ function PrayerTimesContent() {
 function SchedulePanel({
   data,
   prayerOrder,
-  prayerLabels,
+  prayerDisplayNames,
   t,
 }: {
   data: PrayerTimesResponse
   prayerOrder: string[]
-  prayerLabels: Record<string, string>
+  prayerDisplayNames: Record<string, string>
   t: (key: string, values?: Record<string, string>) => string
 }) {
   return (
@@ -428,7 +428,7 @@ function SchedulePanel({
                                 isCurrent ? 'text-primary' : 'text-foreground'
                               )}
                             >
-                              {prayerLabels[prayer]}
+                              {prayerDisplayNames[prayer]}
                             </span>
                             {isUpcoming && timeLeft && (
                               <span
@@ -567,10 +567,10 @@ function parseTimeToMinutes(timeStr: string): number {
 
 function DayTimeline({
   data,
-  prayerLabels,
+  prayerDisplayNames,
 }: {
   data: PrayerTimesResponse
-  prayerLabels: Record<string, string>
+  prayerDisplayNames: Record<string, string>
 }) {
   const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const
   const times = prayers.map((p) => parseTimeToMinutes(data.times?.[p] ?? ''))
@@ -619,7 +619,7 @@ function DayTimeline({
                 )}
                 style={{ fontFamily: F.glacial }}
               >
-                {prayerLabels[prayer]}
+                {prayerDisplayNames[prayer]}
               </span>
               <span
                 className={cn(

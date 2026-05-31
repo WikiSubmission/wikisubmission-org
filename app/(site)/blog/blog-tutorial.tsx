@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import gsap from 'gsap'
 import { 
   X, ChevronLeft, ChevronRight, BookOpen, Lightbulb, CheckCircle2,
@@ -548,16 +549,65 @@ export function BlogTutorial({
 }: {
   onClose: () => void
 }) {
+  const t = useTranslations('blog')
+
+  const STEPS = [
+    {
+      title: t('tutorialStep1Title'),
+      content: HARDCODED_STEPS[0].content,
+      mockupId: 'login',
+      tip: t('tutorialStep1Tip'),
+      success: t('tutorialStep1Success'),
+    },
+    {
+      title: t('tutorialStep2Title'),
+      content: HARDCODED_STEPS[1].content,
+      mockupId: 'profile-setup',
+      tip: t('tutorialStep2Tip'),
+      success: t('tutorialStep2Success'),
+    },
+    {
+      title: t('tutorialStep3Title'),
+      content: HARDCODED_STEPS[2].content,
+      mockupId: 'studio-profile',
+      tip: t('tutorialStep3Tip'),
+      success: t('tutorialStep3Success'),
+    },
+    {
+      title: t('tutorialStep4Title'),
+      content: HARDCODED_STEPS[3].content,
+      mockupId: 'articles-list',
+      mockupSubId: 'approved',
+      tip: t('tutorialStep4Tip'),
+      success: t('tutorialStep4Success'),
+    },
+    {
+      title: t('tutorialStep5Title'),
+      content: HARDCODED_STEPS[4].content,
+      mockupId: 'editor',
+      mockupSubId: 'language',
+      tip: t('tutorialStep5Tip'),
+      success: t('tutorialStep5Success'),
+    },
+    {
+      title: t('tutorialStep6Title'),
+      content: HARDCODED_STEPS[5].content,
+      mockupId: 'publish',
+      tip: t('tutorialStep6Tip'),
+      success: t('tutorialStep6Success'),
+    },
+  ]
+
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [mockupSubId, setMockupSubId] = useState<string | undefined>(HARDCODED_STEPS[0].mockupSubId)
+  const [mockupSubId, setMockupSubId] = useState<string | undefined>(STEPS[0].mockupSubId)
   const [previewOpen, setPreviewOpen] = useState(true)
 
-  const slide = HARDCODED_STEPS[currentSlide]
-  const progress = ((currentSlide + 1) / HARDCODED_STEPS.length) * 100
+  const slide = STEPS[currentSlide]
+  const progress = ((currentSlide + 1) / STEPS.length) * 100
 
   const handleSlideChange = (newSlideIndex: number) => {
     setCurrentSlide(newSlideIndex)
-    setMockupSubId(HARDCODED_STEPS[newSlideIndex].mockupSubId)
+    setMockupSubId(STEPS[newSlideIndex].mockupSubId)
   }
 
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -653,9 +703,9 @@ export function BlogTutorial({
       <div className="flex items-center justify-between px-5 py-3 border-b border-border/60 bg-background/40 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <BookOpen size={16} className="text-primary shrink-0" />
-          <span className="font-headline font-bold text-sm truncate">Contributor Guide</span>
+          <span className="font-headline font-bold text-sm truncate">{t('tutorialTitle')}</span>
           <span className="text-[10px] font-mono text-muted-foreground/70 shrink-0 ml-1">
-            {currentSlide + 1}/{HARDCODED_STEPS.length}
+            {currentSlide + 1}/{STEPS.length}
           </span>
         </div>
         <button
@@ -685,7 +735,7 @@ export function BlogTutorial({
         >
             <div className="space-y-2">
               <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-mono text-primary font-bold uppercase tracking-widest">
-                Step {currentSlide + 1}
+                {t('tutorialStepLabel', { n: currentSlide + 1 })}
               </span>
               <h2 className="font-headline text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
                 {slide.title}
@@ -702,7 +752,7 @@ export function BlogTutorial({
                   <div className="p-3.5 rounded-lg bg-muted/40 border border-border/60 flex gap-3">
                     <Lightbulb size={15} className="shrink-0 mt-0.5 text-amber-500/80" />
                     <div className="min-w-0">
-                      <h4 className="text-[10px] font-bold mb-0.5 text-muted-foreground uppercase tracking-widest">Tip</h4>
+                      <h4 className="text-[10px] font-bold mb-0.5 text-muted-foreground uppercase tracking-widest">{t('tutorialTip')}</h4>
                       <p className="text-xs text-muted-foreground/90 leading-relaxed">{slide.tip}</p>
                     </div>
                   </div>
@@ -711,7 +761,7 @@ export function BlogTutorial({
                   <div className="p-3.5 rounded-lg bg-muted/40 border border-border/60 flex gap-3">
                     <CheckCircle2 size={15} className="shrink-0 mt-0.5 text-emerald-500/80" />
                     <div className="min-w-0">
-                      <h4 className="text-[10px] font-bold mb-0.5 text-muted-foreground uppercase tracking-widest">Outcome</h4>
+                      <h4 className="text-[10px] font-bold mb-0.5 text-muted-foreground uppercase tracking-widest">{t('tutorialOutcome')}</h4>
                       <p className="text-xs text-muted-foreground/90 leading-relaxed">{slide.success}</p>
                     </div>
                   </div>
@@ -723,13 +773,13 @@ export function BlogTutorial({
               <div className="flex items-center justify-between px-3 py-2 border-b border-border/60 bg-muted/40">
                 <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   <ImageIcon size={12} />
-                  Preview
+                  {t('tutorialPreview')}
                 </div>
                 <button
                   onClick={() => setPreviewOpen((v) => !v)}
                   className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
                 >
-                  {previewOpen ? 'Hide' : 'Show'}
+                  {previewOpen ? t('tutorialHide') : t('tutorialShow')}
                 </button>
               </div>
               {previewRender && (
@@ -757,7 +807,7 @@ export function BlogTutorial({
                               : 'bg-muted/60 text-muted-foreground border-border/40 hover:bg-primary/10 hover:text-primary hover:border-primary/20'
                           )}
                         >
-                          Editor
+                          {t('tutorialViewEditor')}
                         </button>
                         <button
                           onClick={() => setMockupSubId('language')}
@@ -769,7 +819,7 @@ export function BlogTutorial({
                           )}
                         >
                           <ArrowRightLeft size={11} />
-                          Translations
+                          {t('tutorialViewTranslations')}
                         </button>
                       </div>
                     )}
@@ -788,11 +838,11 @@ export function BlogTutorial({
           className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg border border-border bg-background hover:bg-muted/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-medium"
         >
           <ChevronLeft size={16} />
-          <span className="hidden sm:inline">Previous</span>
+          <span className="hidden sm:inline">{t('tutorialPrevious')}</span>
         </button>
 
         <div className="flex items-center gap-1.5">
-          {HARDCODED_STEPS.map((_, i) => (
+          {STEPS.map((_, i) => (
             <button
               key={i}
               onClick={() => handleSlideChange(i)}
@@ -805,13 +855,13 @@ export function BlogTutorial({
           ))}
         </div>
 
-        {currentSlide < HARDCODED_STEPS.length - 1 ? (
+        {currentSlide < STEPS.length - 1 ? (
           <button
-            onClick={() => handleSlideChange(Math.min(HARDCODED_STEPS.length - 1, currentSlide + 1))}
+            onClick={() => handleSlideChange(Math.min(STEPS.length - 1, currentSlide + 1))}
             className="inline-flex items-center gap-1.5 h-10 px-4 sm:px-5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-semibold"
           >
-            <span className="hidden sm:inline">Continue</span>
-            <span className="sm:hidden">Next</span>
+            <span className="hidden sm:inline">{t('tutorialContinue')}</span>
+            <span className="sm:hidden">{t('tutorialNext')}</span>
             <ChevronRight size={16} />
           </button>
         ) : (
@@ -819,7 +869,7 @@ export function BlogTutorial({
             onClick={onClose}
             className="inline-flex items-center gap-1.5 h-10 px-4 sm:px-5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors text-sm font-semibold"
           >
-            <span className="hidden sm:inline">Done</span>
+            <span className="hidden sm:inline">{t('tutorialDone')}</span>
             <CheckCircle2 size={16} />
           </button>
         )}

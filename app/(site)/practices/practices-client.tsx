@@ -8,7 +8,7 @@ import RamadanClient from './ramadan-client'
 import { ZakatCalculator } from '@/components/zakat-calculator'
 
 import type { components } from '@/src/api/types.gen'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import {
   BookOpen,
   MapPin,
@@ -103,6 +103,7 @@ export default function PracticesClient({
   prayerVerse: VerseData | null
 }) {
   const t = useTranslations('practices')
+  const locale = useLocale()
   const searchParams = useSearchParams()
   const hasQuery = !!searchParams.get('q')
 
@@ -121,7 +122,7 @@ export default function PracticesClient({
   const daysUntilRamadan = useMemo(() => daysUntilNextRamadan(), [])
   const showRamadan = daysUntilRamadan <= 15
 
-  const prayerText = prayerVerse?.tr?.['en']?.tx
+  const prayerText = prayerVerse?.tr?.[locale]?.tx ?? prayerVerse?.tr?.['en']?.tx
 
   const LEARNING_CARDS = [
     { title: t('card1Title'), description: t('card1Desc'), icon: Compass },
@@ -173,7 +174,7 @@ export default function PracticesClient({
                   className="text-sm text-[var(--ed-fg-muted)] leading-relaxed mb-8"
                   style={{ fontFamily: F.serif }}
                 >
-                  Establish the five daily contact prayers, precisely timed to the sun&apos;s position.
+                  {t('prayerTimesDesc')}
                 </p>
               </div>
 
@@ -257,7 +258,7 @@ export default function PracticesClient({
                       className="font-bold text-[9px] uppercase tracking-[0.15em]"
                       style={{ fontFamily: F.glacial }}
                     >
-                      Fasting Guide
+                      {t('fastingGuide')}
                     </span>
                   </Link>
                   {daysUntilRamadan > 0 && (
@@ -266,7 +267,7 @@ export default function PracticesClient({
                       style={{ fontFamily: F.glacial }}
                     >
                       <div className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)]" />
-                      T-minus {daysUntilRamadan} days
+                      {t('tMinus', { days: daysUntilRamadan })}
                     </div>
                   )}
                 </div>
