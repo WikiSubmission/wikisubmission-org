@@ -56,6 +56,9 @@ export interface ParsedVariantId {
 
 const DIFFICULTIES: GameDifficulty[] = ['easy', 'medium', 'hard', 'professional']
 const SIZES: GameRoundSize[] = ['short', 'medium', 'long']
+const LANGUAGES: GameLanguage[] = [
+  'en', 'ar', 'ac', 'fa', 'ur', 'fr', 'de', 'es', 'sv', 'tr', 'id', 'tl', 'ru', 'bn', 'ta',
+]
 
 // Variant ids look like `p42-en-hard-medium-7`:
 //   p<passageId> - <language> - <difficulty> - <size> - <counter>
@@ -68,13 +71,13 @@ export function parseVariantId(variantId: string): ParsedVariantId | null {
   const passageId = Number(rawPassage.slice(1))
   if (!Number.isInteger(passageId) || passageId <= 0) return null
 
-  if (language !== 'en') return null
+  if (!LANGUAGES.includes(language as GameLanguage)) return null
   if (!DIFFICULTIES.includes(difficulty as GameDifficulty)) return null
   if (!SIZES.includes(size as GameRoundSize)) return null
 
   return {
     passage_id: passageId,
-    language,
+    language: language as GameLanguage,
     difficulty: difficulty as GameDifficulty,
     size: size as GameRoundSize,
   }

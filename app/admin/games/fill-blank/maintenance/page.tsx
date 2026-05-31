@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { GamesMaintenance } from './games-maintenance'
+import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,15 +9,14 @@ export default async function GamesFillBlankMaintenancePage() {
   const session = await auth()
   if (!session?.accessToken) redirect('/auth/sign-in?next=/admin/games/fill-blank/maintenance')
 
+  const t = await getTranslations('adminGames')
+
   if (!session.isAdmin && !session.isEditor) {
     return (
       <main style={notAuthorizedWrap}>
-        <p style={kicker}>Studio</p>
-        <h1 style={heading}>Not authorized</h1>
-        <p style={muted}>
-          This page is restricted to the games editorial team. Ask an administrator to grant you
-          the games_editor permission from the admin access page.
-        </p>
+        <p style={kicker}>{t('studio')}</p>
+        <h1 style={heading}>{t('notAuthorized')}</h1>
+        <p style={muted}>{t('notAuthorizedDesc')}</p>
       </main>
     )
   }

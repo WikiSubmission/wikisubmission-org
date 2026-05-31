@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
+import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,30 +12,27 @@ export default async function AdminGamesHubPage() {
   // (for example /admin/games/fill-blank) without seeing this hub.
   if (!session.isAdmin) redirect('/admin/games/fill-blank')
 
+  const t = await getTranslations('adminGames')
+
   return (
     <section style={wrap}>
       <header style={{ marginBottom: 24 }}>
-        <p style={kicker}>Administration / Games</p>
-        <h1 style={heading}>Games</h1>
-        <p style={lede}>Per-game studios and shared maintenance.</p>
+        <p style={kicker}>{t('hubKicker')}</p>
+        <h1 style={heading}>{t('hubTitle')}</h1>
+        <p style={lede}>{t('hubLede')}</p>
       </header>
 
       <ul style={grid}>
         <li>
           <Link href="/admin/games/fill-blank" style={tileStyle}>
-            <div style={tileTitle}>Fill the Missing Word</div>
-            <p style={tileBody}>
-              Curate passages and review GROQ proposals. Approve, reject, or flag for refinement.
-            </p>
+            <div style={tileTitle}>{t('fillBlankTile')}</div>
+            <p style={tileBody}>{t('fillBlankTileBody')}</p>
           </Link>
         </li>
         <li>
           <Link href="/admin/games/fill-blank/maintenance" style={tileStyle}>
-            <div style={tileTitle}>Maintenance</div>
-            <p style={tileBody}>
-              Word frequency tables and lemma data for all languages. Rebuild after adding a
-              language or correcting translation text.
-            </p>
+            <div style={tileTitle}>{t('maintenanceTile')}</div>
+            <p style={tileBody}>{t('maintenanceTileBody')}</p>
           </Link>
         </li>
       </ul>

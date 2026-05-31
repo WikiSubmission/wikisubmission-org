@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRef, useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { ThemedSelect } from '@/components/ui/themed-select'
 import type { ReviewPassage, ReviewStatus } from '@/lib/games-editor'
 import {
@@ -23,13 +24,6 @@ const BACKOFF_MAX_MS = 600_000
 const STATUS_OPTIONS = ['proposed', 'approved', 'needs_refinement', 'rejected', 'all'] as const
 type StatusFilter = (typeof STATUS_OPTIONS)[number]
 
-const STATUS_LABELS: Record<string, string> = {
-  proposed: 'Proposed',
-  approved: 'Approved',
-  needs_refinement: 'Needs refinement',
-  rejected: 'Rejected',
-  all: 'All',
-}
 
 export function GamesReview({
   initialPassages,
@@ -40,6 +34,15 @@ export function GamesReview({
   initialError: string | null
   initialProposedChapters: ProposedChapter[]
 }) {
+  const t = useTranslations('adminGames')
+  const statusLabels: Record<string, string> = {
+    proposed: t('statusProposed'),
+    approved: t('statusApproved'),
+    needs_refinement: t('statusNeedsRefinement'),
+    rejected: t('statusRejected'),
+    all: t('statusAll'),
+  }
+
   const [passages, setPassages] = useState<ReviewPassage[]>(initialPassages)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('proposed')
   const [chapterFilter, setChapterFilter] = useState('')
@@ -122,7 +125,7 @@ export function GamesReview({
       if (failed.length > 0) {
         setBulkMsg(`Updated ${updated}. ${failed.length} failed — selection kept.`)
       } else {
-        setBulkMsg(`Updated ${updated} passage(s) to ${STATUS_LABELS[status] ?? status}.`)
+        setBulkMsg(`Updated ${updated} passage(s) to ${statusLabels[status] ?? status}.`)
       }
       void refreshProposedSummary()
     } finally {
@@ -244,15 +247,12 @@ export function GamesReview({
   return (
     <main style={wrap}>
       <header style={{ marginBottom: 32 }}>
-        <p style={kicker}>Studio · Games</p>
-        <h1 style={heading}>Editorial review</h1>
-        <p style={muted}>
-          Approve, reject, or flag GROQ-proposed passages for the Fill-the-Blank catalog. Approved
-          passages become playable immediately.
-        </p>
+        <p style={kicker}>{t('editorialKicker')}</p>
+        <h1 style={heading}>{t('editorialTitle')}</h1>
+        <p style={muted}>{t('editorialDesc')}</p>
         <div style={{ marginTop: 12 }}>
           <Link href="/admin/games/fill-blank/maintenance" style={maintLink}>
-            Maintenance (frequency &amp; lemma)
+            {t('maintenanceLink')}
           </Link>
         </div>
       </header>
@@ -260,7 +260,7 @@ export function GamesReview({
       <section style={curatePanel}>
         <div style={maintRow}>
           <label style={fieldLabel}>
-            Curate chapter
+            {t('curateChapterLabel')}
             <input
               type="number"
               min={1}
@@ -280,7 +280,7 @@ export function GamesReview({
             disabled={curatePending || !curateChapter.trim()}
             style={approveButton}
           >
-            {curatePending ? 'Curating…' : 'Generate passages'}
+            {curatePending ? t('curating') : t('generatePassages')}
           </button>
           {curatePending && (
             <button
@@ -290,7 +290,7 @@ export function GamesReview({
               }}
               style={ghostButton}
             >
-              Stop
+              {t('stop')}
             </button>
           )}
           {curateMsg && <span style={maintMsg}>{curateMsg}</span>}
@@ -300,9 +300,9 @@ export function GamesReview({
           the model and may take a while for long chapters.
         </p>
         <div style={{ marginTop: 4 }}>
-          <span style={mono}>Chapters with proposals:</span>{' '}
+          <span style={mono}>{t('chaptersWithProposals')}</span>{' '}
           {proposedChapters.length === 0 ? (
-            <span style={{ ...mono, opacity: 0.7 }}>none yet</span>
+            <span style={{ ...mono, opacity: 0.7 }}>{t('noneYet')}</span>
           ) : (
             <span style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
               {proposedChapters.map((pc) => (
@@ -327,7 +327,7 @@ export function GamesReview({
 
       <section style={filterBar}>
         <label style={fieldLabel}>
-          Status
+          {t('statusFilterLabel')}
           <ThemedSelect
             value={statusFilter}
             onChange={(value) => {
@@ -335,11 +335,11 @@ export function GamesReview({
               setStatusFilter(next)
               applyFilters(next, chapterFilter)
             }}
-            options={STATUS_OPTIONS.map((s) => ({ value: s, label: STATUS_LABELS[s] }))}
+            options={STATUS_OPTIONS.map((s) => ({ value: s, label: statusLabels[s] }))}
           />
         </label>
         <label style={fieldLabel}>
-          Chapter
+          {t('chapterFilterLabel')}
           <input
             type="number"
             min={1}
@@ -444,6 +444,14 @@ function PassageCard({
   onToggleSelected: () => void
   onSetStatus: (status: ReviewStatus) => void
 }) {
+  const t = useTranslations('adminGames')
+  const statusLabels: Record<string, string> = {
+    proposed: t('statusProposed'),
+    approved: t('statusApproved'),
+    needs_refinement: t('statusNeedsRefinement'),
+    rejected: t('statusRejected'),
+    all: t('statusAll'),
+  }
   const range =
     passage.chapter_start === passage.chapter_end
       ? `${passage.chapter_start}:${passage.verse_start}-${passage.verse_end}`
@@ -462,7 +470,7 @@ function PassageCard({
             style={checkbox}
           />
           <span style={verseRange}>{range}</span>
-          <span style={statusBadge(passage.status)}>{STATUS_LABELS[passage.status] ?? passage.status}</span>
+          <span style={statusBadge(passage.status)}>{statusLabels[passage.status] ?? passage.status}</span>
         </div>
         <span style={mono}>#{passage.id}</span>
       </div>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   frequencyStatsAction,
   lemmaStatsAction,
@@ -38,6 +39,7 @@ export function GamesMaintenance() {
   const [lemmaLoading, setLemmaLoading] = useState(true)
   const [freqError, setFreqError] = useState<string | null>(null)
   const [lemmaError, setLemmaError] = useState<string | null>(null)
+  const t = useTranslations('adminGames')
 
   // Per-language seed state: null = idle, 'seeding' = in flight, string = result message
   const [seedState, setSeedState] = useState<Map<string, string | 'seeding'>>(new Map())
@@ -78,9 +80,9 @@ export function GamesMaintenance() {
     if (res.ok) {
       if (res.data.lemma_rows > 0) {
         setLemmaStats((prev) => new Map(prev).set(code, res.data.lemma_rows))
-        setLemmaState((prev) => new Map(prev).set(code, `${res.data.lemma_rows.toLocaleString()} rows loaded`))
+        setLemmaState((prev) => new Map(prev).set(code, t('rowsLoaded', { rows: res.data.lemma_rows.toLocaleString() })))
       } else {
-        setLemmaState((prev) => new Map(prev).set(code, 'No fixture in this deploy'))
+        setLemmaState((prev) => new Map(prev).set(code, t('noFixtureInDeploy')))
       }
     } else {
       setLemmaState((prev) => new Map(prev).set(code, res.error ?? 'failed'))
@@ -90,33 +92,26 @@ export function GamesMaintenance() {
   return (
     <main style={wrap}>
       <header style={{ marginBottom: 32 }}>
-        <p style={kicker}>Studio · Games · Fill the Blank</p>
-        <h1 style={heading}>Maintenance</h1>
-        <p style={muted}>
-          Word frequencies and lemma data for the fill-blank game. Neither affects curation or
-          passage review.
-        </p>
+        <p style={kicker}>{t('maintenanceKicker')}</p>
+        <h1 style={heading}>{t('maintenanceTitle')}</h1>
+        <p style={muted}>{t('maintenanceDesc')}</p>
         <div style={{ marginTop: 12 }}>
           <Link href="/admin/games/fill-blank" style={backLink}>
-            Editorial review
+            {t('editorialLink')}
           </Link>
         </div>
       </header>
 
       <section style={tableSection}>
-        <h2 style={sectionHeading}>Word frequencies</h2>
-        <p style={sectionNote}>
-          Counts how often each word appears in a translation. Used to score blank difficulty
-          (common words = Easy, rare = Hard). Rebuild after adding a new language or correcting
-          translation text.
-        </p>
+        <h2 style={sectionHeading}>{t('freqSectionTitle')}</h2>
+        <p style={sectionNote}>{t('freqSectionNote')}</p>
         {freqError && <p style={errorText}>{freqError}</p>}
         <table style={table}>
           <thead>
             <tr>
-              <th style={th}>Language</th>
-              <th style={{ ...th, textAlign: 'right' }}>Tokens</th>
-              <th style={{ ...th, textAlign: 'right' }}>Action</th>
+              <th style={th}>{t('colLanguage')}</th>
+              <th style={{ ...th, textAlign: 'right' }}>{t('colTokens')}</th>
+              <th style={{ ...th, textAlign: 'right' }}>{t('colAction')}</th>
             </tr>
           </thead>
           <tbody>
@@ -150,7 +145,7 @@ export function GamesMaintenance() {
                         disabled={seeding}
                         style={actionButton}
                       >
-                        {seeding ? 'Seeding…' : tokens > 0 ? 'Reseed' : 'Seed'}
+                        {seeding ? t('seeding') : tokens > 0 ? t('reseed') : t('seed')}
                       </button>
                     )}
                   </td>
@@ -162,7 +157,7 @@ export function GamesMaintenance() {
       </section>
 
       <section style={{ ...tableSection, marginTop: 48 }}>
-        <h2 style={sectionHeading}>Lemma data</h2>
+        <h2 style={sectionHeading}>{t('lemmaSectionTitle')}</h2>
         <p style={sectionNote}>
           Maps words to their root form so Hard rounds accept conjugations (e.g.{' '}
           <em>worshipped</em> matches <em>worship</em>). Fixtures are generated offline by a
@@ -175,9 +170,9 @@ export function GamesMaintenance() {
         <table style={table}>
           <thead>
             <tr>
-              <th style={th}>Language</th>
-              <th style={{ ...th, textAlign: 'right' }}>Lemma rows</th>
-              <th style={{ ...th, textAlign: 'right' }}>Status</th>
+              <th style={th}>{t('colLanguage')}</th>
+              <th style={{ ...th, textAlign: 'right' }}>{t('colLemmaRows')}</th>
+              <th style={{ ...th, textAlign: 'right' }}>{t('colStatus')}</th>
             </tr>
           </thead>
           <tbody>
@@ -214,14 +209,14 @@ export function GamesMaintenance() {
                                 disabled={loading}
                                 style={actionButton}
                               >
-                                {loading ? 'Loading…' : rows > 0 ? 'Reload' : 'Load'}
+                                {loading ? t('loadingLemma') : rows > 0 ? t('reload') : t('load')}
                               </button>
                             </>
                           )
                         })()}
                       </div>
                     ) : (
-                      <span style={dimText}>No fixture</span>
+                      <span style={dimText}>{t('noFixture')}</span>
                     )}
                   </td>
                 </tr>

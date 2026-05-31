@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { gamesAdminClient } from '@/lib/games-admin-client'
 import { type ReviewPassage } from '@/lib/games-editor'
 import { GamesReview } from './games-review'
+import { getTranslations } from 'next-intl/server'
 
 // Editorial review console for the Quran Games catalog. Soft check below is
 // UX only; the backend RequireEditor middleware enforces the real gate.
@@ -12,15 +13,14 @@ export default async function GamesFillBlankStudioPage() {
   const session = await auth()
   if (!session?.accessToken) redirect('/auth/sign-in?next=/admin/games/fill-blank')
 
+  const t = await getTranslations('adminGames')
+
   if (!session.isAdmin && !session.isEditor) {
     return (
       <main style={notAuthorizedWrap}>
-        <p style={kicker}>Studio</p>
-        <h1 style={heading}>Not authorized</h1>
-        <p style={muted}>
-          This page is restricted to the games editorial team. Ask an administrator to grant
-          you the games_editor permission from the admin access page.
-        </p>
+        <p style={kicker}>{t('studio')}</p>
+        <h1 style={heading}>{t('notAuthorized')}</h1>
+        <p style={muted}>{t('notAuthorizedDesc')}</p>
       </main>
     )
   }
@@ -32,7 +32,7 @@ export default async function GamesFillBlankStudioPage() {
   try {
     initial = await gamesAdminClient(session.accessToken).listPassages({ status: 'proposed' })
   } catch {
-    initialError = 'Could not load passages. Use the filters to retry.'
+    initialError = t('loadError')
   }
 
   const counts = new Map<number, number>()
