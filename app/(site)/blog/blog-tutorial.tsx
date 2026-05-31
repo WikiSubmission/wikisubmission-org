@@ -10,15 +10,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-type TutorialSlide = {
-  title: string
-  content: string | React.ReactNode
-  mockupId: string
-  mockupSubId?: string
-  tip?: string
-  success?: string
-}
-
 // ── Mockup Components ──────────────────────────────────────────────────────
 
 const SanityChrome = ({ children, title = "WikiSubmission" }: { children: React.ReactNode, title?: string }) => (
@@ -465,85 +456,6 @@ const RenderMockup = ({ id, subId }: { id: string, subId?: string }) => {
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
-const HARDCODED_STEPS: TutorialSlide[] = [
-  {
-    title: 'Account Creation',
-    content: (
-      <>
-        <p>All contributor accounts must be manually approved by our team.</p>
-        <p>Please contact us at <a href="mailto:contact@wikisubmission.org" className="text-primary underline font-bold">contact@wikisubmission.org</a> with your preferred email address.</p>
-        <p>Once approved, you will receive an invitation email leading you to the authentication page:</p>
-      </>
-    ),
-    mockupId: 'login',
-    tip: 'Make sure to check your spam folder if you don&apos;t see the invitation within 24 hours.',
-    success: 'Your request is being processed by our administration team.'
-  },
-  {
-    title: 'Log In & Consent',
-    content: (
-      <>
-        <p>Sign in using the <strong className="text-foreground">exact same email address</strong> you provided for approval.</p>
-        <p>You will be asked to accept Sanity&apos;s Terms of Service. Sanity is the secure infrastructure we use to host and manage our research archives.</p>
-        <p className="mt-4 font-semibold text-foreground italic">Afterwards, you will be redirected to the WikiSubmission Studio.</p>
-      </>
-    ),
-    mockupId: 'profile-setup',
-    tip: 'Using a Google or GitHub account linked to your email is the fastest way to log in.',
-    success: 'Secure connection established with Sanity Studio.'
-  },
-  {
-    title: 'Setup Your Profile',
-    content: (
-      <>
-        <p>Inside the Studio, click on the <strong className="text-foreground">My Profile</strong> tab in the sidebar.</p>
-        <p>Please fill in your <strong className="text-foreground">First Name</strong> and <strong className="text-foreground">Last Name</strong>. We also recommend adding a short biography to introduce yourself to your readers.</p>
-      </>
-    ),
-    mockupId: 'studio-profile',
-    tip: 'A complete profile helps establish your authority as a contributor.',
-    success: 'Your author identity is now configured.'
-  },
-  {
-    title: 'Moderator Verification',
-    content: (
-      <>
-        <p>After setting up your profile, our moderators will verify your credentials.</p>
-        <p>Once verified, the <strong className="text-foreground">Articles</strong> section will unlock, allowing you to start drafting your work:</p>
-      </>
-    ),
-    mockupId: 'articles-list',
-    mockupSubId: 'approved',
-    tip: 'This manual step ensures all published research meets our quality standards.',
-    success: 'Writing permissions unlocked. Welcome to the team!'
-  },
-  {
-    title: 'Create Your Article',
-    content: (
-      <>
-        <p>Click <strong className="text-foreground">+ New article</strong> to begin. Essential: Use the <strong className="text-foreground">Translations</strong> menu to set the language of your article.</p>
-        <p>Setting the correct language ensures your research is indexed correctly for global readers.</p>
-      </>
-    ),
-    mockupId: 'editor',
-    mockupSubId: 'language',
-    tip: 'You can switch languages at any time to see how your article appears in different locales.',
-    success: 'Language metadata configured correctly.'
-  },
-  {
-    title: 'Review & Publish',
-    content: (
-      <>
-        <p>Once your article is ready, click the <strong className="text-foreground">Publish</strong> button in the bottom right corner.</p>
-        <p>Congratulations! Your contribution is now live and accessible to the global community on WikiSubmission.</p>
-      </>
-    ),
-    mockupId: 'publish',
-    tip: 'Published articles can still be edited; simply make your changes and click Update.',
-    success: 'Your research is now part of the global archive!'
-  }
-]
-
 export function BlogTutorial({
   onClose
 }: {
@@ -551,31 +463,58 @@ export function BlogTutorial({
 }) {
   const t = useTranslations('blog')
 
+  const bold = (chunks: React.ReactNode) => <strong className="text-foreground">{chunks}</strong>
+  const link = (chunks: React.ReactNode) => (
+    <a href="mailto:contact@wikisubmission.org" className="text-primary underline font-bold">{chunks}</a>
+  )
+
   const STEPS = [
     {
       title: t('tutorialStep1Title'),
-      content: HARDCODED_STEPS[0].content,
+      content: (
+        <>
+          <p>{t('tutorialStep1Content1')}</p>
+          <p>{t.rich('tutorialStep1Content2', { link })}</p>
+          <p>{t('tutorialStep1Content3')}</p>
+        </>
+      ),
       mockupId: 'login',
       tip: t('tutorialStep1Tip'),
       success: t('tutorialStep1Success'),
     },
     {
       title: t('tutorialStep2Title'),
-      content: HARDCODED_STEPS[1].content,
+      content: (
+        <>
+          <p>{t.rich('tutorialStep2Content1', { bold })}</p>
+          <p>{t('tutorialStep2Content2')}</p>
+          <p className="mt-4 font-semibold text-foreground italic">{t('tutorialStep2Content3')}</p>
+        </>
+      ),
       mockupId: 'profile-setup',
       tip: t('tutorialStep2Tip'),
       success: t('tutorialStep2Success'),
     },
     {
       title: t('tutorialStep3Title'),
-      content: HARDCODED_STEPS[2].content,
+      content: (
+        <>
+          <p>{t.rich('tutorialStep3Content1', { bold })}</p>
+          <p>{t.rich('tutorialStep3Content2', { bold })}</p>
+        </>
+      ),
       mockupId: 'studio-profile',
       tip: t('tutorialStep3Tip'),
       success: t('tutorialStep3Success'),
     },
     {
       title: t('tutorialStep4Title'),
-      content: HARDCODED_STEPS[3].content,
+      content: (
+        <>
+          <p>{t('tutorialStep4Content1')}</p>
+          <p>{t.rich('tutorialStep4Content2', { bold })}</p>
+        </>
+      ),
       mockupId: 'articles-list',
       mockupSubId: 'approved',
       tip: t('tutorialStep4Tip'),
@@ -583,7 +522,12 @@ export function BlogTutorial({
     },
     {
       title: t('tutorialStep5Title'),
-      content: HARDCODED_STEPS[4].content,
+      content: (
+        <>
+          <p>{t.rich('tutorialStep5Content1', { bold })}</p>
+          <p>{t('tutorialStep5Content2')}</p>
+        </>
+      ),
       mockupId: 'editor',
       mockupSubId: 'language',
       tip: t('tutorialStep5Tip'),
@@ -591,7 +535,12 @@ export function BlogTutorial({
     },
     {
       title: t('tutorialStep6Title'),
-      content: HARDCODED_STEPS[5].content,
+      content: (
+        <>
+          <p>{t.rich('tutorialStep6Content1', { bold })}</p>
+          <p>{t('tutorialStep6Content2')}</p>
+        </>
+      ),
       mockupId: 'publish',
       tip: t('tutorialStep6Tip'),
       success: t('tutorialStep6Success'),
