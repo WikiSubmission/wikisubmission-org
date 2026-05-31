@@ -12,6 +12,7 @@ import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { SiteBrand } from '@/components/site-brand'
 import { UserMenu } from '@/components/user-menu'
 import { useSession } from 'next-auth/react'
+import { isRtlLocale } from '@/lib/is-rtl-language'
 
 type FlatLink = { kind: 'link'; label: string; href: string; requiresAuth?: boolean }
 type GroupGrandchild = { label: string; sub: string; href: string; requiresAuth?: boolean }
@@ -117,12 +118,14 @@ function MobileMenu({
   t,
   close,
   items,
+  isRtl,
 }: {
   open: boolean
   pathname: string | null
   t: (k: string) => string
   close: () => void
   items: NavItem[]
+  isRtl: boolean
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [render, setRender] = useState(open)
@@ -191,7 +194,7 @@ function MobileMenu({
                 aria-hidden
                 style={{
                   position: 'absolute',
-                  left: 0,
+                  [isRtl ? 'right' : 'left']: 0,
                   top: 8,
                   bottom: 8,
                   width: 2,
@@ -223,7 +226,7 @@ function MobileMenu({
                 aria-hidden
                 style={{
                   position: 'absolute',
-                  left: 14,
+                  [isRtl ? 'right' : 'left']: 14,
                   top: 8,
                   bottom: 8,
                   width: 1,
@@ -247,7 +250,7 @@ function MobileMenu({
                         color: childActive
                           ? 'var(--ed-fg)'
                           : 'var(--ed-fg-muted)',
-                        padding: '9px 12px 9px 30px',
+                        padding: isRtl ? '9px 30px 9px 12px' : '9px 12px 9px 30px',
                         display: 'flex',
                         alignItems: 'center',
                         textDecoration: 'none',
@@ -255,12 +258,12 @@ function MobileMenu({
                         fontWeight: childActive ? 600 : 500,
                       }}
                     >
-                      {/* Horizontal tick connecting rail (x=14) to text (x=30) */}
+                      {/* Horizontal tick connecting rail to text */}
                       <span
                         aria-hidden
                         style={{
                           position: 'absolute',
-                          left: 14,
+                          [isRtl ? 'right' : 'left']: 14,
                           top: '50%',
                           width: 14,
                           height: 1,
@@ -274,7 +277,7 @@ function MobileMenu({
                           aria-hidden
                           style={{
                             position: 'absolute',
-                            left: 26,
+                            [isRtl ? 'right' : 'left']: 26,
                             top: 6,
                             bottom: 6,
                             width: 2,
@@ -293,7 +296,7 @@ function MobileMenu({
                             aria-hidden
                             style={{
                               position: 'absolute',
-                              left: 38,
+                              [isRtl ? 'right' : 'left']: 38,
                               top: 4,
                               bottom: 4,
                               width: 1,
@@ -317,7 +320,7 @@ function MobileMenu({
                                 color: gActive
                                   ? 'var(--ed-fg)'
                                   : 'var(--ed-fg-muted)',
-                                padding: '8px 12px 8px 54px',
+                                padding: isRtl ? '8px 54px 8px 12px' : '8px 12px 8px 54px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 textDecoration: 'none',
@@ -325,12 +328,12 @@ function MobileMenu({
                                 fontWeight: gActive ? 600 : 500,
                               }}
                             >
-                              {/* Horizontal tick from sub-rail (x=38) to text (x=54) */}
+                              {/* Horizontal tick from sub-rail to text */}
                               <span
                                 aria-hidden
                                 style={{
                                   position: 'absolute',
-                                  left: 38,
+                                  [isRtl ? 'right' : 'left']: 38,
                                   top: '50%',
                                   width: 14,
                                   height: 1,
@@ -344,7 +347,7 @@ function MobileMenu({
                                   aria-hidden
                                   style={{
                                     position: 'absolute',
-                                    left: 50,
+                                    [isRtl ? 'right' : 'left']: 50,
                                     top: 6,
                                     bottom: 6,
                                     width: 2,
@@ -404,6 +407,7 @@ export function SiteNav() {
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 10,
+          direction: 'ltr',
         }}
       >
         <div className="flex-none min-w-0">
@@ -476,7 +480,7 @@ export function SiteNav() {
               }}
             >
               <MessageSquare size={12} />
-              <span>Chat</span>
+              <span>{t('chat')}</span>
             </button>
           )}
 
@@ -527,6 +531,7 @@ export function SiteNav() {
         t={t}
         close={close}
         items={navItems}
+        isRtl={isRtlLocale(locale)}
       />
     </nav>
   )

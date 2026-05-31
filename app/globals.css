@@ -541,6 +541,14 @@ html[data-palette='mono'].dark {
     /* Safari and Chrome */
   }
 
+  /* Flip directional arrow icons for RTL languages */
+  .rtl-flip {
+    display: inline-block;
+  }
+  [dir="rtl"] .rtl-flip {
+    transform: scaleX(-1);
+  }
+
   /* Collapsible rows on /community.
      Radix exposes --radix-collapsible-content-height, which we animate over.
      prefers-reduced-motion disables the animation. */

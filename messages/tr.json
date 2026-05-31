@@ -492,7 +492,8 @@
     "tutorialStep6Content1": "Makaleniz hazır olduğunda, sağ alt köşedeki <bold>Yayınla</bold> düğmesine tıklayın.",
     "tutorialStep6Content2": "Tebrikler! Katkınız artık WikiSubmission'daki küresel topluluk için yayında ve erişilebilir durumda.",
     "tutorialViewEditor": "Düzenleyici",
-    "tutorialViewTranslations": "Çeviriler"
+    "tutorialViewTranslations": "Çeviriler",
+    "instructions": "Talimatlar"
   },
   "practices": {
     "metadataTitle": "Uygulamalar | WikiSubmission",
@@ -1018,5 +1019,25 @@
       "nextAvailable": "Next available in {eta}.",
       "disclosure": "The export file is hosted on Google Drive. The link is delivered by email to {email}, shared only with you, and limited to one request per 24h."
     }
+  },
+  "chat": {
+    "title": "Submission AI",
+    "askAnything": "Her şeyi sorun.",
+    "placeholder": "Her şeyi sorun…",
+    "clear": "Temizle",
+    "disclaimer": "Yapay zeka hata yapabilir. Tüm bilgileri doğrulayın.",
+    "sources": "Kaynaklar",
+    "suggestion1": "19'un önemi nedir?",
+    "suggestion2": "Kuran namaz hakkında ne söylüyor?",
+    "suggestion3": "Kuran'ın benzersiz harfleri nelerdir?"
+  },
+  "userMenu": {
+    "profile": "Profil",
+    "admin": "Yönetici",
+    "gamesStudio": "Oyun Stüdyosu",
+    "language": "Dil",
+    "theme": "Tema",
+    "signIn": "Giriş yap",
+    "signOut": "Çıkış yap"
   }
 }

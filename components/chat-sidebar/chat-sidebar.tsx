@@ -7,10 +7,12 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useChatPanel } from './panel-context'
 import { useChatContext } from '@/components/chat/chat-context'
 import { ChatInput, MessageList, SuggestionCards } from '@/components/chat/chat-ui'
+import { useTranslations } from 'next-intl'
 
 // ── Minimized pill ─────────────────────────────────────────────────────────────
 
 function MinimizedPill({ onOpen, onClose }: { onOpen: () => void; onClose: () => void }) {
+  const t = useTranslations('chat')
   return (
     <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 bg-background border border-border/50 shadow-lg rounded-full px-3 py-2 text-sm font-medium">
       <button onClick={onOpen} className="flex items-center gap-2 hover:opacity-70 transition-opacity">
@@ -21,7 +23,7 @@ function MinimizedPill({ onOpen, onClose }: { onOpen: () => void; onClose: () =>
           height={20}
           className="rounded-full size-5"
         />
-        Submission AI
+        {t('title')}
       </button>
       <button
         onClick={onClose}
@@ -39,6 +41,7 @@ function MinimizedPill({ onOpen, onClose }: { onOpen: () => void; onClose: () =>
 export function ChatSidebar() {
   const { state, open, close, minimize } = useChatPanel()
   const { messages, submit, clear, isPending } = useChatContext()
+  const t = useTranslations('chat')
   const bottomRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const pathname = usePathname()
@@ -98,7 +101,7 @@ export function ChatSidebar() {
               height={22}
               className="rounded-full"
             />
-            <span className="text-sm font-semibold">Submission AI</span>
+            <span className="text-sm font-semibold">{t('title')}</span>
           </div>
           <div className="flex items-center gap-0.5">
             <button
@@ -123,7 +126,7 @@ export function ChatSidebar() {
           {messages.length === 0 ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center">
               <SparklesIcon size={18} className="text-muted-foreground/40" />
-              <p className="text-sm font-medium text-muted-foreground/70">Ask anything.</p>
+              <p className="text-sm font-medium text-muted-foreground/70">{t('askAnything')}</p>
               <SuggestionCards onSelect={submit} />
             </div>
           ) : (

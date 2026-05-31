@@ -300,7 +300,7 @@ export function BlogPostArticle({
           href="/blog"
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeftIcon className="size-4" />
+          <ArrowLeftIcon className="size-4 rtl-flip" />
           <span>All articles</span>
         </Link>
       </nav>
@@ -406,7 +406,7 @@ export function BlogPostArticle({
             href="/blog"
             className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] font-semibold text-primary hover:text-primary/80 transition-colors self-start sm:self-auto"
           >
-            <ArrowLeftIcon className="size-3.5" /> All articles
+            <ArrowLeftIcon className="size-3.5 rtl-flip" /> All articles
           </Link>
           <div className="flex items-center gap-3">
             {post.authorPhotoUrl && (

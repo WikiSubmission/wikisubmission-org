@@ -323,8 +323,8 @@ export function AblutionSlideshow() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={prev} className="size-14 rounded-none border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 flex items-center justify-center hover:bg-[var(--ed-fg)] hover:text-[var(--ed-bg)] transition-all active:scale-95"><ChevronLeft size={24} /></button>
-                <button onClick={next} className="size-14 rounded-none border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 flex items-center justify-center hover:bg-[var(--ed-fg)] hover:text-[var(--ed-bg)] transition-all active:scale-95"><ChevronRight size={24} /></button>
+                <button onClick={prev} className="size-14 rounded-none border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 flex items-center justify-center hover:bg-[var(--ed-fg)] hover:text-[var(--ed-bg)] transition-all active:scale-95"><ChevronLeft size={24} className="rtl-flip" /></button>
+                <button onClick={next} className="size-14 rounded-none border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 flex items-center justify-center hover:bg-[var(--ed-fg)] hover:text-[var(--ed-bg)] transition-all active:scale-95"><ChevronRight size={24} className="rtl-flip" /></button>
               </div>
             </div>
           </div>

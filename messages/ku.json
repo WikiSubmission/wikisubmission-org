@@ -492,7 +492,8 @@
     "tutorialStep6Content1": "Gava gotara te amade be, di quncika jêrê rastê de bişkojka <bold>Weşandinê</bold> bikirtîne.",
     "tutorialStep6Content2": "Pîroz be! Tevdana te niha dijîn e û ji civata cîhanî li WikiSubmission re gihêndirêj e.",
     "tutorialViewEditor": "Edîtor",
-    "tutorialViewTranslations": "Werger"
+    "tutorialViewTranslations": "Werger",
+    "instructions": "Rêberî"
   },
   "practices": {
     "metadataTitle": "کردارەکان | WikiSubmission",
@@ -1018,5 +1019,25 @@
       "nextAvailable": "Next available in {eta}.",
       "disclosure": "The export file is hosted on Google Drive. The link is delivered by email to {email}, shared only with you, and limited to one request per 24h."
     }
+  },
+  "chat": {
+    "title": "Submission AI",
+    "askAnything": "Her tiştî bipirse.",
+    "placeholder": "Her tiştî bipirse…",
+    "clear": "Paqijkirin",
+    "disclaimer": "AI dikare xelet bike. Hemû agahiyan kontrol bike.",
+    "sources": "Çavkanî",
+    "suggestion1": "Girîngiya 19 çi ye?",
+    "suggestion2": "Qur'an li ser nimêjê çi dibêje?",
+    "suggestion3": "Tîpên taybet ên Qur'anê çi ne?"
+  },
+  "userMenu": {
+    "profile": "Profîl",
+    "admin": "Rêvebir",
+    "gamesStudio": "Studiyoya Lîstikan",
+    "language": "Ziman",
+    "theme": "Şêwe",
+    "signIn": "Têketin",
+    "signOut": "Derketin"
   }
 }

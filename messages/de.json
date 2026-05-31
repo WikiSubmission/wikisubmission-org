@@ -492,7 +492,8 @@
     "tutorialStep6Content1": "Sobald Ihr Artikel fertig ist, klicken Sie auf die Schaltfläche <bold>Veröffentlichen</bold> in der unteren rechten Ecke.",
     "tutorialStep6Content2": "Herzlichen Glückwunsch! Ihr Beitrag ist jetzt live und für die globale Gemeinschaft auf WikiSubmission zugänglich.",
     "tutorialViewEditor": "Editor",
-    "tutorialViewTranslations": "Übersetzungen"
+    "tutorialViewTranslations": "Übersetzungen",
+    "instructions": "Anleitung"
   },
   "practices": {
     "metadataTitle": "Praktiken | WikiSubmission",
@@ -1018,5 +1019,25 @@
       "nextAvailable": "Next available in {eta}.",
       "disclosure": "The export file is hosted on Google Drive. The link is delivered by email to {email}, shared only with you, and limited to one request per 24h."
     }
+  },
+  "chat": {
+    "title": "Submission AI",
+    "askAnything": "Fragen Sie alles.",
+    "placeholder": "Fragen Sie alles…",
+    "clear": "Löschen",
+    "disclaimer": "KI kann Fehler machen. Alle Informationen überprüfen.",
+    "sources": "Quellen",
+    "suggestion1": "Was ist die Bedeutung der Zahl 19?",
+    "suggestion2": "Was sagt der Koran über das Gebet?",
+    "suggestion3": "Was sind die einzigartigen Initialen des Korans?"
+  },
+  "userMenu": {
+    "profile": "Profil",
+    "admin": "Admin",
+    "gamesStudio": "Games Studio",
+    "language": "Sprache",
+    "theme": "Design",
+    "signIn": "Anmelden",
+    "signOut": "Abmelden"
   }
 }

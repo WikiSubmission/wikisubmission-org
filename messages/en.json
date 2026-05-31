@@ -502,7 +502,8 @@
     "tutorialStep5Content1": "Click <bold>+ New article</bold> to begin. Essential: Use the <bold>Translations</bold> menu to set the language of your article.",
     "tutorialStep5Content2": "Setting the correct language ensures your research is indexed correctly for global readers.",
     "tutorialStep6Content1": "Once your article is ready, click the <bold>Publish</bold> button in the bottom right corner.",
-    "tutorialStep6Content2": "Congratulations! Your contribution is now live and accessible to the global community on WikiSubmission."
+    "tutorialStep6Content2": "Congratulations! Your contribution is now live and accessible to the global community on WikiSubmission.",
+    "instructions": "Instructions"
   },
   "practices": {
     "metadataTitle": "Practices | WikiSubmission",
@@ -1136,5 +1137,25 @@
       "nextAvailable": "Next available in {eta}.",
       "disclosure": "The export file is hosted on Google Drive. The link is delivered by email to {email}, shared only with you, and limited to one request per 24h."
     }
+  },
+  "chat": {
+    "title": "Submission AI",
+    "askAnything": "Ask anything.",
+    "placeholder": "Ask anything…",
+    "clear": "Clear",
+    "disclaimer": "AI may make mistakes. Verify all information.",
+    "sources": "Sources",
+    "suggestion1": "What is the significance of 19?",
+    "suggestion2": "What does the Quran say about prayer?",
+    "suggestion3": "What are the Quran's unique initials?"
+  },
+  "userMenu": {
+    "profile": "Profile",
+    "admin": "Admin",
+    "gamesStudio": "Games studio",
+    "language": "Language",
+    "theme": "Theme",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
   }
 }

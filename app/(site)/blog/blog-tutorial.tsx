@@ -786,7 +786,7 @@ export function BlogTutorial({
           disabled={currentSlide === 0}
           className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg border border-border bg-background hover:bg-muted/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-medium"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={16} className="rtl-flip" />
           <span className="hidden sm:inline">{t('tutorialPrevious')}</span>
         </button>
 
@@ -811,7 +811,7 @@ export function BlogTutorial({
           >
             <span className="hidden sm:inline">{t('tutorialContinue')}</span>
             <span className="sm:hidden">{t('tutorialNext')}</span>
-            <ChevronRight size={16} />
+            <ChevronRight size={16} className="rtl-flip" />
           </button>
         ) : (
           <button

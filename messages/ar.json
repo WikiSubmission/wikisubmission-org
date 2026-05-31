@@ -501,7 +501,8 @@
     "tutorialStep5Content1": "انقر على <bold>+ مقالة جديدة</bold> للبدء. ضروري: استخدم قائمة <bold>الترجمات</bold> لتعيين لغة مقالتك.",
     "tutorialStep5Content2": "يضمن تعيين اللغة الصحيحة فهرسة بحثك بشكل صحيح للقراء حول العالم.",
     "tutorialStep6Content1": "بمجرد أن تصبح مقالتك جاهزة، انقر على زر <bold>نشر</bold> في الزاوية اليمنى السفلية.",
-    "tutorialStep6Content2": "تهانينا! مساهمتك الآن متاحة للمجتمع العالمي على WikiSubmission."
+    "tutorialStep6Content2": "تهانينا! مساهمتك الآن متاحة للمجتمع العالمي على WikiSubmission.",
+    "instructions": "التعليمات"
   },
   "practices": {
     "metadataTitle": "العبادات | WikiSubmission",
@@ -1083,5 +1084,25 @@
       "nextAvailable": "Next available in {eta}.",
       "disclosure": "The export file is hosted on Google Drive. The link is delivered by email to {email}, shared only with you, and limited to one request per 24h."
     }
+  },
+  "chat": {
+    "title": "الذكاء الاصطناعي للتسليم",
+    "askAnything": "اسأل أي شيء.",
+    "placeholder": "اسأل أي شيء…",
+    "clear": "مسح",
+    "disclaimer": "قد يرتكب الذكاء الاصطناعي أخطاء. تحقق من جميع المعلومات.",
+    "sources": "المصادر",
+    "suggestion1": "ما أهمية الرقم 19؟",
+    "suggestion2": "ماذا يقول القرآن عن الصلاة؟",
+    "suggestion3": "ما هي الأحرف المقطعة في القرآن؟"
+  },
+  "userMenu": {
+    "profile": "الملف الشخصي",
+    "admin": "المدير",
+    "gamesStudio": "استوديو الألعاب",
+    "language": "اللغة",
+    "theme": "المظهر",
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج"
   }
 }

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowUp, Loader2, ChevronDown, Trash2, ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import React, { type FormEvent, type KeyboardEvent, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { ScriptureText } from '@/components/scripture-text'
 import type { Message } from './use-chat'
 
@@ -94,12 +95,14 @@ function getLinkIcon(url: string): string | null {
 }
 
 export function VerseChip({ sources, onNavigate }: { sources: string[]; onNavigate?: () => void }) {
+  const t = useTranslations('chat')
+  const tSources = t('sources')
   const refs = sources.filter((s) => /^\d+:\d+/.test(s))
   const links = sources.filter((s) => /^https?:\/\//i.test(s))
   if (!refs.length && !links.length) return null
   return (
     <div className="mt-3 space-y-2">
-      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40">Sources</p>
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40">{tSources}</p>
       {refs.length > 0 && (
         <div>
           <Link
@@ -146,16 +149,12 @@ export function VerseChip({ sources, onNavigate }: { sources: string[]; onNaviga
 
 // ── Suggestion prompts ─────────────────────────────────────────────────────────
 
-const SUGGESTIONS = [
-  'What is the significance of 19?',
-  'What does the Quran say about prayer?',
-  "What are the Quran's unique initials?",
-]
-
 export function SuggestionCards({ onSelect }: { onSelect: (s: string) => void }) {
+  const t = useTranslations('chat')
+  const suggestions = [t('suggestion1'), t('suggestion2'), t('suggestion3')]
   return (
     <div className="flex flex-col gap-2 w-full max-w-xs">
-      {SUGGESTIONS.map((s) => (
+      {suggestions.map((s) => (
         <button
           key={s}
           onClick={() => onSelect(s)}
@@ -223,6 +222,7 @@ export function ChatInput({
   autoFocus?: boolean
   onClear?: () => void
 }) {
+  const t = useTranslations('chat')
   const [input, setInput] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -261,7 +261,7 @@ export function ChatInput({
             className="flex items-center gap-1 text-[11px] text-muted-foreground/50 hover:text-muted-foreground disabled:opacity-30 transition-colors"
           >
             <Trash2 size={11} />
-            Clear
+            {t('clear')}
           </button>
         )}
       </div>
@@ -277,7 +277,7 @@ export function ChatInput({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKey}
-          placeholder="Ask anything…"
+          placeholder={t('placeholder')}
           maxLength={500}
           autoFocus={autoFocus}
           className="flex-1 h-9 rounded-xl border border-border/50 bg-muted/20 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-colors placeholder:text-muted-foreground/40"
@@ -295,7 +295,7 @@ export function ChatInput({
       </form>
 
       <p className="text-[10px] text-muted-foreground/40 text-center">
-       AI may make mistakes. Verify all information.
+       {t('disclaimer')}
       </p>
     </div>
   )

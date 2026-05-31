@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { getTranslations, getLocale } from 'next-intl/server'
+import { ArrowLeft } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { FillBlankPicker } from './fill-blank-picker'
 import { GamesOverview } from '../games-overview'
 
@@ -10,8 +11,6 @@ export const metadata = {
 
 export default async function FillBlankEntryPage() {
   const t = await getTranslations('games')
-  const locale = await getLocale()
-  const isRtl = ['ar', 'ac', 'fa', 'ur'].includes(locale)
 
   return (
     <section
@@ -36,7 +35,7 @@ export default async function FillBlankEntryPage() {
           textDecoration: 'none',
         }}
       >
-        {isRtl ? '→' : '←'} {t('backToGames')}
+        <ArrowLeft size={13} className="rtl-flip" /> {t('backToGames')}
       </Link>
       <h1
         style={{

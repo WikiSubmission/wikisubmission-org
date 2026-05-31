@@ -292,7 +292,7 @@ function BlogBrowserInner({
             className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-card border border-border/60 text-sm font-medium text-foreground hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-colors shrink-0"
           >
             <BookOpenIcon size={16} />
-            Instructions
+            {t('instructions')}
           </button>
         </div>
       </section>

@@ -3,7 +3,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useTransition, useSyncExternalStore } from 'react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
 import { useUser } from '@/hooks/use-user'
 import { useSignInPromptStore } from '@/store/sign-in-prompt'
@@ -47,6 +47,7 @@ export function UserMenu() {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const currentLocale = useLocale()
+  const t = useTranslations('userMenu')
   const { palette, setPalette } = usePalette()
   const { theme, systemTheme, setTheme } = useTheme()
   const mounted = useSyncExternalStore(
@@ -97,7 +98,7 @@ export function UserMenu() {
           ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-rule)'
         }}
       >
-        Sign in
+        {t('signIn')}
       </button>
     )
   }
@@ -135,21 +136,21 @@ export function UserMenu() {
         <DropdownMenuItem asChild>
           <a href="/me" className="flex items-center gap-2">
             <User className="w-4 h-4" />
-            Profile
+            {t('profile')}
           </a>
         </DropdownMenuItem>
         {isAdmin ? (
           <DropdownMenuItem asChild>
             <a href="/admin" className="flex items-center gap-2">
               <Shield className="w-4 h-4" />
-              Admin
+              {t('admin')}
             </a>
           </DropdownMenuItem>
         ) : isEditor ? (
           <DropdownMenuItem asChild>
             <a href="/admin/games/fill-blank" className="flex items-center gap-2">
               <Gamepad2 className="w-4 h-4" />
-              Games studio
+              {t('gamesStudio')}
             </a>
           </DropdownMenuItem>
         ) : null}
@@ -158,7 +159,7 @@ export function UserMenu() {
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center gap-2">
             <Globe className="w-4 h-4" />
-            <span>Language</span>
+            <span>{t('language')}</span>
             <span className="ml-auto text-xs text-muted-foreground font-mono uppercase tracking-wide">
               {currentLocale.toUpperCase()}
             </span>
@@ -184,7 +185,7 @@ export function UserMenu() {
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center gap-2">
             <Palette className="w-4 h-4" />
-            <span>Theme</span>
+            <span>{t('theme')}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-52 p-2">
             {mounted && (Object.keys(PALETTES) as PaletteKey[]).map((k) => {
@@ -234,7 +235,7 @@ export function UserMenu() {
           className="flex items-center gap-2 text-destructive focus:text-destructive"
         >
           <LogOut className="w-4 h-4" />
-          Sign out
+          {t('signOut')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
