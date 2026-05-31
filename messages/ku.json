@@ -518,7 +518,11 @@
     "card3Title": "ڕەمەزان و ڕۆژوو",
     "card3Desc": "ئامانجی ڕۆژوو و چۆنیەتی ڕاستی بەجێگەیاندنی ڕەمەزان.",
     "card4Title": "کورتە لە حەج",
-    "card4Desc": "حەج بۆ مەککە — ڕێوشوێن و گرنگی ڕۆحی."
+    "card4Desc": "حەج بۆ مەککە — ڕێوشوێن و گرنگی ڕۆحی.",
+    "zakatQuote": "Ji te dipirsin ku çi bidin. Bêje: Tiştê ku hûn didin dê ji bo dê û bav, xizmên, êtim, feqîr û rêviyên biçûk be. Her çi baş bikin, XWEDÊ jê bi temamî haydar e.",
+    "prayerTimesDesc": "Pênc nimêjên têkiliya rojane saz bike, bi tam û bi cîhê rojê re hatiye diyarkirin.",
+    "fastingGuide": "Rêbera Rojiyê",
+    "tMinus": "{days} roj mane"
   },
   "zakatCalculator": {
     "title": "شیکەرەوەی دارایی زەکات",

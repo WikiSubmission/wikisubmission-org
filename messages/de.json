@@ -518,7 +518,11 @@
     "card3Title": "Ramadan & Fasten",
     "card3Desc": "Sinn des Fastens und wie man den Ramadan richtig begeht.",
     "card4Title": "Hadsch — Überblick",
-    "card4Desc": "Die Pilgerfahrt nach Mekka — ihre Riten und spirituelle Bedeutung."
+    "card4Desc": "Die Pilgerfahrt nach Mekka — ihre Riten und spirituelle Bedeutung.",
+    "zakatQuote": "\"Sie fragen dich, was sie spenden sollen. Sag: Das Almosen, das ihr gebt, soll den Eltern, den Verwandten, den Waisen, den Armen und dem Reisenden zugutekommen. Alles Gute, das ihr tut, ist GOtt wohl bekannt.\"",
+    "prayerTimesDesc": "Verrichtet die fünf täglichen Kontaktgebete, die präzise nach der Sonnenposition festgelegt sind.",
+    "fastingGuide": "Fastenratgeber",
+    "tMinus": "Noch {days} Tage"
   },
   "zakatCalculator": {
     "title": "Zakat-Vermögensanalyse",

@@ -518,7 +518,11 @@
     "card3Title": "Ramazan ve Oruç",
     "card3Desc": "Orucun amacı ve Ramazan'ın doğru şekilde nasıl tutulacağı.",
     "card4Title": "Hac'a Genel Bakış",
-    "card4Desc": "Mekke'ye hac — ibadetleri ve ruhani önemi."
+    "card4Desc": "Mekke'ye hac — ibadetleri ve ruhani önemi.",
+    "zakatQuote": "\"Sana ne harcayacaklarını soruyorlar. De ki: Verdiğiniz hayır, anne-babaya, akrabalara, yetimlere, yoksullara ve yolculara gitmelidir. Yaptığınız her iyilikten ALLAH'ın haberi vardır.\"",
+    "prayerTimesDesc": "Güneşin konumuna göre tam zamanlanmış beş günlük iletişim namazını kılın.",
+    "fastingGuide": "Oruç Rehberi",
+    "tMinus": "{days} gün kaldı"
   },
   "zakatCalculator": {
     "title": "Zekat Varlık Analizörü",

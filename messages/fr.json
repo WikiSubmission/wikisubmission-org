@@ -518,7 +518,11 @@
     "card3Title": "Ramadan et Jeûne",
     "card3Desc": "Le but du jeûne et comment observer correctement le Ramadan.",
     "card4Title": "Aperçu du Hajj",
-    "card4Desc": "Le pèlerinage à La Mecque — ses rites et sa signification spirituelle."
+    "card4Desc": "Le pèlerinage à La Mecque — ses rites et sa signification spirituelle.",
+    "zakatQuote": "\"Ils te demandent ce qu'ils doivent donner. Dis : Les aumônes que vous donnez iront aux parents, aux proches, aux orphelins, aux pauvres et aux voyageurs. Tout le bien que vous faites, DIEU en est parfaitement informé.\"",
+    "prayerTimesDesc": "Accomplissez les cinq prières de contact quotidiennes, précisément minutées selon la position du soleil.",
+    "fastingGuide": "Guide du jeûne",
+    "tMinus": "J-{days} jours"
   },
   "zakatCalculator": {
     "title": "Analyseur d’actifs de Zakat",
