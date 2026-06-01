@@ -149,6 +149,9 @@ export function NoteEditorDialog({
           <BlockNoteView
             editor={editor}
             theme={blockNoteTheme}
+            // Emoji picker disabled: keeps the ":"-triggered emoji grid (and its
+            // lazily-loaded @emoji-mart data chunk) out of the notes editor.
+            emojiPicker={false}
             onChange={() => {
               if (!open || loadingRef.current) return
               setSaveState('unsaved')

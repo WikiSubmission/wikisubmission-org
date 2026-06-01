@@ -61,7 +61,7 @@ import {
 import type { components } from '@/src/api/types.gen'
 import { QuranRefText } from '@/components/quran-ref-text'
 import type { BookmarkEntryData, NoteData } from '@/types/bookmarks'
-import { NoteEditorDialog } from '@/components/me/note-editor-dialog'
+import { NoteEditorDialogLazy } from '@/components/me/note-editor-dialog-lazy'
 import { CreateCategoryDialog } from '@/components/me/create-category-dialog'
 
 type VerseData = components['schemas']['VerseData']
@@ -1015,7 +1015,7 @@ export const VerseCard = memo(
 
         {!isLast && <hr className="border-border/20 mx-6 sm:mx-8" />}
 
-        <NoteEditorDialog
+        <NoteEditorDialogLazy
           note={note}
           verseKey={verseId}
           scripture={scripture}

@@ -3,7 +3,7 @@
 import { ws } from '@/lib/wikisubmission-sdk'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { SearchHitWordByWord } from 'wikisubmission-sdk/lib/quran/v1/query-result'
+import type { SearchHitWordByWord } from 'wikisubmission-sdk/lib/quran/v1/query-result'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsTrigger, TabsContent, TabsList } from '@/components/ui/tabs'
 import {
