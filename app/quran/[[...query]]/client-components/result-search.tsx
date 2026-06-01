@@ -1,9 +1,8 @@
 'use client'
 
-import { ws } from '@/lib/wikisubmission-sdk'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import type { SearchHitWordByWord } from 'wikisubmission-sdk/lib/quran/v1/query-result'
+import { wsApi } from '@/src/api/client'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsTrigger, TabsContent, TabsList } from '@/components/ui/tabs'
 import {
@@ -42,6 +41,23 @@ import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useMeSearch } from '@/hooks/use-me-search'
 import { useTranslations } from 'next-intl'
 import { useSession } from 'next-auth/react'
+
+// ─── Word search ──────────────────────────────────────────────────────────────
+
+// Backend /search?scope=words caps a page at 100. One page of distinct word
+// occurrences is enough for the grouped-by-root display below.
+const WORD_SEARCH_LIMIT = 100
+
+// Flattened word-occurrence hit, mapped from the QuranResponse word breakdown
+// returned by /search?scope=words (chapters → verses → w[]).
+type WordHit = {
+  root_word: string
+  arabic: string
+  transliterated: string
+  meanings: string
+  verse_id: string
+  word_index: number
+}
 
 // ─── SearchResultChapter ──────────────────────────────────────────────────────
 
@@ -91,7 +107,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const [sortMode, setSortMode] = useState<'relevance' | 'verse-order'>(
     'relevance'
   )
-  const [wordMatches, setWordMatches] = useState<SearchHitWordByWord[]>([])
+  const [wordMatches, setWordMatches] = useState<WordHit[]>([])
   const [wordLoading, setWordLoading] = useState(false)
 
   const lastQueryRef = useRef<string | null>(null)
@@ -165,38 +181,51 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     setWordLoading(true)
     setWordMatches([])
 
-    const result = await ws.Quran.query(searchQuery, {
-      language: 'english',
-      strategy: 'default',
-      highlight: true,
-      normalizeGodCasing: true,
-      adjustments: {
-        index: false,
-        chapters: false,
-        subtitles: false,
-        footnotes: false,
-        wordByWord: { field: 'english' },
+    const { data, error } = await wsApi.GET('/search', {
+      params: {
+        query: {
+          q: searchQuery,
+          scope: 'words',
+          include_words: true,
+          include_root: true,
+          include_meaning: true,
+          // tl is the transliteration "language"; ar gives the Arabic surface
+          // form. The backend grafts both onto each matched word.
+          word_langs: ['ar', 'en', 'tl'],
+          limit: WORD_SEARCH_LIMIT,
+        },
       },
     })
 
-    if (
-      result.status === 'success' &&
-      result.type === 'search' &&
-      result.data?.some((i) => i.hit === 'word_by_word')
-    ) {
-      setWordMatches(result.data.filter((i) => i.hit === 'word_by_word'))
-    } else if (result.status === 'error') {
-      const msg = decodeURIComponent(result.error ?? '')
-      if (
-        !msg.toLowerCase().includes('index') &&
-        !msg.toLowerCase().includes('disabled')
-      ) {
-        toast.error(msg)
-      }
-    } else {
+    if (error) {
       toast.error(`No word matches for '${searchQuery}'`)
+      setWordLoading(false)
+      return
     }
 
+    // Flatten chapters → verses → words into root-grouped occurrence hits.
+    // Only words carrying a root are shown (the display groups by root).
+    const hits: WordHit[] = []
+    for (const ch of data?.chapters ?? []) {
+      for (const v of ch.verses ?? []) {
+        for (const w of v.w ?? []) {
+          if (!w.r) continue
+          hits.push({
+            root_word: w.r,
+            arabic: w.tx?.ar ?? '',
+            transliterated: w.tx?.tl ?? '',
+            meanings: w.m ?? '',
+            verse_id: v.vk ?? '',
+            word_index: w.wi ?? 0,
+          })
+        }
+      }
+    }
+
+    if (hits.length === 0) {
+      toast.error(`No word matches for '${searchQuery}'`)
+    }
+    setWordMatches(hits)
     setWordLoading(false)
   }, [searchQuery, wordMatches])
 
