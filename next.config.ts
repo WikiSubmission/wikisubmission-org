@@ -1,6 +1,14 @@
+import { spawnSync } from 'node:child_process'
 import type { NextConfig } from 'next'
 import bundleAnalyzer from '@next/bundle-analyzer'
 import createNextIntlPlugin from 'next-intl/plugin'
+import withSerwistInit from '@serwist/next'
+
+// Revision for the precached /offline fallback. Tied to the commit so the
+// fallback is re-fetched on each deploy rather than served stale forever.
+const buildRevision =
+  spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf-8' }).stdout?.trim() ||
+  'dev'
 
 const securityHeaders = [
   {
@@ -52,6 +60,18 @@ const nextConfig: NextConfig = {
     },
   },
   allowedDevOrigins: ['192.168.1.68'],
+  // react-scan is a dev-only profiler (rendered only when NODE_ENV is
+  // development). Its dist trips Webpack's ESM-interop checks, so exclude it
+  // from production Webpack builds — it is never reached at runtime there.
+  webpack: (config, { dev }) => {
+    if (!dev) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'react-scan': false,
+      }
+    }
+    return config
+  },
   images: {
     remotePatterns: [
       {
@@ -148,4 +168,17 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const withNextIntl = createNextIntlPlugin()
 
-export default withBundleAnalyzer(withNextIntl(nextConfig))
+// Serwist builds the service worker from app/sw.ts. It runs only under the
+// Webpack build (production `next build --webpack`); it is disabled in dev so
+// Turbopack `next dev` is unaffected and there is no stale SW during HMR.
+const withSerwist = withSerwistInit({
+  swSrc: 'app/sw.ts',
+  swDest: 'public/sw.js',
+  cacheOnNavigation: true,
+  reloadOnOnline: true,
+  disable: process.env.NODE_ENV === 'development',
+  // Precache the offline fallback document so a cold offline launch returns 200.
+  additionalPrecacheEntries: [{ url: '/offline', revision: buildRevision }],
+})
+
+export default withSerwist(withBundleAnalyzer(withNextIntl(nextConfig)))

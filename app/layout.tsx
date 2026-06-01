@@ -71,4 +71,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  // Status bar / toolbar tint when installed as a PWA. Matches the app
+  // background per color scheme for a seamless, app-like surface.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F6F2EA' },
+    { media: '(prefers-color-scheme: dark)', color: '#14110E' },
+  ],
 }
