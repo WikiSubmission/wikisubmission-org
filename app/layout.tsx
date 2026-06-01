@@ -71,6 +71,9 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  // Draw edge-to-edge under the status bar / gesture nav when installed, so
+  // safe-area-inset-* become meaningful (see globals.css .safe-* utilities).
+  viewportFit: 'cover',
   // Status bar / toolbar tint when installed as a PWA. Matches the app
   // background per color scheme for a seamless, app-like surface.
   themeColor: [

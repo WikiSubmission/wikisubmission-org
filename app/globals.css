@@ -492,6 +492,25 @@ html[data-palette='mono'].dark {
     -webkit-backdrop-filter: blur(12px);
   }
 
+  /* Safe-area insets for installed PWA / TWA (viewport-fit=cover). These
+     resolve to 0 in a normal browser, so the utilities are inert off-device.
+     Apply .safe-bottom to bottom-fixed UI (e.g. the now-playing bar) and
+     .safe-top to top chrome that is NOT part of the Quran fixed-header stack.
+     The Quran header math is offset-sensitive (see CLAUDE.md); wire its inset
+     during on-device testing, not blindly. */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+
   /* Quran layout: fixed header stack slides up when scrolling down.
      SiteNav (h-16 = 64px) + optional sub-header (h-14 = 56px) are fixed.
      On data-nav-hidden the whole stack shifts up by SiteNav height so
