@@ -259,6 +259,31 @@ export const meApi = {
   get activity() {
     return activityApi
   },
+
+  // ── Web push ───────────────────────────────────────────────────────────
+  get push() {
+    return pushApi
+  },
+}
+
+// ── Web push (out-of-contract) ──────────────────────────────────────────────
+
+export interface PushSubscribeBody {
+  endpoint: string
+  keys: { p256dh: string; auth: string }
+  categories?: string[]
+  locale?: string
+  timezone?: string
+}
+
+const pushApi = {
+  subscribe: (body: PushSubscribeBody): Promise<{ id: number; categories: string[] }> =>
+    unwrap(wsApiLoose.POST('/me/push/subscribe', { body })),
+
+  unsubscribe: (endpoint: string): Promise<{ ok: boolean }> =>
+    unwrap(wsApiLoose.DELETE('/me/push/subscribe', { body: { endpoint } })),
+
+  sendTest: (): Promise<{ sent: number }> => unwrap(wsApiLoose.POST('/me/push/test')),
 }
 
 // ── Activity feed (out-of-contract) ────────────────────────────────────────

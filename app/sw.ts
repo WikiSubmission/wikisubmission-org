@@ -38,3 +38,59 @@ const serwist = new Serwist({
 })
 
 serwist.addEventListeners()
+
+// --- Web push ---------------------------------------------------------------
+// Payload shape sent by ws-backend (see api/handlers/push.go).
+interface PushPayload {
+  title: string
+  body: string
+  url?: string
+  tag?: string
+  icon?: string
+}
+
+self.addEventListener('push', (event) => {
+  if (!event.data) return
+
+  let payload: PushPayload
+  try {
+    payload = event.data.json() as PushPayload
+  } catch {
+    payload = { title: 'WikiSubmission', body: event.data.text() }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: payload.icon ?? '/android-chrome-192x192.png',
+      badge: '/icons/maskable-192x192.png',
+      tag: payload.tag,
+      data: { url: payload.url ?? '/' },
+    }),
+  )
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const target = (event.notification.data as { url?: string })?.url ?? '/'
+
+  event.waitUntil(
+    (async () => {
+      const clientList = await self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      })
+      // Focus an existing tab and navigate it instead of opening a duplicate.
+      for (const client of clientList) {
+        if ('focus' in client) {
+          await client.focus()
+          if ('navigate' in client) {
+            await client.navigate(target).catch(() => undefined)
+          }
+          return
+        }
+      }
+      await self.clients.openWindow(target)
+    })(),
+  )
+})

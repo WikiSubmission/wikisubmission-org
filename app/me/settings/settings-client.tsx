@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { meApi } from '@/src/api/me-client'
 import { getSession } from 'next-auth/react'
 import { resolveBrowserApiBaseUrl } from '@/src/api/base-url'
+import { usePushNotifications } from '@/hooks/use-push-notifications'
 
 type ConsentState =
   | { status: 'loading' }
@@ -20,6 +21,7 @@ type ExportState = {
 
 export function SettingsClient() {
   const t = useTranslations('meSettings')
+  const push = usePushNotifications()
   const [consent, setConsent] = useState<ConsentState>({ status: 'loading' })
   const [saving, setSaving] = useState(false)
   const [clearing, setClearing] = useState(false)
@@ -127,6 +129,78 @@ export function SettingsClient() {
                 {consent.consent ? t('consentDisable') : t('consentEnable')}
               </button>
             </div>
+          </section>
+
+          {/* TODO(i18n): move this copy into messages/*.json under meSettings.notifications */}
+          <section style={cardStyle}>
+            <h2 style={h2Style}>Notifications</h2>
+            <p style={bodyStyle}>
+              Get reminders and updates on this device. You can turn them off at
+              any time.
+            </p>
+            {!push.supported && (
+              <p style={mutedStyle}>
+                This browser does not support notifications.
+              </p>
+            )}
+            {push.supported && push.permission === 'denied' && (
+              <p style={mutedStyle}>
+                Notifications are blocked in your browser settings.
+              </p>
+            )}
+            {push.supported && push.permission !== 'denied' && (
+              <div
+                style={{
+                  marginTop: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <span style={statusStyle}>
+                  {push.subscribed ? 'Notifications on' : 'Notifications off'}
+                </span>
+                {push.subscribed ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await push.unsubscribe()
+                        flash('Notifications turned off')
+                      }}
+                      disabled={push.busy}
+                      style={buttonStyle}
+                    >
+                      Turn off
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await push.sendTest()
+                        flash('Test notification sent')
+                      }}
+                      disabled={push.busy}
+                      style={buttonStyle}
+                    >
+                      Send a test
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const ok = await push.subscribe()
+                      flash(ok ? 'Notifications enabled' : 'Could not enable notifications')
+                    }}
+                    disabled={push.busy}
+                    style={buttonStyle}
+                  >
+                    Enable notifications
+                  </button>
+                )}
+              </div>
+            )}
           </section>
 
           <section style={cardStyle}>
