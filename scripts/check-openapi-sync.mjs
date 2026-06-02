@@ -12,7 +12,7 @@
 // Usage: pnpm test:contract
 //        (or: node scripts/check-openapi-sync.mjs)
 
-import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'fs'
+import { readFileSync, mkdirSync, rmSync, existsSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { createHash } from 'crypto'

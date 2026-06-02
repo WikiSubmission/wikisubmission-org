@@ -52,7 +52,17 @@ function getNavItems(t: (k: string) => string): NavItem[] {
       ],
     },
     { kind: 'link', label: 'miracle', href: '/miracle' },
-    { kind: 'link', label: 'practices', href: '/practices' },
+    {
+      kind: 'group',
+      label: 'practices',
+      href: '/practices',
+      children: [
+        { label: 'contactPrayers', sub: 'Five Daily Prayers', href: '/practices/contact-prayers' },
+        { label: 'zakat', sub: 'Obligatory Charity', href: '/practices/zakat' },
+        { label: 'ramadan', sub: 'Fasting Schedule', href: '/practices/ramadan' },
+        { label: 'hajj', sub: 'Pilgrimage to Mecca', href: '/practices/hajj' },
+      ],
+    },
     { kind: 'link', label: 'archive', href: '/archive' },
     { kind: 'link', label: 'music', href: '/music' },
     { kind: 'link', label: 'blog', href: '/blog' },

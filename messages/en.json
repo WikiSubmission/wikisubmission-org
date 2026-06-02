@@ -197,6 +197,7 @@
     "viewSchedule": "View Schedule",
     "today": "Today",
     "fajr": "Fajr",
+    "dhuhr": "Dhuhr",
     "sunrise": "Sunrise",
     "noon": "Noon",
     "asr": "Asr",
@@ -207,7 +208,15 @@
     "dhuhrLabel": "Noon",
     "asrLabel": "Afternoon",
     "maghribLabel": "Sunset",
-    "ishaLabel": "Night"
+    "ishaLabel": "Night",
+    "dawnLabel": "Dawn",
+    "noonLabel": "Noon",
+    "afternoonLabel": "Afternoon",
+    "sunsetLabel": "Sunset",
+    "nightLabel": "Night",
+    "daylightLabel": "Daylight",
+    "coordinatesLabel": "Coordinates",
+    "timezoneLabel": "Timezone"
   },
   "archive": {
     "metadataTitle": "Archive | WikiSubmission",
@@ -336,6 +345,10 @@
     "games": "Games",
     "miracle": "Miracle",
     "practices": "Practices",
+    "contactPrayers": "Contact Prayers",
+    "zakat": "Zakat",
+    "ramadan": "Ramadan",
+    "hajj": "Hajj",
     "search": "Search",
     "videos": "Videos",
     "archive": "Archive",
@@ -506,34 +519,95 @@
     "instructions": "Instructions"
   },
   "practices": {
-    "metadataTitle": "Practices | WikiSubmission",
-    "metadataDescription": "Prayer times and Ramadan schedule for any location.",
-    "badge": "Practices",
-    "heading": "Life as a submitter",
-    "description": "Prayer times, Ramadan schedule, and Zakat calculator — tools to support your daily worship.",
-    "prayerTimes": "Prayer Times",
-    "sectionPrayerLabel": "Astronomical // Times",
-    "zakat": "Zakat",
-    "sectionZakatLabel": "Distribution // Alms",
-    "zakatDescription": "A mandatory charity of 2.5% on all liquid assets. The Quranic mandate (6:141) emphasizes immediate distribution at the point of receipt, ensuring constant flow of capital to those in need.",
-    "prayerTimesDesc": "Establish the five daily contact prayers, precisely timed to the sun's position.",
-    "fastingGuide": "Fasting Guide",
+
+    "metadataTitle": "Practices Hub | WikiSubmission",
+    "metadataDescription": "A single place to learn the rites and quickly use the tools Submitters need most.",
+    "heading": "Life as a Submitter",
+    "description": "Learn the core rites of Submission, how to observe them, and their Quranic foundations.",
+    "learnPlusUse": "Learn + Use",
+    "learnPlusUseDesc": "A single place to learn the rites and quickly use the tools Submitters need most.",
+    "quickAccess": "Quick Access",
+    "quickAccessDesc": "Use the essentials without leaving this page.",
+    "quickAccessSubDesc": "Find today's Contact Prayer times or calculate Zakat immediately, while the full guides remain one click away.",
+    "prayerTimesLookup": "Prayer Times Lookup",
+    "prayerTimesLookupDesc": "Search by city and see the five daily times.",
+    "zakatCalculator": "Zakat Calculator",
+    "zakatCalculatorDesc": "Quickly calculate the required 2.5%.",
+    "contactPrayerTool": "Contact Prayer Tool",
+    "findTodaysPrayerTimes": "Find today's prayer times.",
+    "prayerToolDesc": "Search your location here instead of opening the full Contact Prayers guide. The deeper page remains available when you want the full explanation of times, units, ablution, and recitation.",
+    "fullContactPrayersGuide": "Full Contact Prayers Guide",
+    "zakatTool": "Zakat Tool",
+    "calculateZakatQuickly": "Calculate Zakat quickly.",
+    "zakatToolDesc": "Keep the calculator on the Practices hub for people who already know what they need to do. The full guide explains the rate, recipients, timing, and Quranic purpose.",
+    "fullZakatGuide": "Full Zakat Guide",
+    "ramadanTool": "Ramadan Tool",
+    "checkRamadanDates": "Check Ramadan dates.",
+    "ramadanToolDesc": "When Ramadan is near, the schedule tool appears here so visitors can quickly search by location and year.",
     "tMinus": "T-minus {days} days",
-    "zakatQuote": "“They ask you about giving: say, 'The charity you give shall go to the parents, the relatives, the orphans, the poor, and the traveling alien.' Any good you do, GOD is fully aware thereof.”",
-    "ramadan": "Ramadan",
-    "sectionRamadanLabel": "Lunar Cycle // Fasting",
-    "ramadanCountdown": "T-minus {days} days",
-    "knowledgeLabel": "Knowledge Base",
-    "learnMore": "Learn More",
-    "comingSoon": "Coming Soon",
-    "card1Title": "Understanding Salat",
-    "card1Desc": "The meaning, times, and postures of the five daily prayers.",
-    "card2Title": "Zakat Guide",
-    "card2Desc": "Who owes Zakat, how to calculate it, and who to give it to.",
-    "card3Title": "Ramadan & Fasting",
-    "card3Desc": "The purpose of fasting and how to observe Ramadan correctly.",
-    "card4Title": "Hajj Overview",
-    "card4Desc": "The pilgrimage to Mecca — its rites and spiritual significance."
+    "fullFastingGuide": "Full Fasting Guide",
+    "learnTheRites": "Learn the Rites",
+    "eachPracticeHasFullGuide": "Each practice has its own full guide.",
+    "learnTheRitesDesc": "The main page gives orientation and tools. The dedicated pages give the full explanations, Quranic anchors, steps, and supporting material.",
+    "fourCoreGuides": "Four core guides",
+    "closingMessage": "Start with the tool you need now, or open a full guide when you want to study the rite carefully.",
+    "beginWithPrayer": "Begin with Prayer",
+    "rites": {
+      "contactPrayers": {
+        "title": "Contact Prayers",
+        "eyebrow": "Salat",
+        "cta": "Learn the Contact Prayers",
+        "summary": "Learn the five daily prayers, their times, ablution, units, movements, and recitation structure.",
+        "details": [
+          "Five daily prayers",
+          "Quranic timing",
+          "Ablution and units"
+        ]
+      },
+      "zakat": {
+        "title": "Zakat",
+        "eyebrow": "Obligatory Charity",
+        "cta": "Open the Zakat Guide",
+        "summary": "Understand the obligatory charity, the 2.5% rate, Quranic recipients, timing, and purpose.",
+        "details": [
+          "2.5% of net income",
+          "Named recipients",
+          "Day of harvest"
+        ]
+      },
+      "ramadan": {
+        "title": "Ramadan & Fasting",
+        "eyebrow": "Sawm",
+        "cta": "View Ramadan & Fasting",
+        "summary": "Review the fasting passage, dawn-to-sunset timing, exemptions, substitute days, and Ramadan schedule tools.",
+        "details": [
+          "Dawn to sunset",
+          "Substitute days",
+          "Month of Quran"
+        ]
+      },
+      "hajj": {
+        "title": "Hajj",
+        "eyebrow": "Pilgrimage",
+        "cta": "Explore Hajj",
+        "summary": "See the Quranic foundation of pilgrimage: Abrahamic origin, sacred rites, conduct, and purpose.",
+        "details": [
+          "Sacred months",
+          "Safa and Marwah",
+          "`Arafat and Mina"
+        ]
+      }
+    }
+  },
+  "practiceComponents": {
+    "practicesHub": "Practices",
+    "contactPrayersNav": "Contact Prayers",
+    "zakatNav": "Zakat Guide",
+    "ramadanNav": "Ramadan & Fasting",
+    "hajjNav": "Hajj Overview",
+    "sura": "Sura",
+    "previous": "Previous"
+
   },
   "zakatCalculator": {
     "moduleLabel": "CALCULATION_STUDY",
