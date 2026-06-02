@@ -131,22 +131,14 @@ export function SettingsClient() {
             </div>
           </section>
 
-          {/* TODO(i18n): move this copy into messages/*.json under meSettings.notifications */}
           <section style={cardStyle}>
-            <h2 style={h2Style}>Notifications</h2>
-            <p style={bodyStyle}>
-              Get reminders and updates on this device. You can turn them off at
-              any time.
-            </p>
+            <h2 style={h2Style}>{t('notifications.heading')}</h2>
+            <p style={bodyStyle}>{t('notifications.body')}</p>
             {!push.supported && (
-              <p style={mutedStyle}>
-                This browser does not support notifications.
-              </p>
+              <p style={mutedStyle}>{t('notifications.unsupported')}</p>
             )}
             {push.supported && push.permission === 'denied' && (
-              <p style={mutedStyle}>
-                Notifications are blocked in your browser settings.
-              </p>
+              <p style={mutedStyle}>{t('notifications.blocked')}</p>
             )}
             {push.supported && push.permission !== 'denied' && (
               <div
@@ -159,7 +151,9 @@ export function SettingsClient() {
                 }}
               >
                 <span style={statusStyle}>
-                  {push.subscribed ? 'Notifications on' : 'Notifications off'}
+                  {push.subscribed
+                    ? t('notifications.statusOn')
+                    : t('notifications.statusOff')}
                 </span>
                 {push.subscribed ? (
                   <>
@@ -167,23 +161,23 @@ export function SettingsClient() {
                       type="button"
                       onClick={async () => {
                         await push.unsubscribe()
-                        flash('Notifications turned off')
+                        flash(t('notifications.toastDisabled'))
                       }}
                       disabled={push.busy}
                       style={buttonStyle}
                     >
-                      Turn off
+                      {t('notifications.disable')}
                     </button>
                     <button
                       type="button"
                       onClick={async () => {
                         await push.sendTest()
-                        flash('Test notification sent')
+                        flash(t('notifications.toastTestSent'))
                       }}
                       disabled={push.busy}
                       style={buttonStyle}
                     >
-                      Send a test
+                      {t('notifications.test')}
                     </button>
                   </>
                 ) : (
@@ -191,12 +185,16 @@ export function SettingsClient() {
                     type="button"
                     onClick={async () => {
                       const ok = await push.subscribe()
-                      flash(ok ? 'Notifications enabled' : 'Could not enable notifications')
+                      flash(
+                        ok
+                          ? t('notifications.toastEnabled')
+                          : t('notifications.toastFailed'),
+                      )
                     }}
                     disabled={push.busy}
                     style={buttonStyle}
                   >
-                    Enable notifications
+                    {t('notifications.enable')}
                   </button>
                 )}
               </div>

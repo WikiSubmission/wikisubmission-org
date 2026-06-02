@@ -1076,6 +1076,21 @@
     "loading": "Loading…",
     "saved": "Saved.",
     "error": "Could not load settings.",
+    "notifications": {
+      "heading": "Notifications",
+      "body": "Get reminders and updates on this device. You can turn them off at any time.",
+      "unsupported": "This browser does not support notifications.",
+      "blocked": "Notifications are blocked in your browser settings.",
+      "statusOn": "Notifications on",
+      "statusOff": "Notifications off",
+      "enable": "Enable notifications",
+      "disable": "Turn off",
+      "test": "Send a test",
+      "toastEnabled": "Notifications enabled",
+      "toastFailed": "Could not enable notifications",
+      "toastDisabled": "Notifications turned off",
+      "toastTestSent": "Test notification sent"
+    },
     "export": {
       "heading": "Data export",
       "button": "Request data export",
