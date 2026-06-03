@@ -1014,10 +1014,10 @@
     "export": {
       "heading": "Data export",
       "button": "Request data export",
-      "queued": "Your export is being prepared. We will email {email} with a Google Drive link within ~15 minutes.",
+      "queued": "Your export is being prepared. We will email {email} a secure download link within ~15 minutes.",
       "sent": "Last export sent {when}. You can request another in {eta}.",
       "nextAvailable": "Next available in {eta}.",
-      "disclosure": "The export file is hosted on Google Drive. The link is delivered by email to {email}, shared only with you, and limited to one request per 24h."
+      "disclosure": "The export file is stored privately and delivered as a secure download link by email to {email}. The link is valid for 30 days, shared only with you, and limited to one request per 24h."
     }
   },
   "chat": {
