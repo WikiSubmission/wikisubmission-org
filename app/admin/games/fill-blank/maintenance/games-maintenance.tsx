@@ -9,7 +9,6 @@ import {
   seedFrequencyAction,
   loadLemmasAction,
 } from './actions'
-import type { ActionResult } from './actions'
 import type { LanguageStat } from '@/lib/games-admin-client'
 
 // hasFixture mirrors which db/seeds/games_lemma_<code>.sql files are shipped.

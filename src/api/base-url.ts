@@ -6,5 +6,5 @@ export function resolveServerApiBaseUrl(): string {
 }
 
 export function resolveBrowserApiBaseUrl(): string {
-  return trim(process.env.NEXT_PUBLIC_API_URL ?? '')
+  return trim(process.env.NEXT_PUBLIC_BROWSER_API_URL ?? '/api/ws')
 }

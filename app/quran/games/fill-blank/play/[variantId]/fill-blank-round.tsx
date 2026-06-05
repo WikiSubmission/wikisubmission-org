@@ -85,11 +85,11 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   const stateRef = useRef<{
     feedback: Record<number, 'correct' | 'wrong'>
     attemptsRemaining: Record<number, number>
-    guesses: Record<number, string>
-  }>({ feedback: {}, attemptsRemaining: {}, guesses: {} })
-  // Keep stateRef in sync on every render so stable callbacks always have
-  // the latest values without stale closure issues.
-  stateRef.current = { feedback, attemptsRemaining, guesses }
+  }>({ feedback: {}, attemptsRemaining: {} })
+
+  useEffect(() => {
+    stateRef.current = { feedback, attemptsRemaining }
+  }, [attemptsRemaining, feedback])
 
   useEffect(() => {
     let active = true
@@ -98,14 +98,14 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     const resolve = async (): Promise<GameVariant | null> => {
       const cached = readVariant(variantId)
       if (cached) {
-        startedAt.current = Date.now()
+        startedAt.current = performance.now()
         return cached
       }
       const parsed = parseVariantId(variantId)
       if (!parsed) return null
       const { data } = await meApi.games.startVariant({ ...parsed, variant_id: variantId })
       stashVariant(data)
-      startedAt.current = Date.now()
+      startedAt.current = performance.now()
       return data
     }
     resolve()
@@ -131,6 +131,14 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   }, [variantId])
 
   const variant = load.status === 'ready' ? load.variant : null
+  const blanksByIndex = useMemo(
+    () => new Map((variant?.blanks ?? []).map((b) => [b.index, b])),
+    [variant],
+  )
+  const resultByIndex = useMemo(
+    () => (result ? new Map(result.per_blank.map((r) => [r.index, r])) : null),
+    [result],
+  )
   const totalBlanks = variant?.blanks.length ?? 0
   const filledCount = useMemo(
     () => (variant ? variant.blanks.filter((b) => (guesses[b.index] ?? '').trim() !== '').length : 0),
@@ -227,7 +235,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     if (!variant) return
     // Read post-check state from the ref — updated synchronously inside
     // checkOne before the setState calls, so this is always fresh.
-    const { feedback: fb, attemptsRemaining: ar, guesses: g } = stateRef.current
+    const { feedback: fb, attemptsRemaining: ar } = stateRef.current
     // If the just-checked blank is wrong and still has attempts left, keep
     // focus here regardless of position in the round.
     if (fb[index] === 'wrong' && ar[index] !== undefined && ar[index] > 0) {
@@ -265,12 +273,13 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     setSubmitting(true)
     setSubmitError(null)
     try {
+      const elapsedMs = Math.max(0, performance.now() - startedAt.current)
       const { data } = await meApi.games.submitVariant({
         variant_id: variant.variant_id,
         session_id: variant.session_id,
         guesses: variant.blanks.map((b) => ({ index: b.index, value: (guesses[b.index] ?? '').trim() })),
         hints_used: hintsUsed,
-        elapsed_ms: Math.max(0, Date.now() - startedAt.current),
+        elapsed_ms: elapsedMs,
       })
       setResult(data)
       setDialogOpen(true)
@@ -346,10 +355,6 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     )
   }
 
-  const blanksByIndex = new Map(variant.blanks.map((b) => [b.index, b]))
-  const resultByIndex = result
-    ? new Map(result.per_blank.map((r) => [r.index, r]))
-    : null
   const isEasy = variant.difficulty === 'easy'
   const isRtl = ['ar', 'ac', 'fa', 'ur'].includes(variant.language)
   const dir = isRtl ? 'rtl' : 'ltr'
@@ -366,25 +371,24 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
 
       <div style={{ marginTop: 24, display: 'grid', gap: 18 }}>
         {variant.rendered_verses.map((v) => (
-          <p key={v.verse_key} dir={dir} style={verseStyle}>
-            <span style={verseKeyStyle}>{v.verse_key}</span>{' '}
-            {renderVerse({
-              text: v.text,
-              blanks: blanksByIndex,
-              guesses,
-              feedback,
-              hintsRevealed,
-              attemptsRemaining,
-              checking,
-              resultByIndex,
-              dir,
-              onChange: setGuess,
-              onCheck: checkOne,
-              onEnter: advanceFrom,
-              onReveal: revealHint,
-              registerRef,
-            })}
-          </p>
+          <RenderedVerse
+            key={v.verse_key}
+            verseKey={v.verse_key}
+            text={v.text}
+            blanks={blanksByIndex}
+            guesses={guesses}
+            feedback={feedback}
+            hintsRevealed={hintsRevealed}
+            attemptsRemaining={attemptsRemaining}
+            checking={checking}
+            resultByIndex={resultByIndex}
+            dir={dir}
+            onChange={setGuess}
+            onCheck={checkOne}
+            onEnter={advanceFrom}
+            onReveal={revealHint}
+            registerRef={registerRef}
+          />
         ))}
       </div>
 
@@ -588,6 +592,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
 type BlankFeedback = 'correct' | 'wrong'
 
 interface RenderContext {
+  verseKey: string
   text: string
   blanks: Map<number, GameBlank>
   guesses: Record<number, string>
@@ -604,13 +609,13 @@ interface RenderContext {
   registerRef: (index: number, el: HTMLInputElement | HTMLButtonElement | null) => void
 }
 
-function renderVerse(ctx: RenderContext): React.ReactNode[] {
+function RenderedVerse(ctx: RenderContext) {
   const nodes: React.ReactNode[] = []
   let lastIndex = 0
   let match: RegExpExecArray | null
-  BLANK_TOKEN.lastIndex = 0
+  const blankToken = new RegExp(BLANK_TOKEN)
   let key = 0
-  while ((match = BLANK_TOKEN.exec(ctx.text)) !== null) {
+  while ((match = blankToken.exec(ctx.text)) !== null) {
     if (match.index > lastIndex) {
       nodes.push(<span key={`t${key}`}>{ctx.text.slice(lastIndex, match.index)}</span>)
     }
@@ -650,7 +655,12 @@ function renderVerse(ctx: RenderContext): React.ReactNode[] {
   if (lastIndex < ctx.text.length) {
     nodes.push(<span key={`t${key}`}>{ctx.text.slice(lastIndex)}</span>)
   }
-  return nodes
+  return (
+    <p dir={ctx.dir} style={verseStyle}>
+      <span style={verseKeyStyle}>{ctx.verseKey}</span>{' '}
+      {nodes}
+    </p>
+  )
 }
 
 // first letter → length → first two letters
