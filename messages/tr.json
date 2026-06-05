@@ -1030,47 +1030,47 @@
       "ready": "Your export is ready below. You can request another in {eta}.",
       "failed": "Your last export could not be prepared. Please try again.",
       "nextAvailable": "Next available in {eta}.",
-      "disclosure": "Your data export is stored privately and made available here as a secure download link, valid for 30 days and shared only with you. Limited to one request every 24 hours."
+      "disclosure": "Veri dışa aktarımınız özel olarak saklanır ve burada yalnızca sizinle paylaşılan, 30 gün geçerli güvenli bir indirme bağlantısı olarak sunulur. Her 15 günde bir istekle sınırlıdır."
     },
     "deleteContent": {
-      "heading": "Delete my content",
-      "body": "Permanently erase selected categories of your data. You must download a data export first so you keep a copy.",
-      "exportFirst": "Request and download a data export above before you can delete anything.",
-      "button": "Delete my content…",
-      "dialogTitle": "Delete my content",
-      "warning": "This permanently deletes the data you select. It cannot be undone, and deleted data is not recoverable, even from your export.",
-      "confirmPrompt": "Type {word} to confirm.",
-      "confirmWord": "DELETE",
-      "cancel": "Cancel",
-      "confirm": "Delete permanently",
-      "preparing": "Deleting your selected data…",
-      "done": "Your selected data has been permanently deleted.",
-      "failed": "The deletion could not be completed. Please try again.",
-      "inProgress": "A deletion is already in progress.",
+      "heading": "İçeriğimi sil",
+      "body": "Verilerinizin seçili kategorilerini kalıcı olarak silin. Bir kopyanızın kalması için önce veri dışa aktarımınızı indirmelisiniz.",
+      "exportFirst": "Herhangi bir şeyi silebilmeniz için önce yukarıdan bir veri dışa aktarımı isteyip indirin.",
+      "button": "İçeriğimi sil…",
+      "dialogTitle": "İçeriğimi sil",
+      "warning": "Bu işlem seçtiğiniz verileri kalıcı olarak siler. Geri alınamaz ve silinen veriler, dışa aktarımınızdan bile kurtarılamaz.",
+      "confirmPrompt": "Onaylamak için {word} yazın.",
+      "confirmWord": "SİL",
+      "cancel": "İptal",
+      "confirm": "Kalıcı olarak sil",
+      "preparing": "Seçtiğiniz veriler siliniyor…",
+      "done": "Seçtiğiniz veriler kalıcı olarak silindi.",
+      "failed": "Silme işlemi tamamlanamadı. Lütfen tekrar deneyin.",
+      "inProgress": "Bir silme işlemi zaten sürüyor.",
       "categories": {
         "bookmarks": {
-          "label": "Bookmarks",
-          "explanation": "Your saved verses and bookmark folders."
+          "label": "Yer işaretleri",
+          "explanation": "Kaydettiğiniz ayetler ve yer işareti klasörleriniz."
         },
         "notes": {
-          "label": "Notes",
-          "explanation": "All personal notes you have written on verses."
+          "label": "Notlar",
+          "explanation": "Ayetler üzerine yazdığınız tüm kişisel notlar."
         },
         "collections": {
-          "label": "Collections",
-          "explanation": "Collections you created and collections you follow."
+          "label": "Koleksiyonlar",
+          "explanation": "Oluşturduğunuz ve takip ettiğiniz koleksiyonlar."
         },
         "activity": {
-          "label": "Activity history",
-          "explanation": "Your browsing and search history."
+          "label": "Etkinlik geçmişi",
+          "explanation": "Gezinme ve arama geçmişiniz."
         },
         "reading_progress": {
-          "label": "Reading progress",
-          "explanation": "Reading position, streaks, and cover-to-cover progress."
+          "label": "Okuma ilerlemesi",
+          "explanation": "Okuma konumu, seriler ve baştan sona okuma ilerlemesi."
         },
         "games": {
-          "label": "Game data",
-          "explanation": "Game attempts and stats. Game data is not included in your export."
+          "label": "Oyun verileri",
+          "explanation": "Oyun denemeleri ve istatistikler. Oyun verileri dışa aktarımınıza dahil değildir."
         }
       }
     }

@@ -1030,47 +1030,47 @@
       "ready": "Your export is ready below. You can request another in {eta}.",
       "failed": "Your last export could not be prepared. Please try again.",
       "nextAvailable": "Next available in {eta}.",
-      "disclosure": "Your data export is stored privately and made available here as a secure download link, valid for 30 days and shared only with you. Limited to one request every 24 hours."
+      "disclosure": "Dein Datenexport wird privat gespeichert und hier als sicherer Download-Link bereitgestellt, 30 Tage lang gültig und nur für dich zugänglich. Begrenzt auf eine Anfrage alle 15 Tage."
     },
     "deleteContent": {
-      "heading": "Delete my content",
-      "body": "Permanently erase selected categories of your data. You must download a data export first so you keep a copy.",
-      "exportFirst": "Request and download a data export above before you can delete anything.",
-      "button": "Delete my content…",
-      "dialogTitle": "Delete my content",
-      "warning": "This permanently deletes the data you select. It cannot be undone, and deleted data is not recoverable, even from your export.",
-      "confirmPrompt": "Type {word} to confirm.",
-      "confirmWord": "DELETE",
-      "cancel": "Cancel",
-      "confirm": "Delete permanently",
-      "preparing": "Deleting your selected data…",
-      "done": "Your selected data has been permanently deleted.",
-      "failed": "The deletion could not be completed. Please try again.",
-      "inProgress": "A deletion is already in progress.",
+      "heading": "Meine Inhalte löschen",
+      "body": "Lösche ausgewählte Kategorien deiner Daten dauerhaft. Du musst zuerst einen Datenexport herunterladen, damit du eine Kopie behältst.",
+      "exportFirst": "Fordere oben zuerst einen Datenexport an und lade ihn herunter, bevor du etwas löschen kannst.",
+      "button": "Meine Inhalte löschen…",
+      "dialogTitle": "Meine Inhalte löschen",
+      "warning": "Dadurch werden die von dir ausgewählten Daten dauerhaft gelöscht. Das kann nicht rückgängig gemacht werden, und gelöschte Daten können auch aus deinem Export nicht wiederhergestellt werden.",
+      "confirmPrompt": "Gib zur Bestätigung {word} ein.",
+      "confirmWord": "LÖSCHEN",
+      "cancel": "Abbrechen",
+      "confirm": "Dauerhaft löschen",
+      "preparing": "Deine ausgewählten Daten werden gelöscht…",
+      "done": "Deine ausgewählten Daten wurden dauerhaft gelöscht.",
+      "failed": "Die Löschung konnte nicht abgeschlossen werden. Bitte versuche es erneut.",
+      "inProgress": "Eine Löschung ist bereits im Gange.",
       "categories": {
         "bookmarks": {
-          "label": "Bookmarks",
-          "explanation": "Your saved verses and bookmark folders."
+          "label": "Lesezeichen",
+          "explanation": "Deine gespeicherten Verse und Lesezeichenordner."
         },
         "notes": {
-          "label": "Notes",
-          "explanation": "All personal notes you have written on verses."
+          "label": "Notizen",
+          "explanation": "Alle persönlichen Notizen, die du zu Versen geschrieben hast."
         },
         "collections": {
-          "label": "Collections",
-          "explanation": "Collections you created and collections you follow."
+          "label": "Sammlungen",
+          "explanation": "Sammlungen, die du erstellt hast, und Sammlungen, denen du folgst."
         },
         "activity": {
-          "label": "Activity history",
-          "explanation": "Your browsing and search history."
+          "label": "Aktivitätsverlauf",
+          "explanation": "Dein Browserverlauf und Suchverlauf."
         },
         "reading_progress": {
-          "label": "Reading progress",
-          "explanation": "Reading position, streaks, and cover-to-cover progress."
+          "label": "Lesefortschritt",
+          "explanation": "Leseposition, Serien und Fortschritt von Anfang bis Ende."
         },
         "games": {
-          "label": "Game data",
-          "explanation": "Game attempts and stats. Game data is not included in your export."
+          "label": "Spieldaten",
+          "explanation": "Spielversuche und Statistiken. Spieldaten sind nicht in deinem Export enthalten."
         }
       }
     }

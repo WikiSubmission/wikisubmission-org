@@ -1095,47 +1095,47 @@
       "ready": "Your export is ready below. You can request another in {eta}.",
       "failed": "Your last export could not be prepared. Please try again.",
       "nextAvailable": "Next available in {eta}.",
-      "disclosure": "Your data export is stored privately and made available here as a secure download link, valid for 30 days and shared only with you. Limited to one request every 24 hours."
+      "disclosure": "يُحفَظ تصدير بياناتك بشكل خاص ويُتاح هنا كرابط تنزيل آمن، صالح لمدة 30 يومًا ومشارك معك وحدك. يقتصر على طلب واحد كل 15 يومًا."
     },
     "deleteContent": {
-      "heading": "Delete my content",
-      "body": "Permanently erase selected categories of your data. You must download a data export first so you keep a copy.",
-      "exportFirst": "Request and download a data export above before you can delete anything.",
-      "button": "Delete my content…",
-      "dialogTitle": "Delete my content",
-      "warning": "This permanently deletes the data you select. It cannot be undone, and deleted data is not recoverable, even from your export.",
-      "confirmPrompt": "Type {word} to confirm.",
+      "heading": "احذف محتواي",
+      "body": "امحُ الفئات المحددة من بياناتك نهائيًا. يجب أن تنزّل تصديرًا لبياناتك أولًا حتى تحتفظ بنسخة.",
+      "exportFirst": "اطلب ونزّل تصديرًا لبياناتك أعلاه قبل أن تتمكن من حذف أي شيء.",
+      "button": "احذف محتواي…",
+      "dialogTitle": "احذف محتواي",
+      "warning": "سيؤدي هذا إلى حذف البيانات التي تحددها نهائيًا. لا يمكن التراجع عن ذلك، ولا يمكن استعادة البيانات المحذوفة، حتى من التصدير الخاص بك.",
+      "confirmPrompt": "اكتب {word} للتأكيد.",
       "confirmWord": "DELETE",
-      "cancel": "Cancel",
-      "confirm": "Delete permanently",
-      "preparing": "Deleting your selected data…",
-      "done": "Your selected data has been permanently deleted.",
-      "failed": "The deletion could not be completed. Please try again.",
-      "inProgress": "A deletion is already in progress.",
+      "cancel": "إلغاء",
+      "confirm": "حذف نهائي",
+      "preparing": "جارٍ حذف البيانات المحددة…",
+      "done": "تم حذف بياناتك المحددة نهائيًا.",
+      "failed": "تعذر إكمال الحذف. يُرجى المحاولة مرة أخرى.",
+      "inProgress": "توجد عملية حذف قيد التنفيذ بالفعل.",
       "categories": {
         "bookmarks": {
-          "label": "Bookmarks",
-          "explanation": "Your saved verses and bookmark folders."
+          "label": "الإشارات المرجعية",
+          "explanation": "الآيات المحفوظة ومجلدات الإشارات المرجعية الخاصة بك."
         },
         "notes": {
-          "label": "Notes",
-          "explanation": "All personal notes you have written on verses."
+          "label": "الملاحظات",
+          "explanation": "جميع الملاحظات الشخصية التي كتبتها على الآيات."
         },
         "collections": {
-          "label": "Collections",
-          "explanation": "Collections you created and collections you follow."
+          "label": "المجموعات",
+          "explanation": "المجموعات التي أنشأتها والمجموعات التي تتابعها."
         },
         "activity": {
-          "label": "Activity history",
-          "explanation": "Your browsing and search history."
+          "label": "سجل النشاط",
+          "explanation": "سجل التصفح والبحث الخاص بك."
         },
         "reading_progress": {
-          "label": "Reading progress",
-          "explanation": "Reading position, streaks, and cover-to-cover progress."
+          "label": "تقدم القراءة",
+          "explanation": "موضع القراءة، وسلاسل المواظبة، والتقدم في القراءة من الغلاف إلى الغلاف."
         },
         "games": {
-          "label": "Game data",
-          "explanation": "Game attempts and stats. Game data is not included in your export."
+          "label": "بيانات الألعاب",
+          "explanation": "محاولات الألعاب وإحصاءاتها. بيانات الألعاب غير مضمنة في التصدير الخاص بك."
         }
       }
     }

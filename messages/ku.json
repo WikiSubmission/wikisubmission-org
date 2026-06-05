@@ -1030,47 +1030,47 @@
       "ready": "Your export is ready below. You can request another in {eta}.",
       "failed": "Your last export could not be prepared. Please try again.",
       "nextAvailable": "Next available in {eta}.",
-      "disclosure": "Your data export is stored privately and made available here as a secure download link, valid for 30 days and shared only with you. Limited to one request every 24 hours."
+      "disclosure": "هەناردەکردنی داتاکانت بە نهێنی هەڵدەگیرێت و لێرە وەک بەستەری دابەزاندنی پارێزراو پێشکەش دەکرێت، بۆ ماوەی 30 ڕۆژ دروستە و تەنها لەگەڵ تۆ هاوبەش دەکرێت. تەنها یەک داواکاری لە هەر 15 ڕۆژێکدا ڕێگەپێدراوە."
     },
     "deleteContent": {
-      "heading": "Delete my content",
-      "body": "Permanently erase selected categories of your data. You must download a data export first so you keep a copy.",
-      "exportFirst": "Request and download a data export above before you can delete anything.",
-      "button": "Delete my content…",
-      "dialogTitle": "Delete my content",
-      "warning": "This permanently deletes the data you select. It cannot be undone, and deleted data is not recoverable, even from your export.",
-      "confirmPrompt": "Type {word} to confirm.",
+      "heading": "ناوەڕۆکم بسڕەوە",
+      "body": "هاوپۆلە هەڵبژێردراوەکانی داتاکانت بە هەمیشەیی بسڕەوە. پێویستە سەرەتا هەناردەکردنێکی داتاکانت دابگریت بۆ ئەوەی کۆپییەک لەدەستت بێت.",
+      "exportFirst": "لە سەرەوە سەرەتا هەناردەکردنێکی داتا داوا بکە و دایبەزێنە پێش ئەوەی بتوانیت شتێک بسڕیتەوە.",
+      "button": "ناوەڕۆکم بسڕەوە…",
+      "dialogTitle": "ناوەڕۆکم بسڕەوە",
+      "warning": "ئەمە ئەو داتایە بە هەمیشەیی دەسڕێتەوە کە هەڵیدەبژێریت. ناتوانرێت بگەڕێندرێتەوە، و داتای سڕاوەش ناتوانرێت بگەڕێندرێتەوە، تەنانەت لە هەناردەکەتیشەوە.",
+      "confirmPrompt": "بۆ پشتڕاستکردنەوە {word} بنووسە.",
       "confirmWord": "DELETE",
-      "cancel": "Cancel",
-      "confirm": "Delete permanently",
-      "preparing": "Deleting your selected data…",
-      "done": "Your selected data has been permanently deleted.",
-      "failed": "The deletion could not be completed. Please try again.",
-      "inProgress": "A deletion is already in progress.",
+      "cancel": "هەڵوەشاندنەوە",
+      "confirm": "بە هەمیشەیی بسڕەوە",
+      "preparing": "داتای هەڵبژێردراوت دەسڕدرێتەوە…",
+      "done": "داتای هەڵبژێردراوت بە هەمیشەیی سڕایەوە.",
+      "failed": "نەتوانرا سڕینەوەکە تەواو بکرێت. تکایە دووبارە هەوڵبدەوە.",
+      "inProgress": "سڕینەوەیەک پێشتر لە جێبەجێکردندایە.",
       "categories": {
         "bookmarks": {
-          "label": "Bookmarks",
-          "explanation": "Your saved verses and bookmark folders."
+          "label": "نیشانەکان",
+          "explanation": "ئایەتە هەڵگیراوەکانت و فۆڵدەری نیشانەکانت."
         },
         "notes": {
-          "label": "Notes",
-          "explanation": "All personal notes you have written on verses."
+          "label": "تێبینییەکان",
+          "explanation": "هەموو ئەو تێبینییە کەسییانەی لەسەر ئایەتەکان نووسیوتە."
         },
         "collections": {
-          "label": "Collections",
-          "explanation": "Collections you created and collections you follow."
+          "label": "کۆمەڵەکان",
+          "explanation": "ئەو کۆمەڵانەی دروستت کردوون و ئەوانەی شوێنیان دەکەویت."
         },
         "activity": {
-          "label": "Activity history",
-          "explanation": "Your browsing and search history."
+          "label": "مێژووی چالاکی",
+          "explanation": "مێژووی گەڕان و پشکنینی تۆ."
         },
         "reading_progress": {
-          "label": "Reading progress",
-          "explanation": "Reading position, streaks, and cover-to-cover progress."
+          "label": "پێشکەوتنی خوێندنەوە",
+          "explanation": "شوێنی خوێندنەوە، بەردەوامییەکان، و پێشکەوتنی خوێندنەوە لە بەرگ تا بەرگ."
         },
         "games": {
-          "label": "Game data",
-          "explanation": "Game attempts and stats. Game data is not included in your export."
+          "label": "داتای یاری",
+          "explanation": "هەوڵەکانی یاری و ئامارەکان. داتای یاری لە هەناردەکردنەکەتدا ناگنجێت."
         }
       }
     }
