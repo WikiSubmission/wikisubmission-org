@@ -17,6 +17,7 @@ type ExportStatus = 'queued' | 'running' | 'sent' | 'failed'
 type ExportState = {
   status: ExportStatus
   sent_at?: string
+  download_url?: string
 }
 
 export function SettingsClient() {
@@ -29,7 +30,6 @@ export function SettingsClient() {
   const [exportMsg, setExportMsg] = useState<string | null>(null)
   const [exportState, setExportState] = useState<ExportState | null>(null)
   const [requestingExport, setRequestingExport] = useState(false)
-  const [userEmail, setUserEmail] = useState('')
 
   const authFetch = useCallback(async (path: string, init?: RequestInit) => {
     const session = await getSession()
@@ -46,7 +46,6 @@ export function SettingsClient() {
   }, [authFetch])
 
   useEffect(() => {
-    getSession().then((s) => setUserEmail(s?.user?.email ?? ''))
     const exportTimer = window.setTimeout(() => {
       void refreshExportStatus()
     }, 0)
@@ -57,6 +56,16 @@ export function SettingsClient() {
 
     return () => window.clearTimeout(exportTimer)
   }, [refreshExportStatus])
+
+  // While an export is being prepared, poll the status endpoint until it
+  // resolves to sent or failed so the download link appears without a refresh.
+  useEffect(() => {
+    if (exportState?.status !== 'queued' && exportState?.status !== 'running') return
+    const id = window.setInterval(() => {
+      void refreshExportStatus()
+    }, 3000)
+    return () => window.clearInterval(id)
+  }, [exportState?.status, refreshExportStatus])
 
   async function requestExport() {
     if (requestingExport) return
@@ -70,7 +79,6 @@ export function SettingsClient() {
         return
       }
       if (res.ok) {
-        setExportMsg(t('export.queued', { email: userEmail || 'your email' }))
         await refreshExportStatus()
       }
     } finally {
@@ -203,18 +211,39 @@ export function SettingsClient() {
 
           <section style={cardStyle}>
             <h2 style={h2Style}>{t('export.heading')}</h2>
-            <p style={bodyStyle}>{t('export.disclosure', { email: userEmail || 'your email' })}</p>
-            {(exportState == null || exportState.status === 'failed') && (
+            <p style={bodyStyle}>{t('export.disclosure')}</p>
+
+            {(exportState?.status === 'queued' || exportState?.status === 'running') && (
+              <p style={bodyStyle}>{t('export.preparing')}</p>
+            )}
+
+            {exportState?.status === 'sent' && exportState.download_url && (
+              <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <a
+                  href={exportState.download_url}
+                  download
+                  style={{ ...buttonStyle, textDecoration: 'none', display: 'inline-block', width: 'fit-content' }}
+                >
+                  {t('export.download')}
+                </a>
+                {within24h(exportState.sent_at) && (
+                  <p style={mutedStyle}>
+                    {t('export.ready', { eta: formatHHMM(secondsUntil24h(exportState.sent_at)) })}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {exportState?.status === 'failed' && <p style={bodyStyle}>{t('export.failed')}</p>}
+
+            {(exportState == null ||
+              exportState.status === 'failed' ||
+              (exportState.status === 'sent' && !within24h(exportState.sent_at))) && (
               <button type="button" onClick={requestExport} disabled={requestingExport} style={{ ...buttonStyle, marginTop: 16 }}>
                 {t('export.button')}
               </button>
             )}
-            {(exportState?.status === 'queued' || exportState?.status === 'running') && (
-              <p style={bodyStyle}>{t('export.queued', { email: userEmail || 'your email' })}</p>
-            )}
-            {exportState?.status === 'sent' && within24h(exportState.sent_at) && (
-              <p style={bodyStyle}>{t('export.sent', { when: relative(exportState.sent_at), eta: formatHHMM(secondsUntil24h(exportState.sent_at)) })}</p>
-            )}
+
             {exportMsg && <p style={bodyStyle}>{exportMsg}</p>}
           </section>
 
@@ -315,11 +344,4 @@ function secondsUntil24h(sentAt?: string): number {
   if (!sentAt) return 0
   const end = new Date(sentAt).getTime() + 24 * 3600 * 1000
   return Math.max(0, Math.floor((end - Date.now()) / 1000))
-}
-
-function relative(sentAt?: string): string {
-  if (!sentAt) return ''
-  const diffMin = Math.floor((Date.now() - new Date(sentAt).getTime()) / 60000)
-  if (diffMin < 60) return `${diffMin}m ago`
-  return `${Math.floor(diffMin / 60)}h ago`
 }
