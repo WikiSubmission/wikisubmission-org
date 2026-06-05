@@ -50,7 +50,7 @@ function RamadanContent() {
     if (!location) { setData(null); return }
     setLoading(true); setError(null)
     try {
-      const url = `https://practices.wikisubmission.org/ramadan/${encodeURIComponent(location)}?year=${year}`
+      const url = `/api/practices/ramadan/${encodeURIComponent(location)}?year=${year}`
       const response = await fetch(url)
       if (!response.ok) throw new Error(t('locationNotFound'))
       const result: RamadanResponse = await response.json()
@@ -84,7 +84,7 @@ function RamadanContent() {
       const params = new URLSearchParams(searchParams.toString())
       params.set('q', trimmed)
       params.set('year', year)
-      router.push(`/ramadan?${params.toString()}`)
+      router.push(`/practices/ramadan?${params.toString()}`)
       fetchRamadanSchedule(trimmed, year)
     }
   }
@@ -95,7 +95,7 @@ function RamadanContent() {
       const params = new URLSearchParams(searchParams.toString())
       params.set('q', searchQuery.trim())
       params.set('year', newYear)
-      router.push(`/ramadan?${params.toString()}`)
+      router.push(`/practices/ramadan?${params.toString()}`)
       fetchRamadanSchedule(searchQuery.trim(), newYear)
     }
   }

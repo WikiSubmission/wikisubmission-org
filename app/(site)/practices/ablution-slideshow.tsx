@@ -39,7 +39,6 @@ type YTNamespace = {
 
 declare global {
   interface Window {
-    YT?: YTNamespace
     onYouTubeIframeAPIReady?: () => void
   }
 }
@@ -231,8 +230,9 @@ export function AblutionSlideshow() {
     }
 
     const initPlayer = () => {
-      if (!window.YT) return
-      playerRef.current = new window.YT.Player('yt-player', {
+      const yt = window.YT as YTNamespace | undefined
+      if (!yt) return
+      playerRef.current = new yt.Player('yt-player', {
         videoId: 'Y8QnnhDGgtw',
         playerVars: {
           autoplay: 1,
@@ -246,7 +246,8 @@ export function AblutionSlideshow() {
             startTimer()
           },
           onStateChange: (event: YTStateEvent) => {
-            if (window.YT && event.data === window.YT.PlayerState.PLAYING) {
+            const currentYt = window.YT as YTNamespace | undefined
+            if (currentYt && event.data === currentYt.PlayerState.PLAYING) {
               startTimer()
             } else {
               stopTimer()
@@ -256,7 +257,8 @@ export function AblutionSlideshow() {
       })
     }
 
-    if (window.YT && window.YT.Player) {
+    const existingYt = window.YT as YTNamespace | undefined
+    if (existingYt?.Player) {
       initPlayer()
     } else {
       window.onYouTubeIframeAPIReady = initPlayer
