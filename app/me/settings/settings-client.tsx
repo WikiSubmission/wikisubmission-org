@@ -6,6 +6,14 @@ import { meApi } from '@/src/api/me-client'
 import { getSession } from 'next-auth/react'
 import { resolveBrowserApiBaseUrl } from '@/src/api/base-url'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 type ConsentState =
   | { status: 'loading' }
@@ -20,6 +28,30 @@ type ExportState = {
   download_url?: string
 }
 
+type DeleteStatus = 'queued' | 'running' | 'done' | 'failed'
+
+type DeleteState = {
+  status: DeleteStatus
+  categories?: string[]
+  counts?: Record<string, number>
+  completed_at?: string
+} | null
+
+// Must match db.DeletionCategories on the backend.
+const DELETE_CATEGORIES = [
+  'bookmarks',
+  'notes',
+  'collections',
+  'activity',
+  'reading_progress',
+  'games',
+] as const
+
+// The export download link stays valid for 30 days; a new export can only be
+// requested every 15 days (enforced server-side). Both windows are mirrored
+// here so the UI matches the backend gating.
+const EXPORT_COOLDOWN_MS = 15 * 24 * 3600 * 1000
+
 export function SettingsClient() {
   const t = useTranslations('meSettings')
   const push = usePushNotifications()
@@ -30,6 +62,11 @@ export function SettingsClient() {
   const [exportMsg, setExportMsg] = useState<string | null>(null)
   const [exportState, setExportState] = useState<ExportState | null>(null)
   const [requestingExport, setRequestingExport] = useState(false)
+  const [deleteState, setDeleteState] = useState<DeleteState>(null)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [selectedCats, setSelectedCats] = useState<Set<string>>(new Set())
+  const [confirmText, setConfirmText] = useState('')
+  const [submittingDelete, setSubmittingDelete] = useState(false)
 
   const authFetch = useCallback(async (path: string, init?: RequestInit) => {
     const session = await getSession()
@@ -45,17 +82,33 @@ export function SettingsClient() {
     setExportState(body.data ?? null)
   }, [authFetch])
 
+  const refreshDeleteStatus = useCallback(async () => {
+    const res = await authFetch('/me/delete-content/status')
+    if (!res.ok) return
+    const body = (await res.json()) as { data?: DeleteState }
+    setDeleteState(body.data ?? null)
+  }, [authFetch])
+
   useEffect(() => {
-    const exportTimer = window.setTimeout(() => {
+    let alive = true
+    const timer = window.setTimeout(() => {
       void refreshExportStatus()
+      void refreshDeleteStatus()
     }, 0)
     meApi.activity
       .getConsent()
-      .then(({ consent }) => setConsent({ status: 'ready', consent }))
-      .catch(() => setConsent({ status: 'error' }))
+      .then(({ consent }) => {
+        if (alive) setConsent({ status: 'ready', consent })
+      })
+      .catch(() => {
+        if (alive) setConsent({ status: 'error' })
+      })
 
-    return () => window.clearTimeout(exportTimer)
-  }, [refreshExportStatus])
+    return () => {
+      alive = false
+      window.clearTimeout(timer)
+    }
+  }, [refreshExportStatus, refreshDeleteStatus])
 
   // While an export is being prepared, poll the status endpoint until it
   // resolves to sent or failed so the download link appears without a refresh.
@@ -67,6 +120,15 @@ export function SettingsClient() {
     return () => window.clearInterval(id)
   }, [exportState?.status, refreshExportStatus])
 
+  // Same polling for an in-progress deletion.
+  useEffect(() => {
+    if (deleteState?.status !== 'queued' && deleteState?.status !== 'running') return
+    const id = window.setInterval(() => {
+      void refreshDeleteStatus()
+    }, 3000)
+    return () => window.clearInterval(id)
+  }, [deleteState?.status, refreshDeleteStatus])
+
   async function requestExport() {
     if (requestingExport) return
     setRequestingExport(true)
@@ -75,7 +137,7 @@ export function SettingsClient() {
       const res = await authFetch('/me/export', { method: 'POST' })
       if (res.status === 429) {
         const body = await res.json()
-        setExportMsg(t('export.nextAvailable', { eta: formatHHMM(Number(body.retry_after_seconds ?? 0)) }))
+        setExportMsg(t('export.nextAvailable', { eta: formatEta(Number(body.retry_after_seconds ?? 0)) }))
         return
       }
       if (res.ok) {
@@ -110,10 +172,66 @@ export function SettingsClient() {
     }
   }
 
+  function toggleCategory(key: string) {
+    setSelectedCats((cur) => {
+      const next = new Set(cur)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  function openDeleteDialog() {
+    setSelectedCats(new Set())
+    setConfirmText('')
+    setDeleteOpen(true)
+  }
+
+  async function submitDelete() {
+    if (submittingDelete) return
+    const categories = [...selectedCats]
+    // Re-assert the same guards the button enforces, so the destructive POST
+    // can never fire without an explicit selection, a typed confirmation, and a
+    // completed export (the server enforces these too).
+    if (categories.length === 0) return
+    if (confirmText.trim() !== confirmWord) return
+    if (!exportReady) return
+    setSubmittingDelete(true)
+    try {
+      const res = await authFetch('/me/delete-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categories }),
+      })
+      if (res.status === 409) {
+        flash(t('deleteContent.exportFirst'))
+        return
+      }
+      if (res.status === 429) {
+        flash(t('deleteContent.inProgress'))
+        return
+      }
+      if (res.ok) {
+        setDeleteOpen(false)
+        await refreshDeleteStatus()
+      }
+    } finally {
+      setSubmittingDelete(false)
+    }
+  }
+
   function flash(msg: string) {
     setToast(msg)
     window.setTimeout(() => setToast((cur) => (cur === msg ? null : cur)), 2400)
   }
+
+  // A completed, downloadable export is required before any deletion. The
+  // backend enforces this too; the UI mirrors it to keep the flow clear.
+  const exportReady = exportState?.status === 'sent'
+  const deletionInFlight = deleteState?.status === 'queued' || deleteState?.status === 'running'
+  const confirmWord = t('deleteContent.confirmWord')
+  const canSubmitDelete =
+    selectedCats.size > 0 && confirmText.trim() === confirmWord && !submittingDelete
 
   return (
     <section style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px' }}>
@@ -226,9 +344,9 @@ export function SettingsClient() {
                 >
                   {t('export.download')}
                 </a>
-                {within24h(exportState.sent_at) && (
+                {withinCooldown(exportState.sent_at) && (
                   <p style={mutedStyle}>
-                    {t('export.ready', { eta: formatHHMM(secondsUntil24h(exportState.sent_at)) })}
+                    {t('export.ready', { eta: formatEta(secondsUntilCooldownEnd(exportState.sent_at)) })}
                   </p>
                 )}
               </div>
@@ -238,7 +356,7 @@ export function SettingsClient() {
 
             {(exportState == null ||
               exportState.status === 'failed' ||
-              (exportState.status === 'sent' && !within24h(exportState.sent_at))) && (
+              (exportState.status === 'sent' && !withinCooldown(exportState.sent_at))) && (
               <button type="button" onClick={requestExport} disabled={requestingExport} style={{ ...buttonStyle, marginTop: 16 }}>
                 {t('export.button')}
               </button>
@@ -254,8 +372,111 @@ export function SettingsClient() {
               {t('clearButton')}
             </button>
           </section>
+
+          <section style={{ ...cardStyle, borderColor: 'var(--destructive, #b91c1c)' }}>
+            <h2 style={h2Style}>{t('deleteContent.heading')}</h2>
+            <p style={bodyStyle}>{t('deleteContent.body')}</p>
+
+            {!exportReady && <p style={mutedStyle}>{t('deleteContent.exportFirst')}</p>}
+
+            {deletionInFlight && <p style={bodyStyle}>{t('deleteContent.preparing')}</p>}
+
+            {deleteState?.status === 'done' && (
+              <div style={{ marginTop: 12 }}>
+                <p style={bodyStyle}>{t('deleteContent.done')}</p>
+                {deleteState.counts && (
+                  <ul style={{ ...mutedStyle, marginTop: 8, paddingLeft: 18 }}>
+                    {Object.entries(deleteState.counts)
+                      .filter(([key]) => (DELETE_CATEGORIES as readonly string[]).includes(key))
+                      .map(([key, count]) => (
+                        <li key={key}>
+                          {t(`deleteContent.categories.${key}.label`)}: {count}
+                        </li>
+                      ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
+            {deleteState?.status === 'failed' && <p style={bodyStyle}>{t('deleteContent.failed')}</p>}
+
+            {!deletionInFlight && (
+              <button
+                type="button"
+                onClick={openDeleteDialog}
+                disabled={!exportReady}
+                style={{
+                  ...buttonStyle,
+                  marginTop: 16,
+                  background: exportReady ? 'var(--destructive, #b91c1c)' : 'var(--ed-rule)',
+                  borderColor: exportReady ? 'var(--destructive, #b91c1c)' : 'var(--ed-rule)',
+                  color: '#fff',
+                  cursor: exportReady ? 'pointer' : 'not-allowed',
+                }}
+              >
+                {t('deleteContent.button')}
+              </button>
+            )}
+          </section>
         </>
       )}
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('deleteContent.dialogTitle')}</DialogTitle>
+          </DialogHeader>
+
+          <p className="text-sm font-medium text-destructive">{t('deleteContent.warning')}</p>
+
+          <div className="flex flex-col gap-3 py-2">
+            {DELETE_CATEGORIES.map((key) => (
+              <label key={key} className="flex items-start gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={selectedCats.has(key)}
+                  onChange={() => toggleCategory(key)}
+                />
+                <span>
+                  <span className="font-medium">{t(`deleteContent.categories.${key}.label`)}</span>
+                  <span className="block text-muted-foreground">
+                    {t(`deleteContent.categories.${key}.explanation`)}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </div>
+
+          <label className="block text-sm">
+            <span className="text-muted-foreground">
+              {t('deleteContent.confirmPrompt', { word: confirmWord })}
+            </span>
+            <input
+              type="text"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              className="mt-1 w-full rounded-md border bg-background px-3 py-2"
+              placeholder={confirmWord}
+              autoComplete="off"
+            />
+          </label>
+
+          <DialogFooter className="gap-2 pt-2">
+            <Button variant="outline" size="sm" onClick={() => setDeleteOpen(false)}>
+              {t('deleteContent.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={!canSubmitDelete}
+              onClick={submitDelete}
+            >
+              {t('deleteContent.confirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {toast && (
         <p style={toastStyle} role="status">
@@ -328,20 +549,25 @@ const toastStyle: React.CSSProperties = {
   zIndex: 100,
 }
 
-function formatHHMM(totalSeconds: number): string {
-  const clamped = Math.max(0, Math.floor(totalSeconds))
-  const h = Math.floor(clamped / 3600)
-  const m = Math.floor((clamped % 3600) / 60)
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+// Renders a coarse "Nd Mh" / "Mh Ms" countdown. Used for the multi-day export
+// cooldown, where an HH:MM clock would read awkwardly.
+function formatEta(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds))
+  const days = Math.floor(s / 86400)
+  const hours = Math.floor((s % 86400) / 3600)
+  const mins = Math.floor((s % 3600) / 60)
+  if (days > 0) return `${days}d ${hours}h`
+  if (hours > 0) return `${hours}h ${mins}m`
+  return `${mins}m`
 }
 
-function within24h(sentAt?: string): boolean {
+function withinCooldown(sentAt?: string): boolean {
   if (!sentAt) return false
-  return Date.now() - new Date(sentAt).getTime() < 24 * 3600 * 1000
+  return Date.now() - new Date(sentAt).getTime() < EXPORT_COOLDOWN_MS
 }
 
-function secondsUntil24h(sentAt?: string): number {
+function secondsUntilCooldownEnd(sentAt?: string): number {
   if (!sentAt) return 0
-  const end = new Date(sentAt).getTime() + 24 * 3600 * 1000
+  const end = new Date(sentAt).getTime() + EXPORT_COOLDOWN_MS
   return Math.max(0, Math.floor((end - Date.now()) / 1000))
 }
