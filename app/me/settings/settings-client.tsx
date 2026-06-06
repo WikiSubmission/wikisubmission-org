@@ -207,54 +207,6 @@ export function SettingsClient() {
     }
   }
 
-  function toggleCategory(key: string) {
-    setSelectedCats((cur) => {
-      const next = new Set(cur)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
-      return next
-    })
-  }
-
-  function openDeleteDialog() {
-    setSelectedCats(new Set())
-    setConfirmText('')
-    setDeleteOpen(true)
-  }
-
-  async function submitDelete() {
-    if (submittingDelete) return
-    const categories = [...selectedCats]
-    // Re-assert the same guards the button enforces, so the destructive POST
-    // can never fire without an explicit selection, a typed confirmation, and a
-    // completed export (the server enforces these too).
-    if (categories.length === 0) return
-    if (confirmText.trim() !== confirmWord) return
-    if (!exportReady) return
-    setSubmittingDelete(true)
-    try {
-      const res = await authFetch('/me/delete-content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categories }),
-      })
-      if (res.status === 409) {
-        flash(t('deleteContent.exportFirst'))
-        return
-      }
-      if (res.status === 429) {
-        flash(t('deleteContent.inProgress'))
-        return
-      }
-      if (res.ok) {
-        setDeleteOpen(false)
-        await refreshDeleteStatus()
-      }
-    } finally {
-      setSubmittingDelete(false)
-    }
-  }
-
   function flash(msg: string) {
     setToast(msg)
     window.setTimeout(() => setToast((cur) => (cur === msg ? null : cur)), 2400)
@@ -398,52 +350,6 @@ export function SettingsClient() {
             )}
 
             {exportMsg && <p style={bodyStyle}>{exportMsg}</p>}
-          </section>
-
-          <section style={{ ...cardStyle, borderColor: 'var(--destructive, #b91c1c)' }}>
-            <h2 style={h2Style}>{t('deleteContent.heading')}</h2>
-            <p style={bodyStyle}>{t('deleteContent.body')}</p>
-
-            {!exportReady && <p style={mutedStyle}>{t('deleteContent.exportFirst')}</p>}
-
-            {deletionInFlight && <p style={bodyStyle}>{t('deleteContent.preparing')}</p>}
-
-            {deleteState?.status === 'done' && (
-              <div style={{ marginTop: 12 }}>
-                <p style={bodyStyle}>{t('deleteContent.done')}</p>
-                {deleteState.counts && (
-                  <ul style={{ ...mutedStyle, marginTop: 8, paddingLeft: 18 }}>
-                    {Object.entries(deleteState.counts)
-                      .filter(([key]) => (DELETE_CATEGORIES as readonly string[]).includes(key))
-                      .map(([key, count]) => (
-                        <li key={key}>
-                          {t(`deleteContent.categories.${key}.label`)}: {count}
-                        </li>
-                      ))}
-                  </ul>
-                )}
-              </div>
-            )}
-
-            {deleteState?.status === 'failed' && <p style={bodyStyle}>{t('deleteContent.failed')}</p>}
-
-            {!deletionInFlight && (
-              <button
-                type="button"
-                onClick={openDeleteDialog}
-                disabled={!exportReady}
-                style={{
-                  ...buttonStyle,
-                  marginTop: 16,
-                  background: exportReady ? 'var(--destructive, #b91c1c)' : 'var(--ed-rule)',
-                  borderColor: exportReady ? 'var(--destructive, #b91c1c)' : 'var(--ed-rule)',
-                  color: '#fff',
-                  cursor: exportReady ? 'pointer' : 'not-allowed',
-                }}
-              >
-                {t('deleteContent.button')}
-              </button>
-            )}
           </section>
 
           <section style={{ ...cardStyle, borderColor: 'var(--destructive, #b91c1c)' }}>
