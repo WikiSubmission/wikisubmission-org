@@ -1,166 +1,37 @@
 import React from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { buildPageMetadata } from '@/constants/metadata'
 import { SectionDivider, F } from '@/app/(site)/_sections/shared'
+import {
+  ACCESSIBILITY_RULES,
+  BRAND_MARKDOWN_PATH,
+  CONTENT_PATTERNS,
+  DONTS,
+  DOS,
+  FORM_RULES,
+  I18N_RULES,
+  IMPLEMENTATION_RULES,
+  INTERACTION_STATES,
+  MOTION_RULES,
+  NAVIGATION_RULES,
+  PALETTES,
+  RESPONSIVE_RULES,
+  TOKENS,
+  TYPE,
+  VOICE,
+  type BrandCard,
+  type BrandRule,
+  type ModeSwatches,
+  type PaletteDoc,
+} from '@/app/(site)/brand/content'
 
 export const metadata = buildPageMetadata({
   title: 'Brand · WikiSubmission',
   description:
-    'WikiSubmission brand guidelines — palettes, typography, tokens, components, and voice.',
+    'WikiSubmission brand guidelines — palettes, typography, responsive rules, accessibility, motion, components, and voice.',
   url: '/brand',
 })
-
-/* ------------------------------------------------------------------ */
-/* Palette documentation — three palettes × two modes.
-   These are intentionally hardcoded here: brand swatches must show
-   their canonical hex values regardless of the user's active theme. */
-/* ------------------------------------------------------------------ */
-
-interface ModeSwatches {
-  bg: string
-  fg: string
-  accent: string
-  rule: string
-}
-
-interface PaletteDoc {
-  key: 'ink' | 'violet' | 'mono'
-  label: string
-  tagline: string
-  light: ModeSwatches
-  dark: ModeSwatches
-}
-
-const PALETTES: PaletteDoc[] = [
-  {
-    key: 'ink',
-    label: 'Ink on Parchment',
-    tagline: 'Editorial. Default. The canonical look.',
-    light: { bg: '#F6F2EA', fg: '#1A1715', accent: '#6B3410', rule: '#D9CFB9' },
-    dark: { bg: '#14110E', fg: '#EEE4D0', accent: '#D4A373', rule: '#2A241E' },
-  },
-  {
-    key: 'violet',
-    label: 'Sharpened Violet',
-    tagline: 'Contemporary. High contrast. Modernist.',
-    light: { bg: '#FAFAFA', fg: '#121214', accent: '#5A1FD4', rule: '#E5E5EA' },
-    dark: { bg: '#0C0C0E', fg: '#F4F4F5', accent: '#B48CFF', rule: '#27272C' },
-  },
-  {
-    key: 'mono',
-    label: 'Monochrome',
-    tagline: 'Minimal. True black on warm white.',
-    light: { bg: '#F4F4F2', fg: '#0E0E0D', accent: '#0E0E0D', rule: '#D8D8D4' },
-    dark: { bg: '#0A0A09', fg: '#F1F1EC', accent: '#F1F1EC', rule: '#23231F' },
-  },
-]
-
-/* ------------------------------------------------------------------ */
-/* Semantic token documentation. These flow through the active palette.  */
-/* ------------------------------------------------------------------ */
-
-const TOKENS: Array<{ name: string; role: string; mapsTo: string }> = [
-  { name: '--ed-bg', role: 'Page background', mapsTo: '--background' },
-  { name: '--ed-fg', role: 'Primary text', mapsTo: '--foreground' },
-  { name: '--ed-fg-muted', role: 'Secondary text, captions', mapsTo: '--muted-foreground' },
-  { name: '--ed-accent', role: 'Highlights, links, key motifs', mapsTo: '--primary' },
-  { name: '--ed-accent-soft', role: 'Tinted accent surface', mapsTo: '--accent' },
-  { name: '--ed-rule', role: 'Hairline borders, dividers', mapsTo: '--border' },
-  { name: '--ed-bg-alt', role: 'Muted surface (cards, callouts)', mapsTo: '--muted' },
-  { name: '--ed-surface', role: 'Card surface (elevated)', mapsTo: '--card' },
-]
-
-/* ------------------------------------------------------------------ */
-/* Typography specimens                                                */
-/* ------------------------------------------------------------------ */
-
-const TYPE: Array<{
-  name: string
-  role: string
-  variable: string
-  family: string
-  sample: string
-  size: number
-  italic?: boolean
-}> = [
-  {
-    name: 'Cormorant Garamond',
-    role: 'Display, headings, italic accents',
-    variable: '--font-cormorant',
-    family: F.display,
-    sample: 'In the name of God, Most Gracious, Most Merciful.',
-    size: 40,
-  },
-  {
-    name: 'Source Serif 4',
-    role: 'Body copy, paragraphs, reading',
-    variable: '--font-source-serif',
-    family: F.serif,
-    sample: 'Praise be to God, Lord of the universe, Most Gracious, Most Merciful.',
-    size: 18,
-  },
-  {
-    name: 'JetBrains Mono',
-    role: 'References, verse keys, tokens, code',
-    variable: '--font-jetbrains',
-    family: F.mono,
-    sample: '1:1  ·  Sura 112:1–4  ·  --ed-accent',
-    size: 14,
-  },
-  {
-    name: 'Amiri',
-    role: 'Arabic Quranic text',
-    variable: '--font-amiri',
-    family: F.arabic,
-    sample: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-    size: 32,
-  },
-  {
-    name: 'Glacial Indifference',
-    role: 'UI eyebrow, uppercase metadata',
-    variable: '--font-glacial',
-    family: F.glacial,
-    sample: 'CHAPTER · VERSE · TRANSLATION',
-    size: 12,
-  },
-]
-
-/* ------------------------------------------------------------------ */
-/* Voice                                                                */
-/* ------------------------------------------------------------------ */
-
-const VOICE = [
-  { word: 'Scholarly', body: 'Precise, sourced, footnoted. Never speculative.' },
-  { word: 'Reverent', body: 'Quiet, deliberate. The verses are the focus.' },
-  { word: 'Plain', body: 'No jargon. A 12-year-old can read every page.' },
-  { word: 'Timeless', body: 'No trends. No dates in the design language.' },
-]
-
-/* ------------------------------------------------------------------ */
-/* Application — Do / Don't                                             */
-/* ------------------------------------------------------------------ */
-
-const DOS = [
-  'Use --ed-* tokens for every color reference.',
-  'Pair Cormorant displays with Source Serif body.',
-  'Keep hairlines at exactly 1px, never thicker.',
-  'Let Arabic breathe — generous line-height (1.7+).',
-  'Use the section-number motif (§ I, § II) for chaptering.',
-  'Test every page in all three palettes, both modes.',
-]
-
-const DONTS = [
-  'Hardcode hex values in components.',
-  'Round corners beyond 3px — squares are the language.',
-  'Decorate empty space — silence is part of the layout.',
-  'Mix more than two type families on a single screen.',
-  'Use icon-only buttons without aria labels.',
-  'Recolor or distort the logo mark.',
-]
-
-/* ------------------------------------------------------------------ */
-/* Page                                                                 */
-/* ------------------------------------------------------------------ */
 
 const SECTION_PADDING = 'py-20 sm:py-28'
 const CONTAINER = 'max-w-[1240px] mx-auto px-5 sm:px-10'
@@ -168,7 +39,6 @@ const CONTAINER = 'max-w-[1240px] mx-auto px-5 sm:px-10'
 export default function BrandPage() {
   return (
     <main style={{ backgroundColor: 'var(--ed-bg)', color: 'var(--ed-fg)' }}>
-      {/* ---------- Masthead ---------- */}
       <section className={`${CONTAINER} ${SECTION_PADDING}`}>
         <div
           style={{
@@ -202,82 +72,60 @@ export default function BrandPage() {
             fontSize: 19,
             lineHeight: 1.6,
             color: 'var(--ed-fg-muted)',
-            maxWidth: '60ch',
+            maxWidth: '62ch',
           }}
         >
-          WikiSubmission ships under three palettes and two modes. This document
-          defines the system that holds them together — the tokens, typography,
-          motifs, and voice that read the same in every theme.
+          WikiSubmission ships under three palettes and two modes. This document defines the
+          system that keeps those themes coherent across reading surfaces, navigation, forms,
+          motion, accessibility, and voice.
         </p>
+        <div className="flex flex-wrap items-center gap-4 mt-8">
+          <a href={BRAND_MARKDOWN_PATH} download className="ed-btn-ghost" style={{ fontFamily: F.serif }}>
+            Download Markdown
+          </a>
+          <span
+            style={{
+              fontFamily: F.mono,
+              fontSize: 11.5,
+              color: 'var(--ed-fg-muted)',
+            }}
+          >
+            LLM-friendly export of this page’s design guidance.
+          </span>
+        </div>
       </section>
 
       <Hairline />
 
-      {/* ---------- § I — North Star ---------- */}
       <section className={`${CONTAINER} ${SECTION_PADDING}`}>
-        <SectionDivider num="§ I" title="North star" sub="Why this exists" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {[
+        <SectionDivider id="north-star" num="§ I" title="North star" sub="Why this exists" />
+        <CardGrid
+          cards={[
             {
               title: 'Scripture first',
               body: 'Every visual decision serves the reading. Surfaces stay quiet so the verses can speak.',
             },
             {
               title: 'Editorial, not corporate',
-              body: 'Type-led layouts, hairline rules, generous whitespace. We borrow from broadsheets, not dashboards.',
+              body: 'Type-led layouts, hairline rules, and generous whitespace beat dashboard chrome and startup gloss.',
             },
             {
               title: 'Theme-honest',
-              body: 'Three palettes, two modes. The brand is the system, not a single colorway.',
+              body: 'Three palettes, two modes. The brand is the system across states, not a single preferred screenshot.',
             },
-          ].map((card) => (
-            <div key={card.title}>
-              <div
-                style={{
-                  fontFamily: F.display,
-                  fontSize: 24,
-                  fontWeight: 500,
-                  letterSpacing: '-0.015em',
-                  color: 'var(--ed-fg)',
-                  marginBottom: 12,
-                }}
-              >
-                {card.title}
-              </div>
-              <p
-                style={{
-                  fontFamily: F.serif,
-                  fontSize: 15,
-                  lineHeight: 1.65,
-                  color: 'var(--ed-fg-muted)',
-                }}
-              >
-                {card.body}
-              </p>
-            </div>
-          ))}
-        </div>
+          ]}
+          columns="md:grid-cols-3"
+        />
       </section>
 
       <Hairline />
 
-      {/* ---------- § II — Palettes ---------- */}
       <section className={`${CONTAINER} ${SECTION_PADDING}`}>
-        <SectionDivider num="§ II" title="Palettes" sub="Three documented" />
-        <p
-          style={{
-            fontFamily: F.serif,
-            fontSize: 15,
-            lineHeight: 1.65,
-            color: 'var(--ed-fg-muted)',
-            marginBottom: 48,
-            maxWidth: '64ch',
-          }}
-        >
-          This page follows your active palette — switch via the theme control
-          in the header to see the chrome adapt. The swatches below always show
-          all three palettes at their canonical hex values.
-        </p>
+        <SectionDivider id="palettes" num="§ II" title="Palettes" sub="Three documented" />
+        <SectionLead>
+          This page follows your active palette. Switch themes in the header to see the chrome adapt.
+          The swatches below stay canonical and should not be rewritten by the active theme.
+        </SectionLead>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {PALETTES.map((p) => (
             <PaletteCard key={p.key} palette={p} />
@@ -287,30 +135,13 @@ export default function BrandPage() {
 
       <Hairline />
 
-      {/* ---------- § III — Tokens ---------- */}
       <section className={`${CONTAINER} ${SECTION_PADDING}`}>
-        <SectionDivider num="§ III" title="Tokens" sub="The semantic API" />
-        <p
-          style={{
-            fontFamily: F.serif,
-            fontSize: 15,
-            lineHeight: 1.65,
-            color: 'var(--ed-fg-muted)',
-            marginBottom: 36,
-            maxWidth: '64ch',
-          }}
-        >
-          Always reference these tokens — never the underlying palette hex.
-          The token layer absorbs theme switching so a single component reads
-          correctly in every palette × mode.
-        </p>
-        <div
-          style={{
-            border: '1px solid var(--ed-rule)',
-            borderRadius: 3,
-            overflow: 'hidden',
-          }}
-        >
+        <SectionDivider id="tokens" num="§ III" title="Tokens" sub="The semantic API" />
+        <SectionLead>
+          Always reference semantic tokens before reaching for raw palette values. The token layer is
+          what keeps a single component legible in every palette × mode combination.
+        </SectionLead>
+        <div style={{ border: '1px solid var(--ed-rule)', borderRadius: 3, overflow: 'hidden' }}>
           {TOKENS.map((tok, i) => (
             <div
               key={tok.name}
@@ -334,23 +165,11 @@ export default function BrandPage() {
                     flexShrink: 0,
                   }}
                 />
-                <code
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 12.5,
-                    color: 'var(--ed-fg)',
-                  }}
-                >
+                <code style={{ fontFamily: F.mono, fontSize: 12.5, color: 'var(--ed-fg)' }}>
                   {tok.name}
                 </code>
               </div>
-              <div
-                style={{
-                  fontFamily: F.serif,
-                  fontSize: 14,
-                  color: 'var(--ed-fg-muted)',
-                }}
-              >
+              <div style={{ fontFamily: F.serif, fontSize: 14, color: 'var(--ed-fg-muted)' }}>
                 {tok.role}
               </div>
               <code
@@ -371,18 +190,14 @@ export default function BrandPage() {
 
       <Hairline />
 
-      {/* ---------- § IV — Typography ---------- */}
       <section className={`${CONTAINER} ${SECTION_PADDING}`}>
-        <SectionDivider num="§ IV" title="Typography" sub="Five families" />
+        <SectionDivider id="typography" num="§ IV" title="Typography" sub="Five families" />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
           {TYPE.map((t) => (
             <div
               key={t.name}
               className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 md:gap-12"
-              style={{
-                paddingBottom: 32,
-                borderBottom: '1px solid var(--ed-rule)',
-              }}
+              style={{ paddingBottom: 32, borderBottom: '1px solid var(--ed-rule)' }}
             >
               <div>
                 <div
@@ -408,13 +223,7 @@ export default function BrandPage() {
                 >
                   {t.role}
                 </div>
-                <code
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 11,
-                    color: 'var(--ed-accent)',
-                  }}
-                >
+                <code style={{ fontFamily: F.mono, fontSize: 11, color: 'var(--ed-accent)' }}>
                   var({t.variable})
                 </code>
               </div>
@@ -439,194 +248,161 @@ export default function BrandPage() {
 
       <Hairline />
 
-      {/* ---------- § V — Logo ---------- */}
       <section className={`${CONTAINER} ${SECTION_PADDING}`}>
-        <SectionDivider num="§ V" title="Logo" sub="Mark variants" />
+        <SectionDivider id="logo" num="§ V" title="Logo" sub="Mark variants" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <LogoCard
             src="/brand-assets/logo-transparent.png"
             label="Transparent"
-            note="Default. Any background."
+            note="Default. Any background. Preferred in ordinary product usage."
             bg="var(--ed-bg-alt)"
           />
           <LogoCard
             src="/brand-assets/logo-black.png"
             label="Black"
-            note="Light backgrounds only."
+            note="Light backgrounds only. Use when transparency harms legibility."
             bg="#FBF8F1"
           />
           <LogoCard
             src="/brand-assets/logo-white.png"
             label="White"
-            note="Dark backgrounds only."
+            note="Dark backgrounds only. Avoid adding outer glow or stroke rescue effects."
             bg="#14110E"
           />
         </div>
-        <div
-          className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10"
-          style={{
-            paddingTop: 28,
-            borderTop: '1px solid var(--ed-rule)',
-          }}
-        >
-          <Rule
-            heading="Clear space"
-            body="Reserve at least 30% of the mark's height as padding on all sides. Never let other content encroach."
-          />
-          <Rule
-            heading="Don't"
-            body="Recolor, distort, rotate, or apply effects. Use the provided variants only."
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10" style={{ paddingTop: 28, borderTop: '1px solid var(--ed-rule)' }}>
+          <Rule heading="Clear space" body="Reserve at least 30% of the mark's height as padding on all sides. Never let other content encroach." />
+          <Rule heading="Don't" body="Recolor, distort, rotate, or apply effects. Use the provided variants only." />
         </div>
       </section>
 
       <Hairline />
 
-      {/* ---------- § VI — Components ---------- */}
       <section className={`${CONTAINER} ${SECTION_PADDING}`}>
-        <SectionDivider num="§ VI" title="Components" sub="Editorial primitives" />
+        <SectionDivider id="responsive" num="§ VI" title="Responsive" sub="Current layout contract" />
+        <SectionLead>
+          These rules describe current implementation patterns in the repo. I did not find a separate,
+          versioned breakpoint token file, so this section records the actual responsive behavior in use.
+        </SectionLead>
+        <SpecTable rows={RESPONSIVE_RULES} />
+      </section>
+
+      <Hairline />
+
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider id="interaction" num="§ VII" title="Interaction" sub="State behavior" />
+        <CardGrid cards={INTERACTION_STATES} columns="md:grid-cols-2 xl:grid-cols-4" />
+      </section>
+
+      <Hairline />
+
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider id="components" num="§ VIII" title="Components" sub="Editorial and forms" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ComponentCard label=".ed-link">
-            <a href="#" className="ed-link" style={{ fontFamily: F.serif, fontSize: 16 }}>
+            <Link href="/introduction" className="ed-link" style={{ fontFamily: F.serif, fontSize: 16 }}>
               Read the introduction →
-            </a>
+            </Link>
           </ComponentCard>
           <ComponentCard label=".ed-cta">
-            <a href="#" className="ed-cta" style={{ fontFamily: F.serif, fontSize: 14 }}>
+            <Link href="/quran" className="ed-cta" style={{ fontFamily: F.serif, fontSize: 14 }}>
               Begin reading <span aria-hidden="true">→</span>
-            </a>
+            </Link>
           </ComponentCard>
           <ComponentCard label=".ed-btn-primary">
-            <span className="ed-btn-primary" style={{ fontFamily: F.serif }}>
+            <button type="button" className="ed-btn-primary" style={{ fontFamily: F.serif }}>
               Open the Quran
-            </span>
+            </button>
           </ComponentCard>
           <ComponentCard label=".ed-btn-ghost">
-            <span className="ed-btn-ghost" style={{ fontFamily: F.serif }}>
+            <button type="button" className="ed-btn-ghost" style={{ fontFamily: F.serif }}>
               Learn more
-            </span>
+            </button>
           </ComponentCard>
         </div>
-      </section>
-
-      <Hairline />
-
-      {/* ---------- § VII — Geometry ---------- */}
-      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
-        <SectionDivider num="§ VII" title="Geometry" sub="Numbers, fixed" />
-        <div
-          style={{
-            border: '1px solid var(--ed-rule)',
-            borderRadius: 3,
-            overflow: 'hidden',
-          }}
-        >
-          {[
-            ['Max content width', '1240px'],
-            ['Section padding', '20–40px horizontal · 80–120px vertical'],
-            ['Border radius', '0–3px (squares preferred · buttons 2px · cards 3px)'],
-            ['Hairlines', '1px solid var(--ed-rule)'],
-            ['Vertical rhythm', '8 · 12 · 16 · 24 · 32 · 48 · 64 · 96'],
-          ].map(([k, v], i) => (
-            <div
-              key={k}
-              className="grid grid-cols-1 sm:grid-cols-[260px_1fr]"
-              style={{
-                gap: 16,
-                padding: '14px 18px',
-                borderTop: i === 0 ? 'none' : '1px solid var(--ed-rule)',
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: F.glacial,
-                  fontSize: 11,
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  color: 'var(--ed-accent)',
-                  fontWeight: 600,
-                  alignSelf: 'center',
-                }}
-              >
-                {k}
-              </div>
-              <div
-                style={{
-                  fontFamily: F.mono,
-                  fontSize: 13,
-                  color: 'var(--ed-fg)',
-                }}
-              >
-                {v}
-              </div>
-            </div>
-          ))}
+        <div style={{ marginTop: 40 }}>
+          <SpecTable rows={FORM_RULES} />
         </div>
       </section>
 
       <Hairline />
 
-      {/* ---------- § VIII — Voice ---------- */}
       <section className={`${CONTAINER} ${SECTION_PADDING}`}>
-        <SectionDivider num="§ VIII" title="Voice" sub="How we sound" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {VOICE.map((v) => (
-            <div
-              key={v.word}
-              style={{
-                padding: '24px 22px',
-                border: '1px solid var(--ed-rule)',
-                borderRadius: 3,
-                backgroundColor: 'var(--ed-bg-alt)',
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: F.display,
-                  fontSize: 28,
-                  fontWeight: 500,
-                  letterSpacing: '-0.02em',
-                  color: 'var(--ed-fg)',
-                  marginBottom: 8,
-                }}
-              >
-                {v.word}
-              </div>
-              <p
-                style={{
-                  fontFamily: F.serif,
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                  color: 'var(--ed-fg-muted)',
-                }}
-              >
-                {v.body}
-              </p>
-            </div>
-          ))}
-        </div>
+        <SectionDivider id="navigation" num="§ IX" title="Navigation" sub="Wayfinding and chrome" />
+        <SpecTable rows={NAVIGATION_RULES} />
       </section>
 
       <Hairline />
 
-      {/* ---------- § IX — Application ---------- */}
       <section className={`${CONTAINER} ${SECTION_PADDING}`}>
-        <SectionDivider num="§ IX" title="Application" sub="Do · Don't" />
+        <SectionDivider id="content" num="§ X" title="Content patterns" sub="Editorial structures" />
+        <SpecTable rows={CONTENT_PATTERNS} />
+      </section>
+
+      <Hairline />
+
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider id="geometry" num="§ XI" title="Geometry" sub="Numbers, fixed" />
+        <SpecTable
+          rows={[
+            { label: 'Max content width', body: '1240px' },
+            { label: 'Section padding', body: '20–40px horizontal · 80–120px vertical' },
+            { label: 'Editorial radii', body: '0–3px on brand-led surfaces; squares remain the default visual language.' },
+            { label: 'Hairlines', body: '1px solid var(--ed-rule)' },
+            { label: 'Vertical rhythm', body: '8 · 12 · 16 · 24 · 32 · 48 · 64 · 96' },
+          ]}
+        />
+      </section>
+
+      <Hairline />
+
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider id="accessibility" num="§ XII" title="Accessibility" sub="Non-negotiable" />
+        <SpecTable rows={ACCESSIBILITY_RULES} />
+      </section>
+
+      <Hairline />
+
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider id="motion" num="§ XIII" title="Motion" sub="GSAP, restrained" />
+        <SectionLead>
+          Motion exists across the site, but the codebase already points toward a quiet default: fade-up
+          entrances, small stagger values, and checks for reduced-motion on more immersive interactions.
+        </SectionLead>
+        <SpecTable rows={MOTION_RULES} />
+      </section>
+
+      <Hairline />
+
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider id="i18n" num="§ XIV" title="Internationalization" sub="LTR, RTL, Arabic" />
+        <SpecTable rows={I18N_RULES} />
+      </section>
+
+      <Hairline />
+
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider id="voice" num="§ XV" title="Voice" sub="How we sound" />
+        <CardGrid cards={VOICE} columns="md:grid-cols-2 lg:grid-cols-4" />
+      </section>
+
+      <Hairline />
+
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider id="implementation" num="§ XVI" title="Implementation" sub="Source of truth" />
+        <SpecTable rows={IMPLEMENTATION_RULES} />
+      </section>
+
+      <Hairline />
+
+      <section className={`${CONTAINER} ${SECTION_PADDING}`}>
+        <SectionDivider id="application" num="§ XVII" title="Application" sub="Do · Don't" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <ApplicationList
-            heading="Do"
-            tone="positive"
-            items={DOS}
-          />
-          <ApplicationList
-            heading="Don't"
-            tone="negative"
-            items={DONTS}
-          />
+          <ApplicationList heading="Do" tone="positive" items={DOS} />
+          <ApplicationList heading="Don't" tone="negative" items={DONTS} />
         </div>
       </section>
 
-      {/* ---------- Closing verse ---------- */}
       <section className={`${CONTAINER}`} style={{ paddingTop: 64, paddingBottom: 96 }}>
         <div
           style={{
@@ -660,8 +436,8 @@ export default function BrandPage() {
               color: 'var(--ed-fg-muted)',
             }}
           >
-            We will show them Our proofs in the horizons, and within themselves,
-            until they realize that this is the truth.
+            We will show them Our proofs in the horizons, and within themselves, until they realize
+            that this is the truth.
           </span>
         </div>
       </section>
@@ -669,9 +445,22 @@ export default function BrandPage() {
   )
 }
 
-/* ============================================================ */
-/* Small composables                                              */
-/* ============================================================ */
+function SectionLead({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      style={{
+        fontFamily: F.serif,
+        fontSize: 15,
+        lineHeight: 1.65,
+        color: 'var(--ed-fg-muted)',
+        marginBottom: 36,
+        maxWidth: '68ch',
+      }}
+    >
+      {children}
+    </p>
+  )
+}
 
 function Hairline() {
   return (
@@ -684,6 +473,75 @@ function Hairline() {
         margin: '0 auto',
       }}
     />
+  )
+}
+
+function CardGrid({ cards, columns }: { cards: BrandCard[]; columns: string }) {
+  return (
+    <div className={`grid grid-cols-1 gap-6 ${columns}`}>
+      {cards.map((card) => (
+        <div
+          key={card.title}
+          style={{
+            padding: '24px 22px',
+            border: '1px solid var(--ed-rule)',
+            borderRadius: 3,
+            backgroundColor: 'var(--ed-bg-alt)',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: F.display,
+              fontSize: 28,
+              fontWeight: 500,
+              letterSpacing: '-0.02em',
+              color: 'var(--ed-fg)',
+              marginBottom: 8,
+            }}
+          >
+            {card.title}
+          </div>
+          <p style={{ fontFamily: F.serif, fontSize: 14, lineHeight: 1.6, color: 'var(--ed-fg-muted)' }}>
+            {card.body}
+          </p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function SpecTable({ rows }: { rows: BrandRule[] }) {
+  return (
+    <div style={{ border: '1px solid var(--ed-rule)', borderRadius: 3, overflow: 'hidden' }}>
+      {rows.map((row, i) => (
+        <div
+          key={row.label}
+          className="grid grid-cols-1 sm:grid-cols-[240px_1fr]"
+          style={{
+            gap: 16,
+            padding: '16px 18px',
+            borderTop: i === 0 ? 'none' : '1px solid var(--ed-rule)',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: F.glacial,
+              fontSize: 11,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'var(--ed-accent)',
+              fontWeight: 600,
+              alignSelf: 'start',
+            }}
+          >
+            {row.label}
+          </div>
+          <div style={{ fontFamily: F.serif, fontSize: 14, lineHeight: 1.65, color: 'var(--ed-fg-muted)' }}>
+            {row.body}
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -723,47 +581,26 @@ function PaletteCard({ palette }: { palette: PaletteDoc }) {
         >
           {palette.label}
         </div>
-        <div
-          style={{
-            fontFamily: F.serif,
-            fontSize: 13,
-            color: 'var(--ed-fg-muted)',
-            lineHeight: 1.5,
-          }}
-        >
+        <div style={{ fontFamily: F.serif, fontSize: 13, color: 'var(--ed-fg-muted)', lineHeight: 1.5 }}>
           {palette.tagline}
         </div>
       </div>
       <PaletteModeRow label="Light" mode={palette.light} />
-      <PaletteModeRow label="Dark" mode={palette.dark} isLast />
+      <PaletteModeRow label="Dark" mode={palette.dark} />
     </div>
   )
 }
 
-function PaletteModeRow({
-  label,
-  mode,
-  isLast,
-}: {
-  label: string
-  mode: ModeSwatches
-  isLast?: boolean
-}) {
+function PaletteModeRow({ label, mode }: { label: string; mode: ModeSwatches }) {
   const SWATCHES: Array<[keyof ModeSwatches, string]> = [
     ['bg', 'bg'],
     ['fg', 'fg'],
     ['accent', 'accent'],
     ['rule', 'rule'],
   ]
+
   return (
-    <div
-      style={{
-        borderTop: '1px solid var(--ed-rule)',
-        borderBottom: isLast ? 'none' : 'none',
-        backgroundColor: mode.bg,
-        padding: '18px 20px',
-      }}
-    >
+    <div style={{ borderTop: '1px solid var(--ed-rule)', backgroundColor: mode.bg, padding: '18px 20px' }}>
       <div
         style={{
           fontFamily: F.glacial,
@@ -805,16 +642,7 @@ function PaletteModeRow({
             >
               {lbl}
             </div>
-            <div
-              style={{
-                fontFamily: F.mono,
-                fontSize: 10.5,
-                color: mode.fg,
-                marginTop: 1,
-              }}
-            >
-              {mode[k]}
-            </div>
+            <div style={{ fontFamily: F.mono, fontSize: 10.5, color: mode.fg, marginTop: 1 }}>{mode[k]}</div>
           </div>
         ))}
       </div>
@@ -822,25 +650,9 @@ function PaletteModeRow({
   )
 }
 
-function LogoCard({
-  src,
-  label,
-  note,
-  bg,
-}: {
-  src: string
-  label: string
-  note: string
-  bg: string
-}) {
+function LogoCard({ src, label, note, bg }: { src: string; label: string; note: string; bg: string }) {
   return (
-    <div
-      style={{
-        border: '1px solid var(--ed-rule)',
-        borderRadius: 3,
-        overflow: 'hidden',
-      }}
-    >
+    <div style={{ border: '1px solid var(--ed-rule)', borderRadius: 3, overflow: 'hidden' }}>
       <div
         style={{
           backgroundColor: bg,
@@ -851,13 +663,7 @@ function LogoCard({
           minHeight: 180,
         }}
       >
-        <Image
-          src={src}
-          alt={`WikiSubmission logo — ${label}`}
-          width={88}
-          height={88}
-          style={{ height: 'auto', width: 88 }}
-        />
+        <Image src={src} alt={`WikiSubmission logo — ${label}`} width={88} height={88} style={{ height: 'auto', width: 88 }} />
       </div>
       <div style={{ padding: '14px 18px', backgroundColor: 'var(--ed-bg-alt)' }}>
         <div
@@ -873,16 +679,7 @@ function LogoCard({
         >
           {label}
         </div>
-        <div
-          style={{
-            fontFamily: F.serif,
-            fontSize: 13,
-            color: 'var(--ed-fg-muted)',
-            lineHeight: 1.5,
-          }}
-        >
-          {note}
-        </div>
+        <div style={{ fontFamily: F.serif, fontSize: 13, color: 'var(--ed-fg-muted)', lineHeight: 1.5 }}>{note}</div>
       </div>
     </div>
   )
@@ -904,35 +701,14 @@ function Rule({ heading, body }: { heading: string; body: string }) {
       >
         {heading}
       </div>
-      <p
-        style={{
-          fontFamily: F.serif,
-          fontSize: 14,
-          lineHeight: 1.6,
-          color: 'var(--ed-fg-muted)',
-        }}
-      >
-        {body}
-      </p>
+      <p style={{ fontFamily: F.serif, fontSize: 14, lineHeight: 1.6, color: 'var(--ed-fg-muted)' }}>{body}</p>
     </div>
   )
 }
 
-function ComponentCard({
-  children,
-  label,
-}: {
-  children: React.ReactNode
-  label: string
-}) {
+function ComponentCard({ children, label }: { children: React.ReactNode; label: string }) {
   return (
-    <div
-      style={{
-        border: '1px solid var(--ed-rule)',
-        borderRadius: 3,
-        overflow: 'hidden',
-      }}
-    >
+    <div style={{ border: '1px solid var(--ed-rule)', borderRadius: 3, overflow: 'hidden' }}>
       <div
         style={{
           padding: 36,
@@ -960,17 +736,10 @@ function ComponentCard({
   )
 }
 
-function ApplicationList({
-  heading,
-  items,
-  tone,
-}: {
-  heading: string
-  items: string[]
-  tone: 'positive' | 'negative'
-}) {
+function ApplicationList({ heading, items, tone }: { heading: string; items: string[]; tone: 'positive' | 'negative' }) {
   const accent = tone === 'positive' ? 'var(--ed-accent)' : 'var(--ed-fg-muted)'
   const symbol = tone === 'positive' ? '✓' : '×'
+
   return (
     <div>
       <div
@@ -980,48 +749,32 @@ function ApplicationList({
           fontWeight: 500,
           letterSpacing: '-0.02em',
           color: 'var(--ed-fg)',
-          marginBottom: 20,
-          paddingBottom: 12,
-          borderBottom: '1px solid var(--ed-rule)',
+          marginBottom: 18,
         }}
       >
         {heading}
       </div>
-      <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {items.map((item) => (
-          <li
-            key={item}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '20px 1fr',
-              gap: 12,
-              alignItems: 'baseline',
-            }}
-          >
+          <div key={item} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
             <span
               aria-hidden="true"
               style={{
                 fontFamily: F.mono,
                 fontSize: 14,
                 color: accent,
-                fontWeight: 600,
+                lineHeight: 1.5,
+                flexShrink: 0,
               }}
             >
               {symbol}
             </span>
-            <span
-              style={{
-                fontFamily: F.serif,
-                fontSize: 14.5,
-                lineHeight: 1.55,
-                color: 'var(--ed-fg-muted)',
-              }}
-            >
+            <span style={{ fontFamily: F.serif, fontSize: 15, lineHeight: 1.65, color: 'var(--ed-fg-muted)' }}>
               {item}
             </span>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }
