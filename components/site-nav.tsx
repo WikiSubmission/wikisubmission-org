@@ -184,7 +184,7 @@ function MobileMenu({
             onClick={close}
             style={{
               position: 'relative',
-              fontFamily: F.mono,
+              fontFamily: F.glacial,
               fontSize: 11,
               textTransform: 'uppercase',
               letterSpacing: '0.16em',
@@ -219,7 +219,7 @@ function MobileMenu({
           <div key={item.label} className="flex flex-col">
             <div
               style={{
-                fontFamily: F.mono,
+                fontFamily: F.glacial,
                 fontSize: 10,
                 textTransform: 'uppercase',
                 letterSpacing: '0.2em',
@@ -253,7 +253,7 @@ function MobileMenu({
                       onClick={close}
                       style={{
                         position: 'relative',
-                        fontFamily: F.mono,
+                        fontFamily: F.glacial,
                         fontSize: 11,
                         textTransform: 'uppercase',
                         letterSpacing: '0.16em',
@@ -323,7 +323,7 @@ function MobileMenu({
                               onClick={close}
                               style={{
                                 position: 'relative',
-                                fontFamily: F.mono,
+                                fontFamily: F.glacial,
                                 fontSize: 10.5,
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.16em',
@@ -465,7 +465,7 @@ export function SiteNav() {
               aria-label={t('submissionAI')}
               className="hidden sm:inline-flex items-center gap-1.5 h-[34px] px-2.5 rounded-[2px] transition-colors"
               style={{
-                fontFamily: F.mono,
+                fontFamily: F.glacial,
                 fontSize: 10.5,
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
@@ -710,7 +710,7 @@ function NavGroupMenu({
             </span>
             <span
               style={{
-                fontFamily: F.mono,
+                fontFamily: F.glacial,
                 fontSize: 10,
                 letterSpacing: '0.14em',
                 textTransform: 'uppercase',
@@ -768,7 +768,7 @@ function NavGroupMenu({
                   </span>
                   <span
                     style={{
-                      fontFamily: F.mono,
+                      fontFamily: F.glacial,
                       fontSize: 9.5,
                       letterSpacing: '0.14em',
                       textTransform: 'uppercase',

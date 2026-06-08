@@ -119,7 +119,7 @@ function RamadanContent() {
             <Input
               type="search"
               placeholder={t('searchLocation')}
-              className="pl-9 h-11 bg-[var(--ed-surface)]/50 border-[var(--ed-rule)] rounded-xl focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all placeholder:text-[var(--ed-fg-muted)]/30"
+              className="pl-9 h-11 bg-[var(--ed-surface)]/50 border-[var(--ed-rule)] rounded-[2px] focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all placeholder:text-[var(--ed-fg-muted)]/30"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
