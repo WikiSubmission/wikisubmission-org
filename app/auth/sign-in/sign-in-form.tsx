@@ -142,7 +142,7 @@ export function SignInForm() {
 
         <p className="auth-foot">
           We will never email you anything other than what you ask for.{' '}
-          <Link href="/legal/privacy">Read the privacy note</Link>.
+          <Link href="/legal/privacy-policy">Read the privacy note</Link>.
         </p>
       </div>
     </main>

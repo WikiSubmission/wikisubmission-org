@@ -30,26 +30,22 @@ interface UsePushNotifications {
  * never on mount — auto-prompting is poor UX and hurts opt-in rates.
  */
 export function usePushNotifications(): UsePushNotifications {
-  const [supported, setSupported] = useState(false)
-  const [permission, setPermission] = useState<PushPermission>('default')
+  const [supported] = useState(() => isPushSupported())
+  const [permission, setPermission] = useState<PushPermission>(() =>
+    isPushSupported() ? (Notification.permission as PushPermission) : 'unsupported',
+  )
   const [subscribed, setSubscribed] = useState(false)
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    if (!isPushSupported()) {
-      setSupported(false)
-      setPermission('unsupported')
-      return
-    }
-    setSupported(true)
-    setPermission(Notification.permission as PushPermission)
+    if (!supported) return
 
     // Reflect any existing subscription so the UI starts in the right state.
     navigator.serviceWorker.ready
       .then((reg) => reg.pushManager.getSubscription())
       .then((sub) => setSubscribed(sub !== null))
       .catch(() => setSubscribed(false))
-  }, [])
+  }, [supported])
 
   const subscribe = useCallback(async (): Promise<boolean> => {
     if (!isPushSupported() || !VAPID_PUBLIC_KEY) return false

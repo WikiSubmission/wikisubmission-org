@@ -17,13 +17,6 @@ type CollectionVerseData = components['schemas']['CollectionVerse']
 type Scripture = components['parameters']['MeScriptureParam']
 
 type WsResult<T> = { data?: T; error?: unknown; response: Response }
-type LooseWsApi = {
-  GET: <T = unknown>(path: string, init?: unknown) => Promise<WsResult<T>>
-  POST: <T = unknown>(path: string, init?: unknown) => Promise<WsResult<T>>
-  PUT: <T = unknown>(path: string, init?: unknown) => Promise<WsResult<T>>
-  DELETE: <T = unknown>(path: string, init?: unknown) => Promise<WsResult<T>>
-}
-const wsApiLoose = wsApi as unknown as LooseWsApi
 
 function toScripture(scripture: string): Scripture {
   return scripture === 'bible' ? 'bible' : 'quran'
@@ -264,61 +257,94 @@ export const meApi = {
   get push() {
     return pushApi
   },
+
+  // ── Export + content deletion ───────────────────────────────────────────
+  get privacy() {
+    return privacyApi
+  },
 }
 
-// ── Web push (out-of-contract) ──────────────────────────────────────────────
+// ── Web push (OpenAPI contract) ─────────────────────────────────────────────
 
-export interface PushSubscribeBody {
-  endpoint: string
-  keys: { p256dh: string; auth: string }
-  categories?: string[]
-  locale?: string
-  timezone?: string
-}
+export type PushSubscribeBody = components['schemas']['PushSubscribeRequest']
+type PushSubscribeResponse = components['schemas']['PushSubscribeResponse']
+type PushTestResponse = components['schemas']['PushTestResponse']
+type OkResponse = components['schemas']['OkResponse']
 
 const pushApi = {
-  subscribe: (body: PushSubscribeBody): Promise<{ id: number; categories: string[] }> =>
-    unwrap(wsApiLoose.POST('/me/push/subscribe', { body })),
+  subscribe: (body: PushSubscribeBody): Promise<PushSubscribeResponse> =>
+    unwrap(wsApi.POST('/me/push/subscribe', { body })),
 
-  unsubscribe: (endpoint: string): Promise<{ ok: boolean }> =>
-    unwrap(wsApiLoose.DELETE('/me/push/subscribe', { body: { endpoint } })),
+  unsubscribe: (endpoint: string): Promise<OkResponse> =>
+    unwrap(wsApi.DELETE('/me/push/subscribe', { body: { endpoint } })),
 
-  sendTest: (): Promise<{ sent: number }> => unwrap(wsApiLoose.POST('/me/push/test')),
+  sendTest: (): Promise<PushTestResponse> => unwrap(wsApi.POST('/me/push/test')),
 }
 
-// ── Activity feed (out-of-contract) ────────────────────────────────────────
+// ── Activity feed (OpenAPI contract) ───────────────────────────────────────
 
-export type ActivityKind = 'search' | 'browse_chapter' | 'browse_verse' | 'browse_verse_range'
-
-export interface ActivityEntry {
-  id: number
-  kind: ActivityKind
-  scripture: 'quran' | 'bible'
-  verse_key?: string
-  query?: string
-  created_at: string
-}
-
-interface RecordActivityBody {
-  kind: ActivityKind
-  scripture: 'quran' | 'bible'
-  verse_key?: string
-  query?: string
-}
+export type ActivityKind = components['schemas']['ActivityKind']
+export type ActivityEntry = components['schemas']['ActivityEntry']
+type RecordActivityBody = components['schemas']['RecordActivityRequest']
+type ActivityListEnvelope = components['schemas']['ActivityListEnvelope']
+type ActivityStoredResponse = components['schemas']['ActivityStoredResponse']
+type DeletedCountResponse = components['schemas']['DeletedCountResponse']
+type ActivityConsentResponse = components['schemas']['ActivityConsentResponse']
 
 const activityApi = {
-  record: (body: RecordActivityBody): Promise<{ stored: boolean }> =>
-    unwrap(wsApiLoose.POST('/me/activity', { body })),
+  record: (body: RecordActivityBody): Promise<ActivityStoredResponse> =>
+    unwrap(wsApi.POST('/me/activity', { body })),
 
-  list: (opts?: { limit?: number; offset?: number }): Promise<{ data: ActivityEntry[] }> =>
-    unwrap(wsApiLoose.GET('/me/activity', { params: { query: { limit: opts?.limit, offset: opts?.offset } } })),
+  list: (opts?: { limit?: number; offset?: number }): Promise<ActivityListEnvelope> =>
+    unwrap(wsApi.GET('/me/activity', { params: { query: { limit: opts?.limit, offset: opts?.offset } } })),
 
-  clear: (): Promise<{ deleted: number }> => unwrap(wsApiLoose.DELETE('/me/activity')),
+  clear: (): Promise<DeletedCountResponse> => unwrap(wsApi.DELETE('/me/activity')),
 
-  getConsent: (): Promise<{ consent: boolean }> => unwrap(wsApiLoose.GET('/me/consent')),
+  getConsent: (): Promise<ActivityConsentResponse> => unwrap(wsApi.GET('/me/consent')),
 
-  setConsent: (consent: boolean): Promise<{ consent: boolean }> =>
-    unwrap(wsApiLoose.PUT('/me/consent', { body: { consent } })),
+  setConsent: (consent: boolean): Promise<ActivityConsentResponse> =>
+    unwrap(wsApi.PUT('/me/consent', { body: { consent } })),
+}
+
+// ── Export + content deletion (OpenAPI contract) ───────────────────────────
+
+type UserDataExportEnvelope = components['schemas']['UserDataExportEnvelope']
+type UserDataDeletionEnvelope = components['schemas']['UserDataDeletionEnvelope']
+type RetryAfterResponse = components['schemas']['RetryAfterResponse']
+type ReasonResponse = components['schemas']['ReasonResponse']
+type DeleteContentRequest = components['schemas']['DeleteContentRequest']
+
+const privacyApi = {
+  requestExport: async (): Promise<{ queued: true } | { queued: false; retryAfterSeconds: number }> => {
+    const { error, response } = await wsApi.POST('/me/export')
+    if (response.status === 429) {
+      return {
+        queued: false,
+        retryAfterSeconds: Number((error as RetryAfterResponse | undefined)?.retry_after_seconds ?? 0),
+      }
+    }
+    if (error || !response.ok) throw new Error(`${response.status} ${response.statusText}`)
+    return { queued: true }
+  },
+
+  getExportStatus: (): Promise<UserDataExportEnvelope> => unwrap(wsApi.GET('/me/export/status')),
+
+  requestContentDeletion: async (
+    body: { categories: string[] },
+  ): Promise<{ queued: true } | { queued: false; status: number; reason?: string }> => {
+    const { error, response } = await wsApi.POST('/me/delete-content', { body: body as DeleteContentRequest })
+    if (response.status === 409 || response.status === 429) {
+      return {
+        queued: false,
+        status: response.status,
+        reason: (error as ReasonResponse | undefined)?.reason,
+      }
+    }
+    if (error || !response.ok) throw new Error(`${response.status} ${response.statusText}`)
+    return { queued: true }
+  },
+
+  getDeletionStatus: (): Promise<UserDataDeletionEnvelope> => unwrap(wsApi.GET('/me/delete-content/status')),
 }
 
 // ── Games contract (types derived from the generated OpenAPI schemas) ───────
@@ -352,6 +378,18 @@ type GameLeaderboardEnvelope = components['schemas']['GameLeaderboardEnvelope']
 type GameHistoryEnvelope = components['schemas']['GameHistoryEnvelope']
 type GameStatsEnvelope = components['schemas']['GameStatsEnvelope']
 
+type GameCheckBody = {
+  variant_id: string
+  session_id: string
+  index: number
+  guess: string
+}
+type GameCheckResponse = { correct: boolean; attempts_remaining?: number }
+type GamesCheckApi = {
+  POST: (path: '/games/fill-blank/check', init: { body: GameCheckBody }) => Promise<WsResult<GameCheckResponse>>
+}
+const gamesCheckApi = wsApi as unknown as GamesCheckApi
+
 const gamesApi = {
   listPassages: (
     opts?: { language?: GameLanguage; theme?: string; chapter?: number }
@@ -376,11 +414,6 @@ const gamesApi = {
 
   // Validate a single blank for instant feedback. Returns correctness and, for
   // non-easy difficulties, the remaining attempts for that blank in the session.
-  checkBlank: (body: {
-    variant_id: string
-    session_id: string
-    index: number
-    guess: string
-  }): Promise<{ correct: boolean; attempts_remaining?: number }> =>
-    unwrap(wsApiLoose.POST('/games/fill-blank/check', { body })),
+  checkBlank: (body: GameCheckBody): Promise<GameCheckResponse> =>
+    unwrap(gamesCheckApi.POST('/games/fill-blank/check', { body })),
 }

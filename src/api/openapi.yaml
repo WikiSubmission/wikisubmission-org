@@ -1730,6 +1730,293 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+
+  /me/activity:
+    get:
+      tags: [Me]
+      operationId: listMeActivity
+      summary: List current user's recent activity
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityListEnvelope'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    post:
+      tags: [Me]
+      operationId: recordMeActivity
+      summary: Record one activity event when consent is enabled
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordActivityRequest'
+      responses:
+        '200':
+          description: Stored.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityStoredResponse'
+        '202':
+          description: Accepted but not stored because activity consent is disabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityStoredResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    delete:
+      tags: [Me]
+      operationId: clearMeActivity
+      summary: Clear current user's activity feed
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedCountResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/consent:
+    get:
+      tags: [Me]
+      operationId: getMeActivityConsent
+      summary: Get activity recording consent
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityConsentResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    put:
+      tags: [Me]
+      operationId: setMeActivityConsent
+      summary: Set activity recording consent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetActivityConsentRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityConsentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/export:
+    post:
+      tags: [Me]
+      operationId: requestMeExport
+      summary: Queue a user data export
+      security:
+        - bearerAuth: []
+      responses:
+        '202':
+          description: Export queued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataExportQueuedResponse'
+        '429':
+          description: Existing export is still in progress or cooldown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetryAfterResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/export/status:
+    get:
+      tags: [Me]
+      operationId: getMeExportStatus
+      summary: Get latest user data export status
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataExportEnvelope'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/delete-content:
+    post:
+      tags: [Me]
+      operationId: requestMeContentDeletion
+      summary: Queue deletion of selected user content categories
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteContentRequest'
+      responses:
+        '202':
+          description: Deletion queued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataDeletionQueuedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: A fresh completed export is required before deletion.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReasonResponse'
+        '429':
+          description: A deletion is already in progress.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReasonResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/delete-content/status:
+    get:
+      tags: [Me]
+      operationId: getMeContentDeletionStatus
+      summary: Get latest user data deletion status
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataDeletionEnvelope'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/push/subscribe:
+    post:
+      tags: [Me]
+      operationId: subscribeMePush
+      summary: Subscribe or refresh a browser push endpoint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushSubscribeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushSubscribeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    delete:
+      tags: [Me]
+      operationId: unsubscribeMePush
+      summary: Remove one browser push endpoint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushUnsubscribeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/push/test:
+    post:
+      tags: [Me]
+      operationId: sendMePushTest
+      summary: Send a test push notification to current user's endpoints
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushTestResponse'
+        '503':
+          description: Push sending is not configured.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
   /collections/share/{token}:
     get:
       tags: [Me]
@@ -2048,6 +2335,68 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/session:
+    get:
+      tags: [Editorial]
+      operationId: getEditorialSession
+      summary: Resolved editorial permissions for the current user
+      description: >
+        Returns the caller's editorial permission snapshot (modules and
+        per-version read/write grants) so the editor UI can decide what to
+        render. Authoritative enforcement happens server-side on every mutation;
+        this only shapes the UI.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialSessionEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran-versions:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialQuranVersions
+      summary: List the Quran version registry (editorial)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranVersionListEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/bible-versions:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialBibleVersions
+      summary: List the Bible version registry (editorial)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialBibleVersionListEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
@@ -3725,6 +4074,279 @@ components:
         data:
           $ref: '#/components/schemas/CollectionDetail'
 
+
+    ActivityKind:
+      type: string
+      enum: [search, browse_chapter, browse_verse, browse_verse_range]
+
+    ActivityEntry:
+      type: object
+      required: [id, kind, scripture, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        kind:
+          $ref: '#/components/schemas/ActivityKind'
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        query:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    RecordActivityRequest:
+      type: object
+      required: [kind, scripture]
+      properties:
+        kind:
+          $ref: '#/components/schemas/ActivityKind'
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        query:
+          type: string
+
+    ActivityListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityEntry'
+
+    ActivityStoredResponse:
+      type: object
+      required: [stored]
+      properties:
+        stored:
+          type: boolean
+
+    ActivityConsentResponse:
+      type: object
+      required: [consent]
+      properties:
+        consent:
+          type: boolean
+
+    SetActivityConsentRequest:
+      type: object
+      required: [consent]
+      properties:
+        consent:
+          type: boolean
+
+    DeletedCountResponse:
+      type: object
+      required: [deleted]
+      properties:
+        deleted:
+          type: integer
+          format: int64
+
+    UserDataExportStatus:
+      type: string
+      enum: [queued, running, sent, failed]
+
+    UserDataExport:
+      type: object
+      required: [id, user_id, status, requested_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/UserDataExportStatus'
+        object_key:
+          type: string
+          nullable: true
+        download_url:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        requested_at:
+          type: string
+          format: date-time
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    UserDataExportEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          allOf:
+            - $ref: '#/components/schemas/UserDataExport'
+          nullable: true
+
+    UserDataExportQueuedResponse:
+      type: object
+      required: [status, estimated_minutes]
+      properties:
+        status:
+          type: string
+          enum: [queued]
+        estimated_minutes:
+          type: integer
+
+    RetryAfterResponse:
+      type: object
+      required: [retry_after_seconds]
+      properties:
+        retry_after_seconds:
+          type: integer
+          format: int64
+
+    DeleteContentCategory:
+      type: string
+      enum: [bookmarks, notes, collections, activity, reading_progress, games]
+
+    DeleteContentRequest:
+      type: object
+      required: [categories]
+      properties:
+        categories:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DeleteContentCategory'
+
+    UserDataDeletionStatus:
+      type: string
+      enum: [queued, running, done, failed]
+
+    UserDataDeletion:
+      type: object
+      required: [id, user_id, status, categories, requested_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/UserDataDeletionStatus'
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeleteContentCategory'
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        requested_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    UserDataDeletionEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          allOf:
+            - $ref: '#/components/schemas/UserDataDeletion'
+          nullable: true
+
+    UserDataDeletionQueuedResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [queued]
+
+    ReasonResponse:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+
+    PushKeys:
+      type: object
+      required: [p256dh, auth]
+      properties:
+        p256dh:
+          type: string
+        auth:
+          type: string
+
+    PushSubscribeRequest:
+      type: object
+      required: [endpoint, keys]
+      properties:
+        endpoint:
+          type: string
+          format: uri
+        keys:
+          $ref: '#/components/schemas/PushKeys'
+        categories:
+          type: array
+          items:
+            type: string
+        locale:
+          type: string
+        timezone:
+          type: string
+
+    PushSubscribeResponse:
+      type: object
+      required: [id, categories]
+      properties:
+        id:
+          type: integer
+          format: int64
+        categories:
+          type: array
+          items:
+            type: string
+
+    PushUnsubscribeRequest:
+      type: object
+      required: [endpoint]
+      properties:
+        endpoint:
+          type: string
+          format: uri
+
+    PushTestResponse:
+      type: object
+      required: [sent]
+      properties:
+        sent:
+          type: integer
+
+    OkResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+
     User:
       type: object
       required: [id, auth_id, email, role, permissions, is_active, created_at, updated_at]
@@ -3783,6 +4405,124 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/User'
+
+    EditorialSession:
+      type: object
+      required: [is_admin, modules, quran_versions, bible_versions]
+      properties:
+        is_admin:
+          type: boolean
+        modules:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Module key (article, quran, ...) mapped to can_write. Presence of a key implies read access.
+        quran_versions:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Quran version id (as string key) mapped to can_write. Presence implies read access.
+        bible_versions:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Bible version id (as string key) mapped to can_write.
+        quran_reference_version_id:
+          type: integer
+          format: int64
+          nullable: true
+
+    EditorialSessionEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/EditorialSession'
+
+    VersionAuthor:
+      type: object
+      properties:
+        name:
+          type: string
+        bio:
+          type: string
+          nullable: true
+
+    QuranVersion:
+      type: object
+      required: [id, slug, name, lang_id, direction, is_canonical_english, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        slug:
+          type: string
+        name:
+          type: string
+        lang_id:
+          type: integer
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/VersionAuthor'
+        direction:
+          type: string
+        is_canonical_english:
+          type: boolean
+        reference_version_id:
+          type: integer
+          format: int64
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BibleVersion:
+      type: object
+      required: [id, slug, name, lang_id, direction, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        slug:
+          type: string
+        name:
+          type: string
+        lang_id:
+          type: integer
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/VersionAuthor'
+        direction:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    EditorialQuranVersionListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuranVersion'
+
+    EditorialBibleVersionListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BibleVersion'
 
 
     # -----------------------------------------------------------------------
@@ -4225,6 +4965,18 @@ components:
         The server encountered an unexpected condition that prevented it from
         fulfilling the request. Report the issue to the support team if it
         persists.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [message]
+            properties:
+              message:
+                type: string
+    Forbidden:
+      description: >
+        The caller is authenticated but lacks the required editorial
+        permission for this resource.
       content:
         application/json:
           schema:

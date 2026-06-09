@@ -1,6 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
+
+function computeStandalone(): boolean {
+  if (typeof window === 'undefined') return false
+
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    // iOS Safari exposes navigator.standalone instead of display-mode.
+    ('standalone' in window.navigator &&
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true) ||
+    document.referrer.startsWith('android-app://')
+  )
+}
+
+function subscribe(onStoreChange: () => void) {
+  const mql = window.matchMedia('(display-mode: standalone)')
+  mql.addEventListener('change', onStoreChange)
+  return () => mql.removeEventListener('change', onStoreChange)
+}
 
 /**
  * True when the app is running as an installed PWA / Trusted Web Activity
@@ -12,25 +30,5 @@ import { useEffect, useState } from 'react'
  * on mount.
  */
 export function useStandalone(): boolean {
-  const [standalone, setStandalone] = useState(false)
-
-  useEffect(() => {
-    const mql = window.matchMedia('(display-mode: standalone)')
-
-    const compute = () =>
-      mql.matches ||
-      // iOS Safari exposes navigator.standalone instead of display-mode.
-      ('standalone' in window.navigator &&
-        (window.navigator as Navigator & { standalone?: boolean })
-          .standalone === true) ||
-      document.referrer.startsWith('android-app://')
-
-    setStandalone(compute())
-
-    const onChange = () => setStandalone(compute())
-    mql.addEventListener('change', onChange)
-    return () => mql.removeEventListener('change', onChange)
-  }, [])
-
-  return standalone
+  return useSyncExternalStore(subscribe, computeStandalone, () => false)
 }
