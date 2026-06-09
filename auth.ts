@@ -3,7 +3,7 @@ import Google from 'next-auth/providers/google'
 import Apple from 'next-auth/providers/apple'
 import Discord from 'next-auth/providers/discord'
 import Credentials from 'next-auth/providers/credentials'
-import { SignJWT, jwtVerify } from 'jose'
+import { SignJWT, jwtVerify, importPKCS8 } from 'jose'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { z } from 'zod'
 import { fetchUserAccess } from '@/lib/auth-access'
@@ -60,6 +60,43 @@ async function mintBackendToken({
     .sign(new TextEncoder().encode(backendSecret))
 }
 
+// Apple requires the OAuth client secret to be a short-lived ES256-signed JWT
+// (max 6-month expiry), not a static string. Rather than hand-rotating it twice
+// a year, we sign it at startup from the .p8 private key. It refreshes on every
+// deploy/cold start, so it never silently expires.
+//
+// Required env vars (all four, or Apple sign-in is disabled):
+//   AUTH_APPLE_TEAM_ID      — 10-char Team ID (Developer portal, top-right)
+//   AUTH_APPLE_KEY_ID       — Key ID of the "Sign in with Apple" key (Keys section)
+//   AUTH_APPLE_ID           — Services ID, e.g. org.wikisubmission.signin (also the clientId)
+//   AUTH_APPLE_PRIVATE_KEY  — contents of the downloaded .p8 (PKCS8 PEM; \n-escaped is fine)
+async function generateAppleClientSecret(): Promise<string> {
+  const teamId = process.env.AUTH_APPLE_TEAM_ID
+  const keyId = process.env.AUTH_APPLE_KEY_ID
+  const clientId = process.env.AUTH_APPLE_ID
+  const privateKeyPem = process.env.AUTH_APPLE_PRIVATE_KEY
+
+  if (!teamId || !keyId || !clientId || !privateKeyPem) {
+    // Not fully configured — fall back to a static secret if one was set, else
+    // leave it empty (Apple button will fail, but the rest of auth still works).
+    return process.env.AUTH_APPLE_SECRET ?? ''
+  }
+
+  // Env vars store the PEM with literal "\n"; restore real newlines for parsing.
+  const key = await importPKCS8(privateKeyPem.replace(/\\n/g, '\n'), 'ES256')
+
+  return new SignJWT({})
+    .setProtectedHeader({ alg: 'ES256', kid: keyId })
+    .setIssuer(teamId)
+    .setIssuedAt()
+    .setExpirationTime('150d') // Apple caps client-secret lifetime at 6 months
+    .setAudience('https://appleid.apple.com')
+    .setSubject(clientId)
+    .sign(key)
+}
+
+const appleClientSecret = await generateAppleClientSecret()
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
 
@@ -70,7 +107,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
     Apple({
       clientId: process.env.AUTH_APPLE_ID,
-      clientSecret: process.env.AUTH_APPLE_SECRET,
+      clientSecret: appleClientSecret,
     }),
     Discord({
       clientId: process.env.AUTH_DISCORD_ID,
