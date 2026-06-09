@@ -43,7 +43,14 @@ export function getPublicProxyResponse(request: NextRequest) {
 }
 
 export function isAuthProtectedPath(pathname: string) {
-  return pathname === '/me' || pathname.startsWith('/me/') || pathname === '/admin' || pathname.startsWith('/admin/')
+  return (
+    pathname === '/me' ||
+    pathname.startsWith('/me/') ||
+    pathname === '/admin' ||
+    pathname.startsWith('/admin/') ||
+    pathname === '/editor' ||
+    pathname.startsWith('/editor/')
+  )
 }
 
 const authProxy = auth((request: AuthenticatedRequest) => {
