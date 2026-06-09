@@ -105,12 +105,12 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/privacy-policy',
-        destination: '/legal/privacy',
+        destination: '/legal/privacy-policy',
         permanent: true,
       },
       {
         source: '/terms-of-service',
-        destination: '/legal/terms',
+        destination: '/legal/terms-of-use',
         permanent: true,
       },
       {

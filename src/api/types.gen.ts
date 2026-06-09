@@ -702,6 +702,146 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user's recent activity */
+        get: operations["listMeActivity"];
+        put?: never;
+        /** Record one activity event when consent is enabled */
+        post: operations["recordMeActivity"];
+        /** Clear current user's activity feed */
+        delete: operations["clearMeActivity"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get activity recording consent */
+        get: operations["getMeActivityConsent"];
+        /** Set activity recording consent */
+        put: operations["setMeActivityConsent"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue a user data export */
+        post: operations["requestMeExport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/export/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get latest user data export status */
+        get: operations["getMeExportStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/delete-content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue deletion of selected user content categories */
+        post: operations["requestMeContentDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/delete-content/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get latest user data deletion status */
+        get: operations["getMeContentDeletionStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/push/subscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Subscribe or refresh a browser push endpoint */
+        post: operations["subscribeMePush"];
+        /** Remove one browser push endpoint */
+        delete: operations["unsubscribeMePush"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/push/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a test push notification to current user's endpoints */
+        post: operations["sendMePushTest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/collections/share/{token}": {
         parameters: {
             query?: never;
@@ -870,6 +1010,60 @@ export interface paths {
         head?: never;
         /** Update role/permissions/active state for one user (admin only) */
         patch: operations["updateUserAdmin"];
+        trace?: never;
+    };
+    "/editorial/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resolved editorial permissions for the current user
+         * @description Returns the caller's editorial permission snapshot (modules and per-version read/write grants) so the editor UI can decide what to render. Authoritative enforcement happens server-side on every mutation; this only shapes the UI.
+         */
+        get: operations["getEditorialSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the Quran version registry (editorial) */
+        get: operations["listEditorialQuranVersions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/bible-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the Bible version registry (editorial) */
+        get: operations["listEditorialBibleVersions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
@@ -1925,6 +2119,130 @@ export interface components {
         CollectionDetailEnvelope: {
             data: components["schemas"]["CollectionDetail"];
         };
+        /** @enum {string} */
+        ActivityKind: "search" | "browse_chapter" | "browse_verse" | "browse_verse_range";
+        ActivityEntry: {
+            /** Format: int64 */
+            id: number;
+            kind: components["schemas"]["ActivityKind"];
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key?: string;
+            query?: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        RecordActivityRequest: {
+            kind: components["schemas"]["ActivityKind"];
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key?: string;
+            query?: string;
+        };
+        ActivityListEnvelope: {
+            data: components["schemas"]["ActivityEntry"][];
+        };
+        ActivityStoredResponse: {
+            stored: boolean;
+        };
+        ActivityConsentResponse: {
+            consent: boolean;
+        };
+        SetActivityConsentRequest: {
+            consent: boolean;
+        };
+        DeletedCountResponse: {
+            /** Format: int64 */
+            deleted: number;
+        };
+        /** @enum {string} */
+        UserDataExportStatus: "queued" | "running" | "sent" | "failed";
+        UserDataExport: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            user_id: number;
+            status: components["schemas"]["UserDataExportStatus"];
+            object_key?: string | null;
+            download_url?: string | null;
+            error?: string | null;
+            /** Format: date-time */
+            requested_at: string;
+            /** Format: date-time */
+            sent_at?: string | null;
+        };
+        UserDataExportEnvelope: {
+            data: components["schemas"]["UserDataExport"] | null;
+        };
+        UserDataExportQueuedResponse: {
+            /** @enum {string} */
+            status: "queued";
+            estimated_minutes: number;
+        };
+        RetryAfterResponse: {
+            /** Format: int64 */
+            retry_after_seconds: number;
+        };
+        /** @enum {string} */
+        DeleteContentCategory: "bookmarks" | "notes" | "collections" | "activity" | "reading_progress" | "games";
+        DeleteContentRequest: {
+            categories: components["schemas"]["DeleteContentCategory"][];
+        };
+        /** @enum {string} */
+        UserDataDeletionStatus: "queued" | "running" | "done" | "failed";
+        UserDataDeletion: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            user_id: number;
+            status: components["schemas"]["UserDataDeletionStatus"];
+            categories: components["schemas"]["DeleteContentCategory"][];
+            counts?: {
+                [key: string]: number;
+            } | null;
+            error?: string | null;
+            /** Format: date-time */
+            requested_at: string;
+            /** Format: date-time */
+            completed_at?: string | null;
+        };
+        UserDataDeletionEnvelope: {
+            data: components["schemas"]["UserDataDeletion"] | null;
+        };
+        UserDataDeletionQueuedResponse: {
+            /** @enum {string} */
+            status: "queued";
+        };
+        ReasonResponse: {
+            reason: string;
+        };
+        PushKeys: {
+            p256dh: string;
+            auth: string;
+        };
+        PushSubscribeRequest: {
+            /** Format: uri */
+            endpoint: string;
+            keys: components["schemas"]["PushKeys"];
+            categories?: string[];
+            locale?: string;
+            timezone?: string;
+        };
+        PushSubscribeResponse: {
+            /** Format: int64 */
+            id: number;
+            categories: string[];
+        };
+        PushUnsubscribeRequest: {
+            /** Format: uri */
+            endpoint: string;
+        };
+        PushTestResponse: {
+            sent: number;
+        };
+        OkResponse: {
+            ok: boolean;
+        };
         User: {
             /** Format: int64 */
             id: number;
@@ -1956,6 +2274,65 @@ export interface components {
         };
         UserListEnvelope: {
             data: components["schemas"]["User"][];
+        };
+        EditorialSession: {
+            is_admin: boolean;
+            /** @description Module key (article, quran, ...) mapped to can_write. Presence of a key implies read access. */
+            modules: {
+                [key: string]: boolean;
+            };
+            /** @description Quran version id (as string key) mapped to can_write. Presence implies read access. */
+            quran_versions: {
+                [key: string]: boolean;
+            };
+            /** @description Bible version id (as string key) mapped to can_write. */
+            bible_versions: {
+                [key: string]: boolean;
+            };
+            /** Format: int64 */
+            quran_reference_version_id?: number | null;
+        };
+        EditorialSessionEnvelope: {
+            data: components["schemas"]["EditorialSession"];
+        };
+        VersionAuthor: {
+            name?: string;
+            bio?: string | null;
+        };
+        QuranVersion: {
+            /** Format: int64 */
+            id: number;
+            slug: string;
+            name: string;
+            lang_id: number;
+            authors?: components["schemas"]["VersionAuthor"][];
+            direction: string;
+            is_canonical_english: boolean;
+            /** Format: int64 */
+            reference_version_id?: number | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        BibleVersion: {
+            /** Format: int64 */
+            id: number;
+            slug: string;
+            name: string;
+            lang_id: number;
+            authors?: components["schemas"]["VersionAuthor"][];
+            direction: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        EditorialQuranVersionListEnvelope: {
+            data: components["schemas"]["QuranVersion"][];
+        };
+        EditorialBibleVersionListEnvelope: {
+            data: components["schemas"]["BibleVersion"][];
         };
         GamePassage: {
             /**
@@ -2225,6 +2602,17 @@ export interface components {
         };
         /** @description The server encountered an unexpected condition that prevented it from fulfilling the request. Report the issue to the support team if it persists. */
         InternalServerErrror: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    message: string;
+                };
+            };
+        };
+        /** @description The caller is authenticated but lacks the required editorial permission for this resource. */
+        Forbidden: {
             headers: {
                 [name: string]: unknown;
             };
@@ -3720,6 +4108,333 @@ export interface operations {
             500: components["responses"]["InternalServerErrror"];
         };
     };
+    listMeActivity: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityListEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    recordMeActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordActivityRequest"];
+            };
+        };
+        responses: {
+            /** @description Stored. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityStoredResponse"];
+                };
+            };
+            /** @description Accepted but not stored because activity consent is disabled. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityStoredResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    clearMeActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedCountResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeActivityConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityConsentResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    setMeActivityConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetActivityConsentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityConsentResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    requestMeExport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Export queued. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDataExportQueuedResponse"];
+                };
+            };
+            /** @description Existing export is still in progress or cooldown. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryAfterResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeExportStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDataExportEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    requestMeContentDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteContentRequest"];
+            };
+        };
+        responses: {
+            /** @description Deletion queued. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDataDeletionQueuedResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            /** @description A fresh completed export is required before deletion. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReasonResponse"];
+                };
+            };
+            /** @description A deletion is already in progress. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReasonResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeContentDeletionStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDataDeletionEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    subscribeMePush: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PushSubscribeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushSubscribeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    unsubscribeMePush: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PushUnsubscribeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    sendMePushTest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushTestResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+            /** @description Push sending is not configured. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message: string;
+                    };
+                };
+            };
+        };
+    };
     getSharedCollection: {
         parameters: {
             query?: never;
@@ -3984,6 +4699,72 @@ export interface operations {
             };
             400: components["responses"]["BadRequest"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getEditorialSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialSessionEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialQuranVersions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranVersionListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialBibleVersions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialBibleVersionListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
             500: components["responses"]["InternalServerErrror"];
         };
     };

@@ -70,7 +70,7 @@ https://developers.google.com/digital-asset-links/tools/generator
 
 Required before production rollout:
 
-- Privacy policy URL: https://wikisubmission.org/legal/privacy
+- Privacy policy URL: https://wikisubmission.org/legal/privacy-policy
 - Data Safety form: declare push token + account data + audio streaming
 - Content rating questionnaire
 - Target audience / content declarations

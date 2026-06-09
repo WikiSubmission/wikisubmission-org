@@ -3,8 +3,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { meApi } from '@/src/api/me-client'
-import { getSession } from 'next-auth/react'
-import { resolveBrowserApiBaseUrl } from '@/src/api/base-url'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,8 +22,8 @@ type ExportStatus = 'queued' | 'running' | 'sent' | 'failed'
 
 type ExportState = {
   status: ExportStatus
-  sent_at?: string
-  download_url?: string
+  sent_at?: string | null
+  download_url?: string | null
 }
 
 type DeleteStatus = 'queued' | 'running' | 'done' | 'failed'
@@ -33,8 +31,8 @@ type DeleteStatus = 'queued' | 'running' | 'done' | 'failed'
 type DeleteState = {
   status: DeleteStatus
   categories?: string[]
-  counts?: Record<string, number>
-  completed_at?: string
+  counts?: Record<string, number> | null
+  completed_at?: string | null
 } | null
 
 // Must match db.DeletionCategories on the backend.
@@ -67,26 +65,15 @@ export function SettingsClient() {
   const [confirmText, setConfirmText] = useState('')
   const [submittingDelete, setSubmittingDelete] = useState(false)
 
-  const authFetch = useCallback(async (path: string, init?: RequestInit) => {
-    const session = await getSession()
-    const headers = new Headers(init?.headers ?? {})
-    if (session?.accessToken) headers.set('Authorization', `Bearer ${session.accessToken}`)
-    return fetch(`${resolveBrowserApiBaseUrl()}${path}`, { ...init, headers })
+  const refreshExportStatus = useCallback(async () => {
+    const body = await meApi.privacy.getExportStatus()
+    setExportState(body.data ?? null)
   }, [])
 
-  const refreshExportStatus = useCallback(async () => {
-    const res = await authFetch('/me/export/status')
-    if (!res.ok) return
-    const body = (await res.json()) as { data?: ExportState | null }
-    setExportState(body.data ?? null)
-  }, [authFetch])
-
   const refreshDeleteStatus = useCallback(async () => {
-    const res = await authFetch('/me/delete-content/status')
-    if (!res.ok) return
-    const body = (await res.json()) as { data?: DeleteState }
+    const body = await meApi.privacy.getDeletionStatus()
     setDeleteState(body.data ?? null)
-  }, [authFetch])
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -133,15 +120,12 @@ export function SettingsClient() {
     setRequestingExport(true)
     setExportMsg(null)
     try {
-      const res = await authFetch('/me/export', { method: 'POST' })
-      if (res.status === 429) {
-        const body = await res.json()
-        setExportMsg(t('export.nextAvailable', { eta: formatEta(Number(body.retry_after_seconds ?? 0)) }))
+      const result = await meApi.privacy.requestExport()
+      if (!result.queued) {
+        setExportMsg(t('export.nextAvailable', { eta: formatEta(result.retryAfterSeconds) }))
         return
       }
-      if (res.ok) {
-        await refreshExportStatus()
-      }
+      await refreshExportStatus()
     } finally {
       setRequestingExport(false)
     }
@@ -185,23 +169,17 @@ export function SettingsClient() {
     if (!exportReady) return
     setSubmittingDelete(true)
     try {
-      const res = await authFetch('/me/delete-content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categories }),
-      })
-      if (res.status === 409) {
+      const result = await meApi.privacy.requestContentDeletion({ categories })
+      if (!result.queued && result.status === 409) {
         flash(t('deleteContent.exportFirst'))
         return
       }
-      if (res.status === 429) {
+      if (!result.queued && result.status === 429) {
         flash(t('deleteContent.inProgress'))
         return
       }
-      if (res.ok) {
-        setDeleteOpen(false)
-        await refreshDeleteStatus()
-      }
+      setDeleteOpen(false)
+      await refreshDeleteStatus()
     } finally {
       setSubmittingDelete(false)
     }
@@ -331,9 +309,9 @@ export function SettingsClient() {
                 >
                   {t('export.download')}
                 </a>
-                {withinCooldown(exportState.sent_at) && (
+                {withinCooldown(exportState.sent_at ?? undefined) && (
                   <p style={mutedStyle}>
-                    {t('export.ready', { eta: formatEta(secondsUntilCooldownEnd(exportState.sent_at)) })}
+                    {t('export.ready', { eta: formatEta(secondsUntilCooldownEnd(exportState.sent_at ?? undefined)) })}
                   </p>
                 )}
               </div>
@@ -343,7 +321,7 @@ export function SettingsClient() {
 
             {(exportState == null ||
               exportState.status === 'failed' ||
-              (exportState.status === 'sent' && !withinCooldown(exportState.sent_at))) && (
+              (exportState.status === 'sent' && !withinCooldown(exportState.sent_at ?? undefined))) && (
               <button type="button" onClick={requestExport} disabled={requestingExport} style={{ ...buttonStyle, marginTop: 16 }}>
                 {t('export.button')}
               </button>
