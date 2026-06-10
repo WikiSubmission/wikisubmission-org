@@ -5,12 +5,19 @@ import { auth } from '@/auth'
 import {
   createQuranPublishRequest,
   decideQuranPublishRequest,
+  publishQuranRootMeanings,
   upsertQuranChapterDraft,
+  upsertQuranRootMeaning,
   upsertQuranVerseDraft,
+  upsertQuranWordDraft,
   type MutationResult,
   type QuranPublishRequest,
+  type QuranRootPublishResult,
+  type QuranRootSummary,
   type QuranVerseDraft,
   type QuranVerseDraftInput,
+  type QuranWord,
+  type QuranWordDraftInput,
 } from '@/lib/editorial-client'
 
 // Server actions for the Quran editor. The backend bearer token is read from
@@ -62,6 +69,42 @@ export async function submitPublishAction(
     revalidatePath(`/editor/quran/${versionId}`)
     revalidatePath('/editor/quran/approvals')
   }
+  return result
+}
+
+export async function saveWordDraftAction(
+  versionId: number,
+  chapterNumber: number,
+  wordId: number,
+  body: QuranWordDraftInput,
+): Promise<MutationResult<QuranWord>> {
+  const token = await requireToken()
+  if (!token) return NOT_AUTHED
+  const result = await upsertQuranWordDraft(token, versionId, wordId, body)
+  if (result.ok) revalidatePath(`/editor/quran/${versionId}/${chapterNumber}/words`)
+  return result
+}
+
+export async function saveRootMeaningAction(
+  versionId: number,
+  rootId: number,
+  meaning: string | null,
+): Promise<MutationResult<QuranRootSummary>> {
+  const token = await requireToken()
+  if (!token) return NOT_AUTHED
+  const result = await upsertQuranRootMeaning(token, versionId, rootId, meaning)
+  if (result.ok) revalidatePath(`/editor/quran/${versionId}/roots`)
+  return result
+}
+
+export async function publishRootMeaningsAction(
+  versionId: number,
+  note: string | null,
+): Promise<MutationResult<QuranRootPublishResult>> {
+  const token = await requireToken()
+  if (!token) return NOT_AUTHED
+  const result = await publishQuranRootMeanings(token, versionId, note)
+  if (result.ok) revalidatePath(`/editor/quran/${versionId}/roots`)
   return result
 }
 

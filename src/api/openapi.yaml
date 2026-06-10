@@ -2756,6 +2756,205 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+  # ---------------------------------------------------------------------------
+  # Quran word-by-word + root meanings (Phase 2 of the Sanity Studio port).
+  #
+  # Editors edit per-word text (the version's rendering of each word and an
+  # optional per-word gloss) against the fixed canonical word list, plus a
+  # per-version meaning for each Arabic root. A root's meaning is stored once per
+  # (version, root) and rendered into the word table by JOIN, so editing it
+  # "broadcasts" to every word sharing that root atomically. Word drafts publish
+  # with their chapter (the migration 019 workflow); root meanings span chapters
+  # and publish via a dedicated approver action.
+  # ---------------------------------------------------------------------------
+
+  /editorial/quran/versions/{versionId}/chapters/{chapterNumber}/words:
+    get:
+      tags: [Editorial]
+      operationId: getEditorialQuranChapterWords
+      summary: Word-by-word editing surface for a chapter
+      description: >
+        Returns the fixed canonical word list for every verse of the chapter,
+        each word carrying its canonical Arabic surface and root, this version's
+        draft and published per-word text, the reference version's per-word text
+        (the rail), and the per-version root meaning (draft + published) rendered
+        by JOIN. Requires read access to the version.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+        - $ref: '#/components/parameters/EditorialChapterNumberParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranChapterWordsEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/versions/{versionId}/words/{wordId}:
+    put:
+      tags: [Editorial]
+      operationId: upsertEditorialQuranWordDraft
+      summary: Save a per-word draft (text / gloss)
+      description: >
+        Creates or updates the draft for one canonical word of this version.
+        The word id must belong to the Quran corpus. Requires write access to
+        the version. Records a changelog entry.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+        - $ref: '#/components/parameters/EditorialWordIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuranWordDraftInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranWordDraftEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/versions/{versionId}/roots:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialQuranRoots
+      summary: Root meanings for a version (Root Book)
+      description: >
+        Returns the paginated root list for a version: each root's letters,
+        corpus occurrence count, this version's draft and published meaning, the
+        draft status, and a reference gloss (the canonical English per-root
+        meaning) to translate from. Optional Arabic prefix filter. Requires read
+        access to the version.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+        - name: q
+          in: query
+          required: false
+          description: Arabic root prefix filter.
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Maximum roots to return (default 50, max 200).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranRootListEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/versions/{versionId}/roots/{rootId}:
+    put:
+      tags: [Editorial]
+      operationId: upsertEditorialQuranRootMeaning
+      summary: Save a root meaning draft (broadcasts by JOIN)
+      description: >
+        Creates or updates this version's draft meaning for one root. Because the
+        word table renders the meaning by JOIN, the change is reflected for every
+        word sharing the root immediately. Requires write access to the version.
+        Records a changelog entry.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+        - $ref: '#/components/parameters/EditorialRootIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuranRootMeaningInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranRootMeaningEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/versions/{versionId}/roots/publish:
+    post:
+      tags: [Editorial]
+      operationId: publishEditorialQuranRootMeanings
+      summary: Publish all pending root meaning drafts for a version
+      description: >
+        Syncs every draft-status root meaning for the version into the published
+        root meanings table, in one transaction, and records a changelog entry.
+        Requires admin or the per-version approve grant.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuranPublishDecisionInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranRootPublishEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
 
 components:
   securitySchemes:
@@ -2858,6 +3057,22 @@ components:
       in: path
       required: true
       description: Quran publish request id.
+      schema:
+        type: integer
+        format: int64
+    EditorialWordIdParam:
+      name: wordId
+      in: path
+      required: true
+      description: Canonical Quran word id.
+      schema:
+        type: integer
+        format: int64
+    EditorialRootIdParam:
+      name: rootId
+      in: path
+      required: true
+      description: Quran root id (from the quran_roots registry).
       schema:
         type: integer
         format: int64
@@ -5154,6 +5369,199 @@ components:
         note:
           type: string
           nullable: true
+
+    # -----------------------------------------------------------------------
+    # Quran word-by-word + root meanings (Phase 2)
+    # -----------------------------------------------------------------------
+
+    QuranWordFields:
+      type: object
+      description: The editable per-word fields for a version.
+      properties:
+        word:
+          type: string
+          nullable: true
+          description: This version's rendering of the word (surface / transliteration).
+        meaning:
+          type: string
+          nullable: true
+          description: Optional per-word gloss.
+
+    QuranWord:
+      type: object
+      required: [word_index]
+      properties:
+        word_id:
+          type: integer
+          format: int64
+        word_index:
+          type: integer
+          description: 1-based position of the word within its verse.
+        global_index:
+          type: integer
+          nullable: true
+          description: Position across the whole Quran.
+        arabic:
+          type: string
+          nullable: true
+          description: Canonical Arabic surface form (read-only).
+        root:
+          type: string
+          nullable: true
+          description: Canonical Arabic root letters (read-only).
+        draft:
+          allOf:
+            - $ref: '#/components/schemas/QuranWordFields'
+          nullable: true
+          description: This version's draft text for the word, or null.
+        draft_status:
+          type: string
+          nullable: true
+          description: Status of the draft row (draft / published / archived).
+        published:
+          allOf:
+            - $ref: '#/components/schemas/QuranWordFields'
+          nullable: true
+          description: This version's published text for the word, or null.
+        reference:
+          allOf:
+            - $ref: '#/components/schemas/QuranWordFields'
+          nullable: true
+          description: The reference version's per-word text (the rail), or null.
+        root_meaning:
+          type: string
+          nullable: true
+          description: This version's draft meaning for the word's root (broadcast by JOIN).
+        root_meaning_published:
+          type: string
+          nullable: true
+          description: This version's published meaning for the word's root.
+
+    QuranVerseWords:
+      type: object
+      required: [verse_number, words]
+      properties:
+        verse_number:
+          type: integer
+        words:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuranWord'
+
+    QuranChapterWords:
+      type: object
+      required: [chapter_number, can_write, verses]
+      properties:
+        chapter_number:
+          type: integer
+        can_write:
+          type: boolean
+        reference_version_id:
+          type: integer
+          format: int64
+          nullable: true
+        verses:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuranVerseWords'
+
+    EditorialQuranChapterWordsEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/QuranChapterWords'
+
+    QuranWordDraftInput:
+      type: object
+      description: >
+        Per-word draft fields to upsert. Omitted fields are treated as null
+        (cleared); send the full intended state.
+      properties:
+        word:
+          type: string
+          nullable: true
+        meaning:
+          type: string
+          nullable: true
+
+    EditorialQuranWordDraftEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/QuranWord'
+
+    QuranRootSummary:
+      type: object
+      required: [root_id, letters, occurrences]
+      properties:
+        root_id:
+          type: integer
+          format: int64
+        letters:
+          type: string
+          description: The Arabic root.
+        occurrences:
+          type: integer
+          description: Corpus-wide occurrence count for this root.
+        meaning_draft:
+          type: string
+          nullable: true
+          description: This version's draft meaning, or null.
+        draft_status:
+          type: string
+          nullable: true
+          description: Status of the draft row (draft / published / archived).
+        meaning_published:
+          type: string
+          nullable: true
+          description: This version's published meaning, or null.
+        reference_meaning:
+          type: string
+          nullable: true
+          description: Canonical English gloss for the root, to translate from.
+
+    EditorialQuranRootListEnvelope:
+      type: object
+      required: [data, total]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuranRootSummary'
+        total:
+          type: integer
+          description: Total roots matching the filter (for pagination).
+
+    QuranRootMeaningInput:
+      type: object
+      properties:
+        meaning:
+          type: string
+          nullable: true
+
+    EditorialQuranRootMeaningEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/QuranRootSummary'
+
+    QuranRootPublishResult:
+      type: object
+      required: [published]
+      properties:
+        published:
+          type: integer
+          description: Number of root meanings synced to the published table.
+
+    EditorialQuranRootPublishEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/QuranRootPublishResult'
           description: Optional review note recorded with the decision.
 
     QuranChangelogEntry:

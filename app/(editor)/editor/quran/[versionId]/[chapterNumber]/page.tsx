@@ -36,9 +36,19 @@ export default async function QuranChapterEditorPage({ params }: PageProps) {
 
   return (
     <section style={s.page}>
-      <Link href={`/editor/quran/${versionId}`} style={s.crumb}>
-        ← Chapters
-      </Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <Link href={`/editor/quran/${versionId}`} style={s.crumb}>
+          ← Chapters
+        </Link>
+        <span style={{ display: 'inline-flex', gap: 14 }}>
+          <Link href={`/editor/quran/${versionId}/${chapterNumber}/words`} style={s.crumb}>
+            Word by word →
+          </Link>
+          <Link href={`/editor/quran/${versionId}/roots`} style={s.crumb}>
+            Root Book →
+          </Link>
+        </span>
+      </div>
       <ChapterEditor
         versionId={versionId}
         chapterNumber={chapterNumber}

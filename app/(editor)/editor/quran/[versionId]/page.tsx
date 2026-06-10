@@ -32,9 +32,14 @@ export default async function QuranChaptersPage({ params }: PageProps) {
 
   return (
     <section style={s.page}>
-      <Link href="/editor/quran" style={s.crumb}>
-        ← Versions
-      </Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <Link href="/editor/quran" style={s.crumb}>
+          ← Versions
+        </Link>
+        <Link href={`/editor/quran/${versionId}/roots`} style={s.crumb}>
+          Root Book →
+        </Link>
+      </div>
       <header style={{ marginBottom: 20 }}>
         <p style={s.kicker}>Quran · version {versionId}</p>
         <h1 style={s.heading}>Chapters</h1>

@@ -25,6 +25,13 @@ export type QuranPublishRequest = components['schemas']['QuranPublishRequest']
 export type QuranChangelogEntry = components['schemas']['QuranChangelogEntry']
 export type QuranVerseDraftInput = components['schemas']['QuranVerseDraftInput']
 export type QuranPublishStatus = components['schemas']['QuranPublishStatus']
+export type QuranChapterWords = components['schemas']['QuranChapterWords']
+export type QuranVerseWords = components['schemas']['QuranVerseWords']
+export type QuranWord = components['schemas']['QuranWord']
+export type QuranWordFields = components['schemas']['QuranWordFields']
+export type QuranWordDraftInput = components['schemas']['QuranWordDraftInput']
+export type QuranRootSummary = components['schemas']['QuranRootSummary']
+export type QuranRootPublishResult = components['schemas']['QuranRootPublishResult']
 
 /** Uniform result for editorial mutations invoked from server actions. */
 export type MutationResult<T> = { ok: true; data: T } | { ok: false; error: string }
@@ -261,6 +268,108 @@ export async function decideQuranPublishRequest(
     return { ok: true, data: data.data }
   } catch {
     return { ok: false, error: `Network error during ${decision}.` }
+  }
+}
+
+// ── Quran word-by-word + roots (Phase 2) ─────────────────────────────────────
+
+/** Fetches the word-by-word editing surface for a chapter, or null on failure. */
+export async function getQuranChapterWords(
+  token: string | undefined,
+  versionId: number,
+  chapterNumber: number,
+): Promise<QuranChapterWords | null> {
+  if (!API_BASE || !token) return null
+  try {
+    const { data, error, response } = await authedClient(token).GET(
+      '/editorial/quran/versions/{versionId}/chapters/{chapterNumber}/words',
+      { params: { path: { versionId, chapterNumber } } },
+    )
+    if (error || !response.ok || !data?.data) return null
+    return data.data
+  } catch {
+    return null
+  }
+}
+
+/** Saves one per-word draft. */
+export async function upsertQuranWordDraft(
+  token: string,
+  versionId: number,
+  wordId: number,
+  body: QuranWordDraftInput,
+): Promise<MutationResult<QuranWord>> {
+  try {
+    const { data, error, response } = await authedClient(token).PUT(
+      '/editorial/quran/versions/{versionId}/words/{wordId}',
+      { params: { path: { versionId, wordId } }, body },
+    )
+    if (error || !response.ok || !data?.data) {
+      return { ok: false, error: messageFrom(error, response.status) }
+    }
+    return { ok: true, data: data.data }
+  } catch {
+    return { ok: false, error: 'Network error saving word draft.' }
+  }
+}
+
+/** Lists root meanings for a version (Root Book). Returns empty on failure. */
+export async function listQuranRoots(
+  token: string | undefined,
+  versionId: number,
+  opts?: { q?: string; limit?: number; offset?: number },
+): Promise<{ roots: QuranRootSummary[]; total: number }> {
+  if (!API_BASE || !token) return { roots: [], total: 0 }
+  try {
+    const { data, error, response } = await authedClient(token).GET(
+      '/editorial/quran/versions/{versionId}/roots',
+      { params: { path: { versionId }, query: { q: opts?.q, limit: opts?.limit, offset: opts?.offset } } },
+    )
+    if (error || !response.ok || !data?.data) return { roots: [], total: 0 }
+    return { roots: data.data, total: data.total }
+  } catch {
+    return { roots: [], total: 0 }
+  }
+}
+
+/** Saves this version's draft meaning for a root (broadcasts by JOIN). */
+export async function upsertQuranRootMeaning(
+  token: string,
+  versionId: number,
+  rootId: number,
+  meaning: string | null,
+): Promise<MutationResult<QuranRootSummary>> {
+  try {
+    const { data, error, response } = await authedClient(token).PUT(
+      '/editorial/quran/versions/{versionId}/roots/{rootId}',
+      { params: { path: { versionId, rootId } }, body: { meaning } },
+    )
+    if (error || !response.ok || !data?.data) {
+      return { ok: false, error: messageFrom(error, response.status) }
+    }
+    return { ok: true, data: data.data }
+  } catch {
+    return { ok: false, error: 'Network error saving root meaning.' }
+  }
+}
+
+/** Publishes all pending root meaning drafts for a version (approver only). */
+export async function publishQuranRootMeanings(
+  token: string,
+  versionId: number,
+  note?: string | null,
+): Promise<MutationResult<QuranRootPublishResult>> {
+  try {
+    const { data, error, response } = await authedClient(token).POST(
+      '/editorial/quran/versions/{versionId}/roots/publish',
+      { params: { path: { versionId } }, body: { note } },
+    )
+    if (error || !response.ok || !data?.data) {
+      return { ok: false, error: messageFrom(error, response.status) }
+    }
+    return { ok: true, data: data.data }
+  } catch {
+    return { ok: false, error: 'Network error publishing root meanings.' }
   }
 }
 

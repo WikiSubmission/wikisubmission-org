@@ -1250,6 +1250,106 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/editorial/quran/versions/{versionId}/chapters/{chapterNumber}/words": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Word-by-word editing surface for a chapter
+         * @description Returns the fixed canonical word list for every verse of the chapter, each word carrying its canonical Arabic surface and root, this version's draft and published per-word text, the reference version's per-word text (the rail), and the per-version root meaning (draft + published) rendered by JOIN. Requires read access to the version.
+         */
+        get: operations["getEditorialQuranChapterWords"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/versions/{versionId}/words/{wordId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save a per-word draft (text / gloss)
+         * @description Creates or updates the draft for one canonical word of this version. The word id must belong to the Quran corpus. Requires write access to the version. Records a changelog entry.
+         */
+        put: operations["upsertEditorialQuranWordDraft"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/versions/{versionId}/roots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Root meanings for a version (Root Book)
+         * @description Returns the paginated root list for a version: each root's letters, corpus occurrence count, this version's draft and published meaning, the draft status, and a reference gloss (the canonical English per-root meaning) to translate from. Optional Arabic prefix filter. Requires read access to the version.
+         */
+        get: operations["listEditorialQuranRoots"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/versions/{versionId}/roots/{rootId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save a root meaning draft (broadcasts by JOIN)
+         * @description Creates or updates this version's draft meaning for one root. Because the word table renders the meaning by JOIN, the change is reflected for every word sharing the root immediately. Requires write access to the version. Records a changelog entry.
+         */
+        put: operations["upsertEditorialQuranRootMeaning"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/versions/{versionId}/roots/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publish all pending root meaning drafts for a version
+         * @description Syncs every draft-status root meaning for the version into the published root meanings table, in one transaction, and records a changelog entry. Requires admin or the per-version approve grant.
+         */
+        post: operations["publishEditorialQuranRootMeanings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2620,8 +2720,95 @@ export interface components {
             note?: string | null;
         };
         QuranPublishDecisionInput: {
-            /** @description Optional review note recorded with the decision. */
             note?: string | null;
+        };
+        /** @description The editable per-word fields for a version. */
+        QuranWordFields: {
+            /** @description This version's rendering of the word (surface / transliteration). */
+            word?: string | null;
+            /** @description Optional per-word gloss. */
+            meaning?: string | null;
+        };
+        QuranWord: {
+            /** Format: int64 */
+            word_id?: number;
+            /** @description 1-based position of the word within its verse. */
+            word_index: number;
+            /** @description Position across the whole Quran. */
+            global_index?: number | null;
+            /** @description Canonical Arabic surface form (read-only). */
+            arabic?: string | null;
+            /** @description Canonical Arabic root letters (read-only). */
+            root?: string | null;
+            /** @description This version's draft text for the word, or null. */
+            draft?: components["schemas"]["QuranWordFields"] | null;
+            /** @description Status of the draft row (draft / published / archived). */
+            draft_status?: string | null;
+            /** @description This version's published text for the word, or null. */
+            published?: components["schemas"]["QuranWordFields"] | null;
+            /** @description The reference version's per-word text (the rail), or null. */
+            reference?: components["schemas"]["QuranWordFields"] | null;
+            /** @description This version's draft meaning for the word's root (broadcast by JOIN). */
+            root_meaning?: string | null;
+            /** @description This version's published meaning for the word's root. */
+            root_meaning_published?: string | null;
+        };
+        QuranVerseWords: {
+            verse_number: number;
+            words: components["schemas"]["QuranWord"][];
+        };
+        QuranChapterWords: {
+            chapter_number: number;
+            can_write: boolean;
+            /** Format: int64 */
+            reference_version_id?: number | null;
+            verses: components["schemas"]["QuranVerseWords"][];
+        };
+        EditorialQuranChapterWordsEnvelope: {
+            data: components["schemas"]["QuranChapterWords"];
+        };
+        /** @description Per-word draft fields to upsert. Omitted fields are treated as null (cleared); send the full intended state. */
+        QuranWordDraftInput: {
+            word?: string | null;
+            meaning?: string | null;
+        };
+        EditorialQuranWordDraftEnvelope: {
+            data: components["schemas"]["QuranWord"];
+        };
+        QuranRootSummary: {
+            /** Format: int64 */
+            root_id: number;
+            /** @description The Arabic root. */
+            letters: string;
+            /** @description Corpus-wide occurrence count for this root. */
+            occurrences: number;
+            /** @description This version's draft meaning, or null. */
+            meaning_draft?: string | null;
+            /** @description Status of the draft row (draft / published / archived). */
+            draft_status?: string | null;
+            /** @description This version's published meaning, or null. */
+            meaning_published?: string | null;
+            /** @description Canonical English gloss for the root, to translate from. */
+            reference_meaning?: string | null;
+        };
+        EditorialQuranRootListEnvelope: {
+            data: components["schemas"]["QuranRootSummary"][];
+            /** @description Total roots matching the filter (for pagination). */
+            total: number;
+        };
+        QuranRootMeaningInput: {
+            meaning?: string | null;
+        };
+        EditorialQuranRootMeaningEnvelope: {
+            data: components["schemas"]["QuranRootSummary"];
+        };
+        QuranRootPublishResult: {
+            /** @description Number of root meanings synced to the published table. */
+            published: number;
+        };
+        EditorialQuranRootPublishEnvelope: {
+            /** @description Optional review note recorded with the decision. */
+            data: components["schemas"]["QuranRootPublishResult"];
         };
         QuranChangelogEntry: {
             /** Format: int64 */
@@ -2995,6 +3182,10 @@ export interface components {
         EditorialVerseNumberParam: number;
         /** @description Quran publish request id. */
         EditorialRequestIdParam: number;
+        /** @description Canonical Quran word id. */
+        EditorialWordIdParam: number;
+        /** @description Quran root id (from the quran_roots registry). */
+        EditorialRootIdParam: number;
     };
     requestBodies: never;
     headers: never;
@@ -5383,6 +5574,162 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EditorialQuranChangelogListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getEditorialQuranChapterWords: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+                /** @description Canonical Quran chapter number (1–114). */
+                chapterNumber: components["parameters"]["EditorialChapterNumberParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranChapterWordsEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    upsertEditorialQuranWordDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+                /** @description Canonical Quran word id. */
+                wordId: components["parameters"]["EditorialWordIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuranWordDraftInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranWordDraftEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialQuranRoots: {
+        parameters: {
+            query?: {
+                /** @description Arabic root prefix filter. */
+                q?: string;
+                /** @description Maximum roots to return (default 50, max 200). */
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranRootListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    upsertEditorialQuranRootMeaning: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+                /** @description Quran root id (from the quran_roots registry). */
+                rootId: components["parameters"]["EditorialRootIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuranRootMeaningInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranRootMeaningEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    publishEditorialQuranRootMeanings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["QuranPublishDecisionInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranRootPublishEnvelope"];
                 };
             };
             403: components["responses"]["Forbidden"];
