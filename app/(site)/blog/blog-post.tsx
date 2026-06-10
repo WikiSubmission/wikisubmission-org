@@ -444,7 +444,7 @@ export function BlogPostArticle({
               Continue reading
             </span>
             <h2 className="font-headline text-[clamp(28px,3.2vw,40px)] tracking-[-0.02em] leading-[1.1]">
-              More from the journal
+              More from the blog
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
