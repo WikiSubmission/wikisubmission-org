@@ -9,6 +9,7 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { timingSafeEqual } from 'node:crypto'
 import { Children, type ReactNode } from 'react'
 import { ScriptureText } from '@/components/scripture-text'
+import { BlogReadingProgressBar } from './blog-reading-progress-bar'
 
 export const SANITY_LANGUAGES = ['en', 'fr', 'ar', 'tr'] as const
 
@@ -288,9 +289,12 @@ export function BlogPostArticle({
   const publishedRelated = related.filter((relatedPost) => relatedPost.slug?.current)
   const scriptureRefsEnabled = post.enableScriptureRefs ?? true
   const portableTextComponents = buildPortableTextComponents(scriptureRefsEnabled)
+  const articleBodyId = 'blog-article-body'
 
   return (
     <div className="min-h-screen pb-32 md:pb-40">
+      <BlogReadingProgressBar targetId={articleBodyId} />
+
       {/* ── Top breadcrumb / back link ─────────────────────────────────── */}
       <nav
         aria-label="Article navigation"
@@ -389,7 +393,7 @@ export function BlogPostArticle({
       )}
 
       {/* ── Body ────────────────────────────────────────────────────────── */}
-      <article className="max-w-[680px] mx-auto px-6">
+      <article id={articleBodyId} className="max-w-[680px] mx-auto px-6">
         {post.body?.length ? (
           <PortableText value={post.body} components={portableTextComponents} />
         ) : (
