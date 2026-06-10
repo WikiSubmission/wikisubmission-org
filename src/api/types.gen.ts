@@ -1350,6 +1350,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/editorial/quran/versions/{versionId}/rectify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Quran integrity and coverage report for a version (admin)
+         * @description Admin-only diagnostic scan for a version. Reports corpus-level integrity (canonical roots missing from the roots master, orphan roots, words lacking canonical Arabic) and this version's editorial coverage (words and roots that have drafts or are published). Read-only; touches no data.
+         */
+        get: operations["getEditorialQuranRectifyReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/rectify/roots": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sync the roots master from the canonical corpus (admin)
+         * @description Admin-only. Inserts every canonical Arabic root present in the corpus but missing from the quran_roots master, so root meanings can attach to every word. Idempotent and version-agnostic; touches no version data.
+         */
+        post: operations["syncEditorialQuranRoots"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/versions/{versionId}/rectify/seed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pre-seed empty draft shells for a version (admin)
+         * @description Admin-only. Creates empty word draft rows for every canonical word in the version (optionally limited to one chapter) and, when requested, empty root meaning draft rows for every root. Existing drafts are never overwritten (insert-if-absent). Records a changelog entry.
+         */
+        post: operations["seedEditorialQuranDraftShells"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2809,6 +2869,55 @@ export interface components {
         EditorialQuranRootPublishEnvelope: {
             /** @description Optional review note recorded with the decision. */
             data: components["schemas"]["QuranRootPublishResult"];
+        };
+        /** @description Admin diagnostic snapshot. Corpus fields are version-agnostic (whole-corpus health); coverage fields are scoped to the requested version. */
+        QuranRectifyReport: {
+            /** @description Canonical roots in the corpus but absent from the roots master (repairable via roots sync). */
+            missing_roots: number;
+            /** @description Roots in the master no longer present in the corpus (informational). */
+            orphan_roots: number;
+            /** @description Canonical words with no Arabic word_text (corpus gap, not editor-fixable). */
+            words_missing_arabic: number;
+            /** @description Total canonical words in the corpus. */
+            total_words: number;
+            /** @description Words with a draft for this version. */
+            words_with_draft: number;
+            /** @description Words published for this version. */
+            words_published: number;
+            /** @description Total roots in the master. */
+            total_roots: number;
+            /** @description Root meanings drafted for this version. */
+            root_meaning_drafts: number;
+            /** @description Root meanings published for this version. */
+            root_meanings_published: number;
+        };
+        EditorialQuranRectifyReportEnvelope: {
+            data: components["schemas"]["QuranRectifyReport"];
+        };
+        QuranRootsSyncResult: {
+            /** @description Number of new roots inserted into the master. */
+            inserted: number;
+        };
+        EditorialQuranRootsSyncEnvelope: {
+            data: components["schemas"]["QuranRootsSyncResult"];
+        };
+        QuranRectifySeedInput: {
+            /** @description Limit word-shell seeding to one chapter. Omit to seed the whole version. */
+            chapter_number?: number | null;
+            /**
+             * @description Also create empty root meaning draft shells for every root.
+             * @default false
+             */
+            seed_roots: boolean;
+        };
+        QuranRectifySeedResult: {
+            /** @description Empty word draft rows created (existing drafts untouched). */
+            word_shells_created: number;
+            /** @description Empty root meaning draft rows created (existing drafts untouched). */
+            root_shells_created: number;
+        };
+        EditorialQuranRectifySeedEnvelope: {
+            data: components["schemas"]["QuranRectifySeedResult"];
         };
         QuranChangelogEntry: {
             /** Format: int64 */
@@ -5732,6 +5841,85 @@ export interface operations {
                     "application/json": components["schemas"]["EditorialQuranRootPublishEnvelope"];
                 };
             };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getEditorialQuranRectifyReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranRectifyReportEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    syncEditorialQuranRoots: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranRootsSyncEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    seedEditorialQuranDraftShells: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["QuranRectifySeedInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranRectifySeedEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             500: components["responses"]["InternalServerErrror"];

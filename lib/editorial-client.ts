@@ -32,6 +32,10 @@ export type QuranWordFields = components['schemas']['QuranWordFields']
 export type QuranWordDraftInput = components['schemas']['QuranWordDraftInput']
 export type QuranRootSummary = components['schemas']['QuranRootSummary']
 export type QuranRootPublishResult = components['schemas']['QuranRootPublishResult']
+export type QuranRectifyReport = components['schemas']['QuranRectifyReport']
+export type QuranRootsSyncResult = components['schemas']['QuranRootsSyncResult']
+export type QuranRectifySeedResult = components['schemas']['QuranRectifySeedResult']
+export type QuranRectifySeedInput = components['schemas']['QuranRectifySeedInput']
 
 /** Uniform result for editorial mutations invoked from server actions. */
 export type MutationResult<T> = { ok: true; data: T } | { ok: false; error: string }
@@ -370,6 +374,63 @@ export async function publishQuranRootMeanings(
     return { ok: true, data: data.data }
   } catch {
     return { ok: false, error: 'Network error publishing root meanings.' }
+  }
+}
+
+// ── Quran rectification (admin) ──────────────────────────────────────────────
+
+/** Fetches the integrity + coverage report for a version (admin). null on failure. */
+export async function getQuranRectifyReport(
+  token: string | undefined,
+  versionId: number,
+): Promise<QuranRectifyReport | null> {
+  if (!API_BASE || !token) return null
+  try {
+    const { data, error, response } = await authedClient(token).GET(
+      '/editorial/quran/versions/{versionId}/rectify',
+      { params: { path: { versionId } } },
+    )
+    if (error || !response.ok || !data?.data) return null
+    return data.data
+  } catch {
+    return null
+  }
+}
+
+/** Syncs the roots master from the canonical corpus (admin). */
+export async function syncQuranRoots(
+  token: string,
+): Promise<MutationResult<QuranRootsSyncResult>> {
+  try {
+    const { data, error, response } = await authedClient(token).POST(
+      '/editorial/quran/rectify/roots',
+    )
+    if (error || !response.ok || !data?.data) {
+      return { ok: false, error: messageFrom(error, response.status) }
+    }
+    return { ok: true, data: data.data }
+  } catch {
+    return { ok: false, error: 'Network error syncing roots.' }
+  }
+}
+
+/** Pre-seeds empty draft shells for a version (admin). */
+export async function seedQuranDraftShells(
+  token: string,
+  versionId: number,
+  body: QuranRectifySeedInput,
+): Promise<MutationResult<QuranRectifySeedResult>> {
+  try {
+    const { data, error, response } = await authedClient(token).POST(
+      '/editorial/quran/versions/{versionId}/rectify/seed',
+      { params: { path: { versionId } }, body },
+    )
+    if (error || !response.ok || !data?.data) {
+      return { ok: false, error: messageFrom(error, response.status) }
+    }
+    return { ok: true, data: data.data }
+  } catch {
+    return { ok: false, error: 'Network error seeding draft shells.' }
   }
 }
 

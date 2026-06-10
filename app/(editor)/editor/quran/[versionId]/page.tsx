@@ -36,9 +36,16 @@ export default async function QuranChaptersPage({ params }: PageProps) {
         <Link href="/editor/quran" style={s.crumb}>
           ← Versions
         </Link>
-        <Link href={`/editor/quran/${versionId}/roots`} style={s.crumb}>
-          Root Book →
-        </Link>
+        <span style={{ display: 'flex', gap: 16 }}>
+          {editorial.is_admin && (
+            <Link href={`/editor/quran/${versionId}/rectify`} style={s.crumb}>
+              Rectify →
+            </Link>
+          )}
+          <Link href={`/editor/quran/${versionId}/roots`} style={s.crumb}>
+            Root Book →
+          </Link>
+        </span>
       </div>
       <header style={{ marginBottom: 20 }}>
         <p style={s.kicker}>Quran · version {versionId}</p>

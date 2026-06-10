@@ -2955,6 +2955,93 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+  /editorial/quran/versions/{versionId}/rectify:
+    get:
+      tags: [Editorial]
+      operationId: getEditorialQuranRectifyReport
+      summary: Quran integrity and coverage report for a version (admin)
+      description: >
+        Admin-only diagnostic scan for a version. Reports corpus-level integrity
+        (canonical roots missing from the roots master, orphan roots, words
+        lacking canonical Arabic) and this version's editorial coverage (words and
+        roots that have drafts or are published). Read-only; touches no data.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranRectifyReportEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/rectify/roots:
+    post:
+      tags: [Editorial]
+      operationId: syncEditorialQuranRoots
+      summary: Sync the roots master from the canonical corpus (admin)
+      description: >
+        Admin-only. Inserts every canonical Arabic root present in the corpus but
+        missing from the quran_roots master, so root meanings can attach to every
+        word. Idempotent and version-agnostic; touches no version data.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranRootsSyncEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/versions/{versionId}/rectify/seed:
+    post:
+      tags: [Editorial]
+      operationId: seedEditorialQuranDraftShells
+      summary: Pre-seed empty draft shells for a version (admin)
+      description: >
+        Admin-only. Creates empty word draft rows for every canonical word in the
+        version (optionally limited to one chapter) and, when requested, empty
+        root meaning draft rows for every root. Existing drafts are never
+        overwritten (insert-if-absent). Records a changelog entry.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuranRectifySeedInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranRectifySeedEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
 
 components:
   securitySchemes:
@@ -5563,6 +5650,104 @@ components:
         data:
           $ref: '#/components/schemas/QuranRootPublishResult'
           description: Optional review note recorded with the decision.
+
+    QuranRectifyReport:
+      type: object
+      description: >
+        Admin diagnostic snapshot. Corpus fields are version-agnostic (whole-corpus
+        health); coverage fields are scoped to the requested version.
+      required:
+        - missing_roots
+        - orphan_roots
+        - words_missing_arabic
+        - total_words
+        - words_with_draft
+        - words_published
+        - total_roots
+        - root_meaning_drafts
+        - root_meanings_published
+      properties:
+        missing_roots:
+          type: integer
+          description: Canonical roots in the corpus but absent from the roots master (repairable via roots sync).
+        orphan_roots:
+          type: integer
+          description: Roots in the master no longer present in the corpus (informational).
+        words_missing_arabic:
+          type: integer
+          description: Canonical words with no Arabic word_text (corpus gap, not editor-fixable).
+        total_words:
+          type: integer
+          description: Total canonical words in the corpus.
+        words_with_draft:
+          type: integer
+          description: Words with a draft for this version.
+        words_published:
+          type: integer
+          description: Words published for this version.
+        total_roots:
+          type: integer
+          description: Total roots in the master.
+        root_meaning_drafts:
+          type: integer
+          description: Root meanings drafted for this version.
+        root_meanings_published:
+          type: integer
+          description: Root meanings published for this version.
+
+    EditorialQuranRectifyReportEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/QuranRectifyReport'
+
+    QuranRootsSyncResult:
+      type: object
+      required: [inserted]
+      properties:
+        inserted:
+          type: integer
+          description: Number of new roots inserted into the master.
+
+    EditorialQuranRootsSyncEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/QuranRootsSyncResult'
+
+    QuranRectifySeedInput:
+      type: object
+      properties:
+        chapter_number:
+          type: integer
+          nullable: true
+          minimum: 1
+          maximum: 114
+          description: Limit word-shell seeding to one chapter. Omit to seed the whole version.
+        seed_roots:
+          type: boolean
+          default: false
+          description: Also create empty root meaning draft shells for every root.
+
+    QuranRectifySeedResult:
+      type: object
+      required: [word_shells_created, root_shells_created]
+      properties:
+        word_shells_created:
+          type: integer
+          description: Empty word draft rows created (existing drafts untouched).
+        root_shells_created:
+          type: integer
+          description: Empty root meaning draft rows created (existing drafts untouched).
+
+    EditorialQuranRectifySeedEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/QuranRectifySeedResult'
 
     QuranChangelogEntry:
       type: object

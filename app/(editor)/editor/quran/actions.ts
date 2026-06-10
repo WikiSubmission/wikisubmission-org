@@ -6,14 +6,19 @@ import {
   createQuranPublishRequest,
   decideQuranPublishRequest,
   publishQuranRootMeanings,
+  seedQuranDraftShells,
+  syncQuranRoots,
   upsertQuranChapterDraft,
   upsertQuranRootMeaning,
   upsertQuranVerseDraft,
   upsertQuranWordDraft,
   type MutationResult,
   type QuranPublishRequest,
+  type QuranRectifySeedInput,
+  type QuranRectifySeedResult,
   type QuranRootPublishResult,
   type QuranRootSummary,
+  type QuranRootsSyncResult,
   type QuranVerseDraft,
   type QuranVerseDraftInput,
   type QuranWord,
@@ -105,6 +110,23 @@ export async function publishRootMeaningsAction(
   if (!token) return NOT_AUTHED
   const result = await publishQuranRootMeanings(token, versionId, note)
   if (result.ok) revalidatePath(`/editor/quran/${versionId}/roots`)
+  return result
+}
+
+export async function syncRootsAction(): Promise<MutationResult<QuranRootsSyncResult>> {
+  const token = await requireToken()
+  if (!token) return NOT_AUTHED
+  return syncQuranRoots(token)
+}
+
+export async function seedDraftShellsAction(
+  versionId: number,
+  body: QuranRectifySeedInput,
+): Promise<MutationResult<QuranRectifySeedResult>> {
+  const token = await requireToken()
+  if (!token) return NOT_AUTHED
+  const result = await seedQuranDraftShells(token, versionId, body)
+  if (result.ok) revalidatePath(`/editor/quran/${versionId}/rectify`)
   return result
 }
 
