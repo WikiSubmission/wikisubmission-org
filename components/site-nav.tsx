@@ -396,6 +396,7 @@ export function SiteNav() {
 
   return (
     <nav
+      data-site-nav=""
       style={{
         position: 'sticky',
         top: 0,
