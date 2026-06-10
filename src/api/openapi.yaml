@@ -2400,6 +2400,362 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+  # ---------------------------------------------------------------------------
+  # Quran editorial write path (Phase 1 of the Sanity Studio port).
+  #
+  # Editors save per-verse and per-chapter DRAFTS against a specific Quran
+  # version, then submit a CHAPTER for publishing. A chapter publish request
+  # stays `pending` until an approver (admin, or a holder of the per-version
+  # approve grant) approves it, at which point that chapter's drafts are synced
+  # into the published tables and prior published rows are archived to history.
+  # Every save / request / decision is recorded in an append-only changelog.
+  #
+  # Word-by-word editing, root broadcast, and admin rectification are
+  # intentionally out of scope for Phase 1.
+  # ---------------------------------------------------------------------------
+
+  /editorial/quran/versions/{versionId}/chapters:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialQuranChapters
+      summary: Chapter navigation and progress for a Quran version
+      description: >
+        Returns one summary per canonical chapter (1–114) for the given
+        version: canonical verse count, whether a chapter-title draft exists,
+        how many verses have drafts, and the status of any open publish request.
+        Requires read access to the version.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranChapterListEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/versions/{versionId}/chapters/{chapterNumber}:
+    get:
+      tags: [Editorial]
+      operationId: getEditorialQuranChapter
+      summary: Chapter editor payload (drafts, published, reference rail)
+      description: >
+        Returns the full editing surface for one chapter of a version: the
+        chapter-title draft and published title, and for each canonical verse
+        its current draft, the published text, and the published text of the
+        version's reference version (the rail editors translate beside).
+        Requires read access to the version.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+        - $ref: '#/components/parameters/EditorialChapterNumberParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranChapterEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    put:
+      tags: [Editorial]
+      operationId: upsertEditorialQuranChapterDraft
+      summary: Save the chapter-title draft
+      description: >
+        Creates or updates the chapter-title draft for this version+chapter.
+        Requires write access to the version. Records a changelog entry.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+        - $ref: '#/components/parameters/EditorialChapterNumberParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuranChapterDraftInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranChapterDraftEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/versions/{versionId}/chapters/{chapterNumber}/verses/{verseNumber}:
+    put:
+      tags: [Editorial]
+      operationId: upsertEditorialQuranVerseDraft
+      summary: Save a verse draft (subtitle / content / footer)
+      description: >
+        Creates or updates the draft for one verse of this version+chapter.
+        The verse number must be within the chapter's canonical verse count.
+        Requires write access to the version. Records a changelog entry.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+        - $ref: '#/components/parameters/EditorialChapterNumberParam'
+        - $ref: '#/components/parameters/EditorialVerseNumberParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuranVerseDraftInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranVerseDraftEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/versions/{versionId}/chapters/{chapterNumber}/publish-request:
+    post:
+      tags: [Editorial]
+      operationId: createEditorialQuranPublishRequest
+      summary: Submit a chapter for publishing
+      description: >
+        Opens a `pending` publish request for this version+chapter. At most one
+        request may be open per version+chapter; a second submission while one
+        is pending returns 409. Requires write access to the version. Records a
+        changelog entry.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+        - $ref: '#/components/parameters/EditorialChapterNumberParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuranPublishRequestInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranPublishRequestEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/publish-requests:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialQuranPublishRequests
+      summary: List Quran publish requests (pending-approvals queue)
+      description: >
+        Returns publish requests visible to the caller. Approvers and admins see
+        all requests for versions they can approve (or every version, for
+        admins); other editors see only requests they submitted. Filterable by
+        status and version. Backs the pending-approvals page.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Filter by request status.
+          schema:
+            $ref: '#/components/schemas/QuranPublishStatus'
+        - name: version_id
+          in: query
+          required: false
+          description: Filter to a single Quran version.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranPublishRequestListEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/publish-requests/{requestId}/approve:
+    post:
+      tags: [Editorial]
+      operationId: approveEditorialQuranPublishRequest
+      summary: Approve a publish request and sync the chapter
+      description: >
+        Transitions a `pending` request to `approved` and, in the same
+        transaction, syncs that chapter's drafts into the published tables
+        (archiving any prior published rows to history). Requires admin or the
+        per-version approve grant. Records changelog entries.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialRequestIdParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuranPublishDecisionInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranPublishRequestEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/publish-requests/{requestId}/reject:
+    post:
+      tags: [Editorial]
+      operationId: rejectEditorialQuranPublishRequest
+      summary: Reject a publish request
+      description: >
+        Transitions a `pending` request to `rejected` without publishing.
+        Requires admin or the per-version approve grant. Records a changelog
+        entry.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialRequestIdParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuranPublishDecisionInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranPublishRequestEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/publish-requests/{requestId}/cancel:
+    post:
+      tags: [Editorial]
+      operationId: cancelEditorialQuranPublishRequest
+      summary: Cancel an open publish request
+      description: >
+        Transitions a `pending` request to `cancelled`. Allowed for the original
+        requester, an approver of the version, or an admin. Records a changelog
+        entry.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialRequestIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranPublishRequestEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran/versions/{versionId}/chapters/{chapterNumber}/changelog:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialQuranChapterChangelog
+      summary: Recent editorial changelog for a chapter
+      description: >
+        Returns the append-only changelog entries (draft saves, publish
+        requests, approvals, rejections, publishes) for this version+chapter,
+        most recent first. Requires read access to the version.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialVersionIdParam'
+        - $ref: '#/components/parameters/EditorialChapterNumberParam'
+        - name: limit
+          in: query
+          required: false
+          description: Maximum entries to return (default 50, max 200).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranChangelogListEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
 
 components:
   securitySchemes:
@@ -2470,6 +2826,41 @@ components:
         enum: [quran, bible]
         default: quran
       example: quran
+
+    # Editorial path parameters (Quran write path)
+    EditorialVersionIdParam:
+      name: versionId
+      in: path
+      required: true
+      description: Quran version id.
+      schema:
+        type: integer
+        format: int64
+    EditorialChapterNumberParam:
+      name: chapterNumber
+      in: path
+      required: true
+      description: Canonical Quran chapter number (1–114).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 114
+    EditorialVerseNumberParam:
+      name: verseNumber
+      in: path
+      required: true
+      description: 1-based verse number within the chapter.
+      schema:
+        type: integer
+        minimum: 1
+    EditorialRequestIdParam:
+      name: requestId
+      in: path
+      required: true
+      description: Quran publish request id.
+      schema:
+        type: integer
+        format: int64
 
   schemas:
     # -----------------------------------------------------------------------
@@ -4408,7 +4799,7 @@ components:
 
     EditorialSession:
       type: object
-      required: [is_admin, modules, quran_versions, bible_versions]
+      required: [is_admin, modules, quran_versions, bible_versions, quran_approver_versions]
       properties:
         is_admin:
           type: boolean
@@ -4427,6 +4818,14 @@ components:
           additionalProperties:
             type: boolean
           description: Bible version id (as string key) mapped to can_write.
+        quran_approver_versions:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: >
+            Quran version id (as string key) the caller may approve publish
+            requests for. Presence implies approve authority on that version;
+            admins approve every version regardless of this map.
         quran_reference_version_id:
           type: integer
           format: int64
@@ -4523,6 +4922,284 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BibleVersion'
+
+    # -----------------------------------------------------------------------
+    # Quran editorial write path (Phase 1)
+    # -----------------------------------------------------------------------
+
+    QuranPublishStatus:
+      type: string
+      enum: [pending, approved, rejected, cancelled]
+
+    QuranChapterSummary:
+      type: object
+      required: [chapter_number, verse_count, has_title_draft, draft_verse_count]
+      properties:
+        chapter_number:
+          type: integer
+        verse_count:
+          type: integer
+          description: Canonical verse count for this chapter.
+        title:
+          type: string
+          nullable: true
+          description: Current chapter-title draft, or null if none.
+        has_title_draft:
+          type: boolean
+        draft_verse_count:
+          type: integer
+          description: Number of verses in this chapter that have a draft.
+        pending_request:
+          $ref: '#/components/schemas/QuranPublishRequest'
+
+    EditorialQuranChapterListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuranChapterSummary'
+
+    QuranTextFields:
+      type: object
+      description: The editable text fields of a Quran verse.
+      properties:
+        subtitle:
+          type: string
+          nullable: true
+        content:
+          type: string
+          nullable: true
+        footer:
+          type: string
+          nullable: true
+
+    QuranVerseDraft:
+      type: object
+      required: [verse_number]
+      properties:
+        verse_number:
+          type: integer
+        draft:
+          allOf:
+            - $ref: '#/components/schemas/QuranTextFields'
+          nullable: true
+          description: Current draft text, or null if no draft saved yet.
+        draft_status:
+          allOf:
+            - $ref: '#/components/schemas/QuranPublishStatus'
+          nullable: true
+          description: Status of the draft row, if any.
+        draft_updated_at:
+          type: string
+          format: date-time
+          nullable: true
+        published:
+          allOf:
+            - $ref: '#/components/schemas/QuranTextFields'
+          nullable: true
+          description: Currently published text for this verse, or null.
+        reference:
+          allOf:
+            - $ref: '#/components/schemas/QuranTextFields'
+          nullable: true
+          description: >
+            Published text of the version's reference version for this verse,
+            shown as the translation rail. Null if no reference version is set
+            or it has no published text here.
+
+    QuranChapterEditor:
+      type: object
+      required: [chapter_number, verse_count, can_write, verses]
+      properties:
+        chapter_number:
+          type: integer
+        verse_count:
+          type: integer
+        title_draft:
+          type: string
+          nullable: true
+        title_published:
+          type: string
+          nullable: true
+        reference_version_id:
+          type: integer
+          format: int64
+          nullable: true
+        can_write:
+          type: boolean
+          description: Whether the caller may edit this version.
+        pending_request:
+          $ref: '#/components/schemas/QuranPublishRequest'
+        verses:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuranVerseDraft'
+
+    EditorialQuranChapterEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/QuranChapterEditor'
+
+    QuranVerseDraftInput:
+      type: object
+      description: >
+        Verse draft fields to upsert. Omitted fields are treated as null
+        (cleared); send the full intended state of all three fields.
+      properties:
+        subtitle:
+          type: string
+          nullable: true
+        content:
+          type: string
+          nullable: true
+        footer:
+          type: string
+          nullable: true
+
+    EditorialQuranVerseDraftEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/QuranVerseDraft'
+
+    QuranChapterDraftInput:
+      type: object
+      description: Chapter-title draft to upsert.
+      properties:
+        title:
+          type: string
+          nullable: true
+
+    EditorialQuranChapterDraftEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [chapter_number]
+          properties:
+            chapter_number:
+              type: integer
+            title:
+              type: string
+              nullable: true
+
+    QuranPublishRequest:
+      type: object
+      required: [id, version_id, chapter_number, status, requested_by, requested_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        version_id:
+          type: integer
+          format: int64
+        chapter_number:
+          type: integer
+        status:
+          $ref: '#/components/schemas/QuranPublishStatus'
+        note:
+          type: string
+          nullable: true
+          description: Optional note from the submitter.
+        requested_by:
+          type: integer
+          format: int64
+        requested_at:
+          type: string
+          format: date-time
+        reviewed_by:
+          type: integer
+          format: int64
+          nullable: true
+        reviewed_at:
+          type: string
+          format: date-time
+          nullable: true
+        review_note:
+          type: string
+          nullable: true
+
+    EditorialQuranPublishRequestEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/QuranPublishRequest'
+
+    EditorialQuranPublishRequestListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuranPublishRequest'
+
+    QuranPublishRequestInput:
+      type: object
+      properties:
+        note:
+          type: string
+          nullable: true
+
+    QuranPublishDecisionInput:
+      type: object
+      properties:
+        note:
+          type: string
+          nullable: true
+          description: Optional review note recorded with the decision.
+
+    QuranChangelogEntry:
+      type: object
+      required: [id, version_id, action, actor_id, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        version_id:
+          type: integer
+          format: int64
+        chapter_number:
+          type: integer
+          nullable: true
+        verse_number:
+          type: integer
+          nullable: true
+        action:
+          type: string
+          description: >
+            One of verse_draft_saved, chapter_draft_saved, publish_requested,
+            publish_approved, publish_rejected, publish_cancelled, published.
+        actor_id:
+          type: integer
+          format: int64
+        publish_request_id:
+          type: integer
+          format: int64
+          nullable: true
+        detail:
+          type: object
+          additionalProperties: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    EditorialQuranChangelogListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuranChangelogEntry'
 
 
     # -----------------------------------------------------------------------

@@ -1066,6 +1066,190 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/editorial/quran/versions/{versionId}/chapters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Chapter navigation and progress for a Quran version
+         * @description Returns one summary per canonical chapter (1–114) for the given version: canonical verse count, whether a chapter-title draft exists, how many verses have drafts, and the status of any open publish request. Requires read access to the version.
+         */
+        get: operations["listEditorialQuranChapters"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/versions/{versionId}/chapters/{chapterNumber}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Chapter editor payload (drafts, published, reference rail)
+         * @description Returns the full editing surface for one chapter of a version: the chapter-title draft and published title, and for each canonical verse its current draft, the published text, and the published text of the version's reference version (the rail editors translate beside). Requires read access to the version.
+         */
+        get: operations["getEditorialQuranChapter"];
+        /**
+         * Save the chapter-title draft
+         * @description Creates or updates the chapter-title draft for this version+chapter. Requires write access to the version. Records a changelog entry.
+         */
+        put: operations["upsertEditorialQuranChapterDraft"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/versions/{versionId}/chapters/{chapterNumber}/verses/{verseNumber}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save a verse draft (subtitle / content / footer)
+         * @description Creates or updates the draft for one verse of this version+chapter. The verse number must be within the chapter's canonical verse count. Requires write access to the version. Records a changelog entry.
+         */
+        put: operations["upsertEditorialQuranVerseDraft"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/versions/{versionId}/chapters/{chapterNumber}/publish-request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit a chapter for publishing
+         * @description Opens a `pending` publish request for this version+chapter. At most one request may be open per version+chapter; a second submission while one is pending returns 409. Requires write access to the version. Records a changelog entry.
+         */
+        post: operations["createEditorialQuranPublishRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/publish-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Quran publish requests (pending-approvals queue)
+         * @description Returns publish requests visible to the caller. Approvers and admins see all requests for versions they can approve (or every version, for admins); other editors see only requests they submitted. Filterable by status and version. Backs the pending-approvals page.
+         */
+        get: operations["listEditorialQuranPublishRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/publish-requests/{requestId}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve a publish request and sync the chapter
+         * @description Transitions a `pending` request to `approved` and, in the same transaction, syncs that chapter's drafts into the published tables (archiving any prior published rows to history). Requires admin or the per-version approve grant. Records changelog entries.
+         */
+        post: operations["approveEditorialQuranPublishRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/publish-requests/{requestId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reject a publish request
+         * @description Transitions a `pending` request to `rejected` without publishing. Requires admin or the per-version approve grant. Records a changelog entry.
+         */
+        post: operations["rejectEditorialQuranPublishRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/publish-requests/{requestId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel an open publish request
+         * @description Transitions a `pending` request to `cancelled`. Allowed for the original requester, an approver of the version, or an admin. Records a changelog entry.
+         */
+        post: operations["cancelEditorialQuranPublishRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran/versions/{versionId}/chapters/{chapterNumber}/changelog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Recent editorial changelog for a chapter
+         * @description Returns the append-only changelog entries (draft saves, publish requests, approvals, rejections, publishes) for this version+chapter, most recent first. Requires read access to the version.
+         */
+        get: operations["listEditorialQuranChapterChangelog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2289,6 +2473,10 @@ export interface components {
             bible_versions: {
                 [key: string]: boolean;
             };
+            /** @description Quran version id (as string key) the caller may approve publish requests for. Presence implies approve authority on that version; admins approve every version regardless of this map. */
+            quran_approver_versions: {
+                [key: string]: boolean;
+            };
             /** Format: int64 */
             quran_reference_version_id?: number | null;
         };
@@ -2333,6 +2521,129 @@ export interface components {
         };
         EditorialBibleVersionListEnvelope: {
             data: components["schemas"]["BibleVersion"][];
+        };
+        /** @enum {string} */
+        QuranPublishStatus: "pending" | "approved" | "rejected" | "cancelled";
+        QuranChapterSummary: {
+            chapter_number: number;
+            /** @description Canonical verse count for this chapter. */
+            verse_count: number;
+            /** @description Current chapter-title draft, or null if none. */
+            title?: string | null;
+            has_title_draft: boolean;
+            /** @description Number of verses in this chapter that have a draft. */
+            draft_verse_count: number;
+            pending_request?: components["schemas"]["QuranPublishRequest"];
+        };
+        EditorialQuranChapterListEnvelope: {
+            data: components["schemas"]["QuranChapterSummary"][];
+        };
+        /** @description The editable text fields of a Quran verse. */
+        QuranTextFields: {
+            subtitle?: string | null;
+            content?: string | null;
+            footer?: string | null;
+        };
+        QuranVerseDraft: {
+            verse_number: number;
+            /** @description Current draft text, or null if no draft saved yet. */
+            draft?: components["schemas"]["QuranTextFields"] | null;
+            /** @description Status of the draft row, if any. */
+            draft_status?: components["schemas"]["QuranPublishStatus"] | null;
+            /** Format: date-time */
+            draft_updated_at?: string | null;
+            /** @description Currently published text for this verse, or null. */
+            published?: components["schemas"]["QuranTextFields"] | null;
+            /** @description Published text of the version's reference version for this verse, shown as the translation rail. Null if no reference version is set or it has no published text here. */
+            reference?: components["schemas"]["QuranTextFields"] | null;
+        };
+        QuranChapterEditor: {
+            chapter_number: number;
+            verse_count: number;
+            title_draft?: string | null;
+            title_published?: string | null;
+            /** Format: int64 */
+            reference_version_id?: number | null;
+            /** @description Whether the caller may edit this version. */
+            can_write: boolean;
+            pending_request?: components["schemas"]["QuranPublishRequest"];
+            verses: components["schemas"]["QuranVerseDraft"][];
+        };
+        EditorialQuranChapterEnvelope: {
+            data: components["schemas"]["QuranChapterEditor"];
+        };
+        /** @description Verse draft fields to upsert. Omitted fields are treated as null (cleared); send the full intended state of all three fields. */
+        QuranVerseDraftInput: {
+            subtitle?: string | null;
+            content?: string | null;
+            footer?: string | null;
+        };
+        EditorialQuranVerseDraftEnvelope: {
+            data: components["schemas"]["QuranVerseDraft"];
+        };
+        /** @description Chapter-title draft to upsert. */
+        QuranChapterDraftInput: {
+            title?: string | null;
+        };
+        EditorialQuranChapterDraftEnvelope: {
+            data: {
+                chapter_number: number;
+                title?: string | null;
+            };
+        };
+        QuranPublishRequest: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            version_id: number;
+            chapter_number: number;
+            status: components["schemas"]["QuranPublishStatus"];
+            /** @description Optional note from the submitter. */
+            note?: string | null;
+            /** Format: int64 */
+            requested_by: number;
+            /** Format: date-time */
+            requested_at: string;
+            /** Format: int64 */
+            reviewed_by?: number | null;
+            /** Format: date-time */
+            reviewed_at?: string | null;
+            review_note?: string | null;
+        };
+        EditorialQuranPublishRequestEnvelope: {
+            data: components["schemas"]["QuranPublishRequest"];
+        };
+        EditorialQuranPublishRequestListEnvelope: {
+            data: components["schemas"]["QuranPublishRequest"][];
+        };
+        QuranPublishRequestInput: {
+            note?: string | null;
+        };
+        QuranPublishDecisionInput: {
+            /** @description Optional review note recorded with the decision. */
+            note?: string | null;
+        };
+        QuranChangelogEntry: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            version_id: number;
+            chapter_number?: number | null;
+            verse_number?: number | null;
+            /** @description One of verse_draft_saved, chapter_draft_saved, publish_requested, publish_approved, publish_rejected, publish_cancelled, published. */
+            action: string;
+            /** Format: int64 */
+            actor_id: number;
+            /** Format: int64 */
+            publish_request_id?: number | null;
+            detail?: {
+                [key: string]: unknown;
+            } | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        EditorialQuranChangelogListEnvelope: {
+            data: components["schemas"]["QuranChangelogEntry"][];
         };
         GamePassage: {
             /**
@@ -2676,6 +2987,14 @@ export interface components {
          * @example quran
          */
         MeScriptureParam: "quran" | "bible";
+        /** @description Quran version id. */
+        EditorialVersionIdParam: number;
+        /** @description Canonical Quran chapter number (1–114). */
+        EditorialChapterNumberParam: number;
+        /** @description 1-based verse number within the chapter. */
+        EditorialVerseNumberParam: number;
+        /** @description Quran publish request id. */
+        EditorialRequestIdParam: number;
     };
     requestBodies: never;
     headers: never;
@@ -4765,6 +5084,309 @@ export interface operations {
                 };
             };
             403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialQuranChapters: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranChapterListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getEditorialQuranChapter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+                /** @description Canonical Quran chapter number (1–114). */
+                chapterNumber: components["parameters"]["EditorialChapterNumberParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranChapterEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    upsertEditorialQuranChapterDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+                /** @description Canonical Quran chapter number (1–114). */
+                chapterNumber: components["parameters"]["EditorialChapterNumberParam"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuranChapterDraftInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranChapterDraftEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    upsertEditorialQuranVerseDraft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+                /** @description Canonical Quran chapter number (1–114). */
+                chapterNumber: components["parameters"]["EditorialChapterNumberParam"];
+                /** @description 1-based verse number within the chapter. */
+                verseNumber: components["parameters"]["EditorialVerseNumberParam"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuranVerseDraftInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranVerseDraftEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    createEditorialQuranPublishRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+                /** @description Canonical Quran chapter number (1–114). */
+                chapterNumber: components["parameters"]["EditorialChapterNumberParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["QuranPublishRequestInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranPublishRequestEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialQuranPublishRequests: {
+        parameters: {
+            query?: {
+                /** @description Filter by request status. */
+                status?: components["schemas"]["QuranPublishStatus"];
+                /** @description Filter to a single Quran version. */
+                version_id?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranPublishRequestListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    approveEditorialQuranPublishRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran publish request id. */
+                requestId: components["parameters"]["EditorialRequestIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["QuranPublishDecisionInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranPublishRequestEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    rejectEditorialQuranPublishRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran publish request id. */
+                requestId: components["parameters"]["EditorialRequestIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["QuranPublishDecisionInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranPublishRequestEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    cancelEditorialQuranPublishRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Quran publish request id. */
+                requestId: components["parameters"]["EditorialRequestIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranPublishRequestEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialQuranChapterChangelog: {
+        parameters: {
+            query?: {
+                /** @description Maximum entries to return (default 50, max 200). */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Quran version id. */
+                versionId: components["parameters"]["EditorialVersionIdParam"];
+                /** @description Canonical Quran chapter number (1–114). */
+                chapterNumber: components["parameters"]["EditorialChapterNumberParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranChangelogListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalServerErrror"];
         };
     };
