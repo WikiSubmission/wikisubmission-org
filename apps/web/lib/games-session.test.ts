@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { stashVariant, readVariant, parseVariantId } from './games-session'
+import { stashVariant, readVariant, parseVariantId } from '@/lib/games-session'
 import type { GameVariant } from '@/src/api/me-client'
 
 // ── parseVariantId ────────────────────────────────────────────────────────────

@@ -9,6 +9,10 @@ import { ChatProvider } from '@/components/chat/chat-context'
 import { SignInPrompt } from '@/components/sign-in-prompt'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { NavigationReferrerTracker } from '@/components/navigation-referrer-tracker'
+import { registerWebApiAuth } from '@/lib/register-api-auth'
+
+// Wire the shared browser API client to next-auth's session on the client.
+registerWebApiAuth()
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(

@@ -6,7 +6,7 @@
  * This wrapper uses plain fetch with the caller's bearer token. Never import
  * it in a Client Component — call it from server actions only.
  */
-import type { ReviewPassage, ReviewStatus } from './games-editor'
+import type { ReviewPassage, ReviewStatus } from '@/lib/games-editor'
 
 // Trim any trailing slash so path concatenation never produces a double slash
 // (e.g. ".../api/v1/" + "/admin/games" -> ".../api/v1//admin/games"), which the

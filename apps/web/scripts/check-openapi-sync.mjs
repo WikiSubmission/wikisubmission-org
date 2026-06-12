@@ -31,7 +31,8 @@ let ok = true
 
 // ── Check 1: yaml sync ────────────────────────────────────────────────────────
 
-const frontendYaml = resolve(root, 'src/api/openapi.yaml')
+// The OpenAPI spec + generated types now live in the shared workspace package.
+const frontendYaml = resolve(root, '../../packages/shared/src/api/openapi.yaml')
 // root is apps/web; the ws-backend repo sits beside the org monorepo root.
 const backendYaml = resolve(root, '../../../ws-backend/openapi.yaml')
 
@@ -52,7 +53,7 @@ if (!existsSync(backendYaml)) {
 
 // ── Check 2: types.gen.ts sync ────────────────────────────────────────────────
 
-const existingTypes = resolve(root, 'src/api/types.gen.ts')
+const existingTypes = resolve(root, '../../packages/shared/src/api/types.gen.ts')
 const tmp = resolve(tmpdir(), `ws-openapi-check-${process.pid}`)
 
 try {
