@@ -13,6 +13,9 @@ import { FcGoogle } from 'react-icons/fc'
 import { FaApple } from 'react-icons/fa'
 import { Mail, Loader2 } from 'lucide-react'
 
+// TODO: Fix Apple SSO and reinstate it.
+const showAppleSso = false
+
 export function SignInPrompt() {
   const { isOpen, close } = useSignInPromptStore()
   const [email, setEmail] = useState('')
@@ -74,18 +77,20 @@ export function SignInPrompt() {
             Continue with Google
           </button>
 
-          <button
-            onClick={handleApple}
-            disabled={loading !== null}
-            className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg border border-border bg-background hover:bg-muted transition-colors text-sm font-medium text-foreground disabled:opacity-50"
-          >
-            {loading === 'apple' ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <FaApple className="w-4 h-4" />
-            )}
-            Continue with Apple
-          </button>
+          {showAppleSso ? (
+            <button
+              onClick={handleApple}
+              disabled={loading !== null}
+              className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-lg border border-border bg-background hover:bg-muted transition-colors text-sm font-medium text-foreground disabled:opacity-50"
+            >
+              {loading === 'apple' ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <FaApple className="w-4 h-4" />
+              )}
+              Continue with Apple
+            </button>
+          ) : null}
 
           <div className="flex items-center gap-2 text-muted-foreground text-xs">
             <span className="flex-1 h-px bg-border" />
