@@ -13,10 +13,7 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
-import {
-  useQuranPreferences,
-  type QuranPreferences,
-} from '@/hooks/use-quran-preferences'
+import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
 import {
   useChapterReader,

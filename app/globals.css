@@ -742,7 +742,7 @@ html[data-palette='mono'].dark {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   EDITORIAL DESIGN SYSTEM — ported from LoginAdditions handoff (me.css).
+   EDITORIAL DESIGN SYSTEM - ported from the profile handoff styles.
    These class names match the handoff source of truth and are consumed by
    the auth screens, /me profile, /me/notes, /me/bookmarks/[id], the in-reader
    bookmark dialog, the note dialog, the multi-select bar, and margin notes.

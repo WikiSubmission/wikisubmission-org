@@ -9,6 +9,7 @@ overrides:
   '@types/react-dom': 19.2.3
   d3-color: '>=3.1.0'
   postcss: '>=8.5.10'
+  js-cookie: 3.0.7
 
 importers:
 

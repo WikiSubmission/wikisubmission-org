@@ -372,13 +372,26 @@ export function useQuranPlayer() {
   return context
 }
 
+// No-op fallback used when the callbacks hook is consumed outside a
+// QuranPlayerProvider (e.g. a verse card rendered inside an inline
+// scripture-ref dialog from a blog page). Audio actions silently no-op
+// rather than crashing the host page with an error boundary.
+const noopCallbacks: QuranPlayerCallbacksContextType = {
+  playFromVerse: () => {},
+  setChapterQueue: () => {},
+  togglePlayPause: () => {},
+  nextVerse: () => {},
+  prevVerse: () => {},
+  seek: () => {},
+  setReciter: () => {},
+  setVolume: () => {},
+  dismiss: () => {},
+}
+
 /** Subscribe to player callbacks only — stable references, never triggers re-renders. */
 export function useQuranPlayerCallbacks() {
   const context = useContext(QuranPlayerCallbacksContext)
-  if (!context) {
-    throw new Error('useQuranPlayerCallbacks must be used within a QuranPlayerProvider')
-  }
-  return context
+  return context ?? noopCallbacks
 }
 
 export function useQuranProgress() {
