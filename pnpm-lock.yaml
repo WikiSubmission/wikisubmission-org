@@ -13,7 +13,9 @@ overrides:
 
 importers:
 
-  .:
+  .: {}
+
+  apps/web:
     dependencies:
       '@aws-sdk/client-ses':
         specifier: ^3.1053.0

@@ -32,7 +32,8 @@ let ok = true
 // ── Check 1: yaml sync ────────────────────────────────────────────────────────
 
 const frontendYaml = resolve(root, 'src/api/openapi.yaml')
-const backendYaml = resolve(root, '../ws-backend/openapi.yaml')
+// root is apps/web; the ws-backend repo sits beside the org monorepo root.
+const backendYaml = resolve(root, '../../../ws-backend/openapi.yaml')
 
 if (!existsSync(backendYaml)) {
   console.log('SKIP yaml-sync: ../ws-backend/openapi.yaml not found (outside monorepo)')

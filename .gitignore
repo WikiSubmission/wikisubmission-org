@@ -1,14 +1,14 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 
 # serwist generated service worker
-public/sw.js
-public/sw.js.map
-public/swe-worker-*.js
+**/public/sw.js
+**/public/sw.js.map
+**/public/swe-worker-*.js
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -16,14 +16,14 @@ public/swe-worker-*.js
 !.yarn/versions
 
 # testing
-/coverage
+coverage/
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 
 # production
-/build
+build/
 
 # misc
 .DS_Store
@@ -46,13 +46,13 @@ yarn-error.log*
 next-env.d.ts
 
 # next-intl generated types
-messages/*.d.json.ts
+**/messages/*.d.json.ts
 # clerk configuration (can include secrets)
 /.clerk/
 
 bun.lock
 CLAUDE.md
-hooks/use-verse-search.ts
+**/hooks/use-verse-search.ts
 todo.md
 .claude*
 docs/*

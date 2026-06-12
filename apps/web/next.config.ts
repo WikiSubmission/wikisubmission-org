@@ -1,8 +1,14 @@
 import { spawnSync } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import type { NextConfig } from 'next'
 import bundleAnalyzer from '@next/bundle-analyzer'
 import createNextIntlPlugin from 'next-intl/plugin'
 import withSerwistInit from '@serwist/next'
+
+// In a pnpm workspace the app lives at apps/web; point output-file tracing at
+// the monorepo root (two levels up) so standalone traces hoisted dependencies.
+const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../')
 
 // Revision for the precached /offline fallback. Tied to the commit so the
 // fallback is re-fetched on each deploy rather than served stale forever.
@@ -55,6 +61,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  outputFileTracingRoot: monorepoRoot,
   experimental: {
     serverActions: {
       bodySizeLimit: '50mb',
