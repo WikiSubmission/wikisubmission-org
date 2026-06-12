@@ -9,6 +9,8 @@ import { FaApple } from 'react-icons/fa'
 import { Mail, Loader2 } from 'lucide-react'
 
 type Loading = 'google' | 'apple' | 'email' | null
+// TODO: Fix Apple SSO and reinstate it.
+const showAppleSso = false
 
 export function SignInForm() {
   const [email, setEmail] = useState('')
@@ -122,22 +124,24 @@ export function SignInForm() {
             <span className="arrow">→</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => handleProvider('apple')}
-            disabled={disabled}
-            className="auth-provider"
-          >
-            <span className="glyph">
-              {loading === 'apple' ? (
-                <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-              ) : (
-                <FaApple className="w-4 h-4" aria-hidden />
-              )}
-            </span>
-            Apple
-            <span className="arrow">→</span>
-          </button>
+          {showAppleSso ? (
+            <button
+              type="button"
+              onClick={() => handleProvider('apple')}
+              disabled={disabled}
+              className="auth-provider"
+            >
+              <span className="glyph">
+                {loading === 'apple' ? (
+                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                ) : (
+                  <FaApple className="w-4 h-4" aria-hidden />
+                )}
+              </span>
+              Apple
+              <span className="arrow">→</span>
+            </button>
+          ) : null}
         </div>
 
         <p className="auth-foot">
