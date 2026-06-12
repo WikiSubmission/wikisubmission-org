@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import gsap from 'gsap'
@@ -14,6 +14,15 @@ import {
   Database,
   ShieldCheck,
 } from 'lucide-react'
+import { useAutoScroll } from './use-auto-scroll'
+import { AutoScrollControl } from './auto-scroll-control'
+import {
+  SCENE_PROFILES,
+  buildVelocityZones,
+  sampleVelocityAt,
+  DEFAULT_VELOCITY,
+  type Zone,
+} from './scroll-profile'
 import { FaYoutube } from 'react-icons/fa'
 
 let scrollTriggerRegistered = false
@@ -158,6 +167,16 @@ function CornerMarkers({ label, sub }: { label: string; sub: string }) {
 export function MiracleExperience() {
   const t = useTranslations('miracle')
   const rootRef = useRef<HTMLDivElement | null>(null)
+  const zonesRef = useRef<Zone[]>([])
+  const getVelocity = useCallback(
+    (y: number) => sampleVelocityAt(y, zonesRef.current, DEFAULT_VELOCITY),
+    [],
+  )
+  const { isPlaying, speedIndex, speedCount, multiplier, toggle, speedUp, speedDown } = useAutoScroll({
+    startDelayMs: 1000,
+    defaultVelocity: DEFAULT_VELOCITY,
+    getVelocity,
+  })
 
   const heroRef = useRef<HTMLElement | null>(null)
   const heroBgRef = useRef<HTMLDivElement | null>(null)
@@ -223,6 +242,7 @@ export function MiracleExperience() {
                 end: '+=1000',
                 pin: true,
                 scrub: 0.6,
+                id: 'hero',
               },
             })
             .from(heroBgRef.current, { scale: 4, opacity: 0, ease: 'none' })
@@ -249,6 +269,7 @@ export function MiracleExperience() {
                 end: '+=1500',
                 pin: true,
                 scrub: 0.6,
+                id: 'bismillah',
               },
             })
             .to(letters, {
@@ -288,6 +309,7 @@ export function MiracleExperience() {
                 end: '+=1500',
                 pin: true,
                 scrub: 0.6,
+                id: 'chapters',
               },
             })
             .to(chapterProxy, {
@@ -329,6 +351,7 @@ export function MiracleExperience() {
                 end: '+=1500',
                 pin: true,
                 scrub: 0.6,
+                id: 'revelation',
               },
             })
             .fromTo(
@@ -367,6 +390,7 @@ export function MiracleExperience() {
                 end: '+=1500',
                 pin: true,
                 scrub: 0.6,
+                id: 'god',
               },
             })
             .to(godProxy, {
@@ -411,6 +435,7 @@ export function MiracleExperience() {
                 end: '+=2000',
                 pin: true,
                 scrub: 0.6,
+                id: 'verse',
               },
             })
             .to(verseProxy, {
@@ -448,6 +473,7 @@ export function MiracleExperience() {
                 end: '+=2000',
                 pin: true,
                 scrub: 0.6,
+                id: 'discovery',
               },
             })
             .to(
@@ -501,6 +527,7 @@ export function MiracleExperience() {
                 end: '+=1500',
                 pin: true,
                 scrub: 0.6,
+                id: 'finale',
               },
             })
             .to(finaleNumbersRef.current.filter(Boolean), {
@@ -528,6 +555,23 @@ export function MiracleExperience() {
               },
               '>-0.2',
             )
+
+          const rebuildZones = () => {
+            const triggers = ScrollTrigger.getAll()
+              .filter((st) => typeof st.vars.id === 'string')
+              .map((st) => ({
+                id: st.vars.id as string,
+                start: st.start,
+                end: st.end,
+              }))
+            zonesRef.current = buildVelocityZones(triggers, SCENE_PROFILES)
+          }
+          rebuildZones()
+          ScrollTrigger.addEventListener('refresh', rebuildZones)
+          return () => {
+            ScrollTrigger.removeEventListener('refresh', rebuildZones)
+            zonesRef.current = []
+          }
         },
       )
 
@@ -590,6 +634,15 @@ export function MiracleExperience() {
 
   return (
     <div ref={rootRef} className="bg-[var(--ed-bg)] text-[var(--ed-fg)]">
+      <AutoScrollControl
+        isPlaying={isPlaying}
+        speedIndex={speedIndex}
+        speedCount={speedCount}
+        multiplier={multiplier}
+        onToggle={toggle}
+        onSpeedUp={speedUp}
+        onSpeedDown={speedDown}
+      />
       {/* ─── Scene 1: Hero ─── */}
       <section
         ref={heroRef}

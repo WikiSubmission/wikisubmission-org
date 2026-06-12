@@ -1,15 +1,14 @@
 import { ImageResponse } from 'next/og'
 import { type NextRequest } from 'next/server'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 
 export const runtime = 'nodejs'
 
-async function loadAsset(
-  relativePath: string,
-  request: NextRequest
-): Promise<Buffer> {
-  const url = new URL(relativePath, request.url)
-  const res = await fetch(url)
-  return Buffer.from(await res.arrayBuffer())
+const publicDir = join(process.cwd(), 'public')
+
+async function loadPublicAsset(...pathSegments: string[]): Promise<Buffer> {
+  return readFile(join(publicDir, ...pathSegments))
 }
 
 export async function GET(request: NextRequest) {
@@ -27,13 +26,13 @@ export async function GET(request: NextRequest) {
   const WIDTH = small ? 600 : 1200
   const HEIGHT = small ? 240 : 480
 
-  const fontData = await loadAsset(
-    'public/font/GlacialIndifference-Regular.ttf',
-    request
+  const fontData = await loadPublicAsset(
+    'font',
+    'GlacialIndifference-Regular.ttf'
   )
-  const logoData = await loadAsset(
-    'public/brand-assets/logo-transparent.png',
-    request
+  const logoData = await loadPublicAsset(
+    'brand-assets',
+    'logo-transparent.png'
   )
   const logoSrc = `data:image/png;base64,${logoData.toString('base64')}`
 

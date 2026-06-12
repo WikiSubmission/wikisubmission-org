@@ -1,8 +1,19 @@
 'use client'
 
-import { memo, useMemo, useCallback, useState } from 'react'
+import { memo, useMemo, useCallback, useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { useSession } from 'next-auth/react'
+import { useSignInPromptStore } from '@/store/sign-in-prompt'
+import {
+  useAddBookmarkEntry,
+  useRemoveBookmarkEntry,
+} from '@/hooks/use-bookmarks'
+import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
+import {
+  useMarkCoverToCover,
+  useCoverToCoverProgress,
+} from '@/hooks/use-reading-progress'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_FONT } from '@/lib/quran-zoom'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
@@ -21,8 +32,10 @@ import {
   Loader2,
   ArrowUpRight,
   Bookmark,
-  StickyNote,
-  ScanTextIcon,
+  BookmarkCheck,
+  NotebookPen,
+  Plus,
+  BookMarked,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { HighlightText } from '@/components/highlight-text'
@@ -33,12 +46,23 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import type { components } from '@/src/api/types.gen'
 import { QuranRefText } from '@/components/quran-ref-text'
+import type { BookmarkEntryData, NoteData } from '@/types/bookmarks'
+import { NoteEditorDialogLazy } from '@/components/me/note-editor-dialog-lazy'
+import { CreateCategoryDialog } from '@/components/me/create-category-dialog'
 
 type VerseData = components['schemas']['VerseData']
 type WordData = components['schemas']['WordData']
@@ -80,7 +104,7 @@ function WordDetailsDialogContent({
       className="max-w-md sm:max-w-xl rounded-3xl p-0"
       aria-describedby={undefined}
     >
-      <DialogHeader className="relative items-center text-center px-6 pt-8 pb-6 border-b bg-gradient-to-b from-primary/15 via-primary/5 to-transparent gap-2 overflow-hidden">
+      <DialogHeader className="relative items-center text-center px-6 pt-8 pb-6 border-b bg-linear-to-b from-primary/15 via-primary/5 to-transparent gap-2 overflow-hidden">
         {/* Soft radial glow behind the arabic glyph */}
         <div
           aria-hidden
@@ -168,10 +192,6 @@ function WordDetailsDialogContent({
 
 // ─── Word-by-word (Arabic) ────────────────────────────────────────────────────
 
-/**
- * Single word card (non-compact). Tapping always opens the rich details dialog
- * combining audio, root, meaning, and other occurrences.
- */
 function WordCardItem({
   word,
   chapter,
@@ -179,6 +199,7 @@ function WordCardItem({
   verseCoordsValid,
   arabicClass,
   selectionActive,
+  showTransliteration,
 }: {
   word: WordData
   chapter: number
@@ -186,11 +207,13 @@ function WordCardItem({
   verseCoordsValid: boolean
   arabicClass: string
   selectionActive: boolean
+  showTransliteration: boolean
 }) {
   const tx = (word.tx as Record<string, string>) ?? {}
   const arabic = tx['ar'] ?? ''
   const root = word.r ?? undefined
   const translation = tx['en'] ?? ''
+  const transliteration = tx['tl']
   const meaning = word.m ?? undefined
   const word1Based = word.wi ?? 0
 
@@ -212,7 +235,7 @@ function WordCardItem({
         role="button"
         tabIndex={0}
         aria-label={`Details for ${arabic}`}
-        className={`group relative flex h-full flex-col items-center gap-2 px-3.5 py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
+        className={`group relative flex h-full flex-col items-center gap-2 px-1.5 py-2 sm:px-3.5 sm:py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
           isPlaying ? 'bg-primary/10' : 'hover:scale-[1.04]'
         }`}
         onPointerEnter={warm}
@@ -232,18 +255,33 @@ function WordCardItem({
         >
           {arabic}
         </p>
-        <div className="flex flex-1 flex-col items-center self-stretch" dir="ltr">
-          <p className="text-xs text-foreground/80 font-medium text-center wrap-break-words max-w-22">
-            {translation}
-          </p>
+        <div
+          className="flex flex-1 flex-col items-center self-stretch gap-1"
+          dir="ltr"
+        >
+          {showTransliteration && transliteration && (
+            <p className="text-[13px] italic font-semibold text-primary/75 text-center leading-tight tracking-wide wrap-break-words max-w-22">
+              {transliteration}
+            </p>
+          )}
+          <div
+            className={`flex w-full flex-col items-center ${
+              showTransliteration && transliteration
+                ? 'border-t border-border/25 pt-1'
+                : ''
+            }`}
+          >
+            <p className="text-[14px] text-foreground/95 font-semibold text-center leading-tight wrap-break-words max-w-22">
+              {translation}
+            </p>
+          </div>
         </div>
-
       </div>
 
       <WordDetailsDialogContent
         arabic={arabic}
         translation={translation}
-        transliteration={tx['tl']}
+        transliteration={transliteration}
         root={root}
         meaning={meaning}
         chapter={verseCoordsValid ? chapter : undefined}
@@ -254,9 +292,6 @@ function WordCardItem({
   )
 }
 
-/**
- * Compact word (Arabic glyph only). Tap always opens the rich details dialog.
- */
 function WordCompactItem({
   word,
   chapter,
@@ -286,15 +321,61 @@ function WordCompactItem({
   const isLoading = loadingId === audioId
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const open = useCallback(() => {
-    if (!selectionActive) setDialogOpen(true)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+  const isTouchRef = useRef(false)
+  const triggerRef = useRef<HTMLParagraphElement | null>(null)
+
+  const openDialog = useCallback(() => {
+    if (selectionActive) return
+    setTooltipOpen(false)
+    setDialogOpen(true)
   }, [selectionActive])
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    isTouchRef.current = e.pointerType !== 'mouse'
+  }, [])
+
+  const handleClick = useCallback(() => {
+    if (selectionActive) return
+    if (isTouchRef.current) {
+      if (tooltipOpen) {
+        setTooltipOpen(false)
+        setDialogOpen(true)
+      } else {
+        setTooltipOpen(true)
+      }
+    } else {
+      setDialogOpen(true)
+    }
+  }, [selectionActive, tooltipOpen])
+
+  // Dismiss the tooltip when the user taps anywhere else on touch devices.
+  useEffect(() => {
+    if (!tooltipOpen) return
+    const onDocPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node | null
+      if (triggerRef.current && target && triggerRef.current.contains(target)) {
+        return
+      }
+      // Tooltip content lives in a portal — keep it open when tapped inside it.
+      const inTooltipContent = (target as HTMLElement | null)?.closest(
+        '[data-slot="tooltip-content"]'
+      )
+      if (inTooltipContent) return
+      setTooltipOpen(false)
+    }
+    document.addEventListener('pointerdown', onDocPointerDown, true)
+    return () =>
+      document.removeEventListener('pointerdown', onDocPointerDown, true)
+  }, [tooltipOpen])
+
   const warm = useCallback(() => {
     if (verseCoordsValid) preload(chapter, verse, word1Based)
   }, [preload, chapter, verse, word1Based, verseCoordsValid])
 
   const arabicEl = (
     <p
+      ref={triggerRef}
       role="button"
       tabIndex={0}
       aria-label={`Details for ${arabic}`}
@@ -305,11 +386,12 @@ function WordCompactItem({
       }`}
       onPointerEnter={warm}
       onFocus={warm}
-      onClick={open}
+      onPointerDown={handlePointerDown}
+      onClick={handleClick}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          open()
+          openDialog()
         }
       }}
     >
@@ -324,11 +406,20 @@ function WordCompactItem({
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <Tooltip>
+      <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
         <TooltipTrigger asChild>{arabicEl}</TooltipTrigger>
         <TooltipContent
           side="top"
-          className="bg-popover/80 backdrop-blur-sm border-primary/20 px-4 py-2 rounded-xl"
+          role="button"
+          tabIndex={0}
+          onClick={openDialog}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              openDialog()
+            }
+          }}
+          className="bg-popover/80 backdrop-blur-sm border-primary/20 px-4 py-2 rounded-xl cursor-pointer"
         >
           <div className="flex flex-col gap-0.5 py-1 items-center text-center">
             <p className="text-base text-primary">{translation}</p>
@@ -359,14 +450,15 @@ const WordByWordView = memo(
     words,
     verseKey,
     compact,
+    showTransliteration,
   }: {
     words: WordData[]
     verseKey: string
     compact: boolean
+    showTransliteration: boolean
     /** Forwarded from VerseCard — forces re-render on language reload. */
     optsKey?: string
   }) {
-    // Sort once and memoize — words from the API are stable references
     const sorted = useMemo(
       () => [...words].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0)),
       [words]
@@ -406,7 +498,7 @@ const WordByWordView = memo(
     return (
       <div
         dir="rtl"
-        className="flex flex-wrap items-stretch justify-start gap-y-4 gap-x-1.5 py-3"
+        className="flex flex-wrap items-stretch justify-start gap-y-3 gap-x-0 sm:gap-x-1 -mx-4 sm:mx-0 py-3"
       >
         {sorted.map((w) => (
           <WordCardItem
@@ -417,6 +509,7 @@ const WordByWordView = memo(
             verseCoordsValid={verseCoordsValid}
             arabicClass={arabicClass}
             selectionActive={selectionActive}
+            showTransliteration={showTransliteration}
           />
         ))}
       </div>
@@ -425,12 +518,12 @@ const WordByWordView = memo(
   (prev, next) =>
     prev.verseKey === next.verseKey &&
     prev.compact === next.compact &&
+    prev.showTransliteration === next.showTransliteration &&
     prev.optsKey === next.optsKey
 )
 
 // ─── Verse Card ───────────────────────────────────────────────────────────────
 
-// Props type for VerseCard — named so arePropsEqual can reference it cleanly.
 type VerseCardProps = {
   verse: VerseData
   isLast: boolean
@@ -447,10 +540,16 @@ type VerseCardProps = {
   showAudio?: boolean
   /** Hide the copy button. Default: true (show it). */
   showCopyButton?: boolean
-  /** Show the bookmark button (not yet implemented). Default: false. */
+  /** Show the bookmark button. Default: false. */
   showBookmark?: boolean
-  /** Show the notes button (not yet implemented). Default: false. */
+  /** Bookmark category entries for this verse. */
+  entries?: BookmarkEntryData[]
+  /** Scripture context for bookmark/note mutations. Default: 'quran'. */
+  scripture?: string
+  /** Show the notes button. Default: false. */
   showNotes?: boolean
+  /** Single note for this verse. */
+  note?: NoteData | null
   /** When set, verse key badge becomes a link (for search results). */
   verseHref?: string
   /** Search highlight (hl field with <b> tags) to display alongside translation. */
@@ -469,38 +568,69 @@ export const VerseCard = memo(
     showAudio = true,
     showCopyButton = true,
     showBookmark = false,
+    entries = [],
+    scripture = 'quran',
     showNotes = false,
+    note = null,
     verseHref,
     searchHighlight,
   }: VerseCardProps) {
     const prefs = useQuranPreferences()
     const { isRtl } = useLanguagesStore()
-    // Only subscribe to the stable callbacks context — this component never
-    // re-renders due to player STATE changes (currentVerse, isPlaying, etc.)
-    // because those are now passed as props from ChapterReader.
+    const { data: session } = useSession()
+    const openSignIn = useSignInPromptStore((s) => s.open)
+
+    const categories = useBookmarkCategories()
+    const { mutate: addEntry, isPending: addingEntry } =
+      useAddBookmarkEntry(scripture)
+    const { mutate: removeEntry, isPending: removingEntry } =
+      useRemoveBookmarkEntry(scripture)
+    const markCoverToCover = useMarkCoverToCover('quran')
+    const coverToCoverData = useCoverToCoverProgress('quran')
+
+    const [notesOpen, setNotesOpen] = useState(false)
+    const [createCategoryOpen, setCreateCategoryOpen] = useState(false)
+
     const { playFromVerse, togglePlayPause } = useQuranPlayerCallbacks()
 
     const primaryCode =
-      prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
-    const tr = verse.tr?.[primaryCode]
+      prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
+        ? prefs.primaryLanguage
+        : undefined
+    const tr = primaryCode ? verse.tr?.[primaryCode] : undefined
     const secondaryTr =
-      prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl'
+      prefs.secondaryLanguage &&
+      prefs.secondaryLanguage !== 'xl' &&
+      prefs.secondaryLanguage !== 'none'
         ? verse.tr?.[prefs.secondaryLanguage]
         : undefined
 
     const [chNum, vNum] = (verse.vk ?? '').split(':').map(Number)
     const verseId = verse.vk ?? ''
+    const isCoverToCover =
+      scripture === 'quran' && coverToCoverData?.verse_key === verseId
 
-    // Produce a full-text string with <b> highlights for HighlightText.
-    // If the API returned the full text with highlights, use it directly.
-    // If it returned a shorter snippet, extract the highlighted words and
-    // apply them to the full translation text so highlighting always appears inline.
+    type CategoryData = (typeof categories)[0]
+    const bookmarkedCats = useMemo(
+      () =>
+        entries
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          )
+          .slice(0, 3)
+          .map((e) => categories.find((c) => c.id === e.category_id))
+          .filter((c): c is CategoryData => c != null),
+      [entries, categories]
+    )
+
     const highlightedTranslation = useMemo(() => {
       if (!searchHighlight || !tr?.tx) return null
       const stripped = searchHighlight.replace(/<\/?b>/g, '')
       const isFullText = stripped.length >= tr.tx.length * 0.9
       if (isFullText) return searchHighlight
-      // Extract bolded words from the snippet and mark them in the full text
       const boldedWords = [...searchHighlight.matchAll(/<b>(.*?)<\/b>/g)].map(
         (m) => m[1]
       )
@@ -508,8 +638,6 @@ export const VerseCard = memo(
       let result = tr.tx
       for (const word of boldedWords) {
         const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        // Unicode-aware word boundary: only match when the surrounding chars
-        // aren't letters/digits, so "test" won't match inside "testify".
         result = result.replace(
           new RegExp(
             `(?<![\\p{L}\\p{N}_])(${escaped})(?![\\p{L}\\p{N}_])`,
@@ -526,17 +654,12 @@ export const VerseCard = memo(
       [verseId]
     )
 
-    // ─── Multi-select (explicitly entered from the copy menu) ──────────────
     const selectionActive = useVerseSelection((s) => s.active)
     const isSelected = useVerseSelection((s) =>
       verseId ? s.selected.has(verseId) : false
     )
     const toggleSelection = useVerseSelection((s) => s.toggle)
 
-    // Skip selection handling when the interaction starts on an interactive
-    // control (audio/copy/bookmark buttons, dropdown triggers, or menu items).
-    // Links (the verse-key pill) are intentionally NOT skipped — users should
-    // be able to select that verse while multi-select mode is active.
     const isInteractiveTarget = (el: EventTarget | null) => {
       const node = el as HTMLElement | null
       return !!node?.closest(
@@ -546,8 +669,6 @@ export const VerseCard = memo(
 
     const onCardContextMenu = useCallback(
       (e: React.MouseEvent<HTMLDivElement>) => {
-        // Suppress the context menu while selection mode is active; card taps
-        // should only toggle membership until the user exits the mode.
         if (selectionActive) e.preventDefault()
       },
       [selectionActive]
@@ -569,26 +690,49 @@ export const VerseCard = memo(
       if (isCurrentAudio) {
         togglePlayPause()
       } else {
-        // Queue was pre-set in ChapterReader via setChapterQueue; no need to pass it here
         playFromVerse(audioVerse)
       }
     }, [isCurrentAudio, togglePlayPause, playFromVerse, audioVerse])
+
+    const isBookmarked = entries.length > 0
+    const hasNote = !!note
+
+    // First bookmarked category determines the editorial accent bar color.
+    const catColor =
+      bookmarkedCats[0]?.color ??
+      (isBookmarked ? 'var(--ed-accent)' : undefined)
+
+    const editorialState = [
+      'verse',
+      isBookmarked ? 'is-bookmarked' : '',
+      hasNote ? 'has-note' : '',
+      isSelected ? 'is-selected' : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
 
     return (
       <div
         id={verseId}
         onContextMenu={onCardContextMenu}
         onClickCapture={onCardClickCapture}
-        style={{ WebkitUserSelect: selectionActive ? 'none' : undefined }}
-        className={`relative transition-colors duration-500 ${
+        style={{
+          WebkitUserSelect: selectionActive ? 'none' : undefined,
+          ...(catColor
+            ? ({ ['--cat-color' as string]: catColor } as React.CSSProperties)
+            : {}),
+        }}
+        className={`${editorialState} relative transition-colors duration-500 ${
           isSelected
             ? 'bg-primary/10 before:pointer-events-none before:absolute before:inset-2 before:rounded-2xl before:ring-2 before:ring-primary'
             : ''
         } ${
-          !isSelected && (isScrollTarget || isCurrentAudio) ? 'bg-primary/10' : ''
+          !isSelected && (isScrollTarget || isCurrentAudio)
+            ? 'bg-primary/10'
+            : ''
         } ${selectionActive ? 'cursor-pointer select-none' : ''}`}
       >
-        <div className="px-6 py-4 sm:px-8 sm:py-5 space-y-2">
+        <div className="verse-body px-6 py-4 sm:px-8 sm:py-5 space-y-2">
           {/* Subtitle */}
           {prefs.subtitles && tr?.s && (
             <div className="flex justify-center">
@@ -598,109 +742,190 @@ export const VerseCard = memo(
             </div>
           )}
 
-          {/* Verse key + play button */}
+          {/* Verse key + action buttons */}
           <div className="flex items-center justify-between gap-2">
-            {verseHref ? (
-              <Link
-                href={verseHref}
-                target="_blank"
-                className="group flex items-center gap-1 w-fit"
-              >
-                <div className="flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full transition-colors">
-                  <span className="text-lg font-semibold">{chNum}</span>
-                  <span>:</span>
-                  <span className="text-lg font-semibold">{vNum}</span>
-                </div>
-                <ArrowUpRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
-              </Link>
-            ) : (
-              <div className="w-fit shrink-0 flex items-start space-x-0.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full">
-                <span className="w-full text-lg font-semibold">{chNum}</span>
-                <span>:</span>
-                <span className="w-full text-lg font-semibold">{vNum}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-1">
-              {showBookmark && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                  disabled
+            <div className="flex min-w-0 items-center gap-1.5">
+              {verseHref ? (
+                <Link
+                  href={verseHref}
+                  target="_blank"
+                  className="group flex w-fit items-center gap-1"
                 >
-                  <Bookmark className="w-4 h-4" />
-                </Button>
+                  <div className="flex items-start space-x-0.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-primary transition-colors">
+                    <span className="text-lg font-semibold">{chNum}</span>
+                    <span>:</span>
+                    <span className="text-lg font-semibold">{vNum}</span>
+                  </div>
+                  <ArrowUpRight className="size-3.5 text-muted-foreground transition-colors group-hover:text-primary" />
+                </Link>
+              ) : (
+                <div className="flex w-fit shrink-0 items-start space-x-0.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-primary">
+                  <span className="w-full text-lg font-semibold">{chNum}</span>
+                  <span>:</span>
+                  <span className="w-full text-lg font-semibold">{vNum}</span>
+                </div>
+              )}
+              {isCoverToCover && (
+                <span
+                  title="Marked as cover to cover"
+                  className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/20"
+                >
+                  <BookmarkCheck
+                    aria-hidden="true"
+                    className="size-3.5"
+                  />
+                  <span className="sr-only">Marked as cover to cover</span>
+                </span>
+              )}
+            </div>
+            <div className="verse-actions flex items-center gap-1">
+              {showBookmark && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={
+                        isBookmarked ? 'Manage bookmarks' : 'Add to category'
+                      }
+                      className={`h-8 w-8 rounded-full transition-colors ${
+                        isBookmarked
+                          ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-500/10'
+                          : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                      }`}
+                      onClick={(e) => {
+                        if (!session?.accessToken) {
+                          e.preventDefault()
+                          openSignIn()
+                        }
+                      }}
+                    >
+                      {bookmarkedCats.length > 1 ? (
+                        <span className="relative flex items-center justify-center w-4 h-4">
+                          {bookmarkedCats.map((cat, i) => (
+                            <span
+                              key={cat.id}
+                              className="absolute rounded-full ring-[1.5px] ring-background"
+                              style={{
+                                width: 10,
+                                height: 10,
+                                background: cat.color,
+                                right: i * 5,
+                              }}
+                            />
+                          ))}
+                        </span>
+                      ) : (
+                        <Bookmark
+                          className="w-4 h-4"
+                          fill={isBookmarked ? 'currentColor' : 'none'}
+                        />
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-44">
+                    {scripture === 'quran' && markCoverToCover && (
+                      <>
+                        <button
+                          type="button"
+                          className={`flex w-full items-center gap-1.5 px-2 py-1.5 text-xs transition-colors cursor-pointer rounded-sm ${
+                            isCoverToCover
+                              ? 'text-primary bg-primary/10 font-medium'
+                              : 'text-primary hover:bg-primary/10'
+                          }`}
+                          onClick={() => markCoverToCover(verseId)}
+                        >
+                          <BookMarked
+                            className="w-3 h-3"
+                            fill={isCoverToCover ? 'currentColor' : 'none'}
+                          />
+                          {isCoverToCover
+                            ? 'Marked as cover to cover'
+                            : 'Mark as cover to cover'}
+                        </button>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
+                      Bookmark categories
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {categories.length === 0 ? (
+                      <div className="px-3 py-2 text-xs text-muted-foreground">
+                        No categories yet
+                      </div>
+                    ) : (
+                      categories.map((cat) => {
+                        const entry = entries.find(
+                          (e) => e.category_id === cat.id
+                        )
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={cat.id}
+                            checked={!!entry}
+                            disabled={addingEntry || removingEntry}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                addEntry({
+                                  categoryId: cat.id,
+                                  verseKey: verseId,
+                                })
+                              } else if (entry) {
+                                removeEntry({
+                                  entryId: entry.id,
+                                  verseKey: verseId,
+                                })
+                              }
+                            }}
+                          >
+                            <span
+                              className="mr-1.5 inline-block w-2 h-2 rounded-full flex-shrink-0"
+                              style={{ background: cat.color }}
+                            />
+                            {cat.name}
+                          </DropdownMenuCheckboxItem>
+                        )
+                      })
+                    )}
+                    <DropdownMenuSeparator />
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer rounded-sm hover:bg-accent"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setCreateCategoryOpen(true)
+                      }}
+                    >
+                      <Plus className="w-3 h-3" />
+                      New category
+                    </button>
+                    <Link href="/me/bookmarks" className="block">
+                      <div className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer rounded-sm hover:bg-accent">
+                        Manage categories
+                      </div>
+                    </Link>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
               {showNotes && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                  disabled
-                >
-                  <StickyNote className="w-4 h-4" />
-                </Button>
-              )}
-              {(prefs.arabic || prefs.wordByWord) && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={
-                    prefs.wordByWord
-                      ? 'Hide word-by-word'
-                      : 'Show word-by-word'
-                  }
-                  title={
-                    prefs.wordByWord
-                      ? 'Hide word-by-word'
-                      : 'Show word-by-word'
-                  }
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                  aria-label={note ? 'Edit note' : 'Add note'}
+                  className={`relative h-8 w-8 rounded-full transition-colors ${
+                    note
+                      ? 'text-primary hover:bg-primary/10'
+                      : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                  }`}
                   onClick={() => {
-                    // Anchor the clicked verse's position across the WBW
-                    // resize. The virtualizer measures cards lazily as they
-                    // re-render, so a single rAF check is not enough — we
-                    // re-correct each frame until the verse's top stabilizes
-                    // (or a short timeout elapses).
-                    const before = verseId
-                      ? document.getElementById(verseId)?.getBoundingClientRect().top
-                      : null
-
-                    prefs.setPreferences({
-                      ...prefs,
-                      wordByWord: !prefs.wordByWord,
-                      arabic: prefs.wordByWord ? true : prefs.arabic,
-                    })
-
-                    if (before == null || !verseId) return
-                    let frames = 0
-                    let stable = 0
-                    const tick = () => {
-                      const node = document.getElementById(verseId)
-                      if (node) {
-                        const after = node.getBoundingClientRect().top
-                        const delta = after - before
-                        if (Math.abs(delta) > 0.5) {
-                          window.scrollBy(0, delta)
-                          stable = 0
-                        } else {
-                          stable += 1
-                        }
-                      }
-                      frames += 1
-                      if (stable < 4 && frames < 60) requestAnimationFrame(tick)
+                    if (!session?.accessToken) {
+                      openSignIn()
+                      return
                     }
-                    requestAnimationFrame(tick)
+                    setNotesOpen(true)
                   }}
                 >
-                  <span
-                    key={prefs.wordByWord ? 'on' : 'off'}
-                    className={`inline-flex animate-in fade-in zoom-in-90 duration-200 ${
-                      prefs.wordByWord ? 'text-primary' : ''
-                    }`}
-                  >
-                    <ScanTextIcon className="w-4 h-4" />
-                  </span>
+                  <NotebookPen className="w-4 h-4" />
                 </Button>
               )}
               {showCopyButton && (
@@ -730,21 +955,21 @@ export const VerseCard = memo(
           <div className="flex gap-4 sm:gap-6">
             <div className="flex-1 min-w-0 space-y-2">
               {/* Primary translation */}
-              {prefs.text && (tr?.tx || highlightedTranslation) && (
-                <div
-                  className={isRtl(prefs.primaryLanguage) ? 'text-right' : ''}
-                >
-                  <p
-                    className={`${ZOOM_FONT[prefs.zoomLevel ?? 'comfortable'].translation} leading-relaxed text-foreground select-text font-medium`}
-                  >
-                    {highlightedTranslation ? (
-                      <HighlightText text={highlightedTranslation} />
-                    ) : (
-                      tr?.tx
-                    )}
-                  </p>
-                </div>
-              )}
+              {prefs.text &&
+                primaryCode &&
+                (tr?.tx || highlightedTranslation) && (
+                  <div className={isRtl(primaryCode) ? 'text-right' : ''}>
+                    <p
+                      className={`${ZOOM_FONT[prefs.zoomLevel ?? 'comfortable'].translation} leading-relaxed text-foreground select-text font-medium`}
+                    >
+                      {highlightedTranslation ? (
+                        <HighlightText text={highlightedTranslation} />
+                      ) : (
+                        tr?.tx
+                      )}
+                    </p>
+                  </div>
+                )}
 
               {/* Secondary translation */}
               {secondaryTr?.tx && (
@@ -757,9 +982,6 @@ export const VerseCard = memo(
                 </p>
               )}
 
-              {/* Arabic + word-by-word — only render when per-word data is
-                  present so we never fall back to a raw-Arabic string with
-                  awkward tracking. */}
               {(prefs.arabic || prefs.wordByWord) &&
                 verse.w &&
                 verse.w.length > 0 && (
@@ -771,6 +993,7 @@ export const VerseCard = memo(
                       words={verse.w}
                       verseKey={verseId}
                       compact={!prefs.wordByWord}
+                      showTransliteration={prefs.transliteration}
                       optsKey={optsKey}
                     />
                   </div>
@@ -780,7 +1003,7 @@ export const VerseCard = memo(
               {prefs.footnotes && tr?.f && (
                 <p
                   className={`text-sm text-muted-foreground/80 leading-relaxed italic ${
-                    isRtl(prefs.primaryLanguage) ? 'text-right' : 'text-left'
+                    isRtl(primaryCode ?? 'en') ? 'text-right' : 'text-left'
                   }`}
                 >
                   <QuranRefText text={tr.f} from={`footnote of ${verse.vk}`} />
@@ -791,13 +1014,25 @@ export const VerseCard = memo(
         </div>
 
         {!isLast && <hr className="border-border/20 mx-6 sm:mx-8" />}
+
+        <NoteEditorDialogLazy
+          note={note}
+          verseKey={verseId}
+          scripture={scripture}
+          open={notesOpen}
+          onOpenChange={setNotesOpen}
+        />
+        <CreateCategoryDialog
+          open={createCategoryOpen}
+          onOpenChange={setCreateCategoryOpen}
+          onCreated={(id) => {
+            addEntry({ categoryId: id, verseKey: verseId })
+          }}
+        />
       </div>
     )
   },
   (prev: VerseCardProps, next: VerseCardProps) =>
-    // Use reference equality on the verse object: after a reload (same vk, new data),
-    // verse is a new object reference — this lets the card re-render with the new language data.
-    // During normal scroll, the virtualizer passes the same reference → memo skips correctly.
     prev.verse === next.verse &&
     prev.isLast === next.isLast &&
     prev.isScrollTarget === next.isScrollTarget &&
@@ -807,10 +1042,11 @@ export const VerseCard = memo(
     prev.showAudio === next.showAudio &&
     prev.showCopyButton === next.showCopyButton &&
     prev.showBookmark === next.showBookmark &&
+    prev.entries?.length === next.entries?.length &&
     prev.showNotes === next.showNotes &&
+    prev.note?.id === next.note?.id &&
+    prev.note?.updated_at === next.note?.updated_at &&
     prev.isCurrentAudio === next.isCurrentAudio &&
-    // Non-playing cards don't care about isPlaying/isBuffering (they always show Play).
-    // Only check those for the active card to avoid re-rendering all cards on pause/resume.
     (!next.isCurrentAudio ||
       (prev.isPlaying === next.isPlaying &&
         prev.isBuffering === next.isBuffering))

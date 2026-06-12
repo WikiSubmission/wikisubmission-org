@@ -6,21 +6,27 @@ import {
   createBibleNamedInlineRefRe,
 } from '@/lib/scripture-parser'
 
-type Match = { start: number; end: number; ref: string }
+type Match = { start: number; end: number; ref: string; type: 'ref' | 'bold' }
 
 function findAllRefs(text: string): Match[] {
   const matches: Match[] = []
 
   const scanners = [
-    createBibleNamedInlineRefRe(),
-    createBibleNumericInlineRefRe(),
-    createQuranInlineRefRe(),
+    { re: createBibleNamedInlineRefRe(), type: 'ref' as const },
+    { re: createBibleNumericInlineRefRe(), type: 'ref' as const },
+    { re: createQuranInlineRefRe(), type: 'ref' as const },
+    { re: /(\*\*.+?\*\*)/g, type: 'bold' as const },
   ]
 
-  for (const re of scanners) {
+  for (const { re, type } of scanners) {
     let m: RegExpExecArray | null
     while ((m = re.exec(text)) !== null) {
-      matches.push({ start: m.index, end: m.index + m[0].length, ref: m[0] })
+      matches.push({
+        start: m.index,
+        end: m.index + m[0].length,
+        ref: m[0],
+        type,
+      })
     }
   }
 
@@ -57,7 +63,15 @@ export function ScriptureText({
     if (m.start > last) {
       parts.push(<span key={`t-${i}`}>{text.slice(last, m.start)}</span>)
     }
-    parts.push(<ScriptureRef key={`r-${i}`} reference={m.ref} from={from} />)
+    if (m.type === 'bold') {
+      parts.push(
+        <strong key={`b-${i}`}>
+          {m.ref.slice(2, -2)}
+        </strong>
+      )
+    } else {
+      parts.push(<ScriptureRef key={`r-${i}`} reference={m.ref} from={from} />)
+    }
     last = m.end
   })
   if (last < text.length) parts.push(<span key="t-end">{text.slice(last)}</span>)

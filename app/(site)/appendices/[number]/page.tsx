@@ -60,7 +60,7 @@ export default async function AppendixPage({ params }: Props) {
               href="/quran#appendices"
               className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
             >
-              <ChevronLeft className="size-3.5" />
+              <ChevronLeft className="size-3.5 rtl-flip" />
               All Appendices
             </Link>
             <div className="flex items-center gap-3 pt-1">
@@ -126,7 +126,7 @@ export default async function AppendixPage({ params }: Props) {
                 href={`/appendices/${prev.number}`}
                 className="group flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors min-w-0"
               >
-                <ChevronLeft className="size-4 shrink-0" />
+                <ChevronLeft className="size-4 shrink-0 rtl-flip" />
                 <span className="truncate">
                   <span className="text-xs block">Appendix {prev.number}</span>
                   <span className="font-medium">{prev.title}</span>
@@ -145,7 +145,7 @@ export default async function AppendixPage({ params }: Props) {
                   <span className="text-xs block">Appendix {next.number}</span>
                   <span className="font-medium">{next.title}</span>
                 </span>
-                <ChevronRight className="size-4 shrink-0" />
+                <ChevronRight className="size-4 shrink-0 rtl-flip" />
               </Link>
             ) : (
               <span />

@@ -3,9 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { Shuffle } from 'lucide-react'
 import { VERSE_COUNTS } from '@/constants/quran-chapters'
+import { useTranslations } from 'next-intl'
 
 export function RandomVerseTile() {
   const router = useRouter()
+  const t = useTranslations('common')
 
   const go = () => {
     const chapter = Math.floor(Math.random() * 114) + 1
@@ -20,7 +22,7 @@ export function RandomVerseTile() {
     >
       <Shuffle className="size-3 text-muted-foreground/60 group-hover:text-primary transition-colors" />
       <span className="text-sm font-medium leading-snug text-muted-foreground group-hover:text-foreground transition-colors">
-        Random
+        {t('randomVerse')}
       </span>
     </button>
   )

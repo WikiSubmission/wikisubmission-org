@@ -11,9 +11,11 @@ import Link from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { buildPageMetadata } from '@/constants/metadata'
 import { ArrowRight, BookOpen } from 'lucide-react'
-import { VerseListResult } from './mini-components/verse-list-result'
+import { VerseListFetcher } from './mini-components/verse-list-fetcher'
+import { VerseListSkeleton } from './mini-components/verse-list-skeleton'
 import { QuranAccordions } from './mini-components/quran-accordions'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
+import { ActivityRecorder } from '@/components/activity-recorder'
 
 // SSR fetch cache TTL for /quran content. Kept short so backend data
 // updates / corrections show up within an hour without a manual purge.
@@ -182,6 +184,11 @@ export default async function QuranPage({
 
     return (
       <main>
+        <ActivityRecorder
+          kind="browse_chapter"
+          scripture="quran"
+          verseKey={`${parsed.chapterNumber}:${verse ?? 1}`}
+        />
         <Suspense fallback={<Spinner />}>
           <ChapterReader
             key={`${parsed.chapterNumber}-${verse ?? 'full'}`}
@@ -196,33 +203,18 @@ export default async function QuranPage({
 
   // ── Verse list: single refs, ranges, and comma-separated lists ──────────────
   if (parsed.type === 'verse-list') {
-    let data = undefined
-    let apiError = false
-    try {
-      const result = await wsApiServer.GET('/quran', {
-        params: {
-          query: {
-            langs: ['en', 'ar'],
-            verses: queryText,
-            include_words: true,
-            include_root: true,
-            include_meaning: true,
-            word_langs: ['ar', 'en', 'tl'],
-          },
-        },
-      })
-      data = result.data
-      apiError = !!result.error
-    } catch {
-      apiError = true
-    }
     return (
       <main className="py-8 px-4">
-        <VerseListResult
-          queryText={queryText}
-          data={data}
-          apiError={apiError}
+        <ActivityRecorder
+          kind={queryText.includes('-') || queryText.includes(',') ? 'browse_verse_range' : 'browse_verse'}
+          scripture="quran"
+          query={queryText}
         />
+        <Suspense
+          fallback={<VerseListSkeleton queryText={queryText} zoom="comfortable" />}
+        >
+          <VerseListFetcher queryText={queryText} />
+        </Suspense>
       </main>
     )
   }
@@ -230,6 +222,7 @@ export default async function QuranPage({
   // ── Verse ref & text search: client-side via SearchResult ────────────────────
   return (
     <main className="pt-6 sm:pt-8 px-4">
+      <ActivityRecorder kind="search" scripture="quran" query={queryText} />
       <section>
         <Suspense fallback={<Spinner />}>
           <SearchResult props={{ query: queryText }} />

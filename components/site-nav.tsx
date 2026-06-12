@@ -3,57 +3,91 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Sparkles } from 'lucide-react'
+import { Menu, X, MessageSquare } from 'lucide-react'
 import gsap from 'gsap'
 import { PaletteThemeSwitcher } from '@/components/toggles/palette-theme-switcher'
 import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
 import { useTranslations, useLocale } from 'next-intl'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { SiteBrand } from '@/components/site-brand'
+import { UserMenu } from '@/components/user-menu'
+import { useSession } from 'next-auth/react'
+import { isRtlLocale } from '@/lib/is-rtl-language'
 
-type FlatLink = { kind: 'link'; label: string; href: string }
+type FlatLink = { kind: 'link'; label: string; href: string; requiresAuth?: boolean }
+type GroupGrandchild = { label: string; sub: string; href: string; requiresAuth?: boolean }
 type GroupChild = {
   label: string
   sub: string
   href: string
-  children?: { label: string; sub: string; href: string }[]
+  requiresAuth?: boolean
+  children?: GroupGrandchild[]
 }
 type GroupLink = {
   kind: 'group'
   label: string
   href: string
+  requiresAuth?: boolean
   children: GroupChild[]
 }
 type NavItem = FlatLink | GroupLink
 
-const NAV_ITEMS: NavItem[] = [
-  {
-    kind: 'group',
-    label: 'scripture',
-    href: '/quran',
-    children: [
-      {
-        label: 'quran',
-        sub: 'Final Testament',
-        href: '/quran',
-        children: [
-          { label: 'wordLab', sub: 'Roots & concordance', href: '/quran/words' },
-        ],
-      },
-      { label: 'bible', sub: 'Old & New Testaments', href: '/bible' },
-    ],
-  },
-  { kind: 'link', label: 'miracle', href: '/miracle' },
-  { kind: 'link', label: 'practices', href: '/practices' },
-  { kind: 'link', label: 'archive', href: '/archive' },
-  { kind: 'link', label: 'music', href: '/music' },
-  { kind: 'link', label: 'blog', href: '/blog' },
-]
+function getNavItems(t: (k: string) => string): NavItem[] {
+  return [
+    {
+      kind: 'group',
+      label: 'scripture',
+      href: '/quran',
+      children: [
+        {
+          label: 'quran',
+          sub: t('quranSub'),
+          href: '/quran',
+          children: [
+            { label: 'wordLab', sub: t('wordLabSub'), href: '/quran/words' },
+            { label: 'games', sub: t('gamesSub'), href: '/quran/games', requiresAuth: true },
+          ],
+        },
+        { label: 'bible', sub: t('bibleSub'), href: '/bible' },
+      ],
+    },
+    { kind: 'link', label: 'miracle', href: '/miracle' },
+    {
+      kind: 'group',
+      label: 'practices',
+      href: '/practices',
+      children: [
+        { label: 'contactPrayers', sub: 'Five Daily Prayers', href: '/practices/contact-prayers' },
+        { label: 'zakat', sub: 'Obligatory Charity', href: '/practices/zakat' },
+        { label: 'ramadan', sub: 'Fasting Schedule', href: '/practices/ramadan' },
+        { label: 'hajj', sub: 'Pilgrimage to Mecca', href: '/practices/hajj' },
+      ],
+    },
+    { kind: 'link', label: 'archive', href: '/archive' },
+    { kind: 'link', label: 'music', href: '/music' },
+    { kind: 'link', label: 'blog', href: '/blog' },
+  ]
+}
 
 const F = {
   display: 'var(--font-cormorant), Georgia, serif',
   mono: 'var(--font-jetbrains), ui-monospace, monospace',
   glacial: 'var(--font-glacial), sans-serif',
+}
+
+function filterNavItems(items: NavItem[], isAuthed: boolean): NavItem[] {
+  const allow = <T extends { requiresAuth?: boolean }>(node: T): boolean =>
+    isAuthed || !node.requiresAuth
+  return items.filter(allow).map((item) => {
+    if (item.kind === 'link') return item
+    return {
+      ...item,
+      children: item.children.filter(allow).map((c) => ({
+        ...c,
+        children: c.children?.filter(allow),
+      })),
+    }
+  })
 }
 
 function isActive(pathname: string | null, href: string): boolean {
@@ -92,14 +126,16 @@ function MobileMenu({
   open,
   pathname,
   t,
-  locale,
   close,
+  items,
+  isRtl,
 }: {
   open: boolean
   pathname: string | null
   t: (k: string) => string
-  locale: string
   close: () => void
+  items: NavItem[]
+  isRtl: boolean
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [render, setRender] = useState(open)
@@ -140,14 +176,15 @@ function MobileMenu({
       }}
       className="lg:hidden px-4 py-4 flex flex-col gap-0.5 sm:px-6"
     >
-      {NAV_ITEMS.map((item) =>
+      {items.map((item) =>
         item.kind === 'link' ? (
           <Link
             key={item.label}
             href={item.href}
             onClick={close}
             style={{
-              fontFamily: F.mono,
+              position: 'relative',
+              fontFamily: F.glacial,
               fontSize: 11,
               textTransform: 'uppercase',
               letterSpacing: '0.16em',
@@ -155,82 +192,193 @@ function MobileMenu({
                 ? 'var(--ed-fg)'
                 : 'var(--ed-fg-muted)',
               padding: '10px 12px',
-              display: 'block',
+              display: 'flex',
+              alignItems: 'center',
               textDecoration: 'none',
               borderRadius: 4,
+              fontWeight: isActive(pathname, item.href) ? 600 : 500,
             }}
           >
+            {isActive(pathname, item.href) && (
+              <span
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  [isRtl ? 'right' : 'left']: 0,
+                  top: 8,
+                  bottom: 8,
+                  width: 2,
+                  background: 'var(--ed-accent)',
+                  borderRadius: 2,
+                }}
+              />
+            )}
             {t(item.label)}
           </Link>
         ) : (
           <div key={item.label} className="flex flex-col">
             <div
               style={{
-                fontFamily: F.mono,
+                fontFamily: F.glacial,
                 fontSize: 10,
                 textTransform: 'uppercase',
-                letterSpacing: '0.18em',
+                letterSpacing: '0.2em',
                 color: 'var(--ed-fg-muted)',
-                padding: '10px 12px 4px',
+                padding: '12px 12px 6px',
+                opacity: 0.8,
               }}
             >
               {t(item.label)}
             </div>
-            {item.children.map((c) => (
-              <div key={c.label} className="flex flex-col">
-                <Link
-                  href={c.href}
-                  onClick={close}
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 11,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.16em',
-                    color: isActive(pathname, c.href)
-                      ? 'var(--ed-fg)'
-                      : 'var(--ed-fg-muted)',
-                    padding: '8px 24px',
-                    display: 'block',
-                    textDecoration: 'none',
-                    borderRadius: 4,
-                  }}
-                >
-                  {t(c.label)}
-                </Link>
-                {c.children?.map((g) => (
-                  <Link
-                    key={g.label}
-                    href={g.href}
-                    onClick={close}
-                    style={{
-                      fontFamily: F.mono,
-                      fontSize: 10.5,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.16em',
-                      color: isActive(pathname, g.href)
-                        ? 'var(--ed-fg)'
-                        : 'var(--ed-fg-muted)',
-                      padding: '6px 36px',
-                      display: 'block',
-                      textDecoration: 'none',
-                      borderRadius: 4,
-                    }}
-                  >
-                    {t(g.label)}
-                  </Link>
-                ))}
-              </div>
-            ))}
+            <div style={{ position: 'relative' }}>
+              {/* Outer vertical rail spanning all children + grandchildren */}
+              <span
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  [isRtl ? 'right' : 'left']: 14,
+                  top: 8,
+                  bottom: 8,
+                  width: 1,
+                  background: 'var(--ed-rule)',
+                }}
+              />
+              {item.children.map((c) => {
+                const childActive = isActive(pathname, c.href)
+                const hasGrand = !!c.children && c.children.length > 0
+                return (
+                  <div key={c.label}>
+                    <Link
+                      href={c.href}
+                      onClick={close}
+                      style={{
+                        position: 'relative',
+                        fontFamily: F.glacial,
+                        fontSize: 11,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.16em',
+                        color: childActive
+                          ? 'var(--ed-fg)'
+                          : 'var(--ed-fg-muted)',
+                        padding: isRtl ? '9px 30px 9px 12px' : '9px 12px 9px 30px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        textDecoration: 'none',
+                        borderRadius: 4,
+                        fontWeight: childActive ? 600 : 500,
+                      }}
+                    >
+                      {/* Horizontal tick connecting rail to text */}
+                      <span
+                        aria-hidden
+                        style={{
+                          position: 'absolute',
+                          [isRtl ? 'right' : 'left']: 14,
+                          top: '50%',
+                          width: 14,
+                          height: 1,
+                          background: childActive
+                            ? 'var(--ed-accent)'
+                            : 'var(--ed-rule)',
+                        }}
+                      />
+                      {childActive && (
+                        <span
+                          aria-hidden
+                          style={{
+                            position: 'absolute',
+                            [isRtl ? 'right' : 'left']: 26,
+                            top: 6,
+                            bottom: 6,
+                            width: 2,
+                            background: 'var(--ed-accent)',
+                            borderRadius: 2,
+                          }}
+                        />
+                      )}
+                      {t(c.label)}
+                    </Link>
+                    {hasGrand && (
+                      <div style={{ position: 'relative' }}>
+                        {/* Sub-rail for grandchildren level (offset 24px from outer rail) */}
+                        {c.children!.length > 1 && (
+                          <span
+                            aria-hidden
+                            style={{
+                              position: 'absolute',
+                              [isRtl ? 'right' : 'left']: 38,
+                              top: 4,
+                              bottom: 4,
+                              width: 1,
+                              background: 'var(--ed-rule)',
+                            }}
+                          />
+                        )}
+                        {c.children!.map((g) => {
+                          const gActive = isActive(pathname, g.href)
+                          return (
+                            <Link
+                              key={g.label}
+                              href={g.href}
+                              onClick={close}
+                              style={{
+                                position: 'relative',
+                                fontFamily: F.glacial,
+                                fontSize: 10.5,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.16em',
+                                color: gActive
+                                  ? 'var(--ed-fg)'
+                                  : 'var(--ed-fg-muted)',
+                                padding: isRtl ? '8px 54px 8px 12px' : '8px 12px 8px 54px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                textDecoration: 'none',
+                                borderRadius: 4,
+                                fontWeight: gActive ? 600 : 500,
+                              }}
+                            >
+                              {/* Horizontal tick from sub-rail to text */}
+                              <span
+                                aria-hidden
+                                style={{
+                                  position: 'absolute',
+                                  [isRtl ? 'right' : 'left']: 38,
+                                  top: '50%',
+                                  width: 14,
+                                  height: 1,
+                                  background: gActive
+                                    ? 'var(--ed-accent)'
+                                    : 'var(--ed-rule)',
+                                }}
+                              />
+                              {gActive && (
+                                <span
+                                  aria-hidden
+                                  style={{
+                                    position: 'absolute',
+                                    [isRtl ? 'right' : 'left']: 50,
+                                    top: 6,
+                                    bottom: 6,
+                                    width: 2,
+                                    background: 'var(--ed-accent)',
+                                    borderRadius: 2,
+                                  }}
+                                />
+                              )}
+                              {t(g.label)}
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         ),
       )}
-      <div
-        className="mt-2 pt-2 flex items-center gap-2 flex-wrap"
-        style={{ borderTop: '1px solid var(--ed-rule)' }}
-      >
-        <LocaleSwitcher currentLocale={locale} onSelect={close} />
-        <PaletteThemeSwitcher />
-      </div>
     </div>
   )
 }
@@ -241,10 +389,14 @@ export function SiteNav() {
   const t = useTranslations('navbar')
   const locale = useLocale()
   const { toggle: toggleAsk, state: askState } = useChatPanel()
+  const { status } = useSession()
+  const isAuthed = status === 'authenticated'
+  const navItems = filterNavItems(getNavItems(t), isAuthed)
   const close = () => setMobileOpen(false)
 
   return (
     <nav
+      data-site-nav=""
       style={{
         position: 'sticky',
         top: 0,
@@ -266,6 +418,7 @@ export function SiteNav() {
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 10,
+          direction: 'ltr',
         }}
       >
         <div className="flex-none min-w-0">
@@ -284,7 +437,7 @@ export function SiteNav() {
               gap: '1px',
             }}
           >
-            {NAV_ITEMS.map((item) =>
+            {navItems.map((item) =>
               item.kind === 'link' ? (
                 <NavTabLink
                   key={item.label}
@@ -306,62 +459,70 @@ export function SiteNav() {
         </div>
 
         <div className="flex-none flex items-center justify-end gap-1">
-          <button
-            type="button"
-            onClick={toggleAsk}
-            aria-label={t('submissionAI')}
-            className="hidden sm:inline-flex items-center gap-1 h-[34px] px-2.5 rounded-[2px] transition-colors"
-            style={{
-              fontFamily: F.mono,
-              fontSize: 10.5,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              color:
-                askState !== 'closed'
-                  ? 'var(--ed-accent)'
-                  : 'var(--ed-fg-muted)',
-              border: '1px solid var(--ed-rule)',
-              background:
-                askState !== 'closed'
-                  ? 'color-mix(in oklab, var(--ed-accent), transparent 88%)'
-                  : 'transparent',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.borderColor =
-                'var(--ed-fg)'
-            }}
-            onMouseLeave={(e) => {
-              ;(e.currentTarget as HTMLButtonElement).style.borderColor =
-                'var(--ed-rule)'
-            }}
-          >
-            <Sparkles size={12} />
-            <span>{t('submissionAI')}</span>
-          </button>
+          {isAuthed && (
+            <button
+              type="button"
+              onClick={toggleAsk}
+              aria-label={t('submissionAI')}
+              className="hidden sm:inline-flex items-center gap-1.5 h-[34px] px-2.5 rounded-[2px] transition-colors"
+              style={{
+                fontFamily: F.glacial,
+                fontSize: 10.5,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color:
+                  askState !== 'closed'
+                    ? 'var(--ed-accent)'
+                    : 'var(--ed-fg-muted)',
+                border: '1px solid var(--ed-rule)',
+                background:
+                  askState !== 'closed'
+                    ? 'color-mix(in oklab, var(--ed-accent), transparent 88%)'
+                    : 'transparent',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor =
+                  'var(--ed-fg)'
+              }}
+              onMouseLeave={(e) => {
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor =
+                  'var(--ed-rule)'
+              }}
+            >
+              <MessageSquare size={12} />
+              <span>{t('chat')}</span>
+            </button>
+          )}
 
-          <div className="flex items-center gap-0.5">
-            <LocaleSwitcher currentLocale={locale} />
-            <PaletteThemeSwitcher />
-          </div>
+          <UserMenu />
 
-          <button
-            type="button"
-            onClick={toggleAsk}
-            aria-label={t('submissionAI')}
-            className="sm:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md"
-            style={{
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              color:
-                askState !== 'closed'
-                  ? 'var(--ed-accent)'
-                  : 'var(--ed-fg-muted)',
-            }}
-          >
-            <Sparkles size={16} />
-          </button>
+          {!isAuthed && (
+            <div className="flex items-center gap-0.5">
+              <LocaleSwitcher currentLocale={locale} />
+              <PaletteThemeSwitcher />
+            </div>
+          )}
+
+          {isAuthed && (
+            <button
+              type="button"
+              onClick={toggleAsk}
+              aria-label={t('submissionAI')}
+              className="sm:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md"
+              style={{
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                color:
+                  askState !== 'closed'
+                    ? 'var(--ed-accent)'
+                    : 'var(--ed-fg-muted)',
+              }}
+            >
+              <MessageSquare size={16} />
+            </button>
+          )}
 
           <button
             type="button"
@@ -379,8 +540,9 @@ export function SiteNav() {
         open={mobileOpen}
         pathname={pathname}
         t={t}
-        locale={locale}
         close={close}
+        items={navItems}
+        isRtl={isRtlLocale(locale)}
       />
     </nav>
   )
@@ -549,7 +711,7 @@ function NavGroupMenu({
             </span>
             <span
               style={{
-                fontFamily: F.mono,
+                fontFamily: F.glacial,
                 fontSize: 10,
                 letterSpacing: '0.14em',
                 textTransform: 'uppercase',
@@ -607,7 +769,7 @@ function NavGroupMenu({
                   </span>
                   <span
                     style={{
-                      fontFamily: F.mono,
+                      fontFamily: F.glacial,
                       fontSize: 9.5,
                       letterSpacing: '0.14em',
                       textTransform: 'uppercase',

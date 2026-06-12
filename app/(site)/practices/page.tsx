@@ -2,7 +2,7 @@ import PracticesClient from './practices-client'
 import { wsApiServer } from '@/src/api/server-client'
 import type { components } from '@/src/api/types.gen'
 import { buildPageMetadata } from '@/constants/metadata'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 import type { Metadata } from 'next'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,6 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 type VerseData = components['schemas']['VerseData']
 
 export default async function Page() {
+  const locale = await getLocale()
   let prayerVerse: VerseData | null = null
 
   try {
@@ -26,7 +27,7 @@ export default async function Page() {
           chapter_number_start: 4,
           verse_start: 103,
           verse_end: 103,
-          langs: ['en'],
+          langs: Array.from(new Set(['en', locale])),
         },
       },
     })

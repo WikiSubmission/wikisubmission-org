@@ -137,11 +137,11 @@ function ArchiveContent() {
         ])
         setMediaResults(
           mediaResponse?.data ||
-          (Array.isArray(mediaResponse) ? mediaResponse : [])
+            (Array.isArray(mediaResponse) ? mediaResponse : [])
         )
         setNewsletterResults(
           newsletterResponse?.data ||
-          (Array.isArray(newsletterResponse) ? newsletterResponse : [])
+            (Array.isArray(newsletterResponse) ? newsletterResponse : [])
         )
         setPerformedQuery(featured ? '' : q)
         setIsFeatured(featured)
@@ -495,10 +495,7 @@ function ArchiveTab({
 
 function EmptyState({ label, help }: { label: string; help: string }) {
   return (
-    <div
-      className="text-center py-20"
-      style={{ color: 'var(--ed-fg-muted)' }}
-    >
+    <div className="text-center py-20" style={{ color: 'var(--ed-fg-muted)' }}>
       <SearchIcon className="size-12 mx-auto mb-4 opacity-20" />
       <p
         style={{
@@ -612,7 +609,8 @@ function CategoryFilters({
                 style={{
                   padding: '2px 6px',
                   borderRadius: 2,
-                  background: 'color-mix(in oklab, var(--ed-fg), transparent 94%)',
+                  background:
+                    'color-mix(in oklab, var(--ed-fg), transparent 94%)',
                   color: 'var(--ed-fg-muted)',
                   fontSize: 10,
                 }}
@@ -864,24 +862,7 @@ function NewsletterCardGrid({ items }: { items: NewsletterRow[] }) {
         >
           {month} · {first.year}
         </div>
-        <div
-          style={{
-            fontFamily: F.display,
-            fontSize: 20,
-            lineHeight: 1.2,
-            fontWeight: 500,
-            color: 'var(--ed-fg)',
-            textAlign: 'center',
-            letterSpacing: '-0.01em',
-            marginTop: 6,
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
-        >
-          {t('readingPages', { count: items.length })}
-        </div>
+
         <div
           style={{
             marginTop: 'auto',

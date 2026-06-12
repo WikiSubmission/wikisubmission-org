@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import gsap from 'gsap'
 import { 
   X, ChevronLeft, ChevronRight, BookOpen, Lightbulb, CheckCircle2,
@@ -8,15 +9,6 @@ import {
   Search, Plus, Globe, Send, MoreVertical, LayoutGrid, FileText
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-type TutorialSlide = {
-  title: string
-  content: string | React.ReactNode
-  mockupId: string
-  mockupSubId?: string
-  tip?: string
-  success?: string
-}
 
 // ── Mockup Components ──────────────────────────────────────────────────────
 
@@ -464,100 +456,107 @@ const RenderMockup = ({ id, subId }: { id: string, subId?: string }) => {
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
-const HARDCODED_STEPS: TutorialSlide[] = [
-  {
-    title: 'Account Creation',
-    content: (
-      <>
-        <p>All contributor accounts must be manually approved by our team.</p>
-        <p>Please contact us at <a href="mailto:contact@wikisubmission.org" className="text-primary underline font-bold">contact@wikisubmission.org</a> with your preferred email address.</p>
-        <p>Once approved, you will receive an invitation email leading you to the authentication page:</p>
-      </>
-    ),
-    mockupId: 'login',
-    tip: 'Make sure to check your spam folder if you don&apos;t see the invitation within 24 hours.',
-    success: 'Your request is being processed by our administration team.'
-  },
-  {
-    title: 'Log In & Consent',
-    content: (
-      <>
-        <p>Sign in using the <strong className="text-foreground">exact same email address</strong> you provided for approval.</p>
-        <p>You will be asked to accept Sanity&apos;s Terms of Service. Sanity is the secure infrastructure we use to host and manage our research archives.</p>
-        <p className="mt-4 font-semibold text-foreground italic">Afterwards, you will be redirected to the WikiSubmission Studio.</p>
-      </>
-    ),
-    mockupId: 'profile-setup',
-    tip: 'Using a Google or GitHub account linked to your email is the fastest way to log in.',
-    success: 'Secure connection established with Sanity Studio.'
-  },
-  {
-    title: 'Setup Your Profile',
-    content: (
-      <>
-        <p>Inside the Studio, click on the <strong className="text-foreground">My Profile</strong> tab in the sidebar.</p>
-        <p>Please fill in your <strong className="text-foreground">First Name</strong> and <strong className="text-foreground">Last Name</strong>. We also recommend adding a short biography to introduce yourself to your readers.</p>
-      </>
-    ),
-    mockupId: 'studio-profile',
-    tip: 'A complete profile helps establish your authority as a contributor.',
-    success: 'Your author identity is now configured.'
-  },
-  {
-    title: 'Moderator Verification',
-    content: (
-      <>
-        <p>After setting up your profile, our moderators will verify your credentials.</p>
-        <p>Once verified, the <strong className="text-foreground">Articles</strong> section will unlock, allowing you to start drafting your work:</p>
-      </>
-    ),
-    mockupId: 'articles-list',
-    mockupSubId: 'approved',
-    tip: 'This manual step ensures all published research meets our quality standards.',
-    success: 'Writing permissions unlocked. Welcome to the team!'
-  },
-  {
-    title: 'Create Your Article',
-    content: (
-      <>
-        <p>Click <strong className="text-foreground">+ New article</strong> to begin. Essential: Use the <strong className="text-foreground">Translations</strong> menu to set the language of your article.</p>
-        <p>Setting the correct language ensures your research is indexed correctly for global readers.</p>
-      </>
-    ),
-    mockupId: 'editor',
-    mockupSubId: 'language',
-    tip: 'You can switch languages at any time to see how your article appears in different locales.',
-    success: 'Language metadata configured correctly.'
-  },
-  {
-    title: 'Review & Publish',
-    content: (
-      <>
-        <p>Once your article is ready, click the <strong className="text-foreground">Publish</strong> button in the bottom right corner.</p>
-        <p>Congratulations! Your contribution is now live and accessible to the global community on WikiSubmission.</p>
-      </>
-    ),
-    mockupId: 'publish',
-    tip: 'Published articles can still be edited; simply make your changes and click Update.',
-    success: 'Your research is now part of the global archive!'
-  }
-]
-
 export function BlogTutorial({
   onClose
 }: {
   onClose: () => void
 }) {
+  const t = useTranslations('blog')
+
+  const bold = (chunks: React.ReactNode) => <strong className="text-foreground">{chunks}</strong>
+  const link = (chunks: React.ReactNode) => (
+    <a href="mailto:contact@wikisubmission.org" className="text-primary underline font-bold">{chunks}</a>
+  )
+
+  const STEPS = [
+    {
+      title: t('tutorialStep1Title'),
+      content: (
+        <>
+          <p>{t('tutorialStep1Content1')}</p>
+          <p>{t.rich('tutorialStep1Content2', { link })}</p>
+          <p>{t('tutorialStep1Content3')}</p>
+        </>
+      ),
+      mockupId: 'login',
+      tip: t('tutorialStep1Tip'),
+      success: t('tutorialStep1Success'),
+    },
+    {
+      title: t('tutorialStep2Title'),
+      content: (
+        <>
+          <p>{t.rich('tutorialStep2Content1', { bold })}</p>
+          <p>{t('tutorialStep2Content2')}</p>
+          <p className="mt-4 font-semibold text-foreground italic">{t('tutorialStep2Content3')}</p>
+        </>
+      ),
+      mockupId: 'profile-setup',
+      tip: t('tutorialStep2Tip'),
+      success: t('tutorialStep2Success'),
+    },
+    {
+      title: t('tutorialStep3Title'),
+      content: (
+        <>
+          <p>{t.rich('tutorialStep3Content1', { bold })}</p>
+          <p>{t.rich('tutorialStep3Content2', { bold })}</p>
+        </>
+      ),
+      mockupId: 'studio-profile',
+      tip: t('tutorialStep3Tip'),
+      success: t('tutorialStep3Success'),
+    },
+    {
+      title: t('tutorialStep4Title'),
+      content: (
+        <>
+          <p>{t('tutorialStep4Content1')}</p>
+          <p>{t.rich('tutorialStep4Content2', { bold })}</p>
+        </>
+      ),
+      mockupId: 'articles-list',
+      mockupSubId: 'approved',
+      tip: t('tutorialStep4Tip'),
+      success: t('tutorialStep4Success'),
+    },
+    {
+      title: t('tutorialStep5Title'),
+      content: (
+        <>
+          <p>{t.rich('tutorialStep5Content1', { bold })}</p>
+          <p>{t('tutorialStep5Content2')}</p>
+        </>
+      ),
+      mockupId: 'editor',
+      mockupSubId: 'language',
+      tip: t('tutorialStep5Tip'),
+      success: t('tutorialStep5Success'),
+    },
+    {
+      title: t('tutorialStep6Title'),
+      content: (
+        <>
+          <p>{t.rich('tutorialStep6Content1', { bold })}</p>
+          <p>{t('tutorialStep6Content2')}</p>
+        </>
+      ),
+      mockupId: 'publish',
+      tip: t('tutorialStep6Tip'),
+      success: t('tutorialStep6Success'),
+    },
+  ]
+
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [mockupSubId, setMockupSubId] = useState<string | undefined>(HARDCODED_STEPS[0].mockupSubId)
+  const [mockupSubId, setMockupSubId] = useState<string | undefined>(STEPS[0].mockupSubId)
   const [previewOpen, setPreviewOpen] = useState(true)
 
-  const slide = HARDCODED_STEPS[currentSlide]
-  const progress = ((currentSlide + 1) / HARDCODED_STEPS.length) * 100
+  const slide = STEPS[currentSlide]
+  const progress = ((currentSlide + 1) / STEPS.length) * 100
 
   const handleSlideChange = (newSlideIndex: number) => {
     setCurrentSlide(newSlideIndex)
-    setMockupSubId(HARDCODED_STEPS[newSlideIndex].mockupSubId)
+    setMockupSubId(STEPS[newSlideIndex].mockupSubId)
   }
 
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -653,9 +652,9 @@ export function BlogTutorial({
       <div className="flex items-center justify-between px-5 py-3 border-b border-border/60 bg-background/40 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <BookOpen size={16} className="text-primary shrink-0" />
-          <span className="font-headline font-bold text-sm truncate">Contributor Guide</span>
+          <span className="font-headline font-bold text-sm truncate">{t('tutorialTitle')}</span>
           <span className="text-[10px] font-mono text-muted-foreground/70 shrink-0 ml-1">
-            {currentSlide + 1}/{HARDCODED_STEPS.length}
+            {currentSlide + 1}/{STEPS.length}
           </span>
         </div>
         <button
@@ -685,7 +684,7 @@ export function BlogTutorial({
         >
             <div className="space-y-2">
               <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-mono text-primary font-bold uppercase tracking-widest">
-                Step {currentSlide + 1}
+                {t('tutorialStepLabel', { n: currentSlide + 1 })}
               </span>
               <h2 className="font-headline text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
                 {slide.title}
@@ -702,7 +701,7 @@ export function BlogTutorial({
                   <div className="p-3.5 rounded-lg bg-muted/40 border border-border/60 flex gap-3">
                     <Lightbulb size={15} className="shrink-0 mt-0.5 text-amber-500/80" />
                     <div className="min-w-0">
-                      <h4 className="text-[10px] font-bold mb-0.5 text-muted-foreground uppercase tracking-widest">Tip</h4>
+                      <h4 className="text-[10px] font-bold mb-0.5 text-muted-foreground uppercase tracking-widest">{t('tutorialTip')}</h4>
                       <p className="text-xs text-muted-foreground/90 leading-relaxed">{slide.tip}</p>
                     </div>
                   </div>
@@ -711,7 +710,7 @@ export function BlogTutorial({
                   <div className="p-3.5 rounded-lg bg-muted/40 border border-border/60 flex gap-3">
                     <CheckCircle2 size={15} className="shrink-0 mt-0.5 text-emerald-500/80" />
                     <div className="min-w-0">
-                      <h4 className="text-[10px] font-bold mb-0.5 text-muted-foreground uppercase tracking-widest">Outcome</h4>
+                      <h4 className="text-[10px] font-bold mb-0.5 text-muted-foreground uppercase tracking-widest">{t('tutorialOutcome')}</h4>
                       <p className="text-xs text-muted-foreground/90 leading-relaxed">{slide.success}</p>
                     </div>
                   </div>
@@ -723,13 +722,13 @@ export function BlogTutorial({
               <div className="flex items-center justify-between px-3 py-2 border-b border-border/60 bg-muted/40">
                 <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   <ImageIcon size={12} />
-                  Preview
+                  {t('tutorialPreview')}
                 </div>
                 <button
                   onClick={() => setPreviewOpen((v) => !v)}
                   className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
                 >
-                  {previewOpen ? 'Hide' : 'Show'}
+                  {previewOpen ? t('tutorialHide') : t('tutorialShow')}
                 </button>
               </div>
               {previewRender && (
@@ -757,7 +756,7 @@ export function BlogTutorial({
                               : 'bg-muted/60 text-muted-foreground border-border/40 hover:bg-primary/10 hover:text-primary hover:border-primary/20'
                           )}
                         >
-                          Editor
+                          {t('tutorialViewEditor')}
                         </button>
                         <button
                           onClick={() => setMockupSubId('language')}
@@ -769,7 +768,7 @@ export function BlogTutorial({
                           )}
                         >
                           <ArrowRightLeft size={11} />
-                          Translations
+                          {t('tutorialViewTranslations')}
                         </button>
                       </div>
                     )}
@@ -787,12 +786,12 @@ export function BlogTutorial({
           disabled={currentSlide === 0}
           className="inline-flex items-center gap-1.5 h-10 px-4 rounded-lg border border-border bg-background hover:bg-muted/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-medium"
         >
-          <ChevronLeft size={16} />
-          <span className="hidden sm:inline">Previous</span>
+          <ChevronLeft size={16} className="rtl-flip" />
+          <span className="hidden sm:inline">{t('tutorialPrevious')}</span>
         </button>
 
         <div className="flex items-center gap-1.5">
-          {HARDCODED_STEPS.map((_, i) => (
+          {STEPS.map((_, i) => (
             <button
               key={i}
               onClick={() => handleSlideChange(i)}
@@ -805,21 +804,21 @@ export function BlogTutorial({
           ))}
         </div>
 
-        {currentSlide < HARDCODED_STEPS.length - 1 ? (
+        {currentSlide < STEPS.length - 1 ? (
           <button
-            onClick={() => handleSlideChange(Math.min(HARDCODED_STEPS.length - 1, currentSlide + 1))}
+            onClick={() => handleSlideChange(Math.min(STEPS.length - 1, currentSlide + 1))}
             className="inline-flex items-center gap-1.5 h-10 px-4 sm:px-5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-semibold"
           >
-            <span className="hidden sm:inline">Continue</span>
-            <span className="sm:hidden">Next</span>
-            <ChevronRight size={16} />
+            <span className="hidden sm:inline">{t('tutorialContinue')}</span>
+            <span className="sm:hidden">{t('tutorialNext')}</span>
+            <ChevronRight size={16} className="rtl-flip" />
           </button>
         ) : (
           <button
             onClick={onClose}
             className="inline-flex items-center gap-1.5 h-10 px-4 sm:px-5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors text-sm font-semibold"
           >
-            <span className="hidden sm:inline">Done</span>
+            <span className="hidden sm:inline">{t('tutorialDone')}</span>
             <CheckCircle2 size={16} />
           </button>
         )}

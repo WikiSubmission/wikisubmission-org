@@ -66,9 +66,9 @@ export function useVerseSearch(): UseVerseSearchReturn {
    *  Always includes 'en' so English queries work regardless of the user's display language. */
   function buildLangs(opts: VerseSearchOptions): string[] {
     const langs: string[] = ['en']
-    if (opts.primaryLang !== 'xl' && !langs.includes(opts.primaryLang)) langs.push(opts.primaryLang)
+    if (opts.primaryLang !== 'xl' && opts.primaryLang !== 'none' && !langs.includes(opts.primaryLang)) langs.push(opts.primaryLang)
     if (opts.includeArabic && !langs.includes('ar')) langs.push('ar')
-    if (opts.secondaryLang && opts.secondaryLang !== 'xl') {
+    if (opts.secondaryLang && opts.secondaryLang !== 'xl' && opts.secondaryLang !== 'none') {
       if (!langs.includes(opts.secondaryLang)) langs.push(opts.secondaryLang)
     }
     return langs

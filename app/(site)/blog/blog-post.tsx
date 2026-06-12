@@ -9,6 +9,7 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { timingSafeEqual } from 'node:crypto'
 import { Children, type ReactNode } from 'react'
 import { ScriptureText } from '@/components/scripture-text'
+import { BlogReadingProgressBar } from './blog-reading-progress-bar'
 
 export const SANITY_LANGUAGES = ['en', 'fr', 'ar', 'tr'] as const
 
@@ -288,9 +289,12 @@ export function BlogPostArticle({
   const publishedRelated = related.filter((relatedPost) => relatedPost.slug?.current)
   const scriptureRefsEnabled = post.enableScriptureRefs ?? true
   const portableTextComponents = buildPortableTextComponents(scriptureRefsEnabled)
+  const articleBodyId = 'blog-article-body'
 
   return (
     <div className="min-h-screen pb-32 md:pb-40">
+      <BlogReadingProgressBar targetId={articleBodyId} />
+
       {/* ── Top breadcrumb / back link ─────────────────────────────────── */}
       <nav
         aria-label="Article navigation"
@@ -300,7 +304,7 @@ export function BlogPostArticle({
           href="/blog"
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeftIcon className="size-4" />
+          <ArrowLeftIcon className="size-4 rtl-flip" />
           <span>All articles</span>
         </Link>
       </nav>
@@ -389,7 +393,7 @@ export function BlogPostArticle({
       )}
 
       {/* ── Body ────────────────────────────────────────────────────────── */}
-      <article className="max-w-[680px] mx-auto px-6">
+      <article id={articleBodyId} className="max-w-[680px] mx-auto px-6">
         {post.body?.length ? (
           <PortableText value={post.body} components={portableTextComponents} />
         ) : (
@@ -406,7 +410,7 @@ export function BlogPostArticle({
             href="/blog"
             className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] font-semibold text-primary hover:text-primary/80 transition-colors self-start sm:self-auto"
           >
-            <ArrowLeftIcon className="size-3.5" /> All articles
+            <ArrowLeftIcon className="size-3.5 rtl-flip" /> All articles
           </Link>
           <div className="flex items-center gap-3">
             {post.authorPhotoUrl && (
@@ -440,7 +444,7 @@ export function BlogPostArticle({
               Continue reading
             </span>
             <h2 className="font-headline text-[clamp(28px,3.2vw,40px)] tracking-[-0.02em] leading-[1.1]">
-              More from the journal
+              More from the blog
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

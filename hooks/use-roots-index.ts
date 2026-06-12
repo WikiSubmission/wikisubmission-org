@@ -7,6 +7,7 @@ import { rootToLatin, stripDiacritics } from '@/lib/transliteration'
 export type Derivative = {
   ar: string
   tr: string | null
+  en: string | null
   count: number
 }
 
@@ -35,7 +36,7 @@ export type RootsIndex = {
 type Status = 'idle' | 'loading' | 'ready' | 'error'
 
 const INDEX_CACHE_KEY = 'ws-roots-index-v2'
-const DETAIL_CACHE_KEY = 'ws-roots-detail-v5'
+const DETAIL_CACHE_KEY = 'ws-roots-detail-v6'
 const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 7
 const ROOTS_FETCH_LIMIT = 5000
 
@@ -164,6 +165,7 @@ async function fetchDetail(
   const derivs: Derivative[] = (data.dv ?? []).map((d) => ({
     ar: d.ar,
     tr: d.tr ?? null,
+    en: d.en ?? null,
     count: d.c,
   }))
   const occ: Occurrence[] = (data.oc ?? []).map((o) => ({

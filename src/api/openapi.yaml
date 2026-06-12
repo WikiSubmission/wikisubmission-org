@@ -51,7 +51,8 @@ info:
     three-part format `book:chapter:verse` (e.g. `40:5:3` = Matthew 5:3).
 
     ### Authentication
-    All endpoints are public — no authentication required.
+    Reader/Bible/Music/Roots/Community endpoints are public.
+    `/me/*` endpoints require a bearer token.
 
     ### Versioning
     The API is versioned via the URL path (`/api/v1/…`). Breaking changes will
@@ -94,6 +95,15 @@ tags:
       Online and physical community directory sourced from the Sanity content
       lake. Reads are cached server-side and invalidated by webhook on
       document changes.
+  - name: Me
+    description: >
+      Authenticated per-user endpoints for bookmarks, notes, reading progress,
+      streaks, preferences, and collections.
+  - name: Games
+    description: >
+      Quran games. v1 ships "Fill the Missing Word" with curated passages,
+      deterministic per-variant generation, and global/weekly/per-variant
+      leaderboards. All endpoints require authentication.
 
 paths:
   /languages:
@@ -946,8 +956,1458 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+  /me/bookmark-categories:
+    get:
+      tags: [Me]
+      operationId: listMeBookmarkCategories
+      summary: List current user's bookmark categories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkCategoryListEnvelope'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    post:
+      tags: [Me]
+      operationId: createMeBookmarkCategory
+      summary: Create a bookmark category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookmarkCategoryRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkCategoryEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/bookmark-categories/{id}:
+    patch:
+      tags: [Me]
+      operationId: updateMeBookmarkCategory
+      summary: Update a bookmark category name or color
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookmarkCategoryRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkCategoryEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    delete:
+      tags: [Me]
+      operationId: deleteMeBookmarkCategory
+      summary: Delete a bookmark category and all its entries
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NullDataEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/bookmark-categories/{id}/entries:
+    get:
+      tags: [Me]
+      operationId: listMeBookmarkCategoryEntries
+      summary: List all entries in a bookmark category (cross-scripture)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkEntryListEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/bookmark-entries:
+    post:
+      tags: [Me]
+      operationId: createMeBookmarkEntry
+      summary: Add a verse to a bookmark category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookmarkEntryRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkEntryEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/bookmark-entries/{id}:
+    delete:
+      tags: [Me]
+      operationId: deleteMeBookmarkEntry
+      summary: Remove a verse from a bookmark category
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NullDataEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/cover-to-cover:
+    get:
+      tags: [Me]
+      operationId: getMeCoverToCover
+      summary: Get cover-to-cover bookmark for a scripture
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MeScriptureParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkNullableEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    put:
+      tags: [Me]
+      operationId: putMeCoverToCover
+      summary: Upsert cover-to-cover bookmark
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoverToCoverRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/scripture-state:
+    get:
+      tags: [Me]
+      operationId: getMeScriptureState
+      summary: Get bookmark and note state for a chapter
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MeScriptureParam'
+        - name: chapter
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScriptureState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/notes:
+    get:
+      tags: [Me]
+      operationId: getMeNotes
+      summary: List current user's notes
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MeScriptureParam'
+        - name: verse_key
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteListEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    put:
+      tags: [Me]
+      operationId: upsertMeNote
+      summary: Create or update the note for a verse (one note per verse)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertNoteRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/notes/{id}:
+    delete:
+      tags: [Me]
+      operationId: deleteMeNote
+      summary: Delete a note
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NullDataEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/search:
+    get:
+      tags: [Me]
+      operationId: getMeSearch
+      summary: Search verses and personal notes
+      description: >
+        Searches Quran/Bible verses and, for authenticated users, their notes
+        content. Returns merged results with a `source` field distinguishing
+        verse matches from note matches. Note results include a highlighted
+        excerpt. Unauthenticated requests only search verses.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query string.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+        - name: scripture
+          in: query
+          required: false
+          description: Limit results to a single scripture. Omit for all.
+          schema:
+            type: string
+            enum: [quran, bible]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeSearchEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/reading-progress:
+    get:
+      tags: [Me]
+      operationId: getMeReadingProgress
+      summary: Get current reading position
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MeScriptureParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingProgressEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    put:
+      tags: [Me]
+      operationId: putMeReadingProgress
+      summary: Upsert reading position
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutReadingProgressRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingProgressRequiredEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/streak:
+    get:
+      tags: [Me]
+      operationId: getMeStreak
+      summary: Get reading streak metrics
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MeScriptureParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreakEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/reading-stats:
+    get:
+      tags: [Me]
+      operationId: getMeReadingStats
+      summary: Get aggregated reading stats (daily, hourly, weekday, cumulative)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MeScriptureParam'
+        - in: query
+          name: range
+          schema:
+            type: string
+            enum: [7d, 30d, 90d, 1y, all]
+            default: 30d
+          description: Time range relative to now. `all` returns full history.
+        - in: query
+          name: tz
+          schema:
+            type: string
+            default: UTC
+          description: IANA timezone used to bucket day/hour/weekday (e.g. `Asia/Tokyo`).
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadingStatsEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/reading-log:
+    post:
+      tags: [Me]
+      operationId: postMeReadingLog
+      summary: Increment daily reading log
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostReadingLogRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NullDataEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/preferences:
+    get:
+      tags: [Me]
+      operationId: getMePreferences
+      summary: Get per-scripture preferences
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/MeScriptureParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreferencesEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    put:
+      tags: [Me]
+      operationId: putMePreferences
+      summary: Upsert per-scripture preferences
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutPreferencesRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NullDataEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/collections:
+    get:
+      tags: [Me]
+      operationId: listMeCollections
+      summary: List current user's collections
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionListEnvelope'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    post:
+      tags: [Me]
+      operationId: createMeCollection
+      summary: Create a collection
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollectionRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/collections/{id}:
+    get:
+      tags: [Me]
+      operationId: getMeCollectionDetail
+      summary: Get collection with verses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionDetailEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    patch:
+      tags: [Me]
+      operationId: updateMeCollection
+      summary: Update a collection
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCollectionRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    delete:
+      tags: [Me]
+      operationId: deleteMeCollection
+      summary: Delete a collection
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NullDataEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/collections/{id}/verses:
+    post:
+      tags: [Me]
+      operationId: addVerseToMeCollection
+      summary: Add or upsert verse in a collection
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCollectionVerseRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionVerseEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/collections/{id}/verses/{verseId}:
+    delete:
+      tags: [Me]
+      operationId: removeVerseFromMeCollection
+      summary: Remove a verse from a collection
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: verseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NullDataEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/collection-subscriptions:
+    post:
+      tags: [Me]
+      operationId: subscribeMeCollection
+      summary: Subscribe (grab) a public collection by share token
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionSubscribeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionSubscribeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/collection-subscriptions/{id}:
+    delete:
+      tags: [Me]
+      operationId: unsubscribeMeCollection
+      summary: Unsubscribe from a collection
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NullDataEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+
+  /me/activity:
+    get:
+      tags: [Me]
+      operationId: listMeActivity
+      summary: List current user's recent activity
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityListEnvelope'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    post:
+      tags: [Me]
+      operationId: recordMeActivity
+      summary: Record one activity event when consent is enabled
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordActivityRequest'
+      responses:
+        '200':
+          description: Stored.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityStoredResponse'
+        '202':
+          description: Accepted but not stored because activity consent is disabled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityStoredResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    delete:
+      tags: [Me]
+      operationId: clearMeActivity
+      summary: Clear current user's activity feed
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedCountResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/consent:
+    get:
+      tags: [Me]
+      operationId: getMeActivityConsent
+      summary: Get activity recording consent
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityConsentResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    put:
+      tags: [Me]
+      operationId: setMeActivityConsent
+      summary: Set activity recording consent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetActivityConsentRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityConsentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/export:
+    post:
+      tags: [Me]
+      operationId: requestMeExport
+      summary: Queue a user data export
+      security:
+        - bearerAuth: []
+      responses:
+        '202':
+          description: Export queued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataExportQueuedResponse'
+        '429':
+          description: Existing export is still in progress or cooldown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetryAfterResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/export/status:
+    get:
+      tags: [Me]
+      operationId: getMeExportStatus
+      summary: Get latest user data export status
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataExportEnvelope'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/delete-content:
+    post:
+      tags: [Me]
+      operationId: requestMeContentDeletion
+      summary: Queue deletion of selected user content categories
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteContentRequest'
+      responses:
+        '202':
+          description: Deletion queued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataDeletionQueuedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: A fresh completed export is required before deletion.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReasonResponse'
+        '429':
+          description: A deletion is already in progress.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReasonResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/delete-content/status:
+    get:
+      tags: [Me]
+      operationId: getMeContentDeletionStatus
+      summary: Get latest user data deletion status
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataDeletionEnvelope'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/push/subscribe:
+    post:
+      tags: [Me]
+      operationId: subscribeMePush
+      summary: Subscribe or refresh a browser push endpoint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushSubscribeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushSubscribeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    delete:
+      tags: [Me]
+      operationId: unsubscribeMePush
+      summary: Remove one browser push endpoint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushUnsubscribeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/push/test:
+    post:
+      tags: [Me]
+      operationId: sendMePushTest
+      summary: Send a test push notification to current user's endpoints
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushTestResponse'
+        '503':
+          description: Push sending is not configured.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /collections/share/{token}:
+    get:
+      tags: [Me]
+      operationId: getSharedCollection
+      summary: Get publicly shared collection by token
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionDetailEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  # -------------------------------------------------------------------------
+  # Games — Fill the Missing Word
+  # -------------------------------------------------------------------------
+  /games/fill-blank/passages:
+    get:
+      tags: [Games]
+      operationId: listGameFillBlankPassages
+      summary: List approved Fill-the-Blank passages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: language
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [en, ar, ac, fa, ur, fr, de, es, sv, tr, id, tl, ru, bn, ta]
+            default: en
+        - name: theme
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: chapter
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 114
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GamePassageListEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /games/fill-blank/variants:
+    post:
+      tags: [Games]
+      operationId: startGameFillBlankVariant
+      summary: Start (or resume) a Fill-the-Blank round
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartGameVariantRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameVariantEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+        '501':
+          $ref: '#/components/responses/NotImplementedError'
+
+  /games/fill-blank/submit:
+    post:
+      tags: [Games]
+      operationId: submitGameFillBlankAttempt
+      summary: Submit a completed Fill-the-Blank round
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitGameAttemptRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSubmitResultEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          description: Rate-limited.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+        '501':
+          $ref: '#/components/responses/NotImplementedError'
+
+  /games/fill-blank/leaderboard:
+    get:
+      tags: [Games]
+      operationId: getGameFillBlankLeaderboard
+      summary: Get global, weekly, or per-variant leaderboard
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: scope
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [global, weekly, variant]
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [short, medium, long]
+        - name: difficulty
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [easy, medium, hard, professional]
+        - name: variant_id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameLeaderboardEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/games/history:
+    get:
+      tags: [Games]
+      operationId: listMeGameHistory
+      summary: List current user's game attempts (newest first)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameHistoryEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /me/games/stats:
+    get:
+      tags: [Games]
+      operationId: getMeGameStats
+      summary: Aggregate game stats for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameStatsEnvelope'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+
+  /users/me:
+    get:
+      tags: [Me]
+      operationId: getCurrentUserAccess
+      summary: Get current user's account and access flags
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEnvelope'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /users:
+    get:
+      tags: [Me]
+      operationId: listUsersAdmin
+      summary: List users (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /users/{id}:
+    patch:
+      tags: [Me]
+      operationId: updateUserAdmin
+      summary: Update role/permissions/active state for one user (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/session:
+    get:
+      tags: [Editorial]
+      operationId: getEditorialSession
+      summary: Resolved editorial permissions for the current user
+      description: >
+        Returns the caller's editorial permission snapshot (modules and
+        per-version read/write grants) so the editor UI can decide what to
+        render. Authoritative enforcement happens server-side on every mutation;
+        this only shapes the UI.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialSessionEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/quran-versions:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialQuranVersions
+      summary: List the Quran version registry (editorial)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialQuranVersionListEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/bible-versions:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialBibleVersions
+      summary: List the Bible version registry (editorial)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialBibleVersionListEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   # -----------------------------------------------------------------------
   # Reusable parameters shared across Reader endpoints
   # -----------------------------------------------------------------------
@@ -1000,6 +2460,16 @@ components:
         type: boolean
         default: false
       example: false
+    MeScriptureParam:
+      name: scripture
+      in: query
+      required: false
+      description: Scripture scope for user data.
+      schema:
+        type: string
+        enum: [quran, bible]
+        default: quran
+      example: quran
 
   schemas:
     # -----------------------------------------------------------------------
@@ -1298,7 +2768,7 @@ components:
         endpoint. `r` is the storage form (space-separated Arabic letters);
         `tr` is the server-computed Latin Buckwalter transliteration joined
         with hyphens (e.g. `k-t-b`). `s` is reserved for an editorial sense
-        gloss and is always `null` until Phase 2 morphology data lands.
+        gloss and is currently always `null`.
       required: [r, tr, c]
       properties:
         r:
@@ -1370,7 +2840,9 @@ components:
         occurrence count. `tr` is the Latin transliteration of the surface
         form, sourced from `word_text` rows tagged with the `tl` language
         (most-common value when multiple readings exist). `en` and `p` (POS)
-        remain reserved for Phase 2 morphology data and are still `null`.
+        is sourced from `word_text` rows tagged with the `en` language (most-common
+        value when multiple readings exist). `p` (POS) remains reserved for
+        morphology data and is still `null`.
       required: [ar, c]
       properties:
         ar:
@@ -1388,8 +2860,11 @@ components:
         en:
           type: string
           nullable: true
-          description: English gloss for this surface form (Phase 2; always `null`).
-          example: null
+          description: >
+            Most common English gloss for this surface form, drawn from the
+            per-word `en` entry in `word_text`. `null` if no English row exists
+            for that word.
+          example: "book"
         c:
           type: integer
           description: Number of occurrences of this exact surface form.
@@ -2002,6 +3477,1452 @@ components:
         meetingSchedule:
           type: string
 
+    # -----------------------------------------------------------------------
+    # Authenticated /me contract
+    # -----------------------------------------------------------------------
+
+    # cover-to-cover still uses the old bookmark row (kind = 'cover_to_cover')
+    Bookmark:
+      type: object
+      required: [id, scripture, verse_key, name, color, kind, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+        kind:
+          type: string
+          enum: [cover_to_cover]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CoverToCoverRequest:
+      type: object
+      required: [scripture, verse_key]
+      properties:
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+
+    BookmarkCategory:
+      type: object
+      required: [id, name, color, entry_count, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        color:
+          type: string
+        entry_count:
+          type: integer
+          description: Number of entries in this category.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BookmarkEntry:
+      type: object
+      required: [id, category_id, scripture, verse_key, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        category_id:
+          type: integer
+          format: int64
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CreateBookmarkCategoryRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+          default: amber
+
+    UpdateBookmarkCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+
+    CreateBookmarkEntryRequest:
+      type: object
+      required: [category_id, scripture, verse_key]
+      properties:
+        category_id:
+          type: integer
+          format: int64
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+
+    Note:
+      type: object
+      required: [id, scripture, verse_key, content, tags, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        content:
+          type: string
+          description: Markdown content.
+        tags:
+          type: array
+          description: Free-form labels used for filtering on the notes index.
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UpsertNoteRequest:
+      type: object
+      required: [scripture, verse_key, content]
+      properties:
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        content:
+          type: string
+          description: Markdown content.
+        tags:
+          type: array
+          description: Free-form labels. Omit to leave existing tags unchanged.
+          items:
+            type: string
+
+    SearchResult:
+      type: object
+      required: [source, verse_key, scripture, excerpt]
+      properties:
+        source:
+          type: string
+          enum: [note]
+          description: Origin of this result. Only 'note' is returned here; verse results come from the existing /search endpoints.
+        verse_key:
+          type: string
+        scripture:
+          type: string
+          enum: [quran, bible]
+        excerpt:
+          type: string
+          description: Highlighted excerpt from the note content showing the match context.
+
+    ScriptureState:
+      type: object
+      required: [bookmarks, notes]
+      properties:
+        bookmarks:
+          type: object
+          description: Map of verse_key to list of bookmark entries for that verse.
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/BookmarkEntry'
+        notes:
+          type: object
+          description: Map of verse_key to the single note for that verse.
+          additionalProperties:
+            $ref: '#/components/schemas/Note'
+
+    ReadingProgress:
+      type: object
+      required: [scripture, verse_key, updated_at]
+      properties:
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+
+    PutReadingProgressRequest:
+      type: object
+      required: [scripture, verse_key]
+      properties:
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+
+    Streak:
+      type: object
+      required: [current_streak, longest_streak, total_verses_read]
+      properties:
+        current_streak:
+          type: integer
+        longest_streak:
+          type: integer
+        last_active_day:
+          type: string
+        total_verses_read:
+          type: integer
+
+    PostReadingLogRequest:
+      type: object
+      required: [scripture]
+      properties:
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verses_read:
+          type: integer
+          minimum: 1
+          default: 1
+        day:
+          type: string
+          format: date
+
+    PutPreferencesRequest:
+      type: object
+      required: [scripture, payload]
+      properties:
+        scripture:
+          type: string
+          enum: [quran, bible]
+        payload:
+          type: object
+          additionalProperties: true
+
+    Collection:
+      type: object
+      required: [id, name, description, is_public, edit_policy, relation, owner_display_name, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        is_public:
+          type: boolean
+        edit_policy:
+          type: string
+          enum: [owner_only, everyone]
+          default: owner_only
+        relation:
+          type: string
+          enum: [owner, subscriber]
+          description: Whether the current user owns this collection or subscribed to it.
+        owner_display_name:
+          type: string
+          description: Display name of the owner; populated for subscriber rows.
+        share_token:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CollectionVerse:
+      type: object
+      required: [id, collection_id, scripture, verse_key, note, position, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        collection_id:
+          type: integer
+          format: int64
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        note:
+          type: string
+        position:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    CollectionDetail:
+      allOf:
+        - $ref: '#/components/schemas/Collection'
+        - type: object
+          required: [verses]
+          properties:
+            verses:
+              type: array
+              items:
+                $ref: '#/components/schemas/CollectionVerse'
+            is_subscribed:
+              type: boolean
+              nullable: true
+              description: Whether the current authenticated user is subscribed. Null if unauthenticated.
+
+    CreateCollectionRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        is_public:
+          type: boolean
+          default: false
+
+    UpdateCollectionRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        is_public:
+          type: boolean
+        edit_policy:
+          type: string
+          enum: [owner_only, everyone]
+        regenerate_token:
+          type: boolean
+          default: false
+
+    CollectionSubscribeRequest:
+      type: object
+      required: [share_token]
+      properties:
+        share_token:
+          type: string
+
+    CollectionSubscribeResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [collection_id]
+          properties:
+            collection_id:
+              type: integer
+              format: int64
+
+    AddCollectionVerseRequest:
+      type: object
+      required: [scripture, verse_key]
+      properties:
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        note:
+          type: string
+
+    NullDataEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          nullable: true
+          example: null
+
+    BookmarkEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Bookmark'
+
+    BookmarkNullableEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          allOf:
+            - $ref: '#/components/schemas/Bookmark'
+          nullable: true
+
+    BookmarkCategoryEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/BookmarkCategory'
+
+    BookmarkCategoryListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookmarkCategory'
+
+    BookmarkEntryEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/BookmarkEntry'
+
+    BookmarkEntryListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookmarkEntry'
+
+    MeSearchEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResult'
+
+    NoteEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Note'
+
+    NoteListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Note'
+
+    ReadingProgressEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          allOf:
+            - $ref: '#/components/schemas/ReadingProgress'
+          nullable: true
+
+    ReadingProgressRequiredEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ReadingProgress'
+
+    StreakEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Streak'
+
+    ReadingStatsDaily:
+      type: object
+      required: [day, verses_read]
+      properties:
+        day:
+          type: string
+          format: date
+        verses_read:
+          type: integer
+
+    ReadingStatsHourly:
+      type: object
+      required: [hour, verses_read]
+      properties:
+        hour:
+          type: integer
+          minimum: 0
+          maximum: 23
+        verses_read:
+          type: integer
+
+    ReadingStatsWeekday:
+      type: object
+      required: [weekday, verses_read]
+      properties:
+        weekday:
+          type: integer
+          description: ISO weekday (1=Mon … 7=Sun).
+          minimum: 1
+          maximum: 7
+        verses_read:
+          type: integer
+
+    ReadingStats:
+      type: object
+      required: [total, active_days, daily, hourly, weekday, cumulative]
+      properties:
+        total:
+          type: integer
+        active_days:
+          type: integer
+        best_day:
+          $ref: '#/components/schemas/ReadingStatsDaily'
+          nullable: true
+        daily:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadingStatsDaily'
+        hourly:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadingStatsHourly'
+        weekday:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadingStatsWeekday'
+        cumulative:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadingStatsDaily'
+
+    ReadingStatsEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/ReadingStats'
+
+    PreferencesEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+          nullable: true
+
+    CollectionEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Collection'
+
+    CollectionListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Collection'
+
+    CollectionVerseEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/CollectionVerse'
+
+    CollectionDetailEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/CollectionDetail'
+
+
+    ActivityKind:
+      type: string
+      enum: [search, browse_chapter, browse_verse, browse_verse_range]
+
+    ActivityEntry:
+      type: object
+      required: [id, kind, scripture, created_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        kind:
+          $ref: '#/components/schemas/ActivityKind'
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        query:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    RecordActivityRequest:
+      type: object
+      required: [kind, scripture]
+      properties:
+        kind:
+          $ref: '#/components/schemas/ActivityKind'
+        scripture:
+          type: string
+          enum: [quran, bible]
+        verse_key:
+          type: string
+        query:
+          type: string
+
+    ActivityListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityEntry'
+
+    ActivityStoredResponse:
+      type: object
+      required: [stored]
+      properties:
+        stored:
+          type: boolean
+
+    ActivityConsentResponse:
+      type: object
+      required: [consent]
+      properties:
+        consent:
+          type: boolean
+
+    SetActivityConsentRequest:
+      type: object
+      required: [consent]
+      properties:
+        consent:
+          type: boolean
+
+    DeletedCountResponse:
+      type: object
+      required: [deleted]
+      properties:
+        deleted:
+          type: integer
+          format: int64
+
+    UserDataExportStatus:
+      type: string
+      enum: [queued, running, sent, failed]
+
+    UserDataExport:
+      type: object
+      required: [id, user_id, status, requested_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/UserDataExportStatus'
+        object_key:
+          type: string
+          nullable: true
+        download_url:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        requested_at:
+          type: string
+          format: date-time
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    UserDataExportEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          allOf:
+            - $ref: '#/components/schemas/UserDataExport'
+          nullable: true
+
+    UserDataExportQueuedResponse:
+      type: object
+      required: [status, estimated_minutes]
+      properties:
+        status:
+          type: string
+          enum: [queued]
+        estimated_minutes:
+          type: integer
+
+    RetryAfterResponse:
+      type: object
+      required: [retry_after_seconds]
+      properties:
+        retry_after_seconds:
+          type: integer
+          format: int64
+
+    DeleteContentCategory:
+      type: string
+      enum: [bookmarks, notes, collections, activity, reading_progress, games]
+
+    DeleteContentRequest:
+      type: object
+      required: [categories]
+      properties:
+        categories:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DeleteContentCategory'
+
+    UserDataDeletionStatus:
+      type: string
+      enum: [queued, running, done, failed]
+
+    UserDataDeletion:
+      type: object
+      required: [id, user_id, status, categories, requested_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/UserDataDeletionStatus'
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeleteContentCategory'
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        requested_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    UserDataDeletionEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          allOf:
+            - $ref: '#/components/schemas/UserDataDeletion'
+          nullable: true
+
+    UserDataDeletionQueuedResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [queued]
+
+    ReasonResponse:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+
+    PushKeys:
+      type: object
+      required: [p256dh, auth]
+      properties:
+        p256dh:
+          type: string
+        auth:
+          type: string
+
+    PushSubscribeRequest:
+      type: object
+      required: [endpoint, keys]
+      properties:
+        endpoint:
+          type: string
+          format: uri
+        keys:
+          $ref: '#/components/schemas/PushKeys'
+        categories:
+          type: array
+          items:
+            type: string
+        locale:
+          type: string
+        timezone:
+          type: string
+
+    PushSubscribeResponse:
+      type: object
+      required: [id, categories]
+      properties:
+        id:
+          type: integer
+          format: int64
+        categories:
+          type: array
+          items:
+            type: string
+
+    PushUnsubscribeRequest:
+      type: object
+      required: [endpoint]
+      properties:
+        endpoint:
+          type: string
+          format: uri
+
+    PushTestResponse:
+      type: object
+      required: [sent]
+      properties:
+        sent:
+          type: integer
+
+    OkResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+
+    User:
+      type: object
+      required: [id, auth_id, email, role, permissions, is_active, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        auth_id:
+          type: string
+        email:
+          type: string
+          format: email
+        display_name:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [admin, editor, member]
+        permissions:
+          type: object
+          additionalProperties: true
+          nullable: true
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [admin, editor, member]
+        permissions:
+          type: object
+          additionalProperties: true
+        is_active:
+          type: boolean
+
+    UserEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/User'
+
+    UserListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+
+    EditorialSession:
+      type: object
+      required: [is_admin, modules, quran_versions, bible_versions]
+      properties:
+        is_admin:
+          type: boolean
+        modules:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Module key (article, quran, ...) mapped to can_write. Presence of a key implies read access.
+        quran_versions:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Quran version id (as string key) mapped to can_write. Presence implies read access.
+        bible_versions:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Bible version id (as string key) mapped to can_write.
+        quran_reference_version_id:
+          type: integer
+          format: int64
+          nullable: true
+
+    EditorialSessionEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/EditorialSession'
+
+    VersionAuthor:
+      type: object
+      properties:
+        name:
+          type: string
+        bio:
+          type: string
+          nullable: true
+
+    QuranVersion:
+      type: object
+      required: [id, slug, name, lang_id, direction, is_canonical_english, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        slug:
+          type: string
+        name:
+          type: string
+        lang_id:
+          type: integer
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/VersionAuthor'
+        direction:
+          type: string
+        is_canonical_english:
+          type: boolean
+        reference_version_id:
+          type: integer
+          format: int64
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    BibleVersion:
+      type: object
+      required: [id, slug, name, lang_id, direction, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        slug:
+          type: string
+        name:
+          type: string
+        lang_id:
+          type: integer
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/VersionAuthor'
+        direction:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    EditorialQuranVersionListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuranVersion'
+
+    EditorialBibleVersionListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BibleVersion'
+
+
+    # -----------------------------------------------------------------------
+    # Games — Fill the Missing Word
+    # -----------------------------------------------------------------------
+    GamePassage:
+      type: object
+      required: [id, chapter_start, verse_start, chapter_end, verse_end, label, themes]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 42
+        chapter_start:
+          type: integer
+          example: 1
+        verse_start:
+          type: integer
+          example: 1
+        chapter_end:
+          type: integer
+          example: 1
+        verse_end:
+          type: integer
+          example: 7
+        label:
+          type: string
+          example: "The Key — opening prayer"
+        themes:
+          type: array
+          items:
+            type: string
+          example: ["worship", "guidance"]
+
+    GamePassageListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GamePassage'
+
+    StartGameVariantRequest:
+      type: object
+      required: [language, difficulty, size]
+      properties:
+        passage_id:
+          type: integer
+          format: int64
+          description: >
+            When omitted the server selects a passage automatically based on
+            the player's adaptive skill band. When provided the exact passage
+            is used regardless of skill band.
+          example: 42
+        language:
+          type: string
+          enum: [en, ar, ac, fa, ur, fr, de, es, sv, tr, id, tl, ru, bn, ta]
+          example: en
+        difficulty:
+          type: string
+          enum: [easy, medium, hard, professional, adaptive]
+          description: >
+            Difficulty tier for the round. Use `adaptive` to let the server
+            pick the tier based on the player's recent accuracy across all
+            tiers. The resolved tier is always returned in the GameVariant.
+          example: hard
+        size:
+          type: string
+          enum: [short, medium, long, adaptive]
+          description: >
+            Round size (number of blanks). Use `adaptive` to let the server
+            pick based on the player's total attempt history. The resolved
+            size is always returned in the GameVariant.
+          example: medium
+        variant_id:
+          type: string
+          description: >
+            When provided, resume the exact variant referenced. Returns 404 if
+            the variant does not exist. Without this field the server returns
+            the lowest-counter variant the caller has not yet attempted,
+            minting a new one if all existing variants are consumed.
+          example: "p42-en-hard-medium-7"
+
+    GameRenderedVerse:
+      type: object
+      required: [verse_key, text]
+      properties:
+        verse_key:
+          type: string
+          example: "1:2"
+        text:
+          type: string
+          description: >
+            Verse text with each removed word replaced by a
+            `__BLANK_<index>__` token. Indices match the corresponding entries
+            in the `blanks` array.
+          example: "__BLANK_0__ be to GOD, Lord of the universe."
+
+    GameBlank:
+      type: object
+      required: [index, verse_key, word_position]
+      properties:
+        index:
+          type: integer
+          description: 0-based blank index within the variant.
+          example: 0
+        verse_key:
+          type: string
+          example: "1:2"
+        word_position:
+          type: integer
+          description: 0-based word index of the blank inside its verse.
+          example: 0
+        options:
+          type: array
+          description: >
+            Only present for `difficulty = easy`. Shuffled deterministically;
+            exactly one is the answer.
+          items:
+            type: string
+        hint:
+          $ref: '#/components/schemas/GameBlankHint'
+
+    GameBlankHint:
+      type: object
+      description: >
+        Toggleable hints for a blank. Present only for `difficulty = medium`.
+        Each revealed hint costs a flat penalty (see the score formula); the
+        client tracks how many it reveals and reports the total via
+        `hints_used` on submit. Fields are derived from the answer and never
+        contain the full answer.
+      required: [first_letter, first_two, length]
+      properties:
+        first_letter:
+          type: string
+          description: First character of the answer, preserving source case.
+          example: "P"
+        first_two:
+          type: string
+          description: First two characters of the answer (or the whole answer if it is a single character).
+          example: "Pr"
+        length:
+          type: integer
+          description: Character count of the answer.
+          example: 6
+
+    GameVariant:
+      type: object
+      required: [variant_id, session_id, passage, language, difficulty, size, rendered_verses, blanks, replay]
+      properties:
+        variant_id:
+          type: string
+          example: "p42-en-hard-medium-7"
+        session_id:
+          type: string
+          description: >
+            Unique ID for this play session. Pass back on every checkBlank
+            and submit call so the server can track per-blank wrong attempts.
+          example: "01HBJV5Z6Q5T7B5W2J4N8Q3X9F"
+        passage:
+          $ref: '#/components/schemas/GamePassage'
+        language:
+          type: string
+          enum: [en, ar, ac, fa, ur, fr, de, es, sv, tr, id, tl, ru, bn, ta]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard, professional]
+        size:
+          type: string
+          enum: [short, medium, long]
+        rendered_verses:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameRenderedVerse'
+        blanks:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameBlank'
+        replay:
+          type: boolean
+          description: >
+            True when this variant has already been played by the caller and
+            the server cycled back because every other variant in the group
+            has also been played.
+        skill_band:
+          type: string
+          enum: [easy, medium, hard]
+          description: >
+            The adaptive difficulty band used when selecting blanks for this
+            variant. Derived from the player's recent accuracy at this tier;
+            not settable by the client.
+
+    GameVariantEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/GameVariant'
+
+    GameGuess:
+      type: object
+      required: [index, value]
+      properties:
+        index:
+          type: integer
+          example: 0
+        value:
+          type: string
+          example: "Praise"
+
+    SubmitGameAttemptRequest:
+      type: object
+      required: [variant_id, guesses, hints_used]
+      properties:
+        variant_id:
+          type: string
+          example: "p42-en-hard-medium-7"
+        session_id:
+          type: string
+          description: >
+            Session ID returned by startVariant. When provided the server
+            reads per-blank wrong-attempt counts and applies a graduated
+            penalty. Omitting it (e.g. resumed from a shared link) skips
+            the wrong-attempt penalty.
+          example: "01HBJV5Z6Q5T7B5W2J4N8Q3X9F"
+        guesses:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameGuess'
+        hints_used:
+          type: integer
+          minimum: 0
+          example: 1
+        elapsed_ms:
+          type: integer
+          description: Time taken in milliseconds. Tiebreaker only.
+          minimum: 0
+          example: 73214
+
+    GamePerBlankResult:
+      type: object
+      required: [index, correct]
+      properties:
+        index:
+          type: integer
+        correct:
+          type: boolean
+        accepted_answer:
+          type: string
+          description: >
+            Always present on submit. The correct answer for this blank,
+            shown after the round ends regardless of whether the guess was right.
+
+    GameSubmitResult:
+      type: object
+      required: [attempt_id, score, correct_count, total_count, per_blank, difficulty_multiplier, hint_penalty, wrong_penalty]
+      properties:
+        attempt_id:
+          type: string
+          example: "01HBJV5Z6Q5T7B5W2J4N8Q3X9F"
+        score:
+          type: integer
+          example: 1485
+        correct_count:
+          type: integer
+          example: 7
+        total_count:
+          type: integer
+          example: 8
+        per_blank:
+          type: array
+          items:
+            $ref: '#/components/schemas/GamePerBlankResult'
+        difficulty_multiplier:
+          type: number
+          format: double
+          example: 2.0
+        hint_penalty:
+          type: integer
+          example: 25
+        wrong_penalty:
+          type: integer
+          description: >
+            Total score deduction from wrong attempts across all blanks.
+            Each additional wrong attempt on the same blank costs progressively
+            more: attempt N costs N×10 points.
+          example: 30
+
+    GameSubmitResultEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/GameSubmitResult'
+
+    GameLeaderboardEntry:
+      type: object
+      required: [rank, user_id, score, size, difficulty, attempted_at]
+      properties:
+        rank:
+          type: integer
+        user_id:
+          type: integer
+          format: int64
+        display_name:
+          type: string
+          nullable: true
+        score:
+          type: integer
+        size:
+          type: string
+        difficulty:
+          type: string
+        elapsed_ms:
+          type: integer
+          nullable: true
+        variant_id:
+          type: string
+        attempted_at:
+          type: string
+          format: date-time
+
+    GameLeaderboardEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameLeaderboardEntry'
+
+    GameHistoryEntry:
+      type: object
+      required: [attempt_id, variant_id, score, size, difficulty, completed_at]
+      properties:
+        attempt_id:
+          type: string
+        variant_id:
+          type: string
+        score:
+          type: integer
+        size:
+          type: string
+        difficulty:
+          type: string
+        completed_at:
+          type: string
+          format: date-time
+
+    GameHistoryEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameHistoryEntry'
+        next_cursor:
+          type: string
+          nullable: true
+
+    GameStatsByDifficulty:
+      type: object
+      required: [attempts, best_score]
+      properties:
+        attempts:
+          type: integer
+        best_score:
+          type: integer
+
+    GameStats:
+      type: object
+      required: [total_attempts, best_score, variants_completed, by_difficulty]
+      properties:
+        total_attempts:
+          type: integer
+        best_score:
+          type: integer
+        variants_completed:
+          type: integer
+        by_difficulty:
+          type: object
+          properties:
+            easy:
+              $ref: '#/components/schemas/GameStatsByDifficulty'
+            medium:
+              $ref: '#/components/schemas/GameStatsByDifficulty'
+            hard:
+              $ref: '#/components/schemas/GameStatsByDifficulty'
+            professional:
+              $ref: '#/components/schemas/GameStatsByDifficulty'
+
+    GameStatsEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/GameStats'
+
   responses:
     Conflict:
       description: >
@@ -2044,6 +4965,18 @@ components:
         The server encountered an unexpected condition that prevented it from
         fulfilling the request. Report the issue to the support team if it
         persists.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [message]
+            properties:
+              message:
+                type: string
+    Forbidden:
+      description: >
+        The caller is authenticated but lacks the required editorial
+        permission for this resource.
       content:
         application/json:
           schema:

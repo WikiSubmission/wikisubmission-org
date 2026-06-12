@@ -8,22 +8,18 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   BookOpenTextIcon,
+  CaseLowerIcon,
   CheckIcon,
   ChevronDownIcon,
   HashIcon,
   LanguagesIcon,
   MessageSquareTextIcon,
-  ScanTextIcon,
   SettingsIcon,
-  TextIcon,
   TypeIcon,
   ZoomInIcon,
 } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import type {
-  LangCode,
-  ReadingModeLang,
-} from '@/hooks/use-quran-preferences'
+import type { LangCode, ReadingModeLang } from '@/hooks/use-quran-preferences'
 import { ZOOM_LEVELS, type ZoomLevel } from '@/lib/quran-zoom'
 import { LanguageEntry, useLanguagesStore } from '@/hooks/use-languages-store'
 import { Switch } from '@/components/ui/switch'
@@ -202,17 +198,19 @@ export default function QuranSettings() {
   const [langTab, setLangTab] = useState<'primary' | 'secondary'>('primary')
 
   const set = (patch: Partial<typeof prefs>) =>
-    prefs.setPreferences({ ...prefs, ...patch })
+    prefs.setPreferences({ ...prefs, ...patch, text: true })
 
   const toggle = (section: Exclude<Section, null>) =>
     setOpenSection((cur) => (cur === section ? null : section))
 
   const primaryName =
-    languages.find((l) => l.code === prefs.primaryLanguage)?.name ??
-    prefs.primaryLanguage
+    prefs.primaryLanguage === 'none'
+      ? t('none')
+      : (languages.find((l) => l.code === prefs.primaryLanguage)?.name ??
+        prefs.primaryLanguage)
   const secondaryName = prefs.secondaryLanguage
-    ? languages.find((l) => l.code === prefs.secondaryLanguage)?.name ??
-      prefs.secondaryLanguage
+    ? (languages.find((l) => l.code === prefs.secondaryLanguage)?.name ??
+      prefs.secondaryLanguage)
     : t('none')
   const zoomName = t(ZOOM_LABEL_KEYS[prefs.zoomLevel ?? 'comfortable'])
 
@@ -221,12 +219,15 @@ export default function QuranSettings() {
       ? prefs.readingModeLang === 'arabic'
         ? t('arabic')
         : 'Translation'
-      : prefs.text && 'Translation',
-    prefs.displayMode !== 'reading' && prefs.wordByWord && t('wordByWord'),
+      : prefs.primaryLanguage !== 'none' && 'Translation',
     prefs.displayMode !== 'reading' &&
       prefs.arabic &&
       !prefs.wordByWord &&
       t('arabic'),
+    prefs.displayMode !== 'reading' &&
+      prefs.wordByWord &&
+      prefs.transliteration &&
+      t('transliteration'),
     prefs.displayMode !== 'reading' && prefs.subtitles && t('subtitles'),
     prefs.footnotes && t('footnotes'),
   ]
@@ -238,7 +239,12 @@ export default function QuranSettings() {
     : primaryName
 
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu
+      modal={false}
+      onOpenChange={(open) => {
+        if (open) setOpenSection('reading')
+      }}
+    >
       <DropdownMenuTrigger asChild>
         <Button variant="outline" aria-label="Open settings" size="icon-sm">
           <SettingsIcon />
@@ -262,7 +268,7 @@ export default function QuranSettings() {
             label={t('reading')}
             summary={enabledDisplay || '—'}
           >
-            <div className="space-y-0.5 max-h-[24rem] overflow-y-auto">
+            <div className="space-y-0.5 max-h-96 overflow-y-auto">
               {prefs.displayMode === 'reading' && (
                 <div className="px-2 py-2 space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -292,13 +298,6 @@ export default function QuranSettings() {
               {prefs.displayMode !== 'reading' && (
                 <>
                   <SettingTile
-                    icon={<TextIcon className="size-3.5" />}
-                    label="Translation"
-                    description="Verse translation text"
-                    checked={prefs.text}
-                    onCheckedChange={(checked) => set({ text: checked })}
-                  />
-                  <SettingTile
                     icon={<TypeIcon className="size-3.5" />}
                     label={t('arabic')}
                     description="Original Arabic text"
@@ -307,12 +306,12 @@ export default function QuranSettings() {
                     onCheckedChange={(checked) => set({ arabic: checked })}
                   />
                   <SettingTile
-                    icon={<ScanTextIcon className="size-3.5" />}
-                    label={t('wordByWord')}
-                    description="Per-word Arabic with translation"
-                    checked={prefs.wordByWord}
+                    icon={<CaseLowerIcon className="size-3.5" />}
+                    label={t('transliteration')}
+                    description="In Word mode, show Latin script under each word"
+                    checked={prefs.transliteration}
                     onCheckedChange={(checked) =>
-                      set({ wordByWord: checked })
+                      set({ transliteration: checked })
                     }
                   />
                   <SettingTile
@@ -375,13 +374,17 @@ export default function QuranSettings() {
                   )
                 })}
               </div>
-              <div className="max-h-[24rem] overflow-y-auto">
+              <div className="max-h-96 overflow-y-auto">
                 {langTab === 'primary' ? (
                   <LangList
                     value={prefs.primaryLanguage}
+                    nullable
                     languages={languages}
                     onChange={(code) =>
-                      set({ primaryLanguage: code as LangCode })
+                      set({
+                        primaryLanguage:
+                          (code as LangCode | undefined) ?? 'none',
+                      })
                     }
                   />
                 ) : (
@@ -408,8 +411,7 @@ export default function QuranSettings() {
           >
             <div className="flex flex-col gap-0.5">
               {ZOOM_LEVELS.map((level) => {
-                const isActive =
-                  (prefs.zoomLevel ?? 'comfortable') === level
+                const isActive = (prefs.zoomLevel ?? 'comfortable') === level
                 return (
                   <button
                     key={level}

@@ -1,34 +1,21 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Copy, Check } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
+import { parseQuranSegments } from '@/lib/verse-ref-parser'
 import { VerseCard } from './verse-card'
-import { buildVersesText, buildSegmentMarkdown } from '@/lib/quran-copy'
+import { SearchHeader } from './search-header'
+import { CopyAllDropdown } from './copy-all-dropdown'
 import type { components } from '@/src/api/types.gen'
+import type { QuranSegment } from '@/lib/verse-ref-parser'
 
 type VerseData = components['schemas']['VerseData']
 type QuranResponse = components['schemas']['QuranResponse']
 
-// ── Segment types ────────────────────────────────────────────────────────────
-
-type Segment =
-  | { type: 'verse'; cn: number; v: number; raw: string }
-  | { type: 'range'; cn: number; vs: number; ve: number; raw: string }
-
-function parseSegments(q: string): Segment[] {
-  return q.split(',').flatMap((s): Segment[] => {
-    const part = s.trim()
-    const v = part.match(/^(\d+):(\d+)$/)
-    if (v) return [{ type: 'verse', cn: +v[1], v: +v[2], raw: part }]
-    const r = part.match(/^(\d+):(\d+)-(\d+)$/)
-    if (r)
-      return [{ type: 'range', cn: +r[1], vs: +r[2], ve: +r[3], raw: part }]
-    return []
-  })
-}
+type Segment = QuranSegment
 
 function getSegmentVerses(
   seg: Segment,
@@ -50,7 +37,7 @@ function getSegmentVerses(
 
 function segmentLabel(seg: Segment): string {
   if (seg.type === 'verse') return `${seg.cn}:${seg.v}`
-  return `${seg.cn}:${seg.vs}–${seg.ve}`
+  return `${seg.cn}:${seg.vs}-${seg.ve}`
 }
 
 function segmentHref(seg: Segment): string {
@@ -71,22 +58,6 @@ function SegmentBlock({
   chapterTitle: string
   optsKey: string
 }) {
-  const prefs = useQuranPreferences()
-  const primaryCode =
-    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
-  const [copied, setCopied] = useState(false)
-
-  const handleCopySegment = useCallback(() => {
-    const text = buildVersesText(verses, {
-      primaryCode,
-      includeText: true,
-      includeArabic: prefs.arabic,
-    })
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
-  }, [verses, primaryCode, prefs.arabic])
-
   if (verses.length === 0) return null
 
   return (
@@ -102,18 +73,7 @@ function SegmentBlock({
           <span className="text-muted-foreground truncate">{chapterTitle}</span>
           <ArrowRight size={14} className="shrink-0 text-muted-foreground" />
         </Link>
-        <button
-          onClick={handleCopySegment}
-          className="shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted/60"
-          aria-label="Copy segment verses"
-        >
-          {copied ? (
-            <Check size={13} className="text-green-500" />
-          ) : (
-            <Copy size={13} />
-          )}
-          <span>{copied ? 'Copied' : 'Copy'}</span>
-        </button>
+        <CopyAllDropdown verses={verses} label="Copy" />
       </div>
 
       {/* Verses */}
@@ -145,12 +105,8 @@ export function VerseListResult({
   const prefs = useQuranPreferences()
   const zoom = prefs.zoomLevel ?? 'comfortable'
   const maxW = ZOOM_WIDTH_CLASS[zoom]
-  const primaryCode =
-    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
 
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${zoom}-${prefs.arabic}-${prefs.wordByWord}`
-
-  const [copiedAll, setCopiedAll] = useState(false)
 
   // Build lookup: cn → (verseNumber → VerseData) and cn → titles
   const { byChapter, chapterTitles } = useMemo(() => {
@@ -168,22 +124,12 @@ export function VerseListResult({
     return { byChapter, chapterTitles }
   }, [data])
 
-  const segments = useMemo(() => parseSegments(queryText), [queryText])
+  const segments = useMemo(() => parseQuranSegments(queryText), [queryText])
 
-  const handleCopyAllMarkdown = useCallback(() => {
-    const opts = { primaryCode, includeText: prefs.text, includeArabic: prefs.arabic }
-    const parts = segments
-      .map((seg) => {
-        const verses = getSegmentVerses(seg, byChapter)
-        if (verses.length === 0) return null
-        const title = chapterTitles.get(seg.cn) ?? `Chapter ${seg.cn}`
-        return buildSegmentMarkdown(segmentLabel(seg), title, verses, opts)
-      })
-      .filter(Boolean)
-    navigator.clipboard.writeText(parts.join('\n\n'))
-    setCopiedAll(true)
-    setTimeout(() => setCopiedAll(false), 1500)
-  }, [segments, byChapter, chapterTitles, primaryCode, prefs.text, prefs.arabic])
+  const allVerses = useMemo(
+    () => segments.flatMap((seg) => getSegmentVerses(seg, byChapter)),
+    [segments, byChapter]
+  )
 
   if (apiError || !data) {
     return (
@@ -197,20 +143,10 @@ export function VerseListResult({
 
   return (
     <div className={`${maxW} mx-auto space-y-4`}>
-      {/* Copy all as markdown */}
+      <SearchHeader query={queryText} />
+
       <div className="flex justify-end">
-        <button
-          onClick={handleCopyAllMarkdown}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-muted/60 border border-border/40"
-          aria-label="Copy all results"
-        >
-          {copiedAll ? (
-            <Check size={13} className="text-green-500" />
-          ) : (
-            <Copy size={13} />
-          )}
-          <span>{copiedAll ? 'Copied!' : 'Copy all'}</span>
-        </button>
+        <CopyAllDropdown verses={allVerses} />
       </div>
 
       {segments.map((seg, i) => {

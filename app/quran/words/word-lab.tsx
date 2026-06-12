@@ -30,6 +30,7 @@ import { PlayWordButton } from '@/components/play-word-button'
 import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
 import './word-lab.css'
+import { logFrontendEvent } from '@/lib/frontend-logger'
 
 type SortMode = 'frequency' | 'abjadi' | 'reverse'
 type SearchMode = 'arabic' | 'transliteration' | 'english'
@@ -38,7 +39,6 @@ const INDEX_RENDER_CAP = 300
 const ENGLISH_LOOKUP_MIN = 3
 const ENGLISH_LOOKUP_LIMIT = 40
 const ENGLISH_LOOKUP_DEBOUNCE_MS = 220
-const DERIVED_WORD_LOOKUP_LIMIT = 200
 const SHOW_MORPHOLOGY_SECTION = false
 
 const CHEAT_PAIRS: ReadonlyArray<{ lat: string; ar: string; insert: string }> = [
@@ -117,7 +117,7 @@ function extractEnglishRootCandidates(
       if (!rootFlat) continue
       const highlightValues = Object.values(word.hl ?? {})
       const matchedByBackend = highlightValues.some((v) => typeof v === 'string' && v.length > 0)
-      const meaning = (word.m ?? '').toLowerCase()
+      const meaning = ((word.tx?.['en'] ?? word.m) ?? '').toLowerCase()
       const normalizedMeaning = meaning.replace(/^to\s+/i, '')
       const hasTermInMeaning = terms.some((term) => meaning.includes(term))
       if (!matchedByBackend && !hasTermInMeaning) continue
@@ -141,48 +141,6 @@ function extractEnglishRootCandidates(
  * If `wi` is provided (1-based word_index from the backend), highlights the
  * token at that exact position — the most accurate path.
  */
-type FormMeanings = {
-  /** Map of diacritic-stripped surface form → its English gloss. */
-  byForm: Map<string, string>
-  /** Whole-root meaning to use when the string isn't structured per form. */
-  fallback: string | null
-}
-
-/**
- * The corpus stores the root meaning denormalized as a single string. When a
- * root has multiple distinct surface forms with different meanings, the string
- * encodes them as `surface = meaning [/ surface = meaning ...]` (e.g.
- * `مَن = he; she; who / مِن = from; of`). For roots with one shared meaning
- * the string is just the gloss with no `=` separator. Parse both shapes so the
- * derivative cards can show the form-specific gloss when available.
- */
-function parseFormMeanings(meaning: string | null): FormMeanings {
-  if (!meaning) return { byForm: new Map(), fallback: null }
-  const trimmed = meaning.trim()
-  if (!trimmed) return { byForm: new Map(), fallback: null }
-
-  const byForm = new Map<string, string>()
-  const segments = trimmed.split(/\s*\/\s*(?=\S+\s*=)/)
-  for (const segment of segments) {
-    const eqIdx = segment.indexOf('=')
-    if (eqIdx <= 0) continue
-    const surface = segment.slice(0, eqIdx).trim()
-    const text = segment.slice(eqIdx + 1).trim()
-    if (!surface || !text) continue
-    byForm.set(stripDiacritics(surface), text)
-  }
-  return { byForm, fallback: trimmed }
-}
-
-function meaningToEnglishWord(meaning: string | null): string | null {
-  if (!meaning) return null
-  const firstSense = meaning.split(/[;/]/)[0]?.trim() ?? ''
-  if (!firstSense) return null
-  const cleaned = firstSense.replace(/^to\s+/i, '')
-  const match = cleaned.match(/[A-Za-z][A-Za-z'-]*/)
-  return match ? match[0] : null
-}
-
 function highlight(ar: string, hi: string, wi?: number | null): React.ReactNode {
   if (!ar) return ar
   const tokens = ar.split(/(\s+)/)
@@ -288,8 +246,7 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
             offset: 0,
             include_words: true,
             include_root: true,
-            include_meaning: true,
-            word_langs: ['ar'],
+            word_langs: ['ar', 'en'],
           },
         },
       }).then(({ data: searchData, error: searchError }) => {
@@ -536,7 +493,15 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
                 role="radio"
                 aria-checked={sort === k}
                 className={`wl-sort-btn ${sort === k ? 'on' : ''}`}
-                onClick={() => setSort(k)}
+                onClick={() => {
+                  if (sort === k) return
+                  logFrontendEvent('sort_changed', window.location.pathname, {
+                    scope: 'word_lab',
+                    from: sort,
+                    to: k,
+                  })
+                  setSort(k)
+                }}
               >
                 {l}
               </button>
@@ -751,86 +716,6 @@ function Detail({
     setActiveSurface((prev) => (prev === surface ? null : surface))
   }
 
-  const formMeanings = useMemo(
-    () => parseFormMeanings(meaning),
-    [meaning],
-  )
-  const [derivedWordsByRoot, setDerivedWordsByRoot] = useState<{ root: string; words: Map<string, string> }>({
-    root: '',
-    words: new Map(),
-  })
-
-  useEffect(() => {
-    let cancelled = false
-    const rootFlat = normalizeLetters(root.letters)
-    if (!rootFlat) return
-
-    void wsApi.GET('/search', {
-      params: {
-        query: {
-          scope: 'words',
-          root: rootFlat,
-          langs: ['en', 'ar'],
-          include_words: true,
-          include_root: true,
-          include_meaning: true,
-          word_langs: ['ar'],
-          limit: DERIVED_WORD_LOOKUP_LIMIT,
-          offset: 0,
-        },
-      },
-    })
-      .then(({ data: searchData, error: searchError }) => {
-        if (cancelled || searchError || !searchData) return
-        const scores = new Map<string, Map<string, number>>()
-        const verses = (searchData.chapters ?? []).flatMap((chapter) => chapter.verses ?? [])
-        for (const verse of verses) {
-          for (const word of verse.w ?? []) {
-            if (normalizeLetters(word.r ?? '') !== rootFlat) continue
-            const surface = stripDiacritics(word.tx?.ar ?? '')
-            if (!surface) continue
-            const englishWord = meaningToEnglishWord(word.m ?? null)
-            if (!englishWord) continue
-            const normalizedWord = englishWord.toLowerCase()
-            const bucket = scores.get(surface) ?? new Map<string, number>()
-            bucket.set(normalizedWord, (bucket.get(normalizedWord) ?? 0) + 1)
-            scores.set(surface, bucket)
-          }
-        }
-
-        const picked = new Map<string, string>()
-        for (const [surface, bucket] of scores.entries()) {
-          let bestWord = ''
-          let bestScore = -1
-          for (const [word, score] of bucket.entries()) {
-            if (score > bestScore || (score === bestScore && word < bestWord)) {
-              bestWord = word
-              bestScore = score
-            }
-          }
-          if (bestWord) picked.set(surface, bestWord)
-        }
-        setDerivedWordsByRoot({ root: root.letters, words: picked })
-      })
-      .catch(() => {
-        if (cancelled) return
-        setDerivedWordsByRoot({ root: root.letters, words: new Map() })
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [root.letters])
-
-  const lookupFormMeaning = (ar: string): string | null => {
-    if (formMeanings.byForm.size === 0) {
-      // No per-form structure — every form shares the root meaning.
-      return formMeanings.fallback
-    }
-    return formMeanings.byForm.get(stripDiacritics(ar)) ?? null
-  }
-  const derivedWords = derivedWordsByRoot.root === root.letters ? derivedWordsByRoot.words : new Map<string, string>()
-
   return (
     <article className="wl-detail">
       <header className="wl-detail-head">
@@ -858,28 +743,24 @@ function Detail({
           <div className="wl-loading">{t('loadingDerivs')}</div>
         ) : (
           <div className="wl-derivs">
-            {derivs.map((d, i) => {
-              const formEn = lookupFormMeaning(d.ar)
-              const formWord = derivedWords.get(stripDiacritics(d.ar)) ?? meaningToEnglishWord(formEn)
-              return (
-                <button
-                  key={d.ar}
-                  onClick={() => onChipClick(i)}
-                  className={`wl-deriv ${activeDeriv === i ? 'on' : ''} ${activeSurface === d.ar ? 'filtering' : ''}`}
-                  title={activeSurface === d.ar ? t('filterClickAgain') : t('filterClick')}
-                >
-                  <div className="ar" dir="rtl" lang="ar">
-                    {d.ar}
-                  </div>
-                  <div className="tr">{d.tr ?? arabicToLatin(stripDiacritics(d.ar))}</div>
-                  {formWord && <div className="en">{formWord}</div>}
-                  <div className="meta">
-                    <span className="pos">—</span>
-                    <span>{d.count}×</span>
-                  </div>
-                </button>
-              )
-            })}
+            {derivs.map((d, i) => (
+              <button
+                key={d.ar}
+                onClick={() => onChipClick(i)}
+                className={`wl-deriv ${activeDeriv === i ? 'on' : ''} ${activeSurface === d.ar ? 'filtering' : ''}`}
+                title={activeSurface === d.ar ? t('filterClickAgain') : t('filterClick')}
+              >
+                <div className="ar" dir="rtl" lang="ar">
+                  {d.ar}
+                </div>
+                <div className="tr">{d.tr ?? arabicToLatin(stripDiacritics(d.ar))}</div>
+                {d.en && <div className="en">{d.en}</div>}
+                <div className="meta">
+                  <span className="pos">—</span>
+                  <span>{d.count}×</span>
+                </div>
+              </button>
+            ))}
           </div>
         )}
       </Section>
@@ -908,7 +789,7 @@ function Detail({
           <div className="wl-morph-grid">
             <Cell k={t('morphLemma')} v={deriv.ar} ar />
             <Cell k={t('morphTranslit')} v={deriv.tr ?? arabicToLatin(stripDiacritics(deriv.ar))} />
-            <Cell k={t('morphGloss')} v={lookupFormMeaning(deriv.ar) ?? '—'} />
+            <Cell k={t('morphGloss')} v={deriv.en ?? '—'} />
             <Cell k={t('morphPos')} v="—" />
             <Cell k={t('morphRoot')} v={root.letters} ar />
             <Cell k={t('morphCount')} v={`${deriv.count}×`} />
