@@ -70,17 +70,16 @@ export function buildVersesText(verses: VerseData[], opts: CopyVerseOptions): st
 
 /**
  * Plain-text segment used by verse-list-result.tsx:
- *   label — title
+ *   label
  *   [vk] translation
  *   arabic
  */
 export function buildSegmentMarkdown(
   label: string,
-  title: string,
   verses: VerseData[],
   opts: CopyVerseOptions
 ): string {
-  const lines: string[] = [`${label} — ${title}`, '']
+  const lines: string[] = [label, '']
 
   for (const verse of verses) {
     const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']
@@ -114,6 +113,8 @@ export interface CopyMarkdownOptions {
   includeText: boolean
   /** Show Arabic (full verse and per-word). Gated by prefs.arabic. */
   includeArabic: boolean
+  /** Show subtitle text above the verse body. Gated by prefs.subtitles. */
+  includeSubtitles: boolean
   /** Show transliteration lines per word. Gated by prefs.transliteration. */
   includeTransliteration: boolean
   /** Include footnote as a markdown blockquote. Gated by prefs.footnotes. */
@@ -138,21 +139,38 @@ function buildHeaderLine(verse: VerseData, opts: CopyMarkdownOptions): string {
   return key
 }
 
-/**
- * Full-verse plain text: header → Arabic → secondary → footnote.
- * Each block is preference-gated.
- */
-export function buildVerseMarkdown(
+function buildVerseBodyMarkdown(
   verse: VerseData,
-  opts: CopyMarkdownOptions
+  opts: CopyMarkdownOptions,
+  kind: 'full' | 'wbw'
 ): string {
   const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']
   const arTr = verse.tr?.['ar']
   const secondary = opts.secondaryCode ? verse.tr?.[opts.secondaryCode] : undefined
 
-  const blocks: string[] = [buildHeaderLine(verse, opts)]
+  const blocks: string[] = []
 
-  if (opts.includeArabic && arTr?.tx) blocks.push(arTr.tx)
+  if (kind === 'full') {
+    if (opts.includeArabic && arTr?.tx) blocks.push(arTr.tx)
+  } else {
+    const words = verse.w ?? []
+    if (words.length === 0) {
+      if (opts.includeArabic && arTr?.tx) blocks.push(arTr.tx)
+    } else {
+      const sorted = [...words].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0))
+      const lines: string[] = []
+      for (const w of sorted) {
+        const tx = w.tx as Record<string, string> | undefined
+        const parts: string[] = []
+        if (opts.includeArabic && tx?.['ar']) parts.push(tx['ar'])
+        if (opts.includeTransliteration && tx?.['tl']) parts.push(tx['tl'])
+        if (opts.includeText && tx?.['en']) parts.push(tx['en'])
+        if (parts.length > 0) lines.push(parts.join(' — '))
+      }
+      if (lines.length > 0) blocks.push(lines.join('\n'))
+    }
+  }
+
   if (secondary?.tx) blocks.push(secondary.tx)
   if (opts.includeFootnotes && tr?.f) blocks.push(tr.f)
 
@@ -160,50 +178,52 @@ export function buildVerseMarkdown(
 }
 
 /**
- * Word-by-word plain text: header followed by one line per word.
+ * Full-verse plain text: subtitle → header → Arabic → secondary → footnote.
+ * Each block is preference-gated.
+ */
+export function buildVerseMarkdown(
+  verse: VerseData,
+  opts: CopyMarkdownOptions
+): string {
+  const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']
+  const blocks: string[] = []
+  if (opts.includeSubtitles && tr?.s) blocks.push(tr.s)
+  blocks.push(buildHeaderLine(verse, opts))
+  const body = buildVerseBodyMarkdown(verse, opts, 'full')
+  if (body) blocks.push(body)
+  return blocks.join('\n\n')
+}
+
+/**
+ * Word-by-word plain text: subtitle → header → per-word lines → secondary → footnote.
  * Each line is `arabic — transliteration — translation`, conditional on toggles.
  */
 export function buildWordByWordMarkdown(
   verse: VerseData,
   opts: CopyMarkdownOptions
 ): string {
-  const blocks: string[] = [buildHeaderLine(verse, opts)]
-
-  const words = verse.w ?? []
-  if (words.length === 0) {
-    const arTr = verse.tr?.['ar']
-    if (opts.includeArabic && arTr?.tx) blocks.push(arTr.tx)
-    return blocks.join('\n\n')
-  }
-
-  const sorted = [...words].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0))
-  const anySegment =
-    opts.includeArabic || opts.includeTransliteration || opts.includeText
-
-  const lines: string[] = []
-  for (const w of sorted) {
-    const tx = w.tx as Record<string, string> | undefined
-    if (!anySegment) {
-      const arabic = tx?.['ar']
-      if (arabic) lines.push(arabic)
-      continue
-    }
-    const parts: string[] = []
-    if (opts.includeArabic && tx?.['ar']) parts.push(tx['ar'])
-    if (opts.includeTransliteration && tx?.['tl']) parts.push(tx['tl'])
-    if (opts.includeText && tx?.['en']) parts.push(tx['en'])
-    if (parts.length > 0) lines.push(parts.join(' — '))
-  }
-
-  if (lines.length > 0) blocks.push(lines.join('\n'))
+  const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']
+  const blocks: string[] = []
+  if (opts.includeSubtitles && tr?.s) blocks.push(tr.s)
+  blocks.push(buildHeaderLine(verse, opts))
+  const body = buildVerseBodyMarkdown(verse, opts, 'wbw')
+  if (body) blocks.push(body)
   return blocks.join('\n\n')
 }
 
 export function buildMultiVerseMarkdown(
   verses: VerseData[],
   kind: 'full' | 'wbw',
-  opts: CopyMarkdownOptions
+  opts: CopyMarkdownOptions,
+  includeHeader = true
 ): string {
-  const builder = kind === 'full' ? buildVerseMarkdown : buildWordByWordMarkdown
-  return verses.map((v) => builder(v, opts)).join('\n\n')
+  return verses
+    .map((v) =>
+      includeHeader
+        ? kind === 'full'
+          ? buildVerseMarkdown(v, opts)
+          : buildWordByWordMarkdown(v, opts)
+        : buildVerseBodyMarkdown(v, opts, kind)
+    )
+    .join('\n\n')
 }

@@ -7,6 +7,7 @@ import type { ZoomLevel } from '@/lib/quran-zoom'
  * `xl` is a non-standard code for transliterated Arabic (Latin script) — has no API equivalent yet.
  */
 export type LangCode =
+  | 'none' // No translation language selected
   | 'en' // English
   | 'ar' // Arabic
   | 'fr' // French
@@ -88,7 +89,7 @@ export const useQuranPreferences = create(
     {
       name: 'quran-preferences-v4',
       storage: createJSONStorage(() => localStorage),
-      version: 7,
+      version: 8,
       migrate: (state, version) => {
         let next = state as Omit<QuranPreferences, 'displayMode' | 'wordLabSections'> & {
           displayMode?: string
@@ -111,6 +112,9 @@ export const useQuranPreferences = create(
         }
         if (version < 7) {
           next = { ...next, wordTapAction: 'play' as WordTapAction }
+        }
+        if (version < 8) {
+          next = { ...next, text: true }
         }
         return next as QuranPreferences
       },

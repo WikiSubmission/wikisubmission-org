@@ -75,7 +75,7 @@ function PrayerTimesContent() {
         const params = new URLSearchParams()
         if (adjustment) params.set('asr_adjustment', 'true')
         params.set('include_schedule', 'true')
-        const url = `https://practices.wikisubmission.org/prayer-times/${encodeURIComponent(location)}?${params.toString()}`
+        const url = `/api/practices/prayer-times/${encodeURIComponent(location)}?${params.toString()}`
         const response = await fetch(url)
         if (!response.ok) {
           throw new Error(t('locationNotFound'))
@@ -138,16 +138,16 @@ function PrayerTimesContent() {
   }
 
   const prayerOrder = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']
-  const prayerLabels: Record<string, string> = {
-    fajr: 'Dawn',
-    dhuhr: 'Noon',
-    asr: 'Afternoon',
-    maghrib: 'Sunset',
-    isha: 'Night',
+  const prayerDisplayNames: Record<string, string> = {
+    fajr: t('dawnLabel'),
+    dhuhr: t('noonLabel'),
+    asr: t('afternoonLabel'),
+    maghrib: t('sunsetLabel'),
+    isha: t('nightLabel'),
   }
   const prayerArabic: Record<string, string> = {
     fajr: t('fajr'),
-    dhuhr: t('noon'),
+    dhuhr: t('dhuhr'),
     asr: t('asr'),
     maghrib: t('maghrib'),
     isha: t('isha'),
@@ -272,7 +272,7 @@ function PrayerTimesContent() {
                   className="text-3xl md:text-4xl font-medium text-[var(--ed-accent)] capitalize tracking-tight leading-none"
                   style={{ fontFamily: F.serif }}
                 >
-                  {prayerLabels[data.current_prayer.toLowerCase()] ?? data.current_prayer}
+                  {prayerDisplayNames[data.current_prayer.toLowerCase()] ?? data.current_prayer}
                 </span>
               )}
               {data.upcoming_prayer && data.upcoming_prayer_time_left && (
@@ -281,7 +281,7 @@ function PrayerTimesContent() {
                   style={{ fontFamily: F.serif }}
                 >
                   <span className="opacity-60 mx-1">→</span>
-                  <span className="capitalize text-[var(--ed-fg)]"> {prayerLabels[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}</span>
+                  <span className="capitalize text-[var(--ed-fg)]"> {prayerDisplayNames[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}</span>
                   <span className="font-mono text-[var(--ed-accent)]"> {data.upcoming_prayer_time_left}</span>
                 </span>
               )}
@@ -290,7 +290,7 @@ function PrayerTimesContent() {
 
           {/* Day progress timeline */}
           {data.times && (
-            <DayTimeline data={data} prayerLabels={prayerLabels} />
+            <DayTimeline data={data} prayerDisplayNames={prayerDisplayNames} />
           )}
 
           {/* Inline schedule (today + monthly) */}
@@ -298,7 +298,7 @@ function PrayerTimesContent() {
             <SchedulePanel
               data={data}
               prayerOrder={prayerOrder}
-              prayerLabels={prayerLabels}
+              prayerDisplayNames={prayerDisplayNames}
               t={t}
             />
             {/* English → Arabic name mapping, right under the card */}
@@ -308,7 +308,7 @@ function PrayerTimesContent() {
             >
               {prayerOrder.map((prayer) => (
                 <span key={prayer}>
-                  <span className="text-[var(--ed-fg)]/80">{prayerLabels[prayer]}</span>
+                  <span className="text-[var(--ed-fg)]/80">{prayerDisplayNames[prayer]}</span>
                   <span className="opacity-60"> · {prayerArabic[prayer]}</span>
                 </span>
               ))}
@@ -322,17 +322,17 @@ function PrayerTimesContent() {
           >
             {(data.times?.sunrise || data.times?.sunset) && (
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <dt className="uppercase tracking-[0.18em] shrink-0">Daylight</dt>
+                <dt className="uppercase tracking-[0.18em] shrink-0">{t('daylightLabel')}</dt>
                 <dd className="inline-flex flex-wrap gap-x-3 gap-y-1 tabular-nums">
                   {data.times?.sunrise && (
                     <span>
-                      <span className="text-[var(--ed-fg)]/80">Sunrise</span>
+                      <span className="text-[var(--ed-fg)]/80">{t('sunrise')}</span>
                       <span className="opacity-60"> · {data.times.sunrise}</span>
                     </span>
                   )}
                   {data.times?.sunset && (
                     <span>
-                      <span className="text-[var(--ed-fg)]/80">Sunset</span>
+                      <span className="text-[var(--ed-fg)]/80">{t('sunsetLabel')}</span>
                       <span className="opacity-60"> · {data.times.sunset}</span>
                     </span>
                   )}
@@ -341,7 +341,7 @@ function PrayerTimesContent() {
             )}
             {data.coordinates && (
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <dt className="uppercase tracking-[0.18em] shrink-0">Coordinates</dt>
+                <dt className="uppercase tracking-[0.18em] shrink-0">{t('coordinatesLabel')}</dt>
                 <dd className="tabular-nums text-[var(--ed-fg)]/80">
                   {`${data.coordinates.latitude.toFixed(4)}°N, ${data.coordinates.longitude.toFixed(4)}°E`}
                 </dd>
@@ -349,7 +349,7 @@ function PrayerTimesContent() {
             )}
             {data.local_timezone_id && (
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <dt className="uppercase tracking-[0.18em] shrink-0">Timezone</dt>
+                <dt className="uppercase tracking-[0.18em] shrink-0">{t('timezoneLabel')}</dt>
                 <dd className="text-[var(--ed-fg)]/80">{data.local_timezone_id}</dd>
               </div>
             )}
@@ -365,12 +365,12 @@ function PrayerTimesContent() {
 function SchedulePanel({
   data,
   prayerOrder,
-  prayerLabels,
+  prayerDisplayNames,
   t,
 }: {
   data: PrayerTimesResponse
   prayerOrder: string[]
-  prayerLabels: Record<string, string>
+  prayerDisplayNames: Record<string, string>
   t: (key: string, values?: Record<string, string>) => string
 }) {
   return (
@@ -428,7 +428,7 @@ function SchedulePanel({
                                 isCurrent ? 'text-primary' : 'text-foreground'
                               )}
                             >
-                              {prayerLabels[prayer]}
+                              {prayerDisplayNames[prayer]}
                             </span>
                             {isUpcoming && timeLeft && (
                               <span
@@ -567,10 +567,10 @@ function parseTimeToMinutes(timeStr: string): number {
 
 function DayTimeline({
   data,
-  prayerLabels,
+  prayerDisplayNames,
 }: {
   data: PrayerTimesResponse
-  prayerLabels: Record<string, string>
+  prayerDisplayNames: Record<string, string>
 }) {
   const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const
   const times = prayers.map((p) => parseTimeToMinutes(data.times?.[p] ?? ''))
@@ -607,23 +607,23 @@ function DayTimeline({
             <div
               key={prayer}
               className={cn(
-                'flex flex-col items-center gap-1 py-3 px-1 border-l first:border-l-0 border-[var(--ed-rule)]/40 transition-colors',
+                'flex flex-col items-center gap-1 py-3 px-0.5 sm:px-1 border-l first:border-l-0 border-[var(--ed-rule)]/40 transition-colors min-w-0',
                 isCurrent && 'bg-[var(--ed-accent)]/8',
                 isPast && 'opacity-50'
               )}
             >
               <span
                 className={cn(
-                  'text-[10px] uppercase tracking-[0.2em] font-semibold',
+                  'text-[9px] sm:text-[10px] uppercase tracking-wider sm:tracking-[0.2em] font-semibold w-full text-center truncate',
                   isCurrent ? 'text-[var(--ed-accent)]' : 'text-[var(--ed-fg-muted)]'
                 )}
                 style={{ fontFamily: F.glacial }}
               >
-                {prayerLabels[prayer]}
+                {prayerDisplayNames[prayer]}
               </span>
               <span
                 className={cn(
-                  'text-[13px] tabular-nums font-semibold',
+                  'text-[11px] sm:text-[13px] tabular-nums font-semibold whitespace-nowrap',
                   isCurrent ? 'text-[var(--ed-fg)]' : 'text-[var(--ed-fg-muted)]'
                 )}
                 style={{ fontFamily: F.mono }}

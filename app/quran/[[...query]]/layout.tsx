@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import QuranSearchBar from './client-components/search-bar'
 import QuranSettings from './client-components/settings'
 import MetricsCollector from './mini-components/metrics-collector'
-import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { QuranPlayer } from '@/app/quran/[[...query]]/client-components/now-playing-bar'
 import { wsApiServer } from '@/src/api/server-client'
 import { LanguagesInit } from '@/components/languages-init'
@@ -13,6 +12,7 @@ import { SiteFooter } from '@/components/site-footer'
 import { QuranNavSheet } from './client-components/nav-sheet'
 import { QuranModeSelector } from './client-components/mode-selector'
 import { QuranScrollContainer } from './client-components/scroll-container'
+import { QuranPersonalActions } from './mini-components/personal-actions'
 import { getLocale } from 'next-intl/server'
 
 // SSR fetch cache TTL for /quran content. Kept short so backend data
@@ -43,14 +43,14 @@ export default async function QuranLayout({
 
   if (chaptersRes.data && appendicesRes.data) {
     return (
-      <QuranPlayerProvider>
+      <>
         {/* Fixed header stack — SiteNav + optional sub-header.
             CSS slides this up by 64px on scroll-down (data-nav-hidden),
             so the sub-header rises to top-0 giving more reading space. */}
         <div className="quran-fixed-headers">
           <SiteNav />
           {query && (
-            <header className="h-14 glass-nav bg-background/80 border-b border-border/40">
+            <header className="relative h-14 glass-nav bg-background/80 border-b border-border/40">
               <div className="px-3 h-full flex flex-row items-center gap-2 w-full justify-between">
                 <QuranNavSheet
                   chapters={chaptersRes.data}
@@ -61,6 +61,7 @@ export default async function QuranLayout({
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <QuranModeSelector />
+                  <QuranPersonalActions />
                 </div>
                 <QuranSettings />
               </div>
@@ -81,7 +82,7 @@ export default async function QuranLayout({
           <MetricsCollector />
           <QuranPlayer />
         </div>
-      </QuranPlayerProvider>
+      </>
     )
   } else {
     return (

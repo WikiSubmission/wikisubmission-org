@@ -52,8 +52,21 @@ export function PaletteThemeSwitcher() {
           type="button"
           aria-label="Theme"
           title="Theme"
-          className="flex items-center gap-1.5 h-[34px] px-2 rounded-md transition-colors hover:bg-[color-mix(in_oklab,var(--ed-fg),transparent_94%)]"
-          style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+          className="flex items-center gap-1.5 h-[34px] px-2.5 rounded-[2px] transition-colors"
+          style={{
+            border: '1px solid var(--ed-rule)',
+            background: 'transparent',
+            cursor: 'pointer',
+            color: 'var(--ed-fg-muted)',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg)'
+            ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-fg)'
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg-muted)'
+            ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-rule)'
+          }}
         >
           <span
             aria-hidden
@@ -61,39 +74,16 @@ export function PaletteThemeSwitcher() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 2,
-              padding: '3px 4px',
+              padding: '2px 3px',
               borderRadius: 2,
               border: `1px solid ${current.rule}`,
               background: current.bg,
             }}
           >
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: 1,
-                background: current.accent,
-              }}
-            />
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: 1,
-                background: current.fg,
-              }}
-            />
+            <span style={{ width: 7, height: 7, borderRadius: 1, background: current.accent }} />
+            <span style={{ width: 7, height: 7, borderRadius: 1, background: current.fg }} />
           </span>
-          <svg
-            width={10}
-            height={10}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            style={{ color: 'var(--ed-fg-muted)' }}
-            aria-hidden
-          >
+          <svg width={9} height={9} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
             <path d="m6 9 6 6 6-6" />
           </svg>
         </button>

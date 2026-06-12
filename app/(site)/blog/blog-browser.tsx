@@ -35,9 +35,9 @@ export type Category = {
   count: number
 }
 
-function formatDate(dateString?: string) {
+function formatDate(dateString: string | undefined, locale: string) {
   if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-US', {
+  return new Date(dateString).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -62,7 +62,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
   )
 }
 
-function PostCard({ post }: { post: Post }) {
+function PostCard({ post, locale }: { post: Post; locale: string }) {
   return (
     <Link
       href={`/blog/${post.slug?.current}`}
@@ -95,14 +95,14 @@ function PostCard({ post }: { post: Post }) {
         )}
         <div className="mt-4 pt-3.5 border-t border-border/50 flex justify-between items-center text-xs text-muted-foreground/80">
           <span className="truncate">{post.authorName ?? ''}</span>
-          <span className="shrink-0">{formatDate(post.publishedAt)}</span>
+          <span className="shrink-0">{formatDate(post.publishedAt, locale)}</span>
         </div>
       </div>
     </Link>
   )
 }
 
-function SearchResultRow({ post, query }: { post: SearchPost; query: string }) {
+function SearchResultRow({ post, query, locale }: { post: SearchPost; query: string; locale: string }) {
   const hasBodySnippets = post.snippets && post.snippets.length > 0
   const excerptHasMatch = post.excerpt?.toLowerCase().includes(query.toLowerCase())
 
@@ -149,7 +149,7 @@ function SearchResultRow({ post, query }: { post: SearchPost; query: string }) {
         )}
 
         <p className="text-[10px] text-muted-foreground/70 mt-0.5">
-          {[post.authorName, formatDate(post.publishedAt)].filter(Boolean).join(' · ')}
+          {[post.authorName, formatDate(post.publishedAt, locale)].filter(Boolean).join(' · ')}
         </p>
       </div>
     </Link>
@@ -292,7 +292,7 @@ function BlogBrowserInner({
             className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-card border border-border/60 text-sm font-medium text-foreground hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-colors shrink-0"
           >
             <BookOpenIcon size={16} />
-            Instructions
+            {t('instructions')}
           </button>
         </div>
       </section>
@@ -346,7 +346,7 @@ function BlogBrowserInner({
                 {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} for &ldquo;{query.trim()}&rdquo;
               </p>
               {searchResults.map((post) => (
-                <SearchResultRow key={post._id} post={post} query={query.trim()} />
+                <SearchResultRow key={post._id} post={post} query={query.trim()} locale={locale} />
               ))}
             </div>
           ) : (
@@ -362,7 +362,7 @@ function BlogBrowserInner({
           categoryFiltered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {categoryFiltered.map((post) => (
-                <PostCard key={post._id} post={post} />
+                <PostCard key={post._id} post={post} locale={locale} />
               ))}
             </div>
           ) : (
@@ -396,7 +396,7 @@ function BlogBrowserInner({
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {preview.map((post) => (
-                      <PostCard key={post._id} post={post} />
+                      <PostCard key={post._id} post={post} locale={locale} />
                     ))}
                   </div>
                 </section>
@@ -407,7 +407,7 @@ function BlogBrowserInner({
               <section>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {uncategorised.map((post) => (
-                    <PostCard key={post._id} post={post} />
+                    <PostCard key={post._id} post={post} locale={locale} />
                   ))}
                 </div>
               </section>

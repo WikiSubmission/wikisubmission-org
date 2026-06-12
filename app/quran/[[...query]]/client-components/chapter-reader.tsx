@@ -13,10 +13,7 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
-import {
-  useQuranPreferences,
-  type QuranPreferences,
-} from '@/hooks/use-quran-preferences'
+import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
 import {
   useChapterReader,
@@ -30,13 +27,16 @@ import { ReadingView } from '../mini-components/reading-view'
 import { MultiSelectBar } from '../mini-components/multi-select-bar'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useTranslations } from 'next-intl'
-import { useWindowVirtualizer } from '@tanstack/react-virtual'
+import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'
 import {
   useQuranPlayer,
   useQuranPlayerCallbacks,
 } from '@/lib/quran-audio-context'
 import { useChapterBorderLoader } from '@/hooks/use-chapter-border-loader'
-import { ZOOM_WIDTH_CLASS, ZOOM_WIDTH_PX } from '@/lib/quran-zoom'
+import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
+import { useScriptureState } from '@/hooks/use-scripture-state'
+import { useQuranPrefsSync } from '@/hooks/use-prefs-sync'
+import type { ScriptureState } from '@/types/bookmarks'
 
 type VirtualizedVerseListProps = {
   chapterNumber: number
@@ -50,8 +50,6 @@ type VirtualizedVerseListProps = {
     fallbackOpts?: ChapterReaderOptions
   ) => Promise<void>
   opts: ChapterReaderOptions
-  prefs: QuranPreferences
-  zoomLevel: QuranPreferences['zoomLevel']
   optsKey: string
   isRangeMode: boolean
   seekTarget: string | null
@@ -61,6 +59,8 @@ type VirtualizedVerseListProps = {
   isPlaying: boolean
   isBuffering: boolean
   chapterLabel: string
+  scriptureState?: ScriptureState
+  onVerseVisible?: (verseKey: string) => void
 }
 
 function VirtualizedVerseList({
@@ -72,8 +72,6 @@ function VirtualizedVerseList({
   prefetch,
   seekToVerse,
   opts,
-  prefs,
-  zoomLevel,
   optsKey,
   isRangeMode,
   seekTarget,
@@ -83,98 +81,24 @@ function VirtualizedVerseList({
   isPlaying,
   isBuffering,
   chapterLabel,
+  scriptureState,
+  onVerseVisible,
 }: VirtualizedVerseListProps) {
   const listRef = useRef<HTMLDivElement>(null)
-  const [scrollMargin, setScrollMargin] = useState(0)
-  const [viewportWidth, setViewportWidth] = useState<number | null>(null)
+  const virtuosoRef = useRef<VirtuosoHandle>(null)
   const seekDoneRef = useRef(false)
   const seekActiveRef = useRef(false)
   const prevFirstVerseRef = useRef('')
   const seekBehaviorRef = useRef<'auto' | 'smooth'>('auto')
-
-  useLayoutEffect(() => {
-    if (!listRef.current) return
-    const rect = listRef.current.getBoundingClientRect()
-    setScrollMargin(rect.top + window.scrollY)
-  }, [])
-
-  useEffect(() => {
-    const updateViewportWidth = () => setViewportWidth(window.innerWidth)
-    updateViewportWidth()
-    window.addEventListener('resize', updateViewportWidth)
-    return () => window.removeEventListener('resize', updateViewportWidth)
-  }, [])
-
-  const virtualizer = useWindowVirtualizer({
-    count: verses.length,
-    estimateSize: (index) => {
-      const verse = verses[index]
-      const primaryCode =
-        prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
-      const footnoteLen = verse?.tr?.[primaryCode]?.f?.length ?? 0
-      const footnoteRows = Math.ceil(footnoteLen / 65)
-      const wordCount = verse?.w?.length ?? 8
-      // Keep the first client render identical to SSR to avoid hydration mismatch.
-      const vw = viewportWidth ?? 768
-      const innerPad = vw < 640 ? 48 : 64
-      const zoomMaxW = ZOOM_WIDTH_PX[prefs.zoomLevel ?? 'comfortable']
-      const containerW = Math.min(vw - 32 - innerPad, zoomMaxW - 32 - 64)
-
-      if (prefs.wordByWord) {
-        const wordsPerRow = Math.max(2, Math.floor(containerW / 118))
-        const wordRows = Math.ceil(wordCount / wordsPerRow)
-        return Math.max(320, 160 + wordRows * 141 + footnoteRows * 22)
-      }
-
-      if (prefs.arabic && verse?.w && verse.w.length > 0) {
-        const wordsPerRow = Math.max(3, Math.floor(containerW / 72))
-        const wordRows = Math.ceil(wordCount / wordsPerRow)
-        return Math.max(320, 240 + wordRows * 58 + footnoteRows * 22)
-      }
-
-      return Math.max(280, 280 + footnoteRows * 22)
-    },
-    overscan: 12,
-    scrollMargin,
-    scrollPaddingStart: 120,
-    // Use the live scroll position for keyed remounts (mode/layout changes).
-    // The parent resets scroll to 0 once on initial page entry, so we keep the
-    // original navigation fix without breaking in-place remounts mid-chapter.
-    initialOffset: () => (typeof window !== 'undefined' ? window.scrollY : 0),
+  const [lastRenderedIndex, setLastRenderedIndex] = useState(-1)
+  const visibleRangeRef = useRef<{ startIndex: number; endIndex: number }>({
+    startIndex: 0,
+    endIndex: 0,
   })
+  const urlSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useChapterBorderLoader(listRef, loading)
 
-  const isFirstZoomMount = useRef(true)
-  useEffect(() => {
-    if (isFirstZoomMount.current) {
-      isFirstZoomMount.current = false
-      return
-    }
-    virtualizer.measure()
-  }, [virtualizer, zoomLevel])
-
-  useEffect(() => {
-    if (viewportWidth === null) return
-    virtualizer.measure()
-  }, [viewportWidth, virtualizer])
-
-  // Re-measure when rendering-only prefs change (instead of remounting via
-  // a layout key). Remounting mid-seek would reset the virtualizer's scroll
-  // tracking and snap the viewport back to the SSR window.
-  useEffect(() => {
-    virtualizer.measure()
-  }, [
-    virtualizer,
-    prefs.text,
-    prefs.footnotes,
-    prefs.subtitles,
-    prefs.transliteration,
-  ])
-
-  const virtualItems = virtualizer.getVirtualItems()
-  const lastVirtualIndex = virtualItems[virtualItems.length - 1]?.index ?? -1
-  const firstVirtualIndex = virtualItems[0]?.index ?? 0
   const firstVerseKey = verses[0]?.vk ?? ''
 
   const handlePreview = useCallback(
@@ -211,10 +135,6 @@ function VirtualizedVerseList({
     )
     if (targetIndex < 0) return
 
-    // Track the latest seek target across runs (strict mode runs effects
-    // twice in dev — without this the second run early-returned on a stale
-    // "done" flag and the seek never completed). prevFirstVerseRef now
-    // also keys on seekTarget so a brand new target restarts the loop.
     prevFirstVerseRef.current = firstVerseKey
     seekDoneRef.current = false
     seekBehaviorRef.current = 'auto'
@@ -226,7 +146,7 @@ function VirtualizedVerseList({
     let stable = 0
     let rafId = 0
     let cancelled = false
-    const MAX_FRAMES = 120 // ~2s ceiling for layout shifts
+    const MAX_FRAMES = 120
     const STABLE_THRESHOLD = 6
     const tick = () => {
       if (cancelled) return
@@ -242,7 +162,8 @@ function VirtualizedVerseList({
           stable += 1
         }
       } else {
-        virtualizer.scrollToIndex(targetIndex, {
+        virtuosoRef.current?.scrollToIndex({
+          index: targetIndex,
           align: 'start',
           behavior: 'auto',
         })
@@ -264,29 +185,27 @@ function VirtualizedVerseList({
       seekActiveRef.current = false
       cancelAnimationFrame(rafId)
     }
-  }, [firstVerseKey, seekTarget, verses, virtualizer, chapterNumber])
+  }, [firstVerseKey, seekTarget, verses, chapterNumber])
 
   useEffect(() => {
     if (!currentVerseId || !isPlaying) return
     const idx = verses.findIndex((v) => v.vk === currentVerseId)
     if (idx < 0) return
-    virtualizer.scrollToIndex(idx, { align: 'start', behavior: 'smooth' })
-  }, [currentVerseId, isPlaying, verses, virtualizer])
+    virtuosoRef.current?.scrollToIndex({ index: idx, align: 'start', behavior: 'smooth' })
+  }, [currentVerseId, isPlaying, verses])
 
   useEffect(() => {
     if (isRangeMode) return
     if (!hasMore || loading) return
     const isSeeking = !!seekTarget && !seekDoneRef.current
-    const isNearEnd = lastVirtualIndex >= verses.length - 15
+    const isNearEnd = lastRenderedIndex >= verses.length - 15
     if (!isSeeking && !isNearEnd) return
     const timer = setTimeout(() => void loadMore(opts), isSeeking ? 50 : 0)
     return () => clearTimeout(timer)
-  }, [hasMore, isRangeMode, lastVirtualIndex, loadMore, loading, opts, seekTarget, verses.length])
+  }, [hasMore, isRangeMode, lastRenderedIndex, loadMore, loading, opts, seekTarget, verses.length])
 
-  // Only begin syncing the URL to the centred verse after the user has actually
-  // scrolled. Without this guard, an inherited scroll position from the previous
-  // route would be captured on mount and rewritten into the URL as ?verse=N,
-  // making chapter cards appear to "open" at a mid-chapter verse.
+  // Gate URL sync on an actual user scroll gesture to avoid rewriting the
+  // URL from an inherited scroll position on initial mount.
   const userScrolledRef = useRef(false)
   useEffect(() => {
     userScrolledRef.current = false
@@ -296,36 +215,6 @@ function VirtualizedVerseList({
     window.addEventListener('scroll', onScroll, { passive: true, once: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [chapterNumber])
-
-  useEffect(() => {
-    if (isRangeMode) return
-    if (lastVirtualIndex < 0 || verses.length === 0) return
-    if (!userScrolledRef.current) return
-    // Don't rewrite the URL while a seek is still settling — the loop in
-    // the seek effect adjusts scrollY across several frames and the
-    // intermediate centered verses are not where the user wants to land.
-    if (seekActiveRef.current) return
-    const timer = setTimeout(() => {
-      if (seekActiveRef.current) return
-      const centerY = window.scrollY + window.innerHeight / 2
-      const items = virtualizer.getVirtualItems()
-      const centerItem =
-        items.find((v) => v.start <= centerY && v.start + v.size > centerY) ??
-        items[Math.floor(items.length / 2)]
-      const verse = verses[centerItem?.index ?? 0]
-      if (!verse?.vk) return
-      const vNum = verse.vk.split(':')[1]
-      const params = new URLSearchParams(window.location.search)
-      if (params.get('verse') === vNum) return
-      params.set('verse', vNum)
-      window.history.replaceState(
-        null,
-        '',
-        `${window.location.pathname}?${params}`
-      )
-    }, 200)
-    return () => clearTimeout(timer)
-  }, [firstVirtualIndex, isRangeMode, lastVirtualIndex, verses, virtualizer])
 
   const [currentVerseNumber, setCurrentVerseNumber] = useState(1)
   useEffect(() => {
@@ -338,38 +227,72 @@ function VirtualizedVerseList({
       const isAtBottom = scrollY + viewportH >= docH - 8
 
       let vNum: number
+      let visibleVk: string | undefined
       if (isAtTop) {
         const first = verses[0]
         vNum = first ? parseInt(first.vk?.split(':')[1] ?? '1') : 1
+        visibleVk = first?.vk
       } else if (isAtBottom) {
         const last = verses[verses.length - 1]
         vNum = last ? parseInt(last.vk?.split(':')[1] ?? '1') : 1
+        visibleVk = last?.vk
       } else {
         const centerY = scrollY + viewportH / 2
-        const items = virtualizer.getVirtualItems()
-        const centerItem =
-          items.find((v) => v.start <= centerY && v.start + v.size > centerY) ??
-          items[Math.floor(items.length / 2)]
-        const centerVerse = verses[centerItem?.index ?? 0]
-        vNum = centerVerse
-          ? parseInt(centerVerse.vk?.split(':')[1] ?? '1')
-          : 1
+        const { startIndex, endIndex } = visibleRangeRef.current
+        let centerVerse: VerseData | undefined
+        for (let i = startIndex; i <= endIndex; i++) {
+          const v = verses[i]
+          if (!v?.vk) continue
+          const el = document.getElementById(v.vk)
+          if (!el) continue
+          const rect = el.getBoundingClientRect()
+          const absTop = rect.top + scrollY
+          const absBottom = absTop + rect.height
+          if (absTop <= centerY && absBottom > centerY) {
+            centerVerse = v
+            break
+          }
+        }
+        if (!centerVerse) {
+          const midIndex = Math.floor((startIndex + endIndex) / 2)
+          centerVerse = verses[midIndex]
+        }
+        vNum = centerVerse ? parseInt(centerVerse.vk?.split(':')[1] ?? '1') : 1
+        visibleVk = centerVerse?.vk
       }
       setCurrentVerseNumber(vNum)
       centerVerseRef.current = vNum
+      if (visibleVk) onVerseVisible?.(visibleVk)
+
+      // Debounced URL sync — merged here to avoid a separate range-dep effect.
+      if (!isRangeMode && userScrolledRef.current && visibleVk) {
+        if (urlSyncTimerRef.current !== null) clearTimeout(urlSyncTimerRef.current)
+        const vkToSync = visibleVk
+        urlSyncTimerRef.current = setTimeout(() => {
+          if (seekActiveRef.current) return
+          const vNum = vkToSync.split(':')[1]
+          const params = new URLSearchParams(window.location.search)
+          if (params.get('verse') === vNum) return
+          params.set('verse', vNum)
+          window.history.replaceState(null, '', `${window.location.pathname}?${params}`)
+        }, 200)
+      }
     }
 
     window.addEventListener('scroll', computeCurrentVerse, { passive: true })
-    // Intentionally NOT calling computeCurrentVerse() here. Seeding
-    // centerVerseRef to verses[0] on mount means the opts effect would
-    // later anchor a hydration-triggered reload to that verse (i.e. the
-    // SSR window start, which is targetVerse - 5), overriding the URL's
-    // ?verse=N target. Let scroll events fill it in once the user is
-    // actually navigating around the chapter.
+    // Intentionally NOT calling computeCurrentVerse() here — seeding
+    // centerVerseRef on mount would override the URL's ?verse=N target.
     return () => window.removeEventListener('scroll', computeCurrentVerse)
-  }, [centerVerseRef, verses, virtualizer])
+  }, [centerVerseRef, verses, onVerseVisible, isRangeMode])
 
-  const showNav = !hasMore && lastVirtualIndex === verses.length - 1
+  useEffect(
+    () => () => {
+      if (urlSyncTimerRef.current !== null) clearTimeout(urlSyncTimerRef.current)
+    },
+    []
+  )
+
+  const showNav = !hasMore && lastRenderedIndex >= verses.length - 1
 
   return (
     <>
@@ -377,45 +300,40 @@ function VirtualizedVerseList({
         <div
           ref={listRef}
           className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden"
-          style={{
-            position: 'relative',
-            height: Math.max(virtualizer.getTotalSize(), 300),
-          }}
         >
-          {verses.length === 0
-            ? null
-            : virtualItems.map((virtualItem) => {
-                const verse = verses[virtualItem.index]
-                const isLast =
-                  virtualItem.index === verses.length - 1 && !hasMore
-                return (
-                  <div
-                    key={`${optsKey}-${verse.vk ?? virtualItem.index}`}
-                    data-index={virtualItem.index}
-                    ref={virtualizer.measureElement}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      transform: `translateY(${virtualItem.start - virtualizer.options.scrollMargin}px)`,
-                    }}
-                  >
-                    <VerseCard
-                      verse={verse}
-                      isLast={isLast}
-                      isScrollTarget={
-                        seekTarget !== null &&
-                        verse.vk?.split(':')[1] === seekTarget
-                      }
-                      optsKey={optsKey}
-                      isCurrentAudio={currentVerseId === (verse.vk ?? '')}
-                      isPlaying={isPlaying}
-                      isBuffering={isBuffering}
-                    />
-                  </div>
-                )
-              })}
+          <Virtuoso
+            ref={virtuosoRef}
+            useWindowScroll
+            data={verses}
+            computeItemKey={(index, verse) => `${optsKey}-${verse.vk ?? index}`}
+            increaseViewportBy={1000}
+            rangeChanged={(range) => {
+              visibleRangeRef.current = { startIndex: range.startIndex, endIndex: range.endIndex }
+              setLastRenderedIndex(range.endIndex)
+            }}
+            itemContent={(index, verse) => {
+              const isLast = index === verses.length - 1 && !hasMore
+              return (
+                <VerseCard
+                  verse={verse}
+                  isLast={isLast}
+                  isScrollTarget={
+                    seekTarget !== null &&
+                    verse.vk?.split(':')[1] === seekTarget
+                  }
+                  optsKey={optsKey}
+                  isCurrentAudio={currentVerseId === (verse.vk ?? '')}
+                  isPlaying={isPlaying}
+                  isBuffering={isBuffering}
+                  showBookmark
+                  entries={scriptureState?.bookmarks[verse.vk ?? ''] ?? []}
+                  showNotes
+                  note={scriptureState?.notes[verse.vk ?? ''] ?? null}
+                  scripture="quran"
+                />
+              )
+            }}
+          />
         </div>
 
         <div
@@ -512,6 +430,9 @@ export function ChapterReader({
   // Callbacks context: stable reference, used for setChapterQueue.
   const { setChapterQueue } = useQuranPlayerCallbacks()
 
+  const scriptureState = useScriptureState('quran', chapterNumber)
+  useQuranPrefsSync()
+
   // Read the initial verse from the prop (passed by the Server Component),
   // NOT from useSearchParams(). useSearchParams() subscribes to Next.js router
   // contexts and causes ChapterReader (+ all VerseCards) to re-render on every
@@ -607,13 +528,18 @@ export function ChapterReader({
   // so it always fetches English + Arabic. If the user's stored pref is e.g. French
   // primary or a secondary language, reload immediately so the correct translation shows.
   useEffect(() => {
-    const primaryCode = opts.primaryLang !== 'xl' ? opts.primaryLang : 'en'
+    const primaryCode =
+      opts.primaryLang !== 'xl' && opts.primaryLang !== 'none'
+        ? opts.primaryLang
+        : undefined
     const secondaryCode =
-      opts.secondaryLang && opts.secondaryLang !== 'xl' ? opts.secondaryLang : null
+      opts.secondaryLang && opts.secondaryLang !== 'xl' && opts.secondaryLang !== 'none'
+        ? opts.secondaryLang
+        : null
     const firstVerse = reader.verses[0]
     const needsReload =
       reader.verses.length === 0 ||
-      firstVerse?.tr?.[primaryCode] === undefined ||
+      (primaryCode !== undefined && firstVerse?.tr?.[primaryCode] === undefined) ||
       (secondaryCode !== null && firstVerse?.tr?.[secondaryCode] === undefined)
     if (needsReload) reader.reload(opts, seekTarget ? parseInt(seekTarget) : undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -696,12 +622,18 @@ export function ChapterReader({
   // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
   const optsKey = `v2-${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}-${zoomLevel}`
 
-  const primaryCode = prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode =
+    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
+      ? prefs.primaryLanguage
+      : undefined
   const arTitle = reader.chapterTitles?.['ar']
   const primaryTitle =
-    reader.chapterTitles?.[primaryCode] ?? t('sura', { number: chapterNumber })
+    (primaryCode ? reader.chapterTitles?.[primaryCode] : undefined) ??
+    t('sura', { number: chapterNumber })
   const secondaryTitle =
-    prefs.secondaryLanguage && prefs.secondaryLanguage !== 'xl'
+    prefs.secondaryLanguage &&
+    prefs.secondaryLanguage !== 'xl' &&
+    prefs.secondaryLanguage !== 'none'
       ? reader.chapterTitles?.[prefs.secondaryLanguage]
       : undefined
 
@@ -715,7 +647,7 @@ export function ChapterReader({
             <div className="flex flex-col gap-0.5 min-w-0">
               <h1
                 className="text-xl font-bold flex items-center gap-2"
-                dir={getDirection(primaryCode)}
+                dir={getDirection(primaryCode ?? 'en')}
               >
                 <span className="min-w-0">
                   {t('chapter', { number: chapterNumber, title: primaryTitle })}
@@ -730,7 +662,12 @@ export function ChapterReader({
               {secondaryTitle && (
                 <p
                   className="text-sm text-muted-foreground italic"
-                  dir={prefs.secondaryLanguage ? getDirection(prefs.secondaryLanguage) : undefined}
+                  dir={
+                    prefs.secondaryLanguage &&
+                    prefs.secondaryLanguage !== 'none'
+                      ? getDirection(prefs.secondaryLanguage)
+                      : undefined
+                  }
                 >
                   {secondaryTitle}
                 </p>
@@ -799,13 +736,6 @@ export function ChapterReader({
         </div>
       )}
 
-      {/* Verse/Word mode — window virtualizer, page scrolls naturally.
-          Note: we deliberately don't `key={layoutKey}` this. Remounting the
-          virtualizer mid-seek (which happens when zustand hydrates from
-          localStorage right after first paint) would discard the in-flight
-          seek and snap the viewport back to the SSR window. The inner
-          component re-measures via virtualizer.measure() when prefs that
-          affect row height change. */}
       {displayMode !== 'reading' && (
         <VirtualizedVerseList
           chapterNumber={chapterNumber}
@@ -816,8 +746,6 @@ export function ChapterReader({
           prefetch={reader.prefetch}
           seekToVerse={reader.seekToVerse}
           opts={opts}
-          prefs={prefs}
-          zoomLevel={zoomLevel}
           optsKey={optsKey}
           isRangeMode={isRangeMode}
           seekTarget={seekTarget}
@@ -827,6 +755,7 @@ export function ChapterReader({
           isPlaying={isPlaying}
           isBuffering={isBuffering}
           chapterLabel={tCommon('chapter')}
+          scriptureState={scriptureState}
         />
       )}
 

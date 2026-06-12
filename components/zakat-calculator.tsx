@@ -5,6 +5,7 @@ import gsap from 'gsap'
 import { cn } from '@/lib/utils'
 import { Activity, Wallet } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { ThemedSelect } from '@/components/ui/themed-select'
 
 export function ZakatCalculator() {
   const t = useTranslations('zakatCalculator')
@@ -66,17 +67,14 @@ export function ZakatCalculator() {
           <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">
             {t('currency')}
           </label>
-          <select
+          <div className="zakat-currency-select">
+            <ThemedSelect
             value={currency}
-            onChange={(e) => setCurrency(e.target.value)}
-            className="w-full h-12 rounded-xl border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--ed-accent)]/20 transition-all appearance-none"
-          >
-            {['USD', 'EUR', 'GBP', 'SAR', 'AED', 'TRY'].map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+            onChange={setCurrency}
+            options={['USD', 'EUR', 'GBP', 'SAR', 'AED', 'TRY'].map((c) => ({ value: c, label: c }))}
+            aria-label={t('currency')}
+          />
+          </div>
         </div>
         <div className="md:col-span-3">
           <label className="block font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] mb-2 opacity-50">

@@ -57,42 +57,58 @@ export function SectionDivider({
   num,
   title,
   sub,
+  level = 2,
+  id,
 }: {
   num: string
   title: string
   sub: string
+  level?: 2 | 3 | 4 | 5 | 6
+  id?: string
 }) {
+  const HeadingTag = `h${level}` as React.ElementType
+
   return (
     <div
-      className="grid-cols-1 gap-y-3 sm:grid-cols-[auto_auto_1fr_auto] sm:gap-x-5 sm:gap-y-0"
+      className="grid-cols-1 gap-y-3 sm:grid-cols-[auto_1fr_auto] sm:gap-x-5 sm:gap-y-0"
       style={{
         display: 'grid',
         alignItems: 'baseline',
         marginBottom: 64,
       }}
     >
-      <span
+      <HeadingTag
+        id={id}
         style={{
-          fontFamily: F.display,
-          fontSize: 14,
-          fontStyle: 'italic',
-          color: 'var(--ed-accent)',
-          letterSpacing: '0.1em',
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 20,
+          margin: 0,
         }}
       >
-        {num}
-      </span>
-      <span
-        style={{
-          fontFamily: F.display,
-          fontSize: 'clamp(28px, 5vw, 32px)',
-          letterSpacing: '-0.02em',
-          fontWeight: 500,
-          color: 'var(--ed-fg)',
-        }}
-      >
-        {title}
-      </span>
+        <span
+          style={{
+            fontFamily: F.display,
+            fontSize: 14,
+            fontStyle: 'italic',
+            color: 'var(--ed-accent)',
+            letterSpacing: '0.1em',
+          }}
+        >
+          {num}
+        </span>
+        <span
+          style={{
+            fontFamily: F.display,
+            fontSize: 'clamp(28px, 5vw, 32px)',
+            letterSpacing: '-0.02em',
+            fontWeight: 500,
+            color: 'var(--ed-fg)',
+          }}
+        >
+          {title}
+        </span>
+      </HeadingTag>
       <div
         className="hidden sm:block"
         style={{ height: 1, backgroundColor: 'var(--ed-rule)', position: 'relative' }}

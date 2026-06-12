@@ -48,9 +48,9 @@ type State = {
 
 function buildLangs(opts: ChapterReaderOptions): string[] {
   const langs: string[] = []
-  if (opts.primaryLang !== 'xl') langs.push(opts.primaryLang)
+  if (opts.primaryLang !== 'xl' && opts.primaryLang !== 'none') langs.push(opts.primaryLang)
   if (opts.includeArabic && !langs.includes('ar')) langs.push('ar')
-  if (opts.secondaryLang && opts.secondaryLang !== 'xl') {
+  if (opts.secondaryLang && opts.secondaryLang !== 'xl' && opts.secondaryLang !== 'none') {
     if (!langs.includes(opts.secondaryLang)) langs.push(opts.secondaryLang)
   }
   return langs.length > 0 ? langs : ['en']

@@ -72,6 +72,14 @@ export const Metadata: _Metadata = {
     'Open Source Religion',
   ],
   metadataBase: new URL('https://wikisubmission.org'),
+  applicationName: 'WikiSubmission',
+  // Standalone PWA hints. Next auto-injects the manifest link from app/manifest.ts.
+  appleWebApp: {
+    capable: true,
+    title: 'WikiSubmission',
+    statusBarStyle: 'default',
+  },
+  formatDetection: { telephone: false },
   alternates: {
     canonical: '/',
   },

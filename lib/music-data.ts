@@ -68,7 +68,7 @@ export async function fetchMusicData(client: ApiClient): Promise<MusicData> {
   ])
 
   // Preserve the existing display order: highest display_priority first.
-  // Backend returns ascending; the legacy Supabase query used descending.
+  // Backend returns ascending, so re-sort descending here.
   const artists = (artistsRes.data ?? [])
     .map(toArtist)
     .sort((a, b) => (b.display_priority ?? 0) - (a.display_priority ?? 0))

@@ -333,6 +333,739 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/bookmark-categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user's bookmark categories */
+        get: operations["listMeBookmarkCategories"];
+        put?: never;
+        /** Create a bookmark category */
+        post: operations["createMeBookmarkCategory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/bookmark-categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a bookmark category and all its entries */
+        delete: operations["deleteMeBookmarkCategory"];
+        options?: never;
+        head?: never;
+        /** Update a bookmark category name or color */
+        patch: operations["updateMeBookmarkCategory"];
+        trace?: never;
+    };
+    "/me/bookmark-categories/{id}/entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all entries in a bookmark category (cross-scripture) */
+        get: operations["listMeBookmarkCategoryEntries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/bookmark-entries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a verse to a bookmark category */
+        post: operations["createMeBookmarkEntry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/bookmark-entries/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a verse from a bookmark category */
+        delete: operations["deleteMeBookmarkEntry"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/cover-to-cover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get cover-to-cover bookmark for a scripture */
+        get: operations["getMeCoverToCover"];
+        /** Upsert cover-to-cover bookmark */
+        put: operations["putMeCoverToCover"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/scripture-state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get bookmark and note state for a chapter */
+        get: operations["getMeScriptureState"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user's notes */
+        get: operations["getMeNotes"];
+        /** Create or update the note for a verse (one note per verse) */
+        put: operations["upsertMeNote"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/notes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a note */
+        delete: operations["deleteMeNote"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search verses and personal notes
+         * @description Searches Quran/Bible verses and, for authenticated users, their notes content. Returns merged results with a `source` field distinguishing verse matches from note matches. Note results include a highlighted excerpt. Unauthenticated requests only search verses.
+         */
+        get: operations["getMeSearch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/reading-progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current reading position */
+        get: operations["getMeReadingProgress"];
+        /** Upsert reading position */
+        put: operations["putMeReadingProgress"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/streak": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get reading streak metrics */
+        get: operations["getMeStreak"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/reading-stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get aggregated reading stats (daily, hourly, weekday, cumulative) */
+        get: operations["getMeReadingStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/reading-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Increment daily reading log */
+        post: operations["postMeReadingLog"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get per-scripture preferences */
+        get: operations["getMePreferences"];
+        /** Upsert per-scripture preferences */
+        put: operations["putMePreferences"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/collections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user's collections */
+        get: operations["listMeCollections"];
+        put?: never;
+        /** Create a collection */
+        post: operations["createMeCollection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/collections/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get collection with verses */
+        get: operations["getMeCollectionDetail"];
+        put?: never;
+        post?: never;
+        /** Delete a collection */
+        delete: operations["deleteMeCollection"];
+        options?: never;
+        head?: never;
+        /** Update a collection */
+        patch: operations["updateMeCollection"];
+        trace?: never;
+    };
+    "/me/collections/{id}/verses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add or upsert verse in a collection */
+        post: operations["addVerseToMeCollection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/collections/{id}/verses/{verseId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a verse from a collection */
+        delete: operations["removeVerseFromMeCollection"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/collection-subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Subscribe (grab) a public collection by share token */
+        post: operations["subscribeMeCollection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/collection-subscriptions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Unsubscribe from a collection */
+        delete: operations["unsubscribeMeCollection"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user's recent activity */
+        get: operations["listMeActivity"];
+        put?: never;
+        /** Record one activity event when consent is enabled */
+        post: operations["recordMeActivity"];
+        /** Clear current user's activity feed */
+        delete: operations["clearMeActivity"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get activity recording consent */
+        get: operations["getMeActivityConsent"];
+        /** Set activity recording consent */
+        put: operations["setMeActivityConsent"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue a user data export */
+        post: operations["requestMeExport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/export/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get latest user data export status */
+        get: operations["getMeExportStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/delete-content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue deletion of selected user content categories */
+        post: operations["requestMeContentDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/delete-content/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get latest user data deletion status */
+        get: operations["getMeContentDeletionStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/push/subscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Subscribe or refresh a browser push endpoint */
+        post: operations["subscribeMePush"];
+        /** Remove one browser push endpoint */
+        delete: operations["unsubscribeMePush"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/push/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a test push notification to current user's endpoints */
+        post: operations["sendMePushTest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/collections/share/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get publicly shared collection by token */
+        get: operations["getSharedCollection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/games/fill-blank/passages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List approved Fill-the-Blank passages */
+        get: operations["listGameFillBlankPassages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/games/fill-blank/variants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start (or resume) a Fill-the-Blank round */
+        post: operations["startGameFillBlankVariant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/games/fill-blank/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit a completed Fill-the-Blank round */
+        post: operations["submitGameFillBlankAttempt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/games/fill-blank/leaderboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get global, weekly, or per-variant leaderboard */
+        get: operations["getGameFillBlankLeaderboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/games/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List current user's game attempts (newest first) */
+        get: operations["listMeGameHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/games/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Aggregate game stats for the current user */
+        get: operations["getMeGameStats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current user's account and access flags */
+        get: operations["getCurrentUserAccess"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List users (admin only) */
+        get: operations["listUsersAdmin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update role/permissions/active state for one user (admin only) */
+        patch: operations["updateUserAdmin"];
+        trace?: never;
+    };
+    "/editorial/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resolved editorial permissions for the current user
+         * @description Returns the caller's editorial permission snapshot (modules and per-version read/write grants) so the editor UI can decide what to render. Authoritative enforcement happens server-side on every mutation; this only shapes the UI.
+         */
+        get: operations["getEditorialSession"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/quran-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the Quran version registry (editorial) */
+        get: operations["listEditorialQuranVersions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/bible-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the Bible version registry (editorial) */
+        get: operations["listEditorialBibleVersions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -532,7 +1265,7 @@ export interface components {
              */
             meta?: Record<string, never> | null;
         };
-        /** @description Compact record for one Quranic Arabic root, returned by the index endpoint. `r` is the storage form (space-separated Arabic letters); `tr` is the server-computed Latin Buckwalter transliteration joined with hyphens (e.g. `k-t-b`). `s` is reserved for an editorial sense gloss and is always `null` until Phase 2 morphology data lands. */
+        /** @description Compact record for one Quranic Arabic root, returned by the index endpoint. `r` is the storage form (space-separated Arabic letters); `tr` is the server-computed Latin Buckwalter transliteration joined with hyphens (e.g. `k-t-b`). `s` is reserved for an editorial sense gloss and is currently always `null`. */
         RootSummary: {
             /**
              * @description Root letters, space-separated Arabic (storage form).
@@ -572,7 +1305,7 @@ export interface components {
              */
             m?: string | null;
         };
-        /** @description A distinct surface form (token spelling) of a root, with its occurrence count. `tr` is the Latin transliteration of the surface form, sourced from `word_text` rows tagged with the `tl` language (most-common value when multiple readings exist). `en` and `p` (POS) remain reserved for Phase 2 morphology data and are still `null`. */
+        /** @description A distinct surface form (token spelling) of a root, with its occurrence count. `tr` is the Latin transliteration of the surface form, sourced from `word_text` rows tagged with the `tl` language (most-common value when multiple readings exist). `en` and `p` (POS) is sourced from `word_text` rows tagged with the `en` language (most-common value when multiple readings exist). `p` (POS) remains reserved for morphology data and is still `null`. */
         Derivative: {
             /**
              * @description Surface form (Arabic word as it appears in the corpus).
@@ -585,8 +1318,8 @@ export interface components {
              */
             tr?: string | null;
             /**
-             * @description English gloss for this surface form (Phase 2; always `null`).
-             * @example null
+             * @description Most common English gloss for this surface form, drawn from the per-word `en` entry in `word_text`. `null` if no English row exists for that word.
+             * @example book
              */
             en?: string | null;
             /**
@@ -1093,6 +1826,745 @@ export interface components {
             contactPhone?: string;
             meetingSchedule?: string;
         };
+        Bookmark: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            name: string;
+            color: string;
+            /** @enum {string} */
+            kind: "cover_to_cover";
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CoverToCoverRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+        };
+        BookmarkCategory: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            color: string;
+            /** @description Number of entries in this category. */
+            entry_count: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        BookmarkEntry: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            category_id: number;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        CreateBookmarkCategoryRequest: {
+            name: string;
+            /** @default amber */
+            color: string;
+        };
+        UpdateBookmarkCategoryRequest: {
+            name?: string;
+            color?: string;
+        };
+        CreateBookmarkEntryRequest: {
+            /** Format: int64 */
+            category_id: number;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+        };
+        Note: {
+            /** Format: int64 */
+            id: number;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            /** @description Markdown content. */
+            content: string;
+            /** @description Free-form labels used for filtering on the notes index. */
+            tags: string[];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        UpsertNoteRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            /** @description Markdown content. */
+            content: string;
+            /** @description Free-form labels. Omit to leave existing tags unchanged. */
+            tags?: string[];
+        };
+        SearchResult: {
+            /**
+             * @description Origin of this result. Only 'note' is returned here; verse results come from the existing /search endpoints.
+             * @enum {string}
+             */
+            source: "note";
+            verse_key: string;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            /** @description Highlighted excerpt from the note content showing the match context. */
+            excerpt: string;
+        };
+        ScriptureState: {
+            /** @description Map of verse_key to list of bookmark entries for that verse. */
+            bookmarks: {
+                [key: string]: components["schemas"]["BookmarkEntry"][];
+            };
+            /** @description Map of verse_key to the single note for that verse. */
+            notes: {
+                [key: string]: components["schemas"]["Note"];
+            };
+        };
+        ReadingProgress: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PutReadingProgressRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+        };
+        Streak: {
+            current_streak: number;
+            longest_streak: number;
+            last_active_day?: string;
+            total_verses_read: number;
+        };
+        PostReadingLogRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            /** @default 1 */
+            verses_read: number;
+            /** Format: date */
+            day?: string;
+        };
+        PutPreferencesRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            payload: {
+                [key: string]: unknown;
+            };
+        };
+        Collection: {
+            /** Format: int64 */
+            id: number;
+            name: string;
+            description: string;
+            is_public: boolean;
+            /**
+             * @default owner_only
+             * @enum {string}
+             */
+            edit_policy: "owner_only" | "everyone";
+            /**
+             * @description Whether the current user owns this collection or subscribed to it.
+             * @enum {string}
+             */
+            relation: "owner" | "subscriber";
+            /** @description Display name of the owner; populated for subscriber rows. */
+            owner_display_name: string;
+            share_token?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CollectionVerse: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            collection_id: number;
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            note: string;
+            position: number;
+            /** Format: date-time */
+            created_at: string;
+        };
+        CollectionDetail: components["schemas"]["Collection"] & {
+            verses: components["schemas"]["CollectionVerse"][];
+            /** @description Whether the current authenticated user is subscribed. Null if unauthenticated. */
+            is_subscribed?: boolean | null;
+        };
+        CreateCollectionRequest: {
+            name: string;
+            description?: string;
+            /** @default false */
+            is_public: boolean;
+        };
+        UpdateCollectionRequest: {
+            name: string;
+            description?: string;
+            is_public?: boolean;
+            /** @enum {string} */
+            edit_policy?: "owner_only" | "everyone";
+            /** @default false */
+            regenerate_token: boolean;
+        };
+        CollectionSubscribeRequest: {
+            share_token: string;
+        };
+        CollectionSubscribeResponse: {
+            data: {
+                /** Format: int64 */
+                collection_id: number;
+            };
+        };
+        AddCollectionVerseRequest: {
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key: string;
+            note?: string;
+        };
+        NullDataEnvelope: {
+            /** @example null */
+            data: Record<string, never> | null;
+        };
+        BookmarkEnvelope: {
+            data: components["schemas"]["Bookmark"];
+        };
+        BookmarkNullableEnvelope: {
+            data: components["schemas"]["Bookmark"] | null;
+        };
+        BookmarkCategoryEnvelope: {
+            data: components["schemas"]["BookmarkCategory"];
+        };
+        BookmarkCategoryListEnvelope: {
+            data: components["schemas"]["BookmarkCategory"][];
+        };
+        BookmarkEntryEnvelope: {
+            data: components["schemas"]["BookmarkEntry"];
+        };
+        BookmarkEntryListEnvelope: {
+            data: components["schemas"]["BookmarkEntry"][];
+        };
+        MeSearchEnvelope: {
+            data: components["schemas"]["SearchResult"][];
+        };
+        NoteEnvelope: {
+            data: components["schemas"]["Note"];
+        };
+        NoteListEnvelope: {
+            data: components["schemas"]["Note"][];
+        };
+        ReadingProgressEnvelope: {
+            data: components["schemas"]["ReadingProgress"] | null;
+        };
+        ReadingProgressRequiredEnvelope: {
+            data: components["schemas"]["ReadingProgress"];
+        };
+        StreakEnvelope: {
+            data: components["schemas"]["Streak"];
+        };
+        ReadingStatsDaily: {
+            /** Format: date */
+            day: string;
+            verses_read: number;
+        };
+        ReadingStatsHourly: {
+            hour: number;
+            verses_read: number;
+        };
+        ReadingStatsWeekday: {
+            /** @description ISO weekday (1=Mon … 7=Sun). */
+            weekday: number;
+            verses_read: number;
+        };
+        ReadingStats: {
+            total: number;
+            active_days: number;
+            best_day?: components["schemas"]["ReadingStatsDaily"];
+            daily: components["schemas"]["ReadingStatsDaily"][];
+            hourly: components["schemas"]["ReadingStatsHourly"][];
+            weekday: components["schemas"]["ReadingStatsWeekday"][];
+            cumulative: components["schemas"]["ReadingStatsDaily"][];
+        };
+        ReadingStatsEnvelope: {
+            data: components["schemas"]["ReadingStats"];
+        };
+        PreferencesEnvelope: {
+            data: {
+                [key: string]: unknown;
+            } | null;
+        };
+        CollectionEnvelope: {
+            data: components["schemas"]["Collection"];
+        };
+        CollectionListEnvelope: {
+            data: components["schemas"]["Collection"][];
+        };
+        CollectionVerseEnvelope: {
+            data: components["schemas"]["CollectionVerse"];
+        };
+        CollectionDetailEnvelope: {
+            data: components["schemas"]["CollectionDetail"];
+        };
+        /** @enum {string} */
+        ActivityKind: "search" | "browse_chapter" | "browse_verse" | "browse_verse_range";
+        ActivityEntry: {
+            /** Format: int64 */
+            id: number;
+            kind: components["schemas"]["ActivityKind"];
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key?: string;
+            query?: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        RecordActivityRequest: {
+            kind: components["schemas"]["ActivityKind"];
+            /** @enum {string} */
+            scripture: "quran" | "bible";
+            verse_key?: string;
+            query?: string;
+        };
+        ActivityListEnvelope: {
+            data: components["schemas"]["ActivityEntry"][];
+        };
+        ActivityStoredResponse: {
+            stored: boolean;
+        };
+        ActivityConsentResponse: {
+            consent: boolean;
+        };
+        SetActivityConsentRequest: {
+            consent: boolean;
+        };
+        DeletedCountResponse: {
+            /** Format: int64 */
+            deleted: number;
+        };
+        /** @enum {string} */
+        UserDataExportStatus: "queued" | "running" | "sent" | "failed";
+        UserDataExport: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            user_id: number;
+            status: components["schemas"]["UserDataExportStatus"];
+            object_key?: string | null;
+            download_url?: string | null;
+            error?: string | null;
+            /** Format: date-time */
+            requested_at: string;
+            /** Format: date-time */
+            sent_at?: string | null;
+        };
+        UserDataExportEnvelope: {
+            data: components["schemas"]["UserDataExport"] | null;
+        };
+        UserDataExportQueuedResponse: {
+            /** @enum {string} */
+            status: "queued";
+            estimated_minutes: number;
+        };
+        RetryAfterResponse: {
+            /** Format: int64 */
+            retry_after_seconds: number;
+        };
+        /** @enum {string} */
+        DeleteContentCategory: "bookmarks" | "notes" | "collections" | "activity" | "reading_progress" | "games";
+        DeleteContentRequest: {
+            categories: components["schemas"]["DeleteContentCategory"][];
+        };
+        /** @enum {string} */
+        UserDataDeletionStatus: "queued" | "running" | "done" | "failed";
+        UserDataDeletion: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            user_id: number;
+            status: components["schemas"]["UserDataDeletionStatus"];
+            categories: components["schemas"]["DeleteContentCategory"][];
+            counts?: {
+                [key: string]: number;
+            } | null;
+            error?: string | null;
+            /** Format: date-time */
+            requested_at: string;
+            /** Format: date-time */
+            completed_at?: string | null;
+        };
+        UserDataDeletionEnvelope: {
+            data: components["schemas"]["UserDataDeletion"] | null;
+        };
+        UserDataDeletionQueuedResponse: {
+            /** @enum {string} */
+            status: "queued";
+        };
+        ReasonResponse: {
+            reason: string;
+        };
+        PushKeys: {
+            p256dh: string;
+            auth: string;
+        };
+        PushSubscribeRequest: {
+            /** Format: uri */
+            endpoint: string;
+            keys: components["schemas"]["PushKeys"];
+            categories?: string[];
+            locale?: string;
+            timezone?: string;
+        };
+        PushSubscribeResponse: {
+            /** Format: int64 */
+            id: number;
+            categories: string[];
+        };
+        PushUnsubscribeRequest: {
+            /** Format: uri */
+            endpoint: string;
+        };
+        PushTestResponse: {
+            sent: number;
+        };
+        OkResponse: {
+            ok: boolean;
+        };
+        User: {
+            /** Format: int64 */
+            id: number;
+            auth_id: string;
+            /** Format: email */
+            email: string;
+            display_name?: string | null;
+            /** @enum {string} */
+            role: "admin" | "editor" | "member";
+            permissions: {
+                [key: string]: unknown;
+            } | null;
+            is_active: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        UpdateUserRequest: {
+            /** @enum {string} */
+            role?: "admin" | "editor" | "member";
+            permissions?: {
+                [key: string]: unknown;
+            };
+            is_active?: boolean;
+        };
+        UserEnvelope: {
+            data: components["schemas"]["User"];
+        };
+        UserListEnvelope: {
+            data: components["schemas"]["User"][];
+        };
+        EditorialSession: {
+            is_admin: boolean;
+            /** @description Module key (article, quran, ...) mapped to can_write. Presence of a key implies read access. */
+            modules: {
+                [key: string]: boolean;
+            };
+            /** @description Quran version id (as string key) mapped to can_write. Presence implies read access. */
+            quran_versions: {
+                [key: string]: boolean;
+            };
+            /** @description Bible version id (as string key) mapped to can_write. */
+            bible_versions: {
+                [key: string]: boolean;
+            };
+            /** Format: int64 */
+            quran_reference_version_id?: number | null;
+        };
+        EditorialSessionEnvelope: {
+            data: components["schemas"]["EditorialSession"];
+        };
+        VersionAuthor: {
+            name?: string;
+            bio?: string | null;
+        };
+        QuranVersion: {
+            /** Format: int64 */
+            id: number;
+            slug: string;
+            name: string;
+            lang_id: number;
+            authors?: components["schemas"]["VersionAuthor"][];
+            direction: string;
+            is_canonical_english: boolean;
+            /** Format: int64 */
+            reference_version_id?: number | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        BibleVersion: {
+            /** Format: int64 */
+            id: number;
+            slug: string;
+            name: string;
+            lang_id: number;
+            authors?: components["schemas"]["VersionAuthor"][];
+            direction: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        EditorialQuranVersionListEnvelope: {
+            data: components["schemas"]["QuranVersion"][];
+        };
+        EditorialBibleVersionListEnvelope: {
+            data: components["schemas"]["BibleVersion"][];
+        };
+        GamePassage: {
+            /**
+             * Format: int64
+             * @example 42
+             */
+            id: number;
+            /** @example 1 */
+            chapter_start: number;
+            /** @example 1 */
+            verse_start: number;
+            /** @example 1 */
+            chapter_end: number;
+            /** @example 7 */
+            verse_end: number;
+            /** @example The Key — opening prayer */
+            label: string;
+            /**
+             * @example [
+             *       "worship",
+             *       "guidance"
+             *     ]
+             */
+            themes: string[];
+        };
+        GamePassageListEnvelope: {
+            data: components["schemas"]["GamePassage"][];
+        };
+        StartGameVariantRequest: {
+            /**
+             * Format: int64
+             * @description When omitted the server selects a passage automatically based on the player's adaptive skill band. When provided the exact passage is used regardless of skill band.
+             * @example 42
+             */
+            passage_id?: number;
+            /**
+             * @example en
+             * @enum {string}
+             */
+            language: "en" | "ar" | "ac" | "fa" | "ur" | "fr" | "de" | "es" | "sv" | "tr" | "id" | "tl" | "ru" | "bn" | "ta";
+            /**
+             * @description Difficulty tier for the round. Use `adaptive` to let the server pick the tier based on the player's recent accuracy across all tiers. The resolved tier is always returned in the GameVariant.
+             * @example hard
+             * @enum {string}
+             */
+            difficulty: "easy" | "medium" | "hard" | "professional" | "adaptive";
+            /**
+             * @description Round size (number of blanks). Use `adaptive` to let the server pick based on the player's total attempt history. The resolved size is always returned in the GameVariant.
+             * @example medium
+             * @enum {string}
+             */
+            size: "short" | "medium" | "long" | "adaptive";
+            /**
+             * @description When provided, resume the exact variant referenced. Returns 404 if the variant does not exist. Without this field the server returns the lowest-counter variant the caller has not yet attempted, minting a new one if all existing variants are consumed.
+             * @example p42-en-hard-medium-7
+             */
+            variant_id?: string;
+        };
+        GameRenderedVerse: {
+            /** @example 1:2 */
+            verse_key: string;
+            /**
+             * @description Verse text with each removed word replaced by a `__BLANK_<index>__` token. Indices match the corresponding entries in the `blanks` array.
+             * @example __BLANK_0__ be to GOD, Lord of the universe.
+             */
+            text: string;
+        };
+        GameBlank: {
+            /**
+             * @description 0-based blank index within the variant.
+             * @example 0
+             */
+            index: number;
+            /** @example 1:2 */
+            verse_key: string;
+            /**
+             * @description 0-based word index of the blank inside its verse.
+             * @example 0
+             */
+            word_position: number;
+            /** @description Only present for `difficulty = easy`. Shuffled deterministically; exactly one is the answer. */
+            options?: string[];
+            hint?: components["schemas"]["GameBlankHint"];
+        };
+        /** @description Toggleable hints for a blank. Present only for `difficulty = medium`. Each revealed hint costs a flat penalty (see the score formula); the client tracks how many it reveals and reports the total via `hints_used` on submit. Fields are derived from the answer and never contain the full answer. */
+        GameBlankHint: {
+            /**
+             * @description First character of the answer, preserving source case.
+             * @example P
+             */
+            first_letter: string;
+            /**
+             * @description First two characters of the answer (or the whole answer if it is a single character).
+             * @example Pr
+             */
+            first_two: string;
+            /**
+             * @description Character count of the answer.
+             * @example 6
+             */
+            length: number;
+        };
+        GameVariant: {
+            /** @example p42-en-hard-medium-7 */
+            variant_id: string;
+            /**
+             * @description Unique ID for this play session. Pass back on every checkBlank and submit call so the server can track per-blank wrong attempts.
+             * @example 01HBJV5Z6Q5T7B5W2J4N8Q3X9F
+             */
+            session_id: string;
+            passage: components["schemas"]["GamePassage"];
+            /** @enum {string} */
+            language: "en" | "ar" | "ac" | "fa" | "ur" | "fr" | "de" | "es" | "sv" | "tr" | "id" | "tl" | "ru" | "bn" | "ta";
+            /** @enum {string} */
+            difficulty: "easy" | "medium" | "hard" | "professional";
+            /** @enum {string} */
+            size: "short" | "medium" | "long";
+            rendered_verses: components["schemas"]["GameRenderedVerse"][];
+            blanks: components["schemas"]["GameBlank"][];
+            /** @description True when this variant has already been played by the caller and the server cycled back because every other variant in the group has also been played. */
+            replay: boolean;
+            /**
+             * @description The adaptive difficulty band used when selecting blanks for this variant. Derived from the player's recent accuracy at this tier; not settable by the client.
+             * @enum {string}
+             */
+            skill_band?: "easy" | "medium" | "hard";
+        };
+        GameVariantEnvelope: {
+            data: components["schemas"]["GameVariant"];
+        };
+        GameGuess: {
+            /** @example 0 */
+            index: number;
+            /** @example Praise */
+            value: string;
+        };
+        SubmitGameAttemptRequest: {
+            /** @example p42-en-hard-medium-7 */
+            variant_id: string;
+            /**
+             * @description Session ID returned by startVariant. When provided the server reads per-blank wrong-attempt counts and applies a graduated penalty. Omitting it (e.g. resumed from a shared link) skips the wrong-attempt penalty.
+             * @example 01HBJV5Z6Q5T7B5W2J4N8Q3X9F
+             */
+            session_id?: string;
+            guesses: components["schemas"]["GameGuess"][];
+            /** @example 1 */
+            hints_used: number;
+            /**
+             * @description Time taken in milliseconds. Tiebreaker only.
+             * @example 73214
+             */
+            elapsed_ms?: number;
+        };
+        GamePerBlankResult: {
+            index: number;
+            correct: boolean;
+            /** @description Always present on submit. The correct answer for this blank, shown after the round ends regardless of whether the guess was right. */
+            accepted_answer?: string;
+        };
+        GameSubmitResult: {
+            /** @example 01HBJV5Z6Q5T7B5W2J4N8Q3X9F */
+            attempt_id: string;
+            /** @example 1485 */
+            score: number;
+            /** @example 7 */
+            correct_count: number;
+            /** @example 8 */
+            total_count: number;
+            per_blank: components["schemas"]["GamePerBlankResult"][];
+            /**
+             * Format: double
+             * @example 2
+             */
+            difficulty_multiplier: number;
+            /** @example 25 */
+            hint_penalty: number;
+            /**
+             * @description Total score deduction from wrong attempts across all blanks. Each additional wrong attempt on the same blank costs progressively more: attempt N costs N×10 points.
+             * @example 30
+             */
+            wrong_penalty: number;
+        };
+        GameSubmitResultEnvelope: {
+            data: components["schemas"]["GameSubmitResult"];
+        };
+        GameLeaderboardEntry: {
+            rank: number;
+            /** Format: int64 */
+            user_id: number;
+            display_name?: string | null;
+            score: number;
+            size: string;
+            difficulty: string;
+            elapsed_ms?: number | null;
+            variant_id?: string;
+            /** Format: date-time */
+            attempted_at: string;
+        };
+        GameLeaderboardEnvelope: {
+            data: components["schemas"]["GameLeaderboardEntry"][];
+        };
+        GameHistoryEntry: {
+            attempt_id: string;
+            variant_id: string;
+            score: number;
+            size: string;
+            difficulty: string;
+            /** Format: date-time */
+            completed_at: string;
+        };
+        GameHistoryEnvelope: {
+            data: components["schemas"]["GameHistoryEntry"][];
+            next_cursor?: string | null;
+        };
+        GameStatsByDifficulty: {
+            attempts: number;
+            best_score: number;
+        };
+        GameStats: {
+            total_attempts: number;
+            best_score: number;
+            variants_completed: number;
+            by_difficulty: {
+                easy?: components["schemas"]["GameStatsByDifficulty"];
+                medium?: components["schemas"]["GameStatsByDifficulty"];
+                hard?: components["schemas"]["GameStatsByDifficulty"];
+                professional?: components["schemas"]["GameStatsByDifficulty"];
+            };
+        };
+        GameStatsEnvelope: {
+            data: components["schemas"]["GameStats"];
+        };
     };
     responses: {
         /** @description The request could not be completed due to a conflict with the current state of the resource. Resolve the conflict and try again. */
@@ -1130,6 +2602,17 @@ export interface components {
         };
         /** @description The server encountered an unexpected condition that prevented it from fulfilling the request. Report the issue to the support team if it persists. */
         InternalServerErrror: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    message: string;
+                };
+            };
+        };
+        /** @description The caller is authenticated but lacks the required editorial permission for this resource. */
+        Forbidden: {
             headers: {
                 [name: string]: unknown;
             };
@@ -1188,6 +2671,11 @@ export interface components {
          * @example false
          */
         IncludeMeaningParam: boolean;
+        /**
+         * @description Scripture scope for user data.
+         * @example quran
+         */
+        MeScriptureParam: "quran" | "bible";
     };
     requestBodies: never;
     headers: never;
@@ -1830,6 +3318,1454 @@ export interface operations {
             400: components["responses"]["BadRequest"];
             500: components["responses"]["InternalServerErrror"];
             502: components["responses"]["BadGateway"];
+        };
+    };
+    listMeBookmarkCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkCategoryListEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    createMeBookmarkCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBookmarkCategoryRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkCategoryEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    deleteMeBookmarkCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    updateMeBookmarkCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateBookmarkCategoryRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkCategoryEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listMeBookmarkCategoryEntries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkEntryListEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    createMeBookmarkEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBookmarkEntryRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkEntryEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    deleteMeBookmarkEntry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeCoverToCover: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkNullableEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    putMeCoverToCover: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CoverToCoverRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeScriptureState: {
+        parameters: {
+            query: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+                chapter: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScriptureState"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeNotes: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+                verse_key?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteListEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    upsertMeNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertNoteRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    deleteMeNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeSearch: {
+        parameters: {
+            query: {
+                /** @description Search query string. */
+                q: string;
+                /** @description Limit results to a single scripture. Omit for all. */
+                scripture?: "quran" | "bible";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeSearchEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeReadingProgress: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingProgressEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    putMeReadingProgress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutReadingProgressRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingProgressRequiredEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeStreak: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreakEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeReadingStats: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+                /** @description Time range relative to now. `all` returns full history. */
+                range?: "7d" | "30d" | "90d" | "1y" | "all";
+                /** @description IANA timezone used to bucket day/hour/weekday (e.g. `Asia/Tokyo`). */
+                tz?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReadingStatsEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    postMeReadingLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostReadingLogRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMePreferences: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Scripture scope for user data.
+                 * @example quran
+                 */
+                scripture?: components["parameters"]["MeScriptureParam"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    putMePreferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PutPreferencesRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listMeCollections: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionListEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    createMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCollectionRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeCollectionDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionDetailEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    deleteMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    updateMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCollectionRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    addVerseToMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddCollectionVerseRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionVerseEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    removeVerseFromMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                verseId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    subscribeMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CollectionSubscribeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionSubscribeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    unsubscribeMeCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NullDataEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listMeActivity: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityListEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    recordMeActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordActivityRequest"];
+            };
+        };
+        responses: {
+            /** @description Stored. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityStoredResponse"];
+                };
+            };
+            /** @description Accepted but not stored because activity consent is disabled. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityStoredResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    clearMeActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletedCountResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeActivityConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityConsentResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    setMeActivityConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetActivityConsentRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityConsentResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    requestMeExport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Export queued. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDataExportQueuedResponse"];
+                };
+            };
+            /** @description Existing export is still in progress or cooldown. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryAfterResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeExportStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDataExportEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    requestMeContentDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteContentRequest"];
+            };
+        };
+        responses: {
+            /** @description Deletion queued. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDataDeletionQueuedResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            /** @description A fresh completed export is required before deletion. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReasonResponse"];
+                };
+            };
+            /** @description A deletion is already in progress. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReasonResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeContentDeletionStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserDataDeletionEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    subscribeMePush: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PushSubscribeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushSubscribeResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    unsubscribeMePush: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PushUnsubscribeRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    sendMePushTest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PushTestResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+            /** @description Push sending is not configured. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message: string;
+                    };
+                };
+            };
+        };
+    };
+    getSharedCollection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollectionDetailEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listGameFillBlankPassages: {
+        parameters: {
+            query?: {
+                language?: "en" | "ar" | "ac" | "fa" | "ur" | "fr" | "de" | "es" | "sv" | "tr" | "id" | "tl" | "ru" | "bn" | "ta";
+                theme?: string;
+                chapter?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GamePassageListEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    startGameFillBlankVariant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartGameVariantRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameVariantEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+            501: components["responses"]["NotImplementedError"];
+        };
+    };
+    submitGameFillBlankAttempt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitGameAttemptRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameSubmitResultEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            /** @description Rate-limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message: string;
+                    };
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+            501: components["responses"]["NotImplementedError"];
+        };
+    };
+    getGameFillBlankLeaderboard: {
+        parameters: {
+            query: {
+                scope: "global" | "weekly" | "variant";
+                size?: "short" | "medium" | "long";
+                difficulty?: "easy" | "medium" | "hard" | "professional";
+                variant_id?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameLeaderboardEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listMeGameHistory: {
+        parameters: {
+            query?: {
+                limit?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameHistoryEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getMeGameStats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameStatsEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getCurrentUserAccess: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserEnvelope"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listUsersAdmin: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserListEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    updateUserAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getEditorialSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialSessionEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialQuranVersions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialQuranVersionListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialBibleVersions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialBibleVersionListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
         };
     };
 }

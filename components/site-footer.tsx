@@ -108,12 +108,12 @@ export async function SiteFooter() {
                 alignItems: 'center',
                 gap: 10,
                 padding: '8px 16px',
-                backgroundColor: '#000',
-                color: '#fff',
-                borderRadius: 8,
+                backgroundColor: 'var(--ed-fg)',
+                color: 'var(--ed-bg)',
+                borderRadius: 2,
                 textDecoration: 'none',
                 width: 'fit-content',
-                border: '1px solid #000',
+                border: '1px solid var(--ed-fg)',
                 lineHeight: 1,
               }}
             >

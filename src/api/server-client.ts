@@ -10,19 +10,11 @@
  */
 import createClient from 'openapi-fetch'
 import type { paths } from './types.gen'
+import { resolveServerApiBaseUrl } from './base-url'
 
-const baseUrl = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL
+const baseUrl = resolveServerApiBaseUrl()
 const internalAuthToken = process.env.INTERNAL_API_TOKEN
 
-// Most scripture metadata changes rarely — cache those server-side responses
-// for 24h.
-// Next.js data cache is separate from the page cache, so this works even
-// with force-dynamic pages. Music and community content can change through
-// admin tools, so those requests bypass the data cache.
-//
-// X-Internal-Auth, when configured, lets the SSR container bypass the
-// backend's per-IP rate limit — without it, all SSR traffic shares one
-// IP bucket and trips 429s under load.
 const dynamicPrefixes = ['/music/', '/communities']
 
 function isDynamicApiPath(url: RequestInfo | URL) {

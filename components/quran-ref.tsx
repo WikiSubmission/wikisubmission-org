@@ -15,7 +15,6 @@ import { useVerseFetch, useBibleFetch } from '@/hooks/use-verse-fetch'
 import { parseQuranRef, parseBibleRef } from '@/lib/scripture-parser'
 import { VerseCard } from '@/app/quran/[[...query]]/mini-components/verse-card'
 import type { components } from '@/src/api/types.gen'
-import type { LangCode } from '@/hooks/use-quran-preferences'
 
 type BibleVerseData = components['schemas']['BibleVerseData']
 
@@ -72,8 +71,7 @@ export function ScriptureRef({
   const isBible = bibleRef !== null
   const quranRef = isBible ? null : parseQuranRef(reference)
 
-  const primaryCode: LangCode =
-    prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
+  const primaryCode = prefs.primaryLanguage
 
   const doQuranFetch = useCallback(
     (ref: string) =>

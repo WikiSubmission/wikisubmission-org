@@ -13,6 +13,9 @@ const eslintConfig = defineConfig([
     'build/**',
     'next-env.d.ts',
     'LoginAdditions/**',
+    'public/sw.js',
+    'public/swe-worker-*.js',
+    'Frontpage-handoff/**',
   ]),
 ])
 
