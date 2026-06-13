@@ -1,4 +1,4 @@
-import './globals.css'
+import '@/styles/globals.css'
 import Script from 'next/script'
 import { Fonts } from '@/constants/fonts'
 import { Metadata } from '@/constants/metadata'

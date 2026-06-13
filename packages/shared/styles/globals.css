@@ -2,6 +2,18 @@
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
 
+/*
+ * This stylesheet lives in packages/shared and is imported by every app via
+ * the `@/styles/globals.css` alias. Tailwind v4 derives its content scan from
+ * the CSS file location, which would miss the consuming apps, so register the
+ * source roots explicitly. Paths are relative to this file
+ * (packages/shared/styles/). Each entry still honors .gitignore and skips
+ * node_modules, so scanning the whole shared package and both apps is cheap.
+ */
+@source '../';
+@source '../../../apps/web';
+@source '../../../apps/mobile';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
