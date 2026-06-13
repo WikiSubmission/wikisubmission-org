@@ -9,6 +9,12 @@ import createNextIntlPlugin from 'next-intl/plugin'
 // projects. SSR stays exclusively in apps/web.
 const nextConfig: NextConfig = {
   output: 'export',
+  // Dev-only: allow loading /_next/* dev resources (HMR, on-demand chunks) when
+  // previewing on a phone over the LAN host. Next 16 blocks cross-origin dev
+  // resource access by default; without this the device shell loads but client
+  // chunks are blocked, so data-fetching hooks never run. No effect on the
+  // production static export.
+  allowedDevOrigins: ['192.168.100.3'],
   // Static export cannot run the on-demand image optimizer.
   images: { unoptimized: true },
   // Capacitor serves the bundle from capacitor://localhost (iOS) and

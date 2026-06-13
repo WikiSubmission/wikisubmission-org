@@ -8,7 +8,7 @@
  */
 
 const DEFAULT_UPSTREAM_BASE = 'https://practices.wikisubmission.org'
-const FETCH_TIMEOUT_MS = 20_000
+const FETCH_TIMEOUT_MS = 10_000
 
 /** Public upstream base; overridable via NEXT_PUBLIC_PRACTICES_URL. */
 export const PRACTICES_BASE_URL =
