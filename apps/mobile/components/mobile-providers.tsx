@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { PaletteProvider } from '@/lib/theme-palette-context'
 import { IntlProvider } from '@/app/intl-provider'
 import { MobileAuthProvider } from '@/components/mobile-auth-context'
+import { MobileShell } from '@/components/mobile-shell'
 
 /**
  * Client provider tree for the mobile app. This is the native counterpart to
@@ -31,7 +32,7 @@ export function MobileProviders({ children }: { children: React.ReactNode }) {
         <PaletteProvider>
           <QueryClientProvider client={queryClient}>
             <MobileAuthProvider>
-              {children}
+              <MobileShell>{children}</MobileShell>
               <Toaster />
             </MobileAuthProvider>
           </QueryClientProvider>

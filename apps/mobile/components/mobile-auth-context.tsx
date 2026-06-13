@@ -119,8 +119,12 @@ export function MobileAuthProvider({ children }: { children: React.ReactNode }) 
   )
 
   // Keep the latest user in a ref so signOut can read it without being a dep.
+  // Synced in an effect (not during render) so it commits after paint, which
+  // is fine here: signOut only reads it from a user-triggered handler.
   const userRef = useRef<MobileAuthUser | null>(null)
-  userRef.current = session?.user ?? null
+  useEffect(() => {
+    userRef.current = session?.user ?? null
+  }, [session])
 
   const signOut = useCallback(async () => {
     const current = userRef.current
