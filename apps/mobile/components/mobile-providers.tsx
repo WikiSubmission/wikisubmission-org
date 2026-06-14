@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { PaletteProvider } from '@/lib/theme-palette-context'
+import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { IntlProvider } from '@/app/intl-provider'
 import { MobileAuthProvider } from '@/components/mobile-auth-context'
+import { MobileScriptureAuthBridge } from '@/components/mobile-scripture-auth-bridge'
 import { MobileShell } from '@/components/mobile-shell'
 
 /**
@@ -32,8 +34,12 @@ export function MobileProviders({ children }: { children: React.ReactNode }) {
         <PaletteProvider>
           <QueryClientProvider client={queryClient}>
             <MobileAuthProvider>
-              <MobileShell>{children}</MobileShell>
-              <Toaster />
+              <MobileScriptureAuthBridge>
+                <QuranPlayerProvider>
+                  <MobileShell>{children}</MobileShell>
+                  <Toaster />
+                </QuranPlayerProvider>
+              </MobileScriptureAuthBridge>
             </MobileAuthProvider>
           </QueryClientProvider>
         </PaletteProvider>
