@@ -2,7 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { QueryClient, dehydrate, HydrationBoundary } from '@tanstack/react-query'
 import { meApiServer } from '@/src/api/me-server-client'
-import StatsPageClient from './stats-client'
+import StatsPageClient from '@/components/me/stats-screen'
 
 export default async function StatsPage() {
   const session = await auth()

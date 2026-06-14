@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
-import { SettingsClient } from './settings-client'
+import { SettingsClient } from '@/components/me/settings-screen'
 
 export const dynamic = 'force-dynamic'
 

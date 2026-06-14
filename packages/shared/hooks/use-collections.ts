@@ -1,29 +1,29 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
+import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { meApi } from '@/src/api/me-client'
 import type { CollectionData, CollectionDetail } from '@/types/collections'
 
 const COLLECTIONS_KEY = ['collections']
 
 export function useCollections(): CollectionData[] {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const { data } = useQuery<{ data: CollectionData[] }>({
     queryKey: COLLECTIONS_KEY,
     queryFn: () => meApi.listCollections(),
-    enabled: !!session?.accessToken,
+    enabled: isSignedIn,
     staleTime: 30_000,
   })
   return data?.data ?? []
 }
 
 export function useCollectionDetail(id: number) {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   return useQuery<{ data: CollectionDetail }>({
     queryKey: ['collection', id],
     queryFn: () => meApi.getCollection(id),
-    enabled: !!session?.accessToken && id > 0,
+    enabled: isSignedIn && id > 0,
     staleTime: 30_000,
     refetchOnWindowFocus: true,
   })

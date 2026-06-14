@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
-import { ActivityClient } from './activity-client'
+import { ActivityClient } from '@/components/me/activity-screen'
 
 export const dynamic = 'force-dynamic'
 
