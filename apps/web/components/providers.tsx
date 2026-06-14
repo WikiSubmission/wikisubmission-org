@@ -7,6 +7,7 @@ import { ChatPanelProvider } from '@/components/chat-sidebar/panel-context'
 import { ChatSidebar } from '@/components/chat-sidebar/chat-sidebar'
 import { ChatProvider } from '@/components/chat/chat-context'
 import { SignInPrompt } from '@/components/sign-in-prompt'
+import { ScriptureAuthBridge } from '@/components/scripture-auth-bridge'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { NavigationReferrerTracker } from '@/components/navigation-referrer-tracker'
 import { registerWebApiAuth } from '@/lib/register-api-auth'
@@ -29,16 +30,18 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        <QuranPlayerProvider>
-          <ChatPanelProvider>
-            <ChatProvider>
-              <NavigationReferrerTracker />
-              {children}
-              <ChatSidebar />
-              <SignInPrompt />
-            </ChatProvider>
-          </ChatPanelProvider>
-        </QuranPlayerProvider>
+        <ScriptureAuthBridge>
+          <QuranPlayerProvider>
+            <ChatPanelProvider>
+              <ChatProvider>
+                <NavigationReferrerTracker />
+                {children}
+                <ChatSidebar />
+                <SignInPrompt />
+              </ChatProvider>
+            </ChatPanelProvider>
+          </QuranPlayerProvider>
+        </ScriptureAuthBridge>
       </QueryClientProvider>
     </SessionProvider>
   )

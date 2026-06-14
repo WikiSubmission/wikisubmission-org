@@ -3,8 +3,7 @@
 import { memo, useMemo, useCallback, useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { useSession } from 'next-auth/react'
-import { useSignInPromptStore } from '@/store/sign-in-prompt'
+import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import {
   useAddBookmarkEntry,
   useRemoveBookmarkEntry,
@@ -577,8 +576,7 @@ export const VerseCard = memo(
   }: VerseCardProps) {
     const prefs = useQuranPreferences()
     const { isRtl } = useLanguagesStore()
-    const { data: session } = useSession()
-    const openSignIn = useSignInPromptStore((s) => s.open)
+    const { isSignedIn, promptSignIn } = useScriptureAuth()
 
     const categories = useBookmarkCategories()
     const { mutate: addEntry, isPending: addingEntry } =
@@ -794,9 +792,9 @@ export const VerseCard = memo(
                           : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
                       }`}
                       onClick={(e) => {
-                        if (!session?.accessToken) {
+                        if (!isSignedIn) {
                           e.preventDefault()
-                          openSignIn()
+                          promptSignIn()
                         }
                       }}
                     >
@@ -918,8 +916,8 @@ export const VerseCard = memo(
                       : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
                   }`}
                   onClick={() => {
-                    if (!session?.accessToken) {
-                      openSignIn()
+                    if (!isSignedIn) {
+                      promptSignIn()
                       return
                     }
                     setNotesOpen(true)

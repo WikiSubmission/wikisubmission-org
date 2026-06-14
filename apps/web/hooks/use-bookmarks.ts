@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
+import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { meApi } from '@/src/api/me-client'
 import type { BookmarkEntryData, ScriptureState } from '@/types/bookmarks'
 
@@ -105,11 +105,11 @@ export function useRemoveBookmarkEntry(scripture: string) {
 // ── Bookmark category entries (for detail page) ───────────────────────────
 
 export function useBookmarkCategoryEntries(categoryId: number) {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const { data, isLoading } = useQuery({
     queryKey: ['bookmark-category-entries', categoryId],
     queryFn: () => meApi.listBookmarkCategoryEntries(categoryId),
-    enabled: !!session?.accessToken && categoryId > 0,
+    enabled: isSignedIn && categoryId > 0,
     staleTime: 30_000,
   })
   return { entries: data?.data ?? [], isLoading }
@@ -127,11 +127,11 @@ export function useUpsertCoverToCover(scripture: string) {
 // ── Scripture state (bookmarks + notes for a chapter) ─────────────────────
 
 export function useScriptureState(scripture: string, chapter: number): ScriptureState | undefined {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const { data } = useQuery<ScriptureState>({
     queryKey: stateKey(scripture, chapter),
     queryFn: () => meApi.getScriptureState(scripture, chapter),
-    enabled: !!session?.accessToken && chapter > 0,
+    enabled: isSignedIn && chapter > 0,
     staleTime: 60_000,
   })
   return data

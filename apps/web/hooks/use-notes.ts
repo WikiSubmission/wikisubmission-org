@@ -1,7 +1,7 @@
 'use client'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
+import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { meApi } from '@/src/api/me-client'
 import type { NoteData, ScriptureState } from '@/types/bookmarks'
 
@@ -106,11 +106,11 @@ export function useDeleteNote(scripture: string) {
 // ── Note count (quran + bible) ─────────────────────────────────────────────
 
 export function useNotesByScripture(scripture: 'quran' | 'bible'): NoteData[] {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const { data } = useQuery<{ data: NoteData[] }>({
     queryKey: ['notes', scripture],
     queryFn: () => meApi.getNotes(scripture),
-    enabled: !!session?.accessToken,
+    enabled: isSignedIn,
     staleTime: 30_000,
   })
   return data?.data ?? []

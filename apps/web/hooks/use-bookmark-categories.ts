@@ -1,18 +1,18 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
+import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { meApi } from '@/src/api/me-client'
 import type { BookmarkCategoryData } from '@/types/bookmarks'
 
 const CATEGORIES_KEY = ['bookmark-categories']
 
 export function useBookmarkCategories(): BookmarkCategoryData[] {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const { data } = useQuery<{ data: BookmarkCategoryData[] }>({
     queryKey: CATEGORIES_KEY,
     queryFn: () => meApi.listBookmarkCategories(),
-    enabled: !!session?.accessToken,
+    enabled: isSignedIn,
     staleTime: 30_000,
   })
   return data?.data ?? []

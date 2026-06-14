@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useSession } from 'next-auth/react'
+import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { meApi } from '@/src/api/me-client'
 import { useQuranPreferences, type QuranPreferences } from '@/hooks/use-quran-preferences'
 
@@ -19,7 +19,7 @@ function toPayload(prefs: QuranPreferences): Record<string, unknown> {
 // Hydrate local store from server on first load (server-wins), then debounce
 // PUTs on every subsequent local change.
 export function useQuranPrefsSync() {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const prefs = useQuranPreferences()
   const hydratedRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -27,7 +27,7 @@ export function useQuranPrefsSync() {
 
   // Hydrate from server once, on first auth.
   useEffect(() => {
-    if (!session?.accessToken || hydratedRef.current) return
+    if (!isSignedIn || hydratedRef.current) return
     hydratedRef.current = true
 
     meApi.getPreferences('quran').then((res) => {
@@ -40,11 +40,11 @@ export function useQuranPrefsSync() {
       // Silently ignore — local preferences stay as-is if server is unreachable.
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.accessToken])
+  }, [isSignedIn])
 
   // Debounce PUTs whenever preferences change (after hydration).
   useEffect(() => {
-    if (!session?.accessToken || !hydratedRef.current) return
+    if (!isSignedIn || !hydratedRef.current) return
     const payload = toPayload(prefs)
     const serialised = JSON.stringify(payload)
     if (serialised === prevPayloadRef.current) return

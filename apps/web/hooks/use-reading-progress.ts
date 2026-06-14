@@ -2,43 +2,43 @@
 
 import { useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
+import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { meApi } from '@/src/api/me-client'
 import type { BookmarkData, ReadingProgressData } from '@/types/bookmarks'
 
 export function useReadingProgress(scripture: string): ReadingProgressData | null {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const { data } = useQuery({
     queryKey: ['reading-progress', scripture],
     queryFn: () => meApi.getReadingProgress(scripture),
-    enabled: !!session?.accessToken,
+    enabled: isSignedIn,
     staleTime: 60_000,
   })
   return data?.data ?? null
 }
 
 export function useSyncReadingProgress(scripture: string) {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const { mutate } = useMutation({
     mutationFn: (verseKey: string) =>
       meApi.putReadingProgress({ scripture, verse_key: verseKey }),
   })
-  return session?.accessToken ? mutate : null
+  return isSignedIn ? mutate : null
 }
 
 export function useCoverToCoverProgress(scripture: string): BookmarkData | null {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const { data } = useQuery({
     queryKey: ['cover-to-cover', scripture],
     queryFn: () => meApi.getCoverToCover(scripture),
-    enabled: !!session?.accessToken,
+    enabled: isSignedIn,
     staleTime: 60_000,
   })
   return data?.data ?? null
 }
 
 export function useMarkCoverToCover(scripture: string) {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const qc = useQueryClient()
   const { mutate } = useMutation({
     mutationFn: (verseKey: string) =>
@@ -62,12 +62,12 @@ export function useMarkCoverToCover(scripture: string) {
       qc.invalidateQueries({ queryKey: ['streak', scripture] })
     },
   })
-  return session?.accessToken ? mutate : null
+  return isSignedIn ? mutate : null
 }
 
 // Debounced hook: call `reportVerse(verseKey)` and it fires a PUT after 5s of inactivity.
 export function useReadingProgressSync(scripture: string) {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const { mutate } = useMutation({
     mutationFn: (verseKey: string) =>
       meApi.putReadingProgress({ scripture, verse_key: verseKey }),
@@ -76,7 +76,7 @@ export function useReadingProgressSync(scripture: string) {
   const lastRef = useRef<string | null>(null)
 
   function reportVerse(verseKey: string) {
-    if (!session?.accessToken || verseKey === lastRef.current) return
+    if (!isSignedIn || verseKey === lastRef.current) return
     lastRef.current = verseKey
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
