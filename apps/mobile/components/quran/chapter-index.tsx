@@ -54,11 +54,32 @@ export function ChapterIndex() {
           inputMode="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Find a chapter"
-          aria-label="Find a chapter"
+          placeholder="Search chapters or verses"
+          aria-label="Search chapters or verses"
           className="h-11 w-full rounded-xl border border-border/50 bg-muted/40 pl-10 pr-3 text-base outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/60"
         />
       </div>
+
+      {query.trim() && (
+        <Link
+          href={`/quran/search?q=${encodeURIComponent(query.trim())}`}
+          prefetch={false}
+          onClick={() => haptic('light')}
+          className="mb-3 flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3 transition-colors active:bg-primary/10"
+        >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+            <Search className="size-4" />
+          </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate text-base font-semibold leading-tight text-primary">
+              Search all verses
+            </span>
+            <span className="truncate text-sm text-muted-foreground">
+              Find “{query.trim()}” across the Quran
+            </span>
+          </span>
+        </Link>
+      )}
 
       <ul className="flex flex-col gap-1.5">
         {filtered.map((chapter) => (
