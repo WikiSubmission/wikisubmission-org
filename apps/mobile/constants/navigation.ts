@@ -19,7 +19,7 @@ export interface TabItem {
 export const TABS: readonly TabItem[] = [
   { key: 'today', href: '/', label: 'Today', icon: Sunrise },
   { key: 'quran', href: '/quran', label: 'Quran', icon: BookOpen },
-  { key: 'games', href: '/games', label: 'Games', icon: Gamepad2 },
+  { key: 'games', href: '/quran/games', label: 'Games', icon: Gamepad2 },
   { key: 'profile', href: '/me', label: 'Profile', icon: User },
   { key: 'more', href: '/more', label: 'More', icon: LayoutGrid },
 ]
