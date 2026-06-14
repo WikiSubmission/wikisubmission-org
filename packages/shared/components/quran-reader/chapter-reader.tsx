@@ -21,10 +21,10 @@ import {
   type ChapterReaderOptions,
   type VerseData,
 } from '@/hooks/use-chapter-reader'
-import { VerseCard, toQuranVerse } from '../mini-components/verse-card'
-import { VerseMinimap } from '../mini-components/verse-minimap'
-import { ReadingView } from '../mini-components/reading-view'
-import { MultiSelectBar } from '../mini-components/multi-select-bar'
+import { VerseCard, toQuranVerse } from './verse-card'
+import { VerseMinimap } from './verse-minimap'
+import { ReadingView } from './reading-view'
+import { MultiSelectBar } from './multi-select-bar'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useTranslations } from 'next-intl'
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'

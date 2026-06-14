@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { ScriptureRef } from './quran-ref'
+import { ScriptureRef } from '@/components/quran-ref'
 import {
   createQuranInlineRefRe,
   createBibleNumericInlineRefRe,

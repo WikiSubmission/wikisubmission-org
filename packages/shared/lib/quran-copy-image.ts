@@ -5,7 +5,7 @@ import {
   VersePrintCard,
   type PrintKind,
   type VersePrintPrefs,
-} from '@/app/quran/[[...query]]/mini-components/verse-print-card'
+} from '@/components/quran-reader/verse-print-card'
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']

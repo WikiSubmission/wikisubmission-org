@@ -13,7 +13,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useVerseFetch, useBibleFetch } from '@/hooks/use-verse-fetch'
 import { parseQuranRef, parseBibleRef } from '@/lib/scripture-parser'
-import { VerseCard } from '@/app/quran/[[...query]]/mini-components/verse-card'
+import { VerseCard } from '@/components/quran-reader/verse-card'
 import type { components } from '@/src/api/types.gen'
 
 type BibleVerseData = components['schemas']['BibleVerseData']
