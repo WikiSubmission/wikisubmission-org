@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
+import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { meApi } from '@/src/api/me-client'
 import type { NoteData, SearchResultData } from '@/types/bookmarks'
 
@@ -44,9 +44,9 @@ function localNoteMatches(notes: NoteData[], q: string): SearchResultData[] {
 }
 
 export function useMeSearch(q: string, scripture?: string): SearchResultData[] {
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const trimmed = q.trim()
-  const enabled = !!session?.accessToken && trimmed.length > 0
+  const enabled = isSignedIn && trimmed.length > 0
 
   const { data: remote } = useQuery<{ data: SearchResultData[] }>({
     queryKey: ['me-search', trimmed, scripture],

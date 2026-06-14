@@ -34,13 +34,13 @@ import { QuranRef } from '@/components/quran-ref'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { VerseCard } from '@/components/quran-reader/verse-card'
 import { MultiSelectBar } from '@/components/quran-reader/multi-select-bar'
-import { SearchHeader } from '../mini-components/search-header'
-import { CopyAllDropdown } from '../mini-components/copy-all-dropdown'
-import { SearchResultsSkeleton } from '../mini-components/search-results-skeleton'
+import { SearchHeader } from './search-header'
+import { CopyAllDropdown } from './copy-all-dropdown'
+import { SearchResultsSkeleton } from './search-results-skeleton'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useMeSearch } from '@/hooks/use-me-search'
 import { useTranslations } from 'next-intl'
-import { useSession } from 'next-auth/react'
+import { useScriptureAuth } from '@/lib/scripture-auth-context'
 
 // ─── Word search ──────────────────────────────────────────────────────────────
 
@@ -98,7 +98,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
 
   const prefs = useQuranPreferences()
   const verseSearch = useVerseSearch()
-  const { data: session } = useSession()
+  const { isSignedIn } = useScriptureAuth()
   const t = useTranslations('search')
   const tQuran = useTranslations('quran')
   const tCommon = useTranslations('common')
@@ -434,8 +434,8 @@ export default function SearchResult({ props }: { props: { query: string } }) {
                         isLast={index === allVerses.length - 1}
                         optsKey={optsKey}
                         showAudio={false}
-                        showBookmark={!!session?.accessToken}
-                        showNotes={!!session?.accessToken}
+                        showBookmark={isSignedIn}
+                        showNotes={isSignedIn}
                         verseHref={`/quran/${chNum}?verse=${vNum}`}
                         searchHighlight={tr?.hl ?? undefined}
                       />

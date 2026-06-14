@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { Suspense } from 'react'
 import { Spinner } from '@/components/ui/spinner'
-import SearchResult from './client-components/result-search'
+import SearchResult from '@/components/quran-reader/result-search'
 import { ChapterReader } from '@/components/quran-reader/chapter-reader'
 import QuranSearchBar from './client-components/search-bar'
 import { wsApiServer } from '@/src/api/server-client'
