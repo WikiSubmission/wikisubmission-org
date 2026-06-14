@@ -40,7 +40,7 @@ export function FillBlankPicker() {
     try {
       const { data } = await meApi.games.startVariant({ language, difficulty, size })
       stashVariant(data)
-      router.push(`/quran/games/fill-blank/play/${encodeURIComponent(data.variant_id)}`)
+      router.push(`/quran/games/fill-blank/play?v=${encodeURIComponent(data.variant_id)}`)
     } catch {
       setStartFailed(true)
       setStarting(false)

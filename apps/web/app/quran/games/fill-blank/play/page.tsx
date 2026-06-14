@@ -1,10 +1,19 @@
+import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
-import { FillBlankRound } from './fill-blank-round'
+import { FillBlankRound } from '@/components/games/fill-blank-round'
 
-type Params = Promise<{ variantId: string }>
+type SearchParams = Promise<{ v?: string }>
 
-export default async function FillBlankPlayPage({ params }: { params: Params }) {
-  const { variantId } = await params
+// The active variant travels in the `?v=` query rather than a path segment, so
+// the route is a single page shared by both the SSR web app and the static
+// mobile export (which cannot pre-render unbounded path params).
+export default async function FillBlankPlayPage({
+  searchParams,
+}: {
+  searchParams: SearchParams
+}) {
+  const { v } = await searchParams
+  if (!v) redirect('/quran/games/fill-blank')
   const t = await getTranslations('games')
 
   return (
@@ -24,7 +33,7 @@ export default async function FillBlankPlayPage({ params }: { params: Params }) 
           color: 'var(--ed-fg-muted)',
         }}
       >
-        {t('playKicker', { variantId })}
+        {t('playKicker', { variantId: v })}
       </div>
       <h1
         style={{
@@ -37,7 +46,7 @@ export default async function FillBlankPlayPage({ params }: { params: Params }) 
       >
         {t('playTitle')}
       </h1>
-      <FillBlankRound variantId={variantId} />
+      <FillBlankRound variantId={v} />
     </section>
   )
 }

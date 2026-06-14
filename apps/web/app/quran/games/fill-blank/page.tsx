@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
-import { FillBlankPicker } from './fill-blank-picker'
-import { GamesOverview } from '../games-overview'
+import { FillBlankPicker } from '@/components/games/fill-blank-picker'
+import { GamesOverview } from '@/components/games/games-overview'
 
 export const metadata = {
   title: 'Fill the Missing Word — WikiSubmission',

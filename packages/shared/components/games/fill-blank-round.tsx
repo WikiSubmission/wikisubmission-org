@@ -305,7 +305,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
         size: variant.size,
       })
       stashVariant(data)
-      router.push(`/quran/games/fill-blank/play/${encodeURIComponent(data.variant_id)}`)
+      router.push(`/quran/games/fill-blank/play?v=${encodeURIComponent(data.variant_id)}`)
     } catch {
       setRestarting(false)
     }

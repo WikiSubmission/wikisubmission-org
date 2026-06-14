@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
-import { GamesLeaderboard } from './games-leaderboard'
+import { GamesLeaderboard } from '@/components/games/games-leaderboard'
 
 export const metadata = {
   title: 'Leaderboard — Quran Games — WikiSubmission',
