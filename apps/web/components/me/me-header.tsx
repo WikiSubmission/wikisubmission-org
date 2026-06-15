@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Fragment } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { ChevronLeft } from 'lucide-react'
@@ -21,7 +21,7 @@ function normalizeMePath(pathname: string, locale: string): string {
   return pathname
 }
 
-function useCrumbs(pathname: string): Crumb[] {
+function useCrumbs(pathname: string, detailId: string | null): Crumb[] {
   const t = useTranslations('meHeader')
   const collections = useCollections()
   const categories = useBookmarkCategories()
@@ -33,7 +33,9 @@ function useCrumbs(pathname: string): Crumb[] {
   if (segments.length === 1) return crumbs
 
   const section = segments[1]
-  const id = segments[2]
+  // Detail routes (bookmarks/collections) now carry the id in ?id= rather than
+  // a path segment, so the deep-linked item name comes from the query.
+  const id = detailId ?? undefined
 
   if (section === 'notes') {
     crumbs.push({ label: t('notes') })
@@ -132,10 +134,11 @@ function Breadcrumb({ crumbs }: { crumbs: Crumb[] }) {
 
 export function MeHeader() {
   const pathname = usePathname() ?? '/me'
+  const searchParams = useSearchParams()
   const locale = useLocale()
   const normalizedPath = normalizeMePath(pathname, locale)
   const isRoot = ME_ROOT_RE.test(normalizedPath)
-  const crumbs = useCrumbs(normalizedPath)
+  const crumbs = useCrumbs(normalizedPath, searchParams.get('id'))
 
   return (
     <div className="me-header">

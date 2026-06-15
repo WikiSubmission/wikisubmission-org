@@ -216,7 +216,7 @@ function CategoriesSection() {
         {filtered.map((cat) => (
           <Link
             key={cat.id}
-            href={`/me/bookmarks/${cat.id}`}
+            href={`/me/bookmarks?id=${cat.id}`}
             className="cat-row"
             style={{ ['--cat-color' as string]: cat.color }}
           >
@@ -316,7 +316,7 @@ function CollectionsSection() {
       </div>
       <div className="coll-list">
         {collections.slice(0, 4).map((col, idx) => (
-          <Link key={col.id} href={`/me/collections/${col.id}`} className="coll-row">
+          <Link key={col.id} href={`/me/collections?id=${col.id}`} className="coll-row">
             <span className="coll-num">{roman(idx + 1)}</span>
             <div>
               <h3 className="coll-title">{col.name}</h3>

@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus, Search, Share2 } from 'lucide-react'
@@ -18,7 +18,8 @@ function CategoryDetail({ categoryId }: { categoryId: number }) {
   const initialQuery = sp.get('q') ?? ''
   const [search, setSearch] = useState(initialQuery)
 
-  // Sync ?q= in the URL with the local search input, debounced.
+  // Sync ?q= in the URL with the local search input, debounced. The category id
+  // travels in ?id=, so preserve it while editing the query.
   useEffect(() => {
     const id = setTimeout(() => {
       const next = new URLSearchParams(sp.toString())
@@ -109,12 +110,27 @@ function CategoryDetail({ categoryId }: { categoryId: number }) {
   )
 }
 
-export default function BookmarkDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = use(params)
-  const categoryId = parseInt(id, 10)
+// Reads the bookmark category id from the `?id=` query. The detail is a single
+// static route in the export, so the id can't be a path param. With no id, fall
+// back to the dashboard's bookmarks section.
+function BookmarksScreenInner() {
+  const router = useRouter()
+  const sp = useSearchParams()
+  const raw = sp.get('id')
+  const categoryId = raw ? Number.parseInt(raw, 10) : NaN
+
+  useEffect(() => {
+    if (!Number.isFinite(categoryId)) router.replace('/me#bookmarks')
+  }, [categoryId, router])
+
+  if (!Number.isFinite(categoryId)) return null
   return <CategoryDetail categoryId={categoryId} />
+}
+
+export default function BookmarksScreen() {
+  return (
+    <Suspense fallback={null}>
+      <BookmarksScreenInner />
+    </Suspense>
+  )
 }

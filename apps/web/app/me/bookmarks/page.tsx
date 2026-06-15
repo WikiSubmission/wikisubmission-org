@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation'
+import BookmarksScreen from '@/components/me/bookmarks-screen'
 
-export default function BookmarksRedirect() {
-  redirect('/me#bookmarks')
+// Auth is enforced by the /me layout. The category id travels in ?id=; with no
+// id, BookmarksScreen redirects to the dashboard's bookmarks section.
+export default function BookmarksPage() {
+  return <BookmarksScreen />
 }

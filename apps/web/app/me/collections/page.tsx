@@ -1,11 +1,6 @@
-'use client'
+import CollectionsScreen from '@/components/me/collections-screen'
 
-import { CollectionsMasterDetail } from '@/components/me/collections-master-detail'
-
+// Auth is enforced by the /me layout. A deep-linked collection arrives via ?id=.
 export default function CollectionsPage() {
-  return (
-    <div className="flex flex-col gap-6">
-      <CollectionsMasterDetail />
-    </div>
-  )
+  return <CollectionsScreen />
 }
