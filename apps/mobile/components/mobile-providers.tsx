@@ -10,6 +10,7 @@ import { IntlProvider } from '@/app/intl-provider'
 import { MobileAuthProvider } from '@/components/mobile-auth-context'
 import { MobileScriptureAuthBridge } from '@/components/mobile-scripture-auth-bridge'
 import { MobileShell } from '@/components/mobile-shell'
+import { NativeInit } from '@/components/native-init'
 
 /**
  * Client provider tree for the mobile app. This is the native counterpart to
@@ -36,6 +37,7 @@ export function MobileProviders({ children }: { children: React.ReactNode }) {
             <MobileAuthProvider>
               <MobileScriptureAuthBridge>
                 <QuranPlayerProvider>
+                  <NativeInit />
                   <MobileShell>{children}</MobileShell>
                   <Toaster />
                 </QuranPlayerProvider>
