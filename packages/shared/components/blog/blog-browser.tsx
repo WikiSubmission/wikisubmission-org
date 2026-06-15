@@ -12,28 +12,27 @@ import { useLocale } from 'next-intl'
 import gsap from 'gsap'
 import { BlogTutorial } from './blog-tutorial'
 import { BookOpenIcon } from 'lucide-react'
+import type { Category, Post, SearchPost } from '@/lib/blog-queries'
 
-export type Post = {
-  _id: string
-  title: string
-  slug: { current: string }
-  excerpt?: string
-  snippets?: string[]
-  publishedAt?: string
-  category?: string
-  categorySlug?: string
-  thumbnailUrl?: string
-  authorName?: string
+export type { Category, Post, SearchPost } from '@/lib/blog-queries'
+
+// Default full-text search (web): hits the server search route. Mobile passes
+// `disableSearch` instead, so this never runs there.
+async function defaultSearchArticles(q: string, locale: string): Promise<SearchPost[]> {
+  const res = await fetch(`/api/search/blog?q=${encodeURIComponent(q)}&locale=${locale}`)
+  const data = await res.json()
+  return data.articles ?? []
 }
 
-// Search API returns slug as a plain string, not { current: string }
-type SearchPost = Omit<Post, 'slug'> & { slug: string }
-
-export type Category = {
-  name: string
-  slug: string
-  count: number
+// Each platform points article links at its own route shape.
+type BlogBrowserOptions = {
+  hrefForSlug?: (slug: string) => string
+  disableSearch?: boolean
+  showTutorial?: boolean
+  searchArticles?: (q: string, locale: string) => Promise<SearchPost[]>
 }
+
+const defaultHrefForSlug = (slug: string) => `/blog/${slug}`
 
 function formatDate(dateString: string | undefined, locale: string) {
   if (!dateString) return ''
@@ -62,10 +61,18 @@ function Highlight({ text, query }: { text: string; query: string }) {
   )
 }
 
-function PostCard({ post, locale }: { post: Post; locale: string }) {
+function PostCard({
+  post,
+  locale,
+  hrefForSlug,
+}: {
+  post: Post
+  locale: string
+  hrefForSlug: (slug: string) => string
+}) {
   return (
     <Link
-      href={`/blog/${post.slug?.current}`}
+      href={hrefForSlug(post.slug.current)}
       className="group flex flex-col bg-card rounded-2xl border border-border/60 overflow-hidden transition-colors hover:border-border"
     >
       <div className="relative w-full aspect-[16/9] overflow-hidden bg-muted shrink-0">
@@ -102,13 +109,23 @@ function PostCard({ post, locale }: { post: Post; locale: string }) {
   )
 }
 
-function SearchResultRow({ post, query, locale }: { post: SearchPost; query: string; locale: string }) {
+function SearchResultRow({
+  post,
+  query,
+  locale,
+  hrefForSlug,
+}: {
+  post: SearchPost
+  query: string
+  locale: string
+  hrefForSlug: (slug: string) => string
+}) {
   const hasBodySnippets = post.snippets && post.snippets.length > 0
   const excerptHasMatch = post.excerpt?.toLowerCase().includes(query.toLowerCase())
 
   return (
     <Link
-      href={`/blog/${post.slug}`}
+      href={hrefForSlug(post.slug)}
       className="group flex flex-col sm:flex-row sm:items-start bg-background rounded-xl border border-border/40 overflow-hidden transition-colors hover:border-border/80"
     >
       <div className="w-full sm:shrink-0 sm:w-24 sm:h-14 sm:m-3 sm:rounded-lg overflow-hidden bg-muted">
@@ -159,10 +176,14 @@ function SearchResultRow({ post, query, locale }: { post: SearchPost; query: str
 function BlogBrowserInner({
   articles,
   categories,
+  hrefForSlug = defaultHrefForSlug,
+  disableSearch = false,
+  showTutorial = true,
+  searchArticles = defaultSearchArticles,
 }: {
   articles: Post[]
   categories: Category[]
-}) {
+} & BlogBrowserOptions) {
   const t = useTranslations('blog')
   const router = useRouter()
   const pathname = usePathname()
@@ -214,8 +235,10 @@ function BlogBrowserInner({
     [updateUrl, activeCategory]
   )
 
-  // Full-text search via API
+  // Full-text search via the injected source. Disabled platforms (mobile)
+  // never enter this path.
   useEffect(() => {
+    if (disableSearch) return
     if (debounceRef.current) clearTimeout(debounceRef.current)
     const q = query.trim()
     if (q.length < 2) {
@@ -227,9 +250,7 @@ function BlogBrowserInner({
     setSearching(true)
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search/blog?q=${encodeURIComponent(q)}&locale=${locale}`)
-        const data = await res.json()
-        setSearchResults(data.articles ?? [])
+        setSearchResults(await searchArticles(q, locale))
       } catch {
         setSearchResults([])
       } finally {
@@ -237,10 +258,10 @@ function BlogBrowserInner({
       }
     }, 300)
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
-  }, [query, locale])
+  }, [query, locale, disableSearch, searchArticles])
 
   const visibleCategories = categories.filter((c) => c.count > 0)
-  const isSearching = query.trim().length >= 2
+  const isSearching = !disableSearch && query.trim().length >= 2
 
   const categoryFiltered = activeCategory
     ? articles.filter((a) => a.categorySlug === activeCategory)
@@ -265,37 +286,43 @@ function BlogBrowserInner({
       </section>
 
       {/* ── Search + tutorial ─────────────────────────────────────────────── */}
-      <section className="px-6 md:px-12 max-w-[1200px] mx-auto">
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-          <div className="relative flex-1">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60 pointer-events-none" />
-            <input
-              type="text"
-              placeholder={t('searchPlaceholder')}
-              value={query}
-              onChange={(e) => handleQueryChange(e.target.value)}
-              className="w-full h-12 rounded-full bg-card border border-border/60 pl-11 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 placeholder:text-muted-foreground transition-colors"
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {searching ? (
-                <Spinner className="size-4 text-muted-foreground" />
-              ) : query ? (
-                <button onClick={clearSearch} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
-                  <XIcon className="size-3.5" />
-                </button>
-              ) : null}
-            </div>
-          </div>
+      {(!disableSearch || showTutorial) && (
+        <section className="px-6 md:px-12 max-w-[1200px] mx-auto">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+            {!disableSearch && (
+              <div className="relative flex-1">
+                <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder={t('searchPlaceholder')}
+                  value={query}
+                  onChange={(e) => handleQueryChange(e.target.value)}
+                  className="w-full h-12 rounded-full bg-card border border-border/60 pl-11 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 placeholder:text-muted-foreground transition-colors"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {searching ? (
+                    <Spinner className="size-4 text-muted-foreground" />
+                  ) : query ? (
+                    <button onClick={clearSearch} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
+                      <XIcon className="size-3.5" />
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            )}
 
-          <button
-            onClick={() => setTutorialOpen(true)}
-            className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-card border border-border/60 text-sm font-medium text-foreground hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-colors shrink-0"
-          >
-            <BookOpenIcon size={16} />
-            {t('instructions')}
-          </button>
-        </div>
-      </section>
+            {showTutorial && (
+              <button
+                onClick={() => setTutorialOpen(true)}
+                className="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full bg-card border border-border/60 text-sm font-medium text-foreground hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-colors shrink-0"
+              >
+                <BookOpenIcon size={16} />
+                {t('instructions')}
+              </button>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ── Category chips ────────────────────────────────────────────────── */}
       {visibleCategories.length > 0 && (
@@ -346,7 +373,7 @@ function BlogBrowserInner({
                 {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} for &ldquo;{query.trim()}&rdquo;
               </p>
               {searchResults.map((post) => (
-                <SearchResultRow key={post._id} post={post} query={query.trim()} locale={locale} />
+                <SearchResultRow key={post._id} post={post} query={query.trim()} locale={locale} hrefForSlug={hrefForSlug} />
               ))}
             </div>
           ) : (
@@ -362,7 +389,7 @@ function BlogBrowserInner({
           categoryFiltered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {categoryFiltered.map((post) => (
-                <PostCard key={post._id} post={post} locale={locale} />
+                <PostCard key={post._id} post={post} locale={locale} hrefForSlug={hrefForSlug} />
               ))}
             </div>
           ) : (
@@ -396,7 +423,7 @@ function BlogBrowserInner({
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {preview.map((post) => (
-                      <PostCard key={post._id} post={post} locale={locale} />
+                      <PostCard key={post._id} post={post} locale={locale} hrefForSlug={hrefForSlug} />
                     ))}
                   </div>
                 </section>
@@ -407,7 +434,7 @@ function BlogBrowserInner({
               <section>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {uncategorised.map((post) => (
-                    <PostCard key={post._id} post={post} locale={locale} />
+                    <PostCard key={post._id} post={post} locale={locale} hrefForSlug={hrefForSlug} />
                   ))}
                 </div>
               </section>
@@ -470,13 +497,14 @@ function TutorialOverlay({ open, onClose }: { open: boolean; onClose: () => void
 export function BlogBrowser({
   articles,
   categories,
+  ...options
 }: {
   articles: Post[]
   categories: Category[]
-}) {
+} & BlogBrowserOptions) {
   return (
     <Suspense>
-      <BlogBrowserInner articles={articles} categories={categories} />
+      <BlogBrowserInner articles={articles} categories={categories} {...options} />
     </Suspense>
   )
 }

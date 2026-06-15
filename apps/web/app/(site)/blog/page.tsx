@@ -4,8 +4,13 @@ import { sanityServer } from '@/lib/sanity'
 import { Metadata } from 'next'
 import { getLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
-import { BlogBrowser } from './blog-browser'
-import type { Post, Category } from './blog-browser'
+import { BlogBrowser } from '@/components/blog/blog-browser'
+import {
+  ALL_ARTICLES_QUERY,
+  CATEGORIES_QUERY,
+  type Post,
+  type Category,
+} from '@/lib/blog-queries'
 import {
   BlogPostArticle,
   type RelatedBlogPost,
@@ -17,20 +22,6 @@ import {
   resolveBlogPreviewRequest,
   toSanityLanguage,
 } from './blog-post'
-
-const ALL_ARTICLES_QUERY = `*[_type == "article" && language == $language] | order(publishedAt desc) {
-  _id, title, slug, excerpt, publishedAt,
-  "category": categories[0]->name,
-  "categorySlug": categories[0]->slug.current,
-  "thumbnailUrl": thumbnail.asset->url,
-  "authorName": author->firstName + " " + author->lastName
-}`
-
-const CATEGORIES_QUERY = `*[_type == "category"] | order(name asc) {
-  name,
-  "slug": slug.current,
-  "count": count(*[_type == "article" && language == $language && references(^._id)])
-}`
 
 type BlogPageProps = {
   searchParams: Promise<{
