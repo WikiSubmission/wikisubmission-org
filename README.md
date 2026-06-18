@@ -2,6 +2,10 @@
 
 Source code repository for [https://wikisubmission.org](https://wikisubmission.org).
 
+## Backend Follow-up
+
+- Remove any persisted Quran `displayMode` values from backend preference storage and stop accepting or returning that field for Quran preferences. The frontend now treats `displayMode` as local-only UX state by design.
+
 ## Local Setup
 
 Clone the repository:
