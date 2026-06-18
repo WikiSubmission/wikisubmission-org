@@ -1448,6 +1448,7 @@ paths:
       tags: [Me]
       operationId: getMePreferences
       summary: Get per-scripture preferences
+      description: Returns durable per-scripture preferences only. For the Quran reader, `displayMode` is intentionally excluded because it is a local-only UX state and must not override the user's current device choice.
       security:
         - bearerAuth: []
       parameters:
@@ -1467,6 +1468,7 @@ paths:
       tags: [Me]
       operationId: putMePreferences
       summary: Upsert per-scripture preferences
+      description: Persists durable per-scripture preferences only. For the Quran reader, clients must not send `displayMode`; that view state is intentionally local-only and excluded from backend storage.
       security:
         - bearerAuth: []
       requestBody:

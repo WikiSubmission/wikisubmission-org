@@ -5,8 +5,20 @@ import { useSession } from 'next-auth/react'
 import { meApi } from '@/src/api/me-client'
 import { useQuranPreferences, type QuranPreferences } from '@/hooks/use-quran-preferences'
 
-// Keys excluded from sync (functions are not serialisable).
-const EXCLUDED_KEYS = new Set(['setPreferences'])
+// Keys excluded from backend sync.
+// `displayMode` is intentionally local-only because pushing a transient view
+// state through the account preference store created bad UX on chapter loads:
+// stale server state could override the user's current local choice.
+const EXCLUDED_KEYS = new Set(['setPreferences', 'displayMode'])
+
+function stripRemoteOnlyOverrides(
+  prefs: QuranPreferences,
+  remote: Partial<QuranPreferences>
+): QuranPreferences {
+  const next = { ...remote }
+  delete next.displayMode
+  return { ...prefs, ...next }
+}
 
 function toPayload(prefs: QuranPreferences): Record<string, unknown> {
   const out: Record<string, unknown> = {}
@@ -16,8 +28,8 @@ function toPayload(prefs: QuranPreferences): Record<string, unknown> {
   return out
 }
 
-// Hydrate local store from server on first load (server-wins), then debounce
-// PUTs on every subsequent local change.
+// Hydrate local store from server once, then debounce PUTs on subsequent local
+// changes. Only durable reading preferences participate in backend sync.
 export function useQuranPrefsSync() {
   const { data: session } = useSession()
   const prefs = useQuranPreferences()
@@ -32,9 +44,11 @@ export function useQuranPrefsSync() {
 
     meApi.getPreferences('quran').then((res) => {
       if (res.data && typeof res.data === 'object') {
-        // Server-wins: merge server payload into local store, preserving
-        // the local setPreferences function reference.
-        prefs.setPreferences({ ...prefs, ...(res.data as Partial<QuranPreferences>) })
+        // Backend prefs hydrate the durable reading settings only.
+        // `displayMode` remains local-only by design.
+        prefs.setPreferences(
+          stripRemoteOnlyOverrides(prefs, res.data as Partial<QuranPreferences>)
+        )
       }
     }).catch(() => {
       // Silently ignore — local preferences stay as-is if server is unreachable.
