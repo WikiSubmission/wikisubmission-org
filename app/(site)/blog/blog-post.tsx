@@ -499,42 +499,42 @@ function buildPortableTextComponents(scriptureRefsEnabled: boolean) {
   return {
   block: {
     normal: ({ children }: { children?: ReactNode }) => (
-      <p className="mb-6 leading-[1.7] text-[19px] text-foreground/85">{renderText(children)}</p>
+      <p className="mb-6 leading-[1.7] text-[19px] text-foreground/85 break-words [overflow-wrap:anywhere]">{renderText(children)}</p>
     ),
     h1: ({ children }: { children?: ReactNode }) => (
-      <h1 className="font-headline text-[40px] mt-14 mb-5 tracking-[-0.02em] leading-[1.1]">
+      <h1 className="font-headline text-[40px] mt-14 mb-5 tracking-[-0.02em] leading-[1.1] break-words [overflow-wrap:anywhere]">
         {renderText(children)}
       </h1>
     ),
     h2: ({ children }: { children?: ReactNode }) => (
-      <h2 className="font-headline text-[34px] mt-14 mb-4 tracking-[-0.02em] leading-[1.15]">
+      <h2 className="font-headline text-[34px] mt-14 mb-4 tracking-[-0.02em] leading-[1.15] break-words [overflow-wrap:anywhere]">
         {renderText(children)}
       </h2>
     ),
     h3: ({ children }: { children?: ReactNode }) => (
-      <h3 className="font-headline text-[24px] mt-10 mb-3 tracking-[-0.015em] leading-[1.2]">
+      <h3 className="font-headline text-[24px] mt-10 mb-3 tracking-[-0.015em] leading-[1.2] break-words [overflow-wrap:anywhere]">
         {renderText(children)}
       </h3>
     ),
     h4: ({ children }: { children?: ReactNode }) => (
-      <h4 className="font-headline text-[19px] mt-8 mb-2 tracking-[-0.01em]">
+      <h4 className="font-headline text-[19px] mt-8 mb-2 tracking-[-0.01em] break-words [overflow-wrap:anywhere]">
         {renderText(children)}
       </h4>
     ),
     blockquote: ({ children }: { children?: ReactNode }) => (
-      <blockquote className="my-9 pl-6 border-l-2 border-primary italic text-[22px] leading-[1.45]">
+      <blockquote className="my-9 pl-6 border-l-2 border-primary italic text-[22px] leading-[1.45] break-words [overflow-wrap:anywhere]">
         {renderText(children)}
       </blockquote>
     ),
   },
   list: {
     bullet: ({ children }: { children?: ReactNode }) => (
-      <ul className="mb-6 space-y-2 pl-5 list-disc marker:text-primary text-[19px] leading-[1.7] text-foreground/85">
+      <ul className="mb-6 space-y-2 pl-5 list-disc marker:text-primary text-[19px] leading-[1.7] text-foreground/85 break-words [overflow-wrap:anywhere]">
         {children}
       </ul>
     ),
     number: ({ children }: { children?: ReactNode }) => (
-      <ol className="mb-6 space-y-2 pl-5 list-decimal marker:text-primary text-[19px] leading-[1.7] text-foreground/85">
+      <ol className="mb-6 space-y-2 pl-5 list-decimal marker:text-primary text-[19px] leading-[1.7] text-foreground/85 break-words [overflow-wrap:anywhere]">
         {children}
       </ol>
     ),
@@ -568,7 +568,7 @@ function buildPortableTextComponents(scriptureRefsEnabled: boolean) {
           href={value?.href}
           target={isExternal || value?.blank ? '_blank' : undefined}
           rel={isExternal ? 'noopener noreferrer' : undefined}
-          className="text-primary underline underline-offset-4 decoration-primary/40 hover:decoration-primary transition-colors"
+          className="text-primary underline underline-offset-4 decoration-primary/40 hover:decoration-primary transition-colors break-words [overflow-wrap:anywhere]"
         >
           {children}
         </a>
