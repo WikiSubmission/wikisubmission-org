@@ -11,9 +11,12 @@ import { ScriptureAuthBridge } from '@/components/scripture-auth-bridge'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { NavigationReferrerTracker } from '@/components/navigation-referrer-tracker'
 import { registerWebApiAuth } from '@/lib/register-api-auth'
+import { registerWebOfflineStore } from '@/lib/register-offline'
 
 // Wire the shared browser API client to next-auth's session on the client.
 registerWebApiAuth()
+// Make installed offline bundles available to the shared reader/search hooks.
+registerWebOfflineStore()
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(

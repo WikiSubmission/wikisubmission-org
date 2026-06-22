@@ -24,6 +24,9 @@ export interface OfflineContentStore {
    * bundle is not installed. */
   getVerses(scripture: string, lang: string, range: VerseRange): Promise<VerseRow[]>
 
+  /** Localized chapter title from an installed bundle, or null if unavailable. */
+  getChapterTitle(scripture: string, lang: string, chapter: number): Promise<string | null>
+
   /** Full-text search across the given languages' installed bundles. */
   search(scripture: string, langs: string[], q: string, opts?: SearchOpts): Promise<SearchRow[]>
 

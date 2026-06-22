@@ -4,6 +4,8 @@ import { useCallback, useRef, useState } from 'react'
 import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
 import type { LangCode } from '@/hooks/use-quran-preferences'
+import { getRegisteredOfflineContentStore } from '@/lib/offline/registry'
+import { offlineQuranVerses } from '@/lib/offline/quran-adapter'
 
 export type QuranResponse = components['schemas']['QuranResponse']
 export type ChapterData = components['schemas']['ChapterData']
@@ -111,6 +113,31 @@ export function useChapterReader(
       const verseEndParam = rangeEnd !== undefined
         ? rangeEnd
         : verseStart + PAGE_SIZE - 1
+
+      // Offline-first: when an offline store is registered (web only) and every
+      // requested language is installed, serve from the local bundle. Word-by-word
+      // data is not bundled in v1, so those requests always use the network. Any
+      // miss or error falls through to the network path below.
+      const offlineStore = getRegisteredOfflineContentStore()
+      if (offlineStore && !opts.includeWords) {
+        try {
+          const offline = await offlineQuranVerses(offlineStore, langs, {
+            chapter: chapterNumber,
+            verseStart,
+            verseEnd: verseEndParam,
+          })
+          if (offline && offline.verses.length > 0) {
+            return {
+              verses: offline.verses,
+              titles: offline.titles,
+              reachedEnd: rangeEnd !== undefined ? true : offline.verses.length < PAGE_SIZE,
+              error: null,
+            }
+          }
+        } catch {
+          // fall through to the network path
+        }
+      }
 
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 15_000)

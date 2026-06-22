@@ -8,6 +8,7 @@ export type WorkerRequest =
   | { id: number; type: 'remove'; bundleId: string }
   | { id: number; type: 'listFiles' }
   | { id: number; type: 'getVerses'; bundleId: string; range: VerseRange }
+  | { id: number; type: 'getChapterTitle'; bundleId: string; chapter: number }
   | { id: number; type: 'search'; bundleIds: string[]; query: string; opts?: SearchOpts }
 
 /** Result payload type for each request type. */
@@ -17,6 +18,7 @@ export interface WorkerResultMap {
   remove: boolean
   listFiles: string[]
   getVerses: VerseRow[]
+  getChapterTitle: string | null
   search: SearchRow[]
 }
 

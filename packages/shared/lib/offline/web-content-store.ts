@@ -74,6 +74,12 @@ export class WebOfflineContentStore implements OfflineContentStore {
     return this.rpc<VerseRow[]>({ type: 'getVerses', bundleId: id, range })
   }
 
+  async getChapterTitle(scripture: string, lang: string, chapter: number): Promise<string | null> {
+    const id = WebOfflineContentStore.bundleId(scripture, lang)
+    if (!catalog.list().some((b) => b.id === id)) return null
+    return this.rpc<string | null>({ type: 'getChapterTitle', bundleId: id, chapter })
+  }
+
   async search(
     scripture: string,
     langs: string[],

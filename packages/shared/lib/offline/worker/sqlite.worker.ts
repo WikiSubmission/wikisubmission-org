@@ -106,6 +106,11 @@ function getVerses(bundleId: string, range: VerseRange): VerseRow[] {
   ).map(toVerseRow)
 }
 
+function getChapterTitle(bundleId: string, chapter: number): string | null {
+  const found = rows(dbFor(bundleId), `SELECT title FROM chapters WHERE cn = ?`, [chapter])
+  return found.length > 0 ? str(found[0].title) : null
+}
+
 function search(bundleIds: string[], query: string, opts?: SearchOpts): SearchRow[] {
   const norm = normalizeForSearch(query)
   if (!norm) return []
@@ -169,6 +174,9 @@ async function handle(req: WorkerRequest): Promise<unknown> {
     case 'getVerses':
       await ensurePool()
       return getVerses(req.bundleId, req.range)
+    case 'getChapterTitle':
+      await ensurePool()
+      return getChapterTitle(req.bundleId, req.chapter)
     case 'search':
       await ensurePool()
       return search(req.bundleIds, req.query, req.opts)
