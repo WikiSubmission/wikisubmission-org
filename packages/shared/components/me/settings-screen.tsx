@@ -50,7 +50,14 @@ const DELETE_CATEGORIES = [
 // here so the UI matches the backend gating.
 const EXPORT_COOLDOWN_MS = 15 * 24 * 3600 * 1000
 
-export function SettingsClient() {
+interface SettingsClientProps {
+  /** Optional offline-reading section. Injected by apps/web (sqlite-wasm + OPFS);
+   * omitted on Capacitor, which will supply a native adapter in a later phase.
+   * Keeping it a slot prevents the web worker/WASM from entering the mobile bundle. */
+  offlineSection?: React.ReactNode
+}
+
+export function SettingsClient({ offlineSection }: SettingsClientProps = {}) {
   const t = useTranslations('meSettings')
   const push = usePushNotifications()
   const [consent, setConsent] = useState<ConsentState>({ status: 'loading' })
@@ -291,6 +298,8 @@ export function SettingsClient() {
               </div>
             )}
           </section>
+
+          {offlineSection}
 
           <section style={cardStyle}>
             <h2 style={h2Style}>{t('export.heading')}</h2>

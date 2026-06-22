@@ -31,6 +31,7 @@
     "@portabletext/react": "^6.2.0",
     "@portabletext/types": "^4.0.2",
     "@sanity/client": "^7.22.0",
+    "@sqlite.org/sqlite-wasm": "^3.53.0-build1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "d3-array": "^3.2.4",
@@ -45,6 +46,7 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
     "wikisubmission-sdk": "^2.0.8",
+    "zod": "^4.4.3",
     "zustand": "^5.0.13"
   },
   "peerDependencies": {
