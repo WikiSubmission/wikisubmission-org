@@ -1,14 +1,15 @@
 import { describe, it, expect } from 'vitest'
-import { offlineQuranVerses } from '@/lib/offline/quran-adapter'
+import { offlineQuranVerses, offlineQuranSearch } from '@/lib/offline/quran-adapter'
 import type { OfflineContentStore } from '@/lib/offline/content-store'
-import type { BundleInfo, VerseRow } from '@/lib/offline/types'
+import type { BundleInfo, SearchRow, VerseRow } from '@/lib/offline/types'
 
 // A fake store backed by in-memory rows, exercising only the methods the
 // adapter uses. Keyed by `${scripture}-${lang}`.
 function fakeStore(opts: {
   installedIds: string[]
-  verses: Record<string, VerseRow[]>
+  verses?: Record<string, VerseRow[]>
   titles?: Record<string, string>
+  searchRows?: SearchRow[]
 }): OfflineContentStore {
   return {
     async installedBundles() {
@@ -28,13 +29,13 @@ function fakeStore(opts: {
       )
     },
     async getVerses(scripture, lang) {
-      return opts.verses[`${scripture}-${lang}`] ?? []
+      return opts.verses?.[`${scripture}-${lang}`] ?? []
     },
     async getChapterTitle(scripture, lang) {
       return opts.titles?.[`${scripture}-${lang}`] ?? null
     },
-    async search() {
-      return []
+    async search(_scripture, langs) {
+      return (opts.searchRows ?? []).filter((r) => langs.includes(r.lang))
     },
     async install() {},
     async remove() {},
@@ -92,5 +93,43 @@ describe('offlineQuranVerses', () => {
     const result = await offlineQuranVerses(store, ['en', 'ar'], { chapter: 1 })
     expect(result!.verses[1].tr?.ar).toBeUndefined()
     expect(result!.verses[1].tr?.en).toBeDefined()
+  })
+})
+
+describe('offlineQuranSearch', () => {
+  const hits: SearchRow[] = [
+    { vk: '1:1', cn: 1, vn: 1, lang: 'en', text: 'Most Merciful', hl: 'Most <b>Merciful</b>', rank: -2.5 },
+    { vk: '76:3', cn: 76, vn: 3, lang: 'en', text: 'mercy or…', hl: '<b>mercy</b>', rank: -1.0 },
+  ]
+
+  it('returns null when no requested language is installed', async () => {
+    const store = fakeStore({ installedIds: [], searchRows: hits })
+    expect(await offlineQuranSearch(store, ['en'], 'mercy')).toBeNull()
+  })
+
+  it('returns an empty result when nothing matches but content is installed', async () => {
+    const store = fakeStore({ installedIds: ['quran-en'], searchRows: [] })
+    const res = await offlineQuranSearch(store, ['en'], 'zzz')
+    expect(res?.info?.total).toBe(0)
+    expect(res?.chapters).toEqual([])
+  })
+
+  it('groups hits into chapters with hl and a rank-derived score', async () => {
+    const store = fakeStore({ installedIds: ['quran-en'], searchRows: hits })
+    const res = await offlineQuranSearch(store, ['en'], 'mercy')
+    expect(res?.info?.total).toBe(2)
+    expect(res?.chapters?.map((c) => c.cn)).toEqual([1, 76])
+
+    const v = res!.chapters![0].verses![0]
+    expect(v.vk).toBe('1:1')
+    expect(v.tr?.en?.hl).toBe('Most <b>Merciful</b>')
+    expect(v.sc).toBeCloseTo(2.5) // -rank, so a more-negative rank scores higher
+  })
+
+  it('ignores languages the manifest lists but are not installed', async () => {
+    // ar requested but not installed -> only en hits searched.
+    const store = fakeStore({ installedIds: ['quran-en'], searchRows: hits })
+    const res = await offlineQuranSearch(store, ['en', 'ar'], 'mercy')
+    expect(res?.info?.total).toBe(2)
   })
 })

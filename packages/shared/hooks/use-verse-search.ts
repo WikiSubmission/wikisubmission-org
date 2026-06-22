@@ -4,6 +4,8 @@ import { useCallback, useState } from 'react'
 import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
 import type { LangCode } from '@/hooks/use-quran-preferences'
+import { getRegisteredOfflineContentStore } from '@/lib/offline/registry'
+import { offlineQuranSearch } from '@/lib/offline/quran-adapter'
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -74,30 +76,54 @@ export function useVerseSearch(): UseVerseSearchReturn {
     return langs
   }
 
+  // Offline fallback: only when online search is unavailable. Single page (no
+  // offset paging) and verse-scope only (word-by-word isn't bundled in v1).
+  // Returns null when there is no installed content to search.
+  async function tryOffline(query: string, opts: VerseSearchOptions, offset: number) {
+    if (offset > 0 || opts.includeWords) return null
+    const store = getRegisteredOfflineContentStore()
+    if (!store) return null
+    try {
+      return await offlineQuranSearch(store, buildLangs(opts), query, { limit: 50 })
+    } catch {
+      return null
+    }
+  }
+
   const fetchPage = useCallback(
     async (query: string, opts: VerseSearchOptions, offset: number) => {
       const langs = buildLangs(opts)
       const q = query
 
-      const { data, error } = await wsApi.GET('/search', {
-        params: {
-          query: {
-            q,
-            langs,
-            scope: 'verses',
-            limit: SEARCH_LIMIT,
-            offset,
-            include_words: opts.includeWords || undefined,
-            include_root: opts.includeWords || undefined,
-            include_meaning: opts.includeWords || undefined,
-            word_langs: opts.includeWords ? ['ar', 'en', 'tl'] : undefined,
+      try {
+        const { data, error } = await wsApi.GET('/search', {
+          params: {
+            query: {
+              q,
+              langs,
+              scope: 'verses',
+              limit: SEARCH_LIMIT,
+              offset,
+              include_words: opts.includeWords || undefined,
+              include_root: opts.includeWords || undefined,
+              include_meaning: opts.includeWords || undefined,
+              word_langs: opts.includeWords ? ['ar', 'en', 'tl'] : undefined,
+            },
           },
-        },
-      })
+        })
 
-      return {
-        data: data ?? null,
-        error: error ? 'Search failed. Please try again.' : null,
+        if (!error && data) {
+          return { data, error: null }
+        }
+        // Backend reachable but returned an error envelope — try local content.
+        const offline = await tryOffline(query, opts, offset)
+        if (offline) return { data: offline, error: null }
+        return { data: data ?? null, error: 'Search failed. Please try again.' }
+      } catch {
+        // Network failure (offline / timeout): fall back to installed bundles.
+        const offline = await tryOffline(query, opts, offset)
+        if (offline) return { data: offline, error: null }
+        return { data: null, error: 'Search failed. Please try again.' }
       }
     },
     []

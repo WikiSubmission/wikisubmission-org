@@ -61,11 +61,13 @@ export interface SearchOpts {
 }
 
 /** One full-text search hit. `hl` carries the highlighted snippet, mapping to
- * the existing network response's `hl` field so the reader needs no changes. */
+ * the existing network response's `hl` field so the reader needs no changes.
+ * `lang` is the bundle language the hit came from. */
 export interface SearchRow {
   vk: string
   cn: number
   vn: number
+  lang: string
   text: string
   hl?: string
   rank?: number

@@ -122,6 +122,8 @@ function search(bundleIds: string[], query: string, opts?: SearchOpts): SearchRo
 
   const merged: SearchRow[] = []
   for (const bundleId of bundleIds) {
+    // bundleId is `${scripture}-${lang}`; recover the language for the hit.
+    const lang = bundleId.slice(bundleId.indexOf('-') + 1)
     const db = dbFor(bundleId)
     const found = rows(
       db,
@@ -137,6 +139,7 @@ function search(bundleIds: string[], query: string, opts?: SearchOpts): SearchRo
         vk: str(r.vk),
         cn: Number(r.cn),
         vn: Number(r.vn),
+        lang,
         text: str(r.text),
         hl: r.hl == null ? undefined : str(r.hl),
         rank: typeof r.rank === 'number' ? r.rank : Number(r.rank),
