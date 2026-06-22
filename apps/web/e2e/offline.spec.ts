@@ -24,3 +24,22 @@ test('offline store installs a bundle and serves reads + search', async ({ page 
 
   expect(errors, errors.join('\n')).toEqual([])
 })
+
+test('user store applies local mutations and queues the outbox', async ({ page }) => {
+  const errors: string[] = []
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') errors.push(msg.text())
+  })
+
+  await page.goto('/offline-check')
+  await page.getByTestId('run-user').click()
+
+  await expect(page.getByTestId('user-done')).toHaveText('true', { timeout: 60_000 })
+  await expect(page.getByTestId('error')).toHaveText('')
+  // The note write is readable from the local mirror immediately.
+  await expect(page.getByTestId('user-note')).toHaveText('my note')
+  // Both writes are queued in the outbox awaiting sync.
+  await expect(page.getByTestId('user-pending')).toHaveText('2')
+
+  expect(errors, errors.join('\n')).toEqual([])
+})

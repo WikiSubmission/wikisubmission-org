@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { fetchManifest } from '@/lib/offline/manifest'
 import { getOfflineContentStore, OFFLINE_MANIFEST_URL } from '@/lib/offline/web-store-singleton'
+import { getRegisteredOfflineUserStore } from '@/lib/offline/user/registry'
 
 // Diagnostic harness for the offline content store, used by the Playwright e2e
 // to exercise the real sqlite-wasm + OPFS worker path (install -> getVerses ->
@@ -13,6 +14,9 @@ export default function OfflineCheckPage() {
   const [hit, setHit] = useState('')
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
+  const [userNote, setUserNote] = useState('')
+  const [userPending, setUserPending] = useState('')
+  const [userDone, setUserDone] = useState(false)
 
   // Opt-in only (set NEXT_PUBLIC_OFFLINE_CHECK=1 for the e2e build); hidden otherwise.
   if (process.env.NEXT_PUBLIC_OFFLINE_CHECK !== '1') return null
@@ -47,6 +51,29 @@ export default function OfflineCheckPage() {
     }
   }
 
+  async function runUser() {
+    setError('')
+    try {
+      const store = getRegisteredOfflineUserStore()
+      if (!store) throw new Error('user store not registered')
+      await store.open('offline-check-user')
+      await store.clear()
+
+      // Optimistic local writes that enqueue the outbox.
+      await store.apply({ entity: 'bookmark_entry', op: 'create', categoryId: 1, scripture: 'quran', vk: '2:255' })
+      await store.apply({ entity: 'note', op: 'upsert', scripture: 'quran', vk: '1:1', content: 'my note' })
+
+      const note = await store.getNote('quran', '1:1')
+      setUserNote(note?.content ?? 'NONE')
+
+      const pending = await store.pendingMutations()
+      setUserPending(String(pending.length))
+      setUserDone(true)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    }
+  }
+
   return (
     <div style={{ padding: 24, fontFamily: 'monospace' }}>
       <h1>offline-check</h1>
@@ -57,6 +84,14 @@ export default function OfflineCheckPage() {
       <div data-testid="verse">{verse}</div>
       <div data-testid="hit">{hit}</div>
       <div data-testid="done">{done ? 'true' : 'false'}</div>
+
+      <button type="button" data-testid="run-user" onClick={runUser}>
+        run-user
+      </button>
+      <div data-testid="user-note">{userNote}</div>
+      <div data-testid="user-pending">{userPending}</div>
+      <div data-testid="user-done">{userDone ? 'true' : 'false'}</div>
+
       <div data-testid="error">{error}</div>
     </div>
   )
