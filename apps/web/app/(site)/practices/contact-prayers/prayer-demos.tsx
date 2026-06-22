@@ -50,7 +50,7 @@ export function PrayerDemos() {
                     <Image src={demo.thumbnail} alt={demo.title} fill className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 grayscale group-hover:grayscale-0 mix-blend-luminosity group-hover:mix-blend-normal" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
-                  <div className="size-12 rounded-full bg-[var(--ed-bg)]/80 backdrop-blur-md flex items-center justify-center z-20 group-hover:scale-110 group-hover:bg-[var(--ed-accent)] group-hover:text-[var(--ed-bg)] transition-all shadow-lg border border-[var(--ed-rule)]">
+                  <div className="size-12 bg-[var(--ed-bg)]/80 flex items-center justify-center z-20 group-hover:scale-110 group-hover:bg-[var(--ed-accent)] group-hover:text-[var(--ed-bg)] transition-all border border-[var(--ed-rule)]">
                     <Play size={18} className="fill-current ml-1" />
                   </div>
                 </div>
@@ -76,43 +76,43 @@ export function PrayerDemos() {
           </div>
 
           <div className="mt-12 md:mt-16 flex flex-col gap-6 md:gap-8">
-            <div className="border-y sm:border border-red-900/30 bg-red-950/20 p-6 md:p-8 flex flex-col md:flex-row gap-5 md:gap-8 items-start shadow-[0_4px_24px_rgba(220,38,38,0.05)] sm:rounded-xl relative overflow-hidden">
-              <div className="absolute top-0 left-0 sm:w-1 sm:h-full h-1 w-full bg-red-500/50" />
-              
+            <div className="border-y sm:border border-[var(--ed-rule)] bg-[var(--ed-surface)]/20 p-6 md:p-8 flex flex-col md:flex-row gap-5 md:gap-8 items-start relative overflow-hidden">
+              <div className="absolute top-0 left-0 sm:w-1 sm:h-full h-1 w-full bg-[var(--ed-accent)]" />
+
               <div className="flex-1 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full bg-red-500/10 flex items-center justify-center shrink-0 border border-red-500/20 shadow-[inset_0_0_12px_rgba(239,68,68,0.2)]">
-                    <AlertCircle size={20} className="text-red-400" />
+                  <div className="size-10 flex items-center justify-center shrink-0 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/40">
+                    <AlertCircle size={20} className="text-[var(--ed-accent)]" />
                   </div>
-                  <h3 className="text-xl md:text-2xl font-medium text-red-200" style={{ fontFamily: F.serif }}>
+                  <h3 className="text-xl md:text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
                     Missed Prayers Are Gone
                   </h3>
                 </div>
                 <p className="text-[var(--ed-fg-muted)] leading-relaxed text-[15px]" style={{ fontFamily: F.serif }}>
-                  When you miss a prayer at its appointed time, <span className="text-red-300 font-medium">it is gone and cannot be &ldquo;made up.&rdquo;</span> You must seek forgiveness from God for neglecting your contact with Him, and be steadfast in ensuring you observe the next prayers on time.
+                  When you miss a prayer at its appointed time, <span className="text-[var(--ed-fg)] font-medium">it is gone and cannot be &ldquo;made up.&rdquo;</span> You must seek forgiveness from God for neglecting your contact with Him, and be steadfast in ensuring you observe the next prayers on time.
                 </p>
               </div>
 
-              <div className="flex-[1.5] border-l-2 border-red-500/30 pl-6 md:pl-8 space-y-4 mt-2 md:mt-0">
+              <div className="flex-[1.5] border-l-2 border-[var(--ed-rule)] pl-6 md:pl-8 space-y-4 mt-2 md:mt-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-red-300 font-bold" style={{ fontFamily: F.glacial }}>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--ed-accent)] font-bold" style={{ fontFamily: F.glacial }}>
                     Sura 4:103
                   </span>
-                  <div className="h-px w-6 bg-red-900/50" />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-red-400/80" style={{ fontFamily: F.glacial }}>
+                  <div className="h-px w-6 bg-[var(--ed-rule)]" />
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--ed-fg-muted)]" style={{ fontFamily: F.glacial }}>
                     Scriptural Instruction
                   </span>
                 </div>
-                <p className="text-[15px] italic text-red-200/70 leading-relaxed" style={{ fontFamily: F.serif }}>
-                  &quot;Once you complete your Contact Prayer (Salat), you shall remember GOD while standing, sitting, or lying down. Once the war is over, you shall observe the Contact Prayers (Salat); <span className="text-red-200 font-medium not-italic px-1 py-0.5 rounded bg-red-500/10 underline underline-offset-4 decoration-red-500/40">the Contact Prayers (Salat) are decreed for the believers at specific times.</span>&quot;
+                <p className="text-[15px] italic text-[var(--ed-fg-muted)] leading-relaxed" style={{ fontFamily: F.serif }}>
+                  &quot;Once you complete your Contact Prayer (Salat), you shall remember GOD while standing, sitting, or lying down. Once the war is over, you shall observe the Contact Prayers (Salat); <span className="text-[var(--ed-accent)] font-medium not-italic px-1 py-0.5 bg-[var(--ed-accent)]/10 underline underline-offset-4 decoration-[var(--ed-accent)]/40">the Contact Prayers (Salat) are decreed for the believers at specific times.</span>&quot;
                 </p>
               </div>
             </div>
 
-            <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 p-6 md:p-10 flex flex-col md:flex-row gap-8 md:gap-12 items-start shadow-sm">
+            <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 p-6 md:p-10 flex flex-col md:flex-row gap-8 md:gap-12 items-start">
               <div className="flex-1 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full border border-[var(--ed-rule)] bg-[var(--ed-bg)] flex items-center justify-center">
+                  <div className="size-10 border border-[var(--ed-rule)] bg-[var(--ed-bg)] flex items-center justify-center">
                     <Volume2 size={20} className="text-[var(--ed-accent)]" />
                   </div>
                   <h3 className="text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
@@ -135,15 +135,15 @@ export function PrayerDemos() {
                   </span>
                 </div>
                 <p className="text-[15px] italic text-[var(--ed-fg-muted)] leading-relaxed" style={{ fontFamily: F.serif }}>
-                  &quot;Say, &apos;Call Him GOD, or call Him Most Gracious; whichever name you use, to Him belongs the best names.&apos; <span className="text-[var(--ed-accent)] font-medium not-italic px-1 py-0.5 rounded bg-[var(--ed-accent)]/10 underline underline-offset-4 decoration-[var(--ed-accent)]/40">You shall not utter your Contact Prayers (Salat) too loudly, nor secretly; use a moderate tone.</span>&quot;
+                  &quot;Say, &apos;Call Him GOD, or call Him Most Gracious; whichever name you use, to Him belongs the best names.&apos; <span className="text-[var(--ed-accent)] font-medium not-italic px-1 py-0.5 bg-[var(--ed-accent)]/10 underline underline-offset-4 decoration-[var(--ed-accent)]/40">You shall not utter your Contact Prayers (Salat) too loudly, nor secretly; use a moderate tone.</span>&quot;
                 </p>
               </div>
             </div>
 
-            <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 p-6 md:p-10 flex flex-col md:flex-row gap-8 md:gap-12 items-start shadow-sm">
+            <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 p-6 md:p-10 flex flex-col md:flex-row gap-8 md:gap-12 items-start">
               <div className="flex-1 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full border border-[var(--ed-rule)] bg-[var(--ed-bg)] flex items-center justify-center shrink-0">
+                  <div className="size-10 border border-[var(--ed-rule)] bg-[var(--ed-bg)] flex items-center justify-center shrink-0">
                     <Users size={20} className="text-[var(--ed-accent)]" />
                   </div>
                   <h3 className="text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
@@ -171,9 +171,9 @@ export function PrayerDemos() {
                       youtubeStart: 4339,
                       youtubeEnd: 4443
                     })}
-                    className="group flex items-center justify-center gap-2 px-6 py-3 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-300 shadow-md rounded-sm w-full md:w-auto"
+                    className="group inline-flex min-h-11 items-center justify-center gap-2 px-6 py-3 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-300 w-full md:w-auto"
                   >
-                    <div className="size-5 rounded-full border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="size-5 border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Video size={10} fill="currentColor" />
                     </div>
                     <span className="text-[10px] uppercase tracking-[0.2em] font-bold" style={{ fontFamily: F.glacial }}>
@@ -184,10 +184,10 @@ export function PrayerDemos() {
               </div>
             </div>
 
-            <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 p-6 md:p-10 flex flex-col gap-8 shadow-sm">
+            <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 p-6 md:p-10 flex flex-col gap-8">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full border border-[var(--ed-rule)] bg-[var(--ed-bg)] flex items-center justify-center shrink-0">
+                  <div className="size-10 border border-[var(--ed-rule)] bg-[var(--ed-bg)] flex items-center justify-center shrink-0">
                     <Calendar size={20} className="text-[var(--ed-accent)]" />
                   </div>
                   <h3 className="text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
@@ -218,7 +218,7 @@ export function PrayerDemos() {
                   </span>
                 </div>
                 <p className="text-[15px] italic text-[var(--ed-fg-muted)] leading-relaxed" style={{ fontFamily: F.serif }}>
-                  &quot;O you who believe, when the Congregational Prayer (Salat Al-Jumu&apos;ah) is announced on Friday, <span className="text-[var(--ed-accent)] font-medium not-italic px-1 py-0.5 rounded bg-[var(--ed-accent)]/10 underline underline-offset-4 decoration-[var(--ed-accent)]/40">you shall hasten to the commemoration of GOD</span>, and drop all business. This is better for you, if you only knew.&quot;
+                  &quot;O you who believe, when the Congregational Prayer (Salat Al-Jumu&apos;ah) is announced on Friday, <span className="text-[var(--ed-accent)] font-medium not-italic px-1 py-0.5 bg-[var(--ed-accent)]/10 underline underline-offset-4 decoration-[var(--ed-accent)]/40">you shall hasten to the commemoration of GOD</span>, and drop all business. This is better for you, if you only knew.&quot;
                 </p>
               </div>
               
@@ -233,9 +233,9 @@ export function PrayerDemos() {
                     youtubeId: 'K7suTQM7fno',
                     youtubeStart: 1
                   })}
-                  className="group flex items-center justify-center gap-2 px-6 py-3 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-300 shadow-md rounded-sm w-full md:w-auto self-start"
+                  className="group inline-flex min-h-11 items-center justify-center gap-2 px-6 py-3 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-300 w-full md:w-auto self-start"
                 >
-                  <div className="size-5 rounded-full border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="size-5 border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Video size={10} fill="currentColor" />
                   </div>
                   <span className="text-[10px] uppercase tracking-[0.2em] font-bold" style={{ fontFamily: F.glacial }}>
