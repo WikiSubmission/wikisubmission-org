@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import gsap from 'gsap'
@@ -14,15 +14,6 @@ import {
   Database,
   ShieldCheck,
 } from 'lucide-react'
-import { useAutoScroll } from './use-auto-scroll'
-import { AutoScrollControl } from './auto-scroll-control'
-import {
-  SCENE_PROFILES,
-  buildVelocityZones,
-  sampleVelocityAt,
-  DEFAULT_VELOCITY,
-  type Zone,
-} from './scroll-profile'
 import { FaYoutube } from 'react-icons/fa'
 
 let scrollTriggerRegistered = false
@@ -167,16 +158,6 @@ function CornerMarkers({ label, sub }: { label: string; sub: string }) {
 export function MiracleExperience() {
   const t = useTranslations('miracle')
   const rootRef = useRef<HTMLDivElement | null>(null)
-  const zonesRef = useRef<Zone[]>([])
-  const getVelocity = useCallback(
-    (y: number) => sampleVelocityAt(y, zonesRef.current, DEFAULT_VELOCITY),
-    [],
-  )
-  const { isPlaying, speedIndex, speedCount, multiplier, toggle, speedUp, speedDown } = useAutoScroll({
-    startDelayMs: 1000,
-    defaultVelocity: DEFAULT_VELOCITY,
-    getVelocity,
-  })
 
   const heroRef = useRef<HTMLElement | null>(null)
   const heroBgRef = useRef<HTMLDivElement | null>(null)
@@ -226,58 +207,44 @@ export function MiracleExperience() {
     if (typeof window === 'undefined') return
     ensureScrollTrigger()
 
+    const prevSnapType = document.documentElement.style.scrollSnapType
+    document.documentElement.style.scrollSnapType = 'y mandatory'
+
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia()
 
-      // Desktop + reduced-motion-OK: full pinned scrub experience
+      // Desktop: per-section enter animations (no pinning, no scrub)
       mm.add(
         '(min-width: 768px) and (prefers-reduced-motion: no-preference)',
         () => {
           // ── Scene 1: Hero
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: heroRef.current,
-                start: 'top top',
-                end: '+=1000',
-                pin: true,
-                scrub: 0.6,
-                id: 'hero',
-              },
-            })
-            .from(heroBgRef.current, { scale: 4, opacity: 0, ease: 'none' })
+          const heroTl = gsap.timeline({ paused: true })
+          heroTl
+            .from(heroBgRef.current, { scale: 4, opacity: 0, ease: 'power3.out', duration: 0.8 })
             .from(
               heroHeadlineRef.current?.querySelectorAll('.hero-letter') ?? [],
-              { y: 80, opacity: 0, stagger: 0.04, ease: 'none' },
+              { y: 80, opacity: 0, stagger: 0.04, ease: 'power3.out', duration: 0.5 },
               '<0.2',
             )
-            .from(heroBoxRef.current, { y: 60, opacity: 0, ease: 'none' }, '<0.5')
-            .fromTo(
-              heroScanlineRef.current,
-              { y: -20 },
-              { y: 200, ease: 'none' },
-              '<',
-            )
+            .from(heroBoxRef.current, { y: 60, opacity: 0, ease: 'power3.out', duration: 0.5 }, '<0.3')
+            .fromTo(heroScanlineRef.current, { y: -20 }, { y: 200, ease: 'none', duration: 0.8 }, '<')
+          ScrollTrigger.create({
+            trigger: heroRef.current,
+            start: 'top top+=10',
+            onEnter: () => heroTl.play(0),
+            onEnterBack: () => heroTl.restart(),
+          })
 
           // ── Scene 2: Bismillah
           const letters = bismillahLettersRef.current.filter(Boolean)
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: bismillahRef.current,
-                start: 'top top',
-                end: '+=1500',
-                pin: true,
-                scrub: 0.6,
-                id: 'bismillah',
-              },
-            })
+          const bismillahTl = gsap.timeline({ paused: true })
+          bismillahTl
             .to(letters, {
               opacity: 1,
               color: 'var(--ed-accent)',
-              stagger: { each: 0.06, ease: 'none' },
+              stagger: { each: 0.06 },
               duration: 0.06 * letters.length,
-              ease: 'none',
+              ease: 'power3.out',
               onUpdate: function () {
                 const total = letters.length
                 const progress = this.progress()
@@ -291,31 +258,27 @@ export function MiracleExperience() {
               bismillahFinalRef.current,
               {
                 opacity: 1,
-                textShadow:
-                  '0 0 40px var(--ed-accent-soft), 0 0 80px var(--ed-accent-soft)',
+                textShadow: '0 0 40px var(--ed-accent-soft), 0 0 80px var(--ed-accent-soft)',
                 duration: 0.4,
                 ease: 'power2.out',
               },
               '+=0.05',
             )
+          ScrollTrigger.create({
+            trigger: bismillahRef.current,
+            start: 'top top+=10',
+            onEnter: () => bismillahTl.play(0),
+            onEnterBack: () => bismillahTl.restart(),
+          })
 
           // ── Scene 3: 114 Chapters
           const chapterProxy = { value: 0 }
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: chaptersRef.current,
-                start: 'top top',
-                end: '+=1500',
-                pin: true,
-                scrub: 0.6,
-                id: 'chapters',
-              },
-            })
+          const chaptersTl = gsap.timeline({ paused: true })
+          chaptersTl
             .to(chapterProxy, {
               value: 114,
               ease: 'none',
-              duration: 1,
+              duration: 1.2,
               onUpdate: () => {
                 const v = Math.floor(chapterProxy.value)
                 if (chaptersCounterRef.current) {
@@ -327,47 +290,30 @@ export function MiracleExperience() {
             })
             .to(
               chaptersCounterRef.current,
-              {
-                color: 'var(--ed-accent)',
-                textShadow: '0 0 50px var(--ed-accent-soft)',
-                scale: 1.05,
-                duration: 0.2,
-              },
+              { color: 'var(--ed-accent)', textShadow: '0 0 50px var(--ed-accent-soft)', scale: 1.05, duration: 0.2 },
               '>',
             )
-            .from(
-              chaptersFormulaRef.current,
-              { y: 60, opacity: 0, duration: 0.4, ease: 'power3.out' },
-              '<',
-            )
+            .from(chaptersFormulaRef.current, { y: 60, opacity: 0, duration: 0.4, ease: 'power3.out' }, '<')
+          ScrollTrigger.create({
+            trigger: chaptersRef.current,
+            start: 'top top+=10',
+            onEnter: () => chaptersTl.play(0),
+            onEnterBack: () => chaptersTl.restart(),
+          })
 
           // ── Scene 4: First Revelation
           const words = revelationWordsRef.current.filter(Boolean)
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: revelationRef.current,
-                start: 'top top',
-                end: '+=1500',
-                pin: true,
-                scrub: 0.6,
-                id: 'revelation',
-              },
-            })
-            .fromTo(
-              revelationBeamRef.current,
-              { left: '-5%' },
-              { left: '105%', ease: 'none', duration: 1 },
-              0,
-            )
+          const revelationTl = gsap.timeline({ paused: true })
+          revelationTl
+            .fromTo(revelationBeamRef.current, { left: '-5%' }, { left: '105%', ease: 'none', duration: 1.2 }, 0)
             .to(
               words,
               {
                 opacity: 1,
                 color: 'var(--ed-accent)',
-                stagger: { each: 0.05 },
-                duration: 0.05 * words.length,
-                ease: 'none',
+                stagger: { each: 0.06 },
+                duration: 0.06 * words.length,
+                ease: 'power3.out',
                 onUpdate: function () {
                   const total = words.length
                   const progress = this.progress()
@@ -379,68 +325,48 @@ export function MiracleExperience() {
               },
               0,
             )
+          ScrollTrigger.create({
+            trigger: revelationRef.current,
+            start: 'top top+=10',
+            onEnter: () => revelationTl.play(0),
+            onEnterBack: () => revelationTl.restart(),
+          })
 
           // ── Scene 5: God frequency
           const godProxy = { value: 0 }
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: godRef.current,
-                start: 'top top',
-                end: '+=1500',
-                pin: true,
-                scrub: 0.6,
-                id: 'god',
-              },
-            })
+          const godTl = gsap.timeline({ paused: true })
+          godTl
             .to(godProxy, {
               value: 2698,
-              duration: 1,
+              duration: 1.5,
               ease: 'none',
               onUpdate: () => {
                 if (godCounterRef.current) {
-                  godCounterRef.current.textContent = Math.floor(
-                    godProxy.value,
-                  ).toLocaleString()
+                  godCounterRef.current.textContent = Math.floor(godProxy.value).toLocaleString()
                 }
               },
             })
             .to(
               godCounterRef.current,
-              {
-                color: 'var(--ed-accent)',
-                textShadow: '0 0 60px var(--ed-accent-soft)',
-                duration: 0.2,
-              },
+              { color: 'var(--ed-accent)', textShadow: '0 0 60px var(--ed-accent-soft)', duration: 0.2 },
               '>',
             )
-            .from(
-              godFormulaRef.current,
-              { y: 40, opacity: 0, scale: 0.9, duration: 0.4, ease: 'power3.out' },
-              '<',
-            )
-            .to(
-              godHaloRef.current,
-              { opacity: 0.4, scale: 1.4, duration: 0.6, ease: 'power2.out' },
-              '<',
-            )
+            .from(godFormulaRef.current, { y: 40, opacity: 0, scale: 0.9, duration: 0.4, ease: 'power3.out' }, '<')
+            .to(godHaloRef.current, { opacity: 0.4, scale: 1.4, duration: 0.6, ease: 'power2.out' }, '<')
+          ScrollTrigger.create({
+            trigger: godRef.current,
+            start: 'top top+=10',
+            onEnter: () => godTl.play(0),
+            onEnterBack: () => godTl.restart(),
+          })
 
           // ── Scene 6: Chapter 96 verse reel
           const verseProxy = { value: 1 }
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: verseRef.current,
-                start: 'top top',
-                end: '+=2000',
-                pin: true,
-                scrub: 0.6,
-                id: 'verse',
-              },
-            })
+          const verseTl = gsap.timeline({ paused: true })
+          verseTl
             .to(verseProxy, {
               value: 19,
-              duration: 1,
+              duration: 1.5,
               ease: 'none',
               onUpdate: () => {
                 const v = Math.max(1, Math.min(19, Math.round(verseProxy.value)))
@@ -455,32 +381,25 @@ export function MiracleExperience() {
             })
             .to(
               verseTextRef.current,
-              {
-                color: 'var(--ed-accent)',
-                textShadow: '0 0 30px var(--ed-accent-soft)',
-                duration: 0.2,
-              },
+              { color: 'var(--ed-accent)', textShadow: '0 0 30px var(--ed-accent-soft)', duration: 0.2 },
               '>',
             )
+          ScrollTrigger.create({
+            trigger: verseRef.current,
+            start: 'top top+=10',
+            onEnter: () => verseTl.play(0),
+            onEnterBack: () => verseTl.restart(),
+          })
 
           // ── Scene 7: Discovery 1974
           const yearChars = '0123456789'
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: discoveryRef.current,
-                start: 'top top',
-                end: '+=2000',
-                pin: true,
-                scrub: 0.6,
-                id: 'discovery',
-              },
-            })
+          const discoveryTl = gsap.timeline({ paused: true })
+          discoveryTl
             .to(
               { p: 0 },
               {
                 p: 1,
-                duration: 0.5,
+                duration: 0.8,
                 ease: 'none',
                 onUpdate: function () {
                   const p = this.progress()
@@ -490,10 +409,7 @@ export function MiracleExperience() {
                     const lockCount = Math.floor(p * 4)
                     let display = ''
                     for (let i = 0; i < 4; i++) {
-                      display +=
-                        i < lockCount
-                          ? target[i]
-                          : yearChars[Math.floor(Math.random() * 10)]
+                      display += i < lockCount ? target[i] : yearChars[Math.floor(Math.random() * 10)]
                     }
                     discoveryYearRef.current.textContent = display
                   } else {
@@ -502,76 +418,34 @@ export function MiracleExperience() {
                 },
               },
             )
-            .from(
-              discoveryLunarRef.current,
-              { y: 30, opacity: 0, duration: 0.3, ease: 'power3.out' },
-              '>',
-            )
-            .from(
-              discoveryFactorRef.current,
-              { y: 30, opacity: 0, scale: 0.95, duration: 0.3, ease: 'power3.out' },
-              '>+=0.1',
-            )
-            .from(
-              discoveryAnchorRef.current,
-              { y: 40, opacity: 0, duration: 0.4, ease: 'power3.out' },
-              '>+=0.1',
-            )
+            .from(discoveryLunarRef.current, { y: 30, opacity: 0, duration: 0.4, ease: 'power3.out' }, '>')
+            .from(discoveryFactorRef.current, { y: 30, opacity: 0, scale: 0.95, duration: 0.4, ease: 'power3.out' }, '>+=0.1')
+            .from(discoveryAnchorRef.current, { y: 40, opacity: 0, duration: 0.4, ease: 'power3.out' }, '>+=0.1')
+          ScrollTrigger.create({
+            trigger: discoveryRef.current,
+            start: 'top top+=10',
+            onEnter: () => discoveryTl.play(0),
+            onEnterBack: () => discoveryTl.restart(),
+          })
 
           // ── Scene 8: Convergence finale
-          gsap
-            .timeline({
-              scrollTrigger: {
-                trigger: finaleRef.current,
-                start: 'top top',
-                end: '+=1500',
-                pin: true,
-                scrub: 0.6,
-                id: 'finale',
-              },
-            })
+          const finaleTl = gsap.timeline({ paused: true })
+          finaleTl
             .to(finaleNumbersRef.current.filter(Boolean), {
-              x: 0,
-              y: 0,
-              scale: 0.4,
-              opacity: 0.3,
-              stagger: 0.05,
-              duration: 0.6,
-              ease: 'power2.in',
+              x: 0, y: 0, scale: 0.4, opacity: 0.3, stagger: 0.05, duration: 0.6, ease: 'power2.in',
             })
-            .from(
-              finaleCenterRef.current,
-              { scale: 0, opacity: 0, duration: 0.6, ease: 'back.out(1.7)' },
-              '>-0.2',
-            )
+            .from(finaleCenterRef.current, { scale: 0, opacity: 0, duration: 0.6, ease: 'back.out(1.7)' }, '>-0.2')
             .from(
               finaleCardsRef.current?.children ?? [],
-              {
-                scale: 0,
-                opacity: 0,
-                stagger: 0.08,
-                duration: 0.4,
-                ease: 'back.out(1.4)',
-              },
+              { scale: 0, opacity: 0, stagger: 0.08, duration: 0.4, ease: 'back.out(1.4)' },
               '>-0.2',
             )
-
-          const rebuildZones = () => {
-            const triggers = ScrollTrigger.getAll()
-              .filter((st) => typeof st.vars.id === 'string')
-              .map((st) => ({
-                id: st.vars.id as string,
-                start: st.start,
-                end: st.end,
-              }))
-            zonesRef.current = buildVelocityZones(triggers, SCENE_PROFILES)
-          }
-          rebuildZones()
-          ScrollTrigger.addEventListener('refresh', rebuildZones)
-          return () => {
-            ScrollTrigger.removeEventListener('refresh', rebuildZones)
-            zonesRef.current = []
-          }
+          ScrollTrigger.create({
+            trigger: finaleRef.current,
+            start: 'top top+=10',
+            onEnter: () => finaleTl.play(0),
+            onEnterBack: () => finaleTl.restart(),
+          })
         },
       )
 
@@ -629,24 +503,19 @@ export function MiracleExperience() {
       )
     }, rootRef)
 
-    return () => ctx.revert()
+    return () => {
+      ctx.revert()
+      document.documentElement.style.scrollSnapType = prevSnapType
+    }
   }, [])
 
   return (
     <div ref={rootRef} className="bg-[var(--ed-bg)] text-[var(--ed-fg)]">
-      <AutoScrollControl
-        isPlaying={isPlaying}
-        speedIndex={speedIndex}
-        speedCount={speedCount}
-        multiplier={multiplier}
-        onToggle={toggle}
-        onSpeedUp={speedUp}
-        onSpeedDown={speedDown}
-      />
       {/* ─── Scene 1: Hero ─── */}
       <section
         ref={heroRef}
         className="relative h-screen overflow-hidden border-b border-[var(--ed-rule)] flex flex-col items-center justify-center"
+        style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
       >
         <ForensicScanlines />
         <Vignette />
@@ -755,6 +624,7 @@ export function MiracleExperience() {
       <section
         ref={bismillahRef}
         className="relative h-screen overflow-hidden border-b border-[var(--ed-rule)] flex flex-col items-center justify-center px-6"
+        style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
       >
         <ForensicScanlines />
         <Vignette />
@@ -823,6 +693,7 @@ export function MiracleExperience() {
       <section
         ref={chaptersRef}
         className="relative h-screen overflow-hidden border-b border-[var(--ed-rule)] flex flex-col items-center justify-center px-6"
+        style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
       >
         <ForensicScanlines />
         <Vignette />
@@ -887,6 +758,7 @@ export function MiracleExperience() {
       <section
         ref={revelationRef}
         className="relative h-screen overflow-hidden border-b border-[var(--ed-rule)] flex flex-col items-center justify-center px-6"
+        style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
       >
         <ForensicScanlines />
         <Vignette />
@@ -947,6 +819,7 @@ export function MiracleExperience() {
       <section
         ref={godRef}
         className="relative h-screen overflow-hidden border-b border-[var(--ed-rule)] flex flex-col items-center justify-center px-6"
+        style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
       >
         <ForensicScanlines />
         <Vignette />
@@ -1008,6 +881,7 @@ export function MiracleExperience() {
       <section
         ref={verseRef}
         className="relative h-screen overflow-hidden border-b border-[var(--ed-rule)] flex flex-col items-center justify-center px-6"
+        style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
       >
         <ForensicScanlines />
         <Vignette />
@@ -1062,6 +936,7 @@ export function MiracleExperience() {
       <section
         ref={discoveryRef}
         className="relative h-screen overflow-hidden border-b border-[var(--ed-rule)] flex flex-col items-center justify-center px-6"
+        style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
       >
         <ForensicScanlines />
         <Vignette />
@@ -1150,6 +1025,7 @@ export function MiracleExperience() {
       <section
         ref={finaleRef}
         className="relative h-screen overflow-hidden border-b border-[var(--ed-rule)] flex flex-col items-center justify-center px-6"
+        style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
       >
         <ForensicScanlines />
         <Vignette />
@@ -1239,7 +1115,7 @@ export function MiracleExperience() {
       </section>
 
       {/* ─── Static narrative + appendix CTA ─── */}
-      <section className="py-24 border-t border-[var(--ed-rule)] bg-[var(--ed-surface)]/20">
+      <section className="min-h-screen py-24 border-t border-[var(--ed-rule)] bg-[var(--ed-surface)]/20" style={{ scrollSnapAlign: 'start' }}>
         <div className="container mx-auto px-6 max-w-5xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start mb-24">
             <div className="lg:col-span-7 space-y-8">
