@@ -30,9 +30,9 @@ export function AzaanCard() {
             </p>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="mt-5 group inline-flex items-center gap-4 px-8 py-4 rounded-full bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-500 shadow-xl"
+              className="mt-5 group inline-flex items-center gap-4 px-8 py-4 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-500"
             >
-              <div className="size-8 rounded-full border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="size-8 border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Play size={14} className="fill-current ml-0.5" />
               </div>
               <span

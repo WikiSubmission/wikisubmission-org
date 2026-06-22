@@ -178,7 +178,7 @@ function PrayerTimesContent() {
                   setSearchQuery(city)
                   fetchPrayerTimes(city, asrAdjustment)
                 }}
-                className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted/60 hover:bg-primary/10 hover:text-primary border border-border/40 transition-colors cursor-pointer"
+                className="px-3 py-1.5 text-xs font-medium bg-muted/60 hover:bg-primary/10 hover:text-primary border border-border/40 transition-colors cursor-pointer"
                 style={{ fontFamily: F.glacial }}
               >
                 {city}
@@ -204,7 +204,7 @@ function PrayerTimesContent() {
           {/* location row */}
           <Skeleton className="h-8 w-2/5" />
           {/* now / next card */}
-          <Skeleton className="h-20 w-full rounded-2xl" />
+          <Skeleton className="h-20 w-full" />
           {/* day timeline */}
           <Skeleton className="h-16 w-full" />
           {/* schedule button */}
@@ -223,7 +223,7 @@ function PrayerTimesContent() {
               <Input
                 type="search"
                 placeholder={t('searchLocation')}
-                className="pl-9 pr-3 h-11 bg-[var(--ed-surface)]/40 border-[var(--ed-rule)] rounded-xl focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all font-mono text-[12px] tracking-wider"
+                className="pl-9 pr-3 h-11 bg-[var(--ed-surface)]/40 border-[var(--ed-rule)] focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all font-mono text-[12px] tracking-wider"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />

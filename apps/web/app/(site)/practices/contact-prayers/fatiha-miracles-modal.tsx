@@ -207,7 +207,7 @@ export function FatihaMiraclesModal({ isOpen, onClose }: { isOpen: boolean; onCl
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-12">
       <div 
         aria-hidden="true"
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" 
+        className="absolute inset-0 bg-black/80 transition-opacity"
         onClick={onClose}
       />
       
@@ -216,7 +216,7 @@ export function FatihaMiraclesModal({ isOpen, onClose }: { isOpen: boolean; onCl
         role="dialog"
         aria-modal="true"
         aria-labelledby="fatiha-miracles-title"
-        className="relative w-full max-w-4xl bg-[var(--ed-bg)] border border-[var(--ed-rule)] shadow-2xl flex flex-col max-h-full overflow-hidden animate-in fade-in zoom-in-95 duration-300"
+        className="relative w-full max-w-4xl bg-[var(--ed-bg)] border border-[var(--ed-rule)] flex flex-col max-h-full overflow-hidden animate-in fade-in zoom-in-95 duration-300"
       >
         
         {/* Header */}
@@ -234,7 +234,7 @@ export function FatihaMiraclesModal({ isOpen, onClose }: { isOpen: boolean; onCl
             type="button"
             onClick={onClose}
             aria-label="Close miracles modal"
-            className="grid size-11 place-items-center text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] hover:bg-[var(--ed-surface)] rounded-full transition-colors"
+            className="grid size-11 place-items-center text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] hover:bg-[var(--ed-surface)] transition-colors"
           >
             <X size={20} />
           </button>
@@ -272,7 +272,7 @@ export function FatihaMiraclesModal({ isOpen, onClose }: { isOpen: boolean; onCl
                 key={i} 
                 aria-label={`Go to miracle slide ${i + 1}`}
                 aria-current={i === currentIndex ? 'true' : undefined}
-                className={`h-11 rounded-full transition-all duration-300 ${i === currentIndex ? 'w-8 bg-[var(--ed-accent)]' : 'w-4 bg-[var(--ed-rule)] hover:bg-[var(--ed-fg-muted)] cursor-pointer'}`}
+                className={`h-2 transition-all duration-300 ${i === currentIndex ? 'w-8 bg-[var(--ed-accent)]' : 'w-4 bg-[var(--ed-rule)] hover:bg-[var(--ed-fg-muted)] cursor-pointer'}`}
                 onClick={() => setCurrentIndex(i)}
               />
             ))}

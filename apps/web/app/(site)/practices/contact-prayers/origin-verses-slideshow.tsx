@@ -252,7 +252,7 @@ export function OriginVersesSlideshow({ refs }: { refs: string[] }) {
             className="ml-auto flex size-11 items-center justify-center opacity-60 transition-opacity hover:opacity-100"
             title="Copy verse"
           >
-            {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+            {copied ? <Check size={14} className="text-[var(--ed-accent)]" /> : <Copy size={14} />}
           </button>
         </div>
 

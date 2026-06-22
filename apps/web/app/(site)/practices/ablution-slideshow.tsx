@@ -332,7 +332,7 @@ export function AblutionSlideshow() {
           </div>
 
           {/* ── Editorial modules ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-1px bg-[var(--ed-rule)] border border-[var(--ed-rule)] max-w-6xl mx-auto shadow-2xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-1px bg-[var(--ed-rule)] border border-[var(--ed-rule)] max-w-6xl mx-auto">
             {/* Left */}
             <div className="lg:col-span-6 flex flex-col border-r border-[var(--ed-rule)] bg-[var(--ed-bg)]">
               <div className="h-10 px-6 border-b border-[var(--ed-rule)] bg-[var(--ed-surface)] flex items-center gap-3">
@@ -398,7 +398,7 @@ export function AblutionSlideshow() {
             {/* Right */}
             <div className="lg:col-span-6 bg-[var(--ed-surface)]/30 flex flex-col">
               <div className="h-10 px-4 border-b border-[var(--ed-rule)] bg-[var(--ed-surface)] flex items-center justify-between">
-                <div className="flex gap-1.5"><div className="size-2.5 rounded-full bg-[#ff5f56]" /><div className="size-2.5 rounded-full bg-[#ffbd2e]" /><div className="size-2.5 rounded-full bg-[#27c93f]" /></div>
+                <div className="flex gap-1.5"><div className="size-2.5 bg-[var(--ed-rule)]" /><div className="size-2.5 bg-[var(--ed-rule)]" /><div className="size-2.5 bg-[var(--ed-fg-muted)]/30" /></div>
                 <div className="flex items-center gap-3">
                   <span 
                     className="text-[10px] uppercase tracking-[0.18em] text-[var(--ed-fg)] font-bold"
@@ -527,8 +527,8 @@ export function AblutionSlideshow() {
 
           {/* ── CTA ── */}
           <div className="flex flex-col items-center gap-8 -mt-6">
-            <button onClick={openModal} className="group flex items-center gap-4 px-8 py-4 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-500 shadow-xl">
-              <div className="size-8 rounded-full border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform"><Play size={14} fill="currentColor" /></div>
+            <button onClick={openModal} className="group flex items-center gap-4 px-8 py-4 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-500">
+              <div className="size-8 border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform"><Play size={14} fill="currentColor" /></div>
               <span 
                 className="text-[11px] uppercase tracking-[0.3em] font-bold"
                 style={{ fontFamily: F.glacial }}
@@ -591,7 +591,7 @@ export function AblutionSlideshow() {
       {renderModal && (
         <div
           ref={modalBackdropRef}
-          className="fixed inset-0 z-[100] overflow-hidden bg-[var(--ed-bg)]/98 backdrop-blur-xl p-3 md:p-4 flex items-stretch justify-center"
+          className="fixed inset-0 z-[100] overflow-hidden bg-[var(--ed-bg)]/98 p-3 md:p-4 flex items-stretch justify-center"
           onClick={closeModal}
         >
           <div
@@ -617,7 +617,7 @@ export function AblutionSlideshow() {
                     {t('videoSubtitle')}
                   </h3>
                 </div>
-                <button onClick={closeModal} className="size-12 bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all border-none">
+                <button onClick={closeModal} className="size-12 bg-[var(--ed-fg)] text-[var(--ed-bg)] flex items-center justify-center hover:bg-[var(--ed-accent)] transition-all border-none">
                   <X size={20} />
                 </button>
               </div>
@@ -627,7 +627,7 @@ export function AblutionSlideshow() {
 
                 {/* The Display Case */}
                 <div className="space-y-3 max-w-4xl mx-auto w-full min-h-0">
-                  <div className="relative w-full max-h-[42dvh] bg-black border-[8px] md:border-[10px] border-[var(--ed-surface)] shadow-2xl ring-1 ring-[var(--ed-rule)] overflow-hidden aspect-video">
+                  <div className="relative w-full max-h-[42dvh] bg-black border-[8px] md:border-[10px] border-[var(--ed-surface)] ring-1 ring-[var(--ed-rule)] overflow-hidden aspect-video">
                     <div id="yt-player" className="w-full h-full" />
 
                     {/* Display Glare Overlay */}
@@ -648,7 +648,7 @@ export function AblutionSlideshow() {
                       </div>
                       <div className="h-3 w-px bg-[var(--ed-rule)]" />
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className={`size-1.5 rounded-full animate-pulse ${showTranscription ? 'bg-green-500' : 'bg-red-500'}`} />
+                        <div className={`size-1.5 animate-pulse ${showTranscription ? 'bg-[var(--ed-accent)]' : 'bg-[var(--ed-fg-muted)]'}`} />
                         <span 
                           className="text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)] truncate"
                           style={{ fontFamily: F.glacial }}
@@ -679,7 +679,7 @@ export function AblutionSlideshow() {
                         </span>
                         <button
                           onClick={() => setShowTranscription(!showTranscription)}
-                          className={`px-3 py-1 text-[9px] uppercase tracking-widest transition-all ${showTranscription ? 'bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white'}`}
+                          className={`px-3 py-1 text-[9px] uppercase tracking-widest transition-all ${showTranscription ? 'bg-[var(--ed-fg-muted)]/10 text-[var(--ed-fg-muted)] hover:bg-[var(--ed-fg-muted)] hover:text-[var(--ed-bg)]' : 'bg-[var(--ed-accent)]/10 text-[var(--ed-accent)] hover:bg-[var(--ed-accent)] hover:text-[var(--ed-bg)]'}`}
                           style={{ fontFamily: F.glacial }}
                         >
                           {showTranscription ? t('toggleOff') : t('toggleOn')}

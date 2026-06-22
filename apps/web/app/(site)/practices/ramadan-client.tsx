@@ -139,14 +139,14 @@ function RamadanContent() {
       {loading && (
         <div className="space-y-6 pt-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24 w-full rounded-2xl" />)}
+            {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24 w-full" />)}
           </div>
-          <Skeleton className="h-[400px] w-full rounded-2xl" />
+          <Skeleton className="h-[400px] w-full" />
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-3 text-destructive py-12 justify-center bg-destructive/5 rounded-2xl border border-destructive/20">
+        <div className="flex items-center gap-3 text-destructive py-12 justify-center bg-destructive/5 border border-destructive/20">
           <AlertCircleIcon className="size-4" />
           <span className="text-sm font-medium">{error}</span>
         </div>
@@ -185,7 +185,7 @@ function RamadanContent() {
             <SummaryCard title={t('firstFastingDay')} value={data.first_fasting_day} icon={<CalendarIcon className="size-4 text-[var(--ed-accent)] opacity-40" />} />
             <SummaryCard title={t('lastFastingDay')} value={data.last_fasting_day} icon={<CalendarIcon className="size-4 text-[var(--ed-fg-muted)] opacity-30" />} />
             <SummaryCard title={t('nightOfDestiny')} value={data.night_of_destiny} icon={<StarIcon className="size-4 text-amber-500/60" />} />
-            <SummaryCard title={t('averageFastingDuration')} value={data.average_fasting_duration} icon={<MoonIcon className="size-4 text-blue-400/40" />} />
+            <SummaryCard title={t('averageFastingDuration')} value={data.average_fasting_duration} icon={<MoonIcon className="size-4 text-[var(--ed-fg-muted)] opacity-40" />} />
           </div>
 
           <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/20">

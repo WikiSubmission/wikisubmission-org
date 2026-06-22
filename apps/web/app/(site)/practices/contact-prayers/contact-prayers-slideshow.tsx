@@ -161,7 +161,7 @@ export function ContactPrayersSlideshow() {
       </div>
 
       {/* ── Editorial module ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 border border-[var(--ed-rule)] bg-[var(--ed-bg)] w-full shadow-xl">
+      <div className="grid grid-cols-1 lg:grid-cols-12 border border-[var(--ed-rule)] bg-[var(--ed-bg)] w-full">
         <div className="lg:col-span-12 h-10 md:h-11 px-4 md:px-6 border-b border-[var(--ed-rule)] bg-[var(--ed-surface)] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <span

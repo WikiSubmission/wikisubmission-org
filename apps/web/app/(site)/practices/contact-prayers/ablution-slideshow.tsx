@@ -175,8 +175,8 @@ export function AblutionSlideshow() {
                 ))}
               </div>
               <div className="flex justify-center mt-4 md:mt-6">
-                <button onClick={openModal} className="group flex items-center gap-4 px-6 py-3 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-500 shadow-xl shrink-0 rounded-sm">
-                  <div className="size-6 rounded-full border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform"><Play size={12} fill="currentColor" /></div>
+                <button onClick={openModal} className="group flex items-center gap-4 px-6 py-3 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-500 shrink-0">
+                  <div className="size-6 border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform"><Play size={12} fill="currentColor" /></div>
                   <span 
                     className="text-[10px] uppercase tracking-[0.2em] font-bold"
                     style={{ fontFamily: F.glacial }}

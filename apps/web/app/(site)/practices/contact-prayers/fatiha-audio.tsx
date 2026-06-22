@@ -257,7 +257,7 @@ export function FatihaAudio() {
             <div className="flex items-center gap-4">
               <button
                 onClick={togglePlay}
-                className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--ed-accent)] text-[var(--ed-bg)] hover:opacity-90 transition-opacity shrink-0"
+                className="flex items-center justify-center w-12 h-12 bg-[var(--ed-accent)] text-[var(--ed-bg)] hover:opacity-90 transition-opacity shrink-0"
                 aria-label={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? <Pause size={20} className="fill-current" /> : <Play size={20} className="fill-current ml-1" />}
@@ -265,7 +265,7 @@ export function FatihaAudio() {
               
               <button
                 onClick={restart}
-                className="flex size-11 items-center justify-center rounded-full border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] hover:border-[var(--ed-fg)] transition-colors"
+                className="flex size-11 items-center justify-center border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] hover:border-[var(--ed-fg)] transition-colors"
                 aria-label="Restart"
               >
                 <RotateCcw size={16} />
@@ -273,7 +273,7 @@ export function FatihaAudio() {
               
               <button
                 onClick={toggleMute}
-                className="flex size-11 items-center justify-center rounded-full border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] hover:border-[var(--ed-fg)] transition-colors"
+                className="flex size-11 items-center justify-center border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] hover:border-[var(--ed-fg)] transition-colors"
                 aria-label={isMuted ? 'Unmute' : 'Mute'}
               >
                 {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
@@ -311,7 +311,7 @@ export function FatihaAudio() {
                   }}
                   className={`size-10 md:size-11 rounded flex items-center justify-center text-[10px] md:text-xs font-bold transition-all cursor-pointer ${
                     i === activeVerseIndex
-                      ? 'bg-[var(--ed-accent)] text-[var(--ed-bg)] shadow-md scale-110'
+                      ? 'bg-[var(--ed-accent)] text-[var(--ed-bg)] scale-110'
                       : 'bg-[var(--ed-bg)] border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] hover:border-[var(--ed-accent)]/50 hover:text-[var(--ed-fg)] hover:scale-105'
                   }`}
                   aria-label={`Play verse ${i + 1}`}
@@ -351,7 +351,7 @@ export function FatihaAudio() {
             <div className="absolute bottom-3 right-3">
               <button
                 onClick={() => playWord(activeVerse.words[0].start, activeVerse.words[activeVerse.words.length - 1].end)}
-                className="flex items-center justify-center gap-1.5 px-2 py-1 rounded-full border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] hover:text-[var(--ed-accent)] hover:border-[var(--ed-accent)]/50 transition-all text-[8px] uppercase tracking-[0.2em] font-bold bg-[var(--ed-surface)]/30"
+                className="flex items-center justify-center gap-1.5 px-2 py-1 border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] hover:text-[var(--ed-accent)] hover:border-[var(--ed-accent)]/50 transition-all text-[8px] uppercase tracking-[0.2em] font-bold bg-[var(--ed-surface)]/30"
                 style={{ fontFamily: F.glacial }}
                 aria-label={`Play Verse ${activeVerseIndex + 1}`}
               >
@@ -409,9 +409,9 @@ export function FatihaAudio() {
           <div className="pt-4 mt-auto">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="group flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-300 shadow-md rounded-sm"
+              className="group flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all duration-300"
             >
-              <div className="size-5 rounded-full border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="size-5 border border-[var(--ed-bg)]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Video size={10} fill="currentColor" />
               </div>
               <span className="text-[9px] uppercase tracking-[0.2em] font-bold" style={{ fontFamily: F.glacial }}>
