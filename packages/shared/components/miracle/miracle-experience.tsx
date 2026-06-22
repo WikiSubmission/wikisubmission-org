@@ -568,9 +568,9 @@ export function MiracleExperience() {
 
           <div
             ref={heroBoxRef}
-            className="relative p-1 rounded-2xl bg-gradient-to-br from-[var(--ed-rule)] to-transparent overflow-hidden"
+            className="relative overflow-hidden border border-[var(--ed-rule)] bg-[var(--ed-bg)]"
           >
-            <div className="px-12 py-8 rounded-[14px] bg-[var(--ed-bg)] border border-[var(--ed-rule)] flex flex-col items-center gap-2 shadow-2xl">
+            <div className="px-12 py-8 flex flex-col items-center gap-2">
               <div
                 style={{
                   fontFamily: F.mono,
@@ -615,6 +615,7 @@ export function MiracleExperience() {
               style={{ top: 0 }}
             />
           </div>
+
 
           <ScrollHint label={t('visualInitializingScan')} />
         </div>
@@ -714,21 +715,6 @@ export function MiracleExperience() {
           </div>
 
           <div className="relative flex items-center justify-center">
-            <svg
-              className="absolute w-72 h-72 md:w-96 md:h-96 opacity-10"
-              viewBox="0 0 100 100"
-              style={{ animation: 'spin 20s linear infinite' }}
-            >
-              <circle
-                cx="50"
-                cy="50"
-                r="48"
-                fill="none"
-                stroke="var(--ed-accent)"
-                strokeWidth="0.5"
-                strokeDasharray="4 4"
-              />
-            </svg>
             <div
               ref={chaptersCounterRef}
               className="font-mono text-8xl md:text-[10rem] font-bold leading-none tabular-nums"
@@ -739,7 +725,7 @@ export function MiracleExperience() {
 
           <div
             ref={chaptersFormulaRef}
-            className="flex items-center gap-4 bg-[var(--ed-surface)]/60 px-6 py-3 rounded-2xl border border-[var(--ed-rule)] backdrop-blur-sm"
+            className="flex items-center gap-4 bg-[var(--ed-surface)]/60 px-6 py-3 border border-[var(--ed-rule)]"
           >
             <div className="font-mono text-4xl md:text-5xl font-bold text-[var(--ed-accent)]">
               19
@@ -862,7 +848,7 @@ export function MiracleExperience() {
 
           <div
             ref={godFormulaRef}
-            className="flex items-center gap-4 bg-[var(--ed-surface)]/60 px-6 py-3 rounded-2xl border border-[var(--ed-rule)]"
+            className="flex items-center gap-4 bg-[var(--ed-surface)]/60 px-6 py-3 border border-[var(--ed-rule)]"
           >
             <div className="font-mono text-3xl md:text-5xl font-bold text-[var(--ed-accent)]">
               19
@@ -961,7 +947,7 @@ export function MiracleExperience() {
 
           <div
             ref={discoveryLunarRef}
-            className="flex items-center justify-center gap-4 md:gap-6 font-mono text-sm border border-[var(--ed-rule)]/50 bg-[var(--ed-surface)]/30 px-6 py-3 rounded-xl"
+            className="flex items-center justify-center gap-4 md:gap-6 font-mono text-sm border border-[var(--ed-rule)]/50 bg-[var(--ed-surface)]/30 px-6 py-3"
           >
             <div className="flex flex-col items-center text-center">
               <span className="text-[var(--ed-fg-muted)]">13 BH</span>
@@ -987,7 +973,7 @@ export function MiracleExperience() {
 
           <div
             ref={discoveryFactorRef}
-            className="flex items-center gap-4 md:gap-6 bg-[var(--ed-surface)]/80 px-8 py-4 rounded-2xl border border-[var(--ed-rule)] shadow-[0_0_30px_var(--ed-surface)]"
+            className="flex items-center gap-4 md:gap-6 bg-[var(--ed-surface)]/80 px-8 py-4 border border-[var(--ed-rule)]"
           >
             <div className="font-mono text-3xl md:text-4xl text-[var(--ed-fg-muted)]">
               1406
@@ -1004,7 +990,7 @@ export function MiracleExperience() {
             ref={discoveryAnchorRef}
             className="flex flex-col items-center gap-3 pt-4 border-t border-[var(--ed-rule)]/50"
           >
-            <div className="px-3 py-1 rounded border border-[var(--ed-accent)]/30 font-mono text-[9px] tracking-widest text-[var(--ed-accent)] bg-[var(--ed-accent)]/5 uppercase">
+            <div className="px-3 py-1 border border-[var(--ed-accent)]/30 font-mono text-[9px] tracking-widest text-[var(--ed-accent)] bg-[var(--ed-accent)]/5 uppercase">
               {t('visualSurah7430')}
             </div>
             <div
@@ -1097,7 +1083,7 @@ export function MiracleExperience() {
             ].map((item, i) => (
               <div
                 key={i}
-                className="flex flex-col items-center gap-1 px-4 py-3 bg-[var(--ed-surface)]/40 border border-[var(--ed-rule)] rounded-xl"
+                className="flex flex-col items-center gap-1 px-4 py-3 bg-[var(--ed-surface)]/40 border border-[var(--ed-rule)]"
               >
                 <div
                   className="font-mono font-bold text-[var(--ed-accent)]"
@@ -1157,15 +1143,11 @@ export function MiracleExperience() {
                 href="https://youtu.be/4TUYIuxkAmQ?si=KqAL8Ra2c_Y4C2xf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative block p-8 rounded-2xl border border-[var(--ed-rule)] bg-[var(--ed-bg)] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500"
+                className="group relative block p-8 border border-[var(--ed-rule)] bg-[var(--ed-bg)] overflow-hidden transition-colors duration-300 hover:bg-[var(--ed-surface)]/30"
               >
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <FaYoutube size={80} />
-                </div>
-
-                <div className="relative z-10 flex flex-col h-full gap-6">
-                  <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-red-500/5 text-red-500 border border-red-500/10">
-                    <FaYoutube size={24} />
+                <div className="flex flex-col h-full gap-6">
+                  <div className="flex size-11 items-center justify-center border border-[var(--ed-rule)] bg-[var(--ed-surface)]/40 text-[var(--ed-fg-muted)] transition-colors duration-300 group-hover:border-[var(--ed-accent)]/40 group-hover:text-[var(--ed-accent)]">
+                    <FaYoutube size={20} />
                   </div>
 
                   <div>
@@ -1193,9 +1175,9 @@ export function MiracleExperience() {
                     </h3>
                   </div>
 
-                  <div className="mt-auto flex items-center gap-2 text-sm font-medium text-[var(--ed-accent)] group-hover:gap-4 transition-all">
+                  <div className="mt-auto flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ed-accent)] transition-all group-hover:gap-4" style={{ fontFamily: F.mono }}>
                     {t('youtubeWatch')}
-                    <ArrowRight size={16} />
+                    <ArrowRight size={14} strokeWidth={1.8} />
                   </div>
                 </div>
               </a>
@@ -1203,7 +1185,7 @@ export function MiracleExperience() {
           </div>
 
           <div className="text-center space-y-10">
-            <div className="inline-flex p-4 rounded-3xl bg-[var(--ed-bg)] border border-[var(--ed-rule)] shadow-sm">
+            <div className="inline-flex p-4 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/40">
               <Database size={32} className="text-[var(--ed-accent)]" strokeWidth={1} />
             </div>
 
@@ -1230,38 +1212,20 @@ export function MiracleExperience() {
                 href="https://cdn.wikisubmission.org/books/quran-the-final-testament-appendix-1.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[var(--ed-fg)] text-[var(--ed-bg)] hover:bg-[var(--ed-accent)] transition-all group shadow-lg"
+                className="inline-flex min-h-12 items-center gap-3 border border-[var(--ed-accent)] bg-[var(--ed-accent)] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ed-bg)] transition-all duration-300 hover:bg-[var(--ed-fg)] hover:border-[var(--ed-fg)]"
+                style={{ fontFamily: F.mono }}
               >
-                <span
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 12,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    fontWeight: 600,
-                  }}
-                >
-                  {t('appendixButton')}
-                </span>
-                <ExternalLink size={16} className="group-hover:translate-x-1 transition-transform" />
+                {t('appendixButton')}
+                <ExternalLink size={14} strokeWidth={1.8} />
               </a>
 
               <Link
                 href="/appendices/1"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-full border border-[var(--ed-rule)] bg-[var(--ed-bg)] hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] transition-all group"
+                className="inline-flex min-h-12 items-center gap-3 border border-[var(--ed-rule)] bg-[var(--ed-bg)] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]"
+                style={{ fontFamily: F.mono }}
               >
-                <span
-                  style={{
-                    fontFamily: F.mono,
-                    fontSize: 12,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    fontWeight: 600,
-                  }}
-                >
-                  {t('appendixButtonDigital')}
-                </span>
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                {t('appendixButtonDigital')}
+                <ArrowRight size={14} strokeWidth={1.8} />
               </Link>
             </div>
           </div>
@@ -1292,7 +1256,7 @@ function SplitText({ text, className }: { text: string; className?: string }) {
 function SceneIndex({ i, t }: { i: number; t: (k: string) => string }) {
   return (
     <div className="absolute top-10 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30">
-      <div className="px-2 py-1 rounded bg-[var(--ed-surface)] border border-[var(--ed-rule)] font-mono text-[9px] tracking-widest uppercase text-[var(--ed-accent)]">
+      <div className="px-2 py-1 bg-[var(--ed-surface)] border border-[var(--ed-rule)] font-mono text-[9px] tracking-widest uppercase text-[var(--ed-accent)]">
         0{i + 1}
       </div>
       <div className="h-px w-8 bg-[var(--ed-rule)]" />

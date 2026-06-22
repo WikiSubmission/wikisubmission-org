@@ -161,14 +161,10 @@ function VerseQuote({ verseKey, text }: { verseKey: string; text: string }) {
           </span>
         </div>
         <p
-          className="relative text-base italic leading-[1.7] text-[var(--ed-fg-muted)] md:text-lg"
+          className="text-base italic leading-[1.7] text-[var(--ed-fg-muted)] md:text-lg"
           style={{ fontFamily: F.serif }}
         >
-          <span className="absolute -left-1 -top-2 text-4xl text-[var(--ed-accent)]/20 select-none" style={{ fontFamily: F.display }}>
-            &ldquo;
-          </span>
-          {text}
-          <span className="text-[var(--ed-accent)]/20 select-none">&rdquo;</span>
+          &ldquo;{text}&rdquo;
         </p>
       </div>
     </FadeUp>
@@ -340,7 +336,7 @@ export default function PracticesClient({
         <div className="mx-auto grid max-w-6xl gap-14 px-5 pb-20 pt-24 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(280px,390px)] md:pb-28 md:pt-32 lg:gap-20">
           <FadeUp distance={10} duration={0.5} className="flex flex-col justify-between gap-10">
             <div className="space-y-8">
-              <SectionLabel>Practices Hub</SectionLabel>
+              <SectionLabel>{t('hub')}</SectionLabel>
               <h1
                 className="max-w-3xl text-[3.25rem] font-medium leading-[1.05] tracking-tight text-[var(--ed-fg)] md:text-[4.5rem] lg:text-[5rem]"
                 style={{ fontFamily: F.serif }}
@@ -374,7 +370,7 @@ export default function PracticesClient({
           </FadeUp>
 
           <FadeUp distance={14} duration={0.55} className="self-end">
-            <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-bg)]/90 p-7 backdrop-blur-sm md:p-8">
+            <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-7 md:p-8">
               <div className="absolute inset-x-0 top-0 h-[2px] bg-[var(--ed-accent)]/30" />
               <div className="mb-10 flex items-center justify-between gap-4">
                 <Sparkles
