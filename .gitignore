@@ -62,3 +62,11 @@ docs/*
 
 # JetBrains / Android Studio project metadata
 .idea/
+
+# offline content bundle fixtures (generated for e2e via `just offline-bundles`)
+apps/web/public/offline/
+
+# playwright
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/.playwright/

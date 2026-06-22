@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:contract": "node scripts/check-openapi-sync.mjs"
+    "test:contract": "node scripts/check-openapi-sync.mjs",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.1053.0",
@@ -84,6 +85,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "16.2.1",
+    "@playwright/test": "^1.61.0",
     "@tailwindcss/postcss": "^4.3.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
