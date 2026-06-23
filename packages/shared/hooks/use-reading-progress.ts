@@ -4,7 +4,43 @@ import { useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { meApi } from '@/src/api/me-client'
+import { getRegisteredOfflineUserStore } from '@/lib/offline/user/registry'
 import type { BookmarkData, ReadingProgressData } from '@/types/bookmarks'
+
+/**
+ * Persist reading progress, network-first. On success the offline mirror is
+ * refreshed; on failure (offline) the change is captured in the outbox and
+ * replayed on reconnect. All offline-store calls are best-effort so the existing
+ * online path is never affected, and the no-op store on mobile/unsupported
+ * browsers leaves behavior unchanged.
+ */
+async function putReadingProgressOfflineAware(
+  scripture: string,
+  verseKey: string,
+): Promise<{ data: ReadingProgressData | null }> {
+  const store = getRegisteredOfflineUserStore()
+  try {
+    const res = await meApi.putReadingProgress({ scripture, verse_key: verseKey })
+    if (store) {
+      try {
+        await store.mirrorReadingProgress(scripture, verseKey)
+      } catch {
+        // best-effort write-through
+      }
+    }
+    return res
+  } catch (err) {
+    if (store) {
+      try {
+        await store.apply({ entity: 'reading_progress', op: 'upsert', scripture, vk: verseKey })
+        return { data: null }
+      } catch {
+        // store unavailable — surface the original network error
+      }
+    }
+    throw err
+  }
+}
 
 export function useReadingProgress(scripture: string): ReadingProgressData | null {
   const { isSignedIn } = useScriptureAuth()
@@ -20,8 +56,7 @@ export function useReadingProgress(scripture: string): ReadingProgressData | nul
 export function useSyncReadingProgress(scripture: string) {
   const { isSignedIn } = useScriptureAuth()
   const { mutate } = useMutation({
-    mutationFn: (verseKey: string) =>
-      meApi.putReadingProgress({ scripture, verse_key: verseKey }),
+    mutationFn: (verseKey: string) => putReadingProgressOfflineAware(scripture, verseKey),
   })
   return isSignedIn ? mutate : null
 }
@@ -69,8 +104,7 @@ export function useMarkCoverToCover(scripture: string) {
 export function useReadingProgressSync(scripture: string) {
   const { isSignedIn } = useScriptureAuth()
   const { mutate } = useMutation({
-    mutationFn: (verseKey: string) =>
-      meApi.putReadingProgress({ scripture, verse_key: verseKey }),
+    mutationFn: (verseKey: string) => putReadingProgressOfflineAware(scripture, verseKey),
   })
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastRef = useRef<string | null>(null)
