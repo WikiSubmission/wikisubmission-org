@@ -3,10 +3,74 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { meApi } from '@/src/api/me-client'
+import { getRegisteredOfflineUserStore } from '@/lib/offline/user/registry'
 import type { NoteData, ScriptureState } from '@/types/bookmarks'
 
 function chapterFromVerseKey(verseKey: string): number {
   return parseInt(verseKey.split(':')[0] ?? '0', 10)
+}
+
+// Offline-aware note mutations: network-first, with the offline mirror refreshed
+// on success and the change captured in the outbox on failure (replayed on
+// reconnect). The offline branch resolves successfully with an optimistic note
+// so React Query keeps the optimistic cache instead of rolling back. All store
+// calls are best-effort; a null store (mobile/unsupported) leaves behavior
+// unchanged, so the online path never regresses.
+async function upsertNoteOfflineAware(
+  scripture: string,
+  verseKey: string,
+  content: string,
+  tags?: string[],
+): Promise<{ data: NoteData }> {
+  const store = getRegisteredOfflineUserStore()
+  try {
+    const res = await meApi.upsertNote({ scripture, verse_key: verseKey, content, tags })
+    if (store) {
+      try {
+        await store.mirrorNote({ scripture, vk: verseKey, content, tags, updatedAt: Date.now() })
+      } catch {
+        // best-effort write-through
+      }
+    }
+    return res
+  } catch (err) {
+    if (store) {
+      try {
+        await store.apply({ entity: 'note', op: 'upsert', scripture, vk: verseKey, content, tags })
+        return {
+          data: {
+            id: -1,
+            scripture: scripture as 'quran' | 'bible',
+            verse_key: verseKey,
+            content,
+            tags: tags ?? [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        }
+      } catch {
+        // store unavailable — surface the original network error
+      }
+    }
+    throw err
+  }
+}
+
+async function deleteNoteOfflineAware(scripture: string, verseKey: string, id: number): Promise<void> {
+  try {
+    await meApi.deleteNote(id)
+  } catch (err) {
+    const store = getRegisteredOfflineUserStore()
+    if (store) {
+      try {
+        await store.apply({ entity: 'note', op: 'delete', scripture, vk: verseKey })
+        return
+      } catch {
+        // store unavailable — surface the original network error
+      }
+    }
+    throw err
+  }
 }
 
 function stateKey(scripture: string, chapter: number) {
@@ -31,12 +95,7 @@ export function useUpsertNote(scripture: string) {
 
   return useMutation({
     mutationFn: (vars: { verseKey: string; content: string; tags?: string[] }) =>
-      meApi.upsertNote({
-        scripture,
-        verse_key: vars.verseKey,
-        content: vars.content,
-        tags: vars.tags,
-      }),
+      upsertNoteOfflineAware(scripture, vars.verseKey, vars.content, vars.tags),
     onMutate: async ({ verseKey, content, tags }) => {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)
@@ -79,7 +138,7 @@ export function useDeleteNote(scripture: string) {
 
   return useMutation({
     mutationFn: (vars: { id: number; verseKey: string }) =>
-      meApi.deleteNote(vars.id),
+      deleteNoteOfflineAware(scripture, vars.verseKey, vars.id),
     onMutate: async ({ verseKey }) => {
       const chapter = chapterFromVerseKey(verseKey)
       const key = stateKey(scripture, chapter)

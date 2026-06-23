@@ -872,6 +872,7 @@ export const VerseCard = memo(
                                 removeEntry({
                                   entryId: entry.id,
                                   verseKey: verseId,
+                                  categoryId: cat.id,
                                 })
                               }
                             }}
