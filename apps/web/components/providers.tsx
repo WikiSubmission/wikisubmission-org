@@ -10,6 +10,7 @@ import { SignInPrompt } from '@/components/sign-in-prompt'
 import { ScriptureAuthBridge } from '@/components/scripture-auth-bridge'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { NavigationReferrerTracker } from '@/components/navigation-referrer-tracker'
+import { OfflineSyncBridge } from '@/components/offline-sync-bridge'
 import { registerWebApiAuth } from '@/lib/register-api-auth'
 import { registerWebOfflineStore } from '@/lib/register-offline'
 
@@ -38,6 +39,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <ChatPanelProvider>
               <ChatProvider>
                 <NavigationReferrerTracker />
+                <OfflineSyncBridge />
                 {children}
                 <ChatSidebar />
                 <SignInPrompt />
