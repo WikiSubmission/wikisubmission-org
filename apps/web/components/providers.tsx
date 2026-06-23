@@ -11,6 +11,7 @@ import { ScriptureAuthBridge } from '@/components/scripture-auth-bridge'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { NavigationReferrerTracker } from '@/components/navigation-referrer-tracker'
 import { OfflineSyncBridge } from '@/components/offline-sync-bridge'
+import { OfflineSyncStatus } from '@/components/offline-sync-status'
 import { registerWebApiAuth } from '@/lib/register-api-auth'
 import { registerWebOfflineStore } from '@/lib/register-offline'
 
@@ -40,6 +41,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
               <ChatProvider>
                 <NavigationReferrerTracker />
                 <OfflineSyncBridge />
+                <OfflineSyncStatus />
                 {children}
                 <ChatSidebar />
                 <SignInPrompt />
