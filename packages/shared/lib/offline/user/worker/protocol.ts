@@ -10,9 +10,18 @@ export type UserWorkerRequest =
   | { id: number; type: 'getBookmarkEntries'; scripture: string }
   | { id: number; type: 'getNote'; scripture: string; vk: string }
   | { id: number; type: 'getReadingProgress'; scripture: string }
+  | { id: number; type: 'getChapterUserData'; scripture: string; chapter: number }
   | { id: number; type: 'mirrorBookmarkEntries'; scripture: string; entries: BookmarkEntryMirror[] }
   | { id: number; type: 'mirrorNote'; note: NoteMirror }
   | { id: number; type: 'mirrorReadingProgress'; scripture: string; vk: string }
+  | {
+      id: number
+      type: 'mirrorChapterUserData'
+      scripture: string
+      chapter: number
+      entries: BookmarkEntryMirror[]
+      notes: NoteMirror[]
+    }
   | { id: number; type: 'pendingMutations' }
   | { id: number; type: 'pendingCount' }
   | { id: number; type: 'markFlushed'; ids: string[] }
@@ -25,9 +34,11 @@ export interface UserWorkerResultMap {
   getBookmarkEntries: BookmarkEntryMirror[]
   getNote: NoteMirror | null
   getReadingProgress: string | null
+  getChapterUserData: { entries: BookmarkEntryMirror[]; notes: NoteMirror[] }
   mirrorBookmarkEntries: boolean
   mirrorNote: boolean
   mirrorReadingProgress: boolean
+  mirrorChapterUserData: boolean
   pendingMutations: OutboxEntry[]
   pendingCount: number
   markFlushed: boolean

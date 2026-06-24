@@ -40,6 +40,8 @@ test('user store applies local mutations and queues the outbox', async ({ page }
   await expect(page.getByTestId('user-note')).toHaveText('my note')
   // Both writes are queued in the outbox awaiting sync.
   await expect(page.getByTestId('user-pending')).toHaveText('2')
+  // Chapter-scoped read returns the chapter-1 note but not the chapter-2 bookmark.
+  await expect(page.getByTestId('user-chapter')).toHaveText('1n0b')
 
   expect(errors, errors.join('\n')).toEqual([])
 })

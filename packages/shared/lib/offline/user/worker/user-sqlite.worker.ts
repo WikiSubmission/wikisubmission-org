@@ -154,19 +154,71 @@ function getBookmarkEntries(scripture: string): BookmarkEntryMirror[] {
   )
 }
 
-function getNote(scripture: string, vk: string): NoteMirror | null {
-  const found = rows(`SELECT scripture, vk, content, tags, updated_at FROM notes WHERE scripture = ? AND vk = ?`, [
-    scripture,
-    vk,
-  ])
-  if (found.length === 0) return null
-  const r = found[0]
+function noteRowToMirror(r: Record<string, unknown>): NoteMirror {
   return {
     scripture: str(r.scripture),
     vk: str(r.vk),
     content: str(r.content),
     tags: r.tags ? (JSON.parse(str(r.tags)) as string[]) : undefined,
     updatedAt: Number(r.updated_at),
+  }
+}
+
+function getNote(scripture: string, vk: string): NoteMirror | null {
+  const found = rows(`SELECT scripture, vk, content, tags, updated_at FROM notes WHERE scripture = ? AND vk = ?`, [
+    scripture,
+    vk,
+  ])
+  return found.length === 0 ? null : noteRowToMirror(found[0])
+}
+
+// Verse keys are `${chapter}:${verse}`; '2:%' matches 2:1 but not 20:1.
+const chapterPrefix = (chapter: number) => `${chapter}:%`
+
+function getChapterUserData(
+  scripture: string,
+  chapter: number,
+): { entries: BookmarkEntryMirror[]; notes: NoteMirror[] } {
+  const prefix = chapterPrefix(chapter)
+  const entries = rows(
+    `SELECT category_id, scripture, vk FROM bookmark_entries WHERE scripture = ? AND vk LIKE ?`,
+    [scripture, prefix],
+  ).map((r) => ({ categoryId: Number(r.category_id), scripture: str(r.scripture), vk: str(r.vk) }))
+  const notes = rows(
+    `SELECT scripture, vk, content, tags, updated_at FROM notes WHERE scripture = ? AND vk LIKE ?`,
+    [scripture, prefix],
+  ).map(noteRowToMirror)
+  return { entries, notes }
+}
+
+function mirrorChapterUserData(
+  scripture: string,
+  chapter: number,
+  entries: BookmarkEntryMirror[],
+  notes: NoteMirror[],
+): void {
+  const prefix = chapterPrefix(chapter)
+  run('BEGIN')
+  try {
+    run(`DELETE FROM bookmark_entries WHERE scripture = ? AND vk LIKE ?`, [scripture, prefix])
+    for (const e of entries) {
+      run(`INSERT OR IGNORE INTO bookmark_entries (category_id, scripture, vk) VALUES (?, ?, ?)`, [
+        e.categoryId,
+        e.scripture,
+        e.vk,
+      ])
+    }
+    run(`DELETE FROM notes WHERE scripture = ? AND vk LIKE ?`, [scripture, prefix])
+    for (const n of notes) {
+      run(
+        `INSERT OR REPLACE INTO notes (scripture, vk, content, tags, updated_at) VALUES (?, ?, ?, ?, ?)`,
+        [n.scripture, n.vk, n.content, n.tags ? JSON.stringify(n.tags) : null, n.updatedAt],
+      )
+    }
+    run('COMMIT')
+  } catch (e) {
+    run('ROLLBACK')
+    throw e
   }
 }
 
@@ -215,8 +267,13 @@ function handle(req: UserWorkerRequest): Promise<unknown> | unknown {
       return getNote(req.scripture, req.vk)
     case 'getReadingProgress':
       return getReadingProgress(req.scripture)
+    case 'getChapterUserData':
+      return getChapterUserData(req.scripture, req.chapter)
     case 'mirrorBookmarkEntries':
       mirrorBookmarkEntries(req.scripture, req.entries)
+      return true
+    case 'mirrorChapterUserData':
+      mirrorChapterUserData(req.scripture, req.chapter, req.entries, req.notes)
       return true
     case 'mirrorNote':
       run(

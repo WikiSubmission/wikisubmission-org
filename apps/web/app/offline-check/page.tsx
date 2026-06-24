@@ -16,6 +16,7 @@ export default function OfflineCheckPage() {
   const [error, setError] = useState('')
   const [userNote, setUserNote] = useState('')
   const [userPending, setUserPending] = useState('')
+  const [userChapter, setUserChapter] = useState('')
   const [userDone, setUserDone] = useState(false)
 
   // Opt-in only (set NEXT_PUBLIC_OFFLINE_CHECK=1 for the e2e build); hidden otherwise.
@@ -68,6 +69,12 @@ export default function OfflineCheckPage() {
 
       const pending = await store.pendingMutations()
       setUserPending(String(pending.length))
+
+      // Chapter-scoped read: the note at 1:1 is in chapter 1; the bookmark at
+      // 2:255 is not (verifies the verse-key prefix filter).
+      const ch1 = await store.getChapterUserData('quran', 1)
+      setUserChapter(`${ch1.notes.length}n${ch1.entries.length}b`)
+
       setUserDone(true)
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -90,6 +97,7 @@ export default function OfflineCheckPage() {
       </button>
       <div data-testid="user-note">{userNote}</div>
       <div data-testid="user-pending">{userPending}</div>
+      <div data-testid="user-chapter">{userChapter}</div>
       <div data-testid="user-done">{userDone ? 'true' : 'false'}</div>
 
       <div data-testid="error">{error}</div>

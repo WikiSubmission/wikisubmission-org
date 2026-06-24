@@ -32,11 +32,25 @@ export interface OfflineUserStore {
   getBookmarkEntries(scripture: string): Promise<BookmarkEntryMirror[]>
   getNote(scripture: string, vk: string): Promise<NoteMirror | null>
   getReadingProgress(scripture: string): Promise<string | null>
+  /** All mirrored bookmark entries + notes for one chapter (verse keys
+   * `${chapter}:*`) — used to render the reader's annotations offline. */
+  getChapterUserData(
+    scripture: string,
+    chapter: number,
+  ): Promise<{ entries: BookmarkEntryMirror[]; notes: NoteMirror[] }>
 
   // ── write-through from successful online reads ──
   mirrorBookmarkEntries(scripture: string, entries: BookmarkEntryMirror[]): Promise<void>
   mirrorNote(note: NoteMirror): Promise<void>
   mirrorReadingProgress(scripture: string, vk: string): Promise<void>
+  /** Replace one chapter's mirrored bookmark entries + notes with server truth.
+   * Scoped to the chapter so other chapters' mirror data is untouched. */
+  mirrorChapterUserData(
+    scripture: string,
+    chapter: number,
+    entries: BookmarkEntryMirror[],
+    notes: NoteMirror[],
+  ): Promise<void>
 
   // ── local-first writes ──
   /** Apply a mutation to the mirror and enqueue it in the outbox atomically. */

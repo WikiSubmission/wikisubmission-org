@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { meApi } from '@/src/api/me-client'
 import { getRegisteredOfflineUserStore } from '@/lib/offline/user/registry'
-import type { BookmarkEntryData, ScriptureState } from '@/types/bookmarks'
+import type { BookmarkEntryMirror, NoteMirror } from '@/lib/offline/user/user-store'
+import type { BookmarkEntryData, NoteData, ScriptureState } from '@/types/bookmarks'
 
 function chapterFromVerseKey(verseKey: string): number {
   return parseInt(verseKey.split(':')[0] ?? '0', 10)
@@ -180,11 +181,94 @@ export function useUpsertCoverToCover(scripture: string) {
 
 // ── Scripture state (bookmarks + notes for a chapter) ─────────────────────
 
+// Flatten a chapter's ScriptureState into flat mirror rows for write-through.
+function flattenForMirror(state: ScriptureState): {
+  entries: BookmarkEntryMirror[]
+  notes: NoteMirror[]
+} {
+  const entries: BookmarkEntryMirror[] = []
+  for (const [vk, list] of Object.entries(state.bookmarks ?? {})) {
+    for (const e of list) entries.push({ categoryId: e.category_id, scripture: e.scripture, vk })
+  }
+  const notes: NoteMirror[] = []
+  for (const [vk, n] of Object.entries(state.notes ?? {})) {
+    notes.push({
+      scripture: n.scripture,
+      vk,
+      content: n.content,
+      tags: n.tags ?? undefined,
+      updatedAt: Date.parse(n.updated_at ?? '') || Date.now(),
+    })
+  }
+  return { entries, notes }
+}
+
+// Rebuild a ScriptureState from mirror rows for offline reads. Mirror rows carry
+// no server id, so ids are -1 (the reader keys off verse_key, not id).
+function buildScriptureState(
+  entries: BookmarkEntryMirror[],
+  notes: NoteMirror[],
+): ScriptureState {
+  const bookmarks: Record<string, BookmarkEntryData[]> = {}
+  for (const e of entries) {
+    ;(bookmarks[e.vk] ??= []).push({
+      id: -1,
+      category_id: e.categoryId,
+      scripture: e.scripture as 'quran' | 'bible',
+      verse_key: e.vk,
+      created_at: new Date().toISOString(),
+    })
+  }
+  const notesMap: Record<string, NoteData> = {}
+  for (const n of notes) {
+    const iso = new Date(n.updatedAt).toISOString()
+    notesMap[n.vk] = {
+      id: -1,
+      scripture: n.scripture as 'quran' | 'bible',
+      verse_key: n.vk,
+      content: n.content,
+      tags: n.tags ?? [],
+      created_at: iso,
+      updated_at: iso,
+    }
+  }
+  return { bookmarks, notes: notesMap }
+}
+
 export function useScriptureState(scripture: string, chapter: number): ScriptureState | undefined {
   const { isSignedIn } = useScriptureAuth()
   const { data } = useQuery<ScriptureState>({
     queryKey: stateKey(scripture, chapter),
-    queryFn: () => meApi.getScriptureState(scripture, chapter),
+    // Network-first; mirror the result for offline reads (only when nothing is
+    // pending, so un-synced local edits are never overwritten), and fall back to
+    // the mirror when offline.
+    queryFn: async () => {
+      const store = getRegisteredOfflineUserStore()
+      try {
+        const res = await meApi.getScriptureState(scripture, chapter)
+        if (store) {
+          try {
+            if ((await store.pendingCount()) === 0) {
+              const { entries, notes } = flattenForMirror(res)
+              await store.mirrorChapterUserData(scripture, chapter, entries, notes)
+            }
+          } catch {
+            // best-effort write-through
+          }
+        }
+        return res
+      } catch (err) {
+        if (store) {
+          try {
+            const { entries, notes } = await store.getChapterUserData(scripture, chapter)
+            return buildScriptureState(entries, notes)
+          } catch {
+            // store unavailable — surface the original error
+          }
+        }
+        throw err
+      }
+    },
     enabled: isSignedIn && chapter > 0,
     staleTime: 60_000,
   })

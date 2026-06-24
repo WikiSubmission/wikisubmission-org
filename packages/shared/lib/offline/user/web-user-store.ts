@@ -64,6 +64,28 @@ export class WebOfflineUserStore implements OfflineUserStore {
     return this.rpc<string | null>({ type: 'getReadingProgress', scripture })
   }
 
+  getChapterUserData(
+    scripture: string,
+    chapter: number,
+  ): Promise<{ entries: BookmarkEntryMirror[]; notes: NoteMirror[] }> {
+    return this.rpc<{ entries: BookmarkEntryMirror[]; notes: NoteMirror[] }>({
+      type: 'getChapterUserData',
+      scripture,
+      chapter,
+    })
+  }
+
+  mirrorChapterUserData(
+    scripture: string,
+    chapter: number,
+    entries: BookmarkEntryMirror[],
+    notes: NoteMirror[],
+  ): Promise<void> {
+    return this.rpc<boolean>({ type: 'mirrorChapterUserData', scripture, chapter, entries, notes }).then(
+      () => undefined,
+    )
+  }
+
   mirrorBookmarkEntries(scripture: string, entries: BookmarkEntryMirror[]): Promise<void> {
     return this.rpc<boolean>({ type: 'mirrorBookmarkEntries', scripture, entries }).then(() => undefined)
   }

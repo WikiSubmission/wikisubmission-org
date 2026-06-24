@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { getRegisteredOfflineUserStore } from '@/lib/offline/user/registry'
 
 /**
@@ -8,11 +9,17 @@ import { getRegisteredOfflineUserStore } from '@/lib/offline/user/registry'
  * queued in the outbox. Hidden when nothing is pending (the common case). Polls
  * the count cheaply and refreshes on focus/reconnect so it clears promptly once
  * the sync bridge drains the outbox. Web-only.
+ *
+ * Gated on an authenticated session: the outbox only exists for signed-in users,
+ * and this keeps the user worker from spinning up on public pages.
  */
 export function OfflineSyncStatus() {
+  const { status } = useSession()
   const [pending, setPending] = useState(0)
+  const signedIn = status === 'authenticated'
 
   useEffect(() => {
+    if (!signedIn) return
     let alive = true
     const refresh = async () => {
       const store = getRegisteredOfflineUserStore()
@@ -38,9 +45,9 @@ export function OfflineSyncStatus() {
       window.removeEventListener('focus', onActivity)
       document.removeEventListener('visibilitychange', onActivity)
     }
-  }, [])
+  }, [signedIn])
 
-  if (pending === 0) return null
+  if (!signedIn || pending === 0) return null
 
   return (
     <div role="status" style={badgeStyle}>
