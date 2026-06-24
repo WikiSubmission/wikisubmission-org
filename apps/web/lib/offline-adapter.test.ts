@@ -10,6 +10,8 @@ function fakeStore(opts: {
   verses?: Record<string, VerseRow[]>
   titles?: Record<string, string>
   searchRows?: SearchRow[]
+  // Optional sink: records every (scripture, lang, range) getVerses was called with.
+  rangeSink?: Array<{ scripture: string; lang: string; range: unknown }>
 }): OfflineContentStore {
   return {
     async installedBundles() {
@@ -28,7 +30,8 @@ function fakeStore(opts: {
         }),
       )
     },
-    async getVerses(scripture, lang) {
+    async getVerses(scripture, lang, range) {
+      opts.rangeSink?.push({ scripture, lang, range })
       return opts.verses?.[`${scripture}-${lang}`] ?? []
     },
     async getChapterTitle(scripture, lang) {
@@ -94,6 +97,38 @@ describe('offlineQuranVerses', () => {
     expect(result!.verses[1].tr?.ar).toBeUndefined()
     expect(result!.verses[1].tr?.en).toBeDefined()
   })
+
+  // ── Edge cases ─────────────────────────────────────────────────────────────
+
+  it('returns null when no languages are requested', async () => {
+    const store = fakeStore({ installedIds: ['quran-en'], verses: { 'quran-en': enRows } })
+    expect(await offlineQuranVerses(store, [], { chapter: 1 })).toBeNull()
+  })
+
+  it.each(['ur', 'fa', 'ac'])('marks %s as right-to-left', async (lang) => {
+    const id = `quran-${lang}`
+    const store = fakeStore({
+      installedIds: [id],
+      verses: { [`quran-${lang}`]: [{ vk: '1:1', cn: 1, vn: 1, text: 'x' }] },
+    })
+    const result = await offlineQuranVerses(store, [lang], { chapter: 1 })
+    expect(result!.verses[0].tr?.[lang]?.d).toBe('rtl')
+  })
+
+  it('forwards the verse range to the store for each language', async () => {
+    const rangeSink: Array<{ scripture: string; lang: string; range: unknown }> = []
+    const store = fakeStore({
+      installedIds: ['quran-en', 'quran-ar'],
+      verses: { 'quran-en': enRows, 'quran-ar': arRows },
+      rangeSink,
+    })
+    const range = { chapter: 2, verseStart: 5, verseEnd: 10 }
+    await offlineQuranVerses(store, ['en', 'ar'], range)
+    expect(rangeSink).toEqual([
+      { scripture: 'quran', lang: 'en', range },
+      { scripture: 'quran', lang: 'ar', range },
+    ])
+  })
 })
 
 describe('offlineQuranSearch', () => {
@@ -131,5 +166,51 @@ describe('offlineQuranSearch', () => {
     const store = fakeStore({ installedIds: ['quran-en'], searchRows: hits })
     const res = await offlineQuranSearch(store, ['en', 'ar'], 'mercy')
     expect(res?.info?.total).toBe(2)
+  })
+
+  // ── Edge cases ─────────────────────────────────────────────────────────────
+
+  it.each(['', ' ', '\t\n', 'a'])('returns null for a query under two chars (%j)', async (q) => {
+    const store = fakeStore({ installedIds: ['quran-en'], searchRows: hits })
+    expect(await offlineQuranSearch(store, ['en'], q)).toBeNull()
+  })
+
+  it('merges the same verse matched in two languages into one verse with both tr', async () => {
+    // 1:1 matches in both en and ar -> one verse, two translations, kept once.
+    const bilingual: SearchRow[] = [
+      { vk: '1:1', cn: 1, vn: 1, lang: 'en', text: 'Most Merciful', hl: '<b>Merciful</b>', rank: -2.0 },
+      { vk: '1:1', cn: 1, vn: 1, lang: 'ar', text: 'الرحيم', hl: '<b>الرحيم</b>', rank: -3.0 },
+    ]
+    const store = fakeStore({ installedIds: ['quran-en', 'quran-ar'], searchRows: bilingual })
+    const res = await offlineQuranSearch(store, ['en', 'ar'], 'mercy')
+    expect(res?.info?.total).toBe(1)
+    const v = res!.chapters![0].verses![0]
+    expect(v.tr?.en?.hl).toBe('<b>Merciful</b>')
+    expect(v.tr?.ar?.hl).toBe('<b>الرحيم</b>')
+    expect(v.tr?.ar?.d).toBe('rtl')
+    // sc is the strongest (most-negative rank) across the two language hits.
+    expect(v.sc).toBeCloseTo(3.0)
+  })
+
+  it('keeps the strongest score when a verse appears multiple times', async () => {
+    const dupes: SearchRow[] = [
+      { vk: '2:1', cn: 2, vn: 1, lang: 'en', text: 'first', rank: -0.5 },
+      { vk: '2:1', cn: 2, vn: 1, lang: 'en', text: 'first', rank: -4.0 },
+    ]
+    const store = fakeStore({ installedIds: ['quran-en'], searchRows: dupes })
+    const res = await offlineQuranSearch(store, ['en'], 'first')
+    expect(res?.info?.total).toBe(1)
+    expect(res!.chapters![0].verses![0].sc).toBeCloseTo(4.0)
+  })
+
+  it('preserves store hit order across chapters', async () => {
+    // The store returns rows already ranked; the adapter must not reorder chapters.
+    const ordered: SearchRow[] = [
+      { vk: '76:3', cn: 76, vn: 3, lang: 'en', text: 'b', rank: -5.0 },
+      { vk: '1:1', cn: 1, vn: 1, lang: 'en', text: 'a', rank: -2.0 },
+    ]
+    const store = fakeStore({ installedIds: ['quran-en'], searchRows: ordered })
+    const res = await offlineQuranSearch(store, ['en'], 'mercy')
+    expect(res?.chapters?.map((c) => c.cn)).toEqual([76, 1])
   })
 })

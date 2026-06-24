@@ -25,4 +25,31 @@ describe('normalizeForSearch', () => {
       expect(normalizeForSearch(once)).toBe(once)
     }
   })
+
+  // ── Edge cases ─────────────────────────────────────────────────────────────
+
+  it('returns an empty string for empty input', () => {
+    expect(normalizeForSearch('')).toBe('')
+  })
+
+  it('collapses a whitespace-only string to empty', () => {
+    expect(normalizeForSearch('   \t\n  ')).toBe('')
+  })
+
+  it('reduces a combining-mark-only string to empty', () => {
+    // Bare harakat (fatha, kasra, sukun) with no base letters -> nothing remains.
+    expect(normalizeForSearch('َِْ')).toBe('')
+  })
+
+  it('strips a lone standalone hamza to empty', () => {
+    expect(normalizeForSearch('ء')).toBe('')
+  })
+
+  it('collapses internal runs of whitespace between mixed scripts', () => {
+    expect(normalizeForSearch('God   اللَّه\tmercy')).toBe('god الله mercy')
+  })
+
+  it('lowercases Latin while leaving Arabic letters intact', () => {
+    expect(normalizeForSearch('MERCY')).toBe('mercy')
+  })
 })

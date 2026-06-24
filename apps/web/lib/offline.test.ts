@@ -117,6 +117,66 @@ describe('planBundleSync', () => {
     expect(plan.toInstall).toEqual([])
     expect(plan.incompatible).toEqual([])
   })
+
+  // ── Edge cases ─────────────────────────────────────────────────────────────
+
+  it('leaves an installed+selected bundle the manifest dropped untouched (orphan)', () => {
+    // Still selected, so not removed; no longer offered, so cannot update.
+    const plan = planBundleSync([info({ id: 'quran-fr', lang: 'fr' })], manifest(), sel('quran-fr'))
+    expect(plan.toInstall).toEqual([])
+    expect(plan.toUpdate).toEqual([])
+    expect(plan.toRemove).toEqual([])
+    expect(plan.incompatible).toEqual([])
+  })
+
+  it('removes an installed bundle absent from both the manifest and the selection', () => {
+    const plan = planBundleSync([info({ id: 'quran-fr', lang: 'fr' })], manifest(), sel())
+    expect(plan.toRemove).toEqual(['quran-fr'])
+    expect(plan.toInstall).toEqual([])
+  })
+
+  it('flags a normalization_version mismatch when the CLIENT is newer than the server', () => {
+    // Server bundle norm=1, client norm=2 -> still incompatible (other direction).
+    const plan = planBundleSync([], manifest({ normalization_version: 1 }), sel('quran-en'), {
+      clientNormalizationVersion: 2,
+    })
+    expect(plan.incompatible.map((b) => b.id)).toEqual(['quran-en'])
+    expect(plan.toInstall).toEqual([])
+  })
+
+  it('installs a bundle whose schema_version equals the supported boundary', () => {
+    const plan = planBundleSync([], manifest({ schema_version: SUPPORTED_SCHEMA_VERSION }), sel('quran-en'))
+    expect(plan.toInstall.map((b) => b.id)).toEqual(['quran-en'])
+    expect(plan.incompatible).toEqual([])
+  })
+
+  it('handles an empty manifest: removes deselected, cannot install anything', () => {
+    const empty = parseManifest({ bundles: [] })
+    // quran-en installed but deselected -> removed; quran-ar selected but not offered -> ignored.
+    const plan = planBundleSync([info({})], empty, sel('quran-ar'))
+    expect(plan.toRemove).toEqual(['quran-en'])
+    expect(plan.toInstall).toEqual([])
+    expect(plan.incompatible).toEqual([])
+  })
+
+  it('resolves install, update, remove, and incompatible in a single mixed pass', () => {
+    const multi = parseManifest({
+      bundles: [
+        { ...RAW_BUNDLE, id: 'quran-en', lang: 'en', data_version: 3 }, // installed at v2 -> update
+        { ...RAW_BUNDLE, id: 'quran-ar', lang: 'ar', sha256: 'a'.repeat(64) }, // not installed -> install
+        { ...RAW_BUNDLE, id: 'quran-de', lang: 'de', schema_version: SUPPORTED_SCHEMA_VERSION + 1 }, // -> incompatible
+      ],
+    })
+    const installed = [
+      info({ id: 'quran-en', lang: 'en', dataVersion: 2 }),
+      info({ id: 'quran-fr', lang: 'fr' }), // not selected -> remove
+    ]
+    const plan = planBundleSync(installed, multi, sel('quran-en', 'quran-ar', 'quran-de'))
+    expect(plan.toUpdate.map((b) => b.id)).toEqual(['quran-en'])
+    expect(plan.toInstall.map((b) => b.id)).toEqual(['quran-ar'])
+    expect(plan.incompatible.map((b) => b.id)).toEqual(['quran-de'])
+    expect(plan.toRemove).toEqual(['quran-fr'])
+  })
 })
 
 describe('sha256', () => {
@@ -132,5 +192,15 @@ describe('sha256', () => {
     const upper = 'BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD'
     expect(await verifySha256(bytes, upper)).toBe(true)
     expect(await verifySha256(bytes, 'f'.repeat(64))).toBe(false)
+  })
+
+  it('hashes empty bytes to the canonical empty-string digest', async () => {
+    const empty = new Uint8Array(0)
+    expect(await sha256Hex(empty)).toBe(
+      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    )
+    expect(
+      await verifySha256(empty, 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'),
+    ).toBe(true)
   })
 })
