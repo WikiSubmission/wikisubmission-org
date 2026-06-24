@@ -18,6 +18,8 @@ export default function OfflineCheckPage() {
   const [userPending, setUserPending] = useState('')
   const [userChapter, setUserChapter] = useState('')
   const [userDone, setUserDone] = useState(false)
+  const [mismatch, setMismatch] = useState('')
+  const [mismatchDone, setMismatchDone] = useState(false)
 
   // Opt-in only (set NEXT_PUBLIC_OFFLINE_CHECK=1 for the e2e build); hidden otherwise.
   if (process.env.NEXT_PUBLIC_OFFLINE_CHECK !== '1') return null
@@ -81,6 +83,30 @@ export default function OfflineCheckPage() {
     }
   }
 
+  // Integrity path: a bundle whose advertised sha256 does not match the bytes
+  // must be rejected, never imported. Records whether install threw the expected
+  // checksum error (and did not silently succeed).
+  async function runMismatch() {
+    setError('')
+    try {
+      const store = getOfflineContentStore()
+      const manifest = await fetchManifest(OFFLINE_MANIFEST_URL)
+      const en = manifest.bundles.find((b) => b.id === 'quran-en')
+      if (!en) throw new Error('quran-en not in manifest')
+
+      const tampered = { ...en, id: 'quran-en-tampered', sha256: 'f'.repeat(64) }
+      try {
+        await store.install(tampered)
+        setMismatch('INSTALLED') // should never happen
+      } catch (e) {
+        setMismatch(e instanceof Error ? e.message : String(e))
+      }
+      setMismatchDone(true)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    }
+  }
+
   return (
     <div style={{ padding: 24, fontFamily: 'monospace' }}>
       <h1>offline-check</h1>
@@ -99,6 +125,12 @@ export default function OfflineCheckPage() {
       <div data-testid="user-pending">{userPending}</div>
       <div data-testid="user-chapter">{userChapter}</div>
       <div data-testid="user-done">{userDone ? 'true' : 'false'}</div>
+
+      <button type="button" data-testid="run-mismatch" onClick={runMismatch}>
+        run-mismatch
+      </button>
+      <div data-testid="mismatch">{mismatch}</div>
+      <div data-testid="mismatch-done">{mismatchDone ? 'true' : 'false'}</div>
 
       <div data-testid="error">{error}</div>
     </div>

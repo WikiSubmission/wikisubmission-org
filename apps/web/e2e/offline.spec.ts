@@ -45,3 +45,14 @@ test('user store applies local mutations and queues the outbox', async ({ page }
 
   expect(errors, errors.join('\n')).toEqual([])
 })
+
+test('install rejects a bundle whose checksum does not match', async ({ page }) => {
+  await page.goto('/offline-check')
+  await page.getByTestId('run-mismatch').click()
+
+  // Download (~2.7MB) then a failing verify; allow time for the real fetch.
+  await expect(page.getByTestId('mismatch-done')).toHaveText('true', { timeout: 60_000 })
+  await expect(page.getByTestId('error')).toHaveText('')
+  // It threw the checksum error rather than importing tampered bytes.
+  await expect(page.getByTestId('mismatch')).toContainText('checksum mismatch')
+})
