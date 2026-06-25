@@ -68,15 +68,13 @@ const nextConfig: NextConfig = {
     },
   },
   allowedDevOrigins: ['192.168.1.68'],
-  // react-scan is a dev-only profiler (rendered only when NODE_ENV is
-  // development). Its dist trips Webpack's ESM-interop checks, so exclude it
-  // from production Webpack builds — it is never reached at runtime there.
-  webpack: (config, { dev }) => {
-    if (!dev) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'react-scan': false,
-      }
+  webpack: (config) => {
+    // react-scan@0.5.6 ships a broken ESM named export that webpack cannot
+    // compile, and it is a dev-only re-render overlay we do not ship. Alias it
+    // to an empty module in every mode so neither dev nor prod builds choke.
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'react-scan': false,
     }
     return config
   },
