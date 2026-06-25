@@ -223,7 +223,7 @@ function PrayerTimesContent() {
               <Input
                 type="search"
                 placeholder={t('searchLocation')}
-                className="pl-9 pr-3 h-11 bg-[var(--ed-surface)]/40 border-[var(--ed-rule)] focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all font-mono text-[12px] tracking-wider"
+                className="pl-9 pr-3 h-11 bg-[var(--ed-surface)]/40 border-[var(--ed-rule)] focus-visible:ring-0 focus-visible:border-[var(--ed-accent)]/50 transition-all font-[family-name:var(--font-jetbrains)] text-[12px] tracking-wider"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -237,7 +237,7 @@ function PrayerTimesContent() {
               />
               <Label
                 htmlFor="asr-method"
-                className="text-[10px] text-[var(--ed-fg-muted)] font-mono uppercase tracking-[0.18em] cursor-pointer"
+                className="text-[10px] text-[var(--ed-fg-muted)] font-[family-name:var(--font-jetbrains)] uppercase tracking-[0.18em] cursor-pointer"
               >
                 {t('asrMidpoint')}
               </Label>
@@ -282,7 +282,7 @@ function PrayerTimesContent() {
                 >
                   <span className="opacity-60 mx-1">→</span>
                   <span className="capitalize text-[var(--ed-fg)]"> {prayerDisplayNames[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}</span>
-                  <span className="font-mono text-[var(--ed-accent)]"> {data.upcoming_prayer_time_left}</span>
+                  <span className="font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)]"> {data.upcoming_prayer_time_left}</span>
                 </span>
               )}
             </div>
@@ -374,7 +374,7 @@ function SchedulePanel({
   t: (key: string, values?: Record<string, string>) => string
 }) {
   return (
-    <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 rounded-md overflow-hidden">
+    <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 overflow-hidden">
       <Tabs defaultValue="today" className="flex flex-col gap-0">
           <div className="px-5 py-3 border-b border-border/40">
             <TabsList>
@@ -420,7 +420,7 @@ function SchedulePanel({
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
                             {isCurrent && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
+                              <span className="w-1.5 h-1.5 bg-primary animate-pulse shrink-0" />
                             )}
                             <span
                               className={cn(
@@ -435,7 +435,7 @@ function SchedulePanel({
                                 className={cn(
                                   'text-[10px] normal-case leading-none mt-0.5',
                                   isUrgent
-                                    ? 'text-destructive font-bold animate-pulse'
+                                    ? 'text-destructive font-bold'
                                     : 'text-muted-foreground font-light'
                                 )}
                               >

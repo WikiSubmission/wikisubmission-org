@@ -27,6 +27,7 @@ const F = {
   display: 'var(--font-cormorant), Georgia, serif',
   mono: 'var(--font-jetbrains), ui-monospace, monospace',
   serif: 'var(--font-source-serif), Georgia, serif',
+  glacial: 'var(--font-glacial), sans-serif',
   arabic: 'var(--font-amiri), "Scheherazade New", serif',
 }
 
@@ -137,16 +138,16 @@ function CornerMarkers({ label, sub }: { label: string; sub: string }) {
   const t = useTranslations('miracle')
   return (
     <>
-      <div className="absolute top-6 left-6 font-mono text-[8px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-30 z-30">
+      <div className="absolute top-6 left-6 text-[8px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-30 z-30" style={{ fontFamily: F.glacial }}>
         {label}
       </div>
-      <div className="absolute top-6 right-6 font-mono text-[8px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-30 z-30">
+      <div className="absolute top-6 right-6 text-[8px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-30 z-30" style={{ fontFamily: F.glacial }}>
         {sub}
       </div>
-      <div className="absolute bottom-6 left-6 font-mono text-[8px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-30 z-30">
+      <div className="absolute bottom-6 left-6 text-[8px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-30 z-30" style={{ fontFamily: F.glacial }}>
         {t('visualForensicUnit')}
       </div>
-      <div className="absolute bottom-6 right-6 font-mono text-[8px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-30 z-30">
+      <div className="absolute bottom-6 right-6 text-[8px] tracking-[0.4em] uppercase text-[var(--ed-fg-muted)] opacity-30 z-30" style={{ fontFamily: F.glacial }}>
         {t('visualConst')}
       </div>
     </>
@@ -677,11 +678,11 @@ export function MiracleExperience() {
           <div className="flex items-baseline gap-2 pt-6 border-t border-[var(--ed-rule)]/20 px-12">
             <span
               ref={bismillahCounterRef}
-              className="font-mono text-6xl md:text-7xl font-bold tabular-nums"
+              className="font-[family-name:var(--font-jetbrains)] text-6xl md:text-7xl font-bold tabular-nums"
             >
               0
             </span>
-            <span className="font-mono text-sm text-[var(--ed-fg-muted)] opacity-30">
+            <span className="font-[family-name:var(--font-jetbrains)] text-sm text-[var(--ed-fg-muted)] opacity-30">
               / 19
             </span>
           </div>
@@ -717,7 +718,7 @@ export function MiracleExperience() {
           <div className="relative flex items-center justify-center">
             <div
               ref={chaptersCounterRef}
-              className="font-mono text-8xl md:text-[10rem] font-bold leading-none tabular-nums"
+              className="font-[family-name:var(--font-jetbrains)] text-8xl md:text-[10rem] font-bold leading-none tabular-nums"
             >
               0
             </div>
@@ -727,13 +728,13 @@ export function MiracleExperience() {
             ref={chaptersFormulaRef}
             className="flex items-center gap-4 bg-[var(--ed-surface)]/60 px-6 py-3 border border-[var(--ed-rule)]"
           >
-            <div className="font-mono text-4xl md:text-5xl font-bold text-[var(--ed-accent)]">
+            <div className="font-[family-name:var(--font-jetbrains)] text-4xl md:text-5xl font-bold text-[var(--ed-accent)]">
               19
             </div>
             <div className="text-xl opacity-20">×</div>
-            <div className="font-mono text-3xl md:text-4xl font-bold">6</div>
+            <div className="font-[family-name:var(--font-jetbrains)] text-3xl md:text-4xl font-bold">6</div>
             <div className="text-xl opacity-20">=</div>
-            <div className="font-mono text-3xl md:text-4xl font-bold">114</div>
+            <div className="font-[family-name:var(--font-jetbrains)] text-3xl md:text-4xl font-bold">114</div>
           </div>
 
           <StatusBadge text={t('visualVerified114')} icon={<Activity size={10} />} />
@@ -788,11 +789,11 @@ export function MiracleExperience() {
           <div className="flex items-baseline gap-3 pt-6 border-t border-[var(--ed-rule)]/20 px-12">
             <span
               ref={revelationCounterRef}
-              className="font-mono text-6xl md:text-7xl font-bold tabular-nums text-[var(--ed-accent)]"
+              className="font-[family-name:var(--font-jetbrains)] text-6xl md:text-7xl font-bold tabular-nums text-[var(--ed-accent)]"
             >
               0
             </span>
-            <span className="font-mono text-lg text-[var(--ed-fg-muted)] opacity-30">
+            <span className="font-[family-name:var(--font-jetbrains)] text-lg text-[var(--ed-fg-muted)] opacity-30">
               / 19
             </span>
           </div>
@@ -837,7 +838,7 @@ export function MiracleExperience() {
 
           <div
             ref={godCounterRef}
-            className="font-mono text-7xl md:text-[9rem] font-bold tabular-nums leading-none"
+            className="font-[family-name:var(--font-jetbrains)] text-7xl md:text-[9rem] font-bold tabular-nums leading-none"
           >
             0
           </div>
@@ -850,13 +851,13 @@ export function MiracleExperience() {
             ref={godFormulaRef}
             className="flex items-center gap-4 bg-[var(--ed-surface)]/60 px-6 py-3 border border-[var(--ed-rule)]"
           >
-            <div className="font-mono text-3xl md:text-5xl font-bold text-[var(--ed-accent)]">
+            <div className="font-[family-name:var(--font-jetbrains)] text-3xl md:text-5xl font-bold text-[var(--ed-accent)]">
               19
             </div>
             <div className="text-xl opacity-20">×</div>
-            <div className="font-mono text-2xl md:text-4xl font-bold">142</div>
+            <div className="font-[family-name:var(--font-jetbrains)] text-2xl md:text-4xl font-bold">142</div>
             <div className="text-xl opacity-20">=</div>
-            <div className="font-mono text-2xl md:text-4xl font-bold">2,698</div>
+            <div className="font-[family-name:var(--font-jetbrains)] text-2xl md:text-4xl font-bold">2,698</div>
           </div>
 
           <StatusBadge text={t('visualVerified2698')} icon={<Activity size={10} />} />
@@ -881,16 +882,16 @@ export function MiracleExperience() {
           <SceneTitle text={t('factChapter96Label')} />
 
           <div className="flex items-center gap-6">
-            <div className="font-mono text-[10px] tracking-[0.3em] uppercase opacity-40">
+            <div className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-[0.3em] uppercase opacity-40">
               {t('visualVerse')}
             </div>
             <div
               ref={verseNumberRef}
-              className="font-mono text-7xl md:text-8xl font-bold leading-none tabular-nums text-[var(--ed-accent)]"
+              className="font-[family-name:var(--font-jetbrains)] text-7xl md:text-8xl font-bold leading-none tabular-nums text-[var(--ed-accent)]"
             >
               01
             </div>
-            <div className="font-mono text-[10px] tracking-[0.3em] uppercase opacity-40">
+            <div className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-[0.3em] uppercase opacity-40">
               {t('visualOf19')}
             </div>
           </div>
@@ -906,7 +907,7 @@ export function MiracleExperience() {
             </p>
           </div>
 
-          <div className="w-full max-w-md h-1.5 bg-[var(--ed-rule)]/20 overflow-hidden rounded-full">
+          <div className="w-full max-w-md h-1.5 bg-[var(--ed-rule)]/20 overflow-hidden">
             <div
               ref={verseProgressRef}
               className="h-full bg-[var(--ed-accent)] origin-left"
@@ -939,7 +940,7 @@ export function MiracleExperience() {
             <Binary size={24} className="text-[var(--ed-accent)] opacity-40 mb-2" />
             <div
               ref={discoveryYearRef}
-              className="font-mono text-7xl md:text-9xl font-bold leading-none tracking-tighter tabular-nums text-[var(--ed-accent)]"
+              className="font-[family-name:var(--font-jetbrains)] text-7xl md:text-9xl font-bold leading-none tracking-tighter tabular-nums text-[var(--ed-accent)]"
             >
               ----
             </div>
@@ -947,7 +948,7 @@ export function MiracleExperience() {
 
           <div
             ref={discoveryLunarRef}
-            className="flex items-center justify-center gap-4 md:gap-6 font-mono text-sm border border-[var(--ed-rule)]/50 bg-[var(--ed-surface)]/30 px-6 py-3"
+            className="flex items-center justify-center gap-4 md:gap-6 font-[family-name:var(--font-jetbrains)] text-sm border border-[var(--ed-rule)]/50 bg-[var(--ed-surface)]/30 px-6 py-3"
           >
             <div className="flex flex-col items-center text-center">
               <span className="text-[var(--ed-fg-muted)]">13 BH</span>
@@ -975,11 +976,11 @@ export function MiracleExperience() {
             ref={discoveryFactorRef}
             className="flex items-center gap-4 md:gap-6 bg-[var(--ed-surface)]/80 px-8 py-4 border border-[var(--ed-rule)]"
           >
-            <div className="font-mono text-3xl md:text-4xl text-[var(--ed-fg-muted)]">
+            <div className="font-[family-name:var(--font-jetbrains)] text-3xl md:text-4xl text-[var(--ed-fg-muted)]">
               1406
             </div>
             <div className="text-[var(--ed-accent)] opacity-50 text-2xl">=</div>
-            <div className="flex items-center gap-3 font-mono text-3xl md:text-4xl font-bold text-[var(--ed-accent)]">
+            <div className="flex items-center gap-3 font-[family-name:var(--font-jetbrains)] text-3xl md:text-4xl font-bold text-[var(--ed-accent)]">
               <span>19</span>
               <span className="text-xl md:text-2xl opacity-40 text-[var(--ed-fg)]">×</span>
               <span>74</span>
@@ -990,7 +991,7 @@ export function MiracleExperience() {
             ref={discoveryAnchorRef}
             className="flex flex-col items-center gap-3 pt-4 border-t border-[var(--ed-rule)]/50"
           >
-            <div className="px-3 py-1 border border-[var(--ed-accent)]/30 font-mono text-[9px] tracking-widest text-[var(--ed-accent)] bg-[var(--ed-accent)]/5 uppercase">
+            <div className="px-3 py-1 border border-[var(--ed-accent)]/30 font-[family-name:var(--font-jetbrains)] text-[9px] tracking-widest text-[var(--ed-accent)] bg-[var(--ed-accent)]/5 uppercase">
               {t('visualSurah7430')}
             </div>
             <div
@@ -1030,7 +1031,7 @@ export function MiracleExperience() {
               ref={(el) => {
                 finaleNumbersRef.current[i] = el
               }}
-              className="absolute font-mono text-5xl md:text-7xl font-bold text-[var(--ed-accent)] opacity-60"
+              className="absolute font-[family-name:var(--font-jetbrains)] text-5xl md:text-7xl font-bold text-[var(--ed-accent)] opacity-60"
               style={{
                 left: pos.x,
                 top: pos.y,
@@ -1086,12 +1087,12 @@ export function MiracleExperience() {
                 className="flex flex-col items-center gap-1 px-4 py-3 bg-[var(--ed-surface)]/40 border border-[var(--ed-rule)]"
               >
                 <div
-                  className="font-mono font-bold text-[var(--ed-accent)]"
+                  className="font-[family-name:var(--font-jetbrains)] font-bold text-[var(--ed-accent)]"
                   style={{ fontSize: 'clamp(18px, 4vw, 24px)' }}
                 >
                   {item.num}
                 </div>
-                <div className="font-mono text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] opacity-60 text-center">
+                <div className="font-[family-name:var(--font-jetbrains)] text-[8px] uppercase tracking-widest text-[var(--ed-fg-muted)] opacity-60 text-center">
                   {item.label}
                 </div>
               </div>
@@ -1256,11 +1257,11 @@ function SplitText({ text, className }: { text: string; className?: string }) {
 function SceneIndex({ i, t }: { i: number; t: (k: string) => string }) {
   return (
     <div className="absolute top-10 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30">
-      <div className="px-2 py-1 bg-[var(--ed-surface)] border border-[var(--ed-rule)] font-mono text-[9px] tracking-widest uppercase text-[var(--ed-accent)]">
+      <div className="px-2 py-1 bg-[var(--ed-surface)] border border-[var(--ed-rule)] font-[family-name:var(--font-jetbrains)] text-[9px] tracking-widest uppercase text-[var(--ed-accent)]">
         0{i + 1}
       </div>
       <div className="h-px w-8 bg-[var(--ed-rule)]" />
-      <span className="font-mono text-[9px] uppercase opacity-40 tracking-widest">
+      <span className="font-[family-name:var(--font-jetbrains)] text-[9px] uppercase opacity-40 tracking-widest">
         {t('visualSystemRecord')}
       </span>
     </div>
@@ -1271,7 +1272,7 @@ function SceneTitle({ text }: { text: string }) {
   return (
     <h2
       className="text-2xl md:text-4xl font-medium leading-tight max-w-2xl text-center"
-      style={{ fontFamily: F.serif }}
+      style={{ fontFamily: F.display }}
     >
       {text}
     </h2>
@@ -1280,7 +1281,7 @@ function SceneTitle({ text }: { text: string }) {
 
 function StatusBadge({ text, icon }: { text: string; icon: React.ReactNode }) {
   return (
-    <div className="font-mono text-[10px] tracking-[0.3em] uppercase flex items-center gap-2 text-[var(--ed-accent)] font-bold">
+    <div className="font-[family-name:var(--font-jetbrains)] text-[10px] tracking-[0.3em] uppercase flex items-center gap-2 text-[var(--ed-accent)] font-bold">
       {icon}
       <span>{text}</span>
     </div>
@@ -1290,8 +1291,8 @@ function StatusBadge({ text, icon }: { text: string; icon: React.ReactNode }) {
 function ScrollHint({ label }: { label: string }) {
   return (
     <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40 z-30">
-      <div className="font-mono text-[9px] tracking-[0.3em] uppercase">{label}</div>
-      <div className="h-8 w-px bg-[var(--ed-fg-muted)] animate-pulse" />
+      <div className="font-[family-name:var(--font-jetbrains)] text-[9px] tracking-[0.3em] uppercase">{label}</div>
+      <div className="h-8 w-px bg-[var(--ed-fg-muted)]" />
     </div>
   )
 }

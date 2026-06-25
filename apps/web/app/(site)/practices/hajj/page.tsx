@@ -171,7 +171,7 @@ export default function HajjPage() {
               <SectionLabel>Obligation & Timing</SectionLabel>
               <h2
                 className="text-balance text-2xl sm:text-3xl font-medium tracking-tight md:text-4xl"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 A duty owed to God, observed during the specified months
               </h2>
@@ -209,7 +209,7 @@ export default function HajjPage() {
                       />
                       <h3
                         className="font-medium text-[var(--ed-fg)]"
-                        style={{ fontFamily: F.serif }}
+                        style={{ fontFamily: F.display }}
                       >
                         The Sacred House
                       </h3>
@@ -233,7 +233,7 @@ export default function HajjPage() {
                       />
                       <h3
                         className="font-medium text-[var(--ed-fg)]"
-                        style={{ fontFamily: F.serif }}
+                        style={{ fontFamily: F.display }}
                       >
                         Specified Months
                       </h3>
@@ -254,7 +254,7 @@ export default function HajjPage() {
               <SectionLabel>Core rites</SectionLabel>
               <h2
                 className="text-balance text-2xl sm:text-3xl font-medium tracking-tight md:text-4xl"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 The Steps of Hajj
               </h2>
@@ -282,7 +282,7 @@ export default function HajjPage() {
                   <div className="space-y-3 sm:space-y-4 flex-1">
                     <h3
                       className="text-xl sm:text-2xl font-medium"
-                      style={{ fontFamily: F.serif }}
+                      style={{ fontFamily: F.display }}
                     >
                       {step.title}
                     </h3>

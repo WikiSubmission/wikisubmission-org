@@ -45,19 +45,18 @@ export function PrayerDemos() {
                 className="group relative flex w-full flex-col overflow-hidden border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 text-left transition-all duration-500 hover:border-[var(--ed-accent)]/50 hover:bg-[var(--ed-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ed-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--ed-bg)]"
                 onClick={() => setActiveDemo(demo)}
               >
-                <div className="w-full aspect-video bg-black/5 relative overflow-hidden flex items-center justify-center border-b border-[var(--ed-rule)]">
+                <div className="w-full aspect-video bg-[var(--ed-bg-alt)] relative overflow-hidden flex items-center justify-center border-b border-[var(--ed-rule)]">
                   {demo.thumbnail && (
                     <Image src={demo.thumbnail} alt={demo.title} fill className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 grayscale group-hover:grayscale-0 mix-blend-luminosity group-hover:mix-blend-normal" />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
-                  <div className="size-12 bg-[var(--ed-bg)]/80 flex items-center justify-center z-20 group-hover:scale-110 group-hover:bg-[var(--ed-accent)] group-hover:text-[var(--ed-bg)] transition-all border border-[var(--ed-rule)]">
+                  <div className="size-12 bg-[var(--ed-bg)]/80 flex items-center justify-center z-20 group-hover:bg-[var(--ed-accent)] group-hover:text-[var(--ed-bg)] transition-all border border-[var(--ed-rule)]">
                     <Play size={18} className="fill-current ml-1" />
                   </div>
                 </div>
                 
                 <div className="p-5 md:p-6 flex flex-col gap-2">
                   <div className="flex items-center justify-between gap-4">
-                    <h3 className="text-lg md:text-xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
+                    <h3 className="text-lg md:text-xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
                       {demo.title}
                     </h3>
                     <span 
@@ -84,7 +83,7 @@ export function PrayerDemos() {
                   <div className="size-10 flex items-center justify-center shrink-0 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/40">
                     <AlertCircle size={20} className="text-[var(--ed-accent)]" />
                   </div>
-                  <h3 className="text-xl md:text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
+                  <h3 className="text-xl md:text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
                     Missed Prayers Are Gone
                   </h3>
                 </div>
@@ -115,7 +114,7 @@ export function PrayerDemos() {
                   <div className="size-10 border border-[var(--ed-rule)] bg-[var(--ed-bg)] flex items-center justify-center">
                     <Volume2 size={20} className="text-[var(--ed-accent)]" />
                   </div>
-                  <h3 className="text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
+                  <h3 className="text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
                     Tone of Voice
                   </h3>
                 </div>
@@ -146,7 +145,7 @@ export function PrayerDemos() {
                   <div className="size-10 border border-[var(--ed-rule)] bg-[var(--ed-bg)] flex items-center justify-center shrink-0">
                     <Users size={20} className="text-[var(--ed-accent)]" />
                   </div>
-                  <h3 className="text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
+                  <h3 className="text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
                     The Group Prayer
                   </h3>
                 </div>
@@ -190,7 +189,7 @@ export function PrayerDemos() {
                   <div className="size-10 border border-[var(--ed-rule)] bg-[var(--ed-bg)] flex items-center justify-center shrink-0">
                     <Calendar size={20} className="text-[var(--ed-accent)]" />
                   </div>
-                  <h3 className="text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
+                  <h3 className="text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
                     The Friday Prayer
                   </h3>
                 </div>

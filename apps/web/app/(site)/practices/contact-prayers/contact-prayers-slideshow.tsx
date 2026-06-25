@@ -122,9 +122,9 @@ export function ContactPrayersSlideshow() {
           >
             Performance Guide
           </span>
-          <h2 
+          <h2
             className="text-3xl md:text-4xl font-medium text-[var(--ed-fg)] leading-[1.1] tracking-tight"
-            style={{ fontFamily: F.serif }}
+            style={{ fontFamily: F.display }}
           >
             Step-by-Step Instructions
           </h2>
@@ -202,9 +202,9 @@ export function ContactPrayersSlideshow() {
                       <div className="h-px flex-1 bg-[var(--ed-rule)]" />
                     </div>
                   )}
-                  <h3 
+                  <h3
                     className="text-2xl md:text-3xl font-semibold text-[var(--ed-fg)] tracking-tight leading-tight text-center"
-                    style={{ fontFamily: F.serif }}
+                    style={{ fontFamily: F.display }}
                   >
                     {step.title}
                   </h3>

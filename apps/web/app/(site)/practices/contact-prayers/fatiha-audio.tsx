@@ -237,7 +237,7 @@ export function FatihaAudio() {
 
   return (
     <>
-    <div className="border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-6 md:p-8 lg:p-10 shadow-sm w-full">
+    <div className="border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-6 md:p-8 lg:p-10 w-full">
       <audio
         ref={audioRef}
         src="/audio/RashadFatiha.mp3"
@@ -248,7 +248,7 @@ export function FatihaAudio() {
         {/* Left Column: Interactive Audio & Teleprompter */}
         <div className="flex flex-col min-w-0">
           <div className="mb-6">
-            <h2 className="text-2xl md:text-3xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
+            <h2 className="text-2xl md:text-3xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
               How to Pronounce Al-Fatiha (The Key)
             </h2>
           </div>
@@ -281,7 +281,7 @@ export function FatihaAudio() {
             </div>
 
             <div className="flex-1 flex items-center gap-3 w-full">
-              <span className="text-[10px] font-mono text-[var(--ed-fg-muted)] w-8 text-right">
+              <span className="text-[10px] font-[family-name:var(--font-jetbrains)] text-[var(--ed-fg-muted)] w-8 text-right">
                 {formatTime(currentTime)}
               </span>
               <input
@@ -292,7 +292,7 @@ export function FatihaAudio() {
                 onChange={handleSeek}
                 className="flex-1 h-1 bg-[var(--ed-rule)] appearance-none cursor-pointer focus:outline-none accent-[var(--ed-accent)]"
               />
-              <span className="text-[10px] font-mono text-[var(--ed-fg-muted)] w-8">
+              <span className="text-[10px] font-[family-name:var(--font-jetbrains)] text-[var(--ed-fg-muted)] w-8">
                 {formatTime(duration)}
               </span>
             </div>
@@ -309,10 +309,10 @@ export function FatihaAudio() {
                     const verse = fatihaData[i]
                     playWord(verse.words[0].start, verse.words[verse.words.length - 1].end)
                   }}
-                  className={`size-10 md:size-11 rounded flex items-center justify-center text-[10px] md:text-xs font-bold transition-all cursor-pointer ${
+                  className={`size-10 md:size-11 flex items-center justify-center text-[10px] md:text-xs font-bold transition-all cursor-pointer ${
                     i === activeVerseIndex
-                      ? 'bg-[var(--ed-accent)] text-[var(--ed-bg)] scale-110'
-                      : 'bg-[var(--ed-bg)] border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] hover:border-[var(--ed-accent)]/50 hover:text-[var(--ed-fg)] hover:scale-105'
+                      ? 'bg-[var(--ed-accent)] text-[var(--ed-bg)]'
+                      : 'bg-[var(--ed-bg)] border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] hover:border-[var(--ed-accent)]/50 hover:text-[var(--ed-fg)]'
                   }`}
                   aria-label={`Play verse ${i + 1}`}
                 >
@@ -329,7 +329,7 @@ export function FatihaAudio() {
                     <span key={i}>
                       <span
                         onClick={() => playWord(w.start, w.end)}
-                        className={`transition-colors duration-150 cursor-pointer px-1 py-0.5 rounded ${
+                        className={`transition-colors duration-150 cursor-pointer px-1 py-0.5 rounded-none${
                           isActive
                             ? 'text-[var(--ed-accent)] font-bold bg-[var(--ed-accent)]/10'
                             : 'text-[var(--ed-fg)] hover:text-[var(--ed-accent)] hover:bg-[var(--ed-accent)]/10'
@@ -371,10 +371,10 @@ export function FatihaAudio() {
               <div className="space-y-2">
                 <p className="font-bold text-[var(--ed-fg)]">Sounds not in English:</p>
                 <ul className="space-y-1.5 list-none pl-1">
-                  <li><strong className="text-[var(--ed-accent)] font-mono text-[10px] bg-[var(--ed-surface)] px-1 rounded mr-1">ḥ</strong> — breathe out warmly from deep in your throat</li>
-                  <li><strong className="text-[var(--ed-accent)] font-mono text-[10px] bg-[var(--ed-surface)] px-1 rounded mr-1">ṣ/ṭ</strong> — emphatic; flatten tongue against bottom of mouth</li>
-                  <li><strong className="text-[var(--ed-accent)] font-mono text-[10px] bg-[var(--ed-surface)] px-1 rounded mr-1">gh</strong> — soft gargle at back of throat</li>
-                  <li><strong className="text-[var(--ed-accent)] font-mono text-[10px] bg-[var(--ed-surface)] px-1 rounded mr-1">dh</strong> — heavy &quot;th&quot; (as in &quot;the&quot;)</li>
+                  <li><strong className="text-[var(--ed-accent)] font-[family-name:var(--font-jetbrains)] text-[10px] bg-[var(--ed-surface)] px-1 rounded-nonemr-1">ḥ</strong> — breathe out warmly from deep in your throat</li>
+                  <li><strong className="text-[var(--ed-accent)] font-[family-name:var(--font-jetbrains)] text-[10px] bg-[var(--ed-surface)] px-1 rounded-nonemr-1">ṣ/ṭ</strong> — emphatic; flatten tongue against bottom of mouth</li>
+                  <li><strong className="text-[var(--ed-accent)] font-[family-name:var(--font-jetbrains)] text-[10px] bg-[var(--ed-surface)] px-1 rounded-nonemr-1">gh</strong> — soft gargle at back of throat</li>
+                  <li><strong className="text-[var(--ed-accent)] font-[family-name:var(--font-jetbrains)] text-[10px] bg-[var(--ed-surface)] px-1 rounded-nonemr-1">dh</strong> — heavy &quot;th&quot; (as in &quot;the&quot;)</li>
                 </ul>
               </div>
 

@@ -60,9 +60,9 @@ export function AblutionSlideshow() {
                 >
                   Purification Ritual
                 </span>
-                <h3 
+                <h3
                   className="text-3xl md:text-5xl font-medium text-[var(--ed-fg)] leading-[1.1] tracking-tight"
-                  style={{ fontFamily: F.serif }}
+                  style={{ fontFamily: F.display }}
                 >
                   The 4 Steps of Ablution
                 </h3>
@@ -122,7 +122,7 @@ export function AblutionSlideshow() {
                 </div>
                 
                 <div className="space-y-4">
-                  <h3 className="text-3xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>{step.title}</h3>
+                  <h3 className="text-3xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>{step.title}</h3>
                   <p className="text-lg text-[var(--ed-fg)] leading-relaxed" style={{ fontFamily: F.serif }}>{step.description}</p>
                 </div>
                 

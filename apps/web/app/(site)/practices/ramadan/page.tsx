@@ -154,7 +154,7 @@ export default function RamadanPage() {
               <SectionLabel>The fasting rules</SectionLabel>
               <h2
                 className="text-balance text-2xl sm:text-3xl font-medium tracking-tight md:text-4xl"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 God provides complete details for the fast
               </h2>
@@ -207,7 +207,7 @@ export default function RamadanPage() {
               <SectionLabel>Exemptions</SectionLabel>
               <h2
                 className="text-balance text-2xl sm:text-3xl font-medium tracking-tight md:text-4xl"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 God wishes convenience, not hardship
               </h2>

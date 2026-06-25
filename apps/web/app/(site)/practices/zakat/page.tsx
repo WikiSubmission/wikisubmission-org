@@ -243,7 +243,7 @@ export default function ZakatPage() {
               <SectionLabel>Calculation</SectionLabel>
               <h2
                 className="text-balance text-2xl sm:text-3xl font-medium tracking-tight md:text-4xl"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 The required amount is 2.5% of net income
               </h2>
@@ -342,7 +342,7 @@ export default function ZakatPage() {
               <SectionLabel>Timing and recipients</SectionLabel>
               <h2
                 className="text-balance text-2xl sm:text-3xl font-medium tracking-tight md:text-4xl"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 Give on the day of harvest to the people God specifies
               </h2>
@@ -420,7 +420,7 @@ export default function ZakatPage() {
                 <AlertTriangle className="shrink-0 text-[var(--ed-accent)]" size={22} />
                 <h3
                   className="text-lg sm:text-xl font-medium text-[var(--ed-fg)]"
-                  style={{ fontFamily: F.serif }}
+                  style={{ fontFamily: F.display }}
                 >
                   Distinct purpose required
                 </h3>

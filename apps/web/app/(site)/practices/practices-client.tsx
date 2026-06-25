@@ -195,7 +195,7 @@ function ToolShell({
             <div className="space-y-5">
               <h2
                 className="text-3xl font-medium tracking-tight text-[var(--ed-fg)] md:text-[2.75rem] md:leading-[1.1]"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 {title}
               </h2>
@@ -209,7 +209,7 @@ function ToolShell({
           </div>
           {action && <div className="space-y-5">{action}</div>}
         </div>
-        <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 p-6 shadow-[0_2px_8px_rgba(26,23,21,0.02)] sm:p-8 md:p-10">
+        <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 p-6 sm:p-8 md:p-10">
           <div className="absolute inset-x-0 top-0 h-[1px] bg-[var(--ed-accent)]/20" />
           {children}
         </div>
@@ -256,7 +256,7 @@ function RitePreviewCard({
             </p>
             <h3
               className="text-2xl font-medium tracking-tight text-[var(--ed-fg)] md:text-[1.75rem]"
-              style={{ fontFamily: F.serif }}
+              style={{ fontFamily: F.display }}
             >
               {t(`rites.${rite.id}.title`)}
             </h3>
@@ -339,7 +339,7 @@ export default function PracticesClient({
               <SectionLabel>{t('hub')}</SectionLabel>
               <h1
                 className="max-w-3xl text-[3.25rem] font-medium leading-[1.05] tracking-tight text-[var(--ed-fg)] md:text-[4.5rem] lg:text-[5rem]"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 {t("heading")}
               </h1>
@@ -358,7 +358,7 @@ export default function PracticesClient({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] bg-[var(--ed-bg)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)] hover:shadow-[0_2px_12px_rgba(107,52,16,0.06)]"
+                    className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] bg-[var(--ed-bg)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]"
                     style={{ fontFamily: F.glacial }}
                   >
                     <Icon size={14} strokeWidth={1.6} />
@@ -387,7 +387,7 @@ export default function PracticesClient({
               </div>
               <p
                 className="text-[1.65rem] font-medium leading-[1.25] text-[var(--ed-fg)] md:text-[2rem]"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 {t("learnPlusUseDesc")}
               </p>
@@ -415,7 +415,7 @@ export default function PracticesClient({
             <SectionLabel>{t("quickAccess")}</SectionLabel>
             <h2
               className="text-3xl font-medium tracking-tight text-[var(--ed-fg)] md:text-[2.75rem] md:leading-[1.1]"
-              style={{ fontFamily: F.serif }}
+              style={{ fontFamily: F.display }}
             >
               {t("quickAccessDesc")}
             </h2>
@@ -430,7 +430,7 @@ export default function PracticesClient({
           <div className="grid gap-5 md:grid-cols-2">
             <a
               href="#prayer-times"
-              className="group flex items-center justify-between border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-6 transition-all duration-300 hover:border-[var(--ed-accent)]/50 hover:bg-[var(--ed-surface)]/20 hover:shadow-[0_4px_20px_rgba(26,23,21,0.04)]"
+              className="group flex items-center justify-between border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-6 transition-all duration-300 hover:border-[var(--ed-accent)]/50 hover:bg-[var(--ed-surface)]/20"
             >
               <div className="flex items-center gap-5">
                 <span className="flex size-12 items-center justify-center border border-[var(--ed-rule)] text-[var(--ed-accent)] transition-all duration-300 group-hover:border-[var(--ed-accent)]/30 group-hover:bg-[var(--ed-accent)]/5">
@@ -439,7 +439,7 @@ export default function PracticesClient({
                 <div>
                   <h3
                     className="text-xl font-medium text-[var(--ed-fg)]"
-                    style={{ fontFamily: F.serif }}
+                    style={{ fontFamily: F.display }}
                   >
                     {t("prayerTimesLookup")}
                   </h3>
@@ -459,7 +459,7 @@ export default function PracticesClient({
 
             <a
               href="#zakat-calculator"
-              className="group flex items-center justify-between border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-6 transition-all duration-300 hover:border-[var(--ed-accent)]/50 hover:bg-[var(--ed-surface)]/20 hover:shadow-[0_4px_20px_rgba(26,23,21,0.04)]"
+              className="group flex items-center justify-between border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-6 transition-all duration-300 hover:border-[var(--ed-accent)]/50 hover:bg-[var(--ed-surface)]/20"
             >
               <div className="flex items-center gap-5">
                 <span className="flex size-12 items-center justify-center border border-[var(--ed-rule)] text-[var(--ed-accent)] transition-all duration-300 group-hover:border-[var(--ed-accent)]/30 group-hover:bg-[var(--ed-accent)]/5">
@@ -468,7 +468,7 @@ export default function PracticesClient({
                 <div>
                   <h3
                     className="text-xl font-medium text-[var(--ed-fg)]"
-                    style={{ fontFamily: F.serif }}
+                    style={{ fontFamily: F.display }}
                   >
                     {t("zakatCalculator")}
                   </h3>
@@ -499,7 +499,7 @@ export default function PracticesClient({
             {prayerText && <VerseQuote verseKey="4:103" text={prayerText} />}
             <Link
               href="/practices/contact-prayers"
-              className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)] hover:shadow-[0_2px_12px_rgba(107,52,16,0.06)]"
+              className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]"
               style={{ fontFamily: F.glacial }}
             >
               {t("fullContactPrayersGuide")}
@@ -519,7 +519,7 @@ export default function PracticesClient({
         action={
           <Link
             href="/practices/zakat"
-            className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)] hover:shadow-[0_2px_12px_rgba(107,52,16,0.06)]"
+            className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]"
             style={{ fontFamily: F.glacial }}
           >
             {t("fullZakatGuide")}
@@ -549,7 +549,7 @@ export default function PracticesClient({
               )}
               <Link
                 href="/practices/ramadan"
-                className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)] hover:shadow-[0_2px_12px_rgba(107,52,16,0.06)]"
+                className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]"
                 style={{ fontFamily: F.glacial }}
               >
                 {t("fullFastingGuide")}
@@ -574,7 +574,7 @@ export default function PracticesClient({
               <SectionLabel>{t("learnTheRites")}</SectionLabel>
               <h2
                 className="text-3xl font-medium tracking-tight text-[var(--ed-fg)] md:text-[2.75rem] md:leading-[1.1]"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 {t("eachPracticeHasFullGuide")}
               </h2>
@@ -608,7 +608,7 @@ export default function PracticesClient({
           <div className="max-w-2xl">
             <p
               className="text-[1.65rem] font-medium leading-[1.3] text-[var(--ed-fg)] md:text-[2rem]"
-              style={{ fontFamily: F.serif }}
+              style={{ fontFamily: F.display }}
             >
               {t("closingMessage")}
             </p>

@@ -25,7 +25,7 @@ export function AutoScrollControl({
   const t = useTranslations('miracle')
 
   const pillClass =
-    'flex items-center justify-center bg-[var(--ed-surface)]/80 border border-[var(--ed-rule)] backdrop-blur-sm hover:border-[var(--ed-accent)]/50 transition-colors'
+    'flex items-center justify-center bg-[var(--ed-surface)] border border-[var(--ed-rule)] hover:border-[var(--ed-accent)]/50 transition-colors'
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] flex items-center">
@@ -33,7 +33,7 @@ export function AutoScrollControl({
         onClick={onSpeedDown}
         disabled={speedIndex === 0}
         aria-label={t('autoScrollSlower')}
-        className={`${pillClass} rounded-l-full pl-3 pr-2.5 py-2 border-r-0 disabled:opacity-30`}
+        className={`${pillClass} pl-3 pr-2.5 py-2 border-r-0 disabled:opacity-30`}
       >
         <Minus size={10} className="text-[var(--ed-accent)]" />
       </button>
@@ -49,10 +49,16 @@ export function AutoScrollControl({
         ) : (
           <Play size={10} className="text-[var(--ed-accent)]" />
         )}
-        <span className="font-mono uppercase text-[10px] tracking-widest text-[var(--ed-fg-muted)]">
+        <span
+          className="uppercase text-[10px] tracking-widest text-[var(--ed-fg-muted)]"
+          style={{ fontFamily: 'var(--font-glacial), sans-serif' }}
+        >
           {isPlaying ? t('autoScrollPause') : t('autoScrollResume')}
         </span>
-        <span className="font-mono text-[9px] text-[var(--ed-accent)] opacity-60 tabular-nums">
+        <span
+          className="text-[9px] text-[var(--ed-accent)] opacity-60 tabular-nums"
+          style={{ fontFamily: 'var(--font-jetbrains), ui-monospace, monospace' }}
+        >
           {multiplier}x
         </span>
       </button>
@@ -61,7 +67,7 @@ export function AutoScrollControl({
         onClick={onSpeedUp}
         disabled={speedIndex === speedCount - 1}
         aria-label={t('autoScrollFaster')}
-        className={`${pillClass} rounded-r-full pl-2.5 pr-3 py-2 border-l-0 disabled:opacity-30`}
+        className={`${pillClass} pl-2.5 pr-3 py-2 border-l-0 disabled:opacity-30`}
       >
         <Plus size={10} className="text-[var(--ed-accent)]" />
       </button>

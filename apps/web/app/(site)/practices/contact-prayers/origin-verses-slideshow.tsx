@@ -167,9 +167,9 @@ export function OriginVersesSlideshow({ refs }: { refs: string[] }) {
   if (loading) {
     return (
       <div className="w-full h-72 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 animate-pulse flex flex-col items-center justify-center my-10 gap-3">
-        <div className="h-4 w-32 bg-[var(--ed-rule)] rounded-full mb-4" />
-        <div className="h-6 w-3/4 max-w-lg bg-[var(--ed-rule)] rounded-full" />
-        <div className="h-6 w-2/3 max-w-md bg-[var(--ed-rule)] rounded-full" />
+        <div className="h-4 w-32 bg-[var(--ed-rule)] mb-4" />
+        <div className="h-6 w-3/4 max-w-lg bg-[var(--ed-rule)]" />
+        <div className="h-6 w-2/3 max-w-md bg-[var(--ed-rule)]" />
       </div>
     )
   }
@@ -295,7 +295,7 @@ export function OriginVersesSlideshow({ refs }: { refs: string[] }) {
                 style={{
                   width: i === idx ? 20 : 8,
                   height: 8,
-                  borderRadius: 4,
+                  borderRadius: 0,
                   border: 'none',
                   background:
                     i === idx ? 'var(--ed-accent)' : 'var(--ed-rule)',

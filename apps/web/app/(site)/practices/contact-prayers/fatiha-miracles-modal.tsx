@@ -50,7 +50,7 @@ const SLIDES = [
       <div className="space-y-4">
         <p>Sura 1 is God&apos;s gift to us, to establish contact with Him (Salat).</p>
         <p>Write the sura number and the number of verses next to each other and you get 17, the total number of units in the 5 daily prayers.</p>
-        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-3xl md:text-5xl tracking-[0.5em] font-mono text-[var(--ed-accent)]">
+        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-3xl md:text-5xl tracking-[0.5em] font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)]">
           17
         </div>
       </div>
@@ -61,7 +61,7 @@ const SLIDES = [
     content: (
       <div className="space-y-4">
         <p>Let us write down the sura number, followed by the number of every verse in the sura. This is what we get:</p>
-        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-2xl md:text-4xl tracking-widest font-mono text-[var(--ed-accent)] break-all">
+        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-2xl md:text-4xl tracking-widest font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)] break-all">
           1 1 2 3 4 5 6 7
         </div>
         <p>This number is a multiple of 19.</p>
@@ -73,7 +73,7 @@ const SLIDES = [
     content: (
       <div className="space-y-4">
         <p>Now, let us replace each verse number by the number of letters in that verse. This is what we get:</p>
-        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-2xl md:text-4xl tracking-widest font-mono text-[var(--ed-accent)] break-all">
+        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-2xl md:text-4xl tracking-widest font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)] break-all">
           1 19 17 12 11 19 18 43
         </div>
         <p>Also a multiple of 19. Theoretically, one can alter the letters of Sura 1, and still keep the same number of letters, however, the following mathematical phenomena rule out that possibility. For the gematrical value of every single letter is taken into consideration.</p>
@@ -85,7 +85,7 @@ const SLIDES = [
     content: (
       <div className="space-y-4">
         <p>Let us include the gematrical value of every verse, and write it down following the number of letters in each verse:</p>
-        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-xl md:text-3xl tracking-wider font-mono text-[var(--ed-accent)] break-all">
+        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-xl md:text-3xl tracking-wider font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)] break-all">
           1 19 786 17 581 12 618 11 241 19 836 18 1072 43 6009
         </div>
         <p>Also a multiple of 19.</p>
@@ -97,7 +97,7 @@ const SLIDES = [
     content: (
       <div className="space-y-4">
         <p>Now, let us add the number of each verse, to be followed by the number of letters in that verse, then the gematrical value of that verse. This is what we get:</p>
-        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-lg md:text-2xl tracking-wider font-mono text-[var(--ed-accent)] break-all">
+        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-lg md:text-2xl tracking-wider font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)] break-all">
           1 1 19 786 2 17 581 3 12 618 4 11 241 5 19 836 6 18 1072 7 43 6009
         </div>
         <p>A multiple of 19.</p>
@@ -109,7 +109,7 @@ const SLIDES = [
     content: (
       <div className="space-y-4">
         <p>Instead of the gematrical values of every verse, let us write down the gematrical values of every individual letter in Sura 1. This truly awesome miracle shows that the resulting long number, consisting of 274 digits, is also a multiple of 19. ALLAHU AKBAR.</p>
-        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-sm md:text-base font-mono text-[var(--ed-accent)] break-all">
+        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-sm md:text-base font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)] break-all">
           1 7 1 19 2 60 40 1 30 30 5 1 30 200 8 40 50 1 30 200 8 10 40 2 17 ... 50
         </div>
         <p className="text-sm text-[var(--ed-fg-muted)]">This number starts with the sura number, followed by the number of verses in the sura, followed by the verse number, followed by the number of letters in this verse, followed by the gematrical values of every letter in this verse, followed by the number of the next verse, followed by the number of letters in this verse, followed by the gematrical values of every letter in this verse, and so on to the end of the sura. Thus, the last component is 50, the value of &ldquo;N&rdquo; (last letter).</p>
@@ -121,7 +121,7 @@ const SLIDES = [
     content: (
       <div className="space-y-4">
         <p>If we write down the number of the sura, followed by its number of verses, we get 17, the number of units (Rak&apos;aas) in the 5 daily prayers. Next to the 17, write down the number of the first prayer (1), followed by its number of Rak&apos;aas, which is 2, then two [*]&apos;s (the 274 digit letter sequence), followed by the number of the second prayer (2), followed by the number of Rak&apos;aas in the second prayer (4), followed by four [*]&apos;s, and so on.</p>
-        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-lg md:text-xl tracking-widest font-mono text-[var(--ed-accent)] break-all">
+        <div className="p-6 bg-[var(--ed-surface)]/30 border border-[var(--ed-rule)] text-center text-lg md:text-xl tracking-widest font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)] break-all">
           17 12[*][*] 24[*][*][*][*] 34[*][*][*][*] 43[*][*][*] 54[*][*][*][*]
         </div>
         <p>Not only is the resulting long number a multiple of 19, but also the number of its component digits is 4636 (19x244).</p>
@@ -207,7 +207,7 @@ export function FatihaMiraclesModal({ isOpen, onClose }: { isOpen: boolean; onCl
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-12">
       <div 
         aria-hidden="true"
-        className="absolute inset-0 bg-black/80 transition-opacity"
+        className="absolute inset-0 bg-[var(--ed-fg)]/70 transition-opacity"
         onClick={onClose}
       />
       
@@ -216,13 +216,13 @@ export function FatihaMiraclesModal({ isOpen, onClose }: { isOpen: boolean; onCl
         role="dialog"
         aria-modal="true"
         aria-labelledby="fatiha-miracles-title"
-        className="relative w-full max-w-4xl bg-[var(--ed-bg)] border border-[var(--ed-rule)] flex flex-col max-h-full overflow-hidden animate-in fade-in zoom-in-95 duration-300"
+        className="relative w-full max-w-4xl bg-[var(--ed-bg)] border border-[var(--ed-rule)] flex flex-col max-h-full overflow-hidden animate-in fade-in duration-300"
       >
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-[var(--ed-rule)] bg-[var(--ed-surface)]/20">
           <div>
-            <h2 id="fatiha-miracles-title" className="text-xl md:text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
+            <h2 id="fatiha-miracles-title" className="text-xl md:text-2xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
               The Miracles of &ldquo;The Key&rdquo;
             </h2>
             <p className="text-xs md:text-sm text-[var(--ed-accent)] mt-1 tracking-widest uppercase font-bold" style={{ fontFamily: F.glacial }}>
@@ -243,7 +243,7 @@ export function FatihaMiraclesModal({ isOpen, onClose }: { isOpen: boolean; onCl
         {/* Content */}
         <div className="p-6 md:p-10 overflow-y-auto flex-1 custom-scrollbar">
           <div className="max-w-3xl mx-auto space-y-6">
-            <h3 className="text-2xl md:text-3xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
+            <h3 className="text-2xl md:text-3xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
               {slide.title}
             </h3>
             <div className="text-[15px] md:text-base leading-relaxed text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>

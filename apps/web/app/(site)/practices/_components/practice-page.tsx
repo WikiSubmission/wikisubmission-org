@@ -52,8 +52,8 @@ export function PracticeNav({ active }: { active: PracticeSlug }) {
             className={[
               'inline-flex min-h-11 items-center gap-2 border px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] transition-all duration-300 ease-out active:translate-y-px',
               isActive
-                ? 'border-[var(--ed-accent)] bg-[var(--ed-accent)] text-[var(--ed-bg)] shadow-[0_2px_8px_rgba(107,52,16,0.08)]'
-                : 'border-[var(--ed-rule)] bg-[var(--ed-bg)] text-[var(--ed-fg-muted)] hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)] hover:shadow-[0_2px_8px_rgba(107,52,16,0.04)]',
+                ? 'border-[var(--ed-accent)] bg-[var(--ed-accent)] text-[var(--ed-bg)]'
+                : 'border-[var(--ed-rule)] bg-[var(--ed-bg)] text-[var(--ed-fg-muted)] hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]',
             ].join(' ')}
             style={{ fontFamily: F.glacial }}
           >
@@ -104,7 +104,7 @@ export function PracticeHero({
           <div className="space-y-6">
             <h1
               className="max-w-4xl text-balance text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
-              style={{ fontFamily: F.serif }}
+              style={{ fontFamily: F.display }}
             >
               {title}
             </h1>
@@ -210,7 +210,7 @@ export function ReadingSection({
           <SectionLabel>{label}</SectionLabel>
           <h2
             className="text-balance text-2xl sm:text-3xl font-medium tracking-tight md:text-4xl"
-            style={{ fontFamily: F.serif }}
+            style={{ fontFamily: F.display }}
           >
             {title}
           </h2>
@@ -284,7 +284,7 @@ export function VerseQuote({
       {label && (
         <h3
           className="mb-3 text-lg sm:text-xl font-medium text-[var(--ed-fg)]"
-          style={{ fontFamily: F.serif }}
+          style={{ fontFamily: F.display }}
         >
           {label}
         </h3>
@@ -316,7 +316,7 @@ export function VerseGrid({
         <SectionLabel>{label}</SectionLabel>
         <h2
           className="text-balance text-3xl sm:text-4xl font-medium tracking-tight md:text-5xl"
-          style={{ fontFamily: F.serif }}
+          style={{ fontFamily: F.display }}
         >
           {title}
         </h2>
@@ -370,7 +370,7 @@ export function FactGrid({
             />
             <h3
               className="text-xl sm:text-2xl font-medium"
-              style={{ fontFamily: F.serif }}
+              style={{ fontFamily: F.display }}
             >
               {item.title}
             </h3>

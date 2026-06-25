@@ -165,9 +165,9 @@ function RamadanContent() {
                 {data.location_string}
               </span>
             </div>
-            <h2 
+            <h2
               className="text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
-              style={{ fontFamily: F.serif }}
+              style={{ fontFamily: F.display }}
             >
               {t('schedule', { year: data.year })}
             </h2>
@@ -184,7 +184,7 @@ function RamadanContent() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[var(--ed-rule)] border border-[var(--ed-rule)] overflow-hidden">
             <SummaryCard title={t('firstFastingDay')} value={data.first_fasting_day} icon={<CalendarIcon className="size-4 text-[var(--ed-accent)] opacity-40" />} />
             <SummaryCard title={t('lastFastingDay')} value={data.last_fasting_day} icon={<CalendarIcon className="size-4 text-[var(--ed-fg-muted)] opacity-30" />} />
-            <SummaryCard title={t('nightOfDestiny')} value={data.night_of_destiny} icon={<StarIcon className="size-4 text-amber-500/60" />} />
+            <SummaryCard title={t('nightOfDestiny')} value={data.night_of_destiny} icon={<StarIcon className="size-4 text-[var(--ed-accent)] opacity-40" />} />
             <SummaryCard title={t('averageFastingDuration')} value={data.average_fasting_duration} icon={<MoonIcon className="size-4 text-[var(--ed-fg-muted)] opacity-40" />} />
           </div>
 
@@ -234,7 +234,7 @@ function RamadanContent() {
           <footer className="flex justify-center pt-8">
             <button
               onClick={handleShare}
-              className="group flex items-center gap-3 px-8 py-3 border border-[var(--ed-rule)] bg-[var(--ed-surface)] hover:bg-[var(--ed-accent)] hover:text-white hover:border-[var(--ed-accent)] transition-all"
+              className="group flex items-center gap-3 px-8 py-3 border border-[var(--ed-rule)] bg-[var(--ed-surface)] hover:bg-[var(--ed-accent)] hover:text-[var(--ed-bg)] hover:border-[var(--ed-accent)] transition-all"
             >
               <ShareIcon size={14} className="opacity-60 group-hover:opacity-100 transition-colors" />
               <span 

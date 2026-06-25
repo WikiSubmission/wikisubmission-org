@@ -137,7 +137,7 @@ function LocationPrayerTimes({ location, title }: { location: string; title: str
         {upcomingLabel && data.upcoming_prayer_time_left && (
           <span className="text-sm text-[var(--ed-fg-muted)] tabular-nums leading-none">
             <span className="opacity-60 mr-1">→</span>
-            {upcomingLabel} in <span className="font-mono text-[var(--ed-accent)]">{data.upcoming_prayer_time_left}</span>
+            {upcomingLabel} in <span className="font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)]">{data.upcoming_prayer_time_left}</span>
           </span>
         )}
       </div>
@@ -165,10 +165,7 @@ export function MiniPrayerTimes() {
             </p>
           </div>
           <div className="flex size-10 shrink-0 items-center justify-center border border-[var(--ed-rule)] bg-[var(--ed-bg)] text-[var(--ed-accent)] relative">
-            <span className="absolute flex h-2 w-2 -top-1 -right-1">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--ed-accent)] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--ed-accent)]"></span>
-            </span>
+            <span className="absolute -top-1 -right-1 inline-flex h-1.5 w-1.5 bg-[var(--ed-accent)]"></span>
             <Clock size={18} strokeWidth={1.5} />
           </div>
         </div>

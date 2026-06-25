@@ -22,7 +22,7 @@ export function AzaanCard() {
             <Megaphone size={56} strokeWidth={1} />
           </div>
           <div className="space-y-4">
-            <h3 className="text-3xl md:text-4xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
+            <h3 className="text-3xl md:text-4xl font-medium text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
               The Call to Prayer (Azaan)
             </h3>
             <p className="text-base leading-relaxed text-[var(--ed-fg-muted)] max-w-xl" style={{ fontFamily: F.serif }}>

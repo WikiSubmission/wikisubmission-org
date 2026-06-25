@@ -295,7 +295,7 @@ export function AblutionSlideshow() {
               </span>
               <h2
                 className="text-4xl md:text-6xl font-medium text-[var(--ed-fg)] leading-[1.1] tracking-tight"
-                style={{ fontFamily: F.serif }}
+                style={{ fontFamily: F.display }}
               >
                 {t('sectionTitle')}
               </h2>
@@ -363,9 +363,9 @@ export function AblutionSlideshow() {
                         </span>
                         <div className="h-px flex-1 bg-[var(--ed-rule)]" />
                       </div>
-                      <h3 
+                      <h3
                         className="text-2xl md:text-3xl font-semibold text-[var(--ed-fg)] tracking-tight leading-tight text-center"
-                        style={{ fontFamily: F.serif }}
+                        style={{ fontFamily: F.display }}
                       >
                         {step.title}
                       </h3>
@@ -627,11 +627,8 @@ export function AblutionSlideshow() {
 
                 {/* The Display Case */}
                 <div className="space-y-3 max-w-4xl mx-auto w-full min-h-0">
-                  <div className="relative w-full max-h-[42dvh] bg-black border-[8px] md:border-[10px] border-[var(--ed-surface)] ring-1 ring-[var(--ed-rule)] overflow-hidden aspect-video">
+                  <div className="relative w-full max-h-[42dvh] bg-[var(--ed-fg)] border-[8px] md:border-[10px] border-[var(--ed-surface)] overflow-hidden aspect-video">
                     <div id="yt-player" className="w-full h-full" />
-
-                    {/* Display Glare Overlay */}
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/[0.03] to-white/[0.08] z-10" />
                   </div>
 
                   {/* Status Bar */}
@@ -648,7 +645,7 @@ export function AblutionSlideshow() {
                       </div>
                       <div className="h-3 w-px bg-[var(--ed-rule)]" />
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className={`size-1.5 animate-pulse ${showTranscription ? 'bg-[var(--ed-accent)]' : 'bg-[var(--ed-fg-muted)]'}`} />
+                        <div className={`size-1.5 ${showTranscription ? 'bg-[var(--ed-accent)]' : 'bg-[var(--ed-fg-muted)]'}`} />
                         <span 
                           className="text-[9px] uppercase tracking-widest text-[var(--ed-fg-muted)] truncate"
                           style={{ fontFamily: F.glacial }}
@@ -704,9 +701,9 @@ export function AblutionSlideshow() {
                             style={{
                               fontFamily: F.serif,
                               color: activeCaption.isVerse
-                                ? '#D4AF37'
+                                ? 'var(--ed-accent)'
                                 : activeCaption.isWarning
-                                ? '#EF4444'
+                                ? 'var(--ed-fg)'
                                 : 'var(--ed-fg)',
                             }}
                           >

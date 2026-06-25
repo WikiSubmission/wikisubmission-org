@@ -85,7 +85,7 @@ function PrayerTimeRow({
       <div className="space-y-2">
         <h3
           className="text-2xl font-medium text-[var(--ed-fg)] md:text-3xl"
-          style={{ fontFamily: F.serif }}
+          style={{ fontFamily: F.display }}
         >
           {prayer.name}
         </h3>
@@ -113,7 +113,7 @@ function PrayerTimeRow({
           >
             Units
           </span>
-          <span className="font-mono text-xl leading-none text-[var(--ed-fg)]">
+          <span className="font-[family-name:var(--font-jetbrains)] text-xl leading-none text-[var(--ed-fg)]">
             {prayer.units}
           </span>
         </div>
@@ -209,7 +209,7 @@ export default function ContactPrayersPage() {
             <SectionLabel>Specified times</SectionLabel>
             <h2
               className="text-balance text-3xl font-medium tracking-tight md:text-4xl"
-              style={{ fontFamily: F.serif }}
+              style={{ fontFamily: F.display }}
             >
               The five times are specified in the Quran
             </h2>
@@ -223,9 +223,9 @@ export default function ContactPrayersPage() {
 
         <section className="space-y-12">
           <div className="space-y-8">
-            <h2 
+            <h2
               className="text-center text-balance text-4xl font-medium tracking-tight md:text-5xl underline underline-offset-8 decoration-[var(--ed-accent)]"
-              style={{ fontFamily: F.serif }}
+              style={{ fontFamily: F.display }}
             >
               The Pre-Prayer Rituals
             </h2>
@@ -240,9 +240,9 @@ export default function ContactPrayersPage() {
 
         <section className="space-y-12">
           <div className="space-y-8">
-            <h2 
+            <h2
               className="text-center text-balance text-4xl font-medium tracking-tight md:text-5xl underline underline-offset-8 decoration-[var(--ed-accent)]"
-              style={{ fontFamily: F.serif }}
+              style={{ fontFamily: F.display }}
             >
               The Contact Prayer (Salat)
             </h2>
