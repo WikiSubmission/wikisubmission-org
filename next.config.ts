@@ -42,7 +42,11 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://cdn.wikisubmission.org https://cdn.sanity.io https://img.youtube.com https://www.masjidtucson.org https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
       "font-src 'self'",
-      "connect-src 'self' https://ws-backend.wikisubmission.org https://cdn.sanity.io https://audio.qurancdn.com https://cloudflareinsights.com",
+      // Avatar hosts also appear under img-src, but the service worker
+      // (Serwist defaultCache) re-fetches images via fetch() to cache them,
+      // and fetch() is governed by connect-src — so OAuth avatar hosts must be
+      // allowed here too, or the cache-put fetch is blocked and the image fails.
+      "connect-src 'self' https://ws-backend.wikisubmission.org https://cdn.sanity.io https://audio.qurancdn.com https://cloudflareinsights.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
       "media-src 'self' blob: https://cdn.wikisubmission.org https://audio.qurancdn.com",
       "worker-src 'self' blob:",
       "frame-src https://www.youtube-nocookie.com https://www.youtube.com",
