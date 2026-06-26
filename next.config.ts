@@ -150,8 +150,8 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: '/appendix/:path*',
-        destination: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendix-:path*',
+        source: '/appendix/:path',
+        destination: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendix-:path',
         permanent: false,
       },
       {
