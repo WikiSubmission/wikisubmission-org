@@ -116,7 +116,8 @@
       "postcss": ">=8.5.10",
       "js-cookie": "3.0.7",
       "vite": "8.0.16",
-      "js-yaml": "4.2.0"
+      "js-yaml": "4.2.0",
+      "undici": "^7.28.0"
     }
   },
   "trustedDependencies": [
