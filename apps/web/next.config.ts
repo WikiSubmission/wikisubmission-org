@@ -8,13 +8,17 @@ import withSerwistInit from '@serwist/next'
 
 // In a pnpm workspace the app lives at apps/web; point output-file tracing at
 // the monorepo root (two levels up) so standalone traces hoisted dependencies.
-const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../')
+const monorepoRoot = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../../'
+)
 
 // Revision for the precached /offline fallback. Tied to the commit so the
 // fallback is re-fetched on each deploy rather than served stale forever.
 const buildRevision =
-  spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf-8' }).stdout?.trim() ||
-  'dev'
+  spawnSync('git', ['rev-parse', 'HEAD'], {
+    encoding: 'utf-8',
+  }).stdout?.trim() || 'dev'
 
 const securityHeaders = [
   {
@@ -48,10 +52,14 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://cdn.wikisubmission.org https://cdn.sanity.io https://img.youtube.com https://www.masjidtucson.org https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
       "font-src 'self'",
-      "connect-src 'self' https://ws-backend.wikisubmission.org https://cdn.wikisubmission.org https://cdn.sanity.io https://audio.qurancdn.com https://cloudflareinsights.com",
+      // Avatar hosts also appear under img-src, but the service worker
+      // (Serwist defaultCache) re-fetches images via fetch() to cache them,
+      // and fetch() is governed by connect-src — so OAuth avatar hosts must be
+      // allowed here too, or the cache-put fetch is blocked and the image fails.
+      "connect-src 'self' https://ws-backend.wikisubmission.org https://cdn.sanity.io https://audio.qurancdn.com https://cloudflareinsights.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
       "media-src 'self' blob: https://cdn.wikisubmission.org https://audio.qurancdn.com",
       "worker-src 'self' blob:",
-      "frame-src https://www.youtube-nocookie.com https://www.youtube.com",
+      'frame-src https://www.youtube-nocookie.com https://www.youtube.com',
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",
@@ -146,8 +154,9 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/appendix/0',
-        destination: '/introduction',
-        permanent: true,
+        destination:
+          'https://library.wikisubmission.org/file/quran-the-final-testament-introduction',
+        permanent: false,
       },
       {
         source: '/appendices/0',
@@ -155,9 +164,10 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: '/appendix/:path*',
-        destination: '/appendices/:path*',
-        permanent: true,
+        source: '/appendix/:path',
+        destination:
+          'https://library.wikisubmission.org/file/quran-the-final-testament-appendix-:path',
+        permanent: false,
       },
       {
         source: '/prayer-times',
