@@ -141,8 +141,8 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/appendix/0',
-        destination: '/introduction',
-        permanent: true,
+        destination: 'https://library.wikisubmission.org/file/quran-the-final-testament-introduction',
+        permanent: false,
       },
       {
         source: '/appendices/0',
@@ -151,8 +151,8 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/appendix/:path*',
-        destination: '/appendices/:path*',
-        permanent: true,
+        destination: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendix-:path*',
+        permanent: false,
       },
       {
         source: '/prayer-times',
