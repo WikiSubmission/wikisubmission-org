@@ -461,7 +461,7 @@ export function AppendixContent() {
           Once in a lifetime, Hajj and &lsquo;Umrah are decreed for those who
           can afford it. Pilgrimage commemorates Abraham&rsquo;s exemplary
           submission to God (
-          <Link href="/quran/appendix/9" className="text-primary underline underline-offset-2 hover:text-primary/80">
+          <Link href="/appendices/9" className="text-primary underline underline-offset-2 hover:text-primary/80">
             Appendix 9
           </Link>
           ), and must be observed during the four Sacred Months — Zul-Hijjah,
@@ -505,7 +505,7 @@ export function AppendixContent() {
           pilgrim offers an animal sacrifice to feed the poor and to commemorate
           God&rsquo;s intervention to save Ismail and Abraham from Satan&rsquo;s
           trick (<QuranRef reference="37:107" />,{' '}
-          <Link href="/quran/appendix/9" className="text-primary underline underline-offset-2 hover:text-primary/80">
+          <Link href="/appendices/9" className="text-primary underline underline-offset-2 hover:text-primary/80">
             Appendix 9
           </Link>
           ). The stoning ceremonies symbolize rejection of Satan&rsquo;s

@@ -53,7 +53,7 @@ export function AppendixContent() {
           Consistently, the Quran talks about two deaths, the first death took
           place when we failed to make a stand with God&rsquo;s absolute
           authority (
-          <Link href="/quran/appendix/7" className="text-primary underline underline-offset-2 hover:text-primary/80">
+          <Link href="/appendices/7" className="text-primary underline underline-offset-2 hover:text-primary/80">
             Appendix 7
           </Link>
           ). That first death lasted until we were born into this world. The

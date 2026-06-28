@@ -68,7 +68,7 @@ export function AppendixContent() {
           <QuranRef reference="6:161" />; <QuranRef reference="12:37" />-
           <QuranRef reference="12:38" />; <QuranRef reference="16:123" />;{' '}
           <QuranRef reference="22:78" />;{' '}
-          <Link href="/quran/appendix/9" className="text-primary underline underline-offset-2 hover:text-primary/80">
+          <Link href="/appendices/9" className="text-primary underline underline-offset-2 hover:text-primary/80">
             Appendix 9
           </Link>
           ), the ONLY creed must be &ldquo;<em>LAA ELAAHA ELLAA ALLAH</em> (there
