@@ -11,9 +11,9 @@ export function AppendixContent() {
         className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
       >
         <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;God took a covenant from the prophets, saying, &lsquo;I will give you the
-          scripture and wisdom. Afterwards, a messenger will come to confirm all existing
-          scriptures. You shall believe in him and support him.&rsquo;&rdquo;
+          &ldquo;God took a covenant from the prophets, saying, &lsquo;After I have given you
+          the scripture and wisdom, a messenger will come to confirm what you have. You shall
+          believe in him and support him.&rsquo;&rdquo;
         </p>
         <p className="text-xs text-muted-foreground font-mono">
           <QuranRef reference="3:81" />
