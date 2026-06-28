@@ -4,20 +4,6 @@ import { YouTubeEmbed } from '@/components/youtube-embed'
 export function AppendixContent() {
   return (
     <>
-      {/* Opening verse card */}
-      <div
-        data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
-      >
-        <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;O you who believe, you shall remember God frequently; glorify Him day and
-          night.&rdquo;
-        </p>
-        <p className="text-xs text-muted-foreground font-mono">
-          <QuranRef reference="33:41" />
-        </p>
-      </div>
-
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           Most people are outraged upon hearing the question &ldquo;Who is your god?&rdquo;
@@ -37,9 +23,25 @@ export function AppendixContent() {
           Your god can be your children (<QuranRef reference="7:190" />), your spouse (
           <QuranRef reference="9:24" />), your business (<QuranRef reference="18:35" />), or
           your ego (<QuranRef reference="25:43" />). This is why one of the most important and
-          most repeated commandments in the Quran is to remember God frequently (
-          <QuranRef reference="33:41" />).
+          most repeated commandments in the Quran is:
         </p>
+      </section>
+
+      {/* Commandment verse */}
+      <div
+        data-card
+        className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
+      >
+        <p className="text-base leading-relaxed italic text-foreground/90">
+          &ldquo;O you who believe, you shall remember God frequently; glorify Him day and
+          night.&rdquo;
+        </p>
+        <p className="text-xs text-muted-foreground font-mono">
+          <QuranRef reference="33:41" />
+        </p>
+      </div>
+
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           To put this commandment into practice, we must establish certain habits whereby we
           guarantee that God occupies our minds more than anything else. The Quran helps us
@@ -116,11 +118,13 @@ export function AppendixContent() {
           </span>
           <div className="space-y-1 text-base leading-relaxed text-foreground/90">
             <p>
-              <strong>Glorify God day and night:</strong> When we eat, we must reflect on
-              God&apos;s creation of the food — the flavor, our enjoyment through the senses God
-              has given us, the perfect packaging of a banana or orange, the varieties of
-              seafood. When we see a beautiful flower, animal, or sunset, we must glorify God.
-              We must seize every possible opportunity to remember and glorify God.
+              <strong>Glorify God day and night:</strong> When we eat anything, we
+              shouldn&apos;t be like animals; we must reflect on God&apos;s creation of the food
+              we are eating - the flavor, our enjoyment due to the senses God has given us, the
+              perfect packaging of the banana or the orange, the varieties of sea foods created
+              by God, etc. - and glorify Him as we enjoy His provisions. When we see a beautiful
+              flower, or animal, or sunsets, we must glorify God. We must seize every possible
+              opportunity to remember and glorify God, so that God may be our God.
             </p>
           </div>
         </li>
