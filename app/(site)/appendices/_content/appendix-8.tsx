@@ -82,12 +82,11 @@ export function AppendixContent() {
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           Since the Quran is the most accurate book, it acknowledges that everyone in
-          Paradise will intercede on behalf of loved ones — &ldquo;Please God, admit my
-          mother into Paradise.&rdquo; This intercession will work <em>only</em> if the
-          person&apos;s mother already deserves to go to Paradise (
-          <QuranRef reference="2:255" />, <QuranRef reference="20:109" />,{' '}
-          <QuranRef reference="21:28" />). Thus, such intercession, though it will take
-          place, is utterly useless — God&apos;s decision is already made.
+          Paradise will intercede on behalf of his or her loved ones: &ldquo;Please God,
+          admit my mother into Paradise.&rdquo; This intercession will work if the
+          person&apos;s mother deserves to go to Paradise (<QuranRef reference="2:255" />,{' '}
+          <QuranRef reference="20:109" />, <QuranRef reference="21:28" />). Thus,
+          intercession, though it will take place in this manner, is utterly useless.
         </p>
         <p>
           We learn from the Quran that Abraham, God&apos;s beloved servant, could not
@@ -95,10 +94,7 @@ export function AppendixContent() {
           not intercede on behalf of his son (<QuranRef reference="11:46" />). Muhammad
           could not intercede on behalf of his uncle (<QuranRef reference="111:1-3" />)
           or relatives (<QuranRef reference="9:80" />). What makes anyone think that a
-          prophet or a saint will intercede on behalf of a perfect stranger?
-        </p>
-        <p>
-          The Quran is consistent and unambiguous on this point. See{' '}
+          prophet or a saint will intercede on behalf of a perfect stranger?! See{' '}
           <QuranRef reference="2:48" />, <QuranRef reference="2:123" />,{' '}
           <QuranRef reference="6:51" />, <QuranRef reference="6:70" />,{' '}
           <QuranRef reference="6:94" />, <QuranRef reference="7:53" />,{' '}
@@ -106,10 +102,9 @@ export function AppendixContent() {
           <QuranRef reference="26:100" />, <QuranRef reference="30:13" />,{' '}
           <QuranRef reference="32:4" />, <QuranRef reference="36:23" />,{' '}
           <QuranRef reference="39:44" />, <QuranRef reference="40:18" />,{' '}
-          <QuranRef reference="43:86" />, <QuranRef reference="53:26" />, and{' '}
-          <QuranRef reference="74:48" />. Muhammad&apos;s own intercession is recorded
-          in <QuranRef reference="25:30" /> — where he complains to God about his own
-          people abandoning the Quran.
+          <QuranRef reference="43:86" />, <QuranRef reference="53:26" /> &amp;{' '}
+          <QuranRef reference="74:48" />. Muhammad&apos;s intercession is in{' '}
+          <QuranRef reference="25:30" />.
         </p>
       </section>
 
