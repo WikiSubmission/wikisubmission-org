@@ -34,28 +34,29 @@ export function AppendixContent() {
           and inhumane punishment that has proven useless to all concerned.
         </p>
         <p>
-          Contrary to common belief, the thief&apos;s hand shall not be cut off. Thanks to
-          God&apos;s mercy and the mathematical miracle in the Quran, we know now that the
+          Contrary to common belief, the thief&apos;s hand shall not be cut off. Thank God for
+          His mercy and His mathematical miracle in the Quran, we know now that the
           thief&apos;s hand is to be <em>marked</em>. Marking the hand of the thief is stated
           in <QuranRef reference="5:38" />. The sura and verse numbers add up to 5+38&nbsp;=&nbsp;43.
           The other place in the Quran where &ldquo;the hand is cut&rdquo; is found in{' '}
           <QuranRef reference="12:31" />. This is where we see the women who admired Joseph so
-          much that they &ldquo;cut&rdquo; their hands. Obviously, they did not sever their
-          hands &mdash; no one can do that. The sura and verse numbers add up to
+          much, they &ldquo;cut&rdquo; their hands. Obviously, they did not sever their
+          hands; no one can do that. The sura and verse numbers add up to
           12+31&nbsp;=&nbsp;43, the same total as in <QuranRef reference="5:38" />. This gives
           mathematical confirmation that the Quranic law calls for marking the hand of the
-          thief, not severing it. Additional confirmation: 19 verses after{' '}
+          thief, not severing it. Additional mathematical confirmation is provided: 19 verses
+          after{' '}
           <QuranRef reference="12:31" />, we see the &ldquo;cutting of the hand&rdquo; again.
           Punishment in Submission (Islam) is based on equivalence and social pressure (
           <QuranRef reference="2:178" />, <QuranRef reference="5:38" />,{' '}
           <QuranRef reference="24:2" />).
         </p>
         <p>
-          The blasphemy called &ldquo;Hadith &amp; Sunna&rdquo; instituted stoning to death as
-          the punishment for married adulterers. This is not God&apos;s law. As stated in{' '}
-          <QuranRef reference="24:2" />, the punishment for adultery is whipping in public &mdash; a
-          hundred symbolic lashes. The basic punishment is social pressure and scandalizing the
-          criminal. Whipping in public achieves this goal.
+          The blasphemy called &ldquo;Hadith &amp; Sunna&rdquo; has instituted stoning to death
+          as the punishment for married adulterers. This is not God&apos;s law. As stated in{' '}
+          <QuranRef reference="24:2" />, the punishment for adultery is whipping in public; a
+          hundred symbolic lashes. As pointed out above, the basic punishment is social pressure
+          and scandalizing the criminal. Whipping in public achieves this goal.
         </p>
         <p>
           In dealing with murder, the Quran definitely discourages capital punishment (
@@ -63,13 +64,13 @@ export function AppendixContent() {
           slave, and the female for the female&rdquo; (<QuranRef reference="2:178" />). Due to
           human meanness and injustice, many people cannot even imagine what this Quranic law
           says. They refuse to accept the clear injunctions that strict equivalence must be
-          observed &mdash; if a woman kills a man, or a man kills a woman, or a slave kills a free
+          observed - if a woman kills a man, or a man kills a woman, or a slave kills a free
           person, or a free person kills a slave, capital punishment cannot be applied. The
           Quran prefers that the murderer compensate the victim&apos;s family. Killing the
           murderer does not bring the victim back, nor does the family of the victim benefit
           from executing the murderer. The compensation, however, must be sufficient to be a
           deterrent for others. In Submission (Islam), the victim and/or the victim&apos;s
-          family are the judges for all crimes &mdash; they decide what the punishment shall be under
+          family are the judges for all crimes; they decide what the punishment shall be under
           the supervision of a person who knows the Quran.
         </p>
       </section>
