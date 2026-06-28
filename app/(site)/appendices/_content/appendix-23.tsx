@@ -30,20 +30,6 @@ export function AppendixContent() {
 
   return (
     <>
-      {/* ── Opening card ─────────────────────────────────────────────────── */}
-      <div
-        data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
-      >
-        <p className="text-sm font-semibold uppercase tracking-widest text-primary">
-          Chronological Order of Revelation
-        </p>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          The 114 suras of the Quran, listed in the order they were revealed to the
-          Prophet Muhammad.
-        </p>
-      </div>
-
       {/* ── Table ─────────────────────────────────────────────────────────── */}
       <div
         data-card
@@ -111,23 +97,6 @@ export function AppendixContent() {
           </table>
         </div>
       </div>
-
-      {/* ── Note ─────────────────────────────────────────────────────────── */}
-      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
-        <p>
-          The Prophet Muhammad wrote down the Quran in its chronological order of
-          revelation, together with the necessary instructions to place every piece
-          in its proper position. This chronological sequence was preserved in early
-          Islamic manuscripts and referenced in classical sources including
-          Al-Suyuty&apos;s <em>Itqaan</em>.
-        </p>
-        <p>
-          The current arrangement of suras (from longest to shortest, approximately)
-          differs from the chronological order but was divinely arranged under the
-          Prophet&apos;s supervision. The first sura revealed was Sura 96 (Al-Alaq),
-          and the last complete sura was Sura 110 (Al-Nasr).
-        </p>
-      </section>
     </>
   )
 }
