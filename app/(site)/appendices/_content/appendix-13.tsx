@@ -63,14 +63,32 @@ export function AppendixContent() {
         className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
       >
         <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;When God ALONE is mentioned, the hearts of those who do not
-          believe in the Hereafter shrink with aversion. But when others are
-          mentioned alongside Him, they rejoice.&rdquo;
+          &ldquo;When God ALONE is mentioned, the hearts of those who do
+          disbelieve in the Hereafter shrink with aversion, but when others
+          are mentioned with Him, they become satisfied.&rdquo;
         </p>
         <p className="text-xs text-muted-foreground font-mono">
           <QuranRef reference="39:45" />
         </p>
       </div>
+
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
+        <p>
+          Extensive research into this criterion leads to a startling
+          conclusion: the idol worshipers who do not uphold the First Pillar
+          of Islam as dictated in <QuranRef reference="3:18" /> are forbidden
+          by God from uttering the correct <em>Shahadah</em>. They simply
+          cannot say &ldquo;<em>Ash-hadu Allaa Elaaha Ellaa Allah</em>&rdquo;
+          by itself, without mentioning the name of Muhammad. Challenge any
+          idol worshiper who claims to be a Muslim to say it — they can never
+          say it.
+        </p>
+        <p>
+          Since this is the religion of Abraham, the ONLY creed must be
+          &ldquo;<em>LAA ELAAHA ELLAA ALLAH</em> (there is no god except the
+          One God).&rdquo; Muhammad did not exist on earth before Abraham.
+        </p>
+      </section>
 
       {/* Divider */}
       <div className="flex items-center gap-4" data-parallax>
