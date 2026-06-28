@@ -6,7 +6,7 @@ export function AppendixContent() {
     <>
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          We learn from the Quran that evolution is a divinely designed fact.
+          We learn from the Quran that evolution is a divinely designed fact:
         </p>
       </section>
 
@@ -19,7 +19,7 @@ export function AppendixContent() {
           </p>
         </div>
         <div className="space-y-1">
-          <p className="font-semibold text-foreground">Humans are not descendants of monkeys</p>
+          <p className="font-semibold text-foreground">Humans not descendants of monkeys</p>
           <p className="text-foreground/80">
             &ldquo;He started the creation of man from mud.&rdquo; (<QuranRef reference="32:7" />)
           </p>
@@ -55,14 +55,17 @@ export function AppendixContent() {
           In this computer age, we have mathematical laws that tell us whether a certain event
           is probable or not. If we throw five numbered cubes up in the air and let them fall
           into a guided straight line, the probability laws tell us the number of possible
-          combinations: 1×2×3×4×5&nbsp;=&nbsp;120 combinations. Thus, the probability of
-          obtaining any combination is 1 in 120, or 0.0086.
+          combinations we can get: 1×2×3×4×5&nbsp;=&nbsp;120 combinations. Thus, the probability
+          of obtaining any combination is 1 in 120, or 1/120, or 0.0086.
         </p>
         <p>
-          This probability diminishes fast when we increase the number of cubes. At six cubes,
-          there are 720 combinations and the probability diminishes to 0.0014. Mathematicians
-          have agreed that the probability diminishes to &ldquo;Zero&rdquo; when we increase
-          the number of cubes to 84. The probability becomes 209×10⁻⁵⁰.
+          This probability diminishes fast when we increase the number of cubes. If we increase
+          them by one, the number of combinations becomes
+          1×2×3×4×5×6&nbsp;=&nbsp;720, and the probability of getting any combination diminishes
+          to 1/720, 0.0014. Mathematicians, who are very exacting scientists, have agreed that
+          the probability diminishes to &ldquo;Zero&rdquo; when we increase the number of cubes
+          to 84. If we work with 84 cubes, the probability diminishes to 209×10⁻⁵⁰, or
+          0.00000000000000000000000000000000000000000000000000209
         </p>
         <p>
           Darwin&apos;s famous statement that &ldquo;life began as a &lsquo;simple&rsquo;
@@ -78,8 +81,9 @@ export function AppendixContent() {
         <p>
           Some evolutionists have stated that the human gene and the monkey&apos;s gene are 90%
           similar. However, even if the similarity was 99%, we are still talking about
-          300,000,000 nucleotides that must be haphazardly re-arranged to change a monkey into
-          a human. The probability laws preclude this as an utter impossibility. The human gene
+          300,000,000 nucleotides that must be haphazardly re-arranged to change the monkey
+          into a human. The probability laws preclude this as an utter impossibility. The human
+          gene
           contains 30,000,000,000 nucleotides; 1% of that is 300,000,000.
         </p>
       </section>
