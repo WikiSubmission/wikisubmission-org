@@ -5,21 +5,6 @@ import { YouTubeEmbed } from '@/components/youtube-embed'
 export function AppendixContent() {
   return (
     <>
-      {/* Opening verse card */}
-      <div
-        data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
-      >
-        <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;God took a covenant from the prophets, saying, &lsquo;After I have given you
-          the scripture and wisdom, a messenger will come to confirm what you have. You shall
-          believe in him and support him.&rsquo;&rdquo;
-        </p>
-        <p className="text-xs text-muted-foreground font-mono">
-          <QuranRef reference="3:81" />
-        </p>
-      </div>
-
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           As stated in <QuranRef reference="3:81" />, and in{' '}
