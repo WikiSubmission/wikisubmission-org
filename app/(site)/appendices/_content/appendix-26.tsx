@@ -10,9 +10,9 @@ export function AppendixContent() {
         className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
       >
         <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;God took a covenant from the prophets, saying, &lsquo;I will give you the
-          scripture and wisdom. Afterwards, a messenger will come to confirm all existing
-          scriptures. You shall believe in him and support him.&rsquo;&rdquo;
+          &ldquo;God took a covenant from the prophets, saying, &lsquo;After I have given you
+          the scripture and wisdom, a messenger will come to confirm what you have. You shall
+          believe in him and support him.&rsquo;&rdquo;
         </p>
         <p className="text-xs text-muted-foreground font-mono">
           <QuranRef reference="3:81" />
@@ -114,7 +114,8 @@ export function AppendixContent() {
         <p>
           [5] &ldquo;Abraham&rdquo; is mentioned in 25 suras, &ldquo;Muhammad&rdquo; is
           mentioned in 4 suras, and &ldquo;Rashada&rdquo; occurs in 9 suras. The total of
-          these suras is 25+4+9&nbsp;=&nbsp;38&nbsp;=&nbsp;19&times;2.
+          these suras is 25+4+9&nbsp;=&nbsp;38&nbsp;=&nbsp;19&times;2 (INDEX TO THE WORDS OF
+          QURAN, Abdul Baqi).
         </p>
         <p>
           [6] If we add the numbers of the suras where Abraham, Muhammad, and Rashada occur,
@@ -177,16 +178,152 @@ export function AppendixContent() {
           first verse in each sura where each of the three words is mentioned, the total comes
           to 2793&nbsp;=&nbsp;19&times;147 (Table 3).
         </p>
+      </section>
+
+      <div className="flex items-center gap-4" data-parallax>
+        <hr className="flex-1 border-border/50" />
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
+          Table 3: Suras &amp; First Verse Where Abraham, Muhammad, &amp; Rashada Occur
+        </h2>
+        <hr className="flex-1 border-border/50" />
+      </div>
+
+      <div data-card className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 text-sm overflow-x-auto">
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr>
+              <th className="border border-border/40 px-3 py-2 text-left">Sura No.</th>
+              <th className="border border-border/40 px-3 py-2 text-left">Abraham</th>
+              <th className="border border-border/40 px-3 py-2 text-left">Muhammad</th>
+              <th className="border border-border/40 px-3 py-2 text-left">Rashada</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              [2,124,'-',186],[3,33,144,'-'],[4,54,'-',6],[6,74,'-','-'],[7,'-','-',146],
+              [9,70,'-','-'],[11,69,'-',78],[12,6,'-','-'],[14,35,'-','-'],[15,51,'-','-'],
+              [16,120,'-','-'],[18,'-','-',10],[19,41,'-','-'],[21,'51','-','51*'],[22,26,'-','-'],
+              [26,69,'-','-'],[29,16,'-','-'],[33,7,40,'-'],[37,83,'-','-'],[38,45,'-','-'],
+              [40,'-','-',29],[42,13,'-','-'],[43,26,'-','-'],[47,'-',2,'-'],[48,'-',29,'-'],
+              [49,'-','-',7],[51,24,'-','-'],[53,37,'-','-'],[57,26,'-','-'],[60,4,'-','-'],
+              [72,'-','-',2],[87,19,'-','-'],
+            ].map((row, i) => (
+              <tr key={i}>
+                {row.map((cell, j) => (
+                  <td key={j} className="border border-border/40 px-3 py-2 text-left">{cell}</td>
+                ))}
+              </tr>
+            ))}
+            <tr className="font-semibold">
+              <td className="border border-border/40 px-3 py-2 text-left">991</td>
+              <td className="border border-border/40 px-3 py-2 text-left">1123</td>
+              <td className="border border-border/40 px-3 py-2 text-left">215</td>
+              <td className="border border-border/40 px-3 py-2 text-left">464</td>
+            </tr>
+          </tbody>
+        </table>
+        <p className="text-xs text-muted-foreground">991+1123+215+464 = 2793 = 19×147.</p>
+        <p className="text-xs text-muted-foreground">* Verse 21:51 cannot be added twice.</p>
+      </div>
+
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           [8] The sum of all sura numbers where the three words occur, without repetition,
           plus the sum of all the verse numbers, without repetition, add up to
-          6479&nbsp;=&nbsp;19&times;341. The sum of sura numbers is 991 (see Table 3). The sum
-          of verse numbers is 5488, and: 5488+991&nbsp;=&nbsp;6479&nbsp;=&nbsp;19&times;341.
+          6479&nbsp;=&nbsp;19&times;341. The suras are 2, 3, 4, 6, 7, 9, 11, 12, 14, 15, 16, 18,
+          19, 21, 22, 26, 29, 33, 37, 38, 40, 42, 43, 47, 48, 49, 51, 53, 57, 60, 72, and 87.
+          The sum of these numbers is 991 (see Table 3). The verses where the three words are
+          mentioned, without repetition, are 2, 4, 6, 7, 10, 13, 14, 16, 17, 19, 21, 24, 26,
+          29, 31, 33, 35, 37, 38, 40, 41, 43, 45, 46, 51, 54, 58, 60, 62, 65, 66, 67, 68, 69,
+          70, 74, 75, 76, 78, 83, 84, 87, 95, 97, 104, 109, 114, 120, 123, 124, 125, 126, 127,
+          130, 132, 133, 135, 136, 140, 144, 146, 161, 163, 186, 256, 258, and 260. The sum of
+          these numbers is 5488, and: 5488&nbsp;+&nbsp;991&nbsp;=&nbsp;6479&nbsp;=&nbsp;19&times;341.
         </p>
         <p>
           [9] If we add the sura number, plus the verse number, plus the number of verses
           where Abraham, Muhammad, and Rashada occur, we get a grand total that equals
           7505&nbsp;=&nbsp;19&times;395 (Table 4).
+        </p>
+      </section>
+
+      <div className="flex items-center gap-4" data-parallax>
+        <hr className="flex-1 border-border/50" />
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
+          Table 4: Suras, Verses &amp; Occurrences of Abraham, Muhammad, &amp; Rashada
+        </h2>
+        <hr className="flex-1 border-border/50" />
+      </div>
+
+      <div data-card className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 text-sm overflow-x-auto">
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr>
+              <th className="border border-border/40 px-3 py-2 text-left">Sura No.</th>
+              <th className="border border-border/40 px-3 py-2 text-left">Abraham</th>
+              <th className="border border-border/40 px-3 py-2 text-left">Muhammad</th>
+              <th className="border border-border/40 px-3 py-2 text-left">Rashada</th>
+              <th className="border border-border/40 px-3 py-2 text-left">No. of Verses</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              [2,'124, 125, 126, 127, 130, 132, 133, 135, 136, 140, 258, 260','-','186, 256',14],
+              [3,'33, 65, 67, 68, 84, 95, 97','144','-',8],
+              [4,'54, 125, 163','-','6',4],
+              [6,'74, 75, 83, 161','-','-',4],
+              [7,'-','-','146',1],
+              [9,'70, 114','-','-',2],
+              [11,'69, 74, 75, 76','-','78, 87, 97',7],
+              [12,'6, 38','-','-',2],
+              [14,'35','-','-',1],
+              [15,'51','-','-',1],
+              [16,'120, 123','-','-',2],
+              [18,'-','-','10, 17, 24, 66',4],
+              [19,'41, 46, 58','-','-',3],
+              [21,'51, 60, 62, 69','-','51',5],
+              [22,'26, 43, 78','-','-',3],
+              [26,'69','-','-',1],
+              [29,'16, 31','-','-',2],
+              [33,'7','40','-',2],
+              [37,'83, 104, 109','-','-',3],
+              [38,'45','-','-',1],
+              [40,'-','-','29, 38',2],
+              [42,'13','-','-',1],
+              [43,'26','-','-',1],
+              [47,'-','2','-',1],
+              [48,'-','29','-',1],
+              [49,'-','-','7',1],
+              [51,'24','-','-',1],
+              [53,'37','-','-',1],
+              [57,'26','-','-',1],
+              [60,'4','-','-',1],
+              [72,'-','-','2, 10, 14, 21',4],
+              [87,'19','-','-',1],
+            ].map((row, i) => (
+              <tr key={i}>
+                {row.map((cell, j) => (
+                  <td key={j} className="border border-border/40 px-3 py-2 text-left align-top">{cell}</td>
+                ))}
+              </tr>
+            ))}
+            <tr className="font-semibold">
+              <td className="border border-border/40 px-3 py-2 text-left">991</td>
+              <td className="border border-border/40 px-3 py-2 text-left">5068</td>
+              <td className="border border-border/40 px-3 py-2 text-left">215</td>
+              <td className="border border-border/40 px-3 py-2 text-left">1145</td>
+              <td className="border border-border/40 px-3 py-2 text-left">86</td>
+            </tr>
+          </tbody>
+        </table>
+        <p className="text-xs text-muted-foreground">
+          991+5068+215+1145+86 = 7505 = 19×395.
+        </p>
+      </div>
+
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
+        <p>
+          Thus, it is mathematically coded into the Quran that Abraham, Muhammad, and Rashad
+          are the three messengers of Islam (Submission).
         </p>
         <p>
           [10] As shown in Table 4, the 19 occurrences of the root word &ldquo;Rashada&rdquo;
@@ -195,14 +332,17 @@ export function AppendixContent() {
         </p>
         <p>
           [11] Table 4 shows that the sum of the verse numbers where we see the 19 occurrences
-          of the root word &ldquo;Rashada&rdquo; is 1145. By adding this total (1145) to the
-          gematrical value of &ldquo;Rashad&rdquo; (505), plus the gematrical value of
-          &ldquo;Khalifa&rdquo; (725), we get
+          of the root word &ldquo;Rashada&rdquo; is 1145. By adding this total of verse numbers
+          (1145), to the gematrical value of the name &ldquo;Rashad&rdquo; (505), plus the
+          gematrical value of the name &ldquo;Khalifa&rdquo; (725), we get
           1145+505+725&nbsp;=&nbsp;2375&nbsp;=&nbsp;19&times;125.
         </p>
         <p>
-          [12] If we write down these numbers next to each other — 1145, 505, 725 — we also get
-          a number that is a multiple of 19: 1145505725&nbsp;=&nbsp;19&times;60289775.
+          [12] If we write down these numbers next to each other, i.e., the total of verse
+          numbers (1145), followed by the gematrical value of the name &ldquo;Rashad&rdquo;
+          (505), followed by the gematrical value of the name &ldquo;Khalifa&rdquo; (725), we
+          also get a number that is a multiple of 19:
+          1145505725&nbsp;=&nbsp;19&times;60289775.
         </p>
       </section>
 
@@ -213,13 +353,6 @@ export function AppendixContent() {
         <p className="font-bold text-base pt-2">1145 + 505 + 725 = 2375 = 19 × 125</p>
         <p className="font-bold text-base">1145&nbsp;505&nbsp;725 = 1145505725 = 19 × 60289775</p>
       </div>
-
-      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
-        <p>
-          Thus, it is mathematically coded into the Quran that Abraham, Muhammad, and Rashad
-          are the three messengers of Islam (Submission).
-        </p>
-      </section>
     </>
   )
 }
