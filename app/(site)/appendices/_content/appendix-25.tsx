@@ -23,8 +23,8 @@ export function AppendixContent() {
       {/* ── Body ─────────────────────────────────────────────────────────── */}
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          Among the duties charged to God&apos;s Messenger of the Covenant is
-          unveiling the end of the world. We learn from{' '}
+          Among the duties charged to me as God&apos;s Messenger of the Covenant
+          is unveiling the end of the world. We learn from{' '}
           <QuranRef reference="18:7" />-8 and <QuranRef reference="69:13" />-15
           that this world will come to an end. A new earth and new heavens will
           replace the present heavens and earth (<QuranRef reference="14:48" />).
@@ -35,7 +35,7 @@ export function AppendixContent() {
       <div className="flex items-center gap-4" data-parallax>
         <hr className="flex-1 border-border/50" />
         <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          Signs of the Approaching End
+          Signs of the Approaching End of the World
         </h2>
         <hr className="flex-1 border-border/50" />
       </div>
@@ -52,7 +52,7 @@ export function AppendixContent() {
             {
               num: 1,
               title: 'The splitting of the moon',
-              text: 'This already happened in June 1969 when we landed on the moon and brought back moon rocks. People on earth can now visit many museums, colleges, and observatories to look at pieces of the moon.',
+              text: 'This already happened in June 1969 when we landed on the moon and brought back moon rocks. People on earth can go now to many museums, colleges and observatories to look at pieces of the moon.',
             },
             {
               num: 2,
@@ -64,14 +64,13 @@ export function AppendixContent() {
               num: 3,
               title: 'The creature',
               ref: '27:82',
-              text: '"Made from the earth, it alerts the people that they have been oblivious to their Creator." The Creature, made from the earth, did appear and was instrumental in unveiling the Quran\'s numerical code — the creature is the computer. Note that the digits that make up 27:82 add up to 19.',
+              text: '"Made from the earth, it alerts the people that they have been oblivious to their Creator." The Creature, made from the earth, did appear and was instrumental in unveiling the Quran\'s numerical code, and proclaiming that the world has neglected God\'s message; the creature is the computer. Note that the digits that make up 27:82 add up to 19.',
             },
             {
               num: 4,
               title: "Appearance of God's Messenger of the Covenant",
               ref: '3:81',
               text: 'As detailed in Appendix 2, a consolidating messenger, prophesied in the Quran, comes after all the prophets have delivered the scriptures, to purify and unify. This prophecy was fulfilled in Ramadan 1408.',
-              appendixRef: 2,
             },
             {
               num: 5,
@@ -82,7 +81,7 @@ export function AppendixContent() {
             {
               num: 6,
               title: 'Gog and Magog',
-              text: 'They re-appear, in accordance with God\'s plan, in the year 1700 AH (2271 AD). Gog and Magog are mentioned in 18:94 and 21:96. If you count the verses from 18:94 to the end of Sura 18, you find 17. If you count the verses from 21:96 to the end of Sura 21, you also find 17. This is the Quran\'s sign that Gog and Magog will re-appear in 1700 AH.',
+              text: 'They re-appear, in accordance with God\'s plan, in the year 1700 AH (2271 AD). Gog and Magog are mentioned in 18:94 and 21:96. If you count the verses from 18:94 to the end of Sura 18, you find them 17. If you count the verses from 21:96 to the end of Sura 21, you find them also 17. This is the Quran\'s sign that Gog and Magog will re-appear in 1700 AH.',
               refs: ['18:94', '21:96'],
             },
           ].map((sign) => (
@@ -113,21 +112,7 @@ export function AppendixContent() {
                     </>
                   )}
                 </p>
-                <p className="text-foreground/80">
-                  {sign.text}
-                  {sign.appendixRef && (
-                    <>
-                      {' '}See{' '}
-                      <Link
-                        href={`/appendices/${sign.appendixRef}`}
-                        className="text-primary underline underline-offset-2"
-                      >
-                        Appendix {sign.appendixRef}
-                      </Link>
-                      .
-                    </>
-                  )}
-                </p>
+                <p className="text-foreground/80">{sign.text}</p>
               </div>
             </div>
           ))}
@@ -245,15 +230,6 @@ export function AppendixContent() {
         </div>
       </div>
 
-      {/* ── Year 2280 AD ──────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-4" data-parallax>
-        <hr className="flex-1 border-border/50" />
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          Year 2280 AD
-        </h2>
-        <hr className="flex-1 border-border/50" />
-      </div>
-
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           The unveiling of this information took place in the year 1400 AH, 309 years
@@ -282,26 +258,19 @@ export function AppendixContent() {
         </p>
       </section>
 
-      {/* ── Historical Hadith Corroboration ───────────────────────────────── */}
-      <div className="flex items-center gap-4" data-parallax>
-        <hr className="flex-1 border-border/50" />
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          Historical Corroboration
-        </h2>
-        <hr className="flex-1 border-border/50" />
-      </div>
-
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           While Hadith is forbidden as a source of religious teachings (
           <Link href="/appendices/19" className="text-primary underline underline-offset-2">
             Appendix 19
           </Link>
-          ), it can be a useful source of history. The books of Hadith indicate that
-          the Quranic Initials were believed to determine the life span of the Muslim{' '}
-          <em>Ummah</em>. The classic exegesis by Al-Baydaawy cites the following
-          historical event, also detailed in Al-Suyooty&apos;s <em>Itqaan</em>
-          (First Printing, 1318 AH, Vol 2, Page 10):
+          ), it can be a useful source of history. We can derive a lot of information
+          about historical events and local customs and traditions during the early
+          centuries of Islam. The books of Hadith indicate that the Quranic Initials
+          were believed to determine the life span of the Muslim <em>Ummah</em>. The
+          classic exegesis by Al-Baydaawy cites the following historical event as a
+          possible explanation of the Quranic Initials. The same event is detailed in
+          Al-Suyooty&apos;s <em>Itqaan</em> (First Printing, 1318 AH, Vol 2, Page 10):
         </p>
       </section>
 
