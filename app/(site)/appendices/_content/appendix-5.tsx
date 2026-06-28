@@ -2,6 +2,14 @@ import { QuranRef } from '@/components/quran-ref'
 import Link from 'next/link'
 import { YouTubeEmbed } from '@/components/youtube-embed'
 
+/* ──────────────────────────────────────────────────────────────────────────
+ * Appendix 5 — Heaven and Hell
+ * (from: Quran The Final Testament, by Rashad Khalifa, PhD.)
+ *
+ * Body text is a faithful reproduction of the source published at
+ * masjidtucson.org/quran/appendices/appendix5.html
+ * ────────────────────────────────────────────────────────────────────────── */
+
 export function AppendixContent() {
   return (
     <>
@@ -11,8 +19,8 @@ export function AppendixContent() {
         className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
       >
         <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;Whoever succeeds in barely missing Hell, and is admitted into Heaven,
-          has attained a great triumph.&rdquo;
+          &ldquo;Whoever succeeds in barely missing Hell, and is admitted into
+          Heaven, has attained a great triumph.&rdquo;
         </p>
         <p className="text-xs text-muted-foreground font-mono">
           <QuranRef reference="3:185" />
@@ -22,21 +30,26 @@ export function AppendixContent() {
       {/* Allegory */}
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          The descriptions of Heaven and Hell throughout the Quran are allegorical. And
-          the Quran tells us so whenever such descriptions occur as independent
-          statements, not within a general subject. See <QuranRef reference="2:24-26" />,{' '}
-          <QuranRef reference="13:35" />, and <QuranRef reference="47:15" />. The word{' '}
-          <em>Mathal</em> (allegory) is used in these verses. Linguistically, the word
-          &ldquo;Mathal&rdquo; in these verses can be removed and we still have perfect
-          sentences — but it is there because the descriptions of Heaven and Hell are
+          The descriptions of Heaven and Hell throughout the Quran are
+          allegorical. And the Quran tells us so whenever such descriptions
+          occur as independent statements, not within a general subject. See{' '}
+          <QuranRef reference="2:24-26" />, <QuranRef reference="13:35" />, and{' '}
+          <QuranRef reference="47:15" />. The word <em>Mathal</em> (allegory) is
+          used in these verses. Linguistically, the word &ldquo;Mathal&rdquo; in
+          these verses can be removed, and we still have perfect sentences. But
+          it is there because the descriptions of Heaven and Hell are
           allegorical.
         </p>
         <p>
-          What Heaven and Hell are really like is far beyond our comprehension, hence the
-          need for allegory. How can one describe, for example, the taste of chocolate to
-          a person who has never tasted chocolate? Allegory must be used. The person has
-          to wait to actually taste chocolate to know what it is like. Whatever allegory
-          we use can never approximate the real thing.
+          What Heaven and Hell are really like is far beyond our comprehension.
+          Hence the need for allegory.
+        </p>
+        <p>
+          How can one describe, for example, the taste of chocolate to a person
+          who never tasted chocolate? Allegory will have to be used. The person
+          has to wait to actually taste chocolate in order to know what
+          chocolate tastes like. Whatever allegory we use to describe the taste
+          of chocolate can never approximate the real thing.
         </p>
       </section>
 
@@ -51,17 +64,27 @@ export function AppendixContent() {
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          Heaven already exists, since Adam and Eve were placed in it during their days
-          of innocence (<QuranRef reference="2:35" />). We learn from Sura 55 that there
-          are two &ldquo;High Heavens&rdquo; — one for the humans and one for the jinns
-          — and two &ldquo;Lower Heavens&rdquo; — one for the humans and one for the
-          jinns (see <Link href="/appendices/11" className="text-primary underline underline-offset-2">Appendix 11</Link> for more details).
+          Heaven already exists, since Adam and Eve were placed in it during
+          their days of innocence (<QuranRef reference="2:35" />
+          ). We learn from Sura 55 that there are two &ldquo;High Heavens&rdquo;
+          - one for the humans and one for the jinns - and two &ldquo;Lower
+          Heavens&rdquo; - one for the humans and one for the jinns (see{' '}
+          <Link
+            href="/appendices/11"
+            className="text-primary underline underline-offset-2"
+          >
+            Appendix 11
+          </Link>{' '}
+          for more details).
         </p>
         <p>
           Hell is not created yet. It will be created on the Day of Judgment (
-          <QuranRef reference="69:17" /> &amp; <QuranRef reference="89:23" />). More
-          details are given in{' '}
-          <Link href="/appendices/11" className="text-primary underline underline-offset-2">
+          <QuranRef reference="69:17" /> &amp; <QuranRef reference="89:23" />
+          ). More details are given in{' '}
+          <Link
+            href="/appendices/11"
+            className="text-primary underline underline-offset-2"
+          >
             Appendix 11
           </Link>
           .
@@ -72,15 +95,15 @@ export function AppendixContent() {
       <div className="flex items-center gap-4">
         <hr className="flex-1 border-border/50" />
         <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          The High Heaven vs. The Lower Heaven
+          The High Heaven vs The Lower Heaven
         </h2>
         <hr className="flex-1 border-border/50" />
       </div>
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          There are profound allegorical differences between the High Heaven and the
-          Lower Heaven described in Sura 55:
+          There are profound differences between the High Heaven and the Lower
+          Heaven.
         </p>
 
         <div
@@ -89,40 +112,68 @@ export function AppendixContent() {
         >
           <div className="grid grid-cols-1 gap-3">
             <div className="flex items-start gap-3">
-              <span className="shrink-0 font-semibold text-primary w-32">Water</span>
+              <span className="shrink-0 font-semibold text-primary w-24">
+                Water
+              </span>
               <span className="text-foreground/80">
-                In the High Heaven, water flows freely (<QuranRef reference="55:50" />);
-                in the Lower Heaven it needs to be pumped out (<QuranRef reference="55:66" />).
+                Allegorically, water in the High Heaven flows freely (
+                <QuranRef reference="55:50" />
+                ), while the water of the Lower Heaven needs to be pumped out (
+                <QuranRef reference="55:66" />
+                ).
               </span>
             </div>
             <div className="flex items-start gap-3">
-              <span className="shrink-0 font-semibold text-primary w-32">Fruit</span>
+              <span className="shrink-0 font-semibold text-primary w-24">
+                Fruit
+              </span>
               <span className="text-foreground/80">
-                The High Heaven has all kinds of fruit (<QuranRef reference="55:52" />),
-                while the Lower Heaven has a limited variety (<QuranRef reference="55:68" />).
+                Allegorically, the High Heaven has all kinds of fruit (
+                <QuranRef reference="55:52" />
+                ), while the Lower Heaven has a limited variety of fruits (
+                <QuranRef reference="55:68" />
+                ).
               </span>
             </div>
             <div className="flex items-start gap-3">
-              <span className="shrink-0 font-semibold text-primary w-32">Spouses</span>
+              <span className="shrink-0 font-semibold text-primary w-24">
+                Spouses
+              </span>
               <span className="text-foreground/80">
-                Pure spouses readily join their spouses in the High Heaven (
-                <QuranRef reference="55:56" />), while dwellers of the Lower Heaven must
-                go fetch their spouses (<QuranRef reference="55:72" />).
+                Allegorically, the pure spouses readily join their spouses in
+                the High Heaven (<QuranRef reference="55:56" />
+                ), while the dwellers of the Lower Heaven must go fetch their
+                spouses (
+                <QuranRef reference="55:72" />
+                ).
               </span>
             </div>
           </div>
         </div>
 
         <p>
-          Yet even the Lower Heaven is an incredibly fantastic prize for those fortunate
-          enough to escape Hell (<QuranRef reference="3:185" />). People who depart this
-          life before reaching their 40th birthday, and did not sufficiently develop
-          their souls, will go to the Lower Heaven (<QuranRef reference="46:15" />,{' '}
-          <Link href="/appendices/11" className="text-primary underline underline-offset-2">Appendix 11</Link>{' '}
+          Yet, even the Lower Heaven is an incredibly fantastic prize for those
+          who are fortunate enough to escape Hell and end up in the Lower Heaven
+          (
+          <QuranRef reference="3:185" />) - going to the Lower Heaven is a great
+          triumph. People who depart this life before reaching their 40th
+          birthday, and did not sufficiently develop their souls, will go to the
+          Lower Heaven (<QuranRef reference="46:15" />,{' '}
+          <Link
+            href="/appendices/11"
+            className="text-primary underline underline-offset-2"
+          >
+            Appendices 11
+          </Link>{' '}
           &amp;{' '}
-          <Link href="/appendices/32" className="text-primary underline underline-offset-2">32</Link>).
-          The High Heaven is reserved for those who believed, led a righteous life, and
-          developed their souls sufficiently.
+          <Link
+            href="/appendices/32"
+            className="text-primary underline underline-offset-2"
+          >
+            32
+          </Link>
+          ). The High Heaven is reserved for those who believed, led a righteous
+          life, and developed their souls sufficiently.
         </p>
       </section>
 
@@ -131,8 +182,19 @@ export function AppendixContent() {
         <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Video
         </h2>
-        <YouTubeEmbed videoId="DCw1FX2sidE" title="Appendix 5 — Heaven and Hell" />
+        <YouTubeEmbed
+          videoId="DCw1FX2sidE"
+          title="Appendix 5 — Heaven and Hell"
+        />
       </section>
+
+      {/* Source attribution */}
+      <div className="rounded-lg border border-border/40 bg-muted/20 p-4 text-sm text-muted-foreground leading-relaxed">
+        <p>
+          United Submitters International / International Community of
+          Submitters / Masjid Tucson
+        </p>
+      </div>
     </>
   )
 }
