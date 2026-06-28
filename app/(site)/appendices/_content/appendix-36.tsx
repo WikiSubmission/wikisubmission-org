@@ -4,28 +4,14 @@ import { YouTubeEmbed } from '@/components/youtube-embed'
 export function AppendixContent() {
   return (
     <>
-      {/* Opening verse card */}
-      <div
-        data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
-      >
-        <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;If only the people of the various communities believed and maintained a
-          righteous life, we would have showered them with blessings from the heaven and the
-          earth.&rdquo;
-        </p>
-        <p className="text-xs text-muted-foreground font-mono">
-          <QuranRef reference="7:96" />
-        </p>
-      </div>
-
       <div data-card className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-4 text-sm text-foreground/90">
         <p>
           &ldquo;If the people of the scripture (Jews, Christians, and Muslims) believe and
           maintain a righteous life, we will remit their sins and admit them into the blissful
           Heaven. Had they observed the Torah, the Gospel, and what is revealed herein from
           their Lord, they would have enjoyed provisions from above them, and from beneath their
-          feet.&rdquo; (<QuranRef reference="5:65-66" />)
+          feet. Some of them are righteous, but most of them are evil doers.&rdquo; (
+          <QuranRef reference="5:65-66" />)
         </p>
         <p>
           &ldquo;If only the people of the various communities believed and maintained a
@@ -46,8 +32,9 @@ export function AppendixContent() {
           <QuranRef reference="10:62-64" />, <QuranRef reference="16:97" />,{' '}
           <QuranRef reference="24:55" />, <QuranRef reference="41:30-31" />). On the other
           hand, a nation that violates God&apos;s laws incurs a miserable life (
-          <QuranRef reference="20:124" />). Since God is in full control (
-          <QuranRef reference="10:61" />), His guarantees and promises are absolute. A nation
+          <QuranRef reference="20:124" />). A nation that upholds God&apos;s laws is guaranteed
+          to be a great nation. This is not a mere idealistic dream; since God is in full control (
+          <QuranRef reference="10:61" />), His guarantees and promises are done. A nation
           that upholds God&apos;s laws is characterized by:
         </p>
       </section>
@@ -109,7 +96,7 @@ export function AppendixContent() {
             5
           </span>
           <p className="text-base leading-relaxed text-foreground/90">
-            <strong>A political system based on unanimous consensus.</strong> Through mutual
+            <strong>A political system that is based on unanimous consensus.</strong> Through mutual
             consultation and freedom of expression, one side of any given issue convinces all
             participants in the discussion. The end result is a unanimous agreement, not the
             opinion of a 51% majority rammed down the throat of the 49% minority (
@@ -121,7 +108,8 @@ export function AppendixContent() {
             6
           </span>
           <p className="text-base leading-relaxed text-foreground/90">
-            <strong>The highest standards of moral behavior.</strong> There will be a strong
+            <strong>A society that upholds and maintains the highest standards of moral
+            behavior.</strong> There will be a strong
             family, no alcoholism, no illicit drugs, no illegitimate pregnancies, no abortions,
             and practically no divorce.
           </p>
