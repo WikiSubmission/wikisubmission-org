@@ -5,7 +5,15 @@ import { YouTubeEmbed } from '@/components/youtube-embed'
 export function AppendixContent() {
   return (
     <>
-      {/* Opening card */}
+      {/* Lead */}
+      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
+        <p>
+          Verse <QuranRef reference="3:18" /> states the First Pillar of Islam
+          (Submission):
+        </p>
+      </section>
+
+      {/* 3:18 quote card */}
       <div
         data-card
         className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
@@ -19,45 +27,17 @@ export function AppendixContent() {
         </p>
       </div>
 
-      {/* Intro */}
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          The First Pillar of Islam — &ldquo;Laa Elaaha Ellaa Allah&rdquo;
-          (There is no god except God) — is the very foundation of
-          Submission. This declaration is established in{' '}
-          <QuranRef reference="3:18" /> and confirmed throughout the Quran
-          as the religion of Abraham (
-          <QuranRef reference="2:130" />, <QuranRef reference="2:135" />;{' '}
-          <QuranRef reference="3:95" />; <QuranRef reference="4:125" />;{' '}
-          <QuranRef reference="6:161" />; <QuranRef reference="12:37" />–
-          <QuranRef reference="12:38" />; <QuranRef reference="16:123" />;{' '}
-          <QuranRef reference="22:78" />; see also{' '}
-          <Link href="/quran/appendix/9" className="text-primary underline underline-offset-2 hover:text-primary/80">
-            Appendix 9
-          </Link>
-          ).
+          This most crucial pillar has been distorted. Millions of Muslims
+          have adopted Satan&rsquo;s polytheistic version, and insist upon
+          mentioning the name of Muhammad besides the name of God. However,
+          the Quran&rsquo;s great criterion in <QuranRef reference="39:45" />{' '}
+          stamps such Muslims as disbelievers:
         </p>
       </section>
 
-      {/* Divider */}
-      <div className="flex items-center gap-4" data-parallax>
-        <hr className="flex-1 border-border/50" />
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          A Corrupted Pillar
-        </h2>
-        <hr className="flex-1 border-border/50" />
-      </div>
-
-      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
-        <p>
-          This pillar has been corrupted. Many have adopted the practice of
-          mentioning Muhammad alongside God — a form of idolatry that the
-          Quran explicitly condemns. The test is described in{' '}
-          <QuranRef reference="39:45" />:
-        </p>
-      </section>
-
-      {/* Quote card */}
+      {/* 39:45 quote card */}
       <div
         data-card
         className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
@@ -74,19 +54,26 @@ export function AppendixContent() {
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          Extensive research into this criterion leads to a startling
-          conclusion: the idol worshipers who do not uphold the First Pillar
-          of Islam as dictated in <QuranRef reference="3:18" /> are forbidden
-          by God from uttering the correct <em>Shahadah</em>. They simply
-          cannot say &ldquo;<em>Ash-hadu Allaa Elaaha Ellaa Allah</em>&rdquo;
-          by itself, without mentioning the name of Muhammad. Challenge any
-          idol worshiper who claims to be a Muslim to say it — they can never
-          say it.
-        </p>
-        <p>
-          Since this is the religion of Abraham, the ONLY creed must be
-          &ldquo;<em>LAA ELAAHA ELLAA ALLAH</em> (there is no god except the
-          One God).&rdquo; Muhammad did not exist on earth before Abraham.
+          I have conducted extensive research into this criterion, and I have
+          reached a startling conclusion: the idol worshipers who do not uphold
+          the First Pillar of Islam as dictated in <QuranRef reference="3:18" />{' '}
+          are forbidden by God from uttering the correct <em>Shahadah</em>.
+          They simply cannot say: &ldquo;<em>Ash-hadu Allaa Elaaha Ellaa Allah</em>&rdquo;{' '}
+          by itself, without mentioning the name of Muhammad. Try it with any
+          idol worshiper who claims to be a Muslim. Challenge them to say:
+          &ldquo;<em>Ash-hadu Allaa Elaaha Ellaa Allah</em>.&rdquo; They can
+          never say it. Since this is the religion of Abraham (
+          <QuranRef reference="2:130" />, <QuranRef reference="2:135" />;{' '}
+          <QuranRef reference="3:95" />; <QuranRef reference="4:125" />;{' '}
+          <QuranRef reference="6:161" />; <QuranRef reference="12:37" />-
+          <QuranRef reference="12:38" />; <QuranRef reference="16:123" />;{' '}
+          <QuranRef reference="22:78" />;{' '}
+          <Link href="/quran/appendix/9" className="text-primary underline underline-offset-2 hover:text-primary/80">
+            Appendix 9
+          </Link>
+          ), the ONLY creed must be &ldquo;<em>LAA ELAAHA ELLAA ALLAH</em> (there
+          is no god except the One God)&rdquo;. Muhammad did not exist on earth
+          before Abraham.
         </p>
       </section>
 
@@ -101,38 +88,35 @@ export function AppendixContent() {
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          Distorting the Quran to elevate the Prophet Muhammad is a
-          blasphemy the Quran condemns. Verse{' '}
-          <QuranRef reference="47:19" /> states:{' '}
-          <em>
-            &ldquo;You shall know that there is no god except the one
-            God.&rdquo;
-          </em>
-        </p>
-        <p>
-          As an example, certain publications have added &ldquo;Muhammad
-          Rasool Allah&rdquo; in Quranic calligraphic style directly
-          alongside <QuranRef reference="47:19" />, falsely implying it is
-          part of the divine text. Such additions create a gross and
-          misleading impression that stands in direct contradiction to the
-          verse itself.
+          There is no greater blasphemy than distorting the Quran to idolize
+          the prophet Muhammad against his will. Verse 19 of Sura
+          &ldquo;Muhammad&rdquo; (<QuranRef reference="47:19" />) states:
+          &ldquo;You shall know that there is no god except the one God.&rdquo;
+          Shown below is a photocopy of the regular logo of a Muslim
+          publication <em>THE REVIEW OF RELIGIONS</em> (The London Mosque, 16
+          Gressenhall Road, London SW18 5QL, England). Using the
+          Quran&rsquo;s calligraphic style, the publishers of{' '}
+          <em>THE REVIEW OF RELIGIONS</em> added the phrase &ldquo;
+          <em>Muhammad Rasool Allah</em>&rdquo; in such a way that gives a
+          false impression that such is the Quranic statement of{' '}
+          <QuranRef reference="47:19" />. What a blasphemy!
         </p>
       </section>
 
-      {/* Key verses card */}
+      {/* Blasphemy example */}
       <div
         data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 text-sm"
+        className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 text-center"
       >
-        <p className="font-semibold uppercase tracking-widest text-primary text-xs">
-          The Correct Shahada
+        <p className="text-base leading-relaxed text-foreground/90">
+          You shall know that there is no god besides the One God, Allah.
+          Muhammad is a messenger of God.
         </p>
-        <p className="text-foreground/80 leading-relaxed">
-          The Shahada recognized in the Quran contains only one statement:
-          &ldquo;There is no god except God.&rdquo; Adding the name of any
-          prophet or human to this declaration violates the very monotheism
-          it is meant to affirm (see <QuranRef reference="3:18" />,{' '}
-          <QuranRef reference="47:19" />).
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          [ The blasphemy ]
+        </p>
+        <p className="text-xs italic text-muted-foreground">
+          Typical Example of the Distorted Islam
         </p>
       </div>
 
