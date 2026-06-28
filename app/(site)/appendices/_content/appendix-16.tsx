@@ -10,9 +10,12 @@ export function AppendixContent() {
         className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
       >
         <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;I do not find in what was revealed to me anything prohibited
-          for any eater unless it is (1) carrion, (2) running blood, (3) the
-          meat of pigs.&rdquo;
+          &ldquo;Say, &lsquo;I do not find in what was revealed to me anything
+          prohibited for any eater unless it is (1) carrion, (2) running blood,
+          (3) the meat of pigs, for it is unclean, and (4) meat blasphemously
+          dedicated to other than God.&rsquo; If one is forced to eat these
+          without being malicious or deliberate, then your Lord is Forgiver,
+          Most Merciful.&rdquo;
         </p>
         <p className="text-xs text-muted-foreground font-mono">
           <QuranRef reference="6:145" />
@@ -63,7 +66,7 @@ export function AppendixContent() {
       <div data-card className="rounded-xl border border-border/60 overflow-hidden">
         <div className="px-4 py-3 bg-primary/5 border-b border-border/40">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Prohibited Meats (<QuranRef reference="2:173" />, <QuranRef reference="5:3" />, <QuranRef reference="6:145" />, <QuranRef reference="16:115" />)
+            Prohibited Meats (<QuranRef reference="2:173" />, <QuranRef reference="5:3" />, <QuranRef reference="6:142" />–<QuranRef reference="6:145" />, <QuranRef reference="16:112" />)
           </p>
         </div>
         <ul className="divide-y divide-border/20 text-sm">
