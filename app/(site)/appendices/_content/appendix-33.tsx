@@ -148,7 +148,7 @@ export function AppendixContent() {
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Killing those considered apostates</td>
+              <td className="border border-border/40 px-3 py-2 text-left">Killing whomever they consider an apostate</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="2:256" />; <QuranRef reference="4:90" />;{' '}
                 <QuranRef reference="10:99" />; <QuranRef reference="18:29" />;{' '}
@@ -165,13 +165,13 @@ export function AppendixContent() {
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Stoning adulterers to death</td>
+              <td className="border border-border/40 px-3 py-2 text-left">Stoning the adulterers to death</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="24:2" />, <QuranRef reference="4:25" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Killing those who do not observe Salat</td>
+              <td className="border border-border/40 px-3 py-2 text-left">Killing anyone who does not observe Salat</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="2:256" />, <QuranRef reference="18:29" />
               </td>
@@ -198,13 +198,13 @@ export function AppendixContent() {
               <td colSpan={2} className="border border-border/40 px-3 py-2 text-left font-semibold">Idolizing Muhammad against his will:</td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Calling Muhammad &ldquo;the most honorable messenger&rdquo;</td>
+              <td className="border border-border/40 px-3 py-2 text-left">calling him &ldquo;the most honorable messenger&rdquo;</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="2:285" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Claiming Muhammad was infallible</td>
+              <td className="border border-border/40 px-3 py-2 text-left">claiming that he was infallible</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="4:79" />; <QuranRef reference="9:117" />;{' '}
                 <QuranRef reference="17:73-74" />; <QuranRef reference="33:37" />;{' '}
@@ -213,13 +213,13 @@ export function AppendixContent() {
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Setting up his tomb as a &ldquo;Sacred Mosque&rdquo;</td>
+              <td className="border border-border/40 px-3 py-2 text-left">setting up his tomb as a &ldquo;Sacred Mosque&rdquo;</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="2:149-150" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Claiming Muhammad possesses power of intercession</td>
+              <td className="border border-border/40 px-3 py-2 text-left">claiming that he possesses power of intercession</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="2:48" />, <QuranRef reference="2:123" />,{' '}
                 <QuranRef reference="2:254" />; <QuranRef reference="6:70" />,{' '}
@@ -239,7 +239,7 @@ export function AppendixContent() {
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Adding his name to the Salat prayers &amp; Azan</td>
+              <td className="border border-border/40 px-3 py-2 text-left">Adding his name in the Salat prayers &amp; Azan</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="20:14" />; <QuranRef reference="72:18" />
               </td>
@@ -255,7 +255,7 @@ export function AppendixContent() {
               <td colSpan={2} className="border border-border/40 px-3 py-2 text-left font-semibold">Insulting Muhammad by depicting him as a vicious man:</td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">They claim he gouged out people&apos;s eyes</td>
+              <td className="border border-border/40 px-3 py-2 text-left">they claim he gouged out people&apos;s eyes</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="3:159" />; <QuranRef reference="68:4" />
               </td>
@@ -267,19 +267,22 @@ export function AppendixContent() {
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Teaching that Jesus will come back (making Jesus the last prophet)</td>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                Nullifying the fact that Muhammad was the last prophet by teaching that Jesus
+                will come back to this world. This makes Jesus the last prophet.
+              </td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="33:40" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Claiming Muhammad was illiterate</td>
+              <td className="border border-border/40 px-3 py-2 text-left">Claiming that Muhammad was illiterate, un-intelligent.</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 See <Link href="/appendices/28">Appendix 28</Link>
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Bizarre dietary prohibitions</td>
+              <td className="border border-border/40 px-3 py-2 text-left">A bizarre dietary system with multitudes of prohibitions</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="6:145-150" />; <QuranRef reference="16:115-116" />
               </td>
@@ -297,7 +300,10 @@ export function AppendixContent() {
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Oppressing women and depriving them of rights in marriage, divorce, and inheritance</td>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                Oppressing women and forcing them to wear head-covers and unreasonable clothes;
+                and depriving them of all rights in marriage, divorce, inheritance, etc.
+              </td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="2:228" />; <QuranRef reference="3:195" />;{' '}
                 <QuranRef reference="4:19" />, <QuranRef reference="4:32" />;{' '}
