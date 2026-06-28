@@ -49,9 +49,9 @@ export function AppendixContent() {
           The concept of intercession is utterly illogical. Those who believe in
           Muhammad&apos;s intercession, for example, claim that he will ask God to
           forgive them and admit them into Paradise. They imagine Muhammad on the Day of
-          Judgment choosing the candidates for his intercession. If you ask: &ldquo;How
-          will Muhammad recognize those who deserve his intercession?&rdquo; the answer
-          is, &ldquo;God will tell him!&rdquo;
+          Judgment choosing the candidates for his intercession. If you ask those who
+          believe in intercession: &ldquo;How will Muhammad recognize those who deserve
+          his intercession?&rdquo; they tell you, &ldquo;God will tell him!&rdquo;
         </p>
 
         <div
@@ -60,12 +60,12 @@ export function AppendixContent() {
         >
           <p className="font-semibold text-foreground">The Logical Absurdity</p>
           <p className="text-foreground/80">
-            According to this concept: a person goes to Muhammad and requests his
-            intercession. Muhammad asks God whether this person deserves his intercession
-            or not. God informs Muhammad that the person deserves to go to Paradise.
-            Muhammad then turns around and tells God that the person deserves to go to
-            Paradise! Those who believe in intercession thus make God a secretary of
-            their idol Muhammad. God be glorified.
+            According to this concept, a person will go to Muhammad and request his
+            intercession. Muhammad will then ask God whether this person deserves his
+            intercession or not. God will inform Muhammad that the person deserves to go
+            to Paradise. Muhammad will then turn around and tell God that the person
+            deserves to go to Paradise! The blasphemy is obvious; those who believe in
+            intercession make God a secretary of their idol Muhammad. God be glorified.
           </p>
         </div>
       </section>
