@@ -5,21 +5,6 @@ import { YouTubeEmbed } from '@/components/youtube-embed'
 export function AppendixContent() {
   return (
     <>
-      {/* Opening verse card */}
-      <div
-        data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
-      >
-        <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;When he reaches his maturity and reaches the age of forty, he says,
-          &lsquo;My Lord, direct me to appreciate the blessings You have bestowed upon me and
-          upon my parents, and to do the righteous works that please You.&rsquo;&rdquo;
-        </p>
-        <p className="text-xs text-muted-foreground font-mono">
-          <QuranRef reference="46:15" />
-        </p>
-      </div>
-
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           What is the age of responsibility? If a child dies at the age of 12, without even
@@ -47,17 +32,18 @@ export function AppendixContent() {
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          Your first reaction to this piece of information might be objection: &ldquo;What if
-          the person was really bad, evil, and an atheist — will he go to Heaven if he died
-          before the age of 40?&rdquo; This is because we are mean, while God is the Most
-          Merciful. Our tendency is to &ldquo;put them all in Hell.&rdquo;
+          Your first reaction to this piece of information is objection: &ldquo;What if the
+          person was really bad, evil, and an atheist, will he go to Heaven if he died before
+          the age of 40?&rdquo; This is because you are mean, while God is the Most Merciful.
+          Our tendency is to &ldquo;put them all in Hell.&rdquo;
         </p>
         <p>
-          People who object strongly to this Divine mercy cannot come up with a cut-off age of
-          responsibility. They ask: &ldquo;What if the person was really wicked?&rdquo; The
-          answer is: Does God know that this person was wicked? Yes. Does God know that this
-          person does not deserve to go to Heaven? Yes. Therefore, this person will not die
-          before the age of 40. As simple as that. God is the only one who terminates our lives
+          People who objected strongly to this Divine mercy cannot come up with a cut-off age
+          of responsibility. They ask questions like, &ldquo;What if the person was really
+          wicked?&rdquo; The answer is, &ldquo;Does God know that this person was wicked?&rdquo;
+          &ldquo;Yes.&rdquo; &ldquo;Does God know that this person does not deserve to go to
+          Heaven?&rdquo; &ldquo;Yes.&rdquo; &ldquo;Therefore, this person will not die before
+          the age of 40.&rdquo; As simple as that. God is the only one who terminates our lives
           on this earth. He knows exactly who deserves to go to Heaven and who deserves to go
           to Hell.
         </p>
@@ -73,11 +59,14 @@ export function AppendixContent() {
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          Early in 1989 a man named Theodore Robert Bundy was executed for killing a number of
-          women. The whole nation agreed that he was one of the most vicious criminals in
-          history. Many journalists and politicians lamented that justice took eleven years to
-          execute Ted Bundy — that he should have been executed within a maximum of six years
-          after his conviction. According to the Quran, this would have been the greatest favor
+          Early in 1989 a man by the name of Theodore Robert Bundy was executed for killing a
+          number of women. The whole nation agreed that he was one of the most vicious
+          criminals in history. So much so that his execution was one of the rare occasions
+          where the opponents of capital punishment did not protest. On the contrary, many
+          people actually celebrated his execution. Numerous journalists, editorials, and
+          politicians lamented the fact that justice took eleven years to execute Ted Bundy.
+          They stated that Bundy should have been executed within a maximum of six years after
+          his conviction. According to the Quran, this would have been the greatest favor
           anyone could have done to Bundy. He was 42 years old when executed. Had he been
           executed five years earlier, at the age of 37, he would have gone straight to Heaven,
           and he did not deserve that.
@@ -86,11 +75,11 @@ export function AppendixContent() {
           As it turns out, Bundy was one of the signs God has given us to confirm that anyone
           who dies before 40 goes to Heaven. Bundy&apos;s name, Theodore Robert Bundy, consists
           of 19 letters, and he confessed to killing 19 women just one day before his
-          execution.
+          execution. There were many other signs from God.
         </p>
         <p>
           Delivering this important piece of information is one of the responsibilities given
-          as God&apos;s Messenger of the Covenant. It is not a personal opinion.
+          to me as God&apos;s Messenger of the Covenant. It is not my personal opinion.
         </p>
         <p>
           It is noteworthy that both Martin Luther King and Malcolm X were assassinated just a
