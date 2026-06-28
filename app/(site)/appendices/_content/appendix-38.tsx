@@ -4,20 +4,6 @@ import { YouTubeEmbed } from '@/components/youtube-embed'
 export function AppendixContent() {
   return (
     <>
-      {/* Opening verse card */}
-      <div
-        data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
-      >
-        <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;We will show them our proofs in the horizons, and within themselves, until
-          they realize that this is the truth.&rdquo;
-        </p>
-        <p className="text-xs text-muted-foreground font-mono">
-          <QuranRef reference="41:53" />
-        </p>
-      </div>
-
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           The scriptures are not the only mathematically composed creations of God where the
@@ -26,7 +12,7 @@ export function AppendixContent() {
           universe.&rdquo; A plethora of scientific findings have now shown that the number 19
           represents God&apos;s signature upon certain creations. This divine stamp appears
           throughout the universe in much the same manner as the signature of Michelangelo and
-          Picasso identify their works.
+          Picasso identify their works. For example:
         </p>
       </section>
 
@@ -53,8 +39,8 @@ export function AppendixContent() {
             2
           </span>
           <p className="text-base leading-relaxed text-foreground/90">
-            Halley&apos;s Comet, a profound heavenly phenomenon, visits our solar system every
-            76 years&nbsp;=&nbsp;19&times;4.
+            Halley&apos;s comet, a profound heavenly phenomenon, visits our solar system every
+            76 years,&nbsp;19&times;4.
           </p>
         </li>
         <li className="flex items-baseline gap-3">
@@ -63,7 +49,7 @@ export function AppendixContent() {
           </span>
           <p className="text-base leading-relaxed text-foreground/90">
             God&apos;s stamp on you and me is manifested in the fact that the human body
-            contains 209 bones&nbsp;=&nbsp;19&times;11.
+            contains 209 bones,&nbsp;19&times;11.
           </p>
         </li>
         <li className="flex items-baseline gap-3">
@@ -71,12 +57,12 @@ export function AppendixContent() {
             4
           </span>
           <p className="text-base leading-relaxed text-foreground/90">
-            <em>Langman&apos;s Medical Embryology</em> by T. W. Sadler, used as a textbook in
-            most U.S. medical schools, states on page 88 of the fifth edition: &ldquo;In
-            general the length of pregnancy for a full term fetus is considered to be 280 days
-            or 40 weeks after onset of the last menstruation, or more accurately, 266 days or
-            38 weeks after fertilization.&rdquo; The numbers 266 and 38 are both multiples of
-            19 (19&times;14 and 19&times;2, respectively).
+            <em>Langman&apos;s Medical Embryology</em>, by T. W. Sadler, is used as a textbook in
+            most of the Medical Schools in the U.S.A. On Page 88 of the Fifth edition, we read the
+            following statement: &ldquo;In general the length of pregnancy for a full term fetus
+            is considered to be 280 days or 40 weeks after onset of the last menstruation, or
+            more accurately, 266 days or 38 weeks after fertilization.&rdquo; The numbers 266 and
+            38 are both multiples of 19.
           </p>
         </li>
       </ol>
