@@ -139,7 +139,7 @@ export function ScriptureRef({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <button
         onClick={() => handleOpenChange(true)}
-        className="inline-flex items-center font-glacial text-[0.85em] font-bold text-primary hover:underline px-0.5 transition-colors cursor-pointer align-baseline select-none mx-0.5"
+        className="inline-flex items-center font-glacial text-[0.85em] font-bold text-primary hover:underline px-0.5 transition-colors cursor-pointer align-baseline select-text mx-0.5"
         aria-label={`View ${isBible ? 'Bible' : 'Quran'} verse ${reference}`}
       >
         {label}
