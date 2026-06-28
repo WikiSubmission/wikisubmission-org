@@ -13,8 +13,8 @@ export function AppendixContent() {
           explain this phenomenon.
         </p>
         <p>
-          Now we learn that the missing <em>Basmalah</em> plays a significant role as (1) a
-          significant constituent of the Quran&apos;s mathematical miracle, and (2) a glaring
+          Now we learn that the missing <em>Basmalah</em> plays a significant role as [1] a
+          significant constituent of the Quran&apos;s mathematical miracle, and [2] a glaring
           sign from the Most Gracious, Most Merciful, that Sura 9 has been tampered with and
           must be purified (<Link href="/appendices/24">Appendix 24</Link>). Both roles of the
           missing <em>Basmalah</em> were revealed with the discovery of the Quran&apos;s
@@ -34,51 +34,56 @@ export function AppendixContent() {
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           [1] Since the <em>Basmalah</em> consists of 19 Arabic letters, and prefixes all the
-          suras except one, it can be considered the foundation of the Quran&apos;s 19-based
-          code. The absence of the <em>Basmalah</em> from Sura 9 causes the number of this
-          crucial opening statement to be 113, which does not conform with the code. However,
-          this deficiency is compensated for in Sura 27, where two <em>Basmalah</em>s occur —
-          one as an opener and one in Verse 30. This restores the total number of{' '}
-          <em>Basmalah</em>s in the Quran to 114&nbsp;=&nbsp;19&times;6.
+          suras except one, it can be considered the foundation upon which the Quran&apos;s
+          19-based code is built. But the absence of the <em>Basmalah</em> from Sura 9 causes
+          the number of this crucial opening statement to be 113, a number that does not
+          conform with the Quran&apos;s code. However, we find that this deficiency is
+          compensated for in Sura 27. Two <em>Basmalah</em>s occur in Sura 27, one as an opener
+          and one in Verse 30. This restores the total number of <em>Basmalah</em>s in the
+          Quran to 114&nbsp;=&nbsp;19&times;6.
         </p>
         <p>
           [2] From the missing <em>Basmalah</em> of Sura 9 to the extra <em>Basmalah</em> of
-          Sura 27, there are exactly 19 suras.
+          Sura 27, there are 19 suras.
         </p>
         <p>
           [3] The sum of sura numbers from the missing <em>Basmalah</em> (Sura 9) to the extra{' '}
-          <em>Basmalah</em> (Sura 27) is 9+10+11+…+27&nbsp;=&nbsp;342&nbsp;=&nbsp;19&times;18.
-          This is a mathematical property, any consecutive 19 numbers will add up to a multiple
-          of 19. This equals the number of words from the first <em>Basmalah</em> of Sura 27 to
-          the second <em>Basmalah</em> in <QuranRef reference="27:30" />.
+          <em>Basmalah</em> (Sura 27) is
+          9+10+11+12+…+25+26+27&nbsp;=&nbsp;342&nbsp;=&nbsp;19&times;18. This is a mathematical
+          property, any consecutive 19 numbers will add up to a multiple of 19. But the
+          miraculous phenomenon is that this number, 342, equals the number of words from the
+          first <em>Basmalah</em> of Sura 27 to the second <em>Basmalah</em> in{' '}
+          <QuranRef reference="27:30" />.
         </p>
         <p>
           [4] The occurrence of the extra <em>Basmalah</em> in <QuranRef reference="27:30" />{' '}
-          conforms with the Quran&apos;s code: the sura number plus the verse number is a
-          multiple of 19 (27+30&nbsp;=&nbsp;57&nbsp;=&nbsp;19&times;3).
+          conforms with the Quran&apos;s code in that the sura number, plus the verse number is
+          a multiple of 19 (27+30&nbsp;=&nbsp;57&nbsp;=&nbsp;19&times;3).
         </p>
         <p>
           [5] The occurrence of the extra <em>Basmalah</em> in Verse 30 compares with the
-          occurrence of the number 19 itself in Verse 30 of Sura 74.
+          occurrence of the number 19 itself in Verse 30 (Sura 74).
         </p>
         <p>
           [6] The Quran contains 6234 numbered verses. The absence of the <em>Basmalah</em>{' '}
-          from Sura 9, and its compensation in Verse 30 of Sura 27, gives us two numbered{' '}
-          <em>Basmalah</em>s (<QuranRef reference="1:1" /> &amp; <QuranRef reference="27:30" />)
-          and 112 un-numbered <em>Basmalah</em>s. The total number of verses becomes
-          6234+112&nbsp;=&nbsp;6346&nbsp;=&nbsp;19&times;334.
+          from Sura 9, and compensating for it in Verse 30 of Sura 27 gives us two numbered{' '}
+          <em>Basmalah</em>s, <QuranRef reference="1:1" /> &amp; <QuranRef reference="27:30" />,
+          and 112 un-numbered <em>Basmalah</em>s. This causes the total number of verses in the
+          Quran to be 6234+112&nbsp;=&nbsp;6346&nbsp;=&nbsp;19&times;334.
         </p>
         <p>
           [7] From the missing <em>Basmalah</em> to the extra <em>Basmalah</em>, the number of
           verses containing the word &ldquo;Allah&rdquo; is 513&nbsp;=&nbsp;19&times;27. Note
-          that 27 is the sura number where the extra <em>Basmalah</em> occurs (Table 1).
+          that 27 is the sura number where the extra <em>Basmalah</em> occurs. The data are in
+          Table 1.
         </p>
       </section>
 
       <div className="flex items-center gap-4" data-parallax>
         <hr className="flex-1 border-border/50" />
         <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          Table 1: Verses Containing &ldquo;Allah&rdquo; — Suras 9 to 27
+          Table 1: The Verses Containing the Word &ldquo;Allah&rdquo; from the Missing Basmalah
+          to the Extra Basmalah
         </h2>
         <hr className="flex-1 border-border/50" />
       </div>
@@ -88,7 +93,7 @@ export function AppendixContent() {
           <thead>
             <tr>
               <th className="border border-border/40 px-3 py-2 text-left">Sura Number</th>
-              <th className="border border-border/40 px-3 py-2 text-left">Verses with &ldquo;Allah&rdquo;</th>
+              <th className="border border-border/40 px-3 py-2 text-left">Verses w/ &ldquo;Allah&rdquo;</th>
             </tr>
           </thead>
           <tbody>
@@ -120,7 +125,7 @@ export function AppendixContent() {
       <div className="flex items-center gap-4" data-parallax>
         <hr className="flex-1 border-border/50" />
         <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          Table 2: Suras &amp; Verses — Missing Basmalah to Extra Basmalah
+          Table 2: Suras &amp; Verses From the Missing Basmalah to the Extra Basmalah
         </h2>
         <hr className="flex-1 border-border/50" />
       </div>
@@ -180,7 +185,8 @@ export function AppendixContent() {
       <div className="flex items-center gap-4" data-parallax>
         <hr className="flex-1 border-border/50" />
         <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          Table 3: The Verse Whose Digits Add Up to 10 — Missing Basmalah to Extra Basmalah
+          Table 3: The Verse Whose Digits Add Up to 10, from the Missing Basmalah to the Extra
+          Basmalah
         </h2>
         <hr className="flex-1 border-border/50" />
       </div>
@@ -263,7 +269,7 @@ export function AppendixContent() {
           number of verses in Sura 9 (where two false verses had been injected). If we take the
           same suras listed in Table 4, odd-numbered suras whose numbers of verses are also
           odd, and write down the number of every sura, followed by its number of verses, the
-          resulting long number (30 digits) is a multiple of 19 (Figure 1):
+          resulting long number (30 digits) is a multiple of 19 (Figure 1).
         </p>
       </section>
 
@@ -282,7 +288,7 @@ export function AppendixContent() {
           odd-numbered suras whose verses are also odd-numbered, from the missing{' '}
           <em>Basmalah</em> to the extra <em>Basmalah</em>. If we write down the number of every
           sura, followed by the last digit in every verse in that sura, we end up with a long
-          number of 1988 digits which is divisible by 19 (Figure 2).
+          number, 1988 digits, which is divisible by 19 (Figure 2).
         </p>
       </section>
 
