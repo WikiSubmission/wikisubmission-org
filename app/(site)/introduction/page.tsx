@@ -322,7 +322,7 @@ export default function IntroductionPage() {
               augmented by ignorance—that led Satan to believe that he could
               take care of a dominion, as a god, and run it without disease,
               misery, war, accidents, and chaos. The vast majority of God&apos;s
-              creatures disagreed with Satan. Yet, the minute egotistic minority
+              creatures disagreed with Satan. Yet, the minute egoistic minority
               that agreed with him to various extents were in the billions.
               Thus, a profound dispute erupted within the Heavenly Community (
               <QuranRef reference="38:69" />
