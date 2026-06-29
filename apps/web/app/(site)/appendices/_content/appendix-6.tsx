@@ -28,7 +28,7 @@ export function AppendixContent() {
           &ldquo;folded within God&apos;s hand.&rdquo;
         </p>
         <p>
-          Supported by the Quran&apos;s mathematical code, we are taught that our
+          Supported by the Quran&apos;s formidable mathematical code, we are taught that our
           universe is the smallest and innermost of seven universes (
           <QuranRef reference="41:12" />, <QuranRef reference="55:33" />,{' '}
           <QuranRef reference="67:5" />, &amp; <QuranRef reference="72:8-12" />).

@@ -10,12 +10,11 @@ export function AppendixContent() {
         className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
       >
         <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;God took a covenant from the prophets, saying, &lsquo;I will give you the
-          scripture and wisdom. Afterwards, a messenger will come to confirm all existing
-          scriptures. You shall believe in him and support him.&rsquo; He said,
-          &lsquo;Do you agree with this, and pledge to fulfill this covenant?&rsquo; They
-          said, &lsquo;We agree.&rsquo; He said, &lsquo;You have thus borne witness, and
-          I am also a witness.&rsquo;&rdquo;
+          &ldquo;God took a covenant from the prophets, saying, &lsquo;After I have given you
+          the scripture and wisdom, a messenger will come to confirm what you have. You shall
+          believe in him and support him.&rsquo; He said, &lsquo;Do you agree with this, and
+          pledge to uphold this covenant?&rsquo; They said, &lsquo;We agree.&rsquo; He said,
+          &lsquo;You have thus borne witness, and I am with you a witness.&rsquo;&rdquo;
         </p>
         <p className="text-xs text-muted-foreground font-mono">
           <QuranRef reference="3:81" />
@@ -80,12 +79,24 @@ export function AppendixContent() {
           prophet is also a messenger, but not every messenger is a prophet.
         </p>
         <p>
+          Not every messenger received a new scripture. Some assume Aaron was a prophet
+          (<QuranRef reference="19:53" />) who was given no scripture, yet the Quran states the
+          Torah was given &ldquo;to both Moses and Aaron&rdquo; (<QuranRef reference="21:48" />,{' '}
+          <QuranRef reference="37:117" />). It has also always been a human trait to reject a
+          living messenger: Joseph was even declared &ldquo;the last messenger&rdquo;
+          (<QuranRef reference="40:34" />), though Moses, David, Solomon, Jesus, and Muhammad all
+          came after him.
+        </p>
+        <p>
           <QuranRef reference="33:40" /> states: &ldquo;Muhammad was not the father of
           any of your men; he was a messenger (Rasoul) of God and the last prophet
           (Nabi).&rdquo; Muhammad was thus the last prophet — no new scripture after
           him — but messengers can and do come after him. The gematrical value of
-          &ldquo;Muhammad Khaatum Al-Nabiyyeen&rdquo; equals 1349, or 19×71,
-          confirming this through the Quran&apos;s mathematical code.
+          &ldquo;Muhammad Khaatum Al-Nabiyyeen&rdquo; (the last prophet), plus the sura
+          number (33) and the verse number (40), equals 1349, or 19×71. By contrast, the
+          value of the erroneous expression &ldquo;Muhammad Khaatum Al-Mursaleen&rdquo;
+          (the last messenger) is not a multiple of 19 — confirming the distinction through
+          the Quran&apos;s mathematical code.
         </p>
       </section>
 
@@ -112,7 +123,9 @@ export function AppendixContent() {
           on Zul-Hijjah 3, 1391 (December 21, 1971): &ldquo;I was sitting still, while
           the prophets, one by one, came towards me, looked at my face, then nodded their
           heads.&rdquo; Notably, the numerical sum of month (12) + day (3) + year (1391)
-          = 1406 = 19×74. The number 19 is mentioned in Sura 74.
+          = 1406 = 19×74. The number 19 is mentioned in Sura 74. The number 1406 is also the
+          count of years from the revelation of the Quran to the revelation of its miracle
+          (<Link href="/appendices/1" className="text-primary underline underline-offset-2">Appendix 1</Link>).
         </p>
       </section>
 
@@ -127,18 +140,32 @@ export function AppendixContent() {
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          The Quran&apos;s 19-based mathematical miracle was unveiled after being hidden
-          for 1406 years (19×74). Fourteen centuries of Muslim scholars failed to
-          decipher the Quranic Initials. The root word &ldquo;Rashada&rdquo; (right guidance)
-          occurs exactly 19 times in the Quran — matching the Quran&apos;s mathematical
-          denominator. The name &ldquo;Khalifa&rdquo; (vicegerent / successor) appears
-          in Suras 2 and 38.
+          The name of God&apos;s Messenger of the Covenant is mathematically coded into the
+          Quran as &ldquo;Rashad Khalifa&rdquo; — the most appropriate way to introduce
+          God&apos;s messenger to the world in the computer age. The following is physical,
+          examinable, verifiable, and irrefutable evidence.
         </p>
-        <p>
-          Only sincere believers are granted access to the Quran and its miracle
-          (<QuranRef reference="17:45-46" />, <QuranRef reference="18:57" />,{' '}
-          <QuranRef reference="41:44" />, <QuranRef reference="56:79" />).
-        </p>
+        <div
+          data-card
+          className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 text-sm"
+        >
+          <ul className="space-y-2 text-foreground/80">
+            <li>
+              &bull; <strong>(1)</strong> The Quran&apos;s 19-based miracle remained hidden for
+              1406 years (19×74), predestined to be unveiled through Rashad Khalifa. For fourteen
+              centuries, hundreds of Muslim and Orientalist scholars tried in vain to decipher
+              the Quranic Initials.
+            </li>
+            <li>
+              &bull; <strong>(2)</strong> The Quran is made easy only for sincere believers
+              (<QuranRef reference="54:17" />, <QuranRef reference="39:28" />). No one is granted
+              access to the Quran — let alone its miracle — without specific divine authorization
+              (<QuranRef reference="17:45-46" />, <QuranRef reference="18:57" />,{' '}
+              <QuranRef reference="41:44" />, <QuranRef reference="56:79" />). Its unveiling
+              through Rashad Khalifa is a major sign of his messengership.
+            </li>
+          </ul>
+        </div>
       </section>
 
       {/* Table 1: Rashada and Khalifa occurrences */}
@@ -168,25 +195,25 @@ export function AppendixContent() {
             </thead>
             <tbody>
               {[
-                [1, 2, 186, 'Rashada'],
-                [2, 2, 256, 'Rashada'],
-                [3, 4, 6, 'Rashada'],
-                [4, 7, 146, 'Rashada'],
-                [5, 11, 78, 'Rashada'],
-                [6, 11, 87, 'Rashada'],
-                [7, 11, 97, 'Rashada'],
-                [8, 18, 10, 'Rashada'],
-                [9, 18, 17, 'Rashada'],
-                [10, 18, 24, 'Rashada'],
-                [11, 18, 66, 'Rashada'],
-                [12, 21, 51, 'Rashada'],
-                [13, 40, 29, 'Rashada'],
-                [14, 40, 38, 'Rashada'],
-                [15, 49, 7, 'Rashada'],
-                [16, 72, 2, 'Rashada'],
-                [17, 72, 10, 'Rashada'],
-                [18, 72, 14, 'Rashada'],
-                [19, 72, 21, 'Rashada'],
+                [1, 2, 186],
+                [2, '—', 256],
+                [3, 4, 6],
+                [4, 7, 146],
+                [5, 11, 78],
+                [6, '—', 87],
+                [7, '—', 97],
+                [8, 18, 10],
+                [9, '—', 17],
+                [10, '—', 24],
+                [11, '—', 66],
+                [12, 21, 51],
+                [13, 40, 29],
+                [14, '—', 38],
+                [15, 49, 7],
+                [16, 72, 2],
+                [17, '—', 10],
+                [18, '—', 14],
+                [19, '—', 21],
               ].map(([n, sura, verse]) => (
                 <tr
                   key={n as number}
@@ -210,9 +237,16 @@ export function AppendixContent() {
               </tr>
             </tbody>
           </table>
-          <div className="px-4 py-2 text-xs text-muted-foreground border-t border-border/20">
-            &ldquo;Khalifa&rdquo; occurs at 2:30 and 38:26. Combined sum of all sura and verse
-            numbers = 1463 = 19×77.
+          <div className="px-4 py-2 text-xs text-muted-foreground border-t border-border/20 space-y-1">
+            <p>
+              Repeated sura numbers are shown as &ldquo;—&rdquo; and counted once: the nine
+              distinct suras sum to 224, and the nineteen verse numbers sum to 1145.
+            </p>
+            <p>
+              &ldquo;Khalifa&rdquo; occurs at 2:30 (a non-human khalifa — Satan) and 38:26 (a
+              human khalifa). Sura 2 is already counted above, so &ldquo;Khalifa&rdquo; adds
+              sura 38 and verses 30 + 26 = 56. Grand total: 224 + 1145 + 38 + 56 = 1463 = 19×77.
+            </p>
           </div>
         </div>
       </div>
@@ -226,47 +260,81 @@ export function AppendixContent() {
           <p className="font-semibold text-foreground">Numbered Mathematical Proofs</p>
           <ul className="space-y-2 text-foreground/80">
             <li>
-              &bull; <strong>(3)</strong> The root word &ldquo;Rashada&rdquo; occurs in the Quran
-              exactly 19 times — the Quran&apos;s common denominator.
+              &bull; <strong>(3)</strong> The root word &ldquo;Rashada&rdquo; (to uphold the
+              right guidance) occurs in the Quran exactly 19 times — the Quran&apos;s common
+              denominator.
             </li>
             <li>
-              &bull; <strong>(4)</strong> The name &ldquo;Rashad&rdquo; occurs at 40:29 and 40:38.
-              &ldquo;Khalifa&rdquo; (referring to a human) occurs at 38:26. Sum: 40+29+38+38+26 = 171 = 19×9.
+              &bull; <strong>(4)</strong> &ldquo;Rashad&rdquo; occurs at 40:29 and 40:38.
+              &ldquo;Khalifa&rdquo; occurs at 2:30 (a non-human khalifa — Satan) and 38:26
+              (a human khalifa). Adding the suras and verses of &ldquo;Rashad&rdquo; (40:29, 38)
+              and the human &ldquo;Khalifa&rdquo; (38:26): 40+29+38+38+26 = 171 = 19×9.
             </li>
             <li>
-              &bull; <strong>(5)</strong> All sura and verse numbers for &ldquo;Rashada&rdquo; and
-              &ldquo;Khalifa&rdquo; combined = 1463 = 19×77.
+              &bull; <strong>(5)</strong> The sum of all sura and verse numbers where
+              &ldquo;Rashada&rdquo; and &ldquo;Khalifa&rdquo; occur, combined = 1463 = 19×77.
             </li>
             <li>
-              &bull; <strong>(6)</strong> &ldquo;Rashada&rdquo; total = 1369 (19×72 + 1);
-              &ldquo;Khalifa&rdquo; total = 94 (19×5 − 1). This confirms the full name
-              &ldquo;Rashad Khalifa&rdquo; — not any other Rashad or Khalifa.
+              &bull; <strong>(6)</strong> &ldquo;Rashada&rdquo; total = 1369 = (19×72) + 1;
+              &ldquo;Khalifa&rdquo; total = 94 = (19×5) − 1. &ldquo;Rashada&rdquo; up by one and
+              &ldquo;Khalifa&rdquo; down by one pins the name to &ldquo;Rashad Khalifa&rdquo; —
+              not any other Rashad or Khalifa.
             </li>
             <li>
               &bull; <strong>(7)</strong> Gematrical value of &ldquo;Rashad&rdquo; = 505;
-              &ldquo;Khalifa&rdquo; = 725. Combined = 1230. From the beginning of the Quran
-              to the first &ldquo;Rashada&rdquo; occurrence (2:186): 3 suras, 192 verses.
+              &ldquo;Khalifa&rdquo; = 725 (combined 1230). From the beginning of the Quran
+              to the first &ldquo;Rashada&rdquo; (2:186): 3 suras, 192 verses.
               505 + 725 + 3 + 192 = 1425 = 19×75.
             </li>
             <li>
-              &bull; <strong>(8)</strong> Sum of all verse numbers from 1:1 through 2:186
+              &bull; <strong>(8)</strong> The sum of all verse numbers from 1:1 through 2:186
               (first &ldquo;Rashada&rdquo;) = 17,233 = 19×907.
             </li>
             <li>
-              &bull; <strong>(9)</strong> The Quranic Initials appear in 29 suras. The sum of
-              those sura numbers = 822. Calculation: 822 + 1230 (Rashad Khalifa) = 2052 = 19×108.
+              &bull; <strong>(9)</strong> The Quranic Initials appear in 29 suras; the sum of
+              those sura numbers = 822. 822 + 1230 (Rashad Khalifa) = 2052 = 19×108.
             </li>
             <li>
               &bull; <strong>(10)</strong> The sura numbers plus their verse counts for all suras
-              containing &ldquo;Rashada&rdquo; total 1368 = 19×72.
+              containing &ldquo;Rashada&rdquo; = 1368 = 19×72.
+            </li>
+            <li>
+              &bull; <strong>(11)</strong> Writing each sura number, followed by its number of
+              verses, followed by the individual verse numbers, from the first &ldquo;Rashada&rdquo;
+              (2:186) to the last (72:21), produces a single number of 11,087 digits that is
+              divisible by 19.
+            </li>
+            <li>
+              &bull; <strong>(12)</strong> From the first &ldquo;Rashada&rdquo; to the word
+              &ldquo;Khalifa&rdquo; in 38:26, the sum of the sura numbers and their verse counts
+              = 4541 = 19×239.
+            </li>
+            <li>
+              &bull; <strong>(13)</strong> Writing the value of &ldquo;Rashad&rdquo; (505), then
+              &ldquo;Khalifa&rdquo; (725), then every sura and verse number where
+              &ldquo;Rashada&rdquo; occurs from 2:186 to &ldquo;Khalifa&rdquo; (38:26), produces a
+              number divisible by 19.
             </li>
           </ul>
         </div>
 
-        {/* Five Messengers Table */}
+        {/* Three Messengers (14) + Five Messengers (15) */}
         <p>
-          Among the five great messengers, the gematrical values of their names sum to
-          a multiple of 19:
+          <strong>(14)</strong> The Quran specifies three messengers of Submission (Islam):
+          Abraham, who delivered all the practices of Islam (gematrical value 258); Muhammad,
+          who delivered the Quran (92); and Rashad, who delivered Islam&apos;s proof of
+          authenticity (505). Total: 258 + 92 + 505 = 855 = 19×45.
+        </p>
+        <p>
+          The true Judaism, Christianity, and Islam will be consolidated into one religion —
+          complete submission and absolute devotion to God ALONE. The existing religions are
+          severely corrupted and will die out (<QuranRef reference="9:33" />,{' '}
+          <QuranRef reference="48:28" />, <QuranRef reference="61:9" />).
+        </p>
+        <p>
+          <strong>(15)</strong> Since the Quran sometimes refers to &ldquo;Abraham, Ismail, and
+          Isaac,&rdquo; the gematrical values of all five messengers were added — and the total
+          remains a multiple of 19:
         </p>
       </section>
 
@@ -470,8 +538,8 @@ export function AppendixContent() {
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           <QuranRef reference="98:1-2" />: &ldquo;Those who disbelieved among the people of
-          the scripture, and the idol worshipers, could not change, despite the profound
-          sign given to them. A messenger from God, reciting sacred scriptures.&rdquo;
+          the scripture, and the idolators, will not believe, despite the profound sign given
+          to them. A messenger from God, reciting Sacred Scriptures.&rdquo;
         </p>
         <p>
           <strong>(34)</strong> 505 (Rashad) + 725 (Khalifa) + 98 (sura) + 2 (verse)
@@ -530,31 +598,6 @@ export function AppendixContent() {
           <strong>(40)</strong> The opening phrase of <QuranRef reference="72:27" />,
           &ldquo;Only the Messenger that He chooses,&rdquo; has a gematrical value of
           1919.
-        </p>
-      </section>
-
-      {/* Three Messengers of Islam */}
-      <div className="flex items-center gap-4">
-        <hr className="flex-1 border-border/50" />
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          Three Messengers of Islam
-        </h2>
-        <hr className="flex-1 border-border/50" />
-      </div>
-
-      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
-        <p>
-          <strong>(14)</strong> Abraham delivered all the practices of Islam (gematrical
-          value: 258). Muhammad delivered the Quran (gematrical value: 92). Rashad delivered
-          Islam&apos;s proof of authenticity (gematrical value: 505). Total: 258 + 92 + 505
-          = 855 = 19×45.
-        </p>
-        <p>
-          The true Judaism, Christianity, and Islam will be consolidated into one
-          religion — complete submission and absolute devotion to God ALONE.
-          The existing religions are severely corrupted and will die out
-          (<QuranRef reference="9:33" />, <QuranRef reference="48:28" />,{' '}
-          <QuranRef reference="61:9" />).
         </p>
       </section>
 

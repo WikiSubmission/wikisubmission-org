@@ -4,20 +4,6 @@ import { YouTubeEmbed } from '@/components/youtube-embed'
 export function AppendixContent() {
   return (
     <>
-      {/* Opening verse card */}
-      <div
-        data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
-      >
-        <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;If you fear lest you may not be perfectly equitable in treating more than one
-          wife, then you shall be content with one.&rdquo;
-        </p>
-        <p className="text-xs text-muted-foreground font-mono">
-          <QuranRef reference="4:3" />
-        </p>
-      </div>
-
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           Polygamy was a way of life until the Quran was revealed 1400 years ago. When the
@@ -61,8 +47,8 @@ export function AppendixContent() {
           Other than marrying widowed mothers of orphans, there were three political marriages
           in the Prophet&apos;s life. His close friends Abu Bakr and Omar insisted that he
           marry their daughters, Aisha and Hafsah, to establish traditional family ties among
-          them. The third marriage was to Maria the Egyptian, given to him as a political
-          gesture of friendship from the ruler of Egypt.
+          them. The third marriage was to Maria the Egyptian; she was given to him as a
+          political gesture of friendship from the ruler of Egypt.
         </p>
         <p>
           This perfect example tells us that a man must give his full attention and loyalty in
@@ -93,9 +79,11 @@ export function AppendixContent() {
         <p>
           The Quranic limitations against polygamy point out the possibility of abusing
           God&apos;s law. Therefore, unless we are absolutely sure that God&apos;s law will not
-          be abused, we had better resist our lust and stay away from polygamy. The
-          children&apos;s psychological and social well-being, especially in countries where
-          polygamy is prohibited, almost invariably dictate monogamy.
+          be abused, we had better resist our lust and stay away from polygamy. If the
+          circumstances do not dictate polygamy, we had better give our full attention to one
+          wife and one set of children. The children&apos;s psychological and social well-being,
+          especially in countries where polygamy is prohibited, almost invariably dictate
+          monogamy. A few basic criteria must be observed in contemplating polygamy:
         </p>
       </section>
 

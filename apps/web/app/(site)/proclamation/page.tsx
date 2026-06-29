@@ -239,7 +239,7 @@ export default function ProclamationPage() {
               href="/appendices/1"
               className="text-primary hover:underline text-sm"
             >
-              Appendices 1
+              Appendix 1
             </Link>{' '}
             and{' '}
             <Link

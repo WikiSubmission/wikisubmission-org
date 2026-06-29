@@ -13,19 +13,19 @@ export function AppendixContent() {
         {[
           {
             text: 'Which Hadith, other than God and His revelations, do they uphold?',
-            ref: '45:6',
+            refs: ['45:6'],
           },
           {
             text: 'The Quran is not a fabricated Hadith; ...it details everything.',
-            ref: '12:111',
+            refs: ['12:111'],
           },
           {
             text: 'Some people uphold vain Hadith to divert others from the path of God.',
-            ref: '31:6',
+            refs: ['31:6'],
           },
           {
             text: "The only Sunna to follow shall be God's Sunna.",
-            ref: '17:77',
+            refs: ['17:77', '33:62', '48:23', '6:114'],
           },
         ].map((item, i) => (
           <div key={i} className="space-y-1">
@@ -33,7 +33,12 @@ export function AppendixContent() {
               &ldquo;{item.text}&rdquo;
             </p>
             <p className="text-xs text-muted-foreground font-mono">
-              <QuranRef reference={item.ref} />
+              {item.refs.map((ref, j) => (
+                <span key={ref}>
+                  {j > 0 && ', '}
+                  <QuranRef reference={ref} />
+                </span>
+              ))}
             </p>
           </div>
         ))}
@@ -46,7 +51,7 @@ export function AppendixContent() {
           &ldquo;human and jinn devils,&rdquo; will fabricate lies and attribute them
           to the Prophet (<QuranRef reference="6:112" />,{' '}
           <QuranRef reference="25:31" />). This is precisely what happened after the
-          prophet Muhammad&apos;s death; <em>Hadith</em> (oral) and <em>Sunna</em>{' '}
+          prophet Muhammad&rsquo;s death; <em>Hadith</em> (oral) and <em>Sunna</em>{' '}
           (actions) were invented and attributed to the Prophet.{' '}
           <em>Hadith</em> and <em>Sunna</em> are satanic innovations because they:
         </p>
@@ -54,19 +59,19 @@ export function AppendixContent() {
         <ul className="space-y-2 list-none">
           {[
             <>
-              Defy the divine assertions that the Quran is complete, perfect, fully
+              defy the divine assertions that the Quran is complete, perfect, fully
               detailed, and shall be the only source of religious guidance (
               <QuranRef reference="6:19" />, <QuranRef reference="6:38" />,{' '}
               <QuranRef reference="6:114" /> &amp; <QuranRef reference="45:6" />
-              -7)
+              -7),
             </>,
             <>
-              Blaspheme against the Prophet and depict him as a vicious tyrant who
-              did not uphold the Quran
+              blaspheme against the Prophet and depict him as a vicious tyrant who
+              did not uphold the Quran, and
             </>,
             <>
-              Create false doctrines based on superstition, ignorance, and
-              indefensible nonsensical traditions
+              create false doctrines based on superstition, ignorance, and
+              indefensible nonsensical traditions.
             </>,
           ].map((item, i) => (
             <li key={i} className="flex items-start gap-3">
@@ -80,52 +85,29 @@ export function AppendixContent() {
 
         <p>
           The prophet Muhammad was enjoined, in very strong words, from issuing any
-          religious teachings besides the Quran (
-          <QuranRef reference="69:38" />-48).
+          religious teachings besides the Quran (<QuranRef reference="69:38" />-48).
         </p>
-      </section>
 
-      {/* ── Compromise ───────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-4" data-parallax>
-        <hr className="flex-1 border-border/50" />
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          The Compromise Trap
-        </h2>
-        <hr className="flex-1 border-border/50" />
-      </div>
-
-      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           Some Muslims compromise: &ldquo;If a <em>Hadith</em> agrees with the
           Quran we will accept it, and if it contradicts the Quran, we will reject
-          it!&rdquo; Such a premise proves that these people do not believe God&apos;s
+          it!&rdquo; Such premise proves that these people do not believe God&rsquo;s
           assertions that the Quran is &ldquo;complete, perfect and fully
           detailed.&rdquo; The moment they seek guidance from anything besides the
-          Quran, no matter how &ldquo;right&rdquo; it seems, they fall into Satan&apos;s
-          trap (see <QuranRef reference="63:1" />). For they have rejected God&apos;s
+          Quran, no matter how &ldquo;right&rdquo; it seems, they fall into Satan&rsquo;s
+          trap (see <QuranRef reference="63:1" />). For they have rejected God&rsquo;s
           word and set up another god besides God (
           <QuranRef reference="18:57" />). See{' '}
-          <Link href="/appendices/33" className="text-primary underline underline-offset-2">
+          <Link href="/appendices/33" className="text-primary underline underline-offset-2 hover:text-primary/80">
             Appendix 33
           </Link>
           .
         </p>
-      </section>
 
-      {/* ── Mathematical Proof ───────────────────────────────────────────── */}
-      <div className="flex items-center gap-4" data-parallax>
-        <hr className="flex-1 border-border/50" />
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          Mathematical Proof
-        </h2>
-        <hr className="flex-1 border-border/50" />
-      </div>
-
-      <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          The Quran&apos;s mathematical miracle provides mathematical evidence that
+          The Quran&rsquo;s mathematical miracle provides mathematical evidence that
           the Quran shall be our only source of religious teachings. Here are just
-          two examples:
+          2 examples:
         </p>
 
         <div
@@ -134,20 +116,20 @@ export function AppendixContent() {
         >
           <div className="space-y-1">
             <p className="font-semibold text-foreground">
-              Example 1 &mdash; <QuranRef reference="6:38" />
+              1. <QuranRef reference="6:38" />
             </p>
             <p className="text-foreground/80 leading-relaxed">
-              &ldquo;We did not leave anything out of this book&rdquo; is found in
-              Verse 38 (19×2) and consists of 19 Arabic letters.
+              &ldquo;We did not leave anything out of this book,&rdquo; is in
+              Verse 38 (19x2) and consists of 19 Arabic letters.
             </p>
           </div>
           <div className="space-y-1">
             <p className="font-semibold text-foreground">
-              Example 2 &mdash; <QuranRef reference="6:114" />
+              2. <QuranRef reference="6:114" />
             </p>
             <p className="text-foreground/80 leading-relaxed">
-              &ldquo;He sent down this book fully detailed&rdquo; is found in Verse
-              114 (19×6) and consists of 19 Arabic letters.
+              &ldquo;He sent down this book fully detailed,&rdquo; is in Verse
+              114 (19x6) and consists of 19 Arabic letters.
             </p>
           </div>
         </div>

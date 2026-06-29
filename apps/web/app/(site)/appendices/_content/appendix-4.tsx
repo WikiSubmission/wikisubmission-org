@@ -10,8 +10,8 @@ export function AppendixContent() {
         className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
       >
         <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;Had we revealed this to a non-Arab, and he read it to them in Arabic,
-          they still would not have believed.&rdquo;
+          &ldquo;If we revealed this to people who do not know Arabic. And had him recite
+          it (in Arabic), they could not possibly believe in it.&rdquo;
         </p>
         <p className="text-xs text-muted-foreground font-mono">
           <QuranRef reference="26:198-199" />
@@ -47,7 +47,7 @@ export function AppendixContent() {
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          Arabic is unique in its efficiency and precision. For example, the word
+          Arabic is unique in its efficiency and accuracy. For example, the word
           &ldquo;they&rdquo; in English does not tell you if &ldquo;they&rdquo; are
           males or females. Arabic has four distinct forms:
         </p>

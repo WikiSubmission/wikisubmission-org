@@ -4,21 +4,6 @@ import { YouTubeEmbed } from '@/components/youtube-embed'
 export function AppendixContent() {
   return (
     <>
-      {/* Opening verse card */}
-      <div
-        data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
-      >
-        <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;O you who believe, intoxicants, and gambling, and the altars of idols, and the
-          games of chance are abominations of the devil; you shall avoid them, that you may
-          succeed.&rdquo;
-        </p>
-        <p className="text-xs text-muted-foreground font-mono">
-          <QuranRef reference="5:90" />
-        </p>
-      </div>
-
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           There is no compromise whatsoever regarding illicit drugs and alcoholic beverages;

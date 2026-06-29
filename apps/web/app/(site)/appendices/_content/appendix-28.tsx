@@ -11,8 +11,8 @@ export function AppendixContent() {
         className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
       >
         <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;Read. In the name of your Lord, who created. He created man from an embryo.
-          Read, and your Lord, Most Exalted. Teacher by means of the pen.&rdquo;
+          &ldquo;Read, in the name of your Lord, who created. He created man from an embryo.
+          Read, and your Lord, Most Exalted. Teaches by means of the pen.&rdquo;
         </p>
         <p className="text-xs text-muted-foreground font-mono">
           <QuranRef reference="96:1-4" />
@@ -30,9 +30,14 @@ export function AppendixContent() {
           Ignorant Muslim scholars of the first two centuries after the Quran could not
           understand the Quran&apos;s challenge to produce anything like it. They had no idea
           about the Quran&apos;s mathematical composition, and they knew that many literary
-          giants could have composed works comparable to the Quran in literary excellence. The
-          ignorant scholars then decided to proclaim Muhammad an illiterate man, figuring this
-          would make the Quran&apos;s extraordinary literary excellence truly miraculous.
+          giants could have composed works comparable to the Quran. In fact, many such literary
+          giants did claim the ability to produce a literary work as excellent as the Quran. The
+          latest claim came from Taha Hussein, the renowned Egyptian writer.
+        </p>
+        <p>
+          The ignorant Muslim scholars then decided to proclaim Muhammad an illiterate man! They
+          figured that this would make the Quran&apos;s extraordinary literary excellence truly
+          miraculous.
         </p>
       </section>
 
@@ -85,16 +90,17 @@ export function AppendixContent() {
           him (<QuranRef reference="2:97" />, <QuranRef reference="17:1" />,{' '}
           <QuranRef reference="44:3" />, <QuranRef reference="53:1-18" />,{' '}
           <QuranRef reference="97:1-5" />). Subsequently, the angel Gabriel helped Muhammad
-          release a few verses at a time, from the soul to Muhammad&apos;s memory. The Prophet
-          wrote down and memorized the verses just released into his mind.
+          release a few verses of the Quran at a time, from the soul to Muhammad&apos;s memory.
+          The Prophet wrote down and memorized the verses just released into his mind.
         </p>
         <p>
           When the Prophet died, he left the complete Quran written down with his own hand in
           the chronological order of revelation, along with specific instructions as to where to
-          place every verse. The divine instructions were designed to put the Quran together
-          into the final format intended for God&apos;s Final Testament to the world (
-          <QuranRef reference="75:17" />). The early Muslims put the Quran together during the
-          time of Khalifa Rashed &lsquo;Uthmaan. Read{' '}
+          place every verse. The divine instructions recorded by the Prophet were designed to
+          put the Quran together into the final format intended for God&apos;s Final Testament to
+          the world (<QuranRef reference="75:17" />). The early Muslims did not get around to
+          putting the Quran together until the time of Khalifa Rashed &lsquo;Uthmaan. A committee
+          was appointed to carry out this task. Read{' '}
           <Link href="/appendices/24">Appendix 24</Link> for the details.
         </p>
       </section>

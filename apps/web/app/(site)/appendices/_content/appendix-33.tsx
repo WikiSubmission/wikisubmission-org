@@ -5,21 +5,6 @@ import { YouTubeEmbed } from '@/components/youtube-embed'
 export function AppendixContent() {
   return (
     <>
-      {/* Opening verse card */}
-      <div
-        data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2"
-      >
-        <p className="text-base leading-relaxed italic text-foreground/90">
-          &ldquo;God took a covenant from the prophets, saying, &lsquo;I will give you the
-          scripture and wisdom. Afterwards, a messenger will come to confirm all existing
-          scriptures. You shall believe in him and support him.&rsquo;&rdquo;
-        </p>
-        <p className="text-xs text-muted-foreground font-mono">
-          <QuranRef reference="3:81" />
-        </p>
-      </div>
-
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           As stated in <QuranRef reference="3:81" />, and in{' '}
@@ -41,8 +26,8 @@ export function AppendixContent() {
             <span className="shrink-0 flex items-center justify-center size-6 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold">3</span>
             <p>
               More than 93% of the human beings destined to live in this world are yet to come.
-              The people who have lived on this earth since Adam are only one-fifteenth of the
-              total projected human population.
+              As illustrated in the Introduction, the people who have lived on this earth since
+              Adam are only one-fifteenth of the total projected human population.
             </p>
           </li>
         </ol>
@@ -59,19 +44,19 @@ export function AppendixContent() {
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
           The best illustration of today&apos;s corrupted Judaism can be found in the books of
-          a famous Rabbi, Harold S. Kushner. In his best seller{' '}
-          <em>When Bad Things Happen to Good People</em> (Avon Books, 1981), Rabbi Kushner
-          states:
+          a famous Rabbi; Harold S. Kushner. In his best seller{' '}
+          <em>When Bad Things Happen to Good People</em>, Avon Books, 1981, Rabbi Kushner
+          states the following:
         </p>
       </section>
 
       <div data-card className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-4 text-sm italic text-foreground/80">
-        <p>&ldquo;…we would be advised to take this world as seriously as we can, in case it turns out to be the only one we will ever have, and to look for meaning and justice here.&rdquo; (p. 29)</p>
-        <p>&ldquo;Bad things do happen to good people in this world, but it is not God who wills it. God would like people to get what they deserve, but He cannot always arrange it.&rdquo; (p. 42)</p>
-        <p>&ldquo;God does not reach down to interrupt the workings of laws of nature to protect the righteous from harm… and God cannot stop it.&rdquo; (p. 58)</p>
-        <p>&ldquo;God can&apos;t do everything, but He can do some important things.&rdquo; (p. 113)</p>
-        <p>&ldquo;We can&apos;t ask Him to make us immune to disease, because He can&apos;t do that.&rdquo; (p. 125)</p>
-        <p>&ldquo;I recognize His limitations. He is limited in what He can do by laws of nature, and by the evolution of human nature and human moral freedom.&rdquo; (p. 134)</p>
+        <p>&ldquo;&hellip;, we would be advised to take this world as seriously as we can, in case it turns out to be the only one we will ever have, and to look for meaning and justice here. (P. 29)&rdquo;</p>
+        <p>&ldquo;Bad things do happen to good people in this world, but it is not God who wills it. God would like people to get what they deserve, but He cannot always arrange it. (P. 42)&rdquo;</p>
+        <p>&ldquo;God does not reach down to interrupt the workings of laws of nature to protect the righteous from harm. This is a second area of our world which causes bad things to happen to good people, and God does not cause it and cannot stop it. (P. 58)&rdquo;</p>
+        <p>&ldquo;God can&apos;t do everything, but He can do some important things. (P. 113)&rdquo;</p>
+        <p>&ldquo;We can&apos;t ask Him to make us immune to disease, because He can&apos;t do that. (P. 125)&rdquo;</p>
+        <p>&ldquo;I recognize His limitations. He is limited in what He can do by law of nature, and by the evolution of human nature and human moral freedom. (P. 134)&rdquo;</p>
       </div>
 
       <div className="flex items-center gap-4" data-parallax>
@@ -87,8 +72,8 @@ export function AppendixContent() {
           If Jesus came back to life today, the Christians would crucify him. Outstanding
           Christian scholars have reached solid conclusions that today&apos;s Christianity has
           nothing to do with Jesus, and that its doctrine was mortally distorted at the
-          infamous Nicene Conferences (325 A.D.). See <em>The Myth of God Incarnate</em>{' '}
-          (Westminster Press, Philadelphia, 1977).
+          infamous Nicene Conferences (325 A.D.). See <em>The Myth of God Incarnate</em>,
+          Westminster Press, Philadelphia, 1977.
         </p>
       </section>
 
@@ -117,15 +102,14 @@ export function AppendixContent() {
       <div className="flex items-center gap-4" data-parallax>
         <hr className="flex-1 border-border/50" />
         <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          &ldquo;A Religion Never Authorized by God&rdquo; — <QuranRef reference="42:21" />
+          &ldquo;A Religion Never Authorized by God&rdquo; (<QuranRef reference="42:21" />)
         </h2>
         <hr className="flex-1 border-border/50" />
       </div>
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          The extent to which Islam has been corrupted is illustrated in the following table of
-          innovations and the Quranic principles they violate:
+          The extent to which Islam has been corrupted is illustrated in the following table:
         </p>
       </section>
 
@@ -145,11 +129,11 @@ export function AppendixContent() {
                 <QuranRef reference="6:114" />; <QuranRef reference="7:1-3" />;{' '}
                 <QuranRef reference="12:111" />; <QuranRef reference="17:46" />;{' '}
                 <QuranRef reference="31:6" />; <QuranRef reference="45:6" />;{' '}
-                <QuranRef reference="69:38-47" />
+                <QuranRef reference="69:38-47" />; plus more.
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Killing those considered apostates</td>
+              <td className="border border-border/40 px-3 py-2 text-left">Killing whomever they consider an apostate</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="2:256" />; <QuranRef reference="4:90" />;{' '}
                 <QuranRef reference="10:99" />; <QuranRef reference="18:29" />;{' '}
@@ -157,21 +141,30 @@ export function AppendixContent() {
               </td>
             </tr>
             <tr>
+              <td colSpan={2} className="border border-border/40 px-3 py-2 text-left font-semibold">Vicious criminal justice system:</td>
+            </tr>
+            <tr>
               <td className="border border-border/40 px-3 py-2 text-left">Cutting off the hand of the thief</td>
               <td className="border border-border/40 px-3 py-2 text-left">
-                <QuranRef reference="5:38" />; <QuranRef reference="12:31" />
+                <QuranRef reference="5:38" />, <QuranRef reference="12:31" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Stoning adulterers to death</td>
+              <td className="border border-border/40 px-3 py-2 text-left">Stoning the adulterers to death</td>
               <td className="border border-border/40 px-3 py-2 text-left">
-                <QuranRef reference="24:2" />; <QuranRef reference="4:25" />
+                <QuranRef reference="24:2" />, <QuranRef reference="4:25" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Killing those who do not observe Salat</td>
+              <td className="border border-border/40 px-3 py-2 text-left">Killing anyone who does not observe Salat</td>
               <td className="border border-border/40 px-3 py-2 text-left">
-                <QuranRef reference="2:256" />; <QuranRef reference="18:29" />
+                <QuranRef reference="2:256" />, <QuranRef reference="18:29" />
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-border/40 px-3 py-2 text-left">Killing one who drinks alcohol for the 4th time</td>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                <QuranRef reference="2:256" />, <QuranRef reference="18:29" />
               </td>
             </tr>
             <tr>
@@ -187,35 +180,51 @@ export function AppendixContent() {
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Calling Muhammad &ldquo;the most honorable messenger&rdquo;</td>
+              <td colSpan={2} className="border border-border/40 px-3 py-2 text-left font-semibold">Idolizing Muhammad against his will:</td>
+            </tr>
+            <tr>
+              <td className="border border-border/40 px-3 py-2 text-left">calling him &ldquo;the most honorable messenger&rdquo;</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="2:285" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Claiming Muhammad was infallible</td>
+              <td className="border border-border/40 px-3 py-2 text-left">claiming that he was infallible</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="4:79" />; <QuranRef reference="9:117" />;{' '}
                 <QuranRef reference="17:73-74" />; <QuranRef reference="33:37" />;{' '}
-                <QuranRef reference="66:1" />; <QuranRef reference="80:1-10" />
+                <QuranRef reference="40:66" />, <QuranRef reference="66:1" />;{' '}
+                <QuranRef reference="80:1-10" />; <QuranRef reference="93:7" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Setting up his tomb as a &ldquo;Sacred Mosque&rdquo;</td>
+              <td className="border border-border/40 px-3 py-2 text-left">setting up his tomb as a &ldquo;Sacred Mosque&rdquo;</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="2:149-150" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Claiming Muhammad possesses power of intercession</td>
+              <td className="border border-border/40 px-3 py-2 text-left">claiming that he possesses power of intercession</td>
               <td className="border border-border/40 px-3 py-2 text-left">
-                <QuranRef reference="2:48" />; <QuranRef reference="2:123" />;{' '}
-                <QuranRef reference="6:94" />; <QuranRef reference="39:44" />;{' '}
+                <QuranRef reference="2:48" />, <QuranRef reference="2:123" />,{' '}
+                <QuranRef reference="2:254" />; <QuranRef reference="6:70" />,{' '}
+                <QuranRef reference="6:94" />; <QuranRef reference="7:53" />;{' '}
+                <QuranRef reference="10:3" />; <QuranRef reference="39:44" />;{' '}
                 <QuranRef reference="43:86" />; <QuranRef reference="74:48" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Adding his name to the Salat prayers &amp; Azan</td>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                Inventing an indefensible story about his ascension to the heavens on a horse,
+                at the speed of light, and talking God out of 50 Salat prayers. At the speed of
+                light, he would still be traveling within the Milky Way Galaxy.
+              </td>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                <QuranRef reference="17:1" />; <QuranRef reference="53:1-18" />
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-border/40 px-3 py-2 text-left">Adding his name in the Salat prayers &amp; Azan</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="20:14" />; <QuranRef reference="72:18" />
               </td>
@@ -228,19 +237,37 @@ export function AppendixContent() {
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Teaching that Jesus will come back (making Jesus the last prophet)</td>
+              <td colSpan={2} className="border border-border/40 px-3 py-2 text-left font-semibold">Insulting Muhammad by depicting him as a vicious man:</td>
+            </tr>
+            <tr>
+              <td className="border border-border/40 px-3 py-2 text-left">they claim he gouged out people&apos;s eyes</td>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                <QuranRef reference="3:159" />; <QuranRef reference="68:4" />
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-border/40 px-3 py-2 text-left">Claiming he possessed sexual power of 30 men</td>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                <QuranRef reference="18:110" />; <QuranRef reference="25:20" />
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                Nullifying the fact that Muhammad was the last prophet by teaching that Jesus
+                will come back to this world. This makes Jesus the last prophet.
+              </td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="33:40" />
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Claiming Muhammad was illiterate</td>
+              <td className="border border-border/40 px-3 py-2 text-left">Claiming that Muhammad was illiterate, un-intelligent.</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 See <Link href="/appendices/28">Appendix 28</Link>
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Bizarre dietary prohibitions</td>
+              <td className="border border-border/40 px-3 py-2 text-left">A bizarre dietary system with multitudes of prohibitions</td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="6:145-150" />; <QuranRef reference="16:115-116" />
               </td>
@@ -254,15 +281,35 @@ export function AppendixContent() {
             <tr>
               <td className="border border-border/40 px-3 py-2 text-left">Neglecting the Zakat charity through distortion</td>
               <td className="border border-border/40 px-3 py-2 text-left">
-                <QuranRef reference="6:141" />; <Link href="/appendices/15">Appendix 15</Link>
+                <QuranRef reference="6:141" />, <Link href="/appendices/15">Appendix 15</Link>
               </td>
             </tr>
             <tr>
-              <td className="border border-border/40 px-3 py-2 text-left">Oppressing women and depriving them of rights in marriage, divorce, and inheritance</td>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                Oppressing women and forcing them to wear head-covers and unreasonable clothes;
+                and depriving them of all rights in marriage, divorce, inheritance, etc.
+              </td>
               <td className="border border-border/40 px-3 py-2 text-left">
                 <QuranRef reference="2:228" />; <QuranRef reference="3:195" />;{' '}
-                <QuranRef reference="4:19" />; <QuranRef reference="4:32" />;{' '}
+                <QuranRef reference="4:19" />, <QuranRef reference="4:32" />;{' '}
                 <QuranRef reference="9:71" />
+              </td>
+            </tr>
+            <tr>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                Insulting women by instituting that &ldquo;if a monkey, dog, or a woman passes
+                in front of a praying person, his prayer is nullified&rdquo; (Hadith)
+              </td>
+              <td className="border border-border/40 px-3 py-2 text-left"></td>
+            </tr>
+            <tr>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                Inventing numerous rules from ablution, to prayer, to sleeping, to cutting
+                one&apos;s nails
+              </td>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                <QuranRef reference="5:101" />; <QuranRef reference="42:21" />;{' '}
+                <QuranRef reference="2:67-71" />
               </td>
             </tr>
             <tr>
@@ -277,6 +324,13 @@ export function AppendixContent() {
                 <QuranRef reference="7:32" />; <QuranRef reference="34:13" />;{' '}
                 <QuranRef reference="42:21" />
               </td>
+            </tr>
+            <tr>
+              <td className="border border-border/40 px-3 py-2 text-left">
+                Ridiculing Islam by stating that the earth is built on top of a giant whale!!
+                (<QuranRef reference="79:30" />; Ibn Kathir, 1200 AD &amp; Ben Baz, 1975 AD)
+              </td>
+              <td className="border border-border/40 px-3 py-2 text-left"></td>
             </tr>
           </tbody>
         </table>

@@ -36,8 +36,8 @@ export function AppendixContent() {
           from it every time.
         </p>
         <p>
-          On the other hand, the insincere readers — those who read the Quran to find
-          fault with it — are diverted from the Quran (
+          On the other hand, the insincere readers - those who read the Quran to find
+          fault with it - are diverted from the Quran (
           <QuranRef reference="7:146" />, <QuranRef reference="17:45" />,{' '}
           <QuranRef reference="18:57" />, <QuranRef reference="41:44" />). In fact,
           God&apos;s invisible forces help them find the faults they seek. Since the
@@ -57,50 +57,13 @@ export function AppendixContent() {
 
       <section className="space-y-5 text-base leading-relaxed text-foreground/90">
         <p>
-          God uses His own attributes to describe the Quran; He calls the Quran:
+          God uses His own attributes to describe the Quran; He calls the Quran
+          &ldquo;ʿAzeem = Great&rdquo; (<QuranRef reference="15:87" />),
+          &ldquo;Hakeem = Full of wisdom&rdquo; (<QuranRef reference="36:2" />),
+          &ldquo;Majid = Glorious&rdquo; (<QuranRef reference="50:1" />), and
+          &ldquo;Karim = Honorable&rdquo; (<QuranRef reference="56:77" />). What
+          can we say?
         </p>
-
-        <div
-          data-card
-          className="rounded-xl border border-border/60 overflow-hidden"
-        >
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-border/40 bg-muted/30">
-                <th className="text-left px-4 py-2 font-medium text-muted-foreground">
-                  Arabic
-                </th>
-                <th className="text-left px-4 py-2 font-medium text-muted-foreground">
-                  Meaning
-                </th>
-                <th className="text-left px-4 py-2 font-medium text-muted-foreground">
-                  Reference
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { arabic: 'ʿAzeem', meaning: 'Great', ref: '15:87' },
-                { arabic: 'Hakeem', meaning: 'Full of wisdom', ref: '36:2' },
-                { arabic: 'Majid', meaning: 'Glorious', ref: '50:1' },
-                { arabic: 'Karim', meaning: 'Honorable', ref: '56:77' },
-              ].map((row, i) => (
-                <tr
-                  key={i}
-                  className="border-b border-border/20 hover:bg-muted/20 transition-colors"
-                >
-                  <td className="px-4 py-2 font-mono text-xs text-primary font-medium">
-                    {row.arabic}
-                  </td>
-                  <td className="px-4 py-2 text-xs">{row.meaning}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground font-mono">
-                    <QuranRef reference={row.ref} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </section>
 
       {/* ── Accessible to Believers ───────────────────────────────────────── */}

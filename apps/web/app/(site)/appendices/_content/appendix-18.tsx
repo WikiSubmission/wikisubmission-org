@@ -1,5 +1,4 @@
 import { QuranRef } from '@/components/quran-ref'
-import Link from 'next/link'
 import { YouTubeEmbed } from '@/components/youtube-embed'
 
 export function AppendixContent() {
@@ -55,36 +54,6 @@ export function AppendixContent() {
           <QuranRef reference="17:46" /> refers to &ldquo;the Quran ALONE.&rdquo;
         </p>
       </section>
-
-      {/* ── The Quran is Sufficient ───────────────────────────────────────── */}
-      <div className="flex items-center gap-4" data-parallax>
-        <hr className="flex-1 border-border/50" />
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0">
-          The Quran is Sufficient
-        </h2>
-        <hr className="flex-1 border-border/50" />
-      </div>
-
-      <div
-        data-card
-        className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 text-sm"
-      >
-        <p className="leading-relaxed text-foreground/90">
-          God&apos;s mathematical confirmation that the Quran alone is our guide is
-          woven into the very structure of the scripture. The Quran is described as
-          complete (<QuranRef reference="6:115" />), perfect (
-          <QuranRef reference="6:38" />), and as containing all we need for salvation.
-          Following any source of religious teaching beyond the Quran — regardless of
-          how &ldquo;authentic&rdquo; it appears — is a departure from God&apos;s
-          covenant (<QuranRef reference="42:21" />).
-        </p>
-        <p className="leading-relaxed text-foreground/90">
-          See also <Link href="/appendices/19" className="text-primary underline underline-offset-2">Appendix 19</Link> on
-          Hadith &amp; Sunna as satanic innovations, and{' '}
-          <Link href="/appendices/33" className="text-primary underline underline-offset-2">Appendix 33</Link> on
-          &ldquo;Why the Quran Alone.&rdquo;
-        </p>
-      </div>
 
       {/* ── Video ─────────────────────────────────────────────────────────── */}
       <section className="space-y-3">
