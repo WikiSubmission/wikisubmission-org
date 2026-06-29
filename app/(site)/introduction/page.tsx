@@ -179,10 +179,6 @@ function AngelsRatioBars() {
           style={{ width: `${smallPct}%` }}
         />
       </div>
-      <figcaption className="text-xs text-muted-foreground italic mt-2">
-        The zoomed section shows those who agreed with Satan; within that group,
-        most repented.
-      </figcaption>
     </figure>
   )
 }
