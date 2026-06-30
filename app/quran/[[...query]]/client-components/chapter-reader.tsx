@@ -732,6 +732,8 @@ export function ChapterReader({
             loading={reader.loading}
             loadMore={reader.loadMore}
             opts={opts}
+            chapterNumber={chapterNumber}
+            chapterLabel={tCommon('chapter')}
           />
         </div>
       )}
