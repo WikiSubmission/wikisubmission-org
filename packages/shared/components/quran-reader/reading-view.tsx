@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ArrowUpRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 import { useVerseFetch } from '@/hooks/use-verse-fetch'
 import { parseQuranRef } from '@/lib/scripture-parser'
@@ -230,6 +230,8 @@ type Props = {
   loading: boolean
   loadMore: (opts?: ChapterReaderOptions) => Promise<void>
   opts: ChapterReaderOptions
+  chapterNumber: number
+  chapterLabel: string
 }
 
 export function ReadingView({
@@ -238,6 +240,8 @@ export function ReadingView({
   loading,
   loadMore,
   opts,
+  chapterNumber,
+  chapterLabel,
 }: Props) {
   const prefs = useQuranPreferences()
   const primaryCode =
@@ -290,12 +294,11 @@ export function ReadingView({
             {verses.map((v) => {
               const arTr = v.tr?.['ar']
               const [, vNum] = (v.vk ?? '').split(':')
-              const primaryTr = primaryCode ? v.tr?.[primaryCode] : undefined
               return (
                 <span key={v.vk} id={v.vk ?? undefined}>
-                  {prefs.subtitles && primaryTr?.s && (
+                  {prefs.subtitles && arTr?.s && (
                     <span className="block text-center text-base font-sans text-primary font-semibold my-4 not-italic">
-                      {primaryTr.s}
+                      {arTr.s}
                     </span>
                   )}
                   {arTr?.tx ?? ''}
@@ -352,6 +355,49 @@ export function ReadingView({
           <Spinner className="size-4" />
         </div>
       )}
+
+      {/* Previous / next chapter navigation — route-derived, rendered on first paint (SSR) */}
+      <div className="flex justify-between items-center gap-4 pt-6 border-t border-border/40">
+        {chapterNumber > 1 ? (
+          <Link href={`/quran/${chapterNumber - 1}`} prefetch>
+            <Button
+              variant="secondary"
+              size="lg"
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="size-4 shrink-0" />
+              <span>
+                <span className="hidden sm:inline">{chapterLabel} </span>
+                {chapterNumber - 1}
+              </span>
+            </Button>
+          </Link>
+        ) : (
+          <span />
+        )}
+
+        {chapterNumber < 114 ? (
+          <Link
+            href={`/quran/${chapterNumber + 1}`}
+            prefetch
+            className="ml-auto"
+          >
+            <Button
+              variant="secondary"
+              size="lg"
+              className="flex items-center gap-2"
+            >
+              <span>
+                <span className="hidden sm:inline">{chapterLabel} </span>
+                {chapterNumber + 1}
+              </span>
+              <ArrowRight className="size-4 shrink-0" />
+            </Button>
+          </Link>
+        ) : (
+          <span />
+        )}
+      </div>
     </div>
   )
 }
