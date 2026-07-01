@@ -16,7 +16,7 @@ export interface QuranVerse {
   ws_quran_text: Record<string, string>
 }
 
-export type Reciter = 'english-onyx' | 'mishary' | 'basit' | 'minshawi'
+export type Reciter = 'english-onyx' | 'english-callum' | 'mishary' | 'basit' | 'minshawi'
 
 // ─── State context — re-renders when player state changes ─────────────────────
 // Includes callbacks for backward compat with NowPlayingBar (they're stable refs
@@ -66,6 +66,7 @@ const QuranProgressContext = createContext<QuranProgressContextType | undefined>
 
 const RECITER_METADATA_NAMES: Record<Reciter, string> = {
   'english-onyx': 'English (Onyx)',
+  'english-callum': 'English (Callum)',
   mishary: 'Mishary Rashid Alafasy',
   basit: 'Abdul Basit',
   minshawi: 'Mohamed Siddiq El-Minshawi',
@@ -161,7 +162,7 @@ export function QuranPlayerProvider({
   // Construct URL helper
   const getAudioUrl = (verse: QuranVerse, reciterName: string) => {
     const [chapter, verseNum] = verse.verse_id.split(':')
-    const folder = reciterName === 'english-onyx' ? reciterName : `arabic-${reciterName}`
+    const folder = reciterName.startsWith('english-') ? reciterName : `arabic-${reciterName}`
     return `https://cdn.wikisubmission.org/media/quran-recitations/${folder}/${chapter}-${verseNum}.mp3`
   }
 
