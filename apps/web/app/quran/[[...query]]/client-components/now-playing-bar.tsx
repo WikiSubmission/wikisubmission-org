@@ -42,12 +42,13 @@ import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 
 const RECITER_NAMES: Record<Reciter, string> = {
   'english-onyx': 'English (Onyx)',
+  'english-callum': 'English (Callum)',
   mishary: 'Mishary Rashid Alafasy',
   basit: 'Abdul Basit',
   minshawi: 'Mohamed Siddiq El-Minshawi',
 }
 
-const ENGLISH_RECITERS: Reciter[] = ['english-onyx']
+const ENGLISH_RECITERS: Reciter[] = ['english-onyx', 'english-callum']
 const ARABIC_RECITERS: Reciter[] = ['mishary', 'basit', 'minshawi']
 
 export function QuranPlayer() {
