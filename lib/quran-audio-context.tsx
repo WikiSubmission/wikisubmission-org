@@ -80,7 +80,7 @@ export function QuranPlayerProvider({
   const [currentVerse, setCurrentVerse] = useState<QuranVerse | null>(null)
   const [queue, setQueue] = useState<QuranVerse[]>([])
   const [isPlaying, setIsPlaying] = useState(false)
-  const [reciter, setReciter] = useLocalStorage<Reciter>('reciter', 'english-onyx')
+  const [reciter, setReciter] = useLocalStorage<Reciter>('reciter', 'english-callum')
   const [volume, setVolume] = useState(1)
 
   const [progress, setProgress] = useState(0)
