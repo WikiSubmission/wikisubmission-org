@@ -191,7 +191,7 @@ Minimap dot transition is `0.08s linear` (not `0.35s cubic-bezier`) so it tracks
 
 ## Audio Player — Architecture
 
-`lib/quran-audio-context.tsx` manages audio playback. It is split into three contexts to prevent unnecessary re-renders:
+`packages/shared/lib/quran-audio-context.tsx` manages audio playback. It's shared across the monorepo — both `apps/web` and `apps/mobile` mount `QuranPlayerProvider` in their respective provider trees. It is split into three contexts to prevent unnecessary re-renders:
 
 | Context | Contents | Re-renders when |
 | --- | --- | --- |
@@ -200,6 +200,21 @@ Minimap dot transition is `0.08s linear` (not `0.35s cubic-bezier`) so it tracks
 | `QuranProgressContext` | `progress`, `duration`, `currentTime` | every `timeupdate` event |
 
 **Hooks:** `useQuranPlayer()`, `useQuranPlayerCallbacks()`, `useQuranProgress()`
+
+### Reciters and audio URLs
+
+Four reciters: `english-onyx` (translation audio, default), and Arabic reciters `mishary`, `basit`, `minshawi`. Selection persists via `useLocalStorage('reciter', ...)`; the picker UI lives in `now-playing-bar.tsx` (separate English/Arabic lists, desktop popover + mobile dialog variants).
+
+Audio is fetched directly from CloudFront — there is no backend proxy in the request path:
+
+```
+https://cdn.wikisubmission.org/media/quran-recitations/{folder}/{chapter}-{verse}.mp3
+// folder = "english-onyx" | "arabic-{reciter}"
+```
+
+`../ws-lib` (deployed as `library.wikisubmission.org`) does **not** proxy or serve recitation audio — it's a generic S3-object file library unrelated to the Quran reader: it fuzzy-searches a Postgres-indexed table of S3 keys (`db.SearchObjects`) and redirects to a signed/public CloudFront URL via `/file/*filepath` (`aws/cloudfront.go`, `api/handlers/file.go`). Recitation mp3s aren't indexed through it, so the frontend talks to the `cdn.wikisubmission.org` CloudFront host directly instead.
+
+A second, hidden `<audio>` element (`nextAudioRef`) preloads the next verse in the queue as soon as the current one starts playing.
 
 ### Stable callback pattern
 
@@ -218,9 +233,13 @@ const nextVerse = useCallback(() => {
 
 ### Per-card audio state
 
-`VerseCard` does NOT call `useQuranPlayer()`. Instead, `ChapterReader` computes `isCurrentAudio = currentVerse?.verse_id === verse.vk` and passes it as a prop. This way only the active card re-renders when the verse advances, not all 300+.
+`VerseCard` does NOT call `useQuranPlayer()`. Instead, `ChapterReader` (`packages/shared/components/quran-reader/chapter-reader.tsx`) computes `isCurrentAudio = currentVerse?.verse_id === verse.vk` and passes it as a prop. This way only the active card re-renders when the verse advances, not all 300+. `ChapterReader` also keeps the player's queue synced to the currently loaded verse range via `setChapterQueue`.
 
 `arePropsEqual` in `VerseCard`'s `memo` skips `isPlaying`/`isBuffering` checks for cards that are not currently playing.
+
+### Word-by-word audio (separate system)
+
+`packages/shared/lib/word-audio.ts` drives word-by-word audio playback (word-by-word display mode). It does not go through `QuranPlayerProvider` — it's a distinct, simpler playback path from the verse-level recitation system above.
 
 ---
 
@@ -256,24 +275,25 @@ The `parentRef` scroll container has `overscroll-contain` to prevent the iOS rub
 
 ## Key File Map
 
+> **Note:** This project is now a monorepo (`apps/web`, `apps/mobile`, `packages/shared`) — the rows below reflect files touched while researching the audio system. The rest of this document (Project Overview, App Router conventions, Data layer) still describes the pre-monorepo single-app layout and hasn't been fully reconciled yet.
+
 | File | Purpose |
 | --- | --- |
-| `app/quran/[[...query]]/layout.tsx` | Quran layout: sidebar, header, audio player provider |
-| `app/quran/[[...query]]/page.tsx` | Server component: parses query, SSR-fetches verses, dispatches to ChapterReader or SearchResult |
-| `app/quran/[[...query]]/client-components/chapter-reader.tsx` | Main chapter reader: virtual list, audio sync, URL sync, minimap |
-| `app/quran/[[...query]]/client-components/sidebar.tsx` | Chapter navigation sidebar (114 chapters + appendices) |
-| `app/quran/[[...query]]/client-components/result-search.tsx` | Quran text search results |
-| `app/quran/[[...query]]/client-components/now-playing-bar.tsx` | Fixed audio player bar |
-| `app/quran/[[...query]]/mini-components/verse-card.tsx` | Individual verse card (memoized) |
-| `app/quran/[[...query]]/mini-components/verse-minimap.tsx` | Right-edge seek minimap |
-| `app/search/search-client.tsx` | Unified search (Quran + Media + Newsletters) |
-| `hooks/use-chapter-reader.ts` | Verse window management (load, load-more, seek, prefetch) |
-| `hooks/use-quran-preferences.ts` | User language + display preferences |
-| `lib/quran-audio-context.tsx` | Audio player context (3-context split) |
-| `src/api/client.ts` | openapi-fetch client (browser) |
-| `src/api/server-client.ts` | openapi-fetch client (server/SSR) |
-| `src/api/types.gen.ts` | Generated TypeScript types from OpenAPI spec |
-| `src/api/openapi.yaml` | Synced OpenAPI spec from ws-backend |
+| `apps/web/app/quran/[[...query]]/layout.tsx` | Quran layout: sidebar, header, audio player provider |
+| `apps/web/app/quran/[[...query]]/page.tsx` | Server component: parses query, SSR-fetches verses, dispatches to ChapterReader or SearchResult |
+| `apps/web/app/quran/[[...query]]/client-components/now-playing-bar.tsx` | Fixed audio player bar, reciter selection UI |
+| `packages/shared/components/quran-reader/chapter-reader.tsx` | Main chapter reader: virtual list, audio sync, URL sync, minimap |
+| `packages/shared/components/quran-reader/result-search.tsx` | Quran text search results |
+| `packages/shared/components/quran-reader/verse-card.tsx` | Individual verse card (memoized) |
+| `packages/shared/components/quran-reader/verse-minimap.tsx` | Right-edge seek minimap |
+| `packages/shared/hooks/use-chapter-reader.ts` | Verse window management (load, load-more, seek, prefetch) |
+| `packages/shared/hooks/use-quran-preferences.ts` | User language + display preferences |
+| `packages/shared/lib/quran-audio-context.tsx` | Audio player context (3-context split), shared by web + mobile |
+| `packages/shared/lib/word-audio.ts` | Word-by-word audio playback (separate from verse recitation) |
+| `packages/shared/src/api/client.ts` | openapi-fetch client (browser) |
+| `packages/shared/src/api/server-client.ts` | openapi-fetch client (server/SSR) |
+| `packages/shared/src/api/types.gen.ts` | Generated TypeScript types from OpenAPI spec |
+| `packages/shared/src/api/openapi.yaml` | Synced OpenAPI spec from ws-backend |
 
 ---
 
