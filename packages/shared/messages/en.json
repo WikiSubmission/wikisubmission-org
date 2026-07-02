@@ -1218,6 +1218,7 @@
       "button": "Request data export",
       "preparing": "Preparing your export…",
       "download": "Download your data",
+      "collectedAt": "Data collected: {date}",
       "ready": "Your export is ready below. You can request another in {eta}.",
       "failed": "Your last export could not be prepared. Please try again.",
       "nextAvailable": "Next available in {eta}.",

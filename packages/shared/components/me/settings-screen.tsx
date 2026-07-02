@@ -318,6 +318,11 @@ export function SettingsClient({ offlineSection }: SettingsClientProps = {}) {
                 >
                   {t('export.download')}
                 </a>
+                {exportState.sent_at && (
+                  <p style={mutedStyle}>
+                    {t('export.collectedAt', { date: formatExportDate(exportState.sent_at) })}
+                  </p>
+                )}
                 {withinCooldown(exportState.sent_at ?? undefined) && (
                   <p style={mutedStyle}>
                     {t('export.ready', { eta: formatEta(secondsUntilCooldownEnd(exportState.sent_at ?? undefined)) })}
@@ -513,6 +518,32 @@ const toastStyle: React.CSSProperties = {
   borderRadius: 2,
   fontSize: 13,
   zIndex: 100,
+}
+
+// Format the export collection date. Shows full date/time if from same day,
+// otherwise just the date.
+function formatExportDate(isoString: string): string {
+  try {
+    const date = new Date(isoString)
+    const now = new Date()
+    const isToday = date.toDateString() === now.toDateString()
+
+    if (isToday) {
+      return date.toLocaleTimeString(undefined, {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+      })
+    }
+
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+  } catch {
+    return isoString
+  }
 }
 
 // Renders a coarse "Nd Mh" / "Mh Ms" countdown. Used for the multi-day export
