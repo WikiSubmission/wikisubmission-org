@@ -26,6 +26,20 @@ async function proxyRequest(
   const upstreamUrl = new URL(path.map(encodeURIComponent).join('/'), `${baseUrl}/`)
   upstreamUrl.search = request.nextUrl.search
 
+  // Temporary auth diagnostic: for /me/* the request must carry a user bearer
+  // token. Log only whether the header is present (never its value) so we can
+  // tell a missing browser token apart from a header stripped in transit.
+  // Remove once the /me 400s are resolved.
+  if (path[0] === 'me') {
+    const authHeader = request.headers.get('authorization')
+    console.warn('[ws-proxy] /me request', {
+      path: path.join('/'),
+      hasAuthorization: !!authHeader,
+      authScheme: authHeader ? authHeader.split(' ')[0] : null,
+      hasCookie: !!request.headers.get('cookie'),
+    })
+  }
+
   const headers = new Headers()
   for (const [key, value] of request.headers) {
     const lower = key.toLowerCase()
