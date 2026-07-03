@@ -1,13 +1,7 @@
 'use client'
 
 import { useOfflineContent } from '@/hooks/use-offline-content'
-import { offlineSupportDiagnostics } from '@/lib/offline/web-store-singleton'
 import type { BundleDescriptor } from '@/lib/offline/types'
-
-// Bump this string on each debug deploy so it is trivial to confirm from the
-// browser whether the freshly-built bundle is actually live. Remove the whole
-// OfflineDebugPanel once the offline section is confirmed rendering on preview.
-const OFFLINE_DEBUG_BUILD = 'offline-debug-2'
 
 // NOTE: copy is English-only for now; move into the meSettings i18n namespace
 // once the offline feature is verified on-device (Phase 2 follow-up).
@@ -24,26 +18,21 @@ export function OfflineSettingsSection() {
 
   if (!offline.loading && !offline.supported) {
     return (
-      <>
-        <OfflineDebugPanel offline={offline} />
-        <section style={cardStyle}>
-          <h2 style={h2Style}>Offline reading</h2>
-          <p style={bodyStyle}>
-            Offline downloads are not available in this browser. Reading still works
-            while you are online.
-          </p>
-        </section>
-      </>
+      <section style={cardStyle}>
+        <h2 style={h2Style}>Offline reading</h2>
+        <p style={bodyStyle}>
+          Offline downloads are not available in this browser. Reading still works
+          while you are online.
+        </p>
+      </section>
     )
   }
 
   const bundles = offline.manifest?.bundles ?? []
 
   return (
-    <>
-      <OfflineDebugPanel offline={offline} />
-      <section style={cardStyle}>
-        <h2 style={h2Style}>Offline reading</h2>
+    <section style={cardStyle}>
+      <h2 style={h2Style}>Offline reading</h2>
       <p style={bodyStyle}>
         Download translations to read and search the Quran without a connection.
       </p>
@@ -79,54 +68,8 @@ export function OfflineSettingsSection() {
             onInstall={() => offline.install(bundle)}
             onRemove={() => offline.remove(bundle.id)}
           />
-          ))}
-        </ul>
-      </section>
-    </>
-  )
-}
-
-// Temporary diagnostic. Renders unconditionally (independent of support/loading)
-// so its presence alone confirms the freshly-built bundle is live, and its
-// contents reveal exactly why the offline UI does or does not activate. Delete
-// this component and its two call sites once the offline section is confirmed.
-function OfflineDebugPanel({ offline }: { offline: ReturnType<typeof useOfflineContent> }) {
-  const diag = offlineSupportDiagnostics()
-  const rows: Array<[string, string]> = [
-    ['build', OFFLINE_DEBUG_BUILD],
-    ['supported', String(offline.supported)],
-    ['loading', String(offline.loading)],
-    ['worker', String(diag.worker)],
-    ['webassembly', String(diag.webassembly)],
-    ['navigator', String(diag.navigator)],
-    ['opfs (storage.getDirectory)', String(diag.opfs)],
-    ['manifest', offline.manifest ? `${offline.manifest.bundles.length} bundles` : 'null'],
-    ['installed', String(offline.installed.length)],
-    ['error', offline.error ?? '—'],
-  ]
-  return (
-    <section
-      style={{
-        ...cardStyle,
-        borderColor: '#f59e0b',
-        background: 'rgba(245,158,11,0.06)',
-        fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
-        fontSize: 12,
-      }}
-    >
-      <strong style={{ display: 'block', marginBottom: 8 }}>
-        ⚠ OFFLINE DEBUG ({OFFLINE_DEBUG_BUILD})
-      </strong>
-      <table style={{ borderCollapse: 'collapse' }}>
-        <tbody>
-          {rows.map(([k, v]) => (
-            <tr key={k}>
-              <td style={{ paddingRight: 16, opacity: 0.7 }}>{k}</td>
-              <td>{v}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        ))}
+      </ul>
     </section>
   )
 }
