@@ -132,7 +132,12 @@ export class WebOfflineContentStore implements OfflineContentStore {
     bundle: BundleDescriptor,
     onProgress?: (p: InstallProgress) => void,
   ): Promise<ArrayBuffer> {
-    const res = await fetch(bundle.url)
+    // Bypass the browser HTTP cache: bundle bytes are persisted to OPFS, so
+    // caching the multi-MB response is pure waste, and a cached copy replays
+    // whatever CORS headers it was stored with (a response cached while the
+    // CDN's CORS config was broken keeps failing every retry for up to a year
+    // under the immutable max-age, even after the CDN is fixed).
+    const res = await fetch(bundle.url, { cache: 'no-store' })
     if (!res.ok || !res.body) {
       throw new Error(`bundle download failed: ${res.status} ${res.statusText}`)
     }
