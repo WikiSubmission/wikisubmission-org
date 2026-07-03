@@ -7,7 +7,7 @@ import type { BundleDescriptor } from '@/lib/offline/types'
 // Bump this string on each debug deploy so it is trivial to confirm from the
 // browser whether the freshly-built bundle is actually live. Remove the whole
 // OfflineDebugPanel once the offline section is confirmed rendering on preview.
-const OFFLINE_DEBUG_BUILD = 'offline-debug-1'
+const OFFLINE_DEBUG_BUILD = 'offline-debug-2'
 
 // NOTE: copy is English-only for now; move into the meSettings i18n namespace
 // once the offline feature is verified on-device (Phase 2 follow-up).

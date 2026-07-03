@@ -211,6 +211,11 @@ export function SettingsClient({ offlineSection }: SettingsClientProps = {}) {
         <h1 style={titleStyle}>{t('title')}</h1>
       </header>
 
+      {/* Offline reading is independent of the activity-consent fetch, so it
+          renders regardless of consent status — a failing/slow /me/consent
+          request must not hide the offline download manager. */}
+      {offlineSection}
+
       {consent.status === 'loading' && <p style={mutedStyle}>{t('loading')}</p>}
       {consent.status === 'error' && <p style={mutedStyle}>{t('error')}</p>}
 
@@ -298,8 +303,6 @@ export function SettingsClient({ offlineSection }: SettingsClientProps = {}) {
               </div>
             )}
           </section>
-
-          {offlineSection}
 
           <section style={cardStyle}>
             <h2 style={h2Style}>{t('export.heading')}</h2>
