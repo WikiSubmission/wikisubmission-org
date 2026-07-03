@@ -59,7 +59,9 @@ const securityHeaders = [
       // blocked and the asset fails to load. This mirrors the OAuth avatar
       // hosts (img-src) and the Cloudflare beacon script (script-src; note the
       // static. subdomain is distinct from cloudflareinsights.com).
-      "connect-src 'self' https://ws-backend.wikisubmission.org https://cdn.sanity.io https://audio.qurancdn.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
+      // cdn.wikisubmission.org: offline manifest + content bundle downloads
+      // (fetch(), so img-src/media-src listings do not cover it).
+      "connect-src 'self' https://ws-backend.wikisubmission.org https://cdn.wikisubmission.org https://cdn.sanity.io https://audio.qurancdn.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
       "media-src 'self' blob: https://cdn.wikisubmission.org https://audio.qurancdn.com",
       "worker-src 'self' blob:",
       'frame-src https://www.youtube-nocookie.com https://www.youtube.com',
