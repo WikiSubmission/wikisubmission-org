@@ -97,6 +97,22 @@ const serwist = new Serwist({
 
 serwist.addEventListeners()
 
+// Offline, Serwist's runtime strategies reject with a `no-response` SerwistError
+// whenever a request misses every cache and the network is unavailable — RSC
+// prefetches (`?_rsc=`), next-auth session polls (`/api/auth/session`), and
+// code-split chunks for routes that have not been cached yet. These are the
+// expected offline outcome and are already handled by the app and the browser
+// as ordinary network errors; the only harm is the flood of "Uncaught (in
+// promise) no-response" entries in the console. Swallow just that error so the
+// console stays readable without changing any fetch behavior. `name` is the
+// SerwistError code (see SerwistError: `this.name = errorCode`).
+self.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason as { name?: string } | undefined
+  if (reason?.name === 'no-response') {
+    event.preventDefault()
+  }
+})
+
 // --- Web push ---------------------------------------------------------------
 // Payload shape sent by ws-backend (see api/handlers/push.go).
 interface PushPayload {
