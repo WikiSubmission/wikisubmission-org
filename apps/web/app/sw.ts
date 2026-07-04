@@ -56,6 +56,17 @@ const sameOriginCache: RuntimeCaching[] = defaultCache.map((entry) => ({
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
+  // The precache manifest is large (~200+ entries). Serwist's default install
+  // concurrency of 10 fires enough simultaneous requests to overwhelm the
+  // preview's proxy, which returns 504s; a single 504 aborts the whole atomic
+  // precache install, so the SW never activates and the app is fully offline-
+  // broken (Chrome's dinosaur). Throttle the burst so install stays within the
+  // server's capacity. cleanupOutdatedCaches removes prior-generation precaches
+  // on activate so stale docs/chunks do not linger across deploys.
+  precacheOptions: {
+    concurrency: 4,
+    cleanupOutdatedCaches: true,
+  },
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
