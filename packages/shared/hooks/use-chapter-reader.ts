@@ -114,21 +114,32 @@ export function useChapterReader(
         ? rangeEnd
         : verseStart + PAGE_SIZE - 1
 
-      // Offline-first: when an offline store is registered (web only) and every
-      // requested language is installed, serve from the local bundle. Word-by-word
-      // data is not bundled in v1, so word requests normally use the network to
-      // get the word breakdown — EXCEPT when the browser is offline, where the
-      // network would just time out. Offline, we still serve verse text and
-      // translations from the bundle (without the word-by-word breakdown) rather
-      // than failing. Any miss or error falls through to the network path below.
       const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false
       const offlineStore = getRegisteredOfflineContentStore()
-      if (offlineStore && (!opts.includeWords || isOffline)) {
+
+      // Serve a verse window from the installed bundles, or null on miss/error.
+      // Word-by-word data is not bundled in v1, so the returned verses carry
+      // text + translations only (no word breakdown).
+      const tryOffline = async (): Promise<FetchResult | null> => {
         try {
+          if (!offlineStore) {
+            console.info('[offline-read] no store registered')
+            return null
+          }
+          const installed = (await offlineStore.installedBundles()).map((b) => b.id)
           const offline = await offlineQuranVerses(offlineStore, langs, {
             chapter: chapterNumber,
             verseStart,
             verseEnd: verseEndParam,
+          })
+          // TEMP diagnostics — remove once offline reads are confirmed working.
+          console.info('[offline-read]', {
+            chapter: chapterNumber,
+            langs,
+            isOffline,
+            includeWords: opts.includeWords,
+            installed,
+            verses: offline?.verses.length ?? null,
           })
           if (offline && offline.verses.length > 0) {
             return {
@@ -138,9 +149,20 @@ export function useChapterReader(
               error: null,
             }
           }
-        } catch {
-          // fall through to the network path
+        } catch (e) {
+          console.error('[offline-read] store error', e)
         }
+        return null
+      }
+
+      // Offline-first: bundles cover verse text + translations. Word requests
+      // prefer the network for the word breakdown, but we still try the bundle
+      // first when the browser reports offline — and again as a fallback if the
+      // network fails — so an unreliable navigator.onLine never strands the
+      // reader on a route it could serve locally.
+      if (!opts.includeWords || isOffline) {
+        const hit = await tryOffline()
+        if (hit) return hit
       }
 
       const controller = new AbortController()
@@ -164,12 +186,16 @@ export function useChapterReader(
           signal: controller.signal,
         }))
       } catch {
+        const hit = await tryOffline()
+        if (hit) return hit
         return { verses: null, titles: null, reachedEnd: undefined, error: 'Request timed out.' }
       } finally {
         clearTimeout(timeout)
       }
 
       if (error || !data) {
+        const hit = await tryOffline()
+        if (hit) return hit
         return { verses: null, titles: null, reachedEnd: undefined, error: 'Failed to load verses.' }
       }
 
