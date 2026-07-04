@@ -199,7 +199,13 @@ const withSerwist = withSerwistInit({
   reloadOnOnline: true,
   disable: process.env.NODE_ENV === 'development',
   // Precache the offline fallback document so a cold offline launch returns 200.
-  additionalPrecacheEntries: [{ url: '/offline', revision: buildRevision }],
+  // `/quran/1` is precached as the offline navigation fallback for reader
+  // routes: one reader document that the client re-targets to the requested
+  // chapter from location.pathname and fills from installed offline bundles.
+  additionalPrecacheEntries: [
+    { url: '/offline', revision: buildRevision },
+    { url: '/quran/1', revision: buildRevision },
+  ],
 })
 
 export default withSerwist(withBundleAnalyzer(withNextIntl(nextConfig)))

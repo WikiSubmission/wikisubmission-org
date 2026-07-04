@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { Suspense } from 'react'
 import { Spinner } from '@/components/ui/spinner'
 import SearchResult from '@/components/quran-reader/result-search'
-import { ChapterReader } from '@/components/quran-reader/chapter-reader'
+import { ReaderBoot } from './client-components/reader-boot'
 import QuranSearchBar from './client-components/search-bar'
 import { wsApiServer } from '@/src/api/server-client'
 import { Metadata } from 'next'
@@ -190,7 +190,7 @@ export default async function QuranPage({
           verseKey={`${parsed.chapterNumber}:${verse ?? 1}`}
         />
         <Suspense fallback={<Spinner />}>
-          <ChapterReader
+          <ReaderBoot
             key={`${parsed.chapterNumber}-${verse ?? 'full'}`}
             chapterNumber={parsed.chapterNumber}
             initialData={data}

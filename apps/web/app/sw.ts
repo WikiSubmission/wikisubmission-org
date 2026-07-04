@@ -66,8 +66,25 @@ const serwist = new Serwist({
   runtimeCaching: sameOriginCache,
   // Google Play Vitals treats a non-200 offline launch as a crash. This serves
   // the precached /offline document for any navigation that fails offline.
+  //
+  // Order matters: PrecacheFallbackPlugin returns the FIRST entry whose matcher
+  // passes. Quran reader routes (/quran, /quran/<chapter>, …) are served a
+  // precached reader document so the client can boot and read verses from the
+  // installed offline bundles. `/quran/[[...query]]` is a single catch-all
+  // segment, so one precached reader doc hydrates for any chapter; the reader
+  // re-derives its target from location.pathname when the cache-served doc was
+  // baked for a different chapter. Everything else falls back to /offline.
   fallbacks: {
     entries: [
+      {
+        url: '/quran/1',
+        matcher({ request }) {
+          return (
+            request.destination === 'document' &&
+            /^\/quran(\/|$)/.test(new URL(request.url).pathname)
+          )
+        },
+      },
       {
         url: '/offline',
         matcher({ request }) {
