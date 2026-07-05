@@ -11,9 +11,12 @@ import {
 import {
   exchangeIdToken,
   refreshSession,
+  requestEmailOtp,
+  verifyEmailOtp,
   type AuthProvider,
   type MobileAuthResponse,
 } from '@/lib/mobile-auth-client'
+import { isAppleSignInAvailable } from '@/lib/platform'
 import {
   clearSession,
   loadSession,
@@ -41,8 +44,14 @@ interface MobileAuthContextValue {
   isAdmin: boolean
   isEditor: boolean
   isLoading: boolean
+  /** Whether the Sign in with Apple button should be offered (iOS only). */
+  appleSignInAvailable: boolean
   signInWithGoogle: () => Promise<void>
   signInWithApple: () => Promise<void>
+  /** Emails a one-time code to the address and arms verifyEmailCode. */
+  requestEmailCode: (email: string) => Promise<void>
+  /** Verifies the code the user entered and signs them in. */
+  verifyEmailCode: (code: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -57,8 +66,13 @@ function toSession(res: MobileAuthResponse): StoredSession {
   }
 }
 
-function providerOf(user: MobileAuthUser): AuthProvider {
-  return user.auth_id.startsWith('apple:') ? 'apple' : 'google'
+// Maps a stored user to the native provider whose SDK session must be cleared on
+// sign-out. Email-OTP users have no native SDK session, so this returns null and
+// the native logout is skipped.
+function providerOf(user: MobileAuthUser): AuthProvider | null {
+  if (user.auth_id.startsWith('apple:')) return 'apple'
+  if (user.auth_id.startsWith('google:')) return 'google'
+  return null
 }
 
 export function MobileAuthProvider({ children }: { children: React.ReactNode }) {
@@ -118,6 +132,28 @@ export function MobileAuthProvider({ children }: { children: React.ReactNode }) 
     [adoptSession],
   )
 
+  // Holds the opaque pending-OTP token between requestEmailCode and
+  // verifyEmailCode. Kept in a ref (not state) so it never triggers a re-render
+  // and is not exposed outside this provider.
+  const pendingOtpRef = useRef<string | null>(null)
+
+  const requestEmailCode = useCallback(async (email: string) => {
+    pendingOtpRef.current = await requestEmailOtp(email)
+  }, [])
+
+  const verifyEmailCode = useCallback(
+    async (code: string) => {
+      const token = pendingOtpRef.current
+      if (!token) {
+        throw new Error('Request a code before verifying')
+      }
+      const res = await verifyEmailOtp(token, code)
+      pendingOtpRef.current = null
+      await adoptSession(toSession(res))
+    },
+    [adoptSession],
+  )
+
   // Keep the latest user in a ref so signOut can read it without being a dep.
   // Synced in an effect (not during render) so it commits after paint, which
   // is fine here: signOut only reads it from a user-triggered handler.
@@ -128,7 +164,8 @@ export function MobileAuthProvider({ children }: { children: React.ReactNode }) 
 
   const signOut = useCallback(async () => {
     const current = userRef.current
-    if (current) await nativeSignOut(providerOf(current))
+    const provider = current ? providerOf(current) : null
+    if (provider) await nativeSignOut(provider)
     await dropSession()
   }, [dropSession])
 
@@ -139,8 +176,11 @@ export function MobileAuthProvider({ children }: { children: React.ReactNode }) 
     isAdmin: user?.is_admin ?? false,
     isEditor: user?.is_editor ?? false,
     isLoading,
+    appleSignInAvailable: isAppleSignInAvailable(),
     signInWithGoogle: useCallback(() => signInWith('google'), [signInWith]),
     signInWithApple: useCallback(() => signInWith('apple'), [signInWith]),
+    requestEmailCode,
+    verifyEmailCode,
     signOut,
   }
 

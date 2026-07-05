@@ -68,3 +68,33 @@ export function refreshSession(refreshToken: string): Promise<MobileAuthResponse
     refresh_token: refreshToken,
   })
 }
+
+// Wire-level response from POST /auth/mobile/otp/request. otp_token is opaque
+// to the client — it is held in memory and presented back to verify.
+interface MobileOTPRequestResponse {
+  otp_token: string
+}
+
+/**
+ * Requests an email one-time code. The backend emails a 6-digit code and returns
+ * an opaque token binding that code; hand the token back to verifyEmailOtp along
+ * with the code the user enters. Mirrors the web send-otp flow, but stateless in
+ * the response body rather than an httpOnly cookie (mobile has no cookie jar).
+ */
+export async function requestEmailOtp(email: string): Promise<string> {
+  const res = await postJson<MobileOTPRequestResponse>('/auth/mobile/otp/request', {
+    email,
+  })
+  return res.otp_token
+}
+
+/** Verifies an emailed code against its pending token, returning a session. */
+export function verifyEmailOtp(
+  otpToken: string,
+  code: string,
+): Promise<MobileAuthResponse> {
+  return postJson<MobileAuthResponse>('/auth/mobile/otp/verify', {
+    otp_token: otpToken,
+    code,
+  })
+}
