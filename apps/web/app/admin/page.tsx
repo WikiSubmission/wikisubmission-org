@@ -21,6 +21,11 @@ const TILES: Tile[] = [
     title: 'Games',
     body: 'Per-game settings and maintenance, including the Fill the Missing Word studio.',
   },
+  {
+    href: '/admin/offline',
+    title: 'Offline bundles',
+    body: 'Rebuild and publish the downloadable Quran packages (text and word by word) after content changes.',
+  },
 ]
 
 export default async function AdminLandingPage() {

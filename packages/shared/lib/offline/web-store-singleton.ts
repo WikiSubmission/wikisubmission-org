@@ -1,11 +1,10 @@
 import type { OfflineContentStore } from './content-store'
 import { WebOfflineContentStore } from './web-content-store'
 
-/** URL of the offline manifest. Overridable per environment; defaults to the
- * production CDN. For local fixtures, set NEXT_PUBLIC_OFFLINE_MANIFEST_URL. */
-export const OFFLINE_MANIFEST_URL =
-  process.env.NEXT_PUBLIC_OFFLINE_MANIFEST_URL ??
-  'https://cdn.wikisubmission.org/offline/manifest.json'
+// Re-exported for existing importers; the constant lives in manifest.ts so
+// worker-free consumers (e.g. the admin bundles page) can use it without
+// pulling in the store.
+export { OFFLINE_MANIFEST_URL } from './manifest'
 
 let store: OfflineContentStore | null = null
 

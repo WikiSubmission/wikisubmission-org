@@ -1,6 +1,12 @@
 import { z } from 'zod'
 import type { BundleDescriptor, Manifest } from './types'
 
+/** URL of the offline manifest. Overridable per environment; defaults to the
+ * production CDN. For local fixtures, set NEXT_PUBLIC_OFFLINE_MANIFEST_URL. */
+export const OFFLINE_MANIFEST_URL =
+  process.env.NEXT_PUBLIC_OFFLINE_MANIFEST_URL ??
+  'https://cdn.wikisubmission.org/offline/manifest.json'
+
 // The wire format is snake_case (emitted by the ws-backend bundle builder). We
 // validate it at the boundary and transform to the camelCased BundleDescriptor.
 const bundleSchema = z
