@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchManifest, OFFLINE_MANIFEST_URL } from '@/lib/offline/manifest'
 import type { Manifest } from '@/lib/offline/types'
-import type { RebuildStatus } from '@/lib/offline-admin-client'
-import { rebuildBundlesAction, rebuildStatusAction } from './actions'
+import type { PublishedState, RebuildStatus } from '@/lib/offline-admin-client'
+import { publishedFilesAction, rebuildBundlesAction, rebuildStatusAction } from './actions'
 
 function formatBytes(n: number): string {
   if (n <= 0) return '0 MB'
@@ -22,10 +22,18 @@ function formatTime(iso?: string): string {
   }
 }
 
+function formatDate(httpDate?: string): string {
+  if (!httpDate) return ''
+  const parsed = new Date(httpDate)
+  return Number.isNaN(parsed.getTime()) ? httpDate : parsed.toLocaleDateString()
+}
+
 export function OfflineBundlesClient() {
   const [manifest, setManifest] = useState<Manifest | null>(null)
   const [manifestError, setManifestError] = useState<string | null>(null)
   const [job, setJob] = useState<RebuildStatus | null>(null)
+  const [published, setPublished] = useState<PublishedState | null>(null)
+  const [publishedError, setPublishedError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
   // The publish flips the manifest a moment after the job reports done; track
@@ -51,15 +59,26 @@ export function OfflineBundlesClient() {
     }
   }, [])
 
+  const loadPublished = useCallback(async () => {
+    const result = await publishedFilesAction()
+    if (result.ok) {
+      setPublished(result.data)
+      setPublishedError(null)
+    } else {
+      setPublishedError(result.error)
+    }
+  }, [])
+
   useEffect(() => {
     // Deferred a tick so the effect body itself schedules no state updates
     // (react-hooks/set-state-in-effect), matching the settings screen.
     const id = window.setTimeout(() => {
       void loadManifest()
       void loadStatus()
+      void loadPublished()
     }, 0)
     return () => window.clearTimeout(id)
-  }, [loadManifest, loadStatus])
+  }, [loadManifest, loadStatus, loadPublished])
 
   // Poll while a rebuild runs; refresh the published list when it lands.
   useEffect(() => {
@@ -70,8 +89,9 @@ export function OfflineBundlesClient() {
     if (job?.status === 'done' && job.finished_at && refreshedFor.current !== job.finished_at) {
       refreshedFor.current = job.finished_at
       void loadManifest()
+      void loadPublished()
     }
-  }, [job, loadStatus, loadManifest])
+  }, [job, loadStatus, loadManifest, loadPublished])
 
   async function startRebuild() {
     if (starting || job?.status === 'running') return
@@ -119,6 +139,48 @@ export function OfflineBundlesClient() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section style={card}>
+        <h2 style={h2}>On the CDN</h2>
+        <p style={body}>
+          Every bundle and manifest version that exists on the CDN, newest first. Old versions
+          stay downloadable at their immutable URLs; the live badge marks what manifest.json
+          currently points at. A version without a badge that is newer than the live one was
+          left behind by a failed publish.
+        </p>
+
+        {publishedError && (
+          <p style={{ ...body, color: 'var(--destructive, #b91c1c)' }}>{publishedError}</p>
+        )}
+        {!publishedError && !published && <p style={muted}>Loading…</p>}
+        {published && (published.versions?.length ?? 0) === 0 && (
+          <p style={muted}>Nothing is published yet.</p>
+        )}
+
+        {published?.versions?.map((version) => (
+          <div key={version.data_version} style={{ marginTop: 16 }}>
+            <h3 style={{ ...mono, margin: 0 }}>
+              Version {version.data_version}
+              {version.live && <span style={liveBadge}>live</span>}
+            </h3>
+            <ul style={list}>
+              {version.files.map((file) => (
+                <li key={file.name} style={row}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <a href={file.url} target="_blank" rel="noopener noreferrer" style={{ ...link, fontSize: 14 }}>
+                      {file.name}
+                    </a>
+                    <span style={mono}>
+                      {formatBytes(file.bytes)}
+                      {file.last_modified ? ` · ${formatDate(file.last_modified)}` : ''}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </section>
 
       <section style={card}>
@@ -208,6 +270,17 @@ const mono: React.CSSProperties = {
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
   color: 'var(--ed-fg-muted)',
+}
+
+const liveBadge: React.CSSProperties = {
+  marginLeft: 8,
+  padding: '2px 8px',
+  borderRadius: 999,
+  background: 'var(--ed-fg)',
+  color: 'var(--ed-bg)',
+  fontSize: 10,
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
 }
 
 const button: React.CSSProperties = {

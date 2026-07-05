@@ -4,6 +4,7 @@ import { auth } from '@/auth'
 import {
   OfflineAdminApiError,
   offlineAdminClient,
+  type PublishedState,
   type RebuildStatus,
 } from '@/lib/offline-admin-client'
 
@@ -52,6 +53,17 @@ export async function rebuildStatusAction(): Promise<ActionResult<RebuildStatus>
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
   try {
     const data = await ctx.client.status()
+    return { ok: true, data }
+  } catch (err) {
+    return { ok: false, error: describe(err) }
+  }
+}
+
+export async function publishedFilesAction(): Promise<ActionResult<PublishedState>> {
+  const ctx = await adminClient()
+  if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
+  try {
+    const data = await ctx.client.files()
     return { ok: true, data }
   } catch (err) {
     return { ok: false, error: describe(err) }

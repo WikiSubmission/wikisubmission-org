@@ -35,6 +35,30 @@ export interface RebuildStatus {
   bundles?: RebuildBundle[]
 }
 
+/** One artifact found on the CDN (bundle file or manifest snapshot). */
+export interface PublishedFile {
+  name: string
+  url: string
+  bytes: number
+  last_modified?: string
+}
+
+/** The artifacts of one data_version as they exist on the CDN. */
+export interface PublishedVersion {
+  data_version: number
+  /** Referenced by the live manifest.json. */
+  live: boolean
+  files: PublishedFile[]
+}
+
+export interface PublishedState {
+  manifest_url: string
+  /** 0 when nothing is published. */
+  live_version: number
+  /** Newest first. */
+  versions?: PublishedVersion[]
+}
+
 /** Error carrying the backend status code and `message` body, for the UI. */
 export class OfflineAdminApiError extends Error {
   readonly status: number
@@ -77,5 +101,8 @@ export function offlineAdminClient(token: string) {
 
     /** Current (or last) rebuild state, for polling. */
     status: (): Promise<RebuildStatus> => call<RebuildStatus>(token, '/rebuild', 'GET'),
+
+    /** Every bundle and manifest version that exists on the CDN. */
+    files: (): Promise<PublishedState> => call<PublishedState>(token, '/files', 'GET'),
   }
 }
