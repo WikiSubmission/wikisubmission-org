@@ -6,6 +6,7 @@ import type {
   SearchRow,
   VerseRange,
   VerseRow,
+  WordRow,
 } from './types'
 
 /**
@@ -23,6 +24,11 @@ export interface OfflineContentStore {
   /** Read a contiguous verse range from an installed bundle. Returns [] if the
    * bundle is not installed. */
   getVerses(scripture: string, lang: string, range: VerseRange): Promise<VerseRow[]>
+
+  /** Read a contiguous verse range's word-by-word rows from an installed
+   * words bundle (`${scripture}-words-${lang}`). Returns [] if the bundle is
+   * not installed. */
+  getWords(scripture: string, lang: string, range: VerseRange): Promise<WordRow[]>
 
   /** Localized chapter title from an installed bundle, or null if unavailable. */
   getChapterTitle(scripture: string, lang: string, chapter: number): Promise<string | null>

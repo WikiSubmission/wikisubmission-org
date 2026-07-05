@@ -1,13 +1,15 @@
 import { describe, it, expect } from 'vitest'
 import { offlineQuranVerses, offlineQuranSearch } from '@/lib/offline/quran-adapter'
 import type { OfflineContentStore } from '@/lib/offline/content-store'
-import type { BundleInfo, SearchRow, VerseRow } from '@/lib/offline/types'
+import type { BundleInfo, SearchRow, VerseRow, WordRow } from '@/lib/offline/types'
 
 // A fake store backed by in-memory rows, exercising only the methods the
-// adapter uses. Keyed by `${scripture}-${lang}`.
+// adapter uses. Verses keyed by `${scripture}-${lang}`, words by the words
+// bundle language.
 function fakeStore(opts: {
   installedIds: string[]
   verses?: Record<string, VerseRow[]>
+  words?: Record<string, WordRow[]>
   titles?: Record<string, string>
   searchRows?: SearchRow[]
   // Optional sink: records every (scripture, lang, range) getVerses was called with.
@@ -19,7 +21,8 @@ function fakeStore(opts: {
         (id): BundleInfo => ({
           id,
           scripture: 'quran',
-          lang: id.split('-')[1] ?? '',
+          lang: id.split('-').pop() ?? '',
+          kind: id.includes('-words-') ? 'words' : 'text',
           bytes: 1,
           sha256: 'a'.repeat(64),
           dataVersion: 1,
@@ -33,6 +36,9 @@ function fakeStore(opts: {
     async getVerses(scripture, lang, range) {
       opts.rangeSink?.push({ scripture, lang, range })
       return opts.verses?.[`${scripture}-${lang}`] ?? []
+    },
+    async getWords(_scripture, lang) {
+      return opts.words?.[lang] ?? []
     },
     async getChapterTitle(scripture, lang) {
       return opts.titles?.[`${scripture}-${lang}`] ?? null
@@ -113,6 +119,74 @@ describe('offlineQuranVerses', () => {
     })
     const result = await offlineQuranVerses(store, [lang], { chapter: 1 })
     expect(result!.verses[0].tr?.[lang]?.d).toBe('rtl')
+  })
+
+  // ── Word-by-word ───────────────────────────────────────────────────────────
+
+  const wordRows: WordRow[] = [
+    { cn: 1, vn: 1, wi: 0, gi: 1, lang: 'ar', text: 'بِسْمِ', root: 'سمو' },
+    { cn: 1, vn: 1, wi: 0, gi: 1, lang: 'en', text: 'In the name', meaning: 'name' },
+    { cn: 1, vn: 1, wi: 0, gi: 1, lang: 'tl', text: 'bismi' },
+    { cn: 1, vn: 1, wi: 1, gi: 2, lang: 'ar', text: 'ٱللَّهِ', root: 'اله' },
+    { cn: 1, vn: 1, wi: 1, gi: 2, lang: 'en', text: 'of GOD' },
+  ]
+
+  it('attaches word arrays from the words bundle, merging languages per word', async () => {
+    const store = fakeStore({
+      installedIds: ['quran-en', 'quran-words-en'],
+      verses: { 'quran-en': enRows },
+      words: { en: wordRows },
+    })
+    const result = await offlineQuranVerses(
+      store,
+      ['en'],
+      { chapter: 1 },
+      { lang: 'en', includeRoot: true, includeMeaning: true },
+    )
+    expect(result!.hasWords).toBe(true)
+
+    const w = result!.verses[0].w
+    expect(w).toHaveLength(2)
+    expect(w![0]).toMatchObject({
+      wi: 0,
+      gi: 1,
+      tx: { ar: 'بِسْمِ', en: 'In the name', tl: 'bismi' },
+      r: 'سمو',
+      m: 'name',
+    })
+    expect(w![1]).toMatchObject({ wi: 1, gi: 2, r: 'اله' })
+    // 1:2 has no word rows — no w array rather than an empty one.
+    expect(result!.verses[1].w).toBeUndefined()
+  })
+
+  it('omits root and meaning unless requested', async () => {
+    const store = fakeStore({
+      installedIds: ['quran-en', 'quran-words-en'],
+      verses: { 'quran-en': enRows },
+      words: { en: wordRows },
+    })
+    const result = await offlineQuranVerses(store, ['en'], { chapter: 1 }, { lang: 'en' })
+    const w = result!.verses[0].w
+    expect(w![0].r).toBeUndefined()
+    expect(w![0].m).toBeUndefined()
+    expect(w![0].tx).toMatchObject({ ar: 'بِسْمِ' })
+  })
+
+  it('serves verses without words when the words bundle is not installed', async () => {
+    const store = fakeStore({
+      installedIds: ['quran-en'],
+      verses: { 'quran-en': enRows },
+      words: { en: wordRows },
+    })
+    const result = await offlineQuranVerses(
+      store,
+      ['en'],
+      { chapter: 1 },
+      { lang: 'en', includeRoot: true, includeMeaning: true },
+    )
+    expect(result).not.toBeNull()
+    expect(result!.hasWords).toBe(false)
+    expect(result!.verses[0].w).toBeUndefined()
   })
 
   it('forwards the verse range to the store for each language', async () => {

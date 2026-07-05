@@ -9,6 +9,7 @@ import type {
   SearchRow,
   VerseRange,
   VerseRow,
+  WordRow,
 } from './types'
 import { verifySha256 } from './verify'
 import type { WorkerRequest, WorkerRequestBody, WorkerResponse } from './worker/protocol'
@@ -64,6 +65,10 @@ export class WebOfflineContentStore implements OfflineContentStore {
     return `${scripture}-${lang}`
   }
 
+  private static wordsBundleId(scripture: string, lang: string): string {
+    return `${scripture}-words-${lang}`
+  }
+
   async installedBundles(): Promise<BundleInfo[]> {
     return catalog.list()
   }
@@ -72,6 +77,12 @@ export class WebOfflineContentStore implements OfflineContentStore {
     const id = WebOfflineContentStore.bundleId(scripture, lang)
     if (!catalog.list().some((b) => b.id === id)) return []
     return this.rpc<VerseRow[]>({ type: 'getVerses', bundleId: id, range })
+  }
+
+  async getWords(scripture: string, lang: string, range: VerseRange): Promise<WordRow[]> {
+    const id = WebOfflineContentStore.wordsBundleId(scripture, lang)
+    if (!catalog.list().some((b) => b.id === id)) return []
+    return this.rpc<WordRow[]>({ type: 'getWords', bundleId: id, range })
   }
 
   async getChapterTitle(scripture: string, lang: string, chapter: number): Promise<string | null> {
@@ -88,7 +99,12 @@ export class WebOfflineContentStore implements OfflineContentStore {
   ): Promise<SearchRow[]> {
     const ids = catalog
       .list()
-      .filter((b) => b.scripture === scripture && langs.includes(b.lang))
+      // Words bundles share scripture+lang with their text bundle but carry
+      // no FTS table — only text bundles are searchable.
+      .filter(
+        (b) =>
+          b.scripture === scripture && langs.includes(b.lang) && (b.kind ?? 'text') === 'text',
+      )
       .map((b) => b.id)
     if (ids.length === 0) return []
     return this.rpc<SearchRow[]>({ type: 'search', bundleIds: ids, query: q, opts })
@@ -112,6 +128,7 @@ export class WebOfflineContentStore implements OfflineContentStore {
       id: bundle.id,
       scripture: bundle.scripture,
       lang: bundle.lang,
+      kind: bundle.kind ?? 'text',
       bytes: bundle.bytes,
       sha256: bundle.sha256,
       dataVersion: bundle.dataVersion,

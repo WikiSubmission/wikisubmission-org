@@ -47,6 +47,16 @@ export default function OfflinePage() {
       </div>
 
       <OfflineRetry />
+
+      {/* Plain anchor (no next/link prefetch logic) so this page stays fully
+          self-contained for the service worker's offline fallback. */}
+      <p className="max-w-sm text-balance text-sm opacity-70">
+        Tip: you can download the Quran for offline reading from the{' '}
+        <a href="/me/settings?tab=downloads" className="underline underline-offset-2">
+          Downloads section
+        </a>{' '}
+        in your settings, so it stays available without a connection.
+      </p>
     </main>
   )
 }

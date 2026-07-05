@@ -13,6 +13,46 @@ function formatBytes(n: number): string {
   return `${mb.toFixed(1)} MB`
 }
 
+const languageNames = new Intl.DisplayNames(['en'], { type: 'language' })
+
+function languageName(code: string): string {
+  try {
+    return languageNames.of(code) ?? code
+  } catch {
+    return code
+  }
+}
+
+/** Bundles grouped for display: one group per language, the text bundle as the
+ * main entry and the word-by-word bundle (when the manifest offers one) as a
+ * nested sub-entry. */
+interface LanguageGroup {
+  lang: string
+  text: BundleDescriptor
+  words?: BundleDescriptor
+}
+
+function groupBundles(bundles: BundleDescriptor[]): {
+  groups: LanguageGroup[]
+  orphans: BundleDescriptor[]
+} {
+  const texts = bundles.filter((b) => (b.kind ?? 'text') === 'text')
+  const words = bundles.filter((b) => b.kind === 'words')
+
+  const wordsByLang = new Map(words.map((b) => [b.lang, b]))
+  const groups = texts.map((text) => ({
+    lang: text.lang,
+    text,
+    words: wordsByLang.get(text.lang),
+  }))
+
+  // Words bundles without a matching text bundle, plus kinds this client does
+  // not recognize: still listed (flat) rather than silently hidden.
+  const grouped = new Set(groups.flatMap((g) => [g.text.id, g.words?.id]))
+  const orphans = bundles.filter((b) => !grouped.has(b.id))
+  return { groups, orphans }
+}
+
 export function OfflineSettingsSection() {
   const offline = useOfflineContent()
 
@@ -29,12 +69,29 @@ export function OfflineSettingsSection() {
   }
 
   const bundles = offline.manifest?.bundles ?? []
+  const { groups, orphans } = groupBundles(bundles)
+
+  const rowProps = (bundle: BundleDescriptor) => ({
+    bundle,
+    installed: offline.isInstalled(bundle.id),
+    busy: offline.busyId === bundle.id,
+    progressPct:
+      offline.busyId === bundle.id && offline.progress
+        ? progressPercent(offline.progress.received, offline.progress.total)
+        : null,
+    progressPhase:
+      offline.busyId === bundle.id ? (offline.progress?.phase ?? null) : null,
+    onInstall: () => offline.install(bundle),
+    onRemove: () => offline.remove(bundle.id),
+  })
 
   return (
     <section style={cardStyle}>
       <h2 style={h2Style}>Offline reading</h2>
       <p style={bodyStyle}>
         Download translations to read and search the Quran without a connection.
+        Add the word-by-word data of a language to keep its word breakdown
+        available offline too.
       </p>
 
       {offline.usage && (
@@ -52,24 +109,25 @@ export function OfflineSettingsSection() {
         <p style={mutedStyle}>No downloadable content is available right now.</p>
       )}
 
-      <ul style={listStyle}>
-        {bundles.map((bundle) => (
-          <BundleRow
-            key={bundle.id}
-            bundle={bundle}
-            installed={offline.isInstalled(bundle.id)}
-            busy={offline.busyId === bundle.id}
-            progressPct={
-              offline.busyId === bundle.id && offline.progress
-                ? progressPercent(offline.progress.received, offline.progress.total)
-                : null
-            }
-            progressPhase={offline.busyId === bundle.id ? offline.progress?.phase ?? null : null}
-            onInstall={() => offline.install(bundle)}
-            onRemove={() => offline.remove(bundle.id)}
-          />
-        ))}
-      </ul>
+      {groups.map((group) => (
+        <div key={group.lang} style={groupStyle}>
+          <h3 style={groupHeadingStyle}>{languageName(group.lang)}</h3>
+          <ul style={listStyle}>
+            <BundleRow {...rowProps(group.text)} label="Quran text" />
+            {group.words && (
+              <BundleRow {...rowProps(group.words)} label="Word by word" nested />
+            )}
+          </ul>
+        </div>
+      ))}
+
+      {orphans.length > 0 && (
+        <ul style={{ ...listStyle, marginTop: 16 }}>
+          {orphans.map((bundle) => (
+            <BundleRow key={bundle.id} {...rowProps(bundle)} label={bundle.id} />
+          ))}
+        </ul>
+      )}
     </section>
   )
 }
@@ -81,6 +139,9 @@ function progressPercent(received: number, total: number): number {
 
 interface BundleRowProps {
   bundle: BundleDescriptor
+  label: string
+  /** Indented sub-entry (word-by-word under its language). */
+  nested?: boolean
   installed: boolean
   busy: boolean
   progressPct: number | null
@@ -91,6 +152,8 @@ interface BundleRowProps {
 
 function BundleRow({
   bundle,
+  label,
+  nested = false,
   installed,
   busy,
   progressPct,
@@ -99,9 +162,9 @@ function BundleRow({
   onRemove,
 }: BundleRowProps) {
   return (
-    <li style={rowStyle}>
+    <li style={nested ? nestedRowStyle : rowStyle}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <span style={{ fontSize: 14, fontWeight: 500 }}>{bundle.id}</span>
+        <span style={{ fontSize: 14, fontWeight: nested ? 400 : 500 }}>{label}</span>
         <span style={statusStyle}>{formatBytes(bundle.bytes)}</span>
       </div>
 
@@ -152,13 +215,23 @@ const bodyStyle: React.CSSProperties = {
 
 const mutedStyle: React.CSSProperties = { marginTop: 8, color: 'var(--ed-fg-muted)', fontSize: 13 }
 
+const groupStyle: React.CSSProperties = { marginTop: 20 }
+
+const groupHeadingStyle: React.CSSProperties = {
+  margin: 0,
+  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+  fontSize: 11,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: 'var(--ed-fg-muted)',
+}
+
 const listStyle: React.CSSProperties = {
   listStyle: 'none',
-  margin: '16px 0 0',
+  margin: '8px 0 0',
   padding: 0,
   display: 'flex',
   flexDirection: 'column',
-  gap: 8,
 }
 
 const rowStyle: React.CSSProperties = {
@@ -168,6 +241,12 @@ const rowStyle: React.CSSProperties = {
   gap: 12,
   padding: '10px 0',
   borderTop: '1px solid var(--ed-rule)',
+}
+
+const nestedRowStyle: React.CSSProperties = {
+  ...rowStyle,
+  paddingLeft: 20,
+  borderTop: '1px dashed var(--ed-rule)',
 }
 
 const statusStyle: React.CSSProperties = {

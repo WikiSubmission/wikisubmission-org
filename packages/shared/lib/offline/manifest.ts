@@ -8,6 +8,9 @@ const bundleSchema = z
     id: z.string().min(1),
     scripture: z.string().min(1),
     lang: z.string().min(1),
+    // Absent on pre-kind manifests; unknown kinds are preserved (the UI skips
+    // what it does not recognize) rather than failing the whole manifest.
+    kind: z.string().min(1).optional(),
     url: z.string().url(),
     bytes: z.number().int().positive(),
     sha256: z.string().regex(/^[0-9a-f]{64}$/, 'sha256 must be 64 lowercase hex chars'),
@@ -21,6 +24,7 @@ const bundleSchema = z
       id: b.id,
       scripture: b.scripture,
       lang: b.lang,
+      kind: b.kind ?? 'text',
       url: b.url,
       bytes: b.bytes,
       sha256: b.sha256,

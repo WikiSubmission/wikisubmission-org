@@ -998,6 +998,11 @@
   },
   "meSettings": {
     "title": "Settings",
+    "tabs": {
+      "general": "General",
+      "privacy": "Privacy",
+      "downloads": "Downloads"
+    },
     "consentHeading": "Data collection",
     "consentBody": "We record the chapters you browse, the verse ranges you open, and the text you search for. This data powers your activity page and nothing else. It is never shared or used to identify you across services.",
     "consentToggleOn": "Collection is on",

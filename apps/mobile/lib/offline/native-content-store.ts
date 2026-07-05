@@ -7,6 +7,7 @@ import type {
   SearchRow,
   VerseRange,
   VerseRow,
+  WordRow,
 } from '@/lib/offline/types'
 import { normalizeForSearch } from '@/lib/text-normalization/normalize'
 import { nativeCatalog, type NativeBundleRecord } from './native-catalog'
@@ -25,6 +26,10 @@ import { closeDb, openDb, query, sqlite } from './native-db'
  */
 function bundleIdOf(scripture: string, lang: string): string {
   return `${scripture}-${lang}`
+}
+
+function wordsBundleIdOf(scripture: string, lang: string): string {
+  return `${scripture}-words-${lang}`
 }
 
 /** The plugin stores a downloaded DB under its URL filename stem. */
@@ -78,6 +83,32 @@ export class NativeOfflineContentStore implements OfflineContentStore {
     return rows.map(toVerseRow)
   }
 
+  async getWords(scripture: string, lang: string, range: VerseRange): Promise<WordRow[]> {
+    const id = wordsBundleIdOf(scripture, lang)
+    const rec = (await nativeCatalog.list()).find((b) => b.id === id)
+    if (!rec) return []
+    const db = await openDb(rec.dbName, true)
+    const start = range.verseStart ?? 1
+    const end = range.verseEnd ?? Number.MAX_SAFE_INTEGER
+    const rows = await query(
+      db,
+      `SELECT cn, vn, wi, gi, lang, text, root, meaning FROM words
+       WHERE cn = ? AND vn BETWEEN ? AND ? ORDER BY vn, wi, lang`,
+      [range.chapter, start, end],
+    )
+    const s = (v: unknown) => (v == null ? undefined : String(v))
+    return rows.map((r) => ({
+      cn: Number(r.cn),
+      vn: Number(r.vn),
+      wi: Number(r.wi),
+      gi: Number(r.gi),
+      lang: String(r.lang ?? ''),
+      text: String(r.text ?? ''),
+      root: s(r.root),
+      meaning: s(r.meaning),
+    }))
+  }
+
   async getChapterTitle(scripture: string, lang: string, chapter: number): Promise<string | null> {
     const rec = await this.recordFor(scripture, lang)
     if (!rec) return null
@@ -98,8 +129,11 @@ export class NativeOfflineContentStore implements OfflineContentStore {
     const limit = opts?.limit ?? 20
     const offset = opts?.offset ?? 0
 
+    // Words bundles share scripture+lang with their text bundle but carry no
+    // FTS table — only text bundles are searchable (mirrors the web adapter).
     const records = (await nativeCatalog.list()).filter(
-      (b) => b.scripture === scripture && langs.includes(b.lang),
+      (b) =>
+        b.scripture === scripture && langs.includes(b.lang) && (b.kind ?? 'text') === 'text',
     )
     if (records.length === 0) return []
 
@@ -142,6 +176,7 @@ export class NativeOfflineContentStore implements OfflineContentStore {
       id: bundle.id,
       scripture: bundle.scripture,
       lang: bundle.lang,
+      kind: bundle.kind ?? 'text',
       bytes: bundle.bytes,
       sha256: bundle.sha256,
       dataVersion: bundle.dataVersion,

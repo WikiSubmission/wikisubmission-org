@@ -48,6 +48,12 @@ type State = {
   lastOpts: ChapterReaderOptions | null
 }
 
+// The words bundle language the offline word-by-word display reads from. The
+// network path hardcodes word_langs [ar, en, tl] below for the same reason:
+// English is the only word-by-word translation that exists today. When more
+// word languages ship, derive this from the reader preferences instead.
+const WORDS_BUNDLE_LANG = 'en'
+
 function buildLangs(opts: ChapterReaderOptions): string[] {
   const langs: string[] = []
   if (opts.primaryLang !== 'xl' && opts.primaryLang !== 'none') langs.push(opts.primaryLang)
@@ -118,29 +124,27 @@ export function useChapterReader(
       const offlineStore = getRegisteredOfflineContentStore()
 
       // Serve a verse window from the installed bundles, or null on miss/error.
-      // Word-by-word data is not bundled in v1, so the returned verses carry
-      // text + translations only (no word breakdown).
+      // The word-by-word breakdown is attached when the words bundle is
+      // installed; otherwise the verses carry text + translations only.
       const tryOffline = async (): Promise<FetchResult | null> => {
         try {
-          if (!offlineStore) {
-            console.info('[offline-read] no store registered')
-            return null
-          }
-          const installed = (await offlineStore.installedBundles()).map((b) => b.id)
-          const offline = await offlineQuranVerses(offlineStore, langs, {
-            chapter: chapterNumber,
-            verseStart,
-            verseEnd: verseEndParam,
-          })
-          // TEMP diagnostics — remove once offline reads are confirmed working.
-          console.info('[offline-read]', {
-            chapter: chapterNumber,
+          if (!offlineStore) return null
+          const offline = await offlineQuranVerses(
+            offlineStore,
             langs,
-            isOffline,
-            includeWords: opts.includeWords,
-            installed,
-            verses: offline?.verses.length ?? null,
-          })
+            {
+              chapter: chapterNumber,
+              verseStart,
+              verseEnd: verseEndParam,
+            },
+            opts.includeWords
+              ? {
+                  lang: WORDS_BUNDLE_LANG,
+                  includeRoot: opts.includeRoot,
+                  includeMeaning: opts.includeMeaning,
+                }
+              : undefined,
+          )
           if (offline && offline.verses.length > 0) {
             return {
               verses: offline.verses,
@@ -155,12 +159,19 @@ export function useChapterReader(
         return null
       }
 
-      // Offline-first: bundles cover verse text + translations. Word requests
-      // prefer the network for the word breakdown, but we still try the bundle
-      // first when the browser reports offline — and again as a fallback if the
-      // network fails — so an unreliable navigator.onLine never strands the
-      // reader on a route it could serve locally.
-      if (!opts.includeWords || isOffline) {
+      // Offline-first: bundles cover verse text + translations, and the words
+      // bundle covers the word-by-word breakdown. A word request only prefers
+      // the network when the words bundle is missing — but even then we try the
+      // bundles first when the browser reports offline, and again as a fallback
+      // if the network fails, so an unreliable navigator.onLine never strands
+      // the reader on a route it could serve locally (then without words).
+      const wordsInstalled =
+        opts.includeWords && offlineStore
+          ? (await offlineStore.installedBundles()).some(
+              (b) => b.id === `quran-words-${WORDS_BUNDLE_LANG}`,
+            )
+          : false
+      if (!opts.includeWords || wordsInstalled || isOffline) {
         const hit = await tryOffline()
         if (hit) return hit
       }

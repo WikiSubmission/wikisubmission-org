@@ -10,7 +10,7 @@
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
 import { normalizeForSearch } from '../../text-normalization/normalize'
-import type { SearchOpts, SearchRow, VerseRange, VerseRow } from '../types'
+import type { SearchOpts, SearchRow, VerseRange, VerseRow, WordRow } from '../types'
 import type { WorkerRequest, WorkerResponse } from './protocol'
 
 // Minimal local typings for the subset of the sqlite-wasm OO1 + SAH-pool API we
@@ -106,6 +106,31 @@ function getVerses(bundleId: string, range: VerseRange): VerseRow[] {
   ).map(toVerseRow)
 }
 
+function toWordRow(r: Record<string, unknown>): WordRow {
+  return {
+    cn: Number(r.cn),
+    vn: Number(r.vn),
+    wi: Number(r.wi),
+    gi: Number(r.gi),
+    lang: str(r.lang),
+    text: str(r.text),
+    root: r.root == null ? undefined : str(r.root),
+    meaning: r.meaning == null ? undefined : str(r.meaning),
+  }
+}
+
+function getWords(bundleId: string, range: VerseRange): WordRow[] {
+  const db = dbFor(bundleId)
+  const start = range.verseStart ?? 1
+  const end = range.verseEnd ?? Number.MAX_SAFE_INTEGER
+  return rows(
+    db,
+    `SELECT cn, vn, wi, gi, lang, text, root, meaning FROM words
+     WHERE cn = ? AND vn BETWEEN ? AND ? ORDER BY vn, wi, lang`,
+    [range.chapter, start, end],
+  ).map(toWordRow)
+}
+
 function getChapterTitle(bundleId: string, chapter: number): string | null {
   const found = rows(dbFor(bundleId), `SELECT title FROM chapters WHERE cn = ?`, [chapter])
   return found.length > 0 ? str(found[0].title) : null
@@ -177,6 +202,9 @@ async function handle(req: WorkerRequest): Promise<unknown> {
     case 'getVerses':
       await ensurePool()
       return getVerses(req.bundleId, req.range)
+    case 'getWords':
+      await ensurePool()
+      return getWords(req.bundleId, req.range)
     case 'getChapterTitle':
       await ensurePool()
       return getChapterTitle(req.bundleId, req.chapter)

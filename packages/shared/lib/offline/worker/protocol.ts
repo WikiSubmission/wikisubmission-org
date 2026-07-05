@@ -1,4 +1,4 @@
-import type { SearchOpts, SearchRow, VerseRange, VerseRow } from '../types'
+import type { SearchOpts, SearchRow, VerseRange, VerseRow, WordRow } from '../types'
 
 /** Request messages sent from the main thread to the sqlite worker. Each carries
  * a monotonic `id` the response echoes so the client can correlate replies. */
@@ -8,6 +8,7 @@ export type WorkerRequest =
   | { id: number; type: 'remove'; bundleId: string }
   | { id: number; type: 'listFiles' }
   | { id: number; type: 'getVerses'; bundleId: string; range: VerseRange }
+  | { id: number; type: 'getWords'; bundleId: string; range: VerseRange }
   | { id: number; type: 'getChapterTitle'; bundleId: string; chapter: number }
   | { id: number; type: 'search'; bundleIds: string[]; query: string; opts?: SearchOpts }
 
@@ -18,6 +19,7 @@ export interface WorkerResultMap {
   remove: boolean
   listFiles: string[]
   getVerses: VerseRow[]
+  getWords: WordRow[]
   getChapterTitle: string | null
   search: SearchRow[]
 }

@@ -1,7 +1,9 @@
 import type { components } from '@/src/api/types.gen'
 import type { OfflineContentStore } from './content-store'
+import type { WordRow } from './types'
 
 type VerseData = components['schemas']['VerseData']
+type WordData = components['schemas']['WordData']
 type QuranResponse = components['schemas']['QuranResponse']
 type ChapterData = components['schemas']['ChapterData']
 type TranslationContent = components['schemas']['TranslationContent']
@@ -21,9 +23,20 @@ export interface OfflineRange {
   verseEnd?: number
 }
 
+/** Word-by-word options for offlineQuranVerses. `lang` selects the words
+ * bundle (`quran-words-${lang}`); the bundle itself carries every word
+ * language the display needs (Arabic, target, transliteration). */
+export interface OfflineWordsOpts {
+  lang: string
+  includeRoot?: boolean
+  includeMeaning?: boolean
+}
+
 export interface OfflineVersesResult {
   verses: VerseData[]
   titles: Record<string, string>
+  /** True when the word-by-word breakdown was attached from a words bundle. */
+  hasWords: boolean
 }
 
 /**
@@ -37,6 +50,7 @@ export async function offlineQuranVerses(
   store: OfflineContentStore,
   langs: string[],
   range: OfflineRange,
+  words?: OfflineWordsOpts,
 ): Promise<OfflineVersesResult | null> {
   if (langs.length === 0) return null
 
@@ -72,6 +86,17 @@ export async function offlineQuranVerses(
     return { vi: spineRow.vn - 1, vk: spineRow.vk, tr }
   })
 
+  // Word-by-word: attached only when the words bundle for the requested
+  // language is installed; its absence never fails the verse read.
+  let hasWords = false
+  if (words && installed.has(`quran-words-${words.lang}`)) {
+    const wordRows = await store.getWords('quran', words.lang, range)
+    if (wordRows.length > 0) {
+      attachWords(verses, wordRows, words)
+      hasWords = true
+    }
+  }
+
   const titleEntries = await Promise.all(
     langs.map(
       async (lang) => [lang, await store.getChapterTitle('quran', lang, range.chapter)] as const,
@@ -82,7 +107,40 @@ export async function offlineQuranVerses(
     if (title) titles[lang] = title
   }
 
-  return { verses, titles }
+  return { verses, titles, hasWords }
+}
+
+/**
+ * Rebuild the API's per-verse `w` arrays from flat word rows, mirroring the
+ * backend's attachWordsToVerses: one WordData per (verse, word_index) whose
+ * `tx` merges every language's text; `r` only when includeRoot (roots ride on
+ * Arabic rows); `m` only when includeMeaning (meanings ride on translation
+ * rows).
+ */
+function attachWords(verses: VerseData[], wordRows: WordRow[], opts: OfflineWordsOpts): void {
+  const byVk = new Map<string, Map<number, WordData>>()
+  for (const row of wordRows) {
+    const vk = `${row.cn}:${row.vn}`
+    let words = byVk.get(vk)
+    if (!words) {
+      words = new Map()
+      byVk.set(vk, words)
+    }
+    let word = words.get(row.wi)
+    if (!word) {
+      word = { wi: row.wi, gi: row.gi, tx: {} }
+      words.set(row.wi, word)
+    }
+    ;(word.tx as Record<string, string>)[row.lang] = row.text
+    if (opts.includeRoot && row.root != null && word.r == null) word.r = row.root
+    if (opts.includeMeaning && row.meaning != null) word.m = row.meaning
+  }
+
+  for (const verse of verses) {
+    const words = verse.vk ? byVk.get(verse.vk) : undefined
+    if (!words) continue
+    verse.w = [...words.values()].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0))
+  }
 }
 
 /**

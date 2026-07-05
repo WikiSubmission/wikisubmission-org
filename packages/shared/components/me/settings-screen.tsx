@@ -50,15 +50,29 @@ const DELETE_CATEGORIES = [
 // here so the UI matches the backend gating.
 const EXPORT_COOLDOWN_MS = 15 * 24 * 3600 * 1000
 
+// Settings are split into tabs so downloads stand apart from account and
+// privacy controls; the offline fallback page links straight to ?tab=downloads.
+const SETTINGS_TABS = ['general', 'privacy', 'downloads'] as const
+type SettingsTab = (typeof SETTINGS_TABS)[number]
+
+function resolveTab(candidate: string | undefined, hasDownloads: boolean): SettingsTab {
+  const tab = SETTINGS_TABS.find((t) => t === candidate) ?? 'general'
+  return tab === 'downloads' && !hasDownloads ? 'general' : tab
+}
+
 interface SettingsClientProps {
   /** Optional offline-reading section. Injected by apps/web (sqlite-wasm + OPFS);
    * omitted on Capacitor, which will supply a native adapter in a later phase.
    * Keeping it a slot prevents the web worker/WASM from entering the mobile bundle. */
   offlineSection?: React.ReactNode
+  /** Initial tab, from the page's ?tab= search param. */
+  initialTab?: string
 }
 
-export function SettingsClient({ offlineSection }: SettingsClientProps = {}) {
+export function SettingsClient({ offlineSection, initialTab }: SettingsClientProps = {}) {
   const t = useTranslations('meSettings')
+  const hasDownloads = offlineSection != null
+  const [tab, setTab] = useState<SettingsTab>(() => resolveTab(initialTab, hasDownloads))
   const push = usePushNotifications()
   const [consent, setConsent] = useState<ConsentState>({ status: 'loading' })
   const [saving, setSaving] = useState(false)
@@ -197,6 +211,18 @@ export function SettingsClient({ offlineSection }: SettingsClientProps = {}) {
     window.setTimeout(() => setToast((cur) => (cur === msg ? null : cur)), 2400)
   }
 
+  function switchTab(next: SettingsTab) {
+    setTab(next)
+    // Keep the URL shareable. replaceState (not router.replace) so frequent
+    // URL updates never re-render the app's useSearchParams consumers.
+    const url = new URL(window.location.href)
+    if (next === 'general') url.searchParams.delete('tab')
+    else url.searchParams.set('tab', next)
+    window.history.replaceState(window.history.state, '', url)
+  }
+
+  const visibleTabs = SETTINGS_TABS.filter((key) => key !== 'downloads' || hasDownloads)
+
   // A completed, downloadable export is required before any deletion. The
   // backend enforces this too; the UI mirrors it to keep the flow clear.
   const exportReady = exportState?.status === 'sent'
@@ -211,28 +237,40 @@ export function SettingsClient({ offlineSection }: SettingsClientProps = {}) {
         <h1 style={titleStyle}>{t('title')}</h1>
       </header>
 
-      {/* Offline reading is independent of the activity-consent fetch, so it
-          renders regardless of consent status — a failing/slow /me/consent
-          request must not hide the offline download manager. */}
-      {offlineSection}
+      <nav style={tabBarStyle} role="tablist" aria-label={t('title')}>
+        {visibleTabs.map((key) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={tab === key}
+            onClick={() => switchTab(key)}
+            style={tabButtonStyle(tab === key)}
+          >
+            {t(`tabs.${key}`)}
+          </button>
+        ))}
+      </nav>
 
-      {consent.status === 'loading' && <p style={mutedStyle}>{t('loading')}</p>}
-      {consent.status === 'error' && <p style={mutedStyle}>{t('error')}</p>}
-
-      {consent.status === 'ready' && (
+      {tab === 'general' && (
         <>
-          <section style={cardStyle}>
-            <h2 style={h2Style}>{t('consentHeading')}</h2>
-            <p style={bodyStyle}>{t('consentBody')}</p>
-            <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={statusStyle}>
-                {consent.consent ? t('consentToggleOn') : t('consentToggleOff')}
-              </span>
-              <button type="button" onClick={toggle} disabled={saving} style={buttonStyle}>
-                {consent.consent ? t('consentDisable') : t('consentEnable')}
-              </button>
-            </div>
-          </section>
+          {consent.status === 'loading' && <p style={mutedStyle}>{t('loading')}</p>}
+          {consent.status === 'error' && <p style={mutedStyle}>{t('error')}</p>}
+
+          {consent.status === 'ready' && (
+            <section style={cardStyle}>
+              <h2 style={h2Style}>{t('consentHeading')}</h2>
+              <p style={bodyStyle}>{t('consentBody')}</p>
+              <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={statusStyle}>
+                  {consent.consent ? t('consentToggleOn') : t('consentToggleOff')}
+                </span>
+                <button type="button" onClick={toggle} disabled={saving} style={buttonStyle}>
+                  {consent.consent ? t('consentDisable') : t('consentEnable')}
+                </button>
+              </div>
+            </section>
+          )}
 
           <section style={cardStyle}>
             <h2 style={h2Style}>{t('notifications.heading')}</h2>
@@ -303,7 +341,11 @@ export function SettingsClient({ offlineSection }: SettingsClientProps = {}) {
               </div>
             )}
           </section>
+        </>
+      )}
 
+      {tab === 'privacy' && (
+        <>
           <section style={cardStyle}>
             <h2 style={h2Style}>{t('export.heading')}</h2>
             <p style={bodyStyle}>{t('export.disclosure')}</p>
@@ -395,6 +437,10 @@ export function SettingsClient({ offlineSection }: SettingsClientProps = {}) {
         </>
       )}
 
+      {/* Offline downloads are independent of the account fetches on the other
+          tabs — a failing/slow /me request must not hide the download manager. */}
+      {tab === 'downloads' && offlineSection}
+
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -474,6 +520,29 @@ const cardStyle: React.CSSProperties = {
   borderRadius: 2,
   background: 'var(--ed-surface)',
   marginBottom: 16,
+}
+
+const tabBarStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 4,
+  marginBottom: 24,
+  borderBottom: '1px solid var(--ed-rule)',
+}
+
+function tabButtonStyle(active: boolean): React.CSSProperties {
+  return {
+    padding: '10px 14px',
+    marginBottom: -1,
+    background: 'transparent',
+    border: 'none',
+    borderBottom: active ? '2px solid var(--ed-fg)' : '2px solid transparent',
+    color: active ? 'var(--ed-fg)' : 'var(--ed-fg-muted)',
+    fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+    fontSize: 11,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+  }
 }
 
 const h2Style: React.CSSProperties = {
