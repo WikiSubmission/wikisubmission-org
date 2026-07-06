@@ -13,7 +13,8 @@ export default async function SettingsPage({
   const session = await auth()
   if (!session?.accessToken) redirect('/auth/sign-in')
   const { tab } = await searchParams
-  // Offline reading is web-only (sqlite-wasm + OPFS); injected here so the
-  // mobile build never pulls in the worker or WASM.
+  // The offline section resolves the platform store from the registry
+  // (sqlite-wasm here, the Capacitor store on mobile); the worker/WASM only
+  // load through this app's registerWebOfflineStore().
   return <SettingsClient offlineSection={<OfflineSettingsSection />} initialTab={tab} />
 }

@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { fetchManifest } from '@/lib/offline/manifest'
+import { fetchManifest, OFFLINE_MANIFEST_URL } from '@/lib/offline/manifest'
+import { getRegisteredOfflineContentStore } from '@/lib/offline/registry'
 import { storageEstimate, type StorageUsage } from '@/lib/offline/storage'
 import type {
   BundleDescriptor,
@@ -9,11 +10,6 @@ import type {
   InstallProgress,
   Manifest,
 } from '@/lib/offline/types'
-import {
-  getOfflineContentStore,
-  isOfflineSupported,
-  OFFLINE_MANIFEST_URL,
-} from '@/lib/offline/web-store-singleton'
 
 export interface OfflineContentState {
   supported: boolean
@@ -34,8 +30,10 @@ export interface OfflineContentApi extends OfflineContentState {
 }
 
 /** Drives the offline settings UI: loads the manifest + installed catalog and
- * exposes install/remove with live progress. Safe on the server and in
- * unsupported browsers (returns supported: false and does nothing). */
+ * exposes install/remove with live progress. Resolves the platform store from
+ * the registry (web sqlite-wasm or the native Capacitor store), so it works in
+ * both apps. Safe on the server and where no store is registered (returns
+ * supported: false and does nothing). */
 export function useOfflineContent(): OfflineContentApi {
   const [state, setState] = useState<OfflineContentState>({
     supported: false,
@@ -49,11 +47,11 @@ export function useOfflineContent(): OfflineContentApi {
   })
 
   const refresh = useCallback(async () => {
-    if (!isOfflineSupported()) {
+    const store = getRegisteredOfflineContentStore()
+    if (!store) {
       setState((s) => ({ ...s, supported: false, loading: false }))
       return
     }
-    const store = getOfflineContentStore()
     try {
       const [installed, usage] = await Promise.all([store.installedBundles(), storageEstimate()])
       let manifest: Manifest | null = null
@@ -80,7 +78,8 @@ export function useOfflineContent(): OfflineContentApi {
 
   const install = useCallback(
     async (bundle: BundleDescriptor) => {
-      const store = getOfflineContentStore()
+      const store = getRegisteredOfflineContentStore()
+      if (!store) return
       setState((s) => ({ ...s, busyId: bundle.id, progress: null, error: null }))
       try {
         await store.install(bundle, (progress) => setState((s) => ({ ...s, progress })))
@@ -99,7 +98,8 @@ export function useOfflineContent(): OfflineContentApi {
   )
 
   const remove = useCallback(async (bundleId: string) => {
-    const store = getOfflineContentStore()
+    const store = getRegisteredOfflineContentStore()
+    if (!store) return
     setState((s) => ({ ...s, busyId: bundleId, error: null }))
     try {
       await store.remove(bundleId)

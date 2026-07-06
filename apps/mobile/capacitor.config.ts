@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 import { KeyboardResize } from '@capacitor/keyboard'
 
 const config: CapacitorConfig = {
-  appId: 'org.wikisubmission.app',
+  appId: 'com.wikisubmission.app',
   appName: 'WikiSubmission',
   // Next static export output. `next build` writes here; `cap sync` copies it
   // into the native iOS/Android projects.

@@ -175,7 +175,7 @@ export function ToolsSection() {
       key: 'android',
       title: t('androidTitle'),
       desc: t('androidDesc'),
-      href: 'https://play.google.com/store/apps/details?id=org.wikisubmission.app',
+      href: 'https://play.google.com/store/apps/details?id=com.wikisubmission.app',
       glyph: GLYPH_ANDROID,
     },
     {
