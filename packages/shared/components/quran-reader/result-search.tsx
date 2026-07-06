@@ -8,6 +8,7 @@ import { Tabs, TabsTrigger, TabsContent, TabsList } from '@/components/ui/tabs'
 import {
   ArrowDownUp,
   ArrowRightIcon,
+  BookMarked,
   CheckIcon,
   ChevronRight,
   SearchIcon,
@@ -39,6 +40,7 @@ import { CopyAllDropdown } from './copy-all-dropdown'
 import { SearchResultsSkeleton } from './search-results-skeleton'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useMeSearch } from '@/hooks/use-me-search'
+import { useLibrarySearch, libraryHitHref, type LibraryHit } from '@/hooks/use-library-search'
 import { useTranslations } from 'next-intl'
 import { useScriptureAuth } from '@/lib/scripture-auth-context'
 
@@ -85,6 +87,52 @@ function SearchResultChapter({
         <ChevronRight className="size-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
       </div>
     </Link>
+  )
+}
+
+// ─── Library results (introduction / proclamation / appendices) ──────────────
+
+/** Render a ts_headline/FTS5 snippet: only <b> markers are interpreted; all
+ * other content is rendered as plain text (no raw HTML injection). */
+function renderSnippet(snippet: string): React.ReactNode {
+  return snippet
+    .split(/(<b>.*?<\/b>)/g)
+    .map((part, i) =>
+      part.startsWith('<b>') ? <b key={i}>{part.slice(3, -4)}</b> : part,
+    )
+}
+
+function libraryHitLabel(hit: LibraryHit): string {
+  if (hit.docType === 'appendix' && hit.docNumber) {
+    return `Appendix ${hit.docNumber} — ${hit.title}`
+  }
+  return hit.title
+}
+
+function LibraryResults({ hits }: { hits: LibraryHit[] }) {
+  if (hits.length === 0) return null
+  return (
+    <div className="bg-primary/5 rounded-2xl border border-primary/20 overflow-hidden divide-y divide-primary/10">
+      {hits.map((hit) => (
+        <Link
+          key={`library:${hit.docType}:${hit.docNumber ?? 0}`}
+          href={libraryHitHref(hit)}
+          className="block px-4 py-3 hover:bg-primary/10 transition-colors"
+        >
+          <div className="flex items-start gap-2">
+            <BookMarked className="size-4 text-primary/80 mt-0.5 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium">{libraryHitLabel(hit)}</p>
+              {hit.snippet && (
+                <p className="text-sm text-muted-foreground line-clamp-2 [&_b]:text-foreground [&_b]:font-semibold">
+                  {renderSnippet(hit.snippet)}
+                </p>
+              )}
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
   )
 }
 
@@ -247,6 +295,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const rawVerses =
     verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
   const noteMatches = useMeSearch(searchQuery, 'quran')
+  const librarySearch = useLibrarySearch(searchQuery)
   const allVerses =
     sortMode === 'verse-order'
       ? [...rawVerses].sort((a, b) => {
@@ -401,6 +450,8 @@ export default function SearchResult({ props }: { props: { query: string } }) {
               })}
             </div>
           )}
+
+          <LibraryResults hits={librarySearch.hits} />
 
           {verseSearch.error ? (
             <p className="text-sm text-muted-foreground py-8 text-center">

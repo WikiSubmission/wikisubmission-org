@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { ChapterReader } from '@/components/quran-reader/chapter-reader'
+import { ChapterToolbar } from '@/components/quran/chapter-toolbar'
 
 // The Quran has a fixed 114 chapters, so the export pre-renders one static page
 // per chapter. The reader itself fetches verses on the client (initialData is
@@ -22,5 +23,10 @@ export default async function ChapterPage({
     notFound()
   }
 
-  return <ChapterReader chapterNumber={chapterNumber} initialData={null} />
+  return (
+    <>
+      <ChapterToolbar />
+      <ChapterReader chapterNumber={chapterNumber} initialData={null} />
+    </>
+  )
 }

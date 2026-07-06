@@ -10,7 +10,7 @@
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
 import { normalizeForSearch } from '../../text-normalization/normalize'
-import type { SearchOpts, SearchRow, VerseRange, VerseRow, WordRow } from '../types'
+import type { DocSearchRow, SearchOpts, SearchRow, VerseRange, VerseRow, WordRow } from '../types'
 import type { WorkerRequest, WorkerResponse } from './protocol'
 
 // Minimal local typings for the subset of the sqlite-wasm OO1 + SAH-pool API we
@@ -176,6 +176,35 @@ function search(bundleIds: string[], query: string, opts?: SearchOpts): SearchRo
   return merged.slice(0, limit)
 }
 
+function searchDocs(bundleId: string, query: string, opts?: SearchOpts): DocSearchRow[] {
+  const norm = normalizeForSearch(query)
+  if (!norm) return []
+  const match = `"${norm.replace(/"/g, '""')}"`
+  const limit = opts?.limit ?? 20
+  const offset = opts?.offset ?? 0
+
+  const db = dbFor(bundleId)
+  const found = rows(
+    db,
+    `SELECT d.doc_type AS doc_type, d.doc_number AS doc_number, d.title AS title,
+            d.section_index AS section_index, d.heading AS heading,
+            snippet(docs_fts, 0, '<b>', '</b>', '…', 12) AS hl,
+            rank AS rank
+     FROM docs_fts f JOIN docs d ON d.rowid = f.rowid
+     WHERE docs_fts MATCH ? ORDER BY rank LIMIT ? OFFSET ?`,
+    [match, limit, offset],
+  )
+  return found.map((r) => ({
+    docType: str(r.doc_type),
+    docNumber: Number(r.doc_number),
+    title: str(r.title),
+    sectionIndex: Number(r.section_index),
+    heading: r.heading == null ? undefined : str(r.heading),
+    hl: r.hl == null ? undefined : str(r.hl),
+    rank: typeof r.rank === 'number' ? r.rank : Number(r.rank),
+  }))
+}
+
 async function handle(req: WorkerRequest): Promise<unknown> {
   switch (req.type) {
     case 'init':
@@ -211,6 +240,9 @@ async function handle(req: WorkerRequest): Promise<unknown> {
     case 'search':
       await ensurePool()
       return search(req.bundleIds, req.query, req.opts)
+    case 'searchDocs':
+      await ensurePool()
+      return searchDocs(req.bundleId, req.query, req.opts)
     default: {
       const _exhaustive: never = req
       throw new Error(`unknown request: ${JSON.stringify(_exhaustive)}`)

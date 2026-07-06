@@ -12,6 +12,7 @@ import { MobileScriptureAuthBridge } from '@/components/mobile-scripture-auth-br
 import { MobileShell } from '@/components/mobile-shell'
 import { NativeInit } from '@/components/native-init'
 import { MobileOfflineSyncBridge } from '@/components/mobile-offline-sync-bridge'
+import { MobileBundleAutoload } from '@/components/mobile-bundle-autoload'
 
 /**
  * Client provider tree for the mobile app. This is the native counterpart to
@@ -40,6 +41,7 @@ export function MobileProviders({ children }: { children: React.ReactNode }) {
                 <QuranPlayerProvider>
                   <NativeInit />
                   <MobileOfflineSyncBridge />
+                  <MobileBundleAutoload />
                   <MobileShell>{children}</MobileShell>
                   <Toaster />
                 </QuranPlayerProvider>

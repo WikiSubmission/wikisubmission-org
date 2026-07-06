@@ -29,12 +29,18 @@ export function normalizePath(pathname: string): string {
   return pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname
 }
 
+/** Library routes mirror web URLs (so shared links work) but live under More. */
+const MORE_ALIAS_PREFIXES = ['/introduction', '/proclamation', '/appendices'] as const
+
 /**
  * Resolve the active tab for a pathname. Longest-href-first so a nested route
  * like `/quran/2` maps to the Quran tab, while `/` only matches Today exactly.
  */
 export function activeTab(pathname: string): TabItem | undefined {
   const path = normalizePath(pathname)
+  if (MORE_ALIAS_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) {
+    return TABS.find((tab) => tab.key === 'more')
+  }
   return [...TABS]
     .sort((a, b) => b.href.length - a.href.length)
     .find((tab) =>

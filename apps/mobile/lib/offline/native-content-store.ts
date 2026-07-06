@@ -2,6 +2,7 @@ import type { OfflineContentStore } from '@/lib/offline/content-store'
 import type {
   BundleDescriptor,
   BundleInfo,
+  DocSearchRow,
   InstallProgress,
   SearchOpts,
   SearchRow,
@@ -165,11 +166,59 @@ export class NativeOfflineContentStore implements OfflineContentStore {
     return merged.slice(0, limit)
   }
 
+  async searchDocs(lang: string, q: string, opts?: SearchOpts): Promise<DocSearchRow[]> {
+    const norm = normalizeForSearch(q)
+    if (!norm) return []
+    const match = `"${norm.replace(/"/g, '""')}"`
+    const limit = opts?.limit ?? 20
+    const offset = opts?.offset ?? 0
+
+    const rec = (await nativeCatalog.list()).find(
+      (b) => b.kind === 'library' && b.lang === lang,
+    )
+    if (!rec) return []
+
+    const db = await openDb(rec.dbName, true)
+    const rows = await query(
+      db,
+      `SELECT d.doc_type AS doc_type, d.doc_number AS doc_number, d.title AS title,
+              d.section_index AS section_index, d.heading AS heading,
+              snippet(docs_fts, 0, '<b>', '</b>', '…', 12) AS hl,
+              rank AS rank
+       FROM docs_fts f JOIN docs d ON d.rowid = f.rowid
+       WHERE docs_fts MATCH ? ORDER BY rank LIMIT ? OFFSET ?`,
+      [match, limit, offset],
+    )
+    return rows.map((r) => ({
+      docType: String(r.doc_type ?? ''),
+      docNumber: Number(r.doc_number),
+      title: String(r.title ?? ''),
+      sectionIndex: Number(r.section_index),
+      heading: r.heading == null ? undefined : String(r.heading),
+      hl: r.hl == null ? undefined : String(r.hl),
+      rank: typeof r.rank === 'number' ? r.rank : Number(r.rank),
+    }))
+  }
+
   async install(bundle: BundleDescriptor, onProgress?: (p: InstallProgress) => void): Promise<void> {
     const dbName = dbNameFromUrl(bundle.url)
+    const previous = (await nativeCatalog.list()).find((b) => b.id === bundle.id)
 
     onProgress?.({ phase: 'download', received: 0, total: bundle.bytes })
     await sqlite().getFromHTTPRequest(bundle.url, true)
+
+    // Bundle files are versioned, so updating leaves the old version's file
+    // behind under its own name — delete it once the new download landed.
+    if (previous && previous.dbName !== dbName) {
+      await closeDb(previous.dbName, true).catch(() => {})
+      try {
+        const oldDb = await openDb(previous.dbName, false)
+        await oldDb.delete()
+      } catch {
+        // Old file already gone — nothing to clean up.
+      }
+      await closeDb(previous.dbName, false).catch(() => {})
+    }
 
     onProgress?.({ phase: 'import', received: bundle.bytes, total: bundle.bytes })
     await nativeCatalog.upsert({

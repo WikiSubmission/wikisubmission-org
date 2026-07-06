@@ -68,8 +68,12 @@ servers:
     description: Production Server
   - url: http://ws-backend.internal/api/v1
     description: Internal Production Server
+  - url: http://preview-ws-backend.internal/api/v1
+    description: Internal Preview Server (Coolify)
   - url: https://ws-backend-vc.wikisubmission.org/api/v1
     description: railway, temp test
+  - url: https://preview.wikisubmission.org/api/v1
+    description: Preview (Coolify)
 
 tags:
   - name: Reader
@@ -80,6 +84,10 @@ tags:
     description: >
       Public read-only endpoints for the Bible — book metadata, verse ranges
       (reader mode), and full-text search.
+  - name: Library
+    description: >
+      Full-text search over the library documents — the Introduction,
+      Proclamation, and the 38 appendices of Quran: The Final Testament.
   - name: Music
     description: >
       Public read-only endpoints for music — artists, categories, albums, and
@@ -778,6 +786,71 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+  /library/search:
+    get:
+      tags: [Library]
+      operationId: searchLibrary
+      summary: Full-text search across library documents
+      description: >
+        Full-text search over the Introduction, Proclamation, and appendix
+        texts, section by section. Results are ranked by relevance and carry a
+        highlighted snippet. Paginate with `limit` and `offset`; use `total`
+        to compute total pages.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: >
+            Search query (2–200 characters). Matched against section headings
+            and body text using PostgreSQL full-text search. Supports quoted
+            phrases.
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 200
+          example: "hadith"
+        - name: lang
+          in: query
+          required: false
+          description: >
+            ISO 639-1 language code to search in. Defaults to all indexed
+            languages (currently only `en` is seeded).
+          schema:
+            type: string
+          example: "en"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of sections to return per page (1–100). Defaults to 20.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          example: 20
+        - name: offset
+          in: query
+          required: false
+          description: >
+            Number of results to skip before returning the page. Use with
+            `limit` and `total` for pagination.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          example: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibrarySearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
   # --- MUSIC API ---
 
   /music/artists:
@@ -1448,7 +1521,6 @@ paths:
       tags: [Me]
       operationId: getMePreferences
       summary: Get per-scripture preferences
-      description: Returns durable per-scripture preferences only. For the Quran reader, `displayMode` is intentionally excluded because it is a local-only UX state and must not override the user's current device choice.
       security:
         - bearerAuth: []
       parameters:
@@ -1468,7 +1540,6 @@ paths:
       tags: [Me]
       operationId: putMePreferences
       summary: Upsert per-scripture preferences
-      description: Persists durable per-scripture preferences only. For the Quran reader, clients must not send `displayMode`; that view state is intentionally local-only and excluded from backend storage.
       security:
         - bearerAuth: []
       requestBody:
@@ -3729,6 +3800,65 @@ components:
     # -----------------------------------------------------------------------
     # Bible schemas
     # -----------------------------------------------------------------------
+    LibrarySearchResult:
+      type: object
+      description: One matching library document section.
+      required: [doc_type, lang, title, section_index, snippet]
+      properties:
+        doc_type:
+          type: string
+          enum: [appendix, introduction, proclamation]
+          description: Which document the section belongs to.
+          example: appendix
+        doc_number:
+          type: integer
+          nullable: true
+          description: Appendix number; null for introduction/proclamation.
+          example: 19
+        lang:
+          type: string
+          description: ISO 639-1 language code of the document.
+          example: en
+        title:
+          type: string
+          description: Document title.
+          example: "Hadith and Sunna: Satanic Innovations"
+        section_index:
+          type: integer
+          description: Zero-based section position within the document.
+          example: 2
+        heading:
+          type: string
+          nullable: true
+          description: Section heading, when the section has one.
+        snippet:
+          type: string
+          description: >
+            Highlighted extract of the matching text. Matches are wrapped in
+            `<b>` tags.
+        rank:
+          type: number
+          format: float
+          description: Relevance score (ts_rank_cd); higher is more relevant.
+    LibrarySearchResponse:
+      type: object
+      description: Envelope for `/library/search` results.
+      required: [q, total, limit, offset, results]
+      properties:
+        q:
+          type: string
+          description: The query as executed.
+        total:
+          type: integer
+          description: Total matching sections across all pages.
+        limit:
+          type: integer
+        offset:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LibrarySearchResult'
     BibleResponse:
       type: object
       description: >

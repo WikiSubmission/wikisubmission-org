@@ -96,6 +96,19 @@ export interface SearchRow {
   rank?: number
 }
 
+/** One full-text search hit in a library-documents bundle (introduction,
+ * proclamation, appendices). `hl` carries the highlighted snippet; `docNumber`
+ * is 0 for the two single documents. */
+export interface DocSearchRow {
+  docType: string // 'appendix' | 'introduction' | 'proclamation'
+  docNumber: number
+  title: string
+  sectionIndex: number
+  heading?: string
+  hl?: string
+  rank?: number
+}
+
 /** Progress callback payload during install. */
 export interface InstallProgress {
   phase: 'download' | 'verify' | 'import'

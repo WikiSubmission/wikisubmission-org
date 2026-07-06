@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "sync": "next build && cap sync",
+    "bundles": "node scripts/fetch-offline-bundles.mjs",
+    "sync": "node scripts/fetch-offline-bundles.mjs && next build && cap sync",
     "ios": "cap open ios",
     "android": "cap open android",
     "lint": "eslint"
@@ -15,6 +16,7 @@
     "@capacitor/android": "^8.4.0",
     "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.4.0",
+    "@capacitor/geolocation": "^8.2.0",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/keyboard": "^8.0.2",
     "@capacitor/preferences": "^8.0.1",

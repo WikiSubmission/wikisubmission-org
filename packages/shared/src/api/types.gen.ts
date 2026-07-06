@@ -233,6 +233,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/library/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Full-text search across library documents
+         * @description Full-text search over the Introduction, Proclamation, and appendix texts, section by section. Results are ranked by relevance and carry a highlighted snippet. Paginate with `limit` and `offset`; use `total` to compute total pages.
+         */
+        get: operations["searchLibrary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/music/artists": {
         parameters: {
             query?: never;
@@ -1797,6 +1817,54 @@ export interface components {
              * @example The Quran teaches that God is One...
              */
             snippet?: string;
+        };
+        /** @description One matching library document section. */
+        LibrarySearchResult: {
+            /**
+             * @description Which document the section belongs to.
+             * @example appendix
+             * @enum {string}
+             */
+            doc_type: "appendix" | "introduction" | "proclamation";
+            /**
+             * @description Appendix number; null for introduction/proclamation.
+             * @example 19
+             */
+            doc_number?: number | null;
+            /**
+             * @description ISO 639-1 language code of the document.
+             * @example en
+             */
+            lang: string;
+            /**
+             * @description Document title.
+             * @example Hadith and Sunna: Satanic Innovations
+             */
+            title: string;
+            /**
+             * @description Zero-based section position within the document.
+             * @example 2
+             */
+            section_index: number;
+            /** @description Section heading, when the section has one. */
+            heading?: string | null;
+            /** @description Highlighted extract of the matching text. Matches are wrapped in `<b>` tags. */
+            snippet: string;
+            /**
+             * Format: float
+             * @description Relevance score (ts_rank_cd); higher is more relevant.
+             */
+            rank?: number;
+        };
+        /** @description Envelope for `/library/search` results. */
+        LibrarySearchResponse: {
+            /** @description The query as executed. */
+            q: string;
+            /** @description Total matching sections across all pages. */
+            total: number;
+            limit: number;
+            offset: number;
+            results: components["schemas"]["LibrarySearchResult"][];
         };
         /** @description Top-level envelope for both `/bible` (reader) and `/bible/search` (FTS) responses. The `info` object describes the resolved query; `books` contains the matching verses grouped by book and chapter. */
         BibleResponse: {
@@ -3783,6 +3851,49 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BibleResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    searchLibrary: {
+        parameters: {
+            query: {
+                /**
+                 * @description Search query (2–200 characters). Matched against section headings and body text using PostgreSQL full-text search. Supports quoted phrases.
+                 * @example hadith
+                 */
+                q: string;
+                /**
+                 * @description ISO 639-1 language code to search in. Defaults to all indexed languages (currently only `en` is seeded).
+                 * @example en
+                 */
+                lang?: string;
+                /**
+                 * @description Maximum number of sections to return per page (1–100). Defaults to 20.
+                 * @example 20
+                 */
+                limit?: number;
+                /**
+                 * @description Number of results to skip before returning the page. Use with `limit` and `total` for pagination.
+                 * @example 0
+                 */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LibrarySearchResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];

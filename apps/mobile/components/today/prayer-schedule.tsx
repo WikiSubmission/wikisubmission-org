@@ -1,11 +1,10 @@
 'use client'
 
-import { MapPin, RefreshCw } from 'lucide-react'
-import { PRAYER_ORDER, type PrayerKey, type PrayerTimesResponse } from '@/lib/prayer-times'
+import { LocateFixed, MapPin, RefreshCw, Sunrise } from 'lucide-react'
+import { PRAYER_ORDER, type PrayerKey } from '@/lib/prayer-times'
 import { usePrayerTimes } from '@/hooks/use-prayer-times'
-import { useNow } from '@/hooks/use-now'
 import { cn } from '@/lib/utils'
-import { LocationPicker } from '@/components/today/location-picker'
+import { PrayerGauge } from '@/components/today/prayer-gauge'
 
 const PRAYER_LABELS: Record<PrayerKey, string> = {
   fajr: 'Fajr',
@@ -15,68 +14,79 @@ const PRAYER_LABELS: Record<PrayerKey, string> = {
   isha: 'Isha',
 }
 
-function parseDurationToSeconds(text: string): number {
-  let total = 0
-  const h = /(\d+)\s*h/.exec(text)
-  const m = /(\d+)\s*m/.exec(text)
-  const s = /(\d+)\s*s/.exec(text)
-  if (h) total += Number(h[1]) * 3600
-  if (m) total += Number(m[1]) * 60
-  if (s) total += Number(s[1])
-  return total
-}
-
-function formatRemaining(seconds: number): string {
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  const s = seconds % 60
-  const pad = (n: number) => String(n).padStart(2, '0')
-  if (h > 0) return `${h}h ${pad(m)}m ${pad(s)}s`
-  if (m > 0) return `${m}m ${pad(s)}s`
-  return `${s}s`
-}
-
-function NextPrayer({ data, dataUpdatedAt }: { data: PrayerTimesResponse; dataUpdatedAt: number }) {
-  const now = useNow()
-
-  // The server reports time-left in the city's timezone at fetch time; subtract
-  // the seconds elapsed since that fetch to tick down without timezone math.
-  const seedSeconds = data.upcoming_prayer_time_left
-    ? parseDurationToSeconds(data.upcoming_prayer_time_left)
-    : null
-  const elapsed = dataUpdatedAt > 0 ? Math.floor((now - dataUpdatedAt) / 1000) : 0
-  const remaining = seedSeconds === null ? null : Math.max(0, seedSeconds - elapsed)
-
-  if (!data.upcoming_prayer) return null
-
+function LocationSplash() {
   return (
-    <div className="text-center">
-      <p className="text-muted-foreground text-xs tracking-[0.2em] uppercase">Next prayer</p>
-      <p className="font-display mt-1 text-3xl">{data.upcoming_prayer}</p>
-      {remaining !== null ? (
-        <p className="text-primary mt-1 font-mono text-sm tabular-nums">
-          in {formatRemaining(remaining)}
-        </p>
-      ) : null}
+    <div className="space-y-3 py-10 text-center">
+      <LocateFixed
+        className="text-primary mx-auto size-8 animate-pulse"
+        aria-hidden="true"
+      />
+      <p className="text-muted-foreground text-sm">Finding your location…</p>
+    </div>
+  )
+}
+
+function LocationPrompt({
+  status,
+  onRequest,
+}: {
+  status: 'denied' | 'unavailable'
+  onRequest: () => void
+}) {
+  return (
+    <div className="space-y-3 py-8 text-center">
+      <MapPin className="text-muted-foreground mx-auto size-8" aria-hidden="true" />
+      <p className="text-foreground text-sm font-medium">
+        {status === 'denied'
+          ? 'Allow approximate location to see prayer times'
+          : 'Your location is unavailable'}
+      </p>
+      <p className="text-muted-foreground px-4 text-xs">
+        {status === 'denied'
+          ? 'Only your approximate location is used, just enough to know your city. If nothing happens, enable Location for this app in system settings.'
+          : 'Make sure location services are turned on, then try again.'}
+      </p>
+      <button
+        type="button"
+        onClick={onRequest}
+        className="text-primary inline-flex items-center gap-1.5 text-sm font-medium"
+      >
+        <LocateFixed className="size-4" aria-hidden="true" />
+        {status === 'denied' ? 'Enable location' : 'Try again'}
+      </button>
     </div>
   )
 }
 
 export function PrayerSchedule() {
-  const { data, isLoading, isError, error, dataUpdatedAt, location, setLocation, refetch } =
-    usePrayerTimes()
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    dataUpdatedAt,
+    locationStatus,
+    requestLocation,
+    refetch,
+  } = usePrayerTimes()
   const currentPrayer = data?.current_prayer?.toLowerCase() ?? ''
+
+  // Cached coords keep showing times while a fresh fix (or a denial) resolves;
+  // the location states only take over when there is nothing to show yet.
+  const showLocationSplash = !data && !isError && locationStatus === 'pending'
+  const showLocationPrompt =
+    !data && !isLoading && (locationStatus === 'denied' || locationStatus === 'unavailable')
 
   return (
     <div className="mx-auto w-full max-w-md space-y-4 px-4">
-      <LocationPicker
-        current={data ? `${data.city}, ${data.country_code}` : location}
-        onSelect={setLocation}
-      />
-
       <div className="border-border/50 bg-background/55 rounded-2xl border p-5 shadow-sm backdrop-blur-md">
-        {isLoading ? (
-          <p className="text-muted-foreground py-8 text-center text-sm">Loading prayer times…</p>
+        {showLocationSplash || (isLoading && !data) ? (
+          <LocationSplash />
+        ) : showLocationPrompt ? (
+          <LocationPrompt
+            status={locationStatus as 'denied' | 'unavailable'}
+            onRequest={requestLocation}
+          />
         ) : isError ? (
           <div className="space-y-3 py-6 text-center">
             <p className="text-muted-foreground text-sm">
@@ -93,13 +103,13 @@ export function PrayerSchedule() {
           </div>
         ) : data ? (
           <>
-            <NextPrayer data={data} dataUpdatedAt={dataUpdatedAt} />
+            <PrayerGauge data={data} dataUpdatedAt={dataUpdatedAt} onExpired={refetch} />
 
             <ul className="divide-border/40 mt-5 divide-y">
               {data.times?.sunrise ? (
                 <li className="text-muted-foreground flex items-center justify-between py-2 text-xs">
                   <span className="flex items-center gap-2">
-                    <MapPin className="size-3" aria-hidden="true" />
+                    <Sunrise className="size-3" aria-hidden="true" />
                     Sunrise
                   </span>
                   <span className="font-mono tabular-nums">{data.times.sunrise}</span>

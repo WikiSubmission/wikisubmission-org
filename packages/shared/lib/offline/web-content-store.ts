@@ -4,6 +4,7 @@ import { requestPersistentStorage } from './storage'
 import type {
   BundleDescriptor,
   BundleInfo,
+  DocSearchRow,
   InstallProgress,
   SearchOpts,
   SearchRow,
@@ -108,6 +109,12 @@ export class WebOfflineContentStore implements OfflineContentStore {
       .map((b) => b.id)
     if (ids.length === 0) return []
     return this.rpc<SearchRow[]>({ type: 'search', bundleIds: ids, query: q, opts })
+  }
+
+  async searchDocs(lang: string, q: string, opts?: SearchOpts): Promise<DocSearchRow[]> {
+    const rec = catalog.list().find((b) => b.kind === 'library' && b.lang === lang)
+    if (!rec) return []
+    return this.rpc<DocSearchRow[]>({ type: 'searchDocs', bundleId: rec.id, query: q, opts })
   }
 
   async install(

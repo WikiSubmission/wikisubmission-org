@@ -1,6 +1,7 @@
 import type {
   BundleDescriptor,
   BundleInfo,
+  DocSearchRow,
   InstallProgress,
   SearchOpts,
   SearchRow,
@@ -35,6 +36,11 @@ export interface OfflineContentStore {
 
   /** Full-text search across the given languages' installed bundles. */
   search(scripture: string, langs: string[], q: string, opts?: SearchOpts): Promise<SearchRow[]>
+
+  /** Full-text search over the installed library-documents bundle
+   * (`library-${lang}`: introduction, proclamation, appendices). Returns []
+   * when no library bundle is installed for the language. */
+  searchDocs(lang: string, q: string, opts?: SearchOpts): Promise<DocSearchRow[]>
 
   /** Download, verify, and install a bundle, replacing any existing copy. */
   install(bundle: BundleDescriptor, onProgress?: (p: InstallProgress) => void): Promise<void>

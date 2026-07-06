@@ -23,6 +23,15 @@ function languageName(code: string): string {
   }
 }
 
+/** Friendly label for non-grouped bundles. The library bundle (introduction,
+ * proclamation, appendices) is a known kind; anything else falls back to id. */
+function orphanLabel(bundle: BundleDescriptor): string {
+  if (bundle.kind === 'library') {
+    return `Introduction, Proclamation & Appendices (${languageName(bundle.lang)})`
+  }
+  return bundle.id
+}
+
 /** Bundles grouped for display: one group per language, the text bundle as the
  * main entry and the word-by-word bundle (when the manifest offers one) as a
  * nested sub-entry. */
@@ -124,7 +133,7 @@ export function OfflineSettingsSection() {
       {orphans.length > 0 && (
         <ul style={{ ...listStyle, marginTop: 16 }}>
           {orphans.map((bundle) => (
-            <BundleRow key={bundle.id} {...rowProps(bundle)} label={bundle.id} />
+            <BundleRow key={bundle.id} {...rowProps(bundle)} label={orphanLabel(bundle)} />
           ))}
         </ul>
       )}

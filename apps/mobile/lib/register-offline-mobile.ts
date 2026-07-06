@@ -4,9 +4,11 @@ import { registerOfflineUserStore } from '@/lib/offline/user/registry'
 import { registerSyncTransport } from '@/lib/offline/user/transport'
 import { NativeOfflineContentStore } from './offline/native-content-store'
 import { NativeOfflineUserStore } from './offline/native-user-store'
+import { preinstallBundledContent } from './offline/preinstall'
 import { mobileSyncTransport } from './offline-sync-transport-mobile'
 
 let userStore: NativeOfflineUserStore | null = null
+let preinstallStarted = false
 
 /**
  * Register the native @capacitor-community/sqlite content + user stores so the
@@ -20,6 +22,12 @@ let userStore: NativeOfflineUserStore | null = null
 export function registerMobileOfflineStore(): NativeOfflineUserStore | null {
   if (!Capacitor.isNativePlatform()) return null
   registerOfflineContentStore(new NativeOfflineContentStore())
+  if (!preinstallStarted) {
+    preinstallStarted = true
+    // Fire-and-forget: seeds the pre-packaged bundles on first launch; the
+    // reader falls back to the network until seeding lands.
+    void preinstallBundledContent().catch(() => {})
+  }
   if (!userStore) userStore = new NativeOfflineUserStore()
   registerOfflineUserStore(userStore)
   registerSyncTransport(mobileSyncTransport)

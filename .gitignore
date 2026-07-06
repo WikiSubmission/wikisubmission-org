@@ -70,3 +70,6 @@ apps/web/public/offline/
 apps/web/test-results/
 apps/web/playwright-report/
 apps/web/.playwright/
+
+# pre-packaged offline bundles (downloaded by apps/mobile/scripts/fetch-offline-bundles.mjs)
+apps/mobile/public/assets/databases/

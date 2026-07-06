@@ -32,4 +32,6 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Approximate location only: prayer times need city-level accuracy. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 </manifest>

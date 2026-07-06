@@ -46,6 +46,9 @@ function fakeStore(opts: {
     async search(_scripture, langs) {
       return (opts.searchRows ?? []).filter((r) => langs.includes(r.lang))
     },
+    async searchDocs() {
+      return []
+    },
     async install() {},
     async remove() {},
   }

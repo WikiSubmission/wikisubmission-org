@@ -5,6 +5,7 @@ import { Metadata } from 'next'
 import { APPENDICES, appendixPdfUrl } from '@/constants/appendices'
 import { buildPageMetadata } from '@/constants/metadata'
 import { ArticleAnimations } from '@/components/article-animations'
+import { getAppendixContent } from '@/content/library'
 
 interface Props {
   params: Promise<{ number: string }>
@@ -39,16 +40,10 @@ export default async function AppendixPage({ params }: Props) {
   const prev = APPENDICES.find((a) => a.number === n - 1)
   const next = APPENDICES.find((a) => a.number === n + 1)
 
-  // Dynamically import the content component for this appendix number.
-  // Content files live in _content/ (private folder — not a Next.js route).
-  // Falls back to a "coming soon" shell if no content file exists yet.
-  let Content: React.ComponentType | null = null
-  try {
-    const mod = await import(`../_content/appendix-${n}`)
-    Content = mod.AppendixContent ?? null
-  } catch {
-    Content = null
-  }
+  // Content components live in packages/shared/content/library (shared with
+  // the mobile app); the registry lazy-loads one appendix per page and returns
+  // null (→ "coming soon" shell) if a file is ever absent.
+  const Content = await getAppendixContent(n)
 
   return (
     <ArticleAnimations>
