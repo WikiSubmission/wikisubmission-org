@@ -1,13 +1,5 @@
 import Link from 'next/link'
-import {
-  BookMarked,
-  BookText,
-  ChevronRight,
-  ListOrdered,
-  Megaphone,
-  ScrollText,
-  Sparkles,
-} from 'lucide-react'
+import { BookText, ChevronRight, ScrollText, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 interface MoreItem {
@@ -32,27 +24,6 @@ const MORE_ITEMS: readonly MoreItem[] = [
     description: 'Essays and writings',
     icon: ScrollText,
     href: '/more/articles',
-  },
-  {
-    key: 'introduction',
-    label: 'Introduction',
-    description: 'Introduction to Quran: The Final Testament',
-    icon: BookMarked,
-    href: '/introduction',
-  },
-  {
-    key: 'proclamation',
-    label: 'Proclamation',
-    description: 'One unified religion for all the people',
-    icon: Megaphone,
-    href: '/proclamation',
-  },
-  {
-    key: 'appendices',
-    label: 'Appendices',
-    description: 'All 38 appendices of the Final Testament',
-    icon: ListOrdered,
-    href: '/appendices',
   },
   { key: 'bible', label: 'Bible', description: 'Coming soon', icon: BookText },
 ]

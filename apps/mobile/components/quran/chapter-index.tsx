@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Search } from 'lucide-react'
+import { BookMarked, ListOrdered, Megaphone, Search } from 'lucide-react'
 import { CHAPTER_TRANSLITERATIONS, VERSE_COUNTS } from '@/constants/quran-chapters'
 import { CHAPTER_TITLES_EN } from '@/lib/quran-titles-en'
 import { haptic } from '@/lib/haptics'
@@ -21,6 +21,29 @@ const CHAPTERS: ChapterRow[] = CHAPTER_TRANSLITERATIONS.map((transliteration, i)
   transliteration,
   verses: VERSE_COUNTS[i] ?? 0,
 }))
+
+// Companion texts reachable from the Quran tab. Routes mirror the web URLs;
+// activeTab() in constants/navigation.ts keeps the Quran tab highlighted.
+const LIBRARY_LINKS = [
+  {
+    href: '/introduction',
+    label: 'Introduction',
+    description: 'Introduction to Quran: The Final Testament',
+    icon: BookMarked,
+  },
+  {
+    href: '/proclamation',
+    label: 'Proclamation',
+    description: 'One unified religion for all the people',
+    icon: Megaphone,
+  },
+  {
+    href: '/appendices',
+    label: 'Appendices',
+    description: 'All 38 appendices of the Final Testament',
+    icon: ListOrdered,
+  },
+] as const
 
 function matches(chapter: ChapterRow, query: string): boolean {
   if (!query) return true
@@ -79,6 +102,39 @@ export function ChapterIndex() {
             </span>
           </span>
         </Link>
+      )}
+
+      {!query.trim() && (
+        <ul className="mb-4 flex flex-col gap-1.5">
+          {LIBRARY_LINKS.map((link) => {
+            const Icon = link.icon
+            return (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  prefetch={false}
+                  onClick={() => haptic('light')}
+                  className={cn(
+                    'flex items-center gap-3 rounded-2xl border border-border/40 bg-muted/30 p-3',
+                    'transition-colors active:bg-muted/60'
+                  )}
+                >
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Icon className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="truncate font-serif text-base font-semibold leading-tight">
+                      {link.label}
+                    </span>
+                    <span className="truncate text-sm text-muted-foreground">
+                      {link.description}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
       )}
 
       <ul className="flex flex-col gap-1.5">
