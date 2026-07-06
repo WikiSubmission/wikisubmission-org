@@ -31,8 +31,8 @@ android-release bump="":
     set -euo pipefail
     if [ -n "{{bump}}" ]; then just _bump-version; fi
     pnpm --filter mobile build
-    cd apps/mobile && npx cap sync android
-    cd apps/mobile/android && ./gradlew bundleRelease --no-daemon
+    (cd apps/mobile && npx cap sync android)
+    (cd apps/mobile/android && ./gradlew bundleRelease --no-daemon)
     echo "AAB: apps/mobile/android/app/build/outputs/bundle/release/app-release.aab"
 
 # Build a signed release APK for sideloading/testing outside the Play Store. Pass --bump to increment versionCode/versionName first.
@@ -41,8 +41,8 @@ android-release-apk bump="":
     set -euo pipefail
     if [ -n "{{bump}}" ]; then just _bump-version; fi
     pnpm --filter mobile build
-    cd apps/mobile && npx cap sync android
-    cd apps/mobile/android && ./gradlew assembleRelease --no-daemon
+    (cd apps/mobile && npx cap sync android)
+    (cd apps/mobile/android && ./gradlew assembleRelease --no-daemon)
     echo "APK: apps/mobile/android/app/build/outputs/apk/release/app-release.apk"
 
 # Build a debug APK and install + launch it on the connected device/emulator
