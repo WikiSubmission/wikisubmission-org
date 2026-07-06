@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import type { AuthProvider } from './mobile-auth-client'
 
 // Minimal surface of @capgo/capacitor-social-login that we depend on. We cast
@@ -36,15 +37,20 @@ async function loadPlugin(): Promise<SocialLoginPlugin> {
 
 async function ensureInitialized(plugin: SocialLoginPlugin): Promise<void> {
   if (initialized) return
-  await plugin.initialize({
+  // Apple config only on iOS: the Android side of the plugin validates the
+  // apple block during initialize() and throws on the missing redirectUrl,
+  // which would break Google sign-in too. Apple sign-in itself is iOS-only
+  // (see isAppleSignInAvailable in ./platform).
+  const options: Record<string, unknown> = {
     google: {
       webClientId: GOOGLE_WEB_CLIENT_ID,
       iOSClientId: GOOGLE_IOS_CLIENT_ID,
     },
-    apple: {
-      clientId: APPLE_CLIENT_ID,
-    },
-  })
+  }
+  if (Capacitor.getPlatform() === 'ios') {
+    options.apple = { clientId: APPLE_CLIENT_ID }
+  }
+  await plugin.initialize(options)
   initialized = true
 }
 

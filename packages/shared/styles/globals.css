@@ -1022,7 +1022,9 @@ html[data-palette='mono'].dark {
 .section { margin-top: 56px; }
 .section-head {
   display: flex; align-items: baseline;
-  gap: 14px;
+  /* Wrap instead of pushing actions past the viewport on narrow screens. */
+  flex-wrap: wrap;
+  gap: 6px 14px;
   padding-bottom: 14px;
   border-bottom: 1px solid var(--ed-rule);
   margin-bottom: 24px;
@@ -2004,9 +2006,34 @@ html[data-palette='mono'].dark {
 
 /* ── Page container ────────────────────────────────────────────────────── */
 .ed-page {
-  max-width: 1080px;
+  /* 100% guard: inside a flex column (mobile shell) the page is a flex item,
+     and without the cap its width is floored by content min-content size —
+     wide content silently widens the whole page past the viewport. */
+  max-width: min(1080px, 100%);
   margin: 0 auto;
   padding: 56px 40px 96px;
+}
+
+/* Grid cells default to min-width:auto, so one wide child (a measured
+   sparkline svg, an unbroken string) locks the whole track — and with it the
+   page — wider than the viewport. Let tracks shrink; content wraps instead. */
+.c2c-grid > *,
+.cat-grid > *,
+.notes-preview > *,
+.coll-list > *,
+.stats > *,
+.stats-mobile > * {
+  min-width: 0;
+}
+
+/* Long unbroken strings (emails, note bodies, names) must not widen the page:
+   unlike break-word, overflow-wrap:anywhere also caps min-content sizing. */
+.note-card-body,
+.coll-title,
+.coll-desc,
+.cat-name,
+.profile-mast-meta {
+  overflow-wrap: anywhere;
 }
 @media (max-width: 767px) {
   .ed-page { padding: 24px 20px 60px; }

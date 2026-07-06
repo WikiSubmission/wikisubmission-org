@@ -7,12 +7,15 @@ const PROJECT_ID = process.env.SANITY_PROJECT_ID ?? process.env.NEXT_PUBLIC_SANI
 const DATASET = process.env.SANITY_DATASET ?? process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production'
 const API_VERSION = '2024-01-01'
 
-// CDN-cached reads — safe in the browser and in a static export.
+// CDN-cached reads — safe in the browser and in a static export. The timeout
+// bounds the request so callers' loading states always resolve to an error
+// instead of spinning forever on an unreachable host.
 export const sanityClient = createClient({
   projectId: PROJECT_ID,
   dataset: DATASET,
   apiVersion: API_VERSION,
   useCdn: true,
+  timeout: 15_000,
 })
 
 /** Build a Sanity image URL from a raw image asset object. */

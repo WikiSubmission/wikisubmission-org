@@ -29,6 +29,13 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BROWSER_API_URL:
       process.env.NEXT_PUBLIC_BROWSER_API_URL ??
       'https://ws-backend.wikisubmission.org/api/v1',
+    // Sanity project id/dataset are public configuration (they appear in every
+    // browser request to the Sanity CDN). Without them the shared client falls
+    // back to the 'buildtime' placeholder and article fetches hang forever.
+    NEXT_PUBLIC_SANITY_PROJECT_ID:
+      process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? 'puy3ce80',
+    NEXT_PUBLIC_SANITY_DATASET:
+      process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production',
   },
 }
 
