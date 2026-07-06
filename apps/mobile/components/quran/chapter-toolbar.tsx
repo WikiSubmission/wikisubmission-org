@@ -40,10 +40,7 @@ export function ChapterToolbar() {
   }, [primaryLanguage, router])
 
   return (
-    <div
-      className="border-border/40 bg-background/80 sticky z-30 flex justify-center border-b px-4 py-2 backdrop-blur-md"
-      style={{ top: 'calc(env(safe-area-inset-top) + 3.5rem)' }}
-    >
+    <div className="border-border/40 bg-background/80 mobile-chapter-toolbar sticky z-30 flex justify-center border-b px-4 py-2 backdrop-blur-md">
       <QuranModeSelector onWordModeIntercept={onWordModeIntercept} />
     </div>
   )

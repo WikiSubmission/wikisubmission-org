@@ -540,6 +540,28 @@ html[data-palette='mono'].dark {
     transform: translateY(-64px);
   }
 
+  /* Mobile app: immersive Quran reader. Scrolling down sets
+     data-reader-chrome-hidden on <html> (useReaderChromeScroll) — the fixed
+     top bar slides away and the sticky chapter toolbar rides up to the
+     safe-area edge, maximizing the reading window. A small upward scroll
+     brings both back. */
+  .mobile-top-bar {
+    transition: transform 250ms ease;
+  }
+
+  html[data-reader-chrome-hidden] .mobile-top-bar {
+    transform: translateY(-100%);
+  }
+
+  .mobile-chapter-toolbar {
+    top: calc(env(safe-area-inset-top) + 3.5rem);
+    transition: top 250ms ease;
+  }
+
+  html[data-reader-chrome-hidden] .mobile-chapter-toolbar {
+    top: env(safe-area-inset-top);
+  }
+
   @keyframes highlight-glow {
 
     0%,

@@ -29,8 +29,8 @@ export function normalizePath(pathname: string): string {
   return pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname
 }
 
-/** Library routes mirror web URLs (so shared links work) but live under More. */
-const MORE_ALIAS_PREFIXES = ['/introduction', '/proclamation', '/appendices'] as const
+/** Library routes mirror web URLs (so shared links work) but are entered from the Quran tab. */
+const QURAN_ALIAS_PREFIXES = ['/introduction', '/proclamation', '/appendices'] as const
 
 /**
  * Resolve the active tab for a pathname. Longest-href-first so a nested route
@@ -38,14 +38,23 @@ const MORE_ALIAS_PREFIXES = ['/introduction', '/proclamation', '/appendices'] as
  */
 export function activeTab(pathname: string): TabItem | undefined {
   const path = normalizePath(pathname)
-  if (MORE_ALIAS_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) {
-    return TABS.find((tab) => tab.key === 'more')
+  if (QURAN_ALIAS_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) {
+    return TABS.find((tab) => tab.key === 'quran')
   }
   return [...TABS]
     .sort((a, b) => b.href.length - a.href.length)
     .find((tab) =>
       tab.href === '/' ? path === '/' : path === tab.href || path.startsWith(`${tab.href}/`),
     )
+}
+
+/**
+ * Immersive reader routes (chapter pages like `/quran/2`): the tab bar is
+ * hidden entirely and the top bar auto-hides on scroll to maximize the
+ * reading window. Games/search under /quran keep the normal chrome.
+ */
+export function isQuranReaderRoute(pathname: string): boolean {
+  return /^\/quran\/\d+$/.test(normalizePath(pathname))
 }
 
 /** A tab root is the tab's own href; deeper paths are pushed screens. */

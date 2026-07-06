@@ -18,7 +18,7 @@ export function MobileTopBar({ title, showBack }: MobileTopBarProps) {
 
   return (
     <header
-      className="glass-nav bg-background/80 fixed inset-x-0 top-0 z-40 border-b"
+      className="glass-nav bg-background/80 mobile-top-bar fixed inset-x-0 top-0 z-40 border-b"
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div className="flex h-14 items-center gap-2 px-3">
