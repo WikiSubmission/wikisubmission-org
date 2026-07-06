@@ -13,13 +13,13 @@ pnpm --filter mobile ios        # cap open ios   (needs Xcode)
 pnpm --filter mobile android    # cap open android (needs Android Studio)
 ```
 
-The native `ios/` and `android/` projects do not exist yet. Create them once a
-native toolchain is available:
+The native `android/` project exists and is checked in; see [ANDROID.md](./ANDROID.md)
+for the full emulator/build/install runbook (JDK 21 required). The `ios/` project
+does not exist yet — it needs macOS + Xcode:
 
 ```bash
 cd apps/mobile
 pnpm exec cap add ios
-pnpm exec cap add android
 ```
 
 ## Auth
@@ -35,6 +35,18 @@ ws-backend native-auth endpoints, and stores the session in
 
 The shared API client reads the stored access token through
 `registerMobileApiAuth()` (`lib/register-api-auth-mobile.ts`).
+
+## Offline bundles
+
+On device, offline Quran content uses `@capacitor-community/sqlite` instead of
+the web sqlite-wasm worker. `registerMobileOfflineStore()`
+(`lib/register-offline-mobile.ts`) registers the native content store, user
+store, and sync transport into the shared registries at startup; the shared
+reader, search, and settings hooks resolve the store from there. Bundles are
+downloaded from the published CDN manifest via the settings Downloads tab
+(`app/me/settings`), which mounts the shared `OfflineSettingsSection`. Off
+device (web preview), nothing is registered and downloads report as
+unavailable.
 
 ## Environment
 
