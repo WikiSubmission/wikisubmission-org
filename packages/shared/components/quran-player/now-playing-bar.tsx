@@ -18,6 +18,8 @@ import {
   Loader2,
   User,
   X,
+  AudioLines,
+  ChevronUp,
 } from 'lucide-react'
 import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
@@ -35,7 +37,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 
-import Image from 'next/image'
+import { cn } from '@/lib/utils'
 import { formatTime } from '@/lib/music-utils'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
@@ -51,7 +53,12 @@ const RECITER_NAMES: Record<Reciter, string> = {
 const ENGLISH_RECITERS: Reciter[] = ['english-onyx', 'english-callum']
 const ARABIC_RECITERS: Reciter[] = ['mishary', 'basit', 'minshawi']
 
-export function QuranPlayer() {
+interface QuranPlayerProps {
+  /** Bottom offset classes — mobile passes an offset clearing its fixed tab bar. */
+  positionClassName?: string
+}
+
+export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayerProps) {
   const {
     currentVerse,
     isPlaying,
@@ -111,8 +118,26 @@ export function QuranPlayer() {
   const VolumeIcon =
     volume === 0 ? VolumeX : volume < 0.33 ? Volume : volume < 0.66 ? Volume1 : Volume2
 
+  // Shared inner content for the leftmost tile — it doubles as the reciter picker trigger
+  const verseInfo = (
+    <>
+      <div className="relative w-9 h-9 rounded-xl shrink-0 ring-1 ring-white/20 dark:ring-white/10 shadow-sm bg-gradient-to-br from-primary/25 via-primary/10 to-transparent flex items-center justify-center">
+        <AudioLines className={cn('w-4.5 h-4.5 text-primary', isPlaying && 'animate-pulse')} />
+      </div>
+      <div className="min-w-0 text-left">
+        <div className="font-semibold text-sm truncate leading-tight">
+          {currentVerse.verse_id}
+        </div>
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground min-w-0">
+          <span className="truncate">{RECITER_NAMES[reciter]}</span>
+          <ChevronUp className="w-2.5 h-2.5 shrink-0" />
+        </div>
+      </div>
+    </>
+  )
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 px-3 pb-5 pointer-events-none">
+    <div className={cn('fixed left-0 right-0 z-50 px-3 pointer-events-none', positionClassName)}>
       <div className={`${ZOOM_WIDTH_CLASS[zoomLevel ?? 'comfortable']} mx-auto pointer-events-auto`}>
 
         {/* ── Liquid glass shell ────────────────────────────────────────────────── */}
@@ -143,20 +168,100 @@ export function QuranPlayer() {
 
               {/* ── Info + mobile controls row ───────────────────────────────── */}
               <div className="flex items-center gap-3 px-3 py-2.5 md:py-0 md:pl-5 w-full md:w-auto md:min-w-[180px] min-w-0 justify-between md:justify-start">
-                {/* Thumbnail + verse info */}
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative w-9 h-9 rounded-xl overflow-hidden shrink-0 ring-1 ring-white/20 dark:ring-white/10 shadow-sm">
-                    <Image src="/graphics/book.png" alt="Quran" fill className="object-cover" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-semibold text-sm truncate leading-tight">
-                      {currentVerse.verse_id}
+                {/* Thumbnail + verse info — tap to pick a reciter (mobile: dialog) */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Select reciter"
+                      className="flex md:hidden items-center gap-3 min-w-0 rounded-xl -mx-1 px-1 py-0.5 active:opacity-70 transition-opacity"
+                    >
+                      {verseInfo}
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="w-[90%] max-w-sm rounded-2xl p-6">
+                    <DialogHeader className="mb-4">
+                      <DialogTitle className="text-left">Select Reciter</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-2">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 pt-1">English</p>
+                      {ENGLISH_RECITERS.map((r) => (
+                        <Button
+                          key={r}
+                          variant={reciter === r ? 'default' : 'outline'}
+                          className="justify-start h-12 px-4 rounded-xl text-sm"
+                          onClick={() => setReciter(r)}
+                        >
+                          <User className="w-4 h-4 mr-2 shrink-0" />
+                          {RECITER_NAMES[r]}
+                        </Button>
+                      ))}
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 pt-2">Arabic</p>
+                      {ARABIC_RECITERS.map((r) => (
+                        <Button
+                          key={r}
+                          variant={reciter === r ? 'default' : 'outline'}
+                          className="justify-start h-12 px-4 rounded-xl text-sm"
+                          onClick={() => setReciter(r)}
+                        >
+                          <User className="w-4 h-4 mr-2 shrink-0" />
+                          {RECITER_NAMES[r]}
+                        </Button>
+                      ))}
                     </div>
-                    <div className="text-[10px] text-muted-foreground truncate">
-                      {RECITER_NAMES[reciter]}
-                    </div>
-                  </div>
-                </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Thumbnail + verse info — click to pick a reciter (desktop: dropdown) */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Select reciter"
+                      className="hidden md:flex items-center gap-3 min-w-0 rounded-xl -mx-1 px-1 py-0.5 hover:bg-muted/40 transition-colors"
+                    >
+                      {verseInfo}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    side="top"
+                    className="w-56 p-1.5 bg-background/90 backdrop-blur-xl border-border/30 shadow-xl rounded-xl"
+                  >
+                    <p className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                      English
+                    </p>
+                    {ENGLISH_RECITERS.map((r) => (
+                      <DropdownMenuItem
+                        key={r}
+                        onClick={() => setReciter(r)}
+                        className={`rounded-lg mb-0.5 cursor-pointer text-sm ${
+                          reciter === r
+                            ? 'bg-primary text-primary-foreground focus:bg-primary/90 focus:text-primary-foreground'
+                            : ''
+                        }`}
+                      >
+                        {RECITER_NAMES[r]}
+                      </DropdownMenuItem>
+                    ))}
+                    <p className="px-2 pt-2 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                      Arabic
+                    </p>
+                    {ARABIC_RECITERS.map((r) => (
+                      <DropdownMenuItem
+                        key={r}
+                        onClick={() => setReciter(r)}
+                        className={`rounded-lg mb-0.5 last:mb-0 cursor-pointer text-sm ${
+                          reciter === r
+                            ? 'bg-primary text-primary-foreground focus:bg-primary/90 focus:text-primary-foreground'
+                            : ''
+                        }`}
+                      >
+                        {RECITER_NAMES[r]}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 {/* Mobile controls (right side of info row) */}
                 <div className="flex md:hidden items-center gap-0.5 shrink-0">
@@ -192,51 +297,7 @@ export function QuranPlayer() {
                     <SkipForward className="w-4 h-4" fill="currentColor" />
                   </Button>
 
-                  {/* Mobile — reciter select */}
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 rounded-full text-muted-foreground"
-                      >
-                        <User className="w-4 h-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="w-[90%] max-w-sm rounded-2xl p-6">
-                      <DialogHeader className="mb-4">
-                        <DialogTitle className="text-left">Select Reciter</DialogTitle>
-                      </DialogHeader>
-                      <div className="grid gap-2">
-                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 pt-1">English</p>
-                        {ENGLISH_RECITERS.map((r) => (
-                          <Button
-                            key={r}
-                            variant={reciter === r ? 'default' : 'outline'}
-                            className="justify-start h-12 px-4 rounded-xl text-sm"
-                            onClick={() => setReciter(r)}
-                          >
-                            <User className="w-4 h-4 mr-2 shrink-0" />
-                            {RECITER_NAMES[r]}
-                          </Button>
-                        ))}
-                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 pt-2">Arabic</p>
-                        {ARABIC_RECITERS.map((r) => (
-                          <Button
-                            key={r}
-                            variant={reciter === r ? 'default' : 'outline'}
-                            className="justify-start h-12 px-4 rounded-xl text-sm"
-                            onClick={() => setReciter(r)}
-                          >
-                            <User className="w-4 h-4 mr-2 shrink-0" />
-                            {RECITER_NAMES[r]}
-                          </Button>
-                        ))}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Mobile — dismiss */}
+                  {/* Mobile — dismiss (rightmost; volume removed: hardware buttons) */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -246,36 +307,6 @@ export function QuranPlayer() {
                   >
                     <X className="w-4 h-4" />
                   </Button>
-
-                  {/* Mobile — volume */}
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 rounded-full text-muted-foreground"
-                      >
-                        <VolumeIcon className="w-4 h-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="w-[85%] max-w-[320px] rounded-2xl p-6">
-                      <DialogHeader className="mb-4">
-                        <DialogTitle className="text-left">Volume</DialogTitle>
-                      </DialogHeader>
-                      <div className="flex items-center gap-4 bg-muted/30 p-4 rounded-xl border border-border/50">
-                        <VolumeX className="w-5 h-5 text-muted-foreground shrink-0" />
-                        <Slider
-                          value={[volume * 100]}
-                          min={0}
-                          max={100}
-                          step={1}
-                          onValueChange={(val) => setVolume(val[0] / 100)}
-                          className="flex-grow"
-                        />
-                        <Volume2 className="w-5 h-5 text-muted-foreground shrink-0" />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
                 </div>
               </div>
 
@@ -340,58 +371,6 @@ export function QuranPlayer() {
 
               {/* ── Desktop settings (right) ─────────────────────────────────── */}
               <div className="hidden md:flex items-center gap-1 pr-5 shrink-0">
-                {/* Reciter */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-1.5 h-8 text-xs text-muted-foreground hover:text-foreground rounded-full px-3"
-                    >
-                      <User className="w-3.5 h-3.5 shrink-0" />
-                      <span className="max-w-[80px] truncate">{RECITER_NAMES[reciter]}</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="end"
-                    side="top"
-                    className="w-56 p-1.5 bg-background/90 backdrop-blur-xl border-border/30 shadow-xl rounded-xl"
-                  >
-                    <p className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
-                      English
-                    </p>
-                    {ENGLISH_RECITERS.map((r) => (
-                      <DropdownMenuItem
-                        key={r}
-                        onClick={() => setReciter(r)}
-                        className={`rounded-lg mb-0.5 cursor-pointer text-sm ${
-                          reciter === r
-                            ? 'bg-primary text-primary-foreground focus:bg-primary/90 focus:text-primary-foreground'
-                            : ''
-                        }`}
-                      >
-                        {RECITER_NAMES[r]}
-                      </DropdownMenuItem>
-                    ))}
-                    <p className="px-2 pt-2 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
-                      Arabic
-                    </p>
-                    {ARABIC_RECITERS.map((r) => (
-                      <DropdownMenuItem
-                        key={r}
-                        onClick={() => setReciter(r)}
-                        className={`rounded-lg mb-0.5 last:mb-0 cursor-pointer text-sm ${
-                          reciter === r
-                            ? 'bg-primary text-primary-foreground focus:bg-primary/90 focus:text-primary-foreground'
-                            : ''
-                        }`}
-                      >
-                        {RECITER_NAMES[r]}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
                 {/* Volume */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

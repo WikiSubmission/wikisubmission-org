@@ -36,6 +36,18 @@ export function NativeInit() {
     // The web bundle has hydrated by the time this effect runs, so hide the
     // native splash now rather than relying solely on the auto-hide timeout.
     SplashScreen.hide().catch(() => {})
+
+    // Route the shared audio player's media-session calls to the native
+    // MediaSession plugin (foreground service + lock-screen controls). The
+    // adapter seam replays state, so this late async registration is safe.
+    Promise.all([
+      import('@/lib/native-media-session'),
+      import('@/lib/media-session-adapter'),
+    ])
+      .then(([{ nativeMediaSessionAdapter }, { registerMediaSessionAdapter }]) =>
+        registerMediaSessionAdapter(nativeMediaSessionAdapter)
+      )
+      .catch(() => {})
   }, [])
 
   // Keep the status bar legible against the current theme. Style.Dark means

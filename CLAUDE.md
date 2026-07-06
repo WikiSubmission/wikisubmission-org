@@ -203,7 +203,7 @@ Minimap dot transition is `0.08s linear` (not `0.35s cubic-bezier`) so it tracks
 
 ### Reciters and audio URLs
 
-Four reciters: `english-onyx` (translation audio, default), and Arabic reciters `mishary`, `basit`, `minshawi`. Selection persists via `useLocalStorage('reciter', ...)`; the picker UI lives in `now-playing-bar.tsx` (separate English/Arabic lists, desktop popover + mobile dialog variants).
+Five reciters: English translation audio `english-callum` (default) and `english-onyx`, and Arabic reciters `mishary` (Alafasy), `basit`, `minshawi`. Selection persists via `useLocalStorage('reciter', ...)`; the picker UI lives in the shared `now-playing-bar.tsx` (separate English/Arabic lists, desktop popover + mobile dialog variants). The bar is mounted by the web Quran layout and globally by the mobile shell (`positionClassName` prop offsets it above the mobile tab bar).
 
 Audio is fetched directly from CloudFront — there is no backend proxy in the request path:
 
@@ -281,7 +281,8 @@ The `parentRef` scroll container has `overscroll-contain` to prevent the iOS rub
 | --- | --- |
 | `apps/web/app/quran/[[...query]]/layout.tsx` | Quran layout: sidebar, header, audio player provider |
 | `apps/web/app/quran/[[...query]]/page.tsx` | Server component: parses query, SSR-fetches verses, dispatches to ChapterReader or SearchResult |
-| `apps/web/app/quran/[[...query]]/client-components/now-playing-bar.tsx` | Fixed audio player bar, reciter selection UI |
+| `packages/shared/components/quran-player/now-playing-bar.tsx` | Fixed audio player bar, reciter selection UI (shared by web + mobile) |
+| `packages/shared/lib/media-session-adapter.ts` | OS media-session seam: web uses `navigator.mediaSession`, mobile registers a native Capacitor adapter |
 | `packages/shared/components/quran-reader/chapter-reader.tsx` | Main chapter reader: virtual list, audio sync, URL sync, minimap |
 | `packages/shared/components/quran-reader/result-search.tsx` | Quran text search results |
 | `packages/shared/components/quran-reader/verse-card.tsx` | Individual verse card (memoized) |

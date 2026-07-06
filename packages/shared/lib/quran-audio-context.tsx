@@ -10,6 +10,7 @@ import React, {
   useMemo,
 } from 'react'
 import useLocalStorage from '@/hooks/use-local-storage'
+import { mediaSession } from '@/lib/media-session-adapter'
 
 export interface QuranVerse {
   verse_id: string
@@ -80,7 +81,7 @@ export function QuranPlayerProvider({
   const [currentVerse, setCurrentVerse] = useState<QuranVerse | null>(null)
   const [queue, setQueue] = useState<QuranVerse[]>([])
   const [isPlaying, setIsPlaying] = useState(false)
-  const [reciter, setReciter] = useLocalStorage<Reciter>('reciter', 'english-onyx')
+  const [reciter, setReciter] = useLocalStorage<Reciter>('reciter', 'english-callum')
   const [volume, setVolume] = useState(1)
 
   const [progress, setProgress] = useState(0)
@@ -201,16 +202,12 @@ export function QuranPlayerProvider({
     }
 
     // Update Media Session Metadata
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: `Verse ${currentVerse.verse_id}`,
-        artist: RECITER_METADATA_NAMES[reciter],
-        album: 'Quran Recitation',
-        artwork: [
-          { src: '/graphics/book.png', sizes: '512x512', type: 'image/png' },
-        ],
-      })
-    }
+    mediaSession.setMetadata({
+      title: `Verse ${currentVerse.verse_id}`,
+      artist: RECITER_METADATA_NAMES[reciter],
+      album: 'Quran Recitation',
+      artworkSrc: '/graphics/book.png',
+    })
   }, [currentVerse, reciter]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle Play/Pause
@@ -290,6 +287,13 @@ export function QuranPlayerProvider({
     if (audioRef.current && audioRef.current.duration) {
       audioRef.current.currentTime = newProgress * audioRef.current.duration
       setProgress(newProgress)
+      // Re-anchor the OS position bar immediately; between seeks it
+      // extrapolates from playbackRate (see the position-state effect).
+      mediaSession.setPositionState({
+        duration: audioRef.current.duration,
+        position: audioRef.current.currentTime,
+        playbackRate: audioRef.current.paused ? 0 : 1,
+      })
     }
   }, [])
 
@@ -312,26 +316,48 @@ export function QuranPlayerProvider({
 
   // Setup Media Session Action Handlers
   useEffect(() => {
-    if (!('mediaSession' in navigator)) return
-
-    navigator.mediaSession.setActionHandler('play', () => togglePlayPause())
-    navigator.mediaSession.setActionHandler('pause', () => togglePlayPause())
-    navigator.mediaSession.setActionHandler('previoustrack', () => prevVerse())
-    navigator.mediaSession.setActionHandler('nexttrack', () => nextVerse())
-    navigator.mediaSession.setActionHandler('seekto', (details) => {
+    mediaSession.setActionHandler('play', () => togglePlayPause())
+    mediaSession.setActionHandler('pause', () => togglePlayPause())
+    mediaSession.setActionHandler('previoustrack', () => prevVerse())
+    mediaSession.setActionHandler('nexttrack', () => nextVerse())
+    mediaSession.setActionHandler('stop', () => dismiss())
+    mediaSession.setActionHandler('seekto', (details) => {
       if (details.seekTime && audioRef.current?.duration) {
         seek(details.seekTime / audioRef.current.duration)
       }
     })
 
     return () => {
-      navigator.mediaSession.setActionHandler('play', null)
-      navigator.mediaSession.setActionHandler('pause', null)
-      navigator.mediaSession.setActionHandler('previoustrack', null)
-      navigator.mediaSession.setActionHandler('nexttrack', null)
-      navigator.mediaSession.setActionHandler('seekto', null)
+      mediaSession.setActionHandler('play', null)
+      mediaSession.setActionHandler('pause', null)
+      mediaSession.setActionHandler('previoustrack', null)
+      mediaSession.setActionHandler('nexttrack', null)
+      mediaSession.setActionHandler('stop', null)
+      mediaSession.setActionHandler('seekto', null)
     }
-  }, [togglePlayPause, prevVerse, nextVerse, seek])
+  }, [togglePlayPause, prevVerse, nextVerse, seek, dismiss])
+
+  // Reflect playback state to the OS session. 'none' (no verse) tears down the
+  // native notification / ends the foreground service.
+  useEffect(() => {
+    mediaSession.setPlaybackState(!currentVerse ? 'none' : isPlaying ? 'playing' : 'paused')
+  }, [isPlaying, currentVerse])
+
+  // Anchor the OS position bar. Deliberately NOT keyed on currentTime — that
+  // would hit the (native) bridge on every timeupdate; the OS extrapolates
+  // between anchors via playbackRate. seek() re-anchors explicitly.
+  useEffect(() => {
+    if (!currentVerse || !duration) {
+      mediaSession.setPositionState(null)
+      return
+    }
+    mediaSession.setPositionState({
+      duration,
+      position: currentTimeRef.current,
+      playbackRate: isPlaying ? 1 : 0,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [duration, isPlaying, currentVerse])
 
   // ─── Context values ────────────────────────────────────────────────────────────
 

@@ -41,6 +41,9 @@ importers:
       '@capacitor/keyboard':
         specifier: ^8.0.2
         version: 8.0.3(@capacitor/core@8.4.0)
+      '@capacitor/local-notifications':
+        specifier: ^8.2.0
+        version: 8.2.0(@capacitor/core@8.4.0)
       '@capacitor/preferences':
         specifier: ^8.0.1
         version: 8.0.1(@capacitor/core@8.4.0)
@@ -50,6 +53,9 @@ importers:
       '@capacitor/status-bar':
         specifier: ^8.0.2
         version: 8.0.2(@capacitor/core@8.4.0)
+      '@capgo/capacitor-media-session':
+        specifier: ^8.0.28
+        version: 8.0.28(@capacitor/core@8.4.0)
       '@capgo/capacitor-social-login':
         specifier: ^8.3.22
         version: 8.3.22(@capacitor/core@8.4.0)
@@ -101,7 +107,7 @@ importers:
         version: 9.39.4(jiti@2.7.0)
       eslint-config-next:
         specifier: 16.2.1
-        version: 16.2.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+        version: 16.2.1(@typescript-eslint/parser@8.60.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
       tailwindcss:
         specifier: ^4.3.0
         version: 4.3.0
@@ -348,7 +354,7 @@ importers:
         version: 9.39.4(jiti@2.7.0)
       eslint-config-next:
         specifier: 16.2.1
-        version: 16.2.1(@typescript-eslint/parser@8.60.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+        version: 16.2.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
       html-to-text:
         specifier: ^10.0.0
         version: 10.0.0
@@ -804,6 +810,11 @@ packages:
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
+  '@capacitor/local-notifications@8.2.0':
+    resolution: {integrity: sha512-fvLY0w2w4MiX+DD4+Wv4DOwOLdzKZsMDwAcRv/Juudd+QbKbn69s6cM3xVqPwAiDqfnqsY4/S8xtQD6M73wY2A==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+
   '@capacitor/preferences@8.0.1':
     resolution: {integrity: sha512-T6no3ebi79XJCk91U3Jp/liJUwgBdvHR+s6vhvPkPxSuch7z3zx5Rv1bdWM6sWruNx+pViuEGqZvbfCdyBvcHQ==}
     peerDependencies:
@@ -821,6 +832,11 @@ packages:
 
   '@capacitor/synapse@1.0.4':
     resolution: {integrity: sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==}
+
+  '@capgo/capacitor-media-session@8.0.28':
+    resolution: {integrity: sha512-p9hEbujYixWr//s66moL/nHd3ppeLk3yirT5VvAJvWHCTWXIqVSeL+dP12XTcpSobMQBKlC28LpIWdYvFcDyXQ==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
 
   '@capgo/capacitor-social-login@8.3.22':
     resolution: {integrity: sha512-7afa+96ekeAU13uutqZVIVHCWXs40peKoWCK2jd9k7eWnFYcLtagRbwUf9CbaAO/zrHaifXpYQSuiWHGyH1QlQ==}
@@ -6678,6 +6694,10 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.4.0
 
+  '@capacitor/local-notifications@8.2.0(@capacitor/core@8.4.0)':
+    dependencies:
+      '@capacitor/core': 8.4.0
+
   '@capacitor/preferences@8.0.1(@capacitor/core@8.4.0)':
     dependencies:
       '@capacitor/core': 8.4.0
@@ -6691,6 +6711,10 @@ snapshots:
       '@capacitor/core': 8.4.0
 
   '@capacitor/synapse@1.0.4': {}
+
+  '@capgo/capacitor-media-session@8.0.28(@capacitor/core@8.4.0)':
+    dependencies:
+      '@capacitor/core': 8.4.0
 
   '@capgo/capacitor-social-login@8.3.22(@capacitor/core@8.4.0)':
     dependencies:

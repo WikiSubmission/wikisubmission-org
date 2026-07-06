@@ -34,4 +34,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Approximate location only: prayer times need city-level accuracy. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Background audio: the media-session plugin contributes its
+         MediaSessionService (foregroundServiceType="mediaPlayback") via
+         manifest merge; the typed FGS permission must be declared app-side. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Android 13+: required for the lock-screen media notification. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>
