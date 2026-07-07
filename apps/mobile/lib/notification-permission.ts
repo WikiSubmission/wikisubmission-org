@@ -1,30 +1,39 @@
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 
-// Android 13+ gates the media playback notification (lock screen controls)
-// behind POST_NOTIFICATIONS. @capacitor/local-notifications is used purely for
-// its permission API — the media notification itself comes from the
-// media-session plugin's foreground service.
+// Android 13+ gates all notifications (media playback controls, prayer
+// reminders, FCM) behind the single POST_NOTIFICATIONS permission.
+// @capacitor/local-notifications is used for its permission API; whichever
+// feature asks first unblocks the others.
 
 const ASKED_KEY = 'notification-permission-asked'
 
 /**
- * Ask for notification permission once, lazily. Called on the first playback
- * (not app start) so the prompt appears in a context the user understands.
- * Denial degrades gracefully: playback and Quick-Settings media controls keep
- * working, only the lock-screen notification is withheld by the OS.
+ * Ask for notification permission, lazily. The media path calls this with no
+ * arguments on first playback and only ever asks once (the one-shot guard
+ * keeps the prompt in a context the user understands). The notification
+ * settings UI passes `force: true` — an explicit toggle is always a valid
+ * moment to re-prompt, until the OS itself reports a permanent denial.
+ *
+ * Returns whether notification permission is granted.
  */
-export async function ensureNotificationPermission(): Promise<void> {
+export async function ensureNotificationPermission(
+  options: { force?: boolean } = {},
+): Promise<boolean> {
   try {
     const { display } = await LocalNotifications.checkPermissions()
-    if (display === 'granted') return
+    if (display === 'granted') return true
 
-    const { value: asked } = await Preferences.get({ key: ASKED_KEY })
-    if (asked) return
+    if (!options.force) {
+      const { value: asked } = await Preferences.get({ key: ASKED_KEY })
+      if (asked) return false
+      await Preferences.set({ key: ASKED_KEY, value: '1' })
+    }
 
-    await Preferences.set({ key: ASKED_KEY, value: '1' })
-    await LocalNotifications.requestPermissions()
+    const result = await LocalNotifications.requestPermissions()
+    return result.display === 'granted'
   } catch {
-    // Permission plumbing must never break playback.
+    // Permission plumbing must never break the caller (e.g. playback).
+    return false
   }
 }

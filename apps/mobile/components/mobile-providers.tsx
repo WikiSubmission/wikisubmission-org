@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { LayoutGroup } from 'framer-motion'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
@@ -11,8 +12,11 @@ import { MobileAuthProvider } from '@/components/mobile-auth-context'
 import { MobileScriptureAuthBridge } from '@/components/mobile-scripture-auth-bridge'
 import { MobileShell } from '@/components/mobile-shell'
 import { NativeInit } from '@/components/native-init'
+import { MobileNotificationsBridge } from '@/components/mobile-notifications-bridge'
 import { MobileOfflineSyncBridge } from '@/components/mobile-offline-sync-bridge'
 import { MobileBundleAutoload } from '@/components/mobile-bundle-autoload'
+import { StartupZikrOverlay } from '@/components/startup-zikr-overlay'
+import { StartupZikrProvider } from '@/lib/startup-zikr-context'
 
 /**
  * Client provider tree for the mobile app. This is the native counterpart to
@@ -40,9 +44,18 @@ export function MobileProviders({ children }: { children: React.ReactNode }) {
               <MobileScriptureAuthBridge>
                 <QuranPlayerProvider>
                   <NativeInit />
+                  <MobileNotificationsBridge />
                   <MobileOfflineSyncBridge />
                   <MobileBundleAutoload />
-                  <MobileShell>{children}</MobileShell>
+                  {/* One LayoutGroup spans the shell and the startup overlay so
+                      the zikr text can fly (layoutId) from the overlay into the
+                      Today screen's strip. */}
+                  <StartupZikrProvider>
+                    <LayoutGroup>
+                      <MobileShell>{children}</MobileShell>
+                      <StartupZikrOverlay />
+                    </LayoutGroup>
+                  </StartupZikrProvider>
                   <Toaster />
                 </QuranPlayerProvider>
               </MobileScriptureAuthBridge>

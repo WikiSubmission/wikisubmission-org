@@ -32,6 +32,19 @@ export function normalizePath(pathname: string): string {
 /** Library routes mirror web URLs (so shared links work) but are entered from the Quran tab. */
 const QURAN_ALIAS_PREFIXES = ['/introduction', '/proclamation', '/appendices'] as const
 
+/** Screens reached from the Today tab (pushed, so the back chevron shows). */
+const TODAY_ALIAS_PREFIXES = ['/zakat'] as const
+
+/** Titles for pushed screens that are not tab roots. */
+const SCREEN_TITLES: Record<string, string> = {
+  '/zakat': 'Zakat',
+}
+
+/** Top-bar title for a pushed screen, when it has one. */
+export function screenTitle(pathname: string): string | undefined {
+  return SCREEN_TITLES[normalizePath(pathname)]
+}
+
 /**
  * Resolve the active tab for a pathname. Longest-href-first so a nested route
  * like `/quran/2` maps to the Quran tab, while `/` only matches Today exactly.
@@ -40,6 +53,9 @@ export function activeTab(pathname: string): TabItem | undefined {
   const path = normalizePath(pathname)
   if (QURAN_ALIAS_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) {
     return TABS.find((tab) => tab.key === 'quran')
+  }
+  if (TODAY_ALIAS_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) {
+    return TABS.find((tab) => tab.key === 'today')
   }
   return [...TABS]
     .sort((a, b) => b.href.length - a.href.length)

@@ -9,10 +9,11 @@ const config: CapacitorConfig = {
   webDir: 'out',
   plugins: {
     SplashScreen: {
-      // NativeInit calls SplashScreen.hide() once the web bundle hydrates;
-      // launchAutoHide is the fallback if that never runs.
-      launchAutoHide: true,
-      launchShowDuration: 2000,
+      // The startup zikr overlay calls SplashScreen.hide() after it paints
+      // (lib/splash-handoff.ts) so the native splash hands off to the JS
+      // overlay without a blank frame. NativeInit arms a 6s safety timeout in
+      // case the overlay never mounts.
+      launchAutoHide: false,
       backgroundColor: '#14110E',
       showSpinner: false,
     },
@@ -27,6 +28,12 @@ const config: CapacitorConfig = {
     Keyboard: {
       resize: KeyboardResize.Native,
       resizeOnFullScreen: true,
+    },
+    LocalNotifications: {
+      // Monochrome status-bar icon (res/drawable/ic_stat_notify.xml); without
+      // one Android renders the adaptive launcher icon as a grey square.
+      smallIcon: 'ic_stat_notify',
+      iconColor: '#C8A24B',
     },
   },
 }

@@ -41,4 +41,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <!-- Android 13+: required for the lock-screen media notification. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- User-scheduled prayer reminders. The user-grantable variant (never
+         USE_EXACT_ALARM): granted at install on Android 12/13, denied by
+         default on 14+ where the plugin falls back to inexact alarms and the
+         notification settings UI offers the special-access screen. Declare
+         the use case in the Play Console app content form. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 </manifest>

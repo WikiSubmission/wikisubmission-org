@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { activeTab, isQuranReaderRoute, isTabRoot } from '@/constants/navigation'
+import { activeTab, isQuranReaderRoute, isTabRoot, screenTitle } from '@/constants/navigation'
 import { MobileTopBar } from '@/components/mobile-top-bar'
 import { QuranPlayer } from '@/components/quran-player/now-playing-bar'
 import { TabBar } from '@/components/tab-bar'
@@ -26,7 +26,10 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <MobileTopBar title={tab?.label ?? 'WikiSubmission'} showBack={!atRoot} />
+      <MobileTopBar
+        title={screenTitle(pathname) ?? tab?.label ?? 'WikiSubmission'}
+        showBack={!atRoot}
+      />
       <main
         className="flex flex-1 flex-col"
         style={{

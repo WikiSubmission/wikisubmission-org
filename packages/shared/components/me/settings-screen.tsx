@@ -65,11 +65,20 @@ interface SettingsClientProps {
    * omitted on Capacitor, which will supply a native adapter in a later phase.
    * Keeping it a slot prevents the web worker/WASM from entering the mobile bundle. */
   offlineSection?: React.ReactNode
+  /** Optional replacement for the web-push notifications section. The mobile
+   * app injects its native (local + FCM) preferences here — the Capacitor
+   * webview has no service-worker push, so the web section would only ever
+   * report "unsupported" there. Web omits it and keeps the built-in section. */
+  notificationsSection?: React.ReactNode
   /** Initial tab, from the page's ?tab= search param. */
   initialTab?: string
 }
 
-export function SettingsClient({ offlineSection, initialTab }: SettingsClientProps = {}) {
+export function SettingsClient({
+  offlineSection,
+  notificationsSection,
+  initialTab,
+}: SettingsClientProps = {}) {
   const t = useTranslations('meSettings')
   const hasDownloads = offlineSection != null
   const [tab, setTab] = useState<SettingsTab>(() => resolveTab(initialTab, hasDownloads))
@@ -272,6 +281,12 @@ export function SettingsClient({ offlineSection, initialTab }: SettingsClientPro
             </section>
           )}
 
+          {notificationsSection != null ? (
+            <section style={cardStyle}>
+              <h2 style={h2Style}>{t('notifications.heading')}</h2>
+              {notificationsSection}
+            </section>
+          ) : (
           <section style={cardStyle}>
             <h2 style={h2Style}>{t('notifications.heading')}</h2>
             <p style={bodyStyle}>{t('notifications.body')}</p>
@@ -341,6 +356,7 @@ export function SettingsClient({ offlineSection, initialTab }: SettingsClientPro
               </div>
             )}
           </section>
+          )}
         </>
       )}
 
