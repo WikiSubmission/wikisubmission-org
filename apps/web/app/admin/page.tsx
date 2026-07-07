@@ -26,6 +26,11 @@ const TILES: Tile[] = [
     title: 'Offline bundles',
     body: 'Rebuild and publish the downloadable Quran packages (text and word by word) after content changes.',
   },
+  {
+    href: '/admin/notifications',
+    title: 'Notifications',
+    body: 'Schedule push notifications to web and mobile devices, and manage the zikr reminder texts shown in the app.',
+  },
 ]
 
 export default async function AdminLandingPage() {
