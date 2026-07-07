@@ -138,8 +138,13 @@ function PrayerTimesContent() {
   }
 
   const prayerOrder = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha']
+  // Display order with sunrise as a first-class event between Fajr and Dhuhr
+  // (used by the timeline and the Today table; prayerOrder stays 5-prayer for
+  // the Arabic name footnote).
+  const eventOrder = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha']
   const prayerDisplayNames: Record<string, string> = {
     fajr: t('dawnLabel'),
+    sunrise: t('sunrise'),
     dhuhr: t('noonLabel'),
     asr: t('afternoonLabel'),
     maghrib: t('sunsetLabel'),
@@ -264,29 +269,37 @@ function PrayerTimesContent() {
             </div>
           )}
 
-          {/* Now / Next — primary headline */}
-          {(data.current_prayer || data.upcoming_prayer) && (
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 -mt-2">
-              {data.current_prayer && (
-                <span
-                  className="text-3xl md:text-4xl font-medium text-[var(--ed-accent)] capitalize tracking-tight leading-none"
-                  style={{ fontFamily: F.serif }}
-                >
-                  {prayerDisplayNames[data.current_prayer.toLowerCase()] ?? data.current_prayer}
-                </span>
-              )}
-              {data.upcoming_prayer && data.upcoming_prayer_time_left && (
-                <span
-                  className="text-base md:text-lg text-[var(--ed-fg-muted)] tabular-nums leading-none whitespace-nowrap"
-                  style={{ fontFamily: F.serif }}
-                >
-                  <span className="opacity-60 mx-1">→</span>
-                  <span className="capitalize text-[var(--ed-fg)]"> {prayerDisplayNames[data.upcoming_prayer.toLowerCase()] ?? data.upcoming_prayer}</span>
-                  <span className="font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)]"> {data.upcoming_prayer_time_left}</span>
-                </span>
-              )}
-            </div>
-          )}
+          {/* Now / Next — primary headline. Prefers the event-cycle fields
+              (sunrise-aware) and falls back to the prayer fields while the
+              deployed API predates them. */}
+          {(() => {
+            const currentKey = data.current_event ?? data.current_prayer
+            const upcomingKey = data.upcoming_event ?? data.upcoming_prayer
+            const upcomingLeft = data.upcoming_event_time_left ?? data.upcoming_prayer_time_left
+            if (!currentKey && !upcomingKey) return null
+            return (
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 -mt-2">
+                {currentKey && (
+                  <span
+                    className="text-3xl md:text-4xl font-medium text-[var(--ed-accent)] capitalize tracking-tight leading-none"
+                    style={{ fontFamily: F.serif }}
+                  >
+                    {prayerDisplayNames[currentKey.toLowerCase()] ?? currentKey}
+                  </span>
+                )}
+                {upcomingKey && upcomingLeft && (
+                  <span
+                    className="text-base md:text-lg text-[var(--ed-fg-muted)] tabular-nums leading-none whitespace-nowrap"
+                    style={{ fontFamily: F.serif }}
+                  >
+                    <span className="opacity-60 mx-1">→</span>
+                    <span className="capitalize text-[var(--ed-fg)]"> {prayerDisplayNames[upcomingKey.toLowerCase()] ?? upcomingKey}</span>
+                    <span className="font-[family-name:var(--font-jetbrains)] text-[var(--ed-accent)]"> {upcomingLeft}</span>
+                  </span>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Day progress timeline */}
           {data.times && (
@@ -297,7 +310,7 @@ function PrayerTimesContent() {
           <div className="space-y-2">
             <SchedulePanel
               data={data}
-              prayerOrder={prayerOrder}
+              eventOrder={eventOrder}
               prayerDisplayNames={prayerDisplayNames}
               t={t}
             />
@@ -364,15 +377,20 @@ function PrayerTimesContent() {
 
 function SchedulePanel({
   data,
-  prayerOrder,
+  eventOrder,
   prayerDisplayNames,
   t,
 }: {
   data: PrayerTimesResponse
-  prayerOrder: string[]
+  eventOrder: string[]
   prayerDisplayNames: Record<string, string>
   t: (key: string, values?: Record<string, string>) => string
 }) {
+  // Sunrise-aware event fields, with prayer-field fallback for older API responses.
+  const currentKey = (data.current_event ?? data.current_prayer)?.toLowerCase()
+  const upcomingKey = (data.upcoming_event ?? data.upcoming_prayer)?.toLowerCase()
+  const upcomingLeft = data.upcoming_event_time_left ?? data.upcoming_prayer_time_left
+  const currentElapsed = data.current_event_time_elapsed ?? data.current_prayer_time_elapsed
   return (
     <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 overflow-hidden">
       <Tabs defaultValue="today" className="flex flex-col gap-0">
@@ -398,20 +416,18 @@ function SchedulePanel({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/20">
-                  {prayerOrder.map((prayer) => {
-                    const isCurrent =
-                      data.current_prayer?.toLowerCase() === prayer
-                    const isUpcoming =
-                      data.upcoming_prayer?.toLowerCase() === prayer
-                    const timeLeft =
-                      data.times_left?.[
-                        prayer as keyof typeof data.times_left
-                      ]
+                  {eventOrder.map((event) => {
+                    const isSunrise = event === 'sunrise'
+                    const isCurrent = currentKey === event
+                    const isUpcoming = upcomingKey === event
+                    const timeLeft = isUpcoming
+                      ? upcomingLeft
+                      : data.times_left?.[event as keyof typeof data.times_left]
                     const isUrgent = timeLeft && !timeLeft.includes('h')
 
                     return (
                       <tr
-                        key={prayer}
+                        key={event}
                         className={cn(
                           'transition-colors',
                           isCurrent ? 'bg-primary/8' : 'hover:bg-muted/30'
@@ -424,11 +440,15 @@ function SchedulePanel({
                             )}
                             <span
                               className={cn(
-                                'font-medium',
-                                isCurrent ? 'text-primary' : 'text-foreground'
+                                isSunrise ? 'font-light italic' : 'font-medium',
+                                isCurrent
+                                  ? 'text-primary'
+                                  : isSunrise
+                                    ? 'text-muted-foreground'
+                                    : 'text-foreground'
                               )}
                             >
-                              {prayerDisplayNames[prayer]}
+                              {prayerDisplayNames[event]}
                             </span>
                             {isUpcoming && timeLeft && (
                               <span
@@ -442,10 +462,10 @@ function SchedulePanel({
                                 {t('inTimeLeft', { timeLeft })}
                               </span>
                             )}
-                            {isCurrent && data.current_prayer_time_elapsed && (
+                            {isCurrent && currentElapsed && (
                               <span className="text-[10px] normal-case leading-none mt-0.5 text-primary/70 font-light">
                                 {t('timeElapsed', {
-                                  elapsed: data.current_prayer_time_elapsed,
+                                  elapsed: currentElapsed,
                                 })}
                               </span>
                             )}
@@ -454,13 +474,16 @@ function SchedulePanel({
                         <td className="py-3.5 px-4 text-right">
                           <span
                             className={cn(
-                              'font-bold uppercase tracking-tight',
+                              'uppercase tracking-tight',
+                              isSunrise ? 'font-medium' : 'font-bold',
                               isCurrent
                                 ? 'text-primary'
-                                : 'text-foreground'
+                                : isSunrise
+                                  ? 'text-muted-foreground'
+                                  : 'text-foreground'
                             )}
                           >
-                            {data.times?.[prayer as keyof typeof data.times]}
+                            {data.times?.[event as keyof typeof data.times]}
                           </span>
                         </td>
                       </tr>
@@ -572,13 +595,13 @@ function DayTimeline({
   data: PrayerTimesResponse
   prayerDisplayNames: Record<string, string>
 }) {
-  const prayers = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const
+  const prayers = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'] as const
   const times = prayers.map((p) => parseTimeToMinutes(data.times?.[p] ?? ''))
-  const [, , , , ishaMin] = times
+  const ishaMin = times[times.length - 1]
 
   const now = new Date()
   const nowMin = now.getHours() * 60 + now.getMinutes()
-  const currentPrayer = data.current_prayer?.toLowerCase() ?? ''
+  const currentPrayer = (data.current_event ?? data.current_prayer)?.toLowerCase() ?? ''
 
   // Map "now" onto the cell grid: locate the current interval, then interpolate
   // within that cell's 20%-wide column. This keeps the progress indicator
@@ -599,7 +622,7 @@ function DayTimeline({
   return (
     <div className="relative">
       {/* Prayer cells — equal-width columns, current cell is the visual anchor */}
-      <div className="grid grid-cols-5 border-y border-[var(--ed-rule)]/40 relative">
+      <div className="grid grid-cols-6 border-y border-[var(--ed-rule)]/40 relative">
         {prayers.map((prayer, i) => {
           const isCurrent = currentPrayer === prayer
           const isPast = nowMin > times[i] && !isCurrent
@@ -700,6 +723,12 @@ interface PrayerTimesResponse {
   upcoming_prayer?: string
   current_prayer_time_elapsed?: string
   upcoming_prayer_time_left?: string
+  // Event cycle (additive API fields): like current/upcoming prayer, but with
+  // sunrise as a first-class event between fajr and dhuhr.
+  current_event?: string
+  upcoming_event?: string
+  current_event_time_elapsed?: string
+  upcoming_event_time_left?: string
   schedule?: {
     date: string
     day: string
