@@ -3115,6 +3115,294 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+  /editorial/content/{module}:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialContent
+      summary: List editorial content documents for a module
+      description: >
+        Lists documents of one content module (article, author, category,
+        community, appendix) with derived draft/published/changed status.
+        Requires read access to the module. Content is stored first-party in
+        Postgres; this surface replaces the retired Sanity Studio.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialContentModuleParam'
+        - name: q
+          in: query
+          required: false
+          description: Case-insensitive substring match on slug and title-like fields.
+          schema:
+            type: string
+            maxLength: 200
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/EditorialContentStatus'
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialContentListEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    post:
+      tags: [Editorial]
+      operationId: createEditorialContent
+      summary: Create a content document (starts as draft)
+      description: >
+        Creates a new document from the given fields. The document starts in
+        draft status; nothing is publicly visible until it is published.
+        Requires write access to the module. Field payloads are validated
+        per module (required keys, unknown-key rejection, slug format).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialContentModuleParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditorialContentInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialContentEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/content/{module}/{docId}:
+    get:
+      tags: [Editorial]
+      operationId: getEditorialContent
+      summary: Fetch one content document (draft payload)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialContentModuleParam'
+        - $ref: '#/components/parameters/EditorialDocIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialContentEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    put:
+      tags: [Editorial]
+      operationId: updateEditorialContent
+      summary: Replace a document's draft fields
+      description: >
+        Replaces the working draft with the given fields. The published
+        snapshot is untouched; status becomes `changed` until re-published.
+        Requires write access to the module.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialContentModuleParam'
+        - $ref: '#/components/parameters/EditorialDocIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditorialContentInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialContentEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+    delete:
+      tags: [Editorial]
+      operationId: deleteEditorialContent
+      summary: Delete a document (draft and published snapshot)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialContentModuleParam'
+        - $ref: '#/components/parameters/EditorialDocIdParam'
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/content/{module}/{docId}/publish:
+    post:
+      tags: [Editorial]
+      operationId: publishEditorialContent
+      summary: Publish the current draft
+      description: >
+        Copies the working draft into the published snapshot readers see.
+        Requires write access to the module.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialContentModuleParam'
+        - $ref: '#/components/parameters/EditorialDocIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialContentEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/content/{module}/{docId}/unpublish:
+    post:
+      tags: [Editorial]
+      operationId: unpublishEditorialContent
+      summary: Retract the published snapshot (document returns to draft)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialContentModuleParam'
+        - $ref: '#/components/parameters/EditorialDocIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialContentEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/admin/editors:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialEditors
+      summary: List users with their editorial grants (admin)
+      description: >
+        Admin-only. Returns every active user together with their editorial
+        module grants, per-version Quran/Bible grants, approver grants and
+        word-by-word reference preference.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialEditorListEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/admin/editors/{userId}:
+    put:
+      tags: [Editorial]
+      operationId: replaceEditorialEditorGrants
+      summary: Replace one user's editorial grants (admin)
+      description: >
+        Admin-only. Replaces the user's module grants, Quran/Bible version
+        grants (including approver capability) and reference preference in one
+        transaction. Grants absent from the request are revoked.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EditorialUserIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditorGrantsInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialEditorEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
 
 components:
   securitySchemes:
@@ -3185,6 +3473,31 @@ components:
         enum: [quran, bible]
         default: quran
       example: quran
+
+    # Editorial path parameters (content modules + admin)
+    EditorialContentModuleParam:
+      name: module
+      in: path
+      required: true
+      description: Editorial content module key.
+      schema:
+        $ref: '#/components/schemas/EditorialContentModule'
+    EditorialDocIdParam:
+      name: docId
+      in: path
+      required: true
+      description: Content document id.
+      schema:
+        type: integer
+        format: int64
+    EditorialUserIdParam:
+      name: userId
+      in: path
+      required: true
+      description: WS user id.
+      schema:
+        type: integer
+        format: int64
 
     # Editorial path parameters (Quran write path)
     EditorialVersionIdParam:
@@ -5271,6 +5584,174 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/EditorialSession'
+
+    EditorialContentModule:
+      type: string
+      description: Content module keys of the first-party editorial store (subset of editor_module).
+      enum: [article, author, category, community, appendix]
+
+    EditorialContentStatus:
+      type: string
+      description: >
+        Derived document status. `draft` = never published; `changed` =
+        published but the working draft differs from the snapshot;
+        `published` = draft and snapshot are identical.
+      enum: [draft, changed, published]
+
+    EditorialContentDoc:
+      type: object
+      required: [id, module, status, fields, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        module:
+          $ref: '#/components/schemas/EditorialContentModule'
+        status:
+          $ref: '#/components/schemas/EditorialContentStatus'
+        fields:
+          type: object
+          additionalProperties: true
+          description: The working draft payload. Shape is module-specific and validated server-side.
+        translation_group:
+          type: string
+          nullable: true
+          description: Groups language variants of one article; null for other modules.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_by_email:
+          type: string
+          nullable: true
+
+    EditorialContentInput:
+      type: object
+      required: [fields]
+      properties:
+        fields:
+          type: object
+          additionalProperties: true
+          description: Full draft payload for the document (replace semantics).
+        translation_group:
+          type: string
+          nullable: true
+          description: >
+            Articles only — attach this document to an existing translation
+            group to declare it a language variant of that article. Omit to
+            start a new group.
+
+    EditorialContentEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/EditorialContentDoc'
+
+    EditorialContentListEnvelope:
+      type: object
+      required: [data, total]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditorialContentDoc'
+        total:
+          type: integer
+          description: Total matching documents before limit/offset.
+
+    EditorVersionGrant:
+      type: object
+      required: [version_id, can_write]
+      properties:
+        version_id:
+          type: integer
+          format: int64
+        can_write:
+          type: boolean
+        can_approve:
+          type: boolean
+          description: Quran only — publish-request approve capability.
+
+    EditorGrantsInput:
+      type: object
+      required: [modules, quran_versions, bible_versions]
+      properties:
+        modules:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Module key mapped to can_write. Presence of a key grants read.
+        quran_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditorVersionGrant'
+        bible_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditorVersionGrant'
+        quran_reference_version_id:
+          type: integer
+          format: int64
+          nullable: true
+
+    EditorialEditor:
+      type: object
+      required: [user_id, email, role, is_active, modules, quran_versions, bible_versions]
+      properties:
+        user_id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        display_name:
+          type: string
+          nullable: true
+        role:
+          type: string
+        is_active:
+          type: boolean
+        modules:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Module key mapped to can_write. Presence of a key implies read access.
+        quran_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditorVersionGrant'
+        bible_versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditorVersionGrant'
+        quran_reference_version_id:
+          type: integer
+          format: int64
+          nullable: true
+
+    EditorialEditorEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/EditorialEditor'
+
+    EditorialEditorListEnvelope:
+      type: object
+      required: [data, total]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditorialEditor'
+        total:
+          type: integer
 
     VersionAuthor:
       type: object
