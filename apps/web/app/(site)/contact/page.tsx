@@ -1,5 +1,6 @@
 import { About } from '@/constants/about'
-import { Mail, Github, MessageSquare, ExternalLink, ArrowRight } from 'lucide-react'
+import { Mail, MessageSquare, ExternalLink, ArrowRight } from 'lucide-react'
+import { FaGithub } from 'react-icons/fa'
 import { getTranslations } from 'next-intl/server'
 import { buildPageMetadata } from '@/constants/metadata'
 
@@ -25,7 +26,7 @@ export default async function ContactPage() {
     {
       key: 'github',
       href: About.social.github,
-      icon: Github,
+      icon: FaGithub,
       title: t('github'),
       description: t('githubDesc'),
       label: 'github.com/wikisubmission',

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { flushOutbox } from '@/lib/offline/user/sync-runner'
 import type { OfflineUserStore } from '@/lib/offline/user/user-store'
-import type { OutboxEntry, SyncResponse } from '@/lib/offline/user/types'
+import type { OutboxEntry, SyncRequest, SyncResponse } from '@/lib/offline/user/types'
 
 function storeWith(pending: OutboxEntry[]) {
   const markFlushed = vi.fn(async () => {})
@@ -53,7 +53,7 @@ describe('flushOutbox', () => {
   it('sends mutations oldest-first', async () => {
     const { store } = storeWith([entry('3'), entry('1'), entry('2')])
     let sentIds: string[] = []
-    const transport = vi.fn(async (req) => {
+    const transport = vi.fn(async (req: SyncRequest) => {
       sentIds = req.mutations.map((m) => m.id)
       return { server_time: 1, results: req.mutations.map((m) => ({ id: m.id, status: 'applied' as const })) }
     })

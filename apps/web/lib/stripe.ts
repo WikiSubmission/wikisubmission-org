@@ -6,6 +6,6 @@ export const stripe = () => {
     throw new Error('Stripe secret key not found')
   }
   return new Stripe(secretKey, {
-    apiVersion: '2026-02-25.clover',
+    apiVersion: '2026-06-24.dahlia',
   })
 }

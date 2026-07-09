@@ -16,14 +16,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@types/react": "19.2.14",
-      "@types/react-dom": "19.2.3",
       "d3-color": ">=3.1.0",
-      "postcss": ">=8.5.10",
-      "js-cookie": "3.0.7",
-      "vite": "8.0.16",
-      "js-yaml": "4.2.0",
-      "undici": "^7.28.0"
+      "postcss": ">=8.5.10"
     }
   },
   "trustedDependencies": [
