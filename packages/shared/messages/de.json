@@ -1080,6 +1080,18 @@
           "explanation": "Spielversuche und Statistiken. Spieldaten sind nicht in deinem Export enthalten."
         }
       }
+    },
+    "deleteAccount": {
+      "heading": "Mein Konto löschen",
+      "body": "Lösche dein gesamtes Konto und alle damit verbundenen Daten dauerhaft. Du musst zuerst einen Datenexport herunterladen, damit du eine Kopie behältst.",
+      "button": "Mein Konto löschen…",
+      "dialogTitle": "Mein Konto löschen",
+      "warning": "Dadurch werden dein Konto und alle deine Daten dauerhaft gelöscht. Das kann nicht rückgängig gemacht werden, und nichts kann wiederhergestellt werden – auch nicht aus deinem Export.",
+      "confirmPrompt": "Gib zur Bestätigung deine E-Mail-Adresse ({email}) ein.",
+      "cancel": "Abbrechen",
+      "confirm": "Mein Konto löschen",
+      "exportFirst": "Fordere oben einen Datenexport an und lade ihn herunter, bevor du dein Konto löschen kannst.",
+      "failed": "Dein Konto konnte nicht gelöscht werden. Bitte versuche es erneut."
     }
   },
   "chat": {

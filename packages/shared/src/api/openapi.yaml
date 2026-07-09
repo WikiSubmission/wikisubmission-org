@@ -2015,6 +2015,33 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+  /me/delete-account:
+    post:
+      tags: [Me]
+      operationId: deleteMeAccount
+      summary: Permanently delete the authenticated user's entire account
+      description: >
+        Erases the user's account and every personal record in a single atomic
+        transaction, then the caller must sign out. A fresh completed data export
+        is required first (same gate as content deletion). Irreversible.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Account deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDeletionResponse'
+        '409':
+          description: A fresh completed export is required before deletion.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReasonResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
   /me/push/subscribe:
     post:
       tags: [Me]
@@ -5416,6 +5443,20 @@ components:
         status:
           type: string
           enum: [queued]
+
+    AccountDeletionResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [deleted]
+        counts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+          nullable: true
 
     ReasonResponse:
       type: object

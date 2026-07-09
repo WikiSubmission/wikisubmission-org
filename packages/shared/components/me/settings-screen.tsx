@@ -72,12 +72,22 @@ interface SettingsClientProps {
   notificationsSection?: React.ReactNode
   /** Initial tab, from the page's ?tab= search param. */
   initialTab?: string
+  /** The signed-in account's email. Used as the typed confirmation value for
+   * wholesale account deletion. When absent, the delete-account card is hidden
+   * (there is nothing to confirm against). */
+  accountEmail?: string
+  /** App-specific sign-out, invoked after the account is deleted. Web passes
+   * next-auth's signOut; mobile passes the Capacitor auth sign-out. When absent,
+   * the delete-account card is hidden. */
+  onAccountDeleted?: () => void
 }
 
 export function SettingsClient({
   offlineSection,
   notificationsSection,
   initialTab,
+  accountEmail,
+  onAccountDeleted,
 }: SettingsClientProps = {}) {
   const t = useTranslations('meSettings')
   const hasDownloads = offlineSection != null
@@ -94,6 +104,9 @@ export function SettingsClient({
   const [selectedCats, setSelectedCats] = useState<Set<string>>(new Set())
   const [confirmText, setConfirmText] = useState('')
   const [submittingDelete, setSubmittingDelete] = useState(false)
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false)
+  const [accountConfirmText, setAccountConfirmText] = useState('')
+  const [submittingAccount, setSubmittingAccount] = useState(false)
 
   const refreshExportStatus = useCallback(async () => {
     const body = await meApi.privacy.getExportStatus()
@@ -215,6 +228,33 @@ export function SettingsClient({
     }
   }
 
+  function openDeleteAccountDialog() {
+    setAccountConfirmText('')
+    setDeleteAccountOpen(true)
+  }
+
+  async function submitDeleteAccount() {
+    if (submittingAccount) return
+    // Re-assert the same guards the button enforces: a completed export and an
+    // exact email match. The server independently enforces the export gate.
+    if (!exportReady) return
+    if (!accountEmail || accountConfirmText.trim() !== accountEmail) return
+    setSubmittingAccount(true)
+    try {
+      const result = await meApi.privacy.deleteAccount()
+      if (!result.deleted && result.status === 409) {
+        flash(t('deleteAccount.exportFirst'))
+        return
+      }
+      setDeleteAccountOpen(false)
+      onAccountDeleted?.()
+    } catch {
+      flash(t('deleteAccount.failed'))
+    } finally {
+      setSubmittingAccount(false)
+    }
+  }
+
   function flash(msg: string) {
     setToast(msg)
     window.setTimeout(() => setToast((cur) => (cur === msg ? null : cur)), 2400)
@@ -239,6 +279,14 @@ export function SettingsClient({
   const confirmWord = t('deleteContent.confirmWord')
   const canSubmitDelete =
     selectedCats.size > 0 && confirmText.trim() === confirmWord && !submittingDelete
+  // Account deletion is only offered when the host app supplied both the email
+  // to confirm against and a sign-out callback to run afterwards.
+  const accountDeletionAvailable = accountEmail != null && onAccountDeleted != null
+  const canSubmitDeleteAccount =
+    exportReady &&
+    accountEmail != null &&
+    accountConfirmText.trim() === accountEmail &&
+    !submittingAccount
 
   return (
     <section style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px' }}>
@@ -450,6 +498,31 @@ export function SettingsClient({
               </button>
             )}
           </section>
+
+          {accountDeletionAvailable && (
+            <section style={{ ...cardStyle, borderColor: 'var(--destructive, #b91c1c)' }}>
+              <h2 style={h2Style}>{t('deleteAccount.heading')}</h2>
+              <p style={bodyStyle}>{t('deleteAccount.body')}</p>
+
+              {!exportReady && <p style={mutedStyle}>{t('deleteAccount.exportFirst')}</p>}
+
+              <button
+                type="button"
+                onClick={openDeleteAccountDialog}
+                disabled={!exportReady}
+                style={{
+                  ...buttonStyle,
+                  marginTop: 16,
+                  background: exportReady ? 'var(--destructive, #b91c1c)' : 'var(--ed-rule)',
+                  borderColor: exportReady ? 'var(--destructive, #b91c1c)' : 'var(--ed-rule)',
+                  color: '#fff',
+                  cursor: exportReady ? 'pointer' : 'not-allowed',
+                }}
+              >
+                {t('deleteAccount.button')}
+              </button>
+            </section>
+          )}
         </>
       )}
 
@@ -509,6 +582,46 @@ export function SettingsClient({
               onClick={submitDelete}
             >
               {t('deleteContent.confirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteAccountOpen} onOpenChange={setDeleteAccountOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('deleteAccount.dialogTitle')}</DialogTitle>
+          </DialogHeader>
+
+          <p className="text-sm font-medium text-destructive">{t('deleteAccount.warning')}</p>
+
+          <label className="block text-sm pt-2">
+            <span className="text-muted-foreground">
+              {t('deleteAccount.confirmPrompt', { email: accountEmail ?? '' })}
+            </span>
+            <input
+              type="text"
+              value={accountConfirmText}
+              onChange={(e) => setAccountConfirmText(e.target.value)}
+              className="mt-1 w-full rounded-md border bg-background px-3 py-2"
+              placeholder={accountEmail}
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+            />
+          </label>
+
+          <DialogFooter className="gap-2 pt-2">
+            <Button variant="outline" size="sm" onClick={() => setDeleteAccountOpen(false)}>
+              {t('deleteAccount.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={!canSubmitDeleteAccount}
+              onClick={submitDeleteAccount}
+            >
+              {t('deleteAccount.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>

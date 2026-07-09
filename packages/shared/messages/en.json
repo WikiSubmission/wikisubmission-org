@@ -1270,6 +1270,18 @@
           "explanation": "Game attempts and stats. Game data is not included in your export."
         }
       }
+    },
+    "deleteAccount": {
+      "heading": "Delete my account",
+      "body": "Permanently delete your entire account and every piece of data attached to it. You must download a data export first so you keep a copy.",
+      "button": "Delete my account…",
+      "dialogTitle": "Delete my account",
+      "warning": "This permanently deletes your account and all of your data. It cannot be undone, and nothing is recoverable — even from your export.",
+      "confirmPrompt": "Type your email address ({email}) to confirm.",
+      "cancel": "Cancel",
+      "confirm": "Delete my account",
+      "exportFirst": "Request and download a data export above before you can delete your account.",
+      "failed": "Your account could not be deleted. Please try again."
     }
   },
   "chat": {

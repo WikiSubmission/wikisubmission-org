@@ -827,6 +827,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/delete-account": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Permanently delete the authenticated user's entire account
+         * @description Erases the user's account and every personal record in a single atomic transaction, then the caller must sign out. A fresh completed data export is required first (same gate as content deletion). Irreversible.
+         */
+        post: operations["deleteMeAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/push/subscribe": {
         parameters: {
             query?: never;
@@ -2747,6 +2767,13 @@ export interface components {
         UserDataDeletionQueuedResponse: {
             /** @enum {string} */
             status: "queued";
+        };
+        AccountDeletionResponse: {
+            /** @enum {string} */
+            status: "deleted";
+            counts?: {
+                [key: string]: number;
+            } | null;
         };
         ReasonResponse: {
             reason: string;
@@ -5290,6 +5317,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserDataDeletionEnvelope"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    deleteMeAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Account deleted. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountDeletionResponse"];
+                };
+            };
+            /** @description A fresh completed export is required before deletion. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReasonResponse"];
                 };
             };
             500: components["responses"]["InternalServerErrror"];

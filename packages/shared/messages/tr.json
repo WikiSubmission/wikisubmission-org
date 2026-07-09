@@ -1080,6 +1080,18 @@
           "explanation": "Oyun denemeleri ve istatistikler. Oyun verileri dışa aktarımınıza dahil değildir."
         }
       }
+    },
+    "deleteAccount": {
+      "heading": "Hesabımı sil",
+      "body": "Hesabınızı ve ona bağlı tüm verileri kalıcı olarak silin. Bir kopyasını saklamak için önce bir veri dışa aktarımı indirmeniz gerekir.",
+      "button": "Hesabımı sil…",
+      "dialogTitle": "Hesabımı sil",
+      "warning": "Bu işlem hesabınızı ve tüm verilerinizi kalıcı olarak siler. Geri alınamaz ve dışa aktarımınızdan bile hiçbir şey kurtarılamaz.",
+      "confirmPrompt": "Onaylamak için e-posta adresinizi ({email}) yazın.",
+      "cancel": "İptal",
+      "confirm": "Hesabımı sil",
+      "exportFirst": "Hesabınızı silebilmek için önce yukarıdan bir veri dışa aktarımı isteyip indirin.",
+      "failed": "Hesabınız silinemedi. Lütfen tekrar deneyin."
     }
   },
   "chat": {
