@@ -345,6 +345,18 @@ const privacyApi = {
   },
 
   getDeletionStatus: (): Promise<UserDataDeletionEnvelope> => unwrap(wsApi.GET('/me/delete-content/status')),
+
+  // Permanently delete the entire account. The backend enforces the same
+  // export-first gate as content deletion (409 export_required). On success the
+  // caller must sign the user out — the account no longer exists.
+  deleteAccount: async (): Promise<{ deleted: true } | { deleted: false; status: number; reason?: string }> => {
+    const { error, response } = await wsApi.POST('/me/delete-account')
+    if (response.status === 409) {
+      return { deleted: false, status: 409, reason: (error as ReasonResponse | undefined)?.reason }
+    }
+    if (error || !response.ok) throw new Error(`${response.status} ${response.statusText}`)
+    return { deleted: true }
+  },
 }
 
 // ── Games contract (types derived from the generated OpenAPI schemas) ───────

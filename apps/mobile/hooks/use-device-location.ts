@@ -121,5 +121,27 @@ export function useDeviceLocation(): UseDeviceLocationResult {
     acquire()
   }, [acquire])
 
+  // Re-acquire when the app returns to the foreground so a user who traveled
+  // sees their new city without restarting. Cheap: getCurrentPosition honors
+  // maximumAge, and the rounded coords keep the query key stable in place.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return
+    let remove: (() => void) | undefined
+    let cancelled = false
+    import('@capacitor/app').then(({ App }) => {
+      if (cancelled) return
+      App.addListener('appStateChange', ({ isActive }) => {
+        if (isActive) acquire()
+      }).then((handle) => {
+        if (cancelled) handle.remove()
+        else remove = () => handle.remove()
+      })
+    })
+    return () => {
+      cancelled = true
+      remove?.()
+    }
+  }, [acquire])
+
   return { location, status, requestLocation: acquire }
 }

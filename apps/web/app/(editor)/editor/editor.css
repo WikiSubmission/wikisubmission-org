@@ -1008,3 +1008,29 @@
   font-family: var(--font-jetbrains); font-size: 10px; color: var(--ed-fg-muted);
 }
 .rootpop-foot .bc { display: inline-flex; align-items: center; gap: 6px; color: var(--ed-accent); }
+
+/* ── portable text block editor (content modules) ─────────────────────── */
+.pt-editor { display: flex; flex-direction: column; gap: 10px; }
+.pt-empty { font-size: 13px; font-style: italic; color: var(--ed-fg-muted); margin: 0; }
+.pt-block {
+  border: 1px solid var(--ed-rule); border-radius: var(--ed-radius);
+  background: var(--ed-surface); padding: 10px 12px 12px;
+}
+.pt-block-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.pt-spacer { flex: 1; }
+.pt-style {
+  font-family: var(--font-glacial); font-size: 10.5px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ed-fg-muted);
+  background: transparent; border: 1px solid var(--ed-rule); border-radius: var(--ed-radius-sm);
+  padding: 4px 7px;
+}
+.pt-style:hover { border-color: var(--ed-fg-muted); }
+.pt-kind {
+  font-family: var(--font-glacial); font-size: 10.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ed-accent);
+}
+.pt-text { width: 100%; }
+.pt-callout { display: flex; flex-direction: column; gap: 8px; }
+.pt-image { display: flex; flex-direction: column; gap: 8px; }
+.pt-note { margin: 0; font-size: 12.5px; font-style: italic; color: var(--ed-fg-muted); }
+.pt-add { display: flex; gap: 8px; margin-top: 2px; }

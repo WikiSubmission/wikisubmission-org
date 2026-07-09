@@ -4,8 +4,8 @@ import { useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { Capacitor } from '@capacitor/core'
 import { StatusBar, Style } from '@capacitor/status-bar'
-import { SplashScreen } from '@capacitor/splash-screen'
 import { Keyboard, KeyboardResize } from '@capacitor/keyboard'
+import { hideNativeSplash } from '@/lib/splash-handoff'
 
 // App chrome background per color scheme. Mirrors the themeColor values in the
 // root layout viewport so the native status bar matches the web header.
@@ -33,9 +33,11 @@ export function NativeInit() {
     Keyboard.setResizeMode({ mode: KeyboardResize.Native }).catch(() => {})
     Keyboard.setAccessoryBarVisible({ isVisible: false }).catch(() => {})
 
-    // The web bundle has hydrated by the time this effect runs, so hide the
-    // native splash now rather than relying solely on the auto-hide timeout.
-    SplashScreen.hide().catch(() => {})
+    // The startup zikr overlay owns SplashScreen.hide(): it lifts the native
+    // splash only after its own first frame has painted, so there is never a
+    // blank flash between the two (launchAutoHide is off). This timeout is the
+    // safety net — if the overlay ever fails to mount, the user still gets in.
+    const splashSafetyTimer = window.setTimeout(hideNativeSplash, 6000)
 
     // Route the shared audio player's media-session calls to the native
     // MediaSession plugin (foreground service + lock-screen controls). The
@@ -48,6 +50,8 @@ export function NativeInit() {
         registerMediaSessionAdapter(nativeMediaSessionAdapter)
       )
       .catch(() => {})
+
+    return () => window.clearTimeout(splashSafetyTimer)
   }, [])
 
   // Keep the status bar legible against the current theme. Style.Dark means

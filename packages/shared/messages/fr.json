@@ -1079,6 +1079,18 @@
           "explanation": "Tentatives de jeu et statistiques. Les données de jeu ne sont pas incluses dans votre export."
         }
       }
+    },
+    "deleteAccount": {
+      "heading": "Supprimer mon compte",
+      "body": "Supprimez définitivement l'intégralité de votre compte et toutes les données qui y sont associées. Vous devez d'abord télécharger un export de vos données pour en conserver une copie.",
+      "button": "Supprimer mon compte…",
+      "dialogTitle": "Supprimer mon compte",
+      "warning": "Cela supprime définitivement votre compte et toutes vos données. Cette action est irréversible et rien ne peut être récupéré, même à partir de votre export.",
+      "confirmPrompt": "Saisissez votre adresse e-mail ({email}) pour confirmer.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer mon compte",
+      "exportFirst": "Demandez et téléchargez un export de vos données ci-dessus avant de pouvoir supprimer votre compte.",
+      "failed": "Votre compte n'a pas pu être supprimé. Veuillez réessayer."
     }
   },
   "chat": {

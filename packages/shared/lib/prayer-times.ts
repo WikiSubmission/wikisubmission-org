@@ -36,7 +36,7 @@ export const DEFAULT_PRAYER_LOCATION = 'Mecca'
 /** localStorage key reused from the web client so a shared device stays in sync. */
 export const PRAYER_LOCATION_STORAGE_KEY = 'pt_location'
 
-interface PrayerTimeSet {
+export interface PrayerTimeSet {
   fajr: string
   dhuhr: string
   asr: string
@@ -64,6 +64,14 @@ export interface PrayerTimesResponse {
   upcoming_prayer?: string
   current_prayer_time_elapsed?: string
   upcoming_prayer_time_left?: string
+  // Event cycle (additive API fields): like current/upcoming prayer, but with
+  // sunrise as a first-class event between fajr and dhuhr. Optional so clients
+  // keep working against an API deployed before these fields existed — use
+  // deriveEventCycle (lib/prayer-events.ts) as the fallback.
+  current_event?: string
+  upcoming_event?: string
+  current_event_time_elapsed?: string
+  upcoming_event_time_left?: string
   schedule?: Array<{ date: string; day: string; times: PrayerTimeSet }>
 }
 

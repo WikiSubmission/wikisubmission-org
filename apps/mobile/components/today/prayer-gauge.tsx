@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import type { PrayerTimesResponse } from '@/lib/prayer-times'
+import { deriveEventCycle } from '@/lib/prayer-events'
 import { useNow } from '@/hooks/use-now'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { parseDurationToSeconds, formatRemaining } from '@/lib/duration'
@@ -26,21 +27,40 @@ export function PrayerGauge({ data, dataUpdatedAt, onExpired }: PrayerGaugeProps
   const reducedMotion = usePrefersReducedMotion()
   const expiredRef = useRef(false)
 
+  // Sunrise-aware event cycle. Prefer the API's event fields; fall back to
+  // deriving the cycle from times_in_utc (recomputed each tick, so no drift
+  // bookkeeping); finally fall back to the 5-prayer fields.
+  const derived = !data.upcoming_event ? deriveEventCycle(data, now) : null
+  const upcomingLabel = data.upcoming_event ?? derived?.upcomingEvent ?? data.upcoming_prayer
+
   // The server reports elapsed/left in the city's timezone at fetch time; add
   // the seconds since that fetch to tick locally without timezone math.
-  const elapsedSeed = data.current_prayer_time_elapsed
-    ? parseDurationToSeconds(data.current_prayer_time_elapsed)
-    : null
-  const leftSeed = data.upcoming_prayer_time_left
-    ? parseDurationToSeconds(data.upcoming_prayer_time_left)
-    : null
+  const elapsedSeed = data.current_event_time_elapsed
+    ? parseDurationToSeconds(data.current_event_time_elapsed)
+    : data.current_prayer_time_elapsed && !derived
+      ? parseDurationToSeconds(data.current_prayer_time_elapsed)
+      : null
+  const leftSeed = data.upcoming_event_time_left
+    ? parseDurationToSeconds(data.upcoming_event_time_left)
+    : data.upcoming_prayer_time_left && !derived
+      ? parseDurationToSeconds(data.upcoming_prayer_time_left)
+      : null
   const drift = dataUpdatedAt > 0 ? Math.floor((now - dataUpdatedAt) / 1000) : 0
 
-  const remaining = leftSeed === null ? null : Math.max(0, leftSeed - drift)
+  const remaining =
+    leftSeed !== null ? Math.max(0, leftSeed - drift) : (derived?.secondsLeft ?? null)
   const fraction =
     elapsedSeed !== null && leftSeed !== null && elapsedSeed + leftSeed > 0
       ? Math.min(1, Math.max(0, (elapsedSeed + drift) / (elapsedSeed + leftSeed)))
-      : null
+      : derived && derived.secondsElapsed + derived.secondsLeft > 0
+        ? Math.min(
+            1,
+            Math.max(
+              0,
+              derived.secondsElapsed / (derived.secondsElapsed + derived.secondsLeft),
+            ),
+          )
+        : null
 
   useEffect(() => {
     expiredRef.current = false
@@ -53,7 +73,7 @@ export function PrayerGauge({ data, dataUpdatedAt, onExpired }: PrayerGaugeProps
     }
   }, [remaining, onExpired])
 
-  if (!data.upcoming_prayer) return null
+  if (!upcomingLabel) return null
 
   const transition = reducedMotion
     ? undefined
@@ -98,8 +118,10 @@ export function PrayerGauge({ data, dataUpdatedAt, onExpired }: PrayerGaugeProps
       </svg>
 
       <div className="absolute inset-x-0 bottom-0 pb-1 text-center">
-        <p className="text-muted-foreground text-[10px] tracking-[0.2em] uppercase">Next prayer</p>
-        <p className="font-display mt-0.5 text-3xl capitalize">{data.upcoming_prayer}</p>
+        <p className="text-muted-foreground text-[10px] tracking-[0.2em] uppercase">
+          {upcomingLabel.toLowerCase() === 'sunrise' ? 'Up next' : 'Next prayer'}
+        </p>
+        <p className="font-display mt-0.5 text-3xl capitalize">{upcomingLabel}</p>
         {remaining !== null ? (
           <p className="text-primary mt-0.5 font-mono text-sm tabular-nums">
             in {formatRemaining(remaining)}

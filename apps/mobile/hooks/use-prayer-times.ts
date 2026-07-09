@@ -3,6 +3,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchPrayerTimes, type PrayerTimesResponse } from '@/lib/prayer-times'
 import {
+  readCachedPrayerResponse,
+  writeCachedPrayerResponse,
+} from '@/lib/prayer-times-cache'
+import {
   useDeviceLocation,
   type DeviceLocationStatus,
 } from '@/hooks/use-device-location'
@@ -27,14 +31,34 @@ export interface UsePrayerTimesResult {
 export function usePrayerTimes(): UsePrayerTimesResult {
   const { location, status: locationStatus, requestLocation } = useDeviceLocation()
 
-  const query = useQuery({
+  const query = useQuery<PrayerTimesResponse, Error>({
     queryKey: ['prayer-times', location],
-    queryFn: ({ signal }) => fetchPrayerTimes(location as string, { signal }),
+    queryFn: async ({ signal }) => {
+      // includeSchedule: one fetch serves both the UI and the local
+      // notification scheduler (which reads the persisted copy offline).
+      const response = await fetchPrayerTimes(location as string, {
+        signal,
+        includeSchedule: true,
+      })
+      const previous = readCachedPrayerResponse()
+      writeCachedPrayerResponse(location as string, response)
+      // Tell the notification bridge when the resolved location moved so it
+      // reschedules prayer notifications for the new city.
+      if (previous && previous.location !== location) {
+        window.dispatchEvent(new Event('prayer-location-changed'))
+      }
+      return response
+    },
     enabled: location !== null,
     staleTime: 5 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
     retry: 1,
+    // Last successful response (any location) paints the card instantly on
+    // relaunch; a location change briefly shows the previous city, then the
+    // animated transition swaps in the fresh one.
+    placeholderData: (previous: PrayerTimesResponse | undefined) =>
+      previous ?? readCachedPrayerResponse()?.response,
   })
 
   return {

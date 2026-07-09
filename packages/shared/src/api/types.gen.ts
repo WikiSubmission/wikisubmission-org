@@ -827,6 +827,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/delete-account": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Permanently delete the authenticated user's entire account
+         * @description Erases the user's account and every personal record in a single atomic transaction, then the caller must sign out. A fresh completed data export is required first (same gate as content deletion). Irreversible.
+         */
+        post: operations["deleteMeAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/push/subscribe": {
         parameters: {
             query?: never;
@@ -1424,6 +1444,129 @@ export interface paths {
          * @description Admin-only. Creates empty word draft rows for every canonical word in the version (optionally limited to one chapter) and, when requested, empty root meaning draft rows for every root. Existing drafts are never overwritten (insert-if-absent). Records a changelog entry.
          */
         post: operations["seedEditorialQuranDraftShells"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/content/{module}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List editorial content documents for a module
+         * @description Lists documents of one content module (article, author, category, community, appendix) with derived draft/published/changed status. Requires read access to the module. Content is stored first-party in Postgres; this surface replaces the retired Sanity Studio.
+         */
+        get: operations["listEditorialContent"];
+        put?: never;
+        /**
+         * Create a content document (starts as draft)
+         * @description Creates a new document from the given fields. The document starts in draft status; nothing is publicly visible until it is published. Requires write access to the module. Field payloads are validated per module (required keys, unknown-key rejection, slug format).
+         */
+        post: operations["createEditorialContent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/content/{module}/{docId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fetch one content document (draft payload) */
+        get: operations["getEditorialContent"];
+        /**
+         * Replace a document's draft fields
+         * @description Replaces the working draft with the given fields. The published snapshot is untouched; status becomes `changed` until re-published. Requires write access to the module.
+         */
+        put: operations["updateEditorialContent"];
+        post?: never;
+        /** Delete a document (draft and published snapshot) */
+        delete: operations["deleteEditorialContent"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/content/{module}/{docId}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publish the current draft
+         * @description Copies the working draft into the published snapshot readers see. Requires write access to the module.
+         */
+        post: operations["publishEditorialContent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/content/{module}/{docId}/unpublish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retract the published snapshot (document returns to draft) */
+        post: operations["unpublishEditorialContent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/admin/editors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List users with their editorial grants (admin)
+         * @description Admin-only. Returns every active user together with their editorial module grants, per-version Quran/Bible grants, approver grants and word-by-word reference preference.
+         */
+        get: operations["listEditorialEditors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editorial/admin/editors/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replace one user's editorial grants (admin)
+         * @description Admin-only. Replaces the user's module grants, Quran/Bible version grants (including approver capability) and reference preference in one transaction. Grants absent from the request are revoked.
+         */
+        put: operations["replaceEditorialEditorGrants"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2625,6 +2768,13 @@ export interface components {
             /** @enum {string} */
             status: "queued";
         };
+        AccountDeletionResponse: {
+            /** @enum {string} */
+            status: "deleted";
+            counts?: {
+                [key: string]: number;
+            } | null;
+        };
         ReasonResponse: {
             reason: string;
         };
@@ -2710,6 +2860,91 @@ export interface components {
         };
         EditorialSessionEnvelope: {
             data: components["schemas"]["EditorialSession"];
+        };
+        /**
+         * @description Content module keys of the first-party editorial store (subset of editor_module).
+         * @enum {string}
+         */
+        EditorialContentModule: "article" | "author" | "category" | "community" | "appendix";
+        /**
+         * @description Derived document status. `draft` = never published; `changed` = published but the working draft differs from the snapshot; `published` = draft and snapshot are identical.
+         * @enum {string}
+         */
+        EditorialContentStatus: "draft" | "changed" | "published";
+        EditorialContentDoc: {
+            /** Format: int64 */
+            id: number;
+            module: components["schemas"]["EditorialContentModule"];
+            status: components["schemas"]["EditorialContentStatus"];
+            /** @description The working draft payload. Shape is module-specific and validated server-side. */
+            fields: {
+                [key: string]: unknown;
+            };
+            /** @description Groups language variants of one article; null for other modules. */
+            translation_group?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: date-time */
+            published_at?: string | null;
+            updated_by_email?: string | null;
+        };
+        EditorialContentInput: {
+            /** @description Full draft payload for the document (replace semantics). */
+            fields: {
+                [key: string]: unknown;
+            };
+            /** @description Articles only — attach this document to an existing translation group to declare it a language variant of that article. Omit to start a new group. */
+            translation_group?: string | null;
+        };
+        EditorialContentEnvelope: {
+            data: components["schemas"]["EditorialContentDoc"];
+        };
+        EditorialContentListEnvelope: {
+            data: components["schemas"]["EditorialContentDoc"][];
+            /** @description Total matching documents before limit/offset. */
+            total: number;
+        };
+        EditorVersionGrant: {
+            /** Format: int64 */
+            version_id: number;
+            can_write: boolean;
+            /** @description Quran only — publish-request approve capability. */
+            can_approve?: boolean;
+        };
+        EditorGrantsInput: {
+            /** @description Module key mapped to can_write. Presence of a key grants read. */
+            modules: {
+                [key: string]: boolean;
+            };
+            quran_versions: components["schemas"]["EditorVersionGrant"][];
+            bible_versions: components["schemas"]["EditorVersionGrant"][];
+            /** Format: int64 */
+            quran_reference_version_id?: number | null;
+        };
+        EditorialEditor: {
+            /** Format: int64 */
+            user_id: number;
+            email: string;
+            display_name?: string | null;
+            role: string;
+            is_active: boolean;
+            /** @description Module key mapped to can_write. Presence of a key implies read access. */
+            modules: {
+                [key: string]: boolean;
+            };
+            quran_versions: components["schemas"]["EditorVersionGrant"][];
+            bible_versions: components["schemas"]["EditorVersionGrant"][];
+            /** Format: int64 */
+            quran_reference_version_id?: number | null;
+        };
+        EditorialEditorEnvelope: {
+            data: components["schemas"]["EditorialEditor"];
+        };
+        EditorialEditorListEnvelope: {
+            data: components["schemas"]["EditorialEditor"][];
+            total: number;
         };
         VersionAuthor: {
             name?: string;
@@ -3351,6 +3586,12 @@ export interface components {
          * @example quran
          */
         MeScriptureParam: "quran" | "bible";
+        /** @description Editorial content module key. */
+        EditorialContentModuleParam: components["schemas"]["EditorialContentModule"];
+        /** @description Content document id. */
+        EditorialDocIdParam: number;
+        /** @description WS user id. */
+        EditorialUserIdParam: number;
         /** @description Quran version id. */
         EditorialVersionIdParam: number;
         /** @description Canonical Quran chapter number (1–114). */
@@ -5081,6 +5322,36 @@ export interface operations {
             500: components["responses"]["InternalServerErrror"];
         };
     };
+    deleteMeAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Account deleted. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountDeletionResponse"];
+                };
+            };
+            /** @description A fresh completed export is required before deletion. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReasonResponse"];
+                };
+            };
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
     subscribeMePush: {
         parameters: {
             query?: never;
@@ -6028,6 +6299,269 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EditorialQuranRectifySeedEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialContent: {
+        parameters: {
+            query?: {
+                /** @description Case-insensitive substring match on slug and title-like fields. */
+                q?: string;
+                status?: components["schemas"]["EditorialContentStatus"];
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Editorial content module key. */
+                module: components["parameters"]["EditorialContentModuleParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialContentListEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    createEditorialContent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Editorial content module key. */
+                module: components["parameters"]["EditorialContentModuleParam"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditorialContentInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialContentEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getEditorialContent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Editorial content module key. */
+                module: components["parameters"]["EditorialContentModuleParam"];
+                /** @description Content document id. */
+                docId: components["parameters"]["EditorialDocIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialContentEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    updateEditorialContent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Editorial content module key. */
+                module: components["parameters"]["EditorialContentModuleParam"];
+                /** @description Content document id. */
+                docId: components["parameters"]["EditorialDocIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditorialContentInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialContentEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    deleteEditorialContent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Editorial content module key. */
+                module: components["parameters"]["EditorialContentModuleParam"];
+                /** @description Content document id. */
+                docId: components["parameters"]["EditorialDocIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    publishEditorialContent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Editorial content module key. */
+                module: components["parameters"]["EditorialContentModuleParam"];
+                /** @description Content document id. */
+                docId: components["parameters"]["EditorialDocIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialContentEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    unpublishEditorialContent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Editorial content module key. */
+                module: components["parameters"]["EditorialContentModuleParam"];
+                /** @description Content document id. */
+                docId: components["parameters"]["EditorialDocIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialContentEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialEditors: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialEditorListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    replaceEditorialEditorGrants: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description WS user id. */
+                userId: components["parameters"]["EditorialUserIdParam"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditorGrantsInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialEditorEnvelope"];
                 };
             };
             400: components["responses"]["BadRequest"];
