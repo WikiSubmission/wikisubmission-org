@@ -195,7 +195,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
         ],
       },
       { kind: 'textarea', key: 'snippet', label: 'Snippet', rows: 2, desc: 'One-line teaser shown in appendix lists.' },
-      { kind: 'pt', key: 'body', label: 'Body' },
+      { kind: 'textarea', key: 'body', label: 'Body (markdown)', rows: 24 },
     ],
   },
 }
