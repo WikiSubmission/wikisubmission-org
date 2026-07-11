@@ -104,9 +104,14 @@ export function useChapterReader(
   // Cache for in-flight prefetch promises: cacheKey → Promise<FetchResult>
   const prefetchCacheRef = useRef(new Map<string, Promise<FetchResult>>())
 
-  // Prevents two concurrent loadMore calls from both applying their results.
-  // Set synchronously before the fetch so even same-tick calls see it.
-  const loadMoreInFlightRef = useRef(false)
+  // The verse_start of the last loadMore request. Guards against duplicate
+  // fetches of the same page: a boolean in-flight flag isn't enough, because
+  // between the fetch resolving and React committing the state update,
+  // stateRef still holds the old lastVerseEnd — a loadMore call landing in
+  // that window would recompute the same page. Comparing requested starts
+  // closes both races (concurrent calls and the pre-commit window), since the
+  // page start only changes once the state commit lands.
+  const loadMoreRequestedStartRef = useRef<number | null>(null)
 
   // Incremented by reload/seekToVerse to cancel any in-flight loadMore.
   // loadMore checks this after its await — if the number changed, the result is stale.
@@ -225,7 +230,7 @@ export function useChapterReader(
   const reload = useCallback(
     async (opts: ChapterReaderOptions, seekVerse?: number) => {
       const generation = ++fetchGenerationRef.current
-      loadMoreInFlightRef.current = false
+      loadMoreRequestedStartRef.current = null
       setState((prev) => ({ ...prev, loading: true, error: null }))
 
       // If a seek is active, reload centered on the target verse so the window
@@ -262,7 +267,6 @@ export function useChapterReader(
   )
 
   const loadMore = useCallback(async (fallbackOpts?: ChapterReaderOptions) => {
-    if (loadMoreInFlightRef.current) return // prevent concurrent calls
     const { lastVerseEnd, lastOpts: storedOpts } = stateRef.current
     const lastOpts = storedOpts ?? fallbackOpts
     if (!lastOpts) return
@@ -270,16 +274,19 @@ export function useChapterReader(
     const generation = fetchGenerationRef.current
     const nextStart = lastVerseEnd + 1
 
-    loadMoreInFlightRef.current = true
+    // Same page already requested (in flight, or applied but not yet
+    // committed) — skip. The ref stays set on success; the next distinct
+    // page start passes naturally once the state commit advances lastVerseEnd.
+    if (loadMoreRequestedStartRef.current === nextStart) return
+    loadMoreRequestedStartRef.current = nextStart
     setState((prev) => ({ ...prev, loading: true, error: null }))
 
     const result = await fetchVerses(nextStart, lastOpts)
 
-    loadMoreInFlightRef.current = false
-
     if (fetchGenerationRef.current !== generation) return // reload/seek superseded this
 
     if (result.error || !result.verses) {
+      loadMoreRequestedStartRef.current = null // allow retrying the same page
       setState((prev) => ({
         ...prev,
         loading: false,
@@ -288,16 +295,22 @@ export function useChapterReader(
       return
     }
 
-    setState((prev) => ({
-      ...prev,
-      verses: [...prev.verses, ...result.verses!],
-      verseCount: prev.verseCount + (result.verses?.length ?? 0),
-      loading: false,
-      error: null,
-      lastVerseEnd: nextStart + PAGE_SIZE - 1,
-      reachedEnd: result.reachedEnd ?? false,
-      lastOpts,
-    }))
+    setState((prev) => {
+      // Backstop: never render the same verse twice, even if a duplicate
+      // fetch slips through (e.g. StrictMode double-invocations in dev).
+      const seen = new Set(prev.verses.map((v) => v.vk))
+      const fresh = result.verses!.filter((v) => !seen.has(v.vk))
+      return {
+        ...prev,
+        verses: [...prev.verses, ...fresh],
+        verseCount: prev.verseCount + fresh.length,
+        loading: false,
+        error: null,
+        lastVerseEnd: nextStart + PAGE_SIZE - 1,
+        reachedEnd: result.reachedEnd ?? false,
+        lastOpts,
+      }
+    })
   }, [fetchVerses]) // stable — reads state from stateRef
 
   /**
@@ -342,7 +355,7 @@ export function useChapterReader(
       if (!opts) return
 
       const generation = ++fetchGenerationRef.current
-      loadMoreInFlightRef.current = false
+      loadMoreRequestedStartRef.current = null
       // Match the snap used in `prefetch` so a hovered window can be reused.
       const PREFETCH_GRID = 25
       const rawStart = Math.max(0, targetVerse - 5)
