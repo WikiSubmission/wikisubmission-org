@@ -32,7 +32,6 @@ import {
   useQuranPlayer,
   useQuranPlayerCallbacks,
 } from '@/lib/quran-audio-context'
-import { useChapterBorderLoader } from '@/hooks/use-chapter-border-loader'
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import { useScriptureState } from '@/hooks/use-scripture-state'
 import { useQuranPrefsSync } from '@/hooks/use-prefs-sync'
@@ -84,20 +83,22 @@ function VirtualizedVerseList({
   scriptureState,
   onVerseVisible,
 }: VirtualizedVerseListProps) {
-  const listRef = useRef<HTMLDivElement>(null)
   const virtuosoRef = useRef<VirtuosoHandle>(null)
   const seekDoneRef = useRef(false)
   const seekActiveRef = useRef(false)
   const prevFirstVerseRef = useRef('')
   const seekBehaviorRef = useRef<'auto' | 'smooth'>('auto')
-  const [lastRenderedIndex, setLastRenderedIndex] = useState(-1)
+  // Rendered-range tracking lives in refs; only the two booleans below are
+  // state. The previous setLastRenderedIndex(range.endIndex) re-rendered this
+  // whole component (and rebuilt Virtuoso's itemContent) on every scroll frame.
+  const lastRenderedIndexRef = useRef(-1)
+  const [nearEnd, setNearEnd] = useState(false)
+  const [atEnd, setAtEnd] = useState(false)
   const visibleRangeRef = useRef<{ startIndex: number; endIndex: number }>({
     startIndex: 0,
     endIndex: 0,
   })
   const urlSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useChapterBorderLoader(listRef, loading)
 
   const firstVerseKey = verses[0]?.vk ?? ''
 
@@ -191,18 +192,22 @@ function VirtualizedVerseList({
     if (!currentVerseId || !isPlaying) return
     const idx = verses.findIndex((v) => v.vk === currentVerseId)
     if (idx < 0) return
-    virtuosoRef.current?.scrollToIndex({ index: idx, align: 'start', behavior: 'smooth' })
+    virtuosoRef.current?.scrollToIndex({ index: idx, align: 'center', behavior: 'smooth' })
   }, [currentVerseId, isPlaying, verses])
 
   useEffect(() => {
     if (isRangeMode) return
     if (!hasMore || loading) return
     const isSeeking = !!seekTarget && !seekDoneRef.current
-    const isNearEnd = lastRenderedIndex >= verses.length - 15
+    const isNearEnd = lastRenderedIndexRef.current >= verses.length - 15
+    // The nearEnd flag can go stale when a batch appends (rendered range stays
+    // put while verses.length grows). Clear it so the next true transition
+    // from rangeChanged re-fires this effect.
+    if (nearEnd && !isNearEnd) setNearEnd(false)
     if (!isSeeking && !isNearEnd) return
     const timer = setTimeout(() => void loadMore(opts), isSeeking ? 50 : 0)
     return () => clearTimeout(timer)
-  }, [hasMore, isRangeMode, lastRenderedIndex, loadMore, loading, opts, seekTarget, verses.length])
+  }, [hasMore, isRangeMode, nearEnd, loadMore, loading, opts, seekTarget, verses.length])
 
   // Gate URL sync on an actual user scroll gesture to avoid rewriting the
   // URL from an inherited scroll position on initial mount.
@@ -292,24 +297,37 @@ function VirtualizedVerseList({
     []
   )
 
-  const showNav = !hasMore && lastRenderedIndex >= verses.length - 1
+  const showNav = !hasMore && atEnd
 
   return (
     <>
       <div>
-        <div
-          ref={listRef}
-          className="bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden"
-        >
+        <div className="relative bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden">
+          {/* Loading glow — pulsing inset ring along the card border. Pure CSS
+              opacity animation (compositor-only); the previous GSAP box-shadow
+              tween repainted the full-height list container every frame. */}
+          <div
+            aria-hidden
+            className={`pointer-events-none absolute inset-0 z-10 rounded-3xl transition-opacity duration-700 [box-shadow:inset_0_0_0_1.5px_color-mix(in_oklab,var(--primary),transparent_55%),inset_0_0_26px_color-mix(in_oklab,var(--primary),transparent_85%)] ${
+              loading ? 'animate-pulse opacity-100' : 'opacity-0'
+            }`}
+          />
           <Virtuoso
             ref={virtuosoRef}
             useWindowScroll
             data={verses}
-            computeItemKey={(index, verse) => `${optsKey}-${verse.vk ?? index}`}
-            increaseViewportBy={1000}
+            // Keyed by verse only — a language/zoom reload updates cards in
+            // place instead of unmounting and remounting all of them (the old
+            // `${optsKey}-` prefix forced a full remount on prefs hydration).
+            computeItemKey={(index, verse) => verse.vk ?? `i-${index}`}
+            increaseViewportBy={{ top: 400, bottom: 1000 }}
             rangeChanged={(range) => {
               visibleRangeRef.current = { startIndex: range.startIndex, endIndex: range.endIndex }
-              setLastRenderedIndex(range.endIndex)
+              lastRenderedIndexRef.current = range.endIndex
+              // Boolean flips only — setState with an unchanged value bails
+              // out, so scrolling doesn't re-render the list component.
+              setNearEnd(range.endIndex >= verses.length - 15)
+              setAtEnd(range.endIndex >= verses.length - 1)
             }}
             itemContent={(index, verse) => {
               const isLast = index === verses.length - 1 && !hasMore
@@ -734,6 +752,8 @@ export function ChapterReader({
             opts={opts}
             chapterNumber={chapterNumber}
             chapterLabel={tCommon('chapter')}
+            currentVerseId={currentVerse?.verse_id}
+            isPlaying={isPlaying}
           />
         </div>
       )}

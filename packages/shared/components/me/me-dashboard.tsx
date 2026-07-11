@@ -99,7 +99,7 @@ function CoverToCoverCard({ scripture }: { scripture: 'quran' | 'bible' }) {
   )
 }
 
-function CoverToCoverSection() {
+function CoverToCoverSection({ hideBible = false }: { hideBible?: boolean }) {
   return (
     <section className="section" id="cover-to-cover">
       <div className="section-head">
@@ -112,7 +112,8 @@ function CoverToCoverSection() {
       </div>
       <div className="c2c-grid">
         <CoverToCoverCard scripture="quran" />
-        <CoverToCoverCard scripture="bible" />
+        {/* Bible is not shipped on mobile yet (no /bible route) — hidden there. */}
+        {!hideBible && <CoverToCoverCard scripture="bible" />}
       </div>
     </section>
   )
@@ -151,7 +152,7 @@ function RhythmTeaser({ scripture, label }: { scripture: 'quran' | 'bible'; labe
   )
 }
 
-function RhythmSection() {
+function RhythmSection({ hideBible = false }: { hideBible?: boolean }) {
   return (
     <section className="section" id="rhythm">
       <div className="section-head">
@@ -167,7 +168,8 @@ function RhythmSection() {
       </div>
       <div className="c2c-grid">
         <RhythmTeaser scripture="quran" label="Quran" />
-        <RhythmTeaser scripture="bible" label="Bible" />
+        {/* Bible is not shipped on mobile yet (no /bible route) — hidden there. */}
+        {!hideBible && <RhythmTeaser scripture="bible" label="Bible" />}
       </div>
     </section>
   )
@@ -382,11 +384,13 @@ function StatsGrid({
   bibleStreak,
   noteCount,
   totalBookmarks,
+  hideBible = false,
 }: {
   quranStreak: number
   bibleStreak: number
   noteCount: number
   totalBookmarks: number
+  hideBible?: boolean
 }) {
   const cells = (
     <>
@@ -402,18 +406,21 @@ function StatsGrid({
         </div>
         <p className="stat-sub">Final Testament</p>
       </div>
-      <div>
-        <Flame className="stat-flame" aria-hidden />
-        <p className="stat-eyebrow">
-          Bible streak
-          <StreakInfoIcon />
-        </p>
-        <div className="stat-num">
-          {bibleStreak}
-          <span className="unit">days</span>
+      {/* Bible is not shipped on mobile yet (no /bible route) — hidden there. */}
+      {!hideBible && (
+        <div>
+          <Flame className="stat-flame" aria-hidden />
+          <p className="stat-eyebrow">
+            Bible streak
+            <StreakInfoIcon />
+          </p>
+          <div className="stat-num">
+            {bibleStreak}
+            <span className="unit">days</span>
+          </div>
+          <p className="stat-sub">Old &amp; New Testament</p>
         </div>
-        <p className="stat-sub">Old &amp; New Testament</p>
-      </div>
+      )}
       <Link href="/me/notes">
         <p className="stat-eyebrow">Notes</p>
         <div className="stat-num">{noteCount}</div>
@@ -527,6 +534,9 @@ interface MeDashboardProps {
   // native MobileAuthProvider. The dashboard stays auth-library agnostic.
   onSignOut: () => void
   providerLabel?: string
+  // Hide all Bible-specific content. The mobile app has no /bible route yet, so
+  // it opts in; web leaves this false and shows Bible as before.
+  hideBible?: boolean
 }
 
 export default function MeDashboard({
@@ -534,6 +544,7 @@ export default function MeDashboard({
   email,
   onSignOut,
   providerLabel = 'Magic link',
+  hideBible = false,
 }: MeDashboardProps) {
   const quranStreak = useStreak('quran')
   const bibleStreak = useStreak('bible')
@@ -556,6 +567,7 @@ export default function MeDashboard({
           bibleStreak={bibleStreak?.current_streak ?? 0}
           noteCount={noteCount}
           totalBookmarks={totalBookmarks}
+          hideBible={hideBible}
         />
       )}
 
@@ -563,8 +575,8 @@ export default function MeDashboard({
         <NewUserStarter />
       ) : (
         <>
-          <CoverToCoverSection />
-          <RhythmSection />
+          <CoverToCoverSection hideBible={hideBible} />
+          <RhythmSection hideBible={hideBible} />
           <CategoriesSection />
           <NotesPreviewSection />
           <CollectionsSection />

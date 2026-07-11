@@ -10,8 +10,8 @@ import {
   writeCachedPrayerResponse,
 } from '@/lib/prayer-times-cache'
 import { PRAYER_EVENT_ORDER, type PrayerEventKey } from '@/lib/prayer-events'
-import { PRAYER_CHANNEL_ID } from './channels'
 import { anyEventEnabled, prefsHash, readNotificationPrefs } from './prefs'
+import { PRAYER_SOUNDS } from './sounds'
 import { computeUpcomingEventInstants } from './schedule-times'
 
 /**
@@ -182,7 +182,7 @@ async function doReschedule(reason: RescheduleReason): Promise<void> {
       id: notificationId(at, event),
       title: EVENT_LABELS[event],
       body: notificationBody(event, response.city),
-      channelId: PRAYER_CHANNEL_ID,
+      channelId: PRAYER_SOUNDS[prefs.sound].channelId,
       schedule: { at, allowWhileIdle: true },
       extra: { type: 'prayer', event, route: '/' },
     }))

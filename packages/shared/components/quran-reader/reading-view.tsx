@@ -232,6 +232,9 @@ type Props = {
   opts: ChapterReaderOptions
   chapterNumber: number
   chapterLabel: string
+  /** vk of the verse currently playing in the audio player, if any. */
+  currentVerseId?: string
+  isPlaying?: boolean
 }
 
 export function ReadingView({
@@ -242,6 +245,8 @@ export function ReadingView({
   opts,
   chapterNumber,
   chapterLabel,
+  currentVerseId,
+  isPlaying = false,
 }: Props) {
   const prefs = useQuranPreferences()
   const primaryCode =
@@ -258,6 +263,27 @@ export function ReadingView({
       loadMore(opts)
     }
   }, [hasMore, loading, verses.length, loadMore, opts])
+
+  // Follow the audio player: keep the playing verse centred in the viewport.
+  // The verse spans carry id={vk}; nothing to do if it isn't loaded yet — the
+  // effect re-fires as playback advances.
+  useEffect(() => {
+    if (!isPlaying || !currentVerseId) return
+    const el = document.getElementById(currentVerseId)
+    if (!el) return
+    const reduceMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches
+    el.scrollIntoView({
+      block: 'center',
+      behavior: reduceMotion ? 'auto' : 'smooth',
+    })
+  }, [currentVerseId, isPlaying])
+
+  const highlightClass = (vk: string | undefined) =>
+    isPlaying && vk && vk === currentVerseId
+      ? 'rounded-sm bg-primary/10 box-decoration-clone transition-colors duration-500'
+      : undefined
 
   // Build footnote index for clickable refs in the translation block
   const footnoteIndex: { verseKey: string; text: string }[] = []
@@ -295,7 +321,7 @@ export function ReadingView({
               const arTr = v.tr?.['ar']
               const [, vNum] = (v.vk ?? '').split(':')
               return (
-                <span key={v.vk} id={v.vk ?? undefined}>
+                <span key={v.vk} id={v.vk ?? undefined} className={highlightClass(v.vk)}>
                   {prefs.subtitles && arTr?.s && (
                     <span className="block text-center text-base font-sans text-primary font-semibold my-4 not-italic">
                       {arTr.s}
@@ -323,7 +349,7 @@ export function ReadingView({
               const [, vNum] = (v.vk ?? '').split(':')
               const fnIdx = footnoteIndex.findIndex((f) => f.verseKey === vNum)
               return (
-                <span key={v.vk} id={v.vk ?? undefined}>
+                <span key={v.vk} id={v.vk ?? undefined} className={highlightClass(v.vk)}>
                   {prefs.subtitles && tr?.s && (
                     <span className="block text-center text-sm font-semibold text-primary my-4">
                       <QuranRefText text={tr.s} from={`subtitle of ${v.vk}`} />

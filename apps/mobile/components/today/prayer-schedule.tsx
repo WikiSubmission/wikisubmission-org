@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bell, LocateFixed, MapPin, RefreshCw, Sunrise } from 'lucide-react'
 import { NotificationSettingsSheet } from '@/components/today/notification-settings-sheet'
+import { ZakatBadge } from '@/components/today/zakat-badge'
 import { PRAYER_EVENT_ORDER, deriveEventCycle, type PrayerEventKey } from '@/lib/prayer-events'
 import { usePrayerTimes } from '@/hooks/use-prayer-times'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
@@ -98,6 +99,7 @@ export function PrayerSchedule() {
   return (
     <div className="mx-auto w-full max-w-md space-y-4 px-4">
       <div className="border-border/50 bg-background/55 relative rounded-2xl border p-5 shadow-sm backdrop-blur-md">
+        <ZakatBadge />
         {data && (
           <button
             type="button"

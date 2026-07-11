@@ -32,6 +32,7 @@ import {
   type CopyImageOptions,
 } from '@/lib/quran-copy-image'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
+import { DENSITY } from './verse-density'
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']
@@ -160,15 +161,14 @@ export function CopyButton({
     activateSelection(verse)
   }, [activateSelection, verse, isPending])
 
-  const iconButtonBase =
-    'h-8 flex items-center justify-center rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors'
+  const iconButtonBase = `${DENSITY.copyButtonHeight} flex items-center justify-center rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors`
 
   return (
     <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
       <button
         type="button"
         aria-label={t('aria')}
-        className={`${iconButtonBase} w-8 ${compact ? '' : 'rounded-r-none pr-0'}`}
+        className={`${iconButtonBase} ${DENSITY.copyButtonWidth} ${compact ? '' : 'rounded-r-none pr-0'}`}
         disabled={isPending}
         onClick={() => runCopy('full-text')}
       >

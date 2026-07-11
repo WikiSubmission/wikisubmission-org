@@ -15,6 +15,8 @@ import { NativeInit } from '@/components/native-init'
 import { MobileNotificationsBridge } from '@/components/mobile-notifications-bridge'
 import { MobileOfflineSyncBridge } from '@/components/mobile-offline-sync-bridge'
 import { MobileBundleAutoload } from '@/components/mobile-bundle-autoload'
+import { MobileWordBundleAutoload } from '@/components/mobile-word-bundle-autoload'
+import { NotificationPermissionPrompt } from '@/components/notification-permission-prompt'
 import { StartupZikrOverlay } from '@/components/startup-zikr-overlay'
 import { StartupZikrProvider } from '@/lib/startup-zikr-context'
 
@@ -23,7 +25,14 @@ import { StartupZikrProvider } from '@/lib/startup-zikr-context'
  * apps/web/components/providers.tsx, but with next-auth's SessionProvider
  * replaced by MobileAuthProvider and no web-only chat/sign-in widgets.
  */
-export function MobileProviders({ children }: { children: React.ReactNode }) {
+export function MobileProviders({
+  dailySeed,
+  children,
+}: {
+  /** Day seed from the server (root layout) for the deterministic daily zikr. */
+  dailySeed: number
+  children: React.ReactNode
+}) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -47,14 +56,16 @@ export function MobileProviders({ children }: { children: React.ReactNode }) {
                   <MobileNotificationsBridge />
                   <MobileOfflineSyncBridge />
                   <MobileBundleAutoload />
+                  <MobileWordBundleAutoload />
                   {/* One LayoutGroup spans the shell and the startup overlay so
                       the zikr text can fly (layoutId) from the overlay into the
                       Today screen's strip. */}
-                  <StartupZikrProvider>
+                  <StartupZikrProvider dailySeed={dailySeed}>
                     <LayoutGroup>
                       <MobileShell>{children}</MobileShell>
                       <StartupZikrOverlay />
                     </LayoutGroup>
+                    <NotificationPermissionPrompt />
                   </StartupZikrProvider>
                   <Toaster />
                 </QuranPlayerProvider>

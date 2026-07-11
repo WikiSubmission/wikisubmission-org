@@ -4,20 +4,35 @@ type VerseData = components['schemas']['VerseData']
 type WordData = components['schemas']['WordData']
 
 /**
- * Inline palette (light mode only) so the rasterized PNG is consistent
- * regardless of the user's theme. Values mirror the `light` theme vars in
- * `app/globals.css`.
+ * Colors used by the rasterized card. Resolved from the user's active theme
+ * at copy time (see `resolvePrintPalette` in lib/quran-copy-image.ts) so the
+ * PNG matches whatever palette (light / dark / violet / …) is on screen.
  */
-const COLORS = {
-  bg: '#F6F2EA',
+export interface VersePrintPalette {
+  /** Card surface. */
+  bg: string
+  fg: string
+  muted: string
+  subtle: string
+  primary: string
+  border: string
+  /** Soft primary wash (pill + word chips). */
+  tint: string
+  /** Stronger primary wash (search-highlight marks). */
+  tintStrong: string
+  divider: string
+}
+
+/** Fallback — mirrors the default light theme in styles/globals.css. */
+export const LIGHT_PRINT_PALETTE: VersePrintPalette = {
+  bg: '#FBF8F1',
   fg: '#1A1715',
   muted: 'rgba(26, 23, 21, 0.65)',
   subtle: 'rgba(26, 23, 21, 0.5)',
   primary: '#6B3410',
-  primaryFg: '#F6F2EA',
-  primaryTint: 'rgba(107, 52, 16, 0.08)',
-  primaryTintStrong: 'rgba(107, 52, 16, 0.18)',
   border: 'rgba(107, 52, 16, 0.18)',
+  tint: 'rgba(107, 52, 16, 0.07)',
+  tintStrong: 'rgba(107, 52, 16, 0.18)',
   divider: 'rgba(26, 23, 21, 0.08)',
 }
 
@@ -36,6 +51,8 @@ export interface VersePrintCardProps {
   verses: VerseData[]
   kind: PrintKind
   prefs: VersePrintPrefs
+  /** Theme colors; defaults to the light palette. */
+  palette?: VersePrintPalette
   /** Raw `<b>...</b>` snippet; marks match words with a soft background. */
   searchHighlight?: string
   /** Text shown in the footer (defaults to 'wikisubmission.org'). */
@@ -90,9 +107,11 @@ function highlightSegments(
 function HighlightedText({
   text,
   searchHighlight,
+  palette,
 }: {
   text: string
   searchHighlight?: string
+  palette: VersePrintPalette
 }) {
   if (!searchHighlight) return <>{text}</>
   const segs = highlightSegments(text, searchHighlight)
@@ -103,8 +122,8 @@ function HighlightedText({
           <mark
             key={i}
             style={{
-              backgroundColor: COLORS.primaryTintStrong,
-              color: COLORS.primary,
+              backgroundColor: palette.tintStrong,
+              color: palette.primary,
               padding: '0 2px',
               borderRadius: '3px',
               fontWeight: 600,
@@ -120,19 +139,25 @@ function HighlightedText({
   )
 }
 
-function VerseKeyPill({ vk }: { vk: string }) {
+function VerseKeyPill({
+  vk,
+  palette,
+}: {
+  vk: string
+  palette: VersePrintPalette
+}) {
   return (
     <span
       style={{
         display: 'inline-block',
-        padding: '4px 12px',
+        padding: '3px 11px',
         borderRadius: '9999px',
-        background: COLORS.primaryTint,
-        color: COLORS.primary,
-        fontWeight: 700,
-        fontSize: '14px',
-        letterSpacing: '0.02em',
-        lineHeight: 1.3,
+        background: palette.tint,
+        color: palette.primary,
+        fontWeight: 600,
+        fontSize: '12.5px',
+        letterSpacing: '0.03em',
+        lineHeight: 1.4,
       }}
     >
       {vk}
@@ -143,10 +168,12 @@ function VerseKeyPill({ vk }: { vk: string }) {
 function FullVerseBody({
   verse,
   prefs,
+  palette,
   searchHighlight,
 }: {
   verse: VerseData
   prefs: VersePrintPrefs
+  palette: VersePrintPalette
   searchHighlight?: string
 }) {
   const tr = verse.tr?.[prefs.primaryCode] ?? verse.tr?.['en']
@@ -158,14 +185,18 @@ function FullVerseBody({
       {prefs.includeText && tr?.tx && (
         <p
           style={{
-            fontSize: '18px',
-            lineHeight: 1.65,
-            color: COLORS.fg,
-            margin: '0 0 20px 0',
+            fontSize: '17px',
+            lineHeight: 1.7,
+            color: palette.fg,
+            margin: '0 0 16px 0',
             fontWeight: 500,
           }}
         >
-          <HighlightedText text={tr.tx} searchHighlight={searchHighlight} />
+          <HighlightedText
+            text={tr.tx}
+            searchHighlight={searchHighlight}
+            palette={palette}
+          />
         </p>
       )}
 
@@ -176,9 +207,9 @@ function FullVerseBody({
           style={{
             fontSize: '26px',
             lineHeight: 1.9,
-            color: COLORS.fg,
+            color: palette.fg,
             textAlign: 'right',
-            margin: '0 0 20px 0',
+            margin: '0 0 16px 0',
           }}
         >
           {arTr.tx}
@@ -188,11 +219,11 @@ function FullVerseBody({
       {secondary?.tx && (
         <p
           style={{
-            fontSize: '15px',
+            fontSize: '14px',
             lineHeight: 1.6,
-            color: COLORS.muted,
+            color: palette.muted,
             fontStyle: 'italic',
-            margin: '0 0 16px 0',
+            margin: '0 0 14px 0',
           }}
         >
           {secondary.tx}
@@ -202,13 +233,13 @@ function FullVerseBody({
       {prefs.includeFootnotes && tr?.f && (
         <p
           style={{
-            fontSize: '13px',
+            fontSize: '12.5px',
             lineHeight: 1.55,
-            color: COLORS.subtle,
+            color: palette.subtle,
             fontStyle: 'italic',
             margin: 0,
             paddingLeft: '12px',
-            borderLeft: `2px solid ${COLORS.divider}`,
+            borderLeft: `2px solid ${palette.tintStrong}`,
           }}
         >
           {tr.f}
@@ -221,10 +252,12 @@ function FullVerseBody({
 function WordByWordBody({
   verse,
   prefs,
+  palette,
   searchHighlight,
 }: {
   verse: VerseData
   prefs: VersePrintPrefs
+  palette: VersePrintPalette
   searchHighlight?: string
 }) {
   const tr = verse.tr?.[prefs.primaryCode] ?? verse.tr?.['en']
@@ -238,14 +271,18 @@ function WordByWordBody({
       {prefs.includeText && tr?.tx && (
         <p
           style={{
-            fontSize: '16px',
-            lineHeight: 1.6,
-            color: COLORS.fg,
-            margin: '0 0 24px 0',
+            fontSize: '15.5px',
+            lineHeight: 1.65,
+            color: palette.fg,
+            margin: '0 0 20px 0',
             fontWeight: 500,
           }}
         >
-          <HighlightedText text={tr.tx} searchHighlight={searchHighlight} />
+          <HighlightedText
+            text={tr.tx}
+            searchHighlight={searchHighlight}
+            palette={palette}
+          />
         </p>
       )}
 
@@ -256,7 +293,7 @@ function WordByWordBody({
             display: 'flex',
             flexWrap: 'wrap',
             justifyContent: 'flex-end',
-            gap: '10px 14px',
+            gap: '8px 10px',
             margin: 0,
           }}
         >
@@ -273,20 +310,19 @@ function WordByWordBody({
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: '4px',
-                  padding: '8px 10px',
-                  border: `1px solid ${COLORS.border}`,
-                  borderRadius: '12px',
-                  background: COLORS.primaryTint,
-                  minWidth: '70px',
+                  padding: '7px 10px',
+                  borderRadius: '10px',
+                  background: palette.tint,
+                  minWidth: '64px',
                 }}
               >
                 {prefs.includeArabic && arabic && (
                   <span
                     className="font-arabic"
                     style={{
-                      fontSize: '22px',
+                      fontSize: '23px',
                       lineHeight: 1.4,
-                      color: COLORS.fg,
+                      color: palette.fg,
                     }}
                   >
                     {arabic}
@@ -300,15 +336,15 @@ function WordByWordBody({
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      gap: '1px',
+                      gap: '2px',
                     }}
                   >
                     {prefs.includeTransliteration && translit && (
                       <span
                         style={{
-                          fontSize: '11px',
+                          fontSize: '10.5px',
                           fontStyle: 'italic',
-                          color: COLORS.muted,
+                          color: palette.muted,
                           lineHeight: 1.3,
                         }}
                       >
@@ -319,11 +355,11 @@ function WordByWordBody({
                       <span
                         style={{
                           fontSize: '12px',
-                          fontWeight: 500,
-                          color: COLORS.fg,
+                          fontWeight: 600,
+                          color: palette.fg,
                           lineHeight: 1.3,
                           textAlign: 'center',
-                          maxWidth: '90px',
+                          maxWidth: '92px',
                           wordBreak: 'break-word',
                         }}
                       >
@@ -346,7 +382,7 @@ function WordByWordBody({
                 <span
                   key={`fb-${w.wi ?? 0}`}
                   className="font-arabic"
-                  style={{ fontSize: '22px', color: COLORS.fg }}
+                  style={{ fontSize: '23px', color: palette.fg }}
                 >
                   {arabic}
                 </span>
@@ -362,7 +398,7 @@ function WordByWordBody({
             style={{
               fontSize: '26px',
               lineHeight: 1.9,
-              color: COLORS.fg,
+              color: palette.fg,
               textAlign: 'right',
               margin: 0,
             }}
@@ -375,15 +411,23 @@ function WordByWordBody({
   )
 }
 
+/** "Quran 2:255" or "Quran 2:1 – 2:5" for the footer. */
+function verseRangeLabel(verses: VerseData[]): string {
+  const first = verses[0]?.vk
+  const last = verses[verses.length - 1]?.vk
+  if (!first) return ''
+  return !last || last === first ? `Quran ${first}` : `Quran ${first} – ${last}`
+}
+
 /**
- * Off-screen render target for "Copy as image". Fixed 680px wide, cream
- * background, cream-and-brown palette. Hardcodes the light theme so the PNG
- * is consistent regardless of the user's current theme.
+ * Off-screen render target for "Copy as image". Fixed 680px wide, themed with
+ * the palette resolved from the user's active theme at copy time.
  */
 export function VersePrintCard({
   verses,
   kind,
   prefs,
+  palette = LIGHT_PRINT_PALETTE,
   searchHighlight,
   footerLabel = 'wikisubmission.org',
 }: VersePrintCardProps) {
@@ -392,43 +436,44 @@ export function VersePrintCard({
       data-verse-print-card
       style={{
         width: '680px',
-        background: COLORS.bg,
-        color: COLORS.fg,
-        border: `1px solid ${COLORS.border}`,
-        borderRadius: '24px',
-        boxShadow: '0 20px 40px -20px rgba(0,0,0,0.25)',
+        background: palette.bg,
+        color: palette.fg,
+        border: `1px solid ${palette.border}`,
+        borderRadius: '20px',
+        boxShadow: '0 24px 48px -24px rgba(0, 0, 0, 0.35)',
         overflow: 'hidden',
         fontFamily:
           "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        colorScheme: 'light',
       }}
     >
-      <div style={{ padding: '32px 40px 20px 40px' }}>
+      <div style={{ padding: '28px 36px 18px 36px' }}>
         {verses.map((verse, i) => (
           <div
             key={verse.vk ?? i}
             style={{
-              paddingBottom: i === verses.length - 1 ? 0 : '20px',
-              marginBottom: i === verses.length - 1 ? 0 : '20px',
+              paddingBottom: i === verses.length - 1 ? 0 : '18px',
+              marginBottom: i === verses.length - 1 ? 0 : '18px',
               borderBottom:
                 i === verses.length - 1
                   ? 'none'
-                  : `1px solid ${COLORS.divider}`,
+                  : `1px solid ${palette.divider}`,
             }}
           >
-            <div style={{ marginBottom: '16px' }}>
-              <VerseKeyPill vk={verse.vk ?? ''} />
+            <div style={{ marginBottom: '14px' }}>
+              <VerseKeyPill vk={verse.vk ?? ''} palette={palette} />
             </div>
             {kind === 'full' ? (
               <FullVerseBody
                 verse={verse}
                 prefs={prefs}
+                palette={palette}
                 searchHighlight={i === 0 ? searchHighlight : undefined}
               />
             ) : (
               <WordByWordBody
                 verse={verse}
                 prefs={prefs}
+                palette={palette}
                 searchHighlight={i === 0 ? searchHighlight : undefined}
               />
             )}
@@ -438,19 +483,29 @@ export function VersePrintCard({
 
       <div
         style={{
-          padding: '14px 40px',
-          borderTop: `1px solid ${COLORS.divider}`,
+          padding: '12px 36px',
+          borderTop: `1px solid ${palette.divider}`,
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
         <span
           style={{
             fontSize: '11px',
-            letterSpacing: '0.12em',
+            letterSpacing: '0.04em',
+            color: palette.subtle,
+            fontWeight: 500,
+          }}
+        >
+          {verseRangeLabel(verses)}
+        </span>
+        <span
+          style={{
+            fontSize: '10.5px',
+            letterSpacing: '0.14em',
             textTransform: 'uppercase',
-            color: COLORS.muted,
+            color: palette.muted,
             fontWeight: 600,
           }}
         >

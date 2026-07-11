@@ -1092,6 +1092,14 @@
       "confirm": "Mein Konto löschen",
       "exportFirst": "Fordere oben einen Datenexport an und lade ihn herunter, bevor du dein Konto löschen kannst.",
       "failed": "Dein Konto konnte nicht gelöscht werden. Bitte versuche es erneut."
+    },
+    "appearance": {
+      "heading": "Appearance",
+      "body": "Theme mode and color palette"
+    },
+    "language": {
+      "heading": "App language",
+      "body": "Language of menus and labels (Quran translation language is set in the reader)"
     }
   },
   "chat": {

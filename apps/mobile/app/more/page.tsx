@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookText, ChevronRight, ScrollText, Sparkles } from 'lucide-react'
+import { ChevronRight, ScrollText, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 interface MoreItem {
@@ -25,7 +25,7 @@ const MORE_ITEMS: readonly MoreItem[] = [
     icon: ScrollText,
     href: '/more/articles',
   },
-  { key: 'bible', label: 'Bible', description: 'Coming soon', icon: BookText },
+  // Bible ("Coming soon") is hidden until the mobile /bible experience ships.
 ]
 
 export default function MorePage() {

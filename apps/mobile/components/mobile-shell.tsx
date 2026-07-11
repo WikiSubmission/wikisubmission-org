@@ -1,10 +1,19 @@
 'use client'
 
+import { useRef } from 'react'
 import { usePathname } from 'next/navigation'
-import { activeTab, isQuranReaderRoute, isTabRoot, screenTitle } from '@/constants/navigation'
+import {
+  activeTab,
+  isQuranReaderRoute,
+  isTabRoot,
+  normalizePath,
+  screenTitle,
+} from '@/constants/navigation'
 import { MobileTopBar } from '@/components/mobile-top-bar'
 import { QuranPlayer } from '@/components/quran-player/now-playing-bar'
 import { TabBar } from '@/components/tab-bar'
+import { AmbientBackdrop } from '@/components/today/ambient-backdrop'
+import { usePageEnterAnimation } from '@/hooks/use-page-enter-animation'
 import { useReaderChromeScroll } from '@/hooks/use-reader-chrome-scroll'
 
 /**
@@ -21,17 +30,25 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
   const tab = activeTab(pathname)
   const atRoot = isTabRoot(pathname)
   const reading = isQuranReaderRoute(pathname)
+  const mainRef = useRef<HTMLElement>(null)
 
   useReaderChromeScroll(reading)
+  usePageEnterAnimation(mainRef)
+
+  const onToday = normalizePath(pathname) === '/'
 
   return (
     <div className="flex min-h-dvh flex-col">
+      {/* Time-of-day scene behind every screen; full strength on Today, faded
+          back elsewhere so dense content stays legible. */}
+      <AmbientBackdrop subdued={!onToday} />
       <MobileTopBar
         title={screenTitle(pathname) ?? tab?.label ?? 'WikiSubmission'}
         showBack={!atRoot}
       />
       <main
-        className="flex flex-1 flex-col"
+        ref={mainRef}
+        className="relative z-10 flex flex-1 flex-col"
         style={{
           paddingTop: 'calc(env(safe-area-inset-top) + 3.5rem)',
           paddingBottom: reading

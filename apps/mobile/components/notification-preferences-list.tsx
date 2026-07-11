@@ -6,6 +6,7 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Switch } from '@/components/ui/switch'
 import { PRAYER_EVENT_ORDER, type PrayerEventKey } from '@/lib/prayer-events'
 import { useNotificationPrefs } from '@/hooks/use-notification-prefs'
+import { AdhanSoundSelector } from '@/components/adhan-sound-selector'
 import { cn } from '@/lib/utils'
 
 const EVENT_LABELS: Record<PrayerEventKey, string> = {
@@ -27,7 +28,7 @@ const EVENT_HINTS: Partial<Record<PrayerEventKey, string>> = {
  * useNotificationPrefs.
  */
 export function NotificationPreferencesList() {
-  const { prefs, loading, permissionBlocked, setMaster, setEvent, setAnnouncements } =
+  const { prefs, loading, permissionBlocked, setMaster, setEvent, setSound, setAnnouncements } =
     useNotificationPrefs()
   const [exactAlarmDenied, setExactAlarmDenied] = useState(false)
 
@@ -101,6 +102,12 @@ export function NotificationPreferencesList() {
           </li>
         ))}
       </ul>
+
+      <AdhanSoundSelector
+        value={prefs.sound}
+        disabled={!prefs.master}
+        onChange={(sound) => void setSound(sound)}
+      />
 
       {exactAlarmDenied && (
         <div className="flex items-center justify-between py-3">

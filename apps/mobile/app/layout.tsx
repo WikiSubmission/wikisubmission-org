@@ -4,6 +4,7 @@ import Script from 'next/script'
 import { Fonts } from '@/constants/fonts'
 import { PALETTE_INIT_SCRIPT } from '@/lib/theme-palette-context'
 import { MobileProviders } from '@/components/mobile-providers'
+import { currentDaySeed } from '@/lib/zikr'
 
 export const metadata: Metadata = {
   title: 'WikiSubmission',
@@ -29,6 +30,10 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Seed the "zikr of the day" here, on the server, so the value is serialized
+  // into the payload and reused verbatim on the client. In the static export
+  // this is the build day (rebuild to rotate); under SSR it is the request day.
+  const dailySeed = currentDaySeed()
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
@@ -43,7 +48,7 @@ export default function RootLayout({
         className={`${Fonts.amiri.variable} ${Fonts.cormorant.variable} ${Fonts.sourceSerif.variable} ${Fonts.jetbrainsMono.variable} ${Fonts.glacial.variable} antialiased wrap-break-words`}
         suppressHydrationWarning
       >
-        <MobileProviders>{children}</MobileProviders>
+        <MobileProviders dailySeed={dailySeed}>{children}</MobileProviders>
       </body>
     </html>
   )

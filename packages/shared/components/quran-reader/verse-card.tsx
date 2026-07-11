@@ -25,6 +25,7 @@ import { PlayWordButton } from '@/components/play-word-button'
 import { useWordAudio, wordAudioId } from '@/lib/word-audio'
 import { RootWordOccurrences } from './root-word-occurrences'
 import { CopyButton } from './copy-button'
+import { DENSITY } from './verse-density'
 import {
   Play,
   Pause,
@@ -234,7 +235,7 @@ function WordCardItem({
         role="button"
         tabIndex={0}
         aria-label={`Details for ${arabic}`}
-        className={`group relative flex h-full flex-col items-center gap-2 px-1.5 py-2 sm:px-3.5 sm:py-2.5 cursor-pointer rounded-xl transition-transform duration-150 ${
+        className={`group relative flex h-full flex-col items-center gap-2 ${DENSITY.wbwCard} cursor-pointer rounded-xl transition-transform duration-150 ${
           isPlaying ? 'bg-primary/10' : 'hover:scale-[1.04]'
         }`}
         onPointerEnter={warm}
@@ -477,7 +478,7 @@ const WordByWordView = memo(
       return (
         <div
           dir="rtl"
-          className="flex flex-wrap text-right justify-start gap-x-4 gap-y-6 py-2"
+          className={`flex flex-wrap text-right justify-start ${DENSITY.wbwCompact}`}
         >
           {sorted.map((w) => (
             <WordCompactItem
@@ -497,7 +498,7 @@ const WordByWordView = memo(
     return (
       <div
         dir="rtl"
-        className="flex flex-wrap items-stretch justify-start gap-y-3 gap-x-0 sm:gap-x-1 -mx-4 sm:mx-0 py-3"
+        className={`flex flex-wrap items-stretch justify-start gap-x-0 sm:gap-x-1 -mx-4 sm:mx-0 ${DENSITY.wbwCards}`}
       >
         {sorted.map((w) => (
           <WordCardItem
@@ -730,7 +731,7 @@ export const VerseCard = memo(
             : ''
         } ${selectionActive ? 'cursor-pointer select-none' : ''}`}
       >
-        <div className="verse-body px-6 py-4 sm:px-8 sm:py-5 space-y-2">
+        <div className={`verse-body ${DENSITY.body}`}>
           {/* Subtitle */}
           {prefs.subtitles && tr?.s && (
             <div className="flex justify-center">
@@ -749,18 +750,18 @@ export const VerseCard = memo(
                   target="_blank"
                   className="group flex w-fit items-center gap-1"
                 >
-                  <div className="flex items-start space-x-0.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-primary transition-colors">
-                    <span className="text-lg font-semibold">{chNum}</span>
-                    <span>:</span>
-                    <span className="text-lg font-semibold">{vNum}</span>
+                  <div
+                    className={`flex items-center rounded-full bg-primary/10 text-primary font-semibold transition-colors ${DENSITY.pill}`}
+                  >
+                    {chNum}:{vNum}
                   </div>
                   <ArrowUpRight className="size-3.5 text-muted-foreground transition-colors group-hover:text-primary" />
                 </Link>
               ) : (
-                <div className="flex w-fit shrink-0 items-start space-x-0.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-primary">
-                  <span className="w-full text-lg font-semibold">{chNum}</span>
-                  <span>:</span>
-                  <span className="w-full text-lg font-semibold">{vNum}</span>
+                <div
+                  className={`flex w-fit shrink-0 items-center rounded-full bg-primary/10 text-primary font-semibold ${DENSITY.pill}`}
+                >
+                  {chNum}:{vNum}
                 </div>
               )}
               {isCoverToCover && (
@@ -786,7 +787,7 @@ export const VerseCard = memo(
                       aria-label={
                         isBookmarked ? 'Manage bookmarks' : 'Add to category'
                       }
-                      className={`h-8 w-8 rounded-full transition-colors ${
+                      className={`${DENSITY.actionButton} rounded-full transition-colors ${
                         isBookmarked
                           ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-500/10'
                           : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
@@ -911,7 +912,7 @@ export const VerseCard = memo(
                   variant="ghost"
                   size="icon"
                   aria-label={note ? 'Edit note' : 'Add note'}
-                  className={`relative h-8 w-8 rounded-full transition-colors ${
+                  className={`relative ${DENSITY.actionButton} rounded-full transition-colors ${
                     note
                       ? 'text-primary hover:bg-primary/10'
                       : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
@@ -934,7 +935,7 @@ export const VerseCard = memo(
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                  className={`${DENSITY.actionButton} rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary`}
                   onClick={handlePlay}
                 >
                   {isCurrentAudio && isPlaying ? (
@@ -986,7 +987,7 @@ export const VerseCard = memo(
                 verse.w.length > 0 && (
                   <div
                     key={prefs.wordByWord ? 'wbw' : 'compact'}
-                    className="py-2 animate-in fade-in duration-200"
+                    className={`${DENSITY.wbwWrap} animate-in fade-in duration-200`}
                   >
                     <WordByWordView
                       words={verse.w}
@@ -1012,7 +1013,7 @@ export const VerseCard = memo(
           </div>
         </div>
 
-        {!isLast && <hr className="border-border/20 mx-6 sm:mx-8" />}
+        {!isLast && <hr className={`border-border/20 ${DENSITY.divider}`} />}
 
         <NoteEditorDialogLazy
           note={note}

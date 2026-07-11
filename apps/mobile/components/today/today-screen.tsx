@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { AmbientBackdrop } from '@/components/today/ambient-backdrop'
 import { PrayerSchedule } from '@/components/today/prayer-schedule'
 import { ZakatCountdown } from '@/components/today/zakat-countdown'
 import { ZikrStrip } from '@/components/today/zikr-strip'
@@ -28,7 +27,7 @@ export function TodayScreen() {
 
   return (
     <div className="relative flex flex-1 flex-col">
-      <AmbientBackdrop />
+      {/* Ambient backdrop is mounted app-wide by MobileShell. */}
       <div className="relative z-10 flex flex-1 flex-col gap-4 py-6">
         {phase === 'overlay' ? (
           // Reserve the strip's height so the flight target position is stable.

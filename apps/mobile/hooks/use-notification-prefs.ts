@@ -1,6 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { LocalNotifications } from '@capacitor/local-notifications'
 import type { PrayerEventKey } from '@/lib/prayer-events'
 import { ensureNotificationPermission } from '@/lib/notification-permission'
 import { syncFcmRegistration } from '@/lib/notifications/fcm'
@@ -11,6 +13,7 @@ import {
   writeNotificationPrefs,
   type NotificationPrefs,
 } from '@/lib/notifications/prefs'
+import type { PrayerSoundId } from '@/lib/notifications/sounds'
 
 export interface UseNotificationPrefsResult {
   prefs: NotificationPrefs
@@ -20,6 +23,7 @@ export interface UseNotificationPrefsResult {
   permissionBlocked: boolean
   setMaster: (on: boolean) => Promise<void>
   setEvent: (event: PrayerEventKey, on: boolean) => Promise<void>
+  setSound: (sound: PrayerSoundId) => Promise<void>
   setAnnouncements: (on: boolean) => Promise<void>
 }
 
@@ -35,10 +39,20 @@ export function useNotificationPrefs(): UseNotificationPrefsResult {
 
   useEffect(() => {
     let alive = true
-    readNotificationPrefs().then((stored) => {
+    readNotificationPrefs().then(async (stored) => {
       if (!alive) return
       setPrefs(stored)
       setLoading(false)
+      // Master defaults on, so surface an OS-level denial immediately rather
+      // than only after the next toggle attempt.
+      if (stored.master && Capacitor.isNativePlatform()) {
+        try {
+          const { display } = await LocalNotifications.checkPermissions()
+          if (alive) setPermissionBlocked(display === 'denied')
+        } catch {
+          // Treat an unreadable permission state as not blocked.
+        }
+      }
     })
     return () => {
       alive = false
@@ -71,6 +85,13 @@ export function useNotificationPrefs(): UseNotificationPrefsResult {
     [apply, prefs],
   )
 
+  const setSound = useCallback(
+    async (sound: PrayerSoundId) => {
+      await apply({ ...prefs, sound })
+    },
+    [apply, prefs],
+  )
+
   const setAnnouncements = useCallback(
     async (on: boolean) => {
       await apply({ ...prefs, announcements: on })
@@ -78,5 +99,5 @@ export function useNotificationPrefs(): UseNotificationPrefsResult {
     [apply, prefs],
   )
 
-  return { prefs, loading, permissionBlocked, setMaster, setEvent, setAnnouncements }
+  return { prefs, loading, permissionBlocked, setMaster, setEvent, setSound, setAnnouncements }
 }

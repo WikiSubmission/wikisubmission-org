@@ -6,6 +6,23 @@ export type Locale = (typeof SUPPORTED_LOCALES)[number]
 
 export const DEFAULT_LOCALE: Locale = 'en'
 
+/** Capacitor Preferences key holding the chosen UI locale. */
+export const LOCALE_PREF_KEY = 'locale'
+
+/** Window event dispatched when the in-app language switcher writes a new
+ * locale, so IntlProvider re-renders without an app restart. */
+export const LOCALE_CHANGED_EVENT = 'ws-locale-changed'
+
+/** Native display names shown in the language switcher. */
+export const LOCALE_LABELS: Record<Locale, string> = {
+  en: 'English',
+  ar: 'العربية',
+  de: 'Deutsch',
+  fr: 'Français',
+  ku: 'کوردی',
+  tr: 'Türkçe',
+}
+
 // Right-to-left scripts among the supported locales.
 const RTL_LOCALES: ReadonlySet<string> = new Set(['ar', 'ku'])
 

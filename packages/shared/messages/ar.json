@@ -1157,6 +1157,14 @@
       "confirm": "حذف حسابي",
       "exportFirst": "اطلب تصدير بياناتك ونزّله أعلاه قبل أن تتمكن من حذف حسابك.",
       "failed": "تعذّر حذف حسابك. يرجى المحاولة مرة أخرى."
+    },
+    "appearance": {
+      "heading": "Appearance",
+      "body": "Theme mode and color palette"
+    },
+    "language": {
+      "heading": "App language",
+      "body": "Language of menus and labels (Quran translation language is set in the reader)"
     }
   },
   "chat": {

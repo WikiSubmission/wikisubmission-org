@@ -7,6 +7,8 @@ import {
   DEFAULT_LOCALE,
   directionFor,
   isLocale,
+  LOCALE_CHANGED_EVENT,
+  LOCALE_PREF_KEY,
   type Locale,
 } from '@/constants/locales'
 
@@ -27,8 +29,6 @@ const MESSAGES: Record<Locale, Record<string, unknown>> = {
   ku,
   tr,
 }
-
-const LOCALE_PREF_KEY = 'locale'
 
 /**
  * Client-side i18n provider for the static-export mobile app. There is no
@@ -53,6 +53,17 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  // Live locale switching from the settings screen (which persists the
+  // preference and fires this event).
+  useEffect(() => {
+    const onLocaleChanged = (event: Event) => {
+      const next = (event as CustomEvent<string>).detail
+      if (isLocale(next)) setLocale(next)
+    }
+    window.addEventListener(LOCALE_CHANGED_EVENT, onLocaleChanged)
+    return () => window.removeEventListener(LOCALE_CHANGED_EVENT, onLocaleChanged)
+  }, [])
+
   useEffect(() => {
     const root = document.documentElement
     root.lang = locale
@@ -60,7 +71,14 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
   }, [locale])
 
   return (
-    <NextIntlClientProvider locale={locale} messages={MESSAGES[locale]}>
+    <NextIntlClientProvider
+      locale={locale}
+      messages={MESSAGES[locale]}
+      // Pinned so the static-export prerender (build machine tz) and the client
+      // render agree, avoiding next-intl markup-mismatch warnings. All in-app
+      // date/time formatting is locale-driven, not tz-sensitive.
+      timeZone="UTC"
+    >
       {children}
     </NextIntlClientProvider>
   )

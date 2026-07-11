@@ -24,6 +24,7 @@ export default function ProfilePage() {
         void signOut()
       }}
       providerLabel={providerLabel}
+      hideBible
     />
   )
 }

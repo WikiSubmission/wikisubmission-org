@@ -1282,6 +1282,14 @@
       "confirm": "Delete my account",
       "exportFirst": "Request and download a data export above before you can delete your account.",
       "failed": "Your account could not be deleted. Please try again."
+    },
+    "appearance": {
+      "heading": "Appearance",
+      "body": "Theme mode and color palette"
+    },
+    "language": {
+      "heading": "App language",
+      "body": "Language of menus and labels (Quran translation language is set in the reader)"
     }
   },
   "chat": {

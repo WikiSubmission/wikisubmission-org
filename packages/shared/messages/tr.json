@@ -1092,6 +1092,14 @@
       "confirm": "Hesabımı sil",
       "exportFirst": "Hesabınızı silebilmek için önce yukarıdan bir veri dışa aktarımı isteyip indirin.",
       "failed": "Hesabınız silinemedi. Lütfen tekrar deneyin."
+    },
+    "appearance": {
+      "heading": "Appearance",
+      "body": "Theme mode and color palette"
+    },
+    "language": {
+      "heading": "App language",
+      "body": "Language of menus and labels (Quran translation language is set in the reader)"
     }
   },
   "chat": {

@@ -70,6 +70,10 @@ interface SettingsClientProps {
    * webview has no service-worker push, so the web section would only ever
    * report "unsupported" there. Web omits it and keeps the built-in section. */
   notificationsSection?: React.ReactNode
+  /** Optional extra content at the top of the general tab. The mobile app
+   * injects app-level controls (UI language, theme) that have no web
+   * equivalent — web settings live in the site chrome instead. */
+  generalExtrasSection?: React.ReactNode
   /** Initial tab, from the page's ?tab= search param. */
   initialTab?: string
   /** The signed-in account's email. Used as the typed confirmation value for
@@ -85,6 +89,7 @@ interface SettingsClientProps {
 export function SettingsClient({
   offlineSection,
   notificationsSection,
+  generalExtrasSection,
   initialTab,
   accountEmail,
   onAccountDeleted,
@@ -311,6 +316,8 @@ export function SettingsClient({
 
       {tab === 'general' && (
         <>
+          {generalExtrasSection}
+
           {consent.status === 'loading' && <p style={mutedStyle}>{t('loading')}</p>}
           {consent.status === 'error' && <p style={mutedStyle}>{t('error')}</p>}
 

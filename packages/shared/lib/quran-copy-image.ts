@@ -3,8 +3,10 @@ import { createRoot, type Root } from 'react-dom/client'
 import * as htmlToImage from 'html-to-image'
 import {
   VersePrintCard,
+  LIGHT_PRINT_PALETTE,
   type PrintKind,
   type VersePrintPrefs,
+  type VersePrintPalette,
 } from '@/components/quran-reader/verse-print-card'
 import type { components } from '@/src/api/types.gen'
 
@@ -39,6 +41,51 @@ export function canCopyImage(): boolean {
 }
 
 /**
+ * Resolves the active theme's tokens to concrete colors so the rasterized
+ * PNG matches what the user sees (light, dark, or any palette). Colors are
+ * read through a hidden probe element — getComputedStyle resolves the CSS
+ * variable (and any color-mix) to a concrete color string.
+ */
+export function resolvePrintPalette(): VersePrintPalette {
+  if (typeof window === 'undefined' || !document.body) {
+    return LIGHT_PRINT_PALETTE
+  }
+  const probe = document.createElement('span')
+  probe.style.position = 'fixed'
+  probe.style.visibility = 'hidden'
+  probe.style.pointerEvents = 'none'
+  document.body.appendChild(probe)
+  try {
+    const read = (variable: string, fallback: string): string => {
+      probe.style.color = fallback
+      probe.style.color = `var(${variable}, ${fallback})`
+      return getComputedStyle(probe).color || fallback
+    }
+    // Fade a resolved color toward transparent (tints, dividers).
+    const fade = (color: string, transparentPct: number) =>
+      `color-mix(in oklab, ${color}, transparent ${transparentPct}%)`
+
+    const fg = read('--foreground', LIGHT_PRINT_PALETTE.fg)
+    const primary = read('--primary', LIGHT_PRINT_PALETTE.primary)
+    return {
+      bg: read('--card', LIGHT_PRINT_PALETTE.bg),
+      fg,
+      muted: read('--muted-foreground', LIGHT_PRINT_PALETTE.muted),
+      subtle: fade(fg, 50),
+      primary,
+      border: read('--border', LIGHT_PRINT_PALETTE.border),
+      tint: fade(primary, 92),
+      tintStrong: fade(primary, 78),
+      divider: fade(fg, 90),
+    }
+  } catch {
+    return LIGHT_PRINT_PALETTE
+  } finally {
+    probe.remove()
+  }
+}
+
+/**
  * Renders the given verses into an off-screen VersePrintCard, rasterizes to
  * a PNG, and writes the result to the clipboard. The hidden host is removed
  * regardless of success/failure.
@@ -58,10 +105,6 @@ async function renderAndCopy(
   host.style.pointerEvents = 'none'
   host.style.zIndex = '-1'
   host.style.width = '680px'
-  // Force light color scheme so the render doesn't pick up the user's dark
-  // theme (VersePrintCard uses inline hex colors anyway, but CSS vars inside
-  // .font-arabic or anything else will resolve to light).
-  host.style.colorScheme = 'light'
   document.body.appendChild(host)
 
   let root: Root | null = null
@@ -72,6 +115,7 @@ async function renderAndCopy(
         verses,
         kind,
         prefs: opts.prefs,
+        palette: resolvePrintPalette(),
         searchHighlight: opts.searchHighlight,
       })
     )
@@ -84,10 +128,10 @@ async function renderAndCopy(
     const target = host.firstElementChild as HTMLElement | null
     if (!target) throw new Error('print card did not render')
 
+    // No backgroundColor — the PNG keeps transparent rounded corners so the
+    // card sits cleanly on whatever background it's pasted onto.
     const blob = await htmlToImage.toBlob(target, {
       pixelRatio: 2,
-      backgroundColor: '#F6F2EA',
-      cacheBust: true,
     })
     if (!blob) throw new Error('toBlob returned null')
 

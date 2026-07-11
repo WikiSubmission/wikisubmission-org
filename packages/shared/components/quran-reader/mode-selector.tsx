@@ -11,17 +11,21 @@ import {
 } from '@/components/ui/tooltip'
 import { useTranslations } from 'next-intl'
 
-type ModeId = 'verse' | 'word' | 'reading'
+export type QuranModeId = 'verse' | 'word' | 'reading'
+
+type ModeId = QuranModeId
 
 export interface QuranModeSelectorProps {
   /** Disable reading mode (search results and verse lists have no single-chapter flow). */
   readingBlocked?: boolean
   /**
    * Optional gate before enabling word mode. Return (or resolve) false to keep
-   * the current mode — e.g. mobile redirects to the downloads screen when the
-   * word-by-word bundle for the user's language is published but not installed.
+   * the current mode — e.g. mobile shows a download sheet when the word-by-word
+   * bundle for the user's language is published but not installed.
    */
   onWordModeIntercept?: () => boolean | Promise<boolean>
+  /** Fires after the mode actually changed (not on taps that keep the current mode). */
+  onModeChanged?: (mode: QuranModeId) => void
 }
 
 /**
@@ -29,7 +33,11 @@ export interface QuranModeSelectorProps {
  * reader header and the mobile chapter toolbar. The two underlying preferences
  * (displayMode + wordByWord) are folded into one three-state control.
  */
-export function QuranModeSelector({ readingBlocked = false, onWordModeIntercept }: QuranModeSelectorProps) {
+export function QuranModeSelector({
+  readingBlocked = false,
+  onWordModeIntercept,
+  onModeChanged,
+}: QuranModeSelectorProps) {
   const prefs = useQuranPreferences()
   const t = useTranslations('quran')
 
@@ -54,6 +62,7 @@ export function QuranModeSelector({ readingBlocked = false, onWordModeIntercept 
   }, [readingBlocked, prefs.displayMode])
 
   const handleModeChange = async (mode: ModeId) => {
+    if (mode === activeMode) return
     if (mode === 'reading' && readingBlocked) return
     if (mode === 'reading') {
       prefs.setPreferences({ ...prefs, displayMode: 'reading' })
@@ -72,6 +81,7 @@ export function QuranModeSelector({ readingBlocked = false, onWordModeIntercept 
         wordByWord: false,
       })
     }
+    onModeChanged?.(mode)
   }
 
   return (

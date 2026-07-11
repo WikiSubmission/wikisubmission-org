@@ -7,9 +7,10 @@ import { useZakatReminder } from '@/hooks/use-zakat-reminder'
 import { cn } from '@/lib/utils'
 
 /**
- * Compact zakat chip between the zikr strip and the prayer card: a days
- * countdown when a reminder is configured, a set-up prompt otherwise. Tapping
- * opens the zakat page (calculator + reminder setup).
+ * Full-width zakat set-up prompt between the zikr strip and the prayer card,
+ * shown only until a reminder is configured — after opt-in the compact
+ * ZakatBadge on the prayer card takes over. Tapping opens the zakat page
+ * (calculator + reminder setup).
  */
 export function ZakatCountdown() {
   const router = useRouter()
@@ -17,6 +18,9 @@ export function ZakatCountdown() {
 
   const configured = prefs?.enabled && daysLeft !== null
   const dueToday = configured && daysLeft <= 0
+
+  // Configured users get the badge on the prayer card instead of this chip.
+  if (configured) return null
 
   return (
     <div className="mx-auto w-full max-w-md px-4">

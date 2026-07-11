@@ -1091,6 +1091,14 @@
       "confirm": "Supprimer mon compte",
       "exportFirst": "Demandez et téléchargez un export de vos données ci-dessus avant de pouvoir supprimer votre compte.",
       "failed": "Votre compte n'a pas pu être supprimé. Veuillez réessayer."
+    },
+    "appearance": {
+      "heading": "Appearance",
+      "body": "Theme mode and color palette"
+    },
+    "language": {
+      "heading": "App language",
+      "body": "Language of menus and labels (Quran translation language is set in the reader)"
     }
   },
   "chat": {

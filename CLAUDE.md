@@ -179,9 +179,9 @@ The listener reads `verses` and `virtualizer` through `minimapStateRef.current` 
 
 Minimap dot transition is `0.08s linear` (not `0.35s cubic-bezier`) so it tracks the scroll position directly without visible lag.
 
-### GSAP border loader
+### Loading glow
 
-`useChapterBorderLoader(listRef, loading)` runs a GSAP animation on the virtual list container's border while verses are loading. A green glow pulses around the card outline, completing with a flash when the first batch arrives. Hook lives at `hooks/use-chapter-border-loader.ts`.
+While verses are loading, a pulsing inset ring (colored from `--primary`) is shown along the list container's border. It's a plain overlay div in `VirtualizedVerseList` (chapter-reader.tsx) animated with CSS `animate-pulse` + an opacity transition — compositor-only, no per-frame repaints. (Replaced the old GSAP `useChapterBorderLoader` box-shadow tween, which repainted the full-height container every frame and caused load stutter.)
 
 ### Sidebar `useSearchParams` isolation
 

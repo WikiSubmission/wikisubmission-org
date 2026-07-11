@@ -1092,6 +1092,14 @@
       "confirm": "ئەکاونتەکەم بسڕەوە",
       "exportFirst": "پێش ئەوەی بتوانیت ئەکاونتەکەت بسڕیتەوە، لە سەرەوە داوای هەناردەی داتا بکە و دایبگرە.",
       "failed": "نەتوانرا ئەکاونتەکەت بسڕدرێتەوە. تکایە دووبارە هەوڵ بدەوە."
+    },
+    "appearance": {
+      "heading": "Appearance",
+      "body": "Theme mode and color palette"
+    },
+    "language": {
+      "heading": "App language",
+      "body": "Language of menus and labels (Quran translation language is set in the reader)"
     }
   },
   "chat": {

@@ -3,6 +3,7 @@
 import { OfflineSettingsSection } from '@/components/me/offline-settings-section'
 import { NotificationPreferencesList } from '@/components/notification-preferences-list'
 import { SettingsClient } from '@/components/me/settings-screen'
+import { MobileGeneralSettings } from '@/components/settings/mobile-general-settings'
 import { useMobileAuth } from '@/components/mobile-auth-context'
 
 // The downloads tab drives the native Capacitor content store registered by
@@ -17,6 +18,7 @@ export default function SettingsPage() {
     <SettingsClient
       offlineSection={<OfflineSettingsSection />}
       notificationsSection={<NotificationPreferencesList />}
+      generalExtrasSection={<MobileGeneralSettings />}
       accountEmail={user?.email ?? undefined}
       onAccountDeleted={() => void signOut()}
     />
