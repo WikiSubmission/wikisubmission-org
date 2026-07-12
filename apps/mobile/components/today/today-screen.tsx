@@ -1,7 +1,9 @@
 'use client'
 
-import { useLayoutEffect, useRef } from 'react'
+import { useCallback, useLayoutEffect, useRef } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { PrayerSchedule } from '@/components/today/prayer-schedule'
+import { PullToRefresh } from '@/components/today/pull-to-refresh'
 import { ZakatCountdown } from '@/components/today/zakat-countdown'
 import { ZikrStrip } from '@/components/today/zikr-strip'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
@@ -25,6 +27,16 @@ export function TodayScreen() {
   // ('flying'), which is what triggers the Flip flight.
   const startupPlaying = phase === 'overlay' || phase === 'flying'
   const cardVisible = phase !== 'overlay'
+
+  const queryClient = useQueryClient()
+  const refresh = useCallback(
+    () =>
+      Promise.all([
+        queryClient.refetchQueries({ queryKey: ['prayer-times'] }),
+        queryClient.refetchQueries({ queryKey: ['zikr'] }),
+      ]),
+    [queryClient],
+  )
 
   // Prayer card + zakat chip open underneath the flight. Instant (no tween)
   // under reduced motion or when the startup was skipped.
@@ -55,7 +67,8 @@ export function TodayScreen() {
   return (
     <div className="relative flex flex-1 flex-col">
       {/* Ambient backdrop is mounted app-wide by MobileShell. */}
-      <div className="relative z-10 flex flex-1 flex-col gap-4 py-6">
+      <PullToRefresh onRefresh={refresh}>
+        <div className="relative z-10 flex flex-1 flex-col gap-4 py-6">
         {phase === 'overlay' ? (
           // Reserve the strip's height so the flight target position is stable.
           <div className="min-h-[5.5rem]" aria-hidden="true" />
@@ -70,11 +83,12 @@ export function TodayScreen() {
           />
         )}
 
-        <div ref={cardRef} className="flex flex-col gap-4">
-          <ZakatCountdown />
-          <PrayerSchedule />
+          <div ref={cardRef} className="flex flex-col gap-4">
+            <ZakatCountdown />
+            <PrayerSchedule />
+          </div>
         </div>
-      </div>
+      </PullToRefresh>
     </div>
   )
 }

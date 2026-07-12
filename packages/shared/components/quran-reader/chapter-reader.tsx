@@ -724,7 +724,10 @@ export function ChapterReader({
                 className="text-xl font-bold flex items-center gap-2"
                 dir={getDirection(primaryCode ?? 'en')}
               >
-                <span className="min-w-0">
+                {/* data-flip-id: landing target for the mobile app's
+                    index-card → reader title continuity (GSAP Flip). Inert
+                    on web. */}
+                <span className="min-w-0" data-flip-id="chapter-title">
                   {t('chapter', { number: chapterNumber, title: primaryTitle })}
                 </span>
                 {reader.loading && reader.verses.length > 0 && (

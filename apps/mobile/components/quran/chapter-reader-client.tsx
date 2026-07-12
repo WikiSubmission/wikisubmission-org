@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { ChapterReader } from '@/components/quran-reader/chapter-reader'
+import { takeChapterFlightState } from '@/lib/chapter-flight'
+import { Flip } from '@/lib/gsap'
 
 /**
  * Client entry for the mobile chapter reader.
@@ -22,6 +24,20 @@ export function ChapterReaderClient({ chapterNumber }: { chapterNumber: number }
     if (typeof window === 'undefined') return undefined
     return new URLSearchParams(window.location.search).get('verse') ?? undefined
   })
+
+  // Index-card → reader title continuity: if the navigation captured a Flip
+  // state of the tapped card's title, fly the chapter heading in from it.
+  useLayoutEffect(() => {
+    const state = takeChapterFlightState()
+    if (!state) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const raf = requestAnimationFrame(() => {
+      const target = document.querySelector<HTMLElement>('[data-flip-id="chapter-title"]')
+      if (!target) return
+      Flip.from(state, { targets: target, duration: 0.45, ease: 'power3.out', scale: true })
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [])
 
   return (
     <ChapterReader

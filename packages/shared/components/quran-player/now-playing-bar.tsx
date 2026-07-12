@@ -37,6 +37,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 
+import gsap from 'gsap'
 import { cn } from '@/lib/utils'
 import { formatTime } from '@/lib/music-utils'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
@@ -113,6 +114,30 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
 
   const { zoomLevel } = useQuranPreferences()
 
+  // Entrance: the bar slides up when playback first gives it something to
+  // show (it renders null while idle, so this fires on each appearance).
+  const barRef = React.useRef<HTMLDivElement>(null)
+  const hasTrack = currentVerse !== null
+  React.useLayoutEffect(() => {
+    const el = barRef.current
+    if (!hasTrack || !el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const tween = gsap.fromTo(
+      el,
+      { y: 24, autoAlpha: 0 },
+      {
+        y: 0,
+        autoAlpha: 1,
+        duration: 0.4,
+        ease: 'power3.out',
+        clearProps: 'transform,opacity,visibility',
+      },
+    )
+    return () => {
+      tween.kill()
+    }
+  }, [hasTrack])
+
   if (!currentVerse) return null
 
   const VolumeIcon =
@@ -137,7 +162,10 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
   )
 
   return (
-    <div className={cn('fixed left-0 right-0 z-50 px-3 pointer-events-none', positionClassName)}>
+    <div
+      ref={barRef}
+      className={cn('fixed left-0 right-0 z-50 px-3 pointer-events-none', positionClassName)}
+    >
       <div className={`${ZOOM_WIDTH_CLASS[zoomLevel ?? 'comfortable']} mx-auto pointer-events-auto`}>
 
         {/* ── Liquid glass shell ────────────────────────────────────────────────── */}

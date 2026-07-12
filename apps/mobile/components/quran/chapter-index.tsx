@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { BookMarked, ListOrdered, Megaphone, Search } from 'lucide-react'
 import { CHAPTER_TRANSLITERATIONS, VERSE_COUNTS } from '@/constants/quran-chapters'
+import { setChapterFlightState } from '@/lib/chapter-flight'
+import { Flip } from '@/lib/gsap'
 import { CHAPTER_TITLES_EN } from '@/lib/quran-titles-en'
 import { haptic } from '@/lib/haptics'
 import { cn } from '@/lib/utils'
@@ -143,7 +145,15 @@ export function ChapterIndex() {
             <Link
               href={`/quran/${chapter.number}`}
               prefetch={false}
-              onClick={() => haptic('light')}
+              onClick={(e) => {
+                haptic('light')
+                // Capture the tapped title's position; the reader's heading
+                // flies in from here (see lib/chapter-flight.ts).
+                const title = e.currentTarget.querySelector<HTMLElement>(
+                  '[data-chapter-card-title]',
+                )
+                if (title) setChapterFlightState(Flip.getState(title))
+              }}
               className={cn(
                 'flex items-center gap-3 rounded-2xl border border-border/40 bg-muted/30 p-3',
                 'transition-colors active:bg-muted/60'
@@ -153,7 +163,11 @@ export function ChapterIndex() {
                 {chapter.number}
               </span>
               <span className="flex min-w-0 flex-col">
-                <span className="truncate font-serif text-base font-semibold leading-tight">
+                <span
+                  data-chapter-card-title
+                  data-flip-id="chapter-title"
+                  className="truncate font-serif text-base font-semibold leading-tight"
+                >
                   {chapter.english}
                 </span>
                 <span className="truncate text-sm text-muted-foreground">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { gsap } from '@/lib/gsap'
 import type { PrayerTimesResponse } from '@/lib/prayer-times'
 import { deriveEventCycle } from '@/lib/prayer-events'
 import { useNow } from '@/hooks/use-now'
@@ -73,6 +74,33 @@ export function PrayerGauge({ data, dataUpdatedAt, onExpired }: PrayerGaugeProps
     }
   }, [remaining, onExpired])
 
+  // Minute roll: a small settle on the countdown line each time the minute
+  // ticks over (per-second churn would be noise; the seconds just re-render).
+  const countdownRef = useRef<HTMLParagraphElement>(null)
+  const minutesLeft = remaining !== null ? Math.floor(remaining / 60) : null
+  const prevMinutesRef = useRef<number | null>(null)
+  useEffect(() => {
+    const el = countdownRef.current
+    const prev = prevMinutesRef.current
+    prevMinutesRef.current = minutesLeft
+    if (!el || minutesLeft === null || prev === null || prev === minutesLeft) return
+    if (reducedMotion) return
+    const tween = gsap.fromTo(
+      el,
+      { y: 6, autoAlpha: 0.35 },
+      {
+        y: 0,
+        autoAlpha: 1,
+        duration: 0.3,
+        ease: 'power2.out',
+        clearProps: 'transform,opacity,visibility',
+      },
+    )
+    return () => {
+      tween.kill()
+    }
+  }, [minutesLeft, reducedMotion])
+
   if (!upcomingLabel) return null
 
   const transition = reducedMotion
@@ -123,7 +151,7 @@ export function PrayerGauge({ data, dataUpdatedAt, onExpired }: PrayerGaugeProps
         </p>
         <p className="font-display mt-0.5 text-3xl capitalize">{upcomingLabel}</p>
         {remaining !== null ? (
-          <p className="text-primary mt-0.5 font-mono text-sm tabular-nums">
+          <p ref={countdownRef} className="text-primary mt-0.5 font-mono text-sm tabular-nums">
             in {formatRemaining(remaining)}
           </p>
         ) : null}
