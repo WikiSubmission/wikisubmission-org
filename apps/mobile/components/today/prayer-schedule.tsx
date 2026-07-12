@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Bell, LocateFixed, MapPin, RefreshCw, Sunrise } from 'lucide-react'
+import { gsap } from '@/lib/gsap'
 import { NotificationSettingsSheet } from '@/components/today/notification-settings-sheet'
 import { ZakatBadge } from '@/components/today/zakat-badge'
 import { PRAYER_EVENT_ORDER, deriveEventCycle, type PrayerEventKey } from '@/lib/prayer-events'
@@ -96,6 +96,25 @@ export function PrayerSchedule() {
 
   const [notificationsOpen, setNotificationsOpen] = useState(false)
 
+  // Location-change transition: slide the fresh city's card in when the
+  // content key moves. No animation on first data (prevKey seeds lazily).
+  const contentRef = useRef<HTMLDivElement>(null)
+  const prevKeyRef = useRef<string | null>(null)
+  useLayoutEffect(() => {
+    const el = contentRef.current
+    const prev = prevKeyRef.current
+    prevKeyRef.current = contentKey
+    if (!el || prev === null || prev === contentKey || reducedMotion) return
+    const tween = gsap.fromTo(
+      el,
+      { autoAlpha: 0, y: 10 },
+      { autoAlpha: 1, y: 0, duration: 0.28, ease: 'power2.out' },
+    )
+    return () => {
+      tween.kill()
+    }
+  }, [contentKey, reducedMotion])
+
   return (
     <div className="mx-auto w-full max-w-md space-y-4 px-4">
       <div className="border-border/50 bg-background/55 relative rounded-2xl border p-5 shadow-sm backdrop-blur-md">
@@ -133,14 +152,7 @@ export function PrayerSchedule() {
           </div>
         ) : data ? (
           <div className="relative">
-            <AnimatePresence mode="popLayout" initial={false}>
-              <motion.div
-                key={contentKey}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: reducedMotion ? 0 : 0.28, ease: 'easeOut' }}
-              >
+            <div ref={contentRef}>
                 <PrayerGauge data={data} dataUpdatedAt={dataUpdatedAt} onExpired={refetch} />
 
                 <ul className="divide-border/40 mt-5 divide-y">
@@ -184,8 +196,7 @@ export function PrayerSchedule() {
                     )
                   })}
                 </ul>
-              </motion.div>
-            </AnimatePresence>
+            </div>
           </div>
         ) : null}
       </div>

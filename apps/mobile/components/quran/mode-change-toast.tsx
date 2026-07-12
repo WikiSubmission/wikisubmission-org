@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
+import { GsapPresence } from '@/components/gsap-presence'
+import { EASE_STANDARD } from '@/lib/gsap'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import type { QuranModeId } from '@/components/quran-reader/mode-selector'
 
@@ -47,19 +48,20 @@ export function ModeChangeToast({
 
   return (
     <div className="pointer-events-none absolute top-full left-1/2 z-30 -translate-x-1/2 pt-2">
-      <AnimatePresence>
-        {visible && (
-          <motion.span
-            initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -4, scale: 0.98 }}
-            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-            className="border-border/50 bg-background/90 text-foreground inline-block rounded-full border px-3 py-1 text-xs font-medium shadow-sm backdrop-blur-md"
-          >
-            {t(MODE_LABEL_KEY[visible])}
-          </motion.span>
-        )}
-      </AnimatePresence>
+      <GsapPresence
+        show={visible !== null}
+        enterFrom={reducedMotion ? {} : { y: -6, scale: 0.96 }}
+        enterTo={{ y: 0, scale: 1, duration: 0.22, ease: EASE_STANDARD }}
+        exitTo={
+          reducedMotion
+            ? { duration: 0.22 }
+            : { y: -4, scale: 0.98, duration: 0.22, ease: EASE_STANDARD }
+        }
+        className="border-border/50 bg-background/90 text-foreground inline-block rounded-full border px-3 py-1 text-xs font-medium shadow-sm backdrop-blur-md"
+      >
+        {/* announcement (not visible): the label must survive the exit fade. */}
+        {announcement ? t(MODE_LABEL_KEY[announcement.mode]) : null}
+      </GsapPresence>
     </div>
   )
 }

@@ -15,15 +15,14 @@ import { dailyZikrIndex, type ZikrItem } from '@/lib/zikr'
 /**
  * Startup zikr animation state. On every cold start the day's zikr shows
  * centered on a full-screen overlay, then flies up into the Today screen's
- * zikr strip (framer-motion layoutId) while the prayer card animates open.
+ * zikr strip (GSAP Flip, see lib/zikr-flight.ts) while the prayer card
+ * animates open.
  *
  * phases: overlay (text centered) → flying (shared-element flight; strip
  * mounted, prayer card entering) → done. `skipped` covers tap-to-skip,
  * reduced motion, non-Today launch routes, and warm navigations.
  */
 export type StartupPhase = 'overlay' | 'flying' | 'done' | 'skipped'
-
-export const ZIKR_HERO_LAYOUT_ID = 'zikr-hero'
 
 interface StartupZikrState {
   phase: StartupPhase

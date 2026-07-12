@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ZikrItem } from '@/lib/zikr'
 import { ZikrRevealText } from '@/components/today/zikr-reveal-text'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
+import { EASE_STANDARD, Flip, gsap } from '@/lib/gsap'
+import { takeZikrFlightState, ZIKR_FLIP_ID } from '@/lib/zikr-flight'
 
 export interface ZikrStripProps {
   items: ZikrItem[]
@@ -14,13 +15,16 @@ export interface ZikrStripProps {
   /** How long the first (daily) zikr holds before rotation begins. Longer than
    *  intervalMs so the day's zikr lingers before the per-user shuffle starts. */
   firstHoldMs?: number
-  /** framer-motion shared-element id for the splash-to-strip flight. */
-  layoutId?: string
+  /** While true the strip is the splash flight's landing target: the text is
+   *  one stable element (no per-word reveal) and Flip animates it in from the
+   *  overlay's captured position. */
+  flightTarget?: boolean
   /** Rotation holds until the startup animation finishes. */
   paused?: boolean
 }
 
-const EASE = [0.4, 0, 0.2, 1] as const
+/** Duration of the splash-to-strip flight (overlay fade matches it). */
+const FLIGHT_DURATION_S = 0.6
 
 /** A uniformly random index other than `prev`, so rotation never repeats the
  *  same zikr back-to-back. Each client shuffles independently. */
@@ -41,13 +45,18 @@ export function ZikrStrip({
   initialIndex = 0,
   intervalMs = 8000,
   firstHoldMs = 15000,
-  layoutId,
+  flightTarget = false,
   paused = false,
 }: ZikrStripProps) {
   const reducedMotion = usePrefersReducedMotion()
   const [index, setIndex] = useState(() =>
     items.length > 0 ? Math.min(initialIndex, items.length - 1) : 0,
   )
+  // The index actually on screen. Trails `index` by one exit tween so the
+  // outgoing zikr can breathe out before the next writes itself in.
+  const [displayedIndex, setDisplayedIndex] = useState(index)
+  const blockRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLParagraphElement>(null)
 
   // The first item is the shared "zikr of the day" handed over by the splash;
   // it holds for firstHoldMs, then each client shuffles its own random order at
@@ -73,61 +82,100 @@ export function ZikrStrip({
     return () => window.clearTimeout(timer)
   }, [paused, items.length, intervalMs, firstHoldMs])
 
-  const item = items[index]
+  // Rotation exit: breathe the current zikr out, then hand over to the next.
+  useEffect(() => {
+    if (index === displayedIndex) return
+    const el = blockRef.current
+    if (!el || reducedMotion) {
+      setDisplayedIndex(index)
+      return
+    }
+    const tween = gsap.to(el, {
+      autoAlpha: 0,
+      y: -6,
+      filter: 'blur(6px)',
+      letterSpacing: '0.14em',
+      duration: 0.9,
+      ease: EASE_STANDARD,
+      onComplete: () => setDisplayedIndex(index),
+    })
+    return () => {
+      tween.kill()
+    }
+  }, [index, displayedIndex, reducedMotion])
+
+  // Entrance for each displayed zikr. Three variants: the splash flight
+  // (Flip from the overlay's captured position), the per-word reveal (block
+  // fades fast, words write themselves in), or the plain breathe-in.
+  useLayoutEffect(() => {
+    const el = blockRef.current
+    if (!el) return
+    const flightState = flightTarget ? takeZikrFlightState() : null
+    if (flightState && heroRef.current) {
+      gsap.set(el, { clearProps: 'all', autoAlpha: 1 })
+      const flight = Flip.from(flightState, {
+        targets: heroRef.current,
+        duration: FLIGHT_DURATION_S,
+        ease: 'power3.inOut',
+        scale: true,
+      })
+      return () => {
+        flight.kill()
+      }
+    }
+    const wordReveal = !flightTarget && !reducedMotion
+    const tween = reducedMotion
+      ? gsap.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 })
+      : wordReveal
+        ? gsap.fromTo(
+            el,
+            { autoAlpha: 0, y: 0, filter: 'blur(0px)', letterSpacing: '0.05em' },
+            { autoAlpha: 1, duration: 0.25, ease: EASE_STANDARD },
+          )
+        : gsap.fromTo(
+            el,
+            { autoAlpha: 0, y: 8, filter: 'blur(6px)', letterSpacing: '0.01em' },
+            {
+              autoAlpha: 1,
+              y: 0,
+              filter: 'blur(0px)',
+              letterSpacing: '0.05em',
+              duration: 0.9,
+              ease: EASE_STANDARD,
+            },
+          )
+    return () => {
+      tween.kill()
+    }
+    // Re-run per displayed zikr; flightTarget/reducedMotion only gate variants.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayedIndex])
+
+  const item = items[displayedIndex]
   if (!item) return null
 
   // Once the splash flight is over the per-word reveal (ZikrRevealText) owns
-  // the entrance, so the block-level enter collapses to a fast fade — only the
-  // breathe-out exit remains at block level.
-  const wordReveal = !layoutId && !reducedMotion
-  const enterExit = reducedMotion
-    ? {
-        initial: { opacity: 0 },
-        animate: { opacity: 1 },
-        exit: { opacity: 0 },
-        transition: { duration: 0.3 },
-      }
-    : wordReveal
-      ? {
-          initial: { opacity: 0 },
-          animate: { opacity: 1, transition: { duration: 0.25, ease: EASE } },
-          exit: {
-            opacity: 0,
-            y: -6,
-            filter: 'blur(6px)',
-            letterSpacing: '0.14em',
-            transition: { duration: 0.9, ease: EASE },
-          },
-        }
-      : {
-          initial: { opacity: 0, y: 8, filter: 'blur(6px)', letterSpacing: '0.01em' },
-          animate: { opacity: 1, y: 0, filter: 'blur(0px)', letterSpacing: '0.05em' },
-          exit: { opacity: 0, y: -6, filter: 'blur(6px)', letterSpacing: '0.14em' },
-          transition: { duration: 0.9, ease: EASE },
-        }
+  // the entrance; during the flight the hero must be one stable element.
+  const wordReveal = !flightTarget && !reducedMotion
 
   return (
     <div className="mx-auto w-full max-w-md px-4">
       {/* Height reserved so rotation never reflows the widgets below. */}
       <div className="flex min-h-[5.5rem] flex-col items-center justify-center text-center">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div key={item.id} className="flex flex-col items-center" {...enterExit}>
-            <motion.p
-              layoutId={layoutId}
-              className="font-display text-foreground/85 text-[1.35rem] leading-snug text-balance"
-            >
-              {/* During the splash flight the hero must be one stable element
-                  for the layoutId morph; afterwards each zikr writes itself in
-                  word by word. */}
-              {wordReveal ? <ZikrRevealText text={item.text} /> : item.text}
-            </motion.p>
-            {item.source && (
-              <p className="text-muted-foreground/70 mt-1.5 font-mono text-[9px] tracking-[0.25em] uppercase">
-                {item.source}
-              </p>
-            )}
-          </motion.div>
-        </AnimatePresence>
+        <div ref={blockRef} className="flex flex-col items-center">
+          <p
+            ref={heroRef}
+            data-flip-id={flightTarget ? ZIKR_FLIP_ID : undefined}
+            className="font-display text-foreground/85 text-[1.35rem] leading-snug text-balance"
+          >
+            {wordReveal ? <ZikrRevealText text={item.text} /> : item.text}
+          </p>
+          {item.source && (
+            <p className="text-muted-foreground/70 mt-1.5 font-mono text-[9px] tracking-[0.25em] uppercase">
+              {item.source}
+            </p>
+          )}
+        </div>
         <div className="border-border/60 mt-3 w-8 border-t" aria-hidden="true" />
       </div>
     </div>

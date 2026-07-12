@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { LayoutGroup } from 'framer-motion'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
@@ -57,14 +56,12 @@ export function MobileProviders({
                   <MobileOfflineSyncBridge />
                   <MobileBundleAutoload />
                   <MobileWordBundleAutoload />
-                  {/* One LayoutGroup spans the shell and the startup overlay so
-                      the zikr text can fly (layoutId) from the overlay into the
-                      Today screen's strip. */}
+                  {/* The startup overlay is a sibling of the shell: the zikr
+                      flight hands off between them via a captured GSAP Flip
+                      state (lib/zikr-flight.ts). */}
                   <StartupZikrProvider dailySeed={dailySeed}>
-                    <LayoutGroup>
-                      <MobileShell>{children}</MobileShell>
-                      <StartupZikrOverlay />
-                    </LayoutGroup>
+                    <MobileShell>{children}</MobileShell>
+                    <StartupZikrOverlay />
                     <NotificationPermissionPrompt />
                   </StartupZikrProvider>
                   <Toaster />

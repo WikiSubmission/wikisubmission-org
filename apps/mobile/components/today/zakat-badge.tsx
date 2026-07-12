@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AnimatePresence, motion } from 'framer-motion'
+import { GsapPresence } from '@/components/gsap-presence'
+import { EASE_STANDARD } from '@/lib/gsap'
 import { haptic } from '@/lib/haptics'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { useZakatReminder } from '@/hooks/use-zakat-reminder'
@@ -75,22 +76,18 @@ export function ZakatBadge() {
       >
         {dueToday ? '!' : daysLeft}
       </span>
-      <AnimatePresence>
-        {(labelVisible || dueToday) && (
-          <motion.span
-            initial={reducedMotion ? { opacity: 0 } : { opacity: 0, x: -6 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={reducedMotion ? { opacity: 0 } : { opacity: 0, x: -4 }}
-            transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-            className={cn(
-              'text-[10px] font-medium tracking-[0.18em] uppercase',
-              dueToday ? 'text-primary' : 'text-muted-foreground',
-            )}
-          >
-            {dueToday ? 'Zakat due' : 'Zakat'}
-          </motion.span>
+      <GsapPresence
+        show={labelVisible || dueToday}
+        enterFrom={reducedMotion ? {} : { x: -6 }}
+        enterTo={{ x: 0, duration: 0.45, ease: EASE_STANDARD }}
+        exitTo={reducedMotion ? { duration: 0.45 } : { x: -4, duration: 0.45, ease: EASE_STANDARD }}
+        className={cn(
+          'text-[10px] font-medium tracking-[0.18em] uppercase',
+          dueToday ? 'text-primary' : 'text-muted-foreground',
         )}
-      </AnimatePresence>
+      >
+        {dueToday ? 'Zakat due' : 'Zakat'}
+      </GsapPresence>
     </button>
   )
 }

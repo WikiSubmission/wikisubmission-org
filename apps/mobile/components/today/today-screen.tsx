@@ -1,17 +1,18 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useLayoutEffect, useRef } from 'react'
 import { PrayerSchedule } from '@/components/today/prayer-schedule'
 import { ZakatCountdown } from '@/components/today/zakat-countdown'
 import { ZikrStrip } from '@/components/today/zikr-strip'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
+import { gsap } from '@/lib/gsap'
 import { useZikr } from '@/hooks/use-zikr'
-import { useStartupZikr, ZIKR_HERO_LAYOUT_ID } from '@/lib/startup-zikr-context'
+import { useStartupZikr } from '@/lib/startup-zikr-context'
 
 /**
  * Today is the mobile home: a themed, time-of-day ambient backdrop behind the
  * zikr strip, the zakat countdown chip, and the day's prayer schedule. On a
- * cold start the startup overlay's zikr flies into the strip (shared layoutId)
+ * cold start the startup overlay's zikr flies into the strip (GSAP Flip)
  * while the prayer card and chip animate open underneath.
  */
 export function TodayScreen() {
@@ -21,9 +22,35 @@ export function TodayScreen() {
 
   // While the overlay owns the zikr (phase 'overlay'), the strip stays
   // unmounted; it mounts in the same commit the overlay's hero unmounts
-  // ('flying'), which is what triggers the layoutId flight.
+  // ('flying'), which is what triggers the Flip flight.
   const startupPlaying = phase === 'overlay' || phase === 'flying'
   const cardVisible = phase !== 'overlay'
+
+  // Prayer card + zakat chip open underneath the flight. Instant (no tween)
+  // under reduced motion or when the startup was skipped.
+  const cardRef = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const el = cardRef.current
+    if (!el) return
+    if (!cardVisible) {
+      gsap.set(el, { autoAlpha: 0, y: 24, scale: 0.98 })
+      return
+    }
+    if (reducedMotion || phase === 'skipped') {
+      gsap.set(el, { autoAlpha: 1, y: 0, scale: 1 })
+      return
+    }
+    const tween = gsap.to(el, {
+      autoAlpha: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.5,
+      ease: 'power3.out',
+    })
+    return () => {
+      tween.kill()
+    }
+  }, [cardVisible, phase, reducedMotion])
 
   return (
     <div className="relative flex flex-1 flex-col">
@@ -36,27 +63,17 @@ export function TodayScreen() {
           <ZikrStrip
             items={items}
             initialIndex={initialIndex}
-            // Shared with the overlay hero only during the flight; afterwards
-            // the id is dropped so rotations don't trigger layout morphs.
-            layoutId={startupPlaying ? ZIKR_HERO_LAYOUT_ID : undefined}
+            // The strip is the Flip landing target only during the flight;
+            // afterwards rotations use their own entrances.
+            flightTarget={startupPlaying}
             paused={startupPlaying}
           />
         )}
 
-        <motion.div
-          initial={false}
-          animate={
-            cardVisible ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 24, scale: 0.98 }
-          }
-          transition={{
-            duration: reducedMotion || phase === 'skipped' ? 0 : 0.5,
-            ease: [0.32, 0.72, 0, 1],
-          }}
-          className="flex flex-col gap-4"
-        >
+        <div ref={cardRef} className="flex flex-col gap-4">
           <ZakatCountdown />
           <PrayerSchedule />
-        </motion.div>
+        </div>
       </div>
     </div>
   )

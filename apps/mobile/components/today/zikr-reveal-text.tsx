@@ -1,7 +1,7 @@
 'use client'
 
-import { Fragment } from 'react'
-import { motion } from 'framer-motion'
+import { Fragment, useLayoutEffect, useRef } from 'react'
+import { EASE_SETTLE, gsap } from '@/lib/gsap'
 
 /**
  * "Being written" text reveal for the zikr strip: words surface one after
@@ -18,21 +18,6 @@ const MAX_TOTAL_STAGGER_S = 1.6
 const WORD_STAGGER_S = 0.14
 const WORD_DURATION_S = 0.7
 
-const container = (stagger: number) => ({
-  hidden: {},
-  visible: { transition: { staggerChildren: stagger } },
-})
-
-const word = {
-  hidden: { opacity: 0, y: 5, filter: 'blur(5px)' },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: WORD_DURATION_S, ease: [0.4, 0, 0.2, 1] as const },
-  },
-}
-
 export function ZikrRevealText({
   text,
   className,
@@ -40,30 +25,46 @@ export function ZikrRevealText({
   text: string
   className?: string
 }) {
+  const rootRef = useRef<HTMLSpanElement>(null)
   const words = text.split(/\s+/).filter(Boolean)
   const stagger = Math.min(
     WORD_STAGGER_S,
     words.length > 1 ? MAX_TOTAL_STAGGER_S / (words.length - 1) : WORD_STAGGER_S,
   )
 
+  useLayoutEffect(() => {
+    const spans = rootRef.current?.querySelectorAll<HTMLElement>('[data-word]')
+    if (!spans || spans.length === 0) return
+    const tween = gsap.fromTo(
+      spans,
+      { autoAlpha: 0, y: 5, filter: 'blur(5px)' },
+      {
+        autoAlpha: 1,
+        y: 0,
+        filter: 'blur(0px)',
+        duration: WORD_DURATION_S,
+        ease: EASE_SETTLE,
+        stagger,
+      },
+    )
+    return () => {
+      tween.kill()
+    }
+  }, [text, stagger])
+
   return (
-    <motion.span
-      dir="auto"
-      className={className}
-      variants={container(stagger)}
-      initial="hidden"
-      animate="visible"
-    >
+    <span dir="auto" className={className} ref={rootRef}>
       {words.map((w, i) => (
         <Fragment key={`${w}-${i}`}>
           {/* The space lives outside the inline-block span; inside it would
-              collapse and the words would run together. */}
-          <motion.span className="inline-block" variants={word}>
+              collapse and the words would run together. Words start hidden so
+              the first painted frame is the tween's from-state. */}
+          <span data-word className="inline-block" style={{ visibility: 'hidden' }}>
             {w}
-          </motion.span>
+          </span>
           {i < words.length - 1 ? ' ' : null}
         </Fragment>
       ))}
-    </motion.span>
+    </span>
   )
 }
