@@ -22,6 +22,10 @@ const COORDS_STORAGE_KEY = 'pt_coords'
 const COORD_DECIMALS = 3
 const POSITION_TIMEOUT_MS = 10_000
 const POSITION_MAX_AGE_MS = 5 * 60 * 1000
+// The cached fix paints the prayer card instantly; the fresh fix (permission
+// check + position request over the native bridge) waits this long so it
+// never competes with hydration and first paint on the startup critical path.
+const FRESH_FIX_DELAY_MS = 500
 
 function toLocationString(latitude: number, longitude: number): string {
   return `${latitude.toFixed(COORD_DECIMALS)},${longitude.toFixed(COORD_DECIMALS)}`
@@ -99,14 +103,12 @@ export function useDeviceLocation(): UseDeviceLocationResult {
     runningRef.current = true
     setStatus('pending')
 
-    // Seed from the last good fix so a relaunch renders times immediately
-    // while the fresh (possibly slow, possibly denied) fix resolves.
-    setLocation((prev) => prev ?? readCachedCoords())
-
     acquirePosition()
       .then((next) => {
         writeCachedCoords(next)
-        setLocation(next)
+        // The rounded coords usually match the cached seed — skip the state
+        // write (and the React Query key change it would ripple) when they do.
+        setLocation((prev) => (prev === next ? prev : next))
         setStatus('granted')
       })
       .catch((error: unknown) => {
@@ -118,7 +120,12 @@ export function useDeviceLocation(): UseDeviceLocationResult {
   }, [])
 
   useEffect(() => {
-    acquire()
+    // Seed from the last good fix so a relaunch renders times immediately
+    // (post-hydration, so the export HTML still matches), then run the fresh
+    // (possibly slow, possibly denied) fix off the startup critical path.
+    setLocation((prev) => prev ?? readCachedCoords())
+    const timer = setTimeout(acquire, FRESH_FIX_DELAY_MS)
+    return () => clearTimeout(timer)
   }, [acquire])
 
   // Re-acquire when the app returns to the foreground so a user who traveled
