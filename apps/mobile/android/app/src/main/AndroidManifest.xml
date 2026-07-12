@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Backups disabled: Capacitor Preferences (SharedPreferences) and the
+         offline SQLite stores hold session/user data that must not leave the
+         device via cloud or device-transfer backup. Server sync is the source
+         of truth for user data, so nothing of value is lost. -->
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
