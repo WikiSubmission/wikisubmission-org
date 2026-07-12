@@ -1,3 +1,4 @@
+import { Directory, Filesystem } from '@capacitor/filesystem'
 import type { OfflineContentStore } from '@/lib/offline/content-store'
 import type {
   BundleDescriptor,
@@ -11,6 +12,7 @@ import type {
   WordRow,
 } from '@/lib/offline/types'
 import { normalizeForSearch } from '@/lib/text-normalization/normalize'
+import { verifySha256 } from '@/lib/offline/verify'
 import { nativeCatalog, type NativeBundleRecord } from './native-catalog'
 import { closeDb, openDb, query, sqlite } from './native-db'
 
@@ -19,11 +21,12 @@ import { closeDb, openDb, query, sqlite } from './native-db'
  * The schema and every query mirror the web worker (sqlite.worker.ts) exactly so
  * the two platforms return identical results from the same bundle files.
  *
- * Install uses the plugin's getFromHTTPRequest to download the prebuilt DB
- * straight into the plugin's database directory. NOTE: byte-level sha256
- * verification (done by the web adapter before OPFS import) is not yet performed
- * on native — integrity here rests on HTTPS plus the immutable, versioned bundle
- * URL. Closing that gap is a tracked follow-up.
+ * Install mirrors the web adapter's download → sha256-verify → import
+ * pipeline: bytes are fetched to memory, hashed against the manifest digest,
+ * staged into the app cache dir, and only then adopted into the plugin's
+ * database directory via moveDatabasesAndAddSuffix ("cache" resolves to the
+ * same directory Filesystem's Directory.Cache writes to on both platforms).
+ * A digest mismatch aborts the install before any file reaches the store.
  */
 function bundleIdOf(scripture: string, lang: string): string {
   return `${scripture}-${lang}`
@@ -37,6 +40,49 @@ function wordsBundleIdOf(scripture: string, lang: string): string {
 function dbNameFromUrl(url: string): string {
   const file = url.split('?')[0].split('/').pop() ?? ''
   return file.replace(/\.db$/i, '')
+}
+
+/** Streams the bundle to memory, reporting received bytes as chunks arrive. */
+async function downloadBytes(
+  url: string,
+  total: number,
+  onProgress?: (p: InstallProgress) => void,
+): Promise<Uint8Array<ArrayBuffer>> {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`bundle download failed: ${res.status}`)
+  if (!res.body) {
+    const buf = new Uint8Array(await res.arrayBuffer())
+    onProgress?.({ phase: 'download', received: buf.byteLength, total })
+    return buf
+  }
+  const reader = res.body.getReader()
+  const chunks: Uint8Array[] = []
+  let received = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    chunks.push(value)
+    received += value.byteLength
+    onProgress?.({ phase: 'download', received, total })
+  }
+  const out = new Uint8Array(received)
+  let offset = 0
+  for (const chunk of chunks) {
+    out.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  return out
+}
+
+/** Chunked base64 encoding — String.fromCharCode(...whole) overflows the arg
+ *  limit on multi-MB bundles. */
+function toBase64(bytes: Uint8Array): string {
+  const CHUNK = 0x8000
+  let binary = ''
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK))
+  }
+  return btoa(binary)
 }
 
 function toVerseRow(r: Record<string, unknown>): VerseRow {
@@ -202,10 +248,33 @@ export class NativeOfflineContentStore implements OfflineContentStore {
 
   async install(bundle: BundleDescriptor, onProgress?: (p: InstallProgress) => void): Promise<void> {
     const dbName = dbNameFromUrl(bundle.url)
+    const stagedFile = `${dbName}.db`
     const previous = (await nativeCatalog.list()).find((b) => b.id === bundle.id)
 
     onProgress?.({ phase: 'download', received: 0, total: bundle.bytes })
-    await sqlite().getFromHTTPRequest(bundle.url, true)
+    const bytes = await downloadBytes(bundle.url, bundle.bytes, onProgress)
+
+    onProgress?.({ phase: 'verify', received: bytes.byteLength, total: bundle.bytes })
+    if (!(await verifySha256(bytes, bundle.sha256))) {
+      throw new Error(`bundle ${bundle.id}: sha256 mismatch — download rejected`)
+    }
+
+    // Stage the verified bytes in the cache dir, then let the plugin adopt the
+    // file into its database directory (adds the SQLite.db suffix). The move
+    // consumes the staged file; the catch cleans up if adoption fails.
+    await Filesystem.writeFile({
+      path: stagedFile,
+      data: toBase64(bytes),
+      directory: Directory.Cache,
+    })
+    try {
+      await sqlite().moveDatabasesAndAddSuffix('cache', [stagedFile])
+    } catch (error) {
+      await Filesystem.deleteFile({ path: stagedFile, directory: Directory.Cache }).catch(
+        () => {},
+      )
+      throw error
+    }
 
     // Bundle files are versioned, so updating leaves the old version's file
     // behind under its own name — delete it once the new download landed.
