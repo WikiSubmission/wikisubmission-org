@@ -16,6 +16,9 @@ importers:
 
   apps/mobile:
     dependencies:
+      '@aparajita/capacitor-secure-storage':
+        specifier: ^8.0.0
+        version: 8.0.0
       '@capacitor-community/sqlite':
         specifier: ^8.1.0
         version: 8.1.0(@capacitor/core@8.4.1)
@@ -572,6 +575,10 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
+  '@aparajita/capacitor-secure-storage@8.0.0':
+    resolution: {integrity: sha512-oYnwSjdIh23aRNgz8982+TmFvQH/2yZkEdw1iIg+H2ziFJoOVELPTc7u6Ez2HwOuDIW5AGqBX75GvrzQ+D70Qg==}
+    engines: {node: '>=20.0.0'}
+
   '@apm-js-collab/code-transformer-bundler-plugins@0.5.0':
     resolution: {integrity: sha512-YxLBY5nGlurL7QeJLq6e5g0ouBpAp0pwgyA/5rHXEXwhiPLn9ZHbT+Y2LlP90GT872cSocfjWRYu/fnpuBudNQ==}
     engines: {node: '>=18.0.0'}
@@ -805,6 +812,11 @@ packages:
     resolution: {integrity: sha512-c2hZzRR5Fk1tbTvhG1jhh2XBAf3EhnIerMIb2sl7Mt41Gxx1fhBJFDa0/BI1IbY4loVepyyuqNC9820/GZuoWQ==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
+
+  '@capacitor/ios@8.4.1':
+    resolution: {integrity: sha512-EgcAk7NYheHMTyP3CUrA65qKs4D2UEAKgw44HI6Uk3dTw6KjLQkdLOQWvbeRncHaZ2gklfOojUoc5DlSw2lhYg==}
+    peerDependencies:
+      '@capacitor/core': ^8.4.0
 
   '@capacitor/keyboard@8.0.5':
     resolution: {integrity: sha512-oFXygC4eKYA5l2MdpTR06L2M/4x6e2SLD5yS1T9+UBDKTkzyvhWKEhbYLUaTIBPpLKqlfGudJw1X73S1H9eUzQ==}
@@ -6856,6 +6868,14 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
+  '@aparajita/capacitor-secure-storage@8.0.0':
+    dependencies:
+      '@capacitor/android': 8.4.1(@capacitor/core@8.4.1)
+      '@capacitor/app': 8.1.0(@capacitor/core@8.4.1)
+      '@capacitor/core': 8.4.1
+      '@capacitor/ios': 8.4.1(@capacitor/core@8.4.1)
+      '@capacitor/keyboard': 8.0.5(@capacitor/core@8.4.1)
+
   '@apm-js-collab/code-transformer-bundler-plugins@0.5.0':
     dependencies:
       '@apm-js-collab/code-transformer': 0.15.0
@@ -7295,6 +7315,10 @@ snapshots:
       '@capacitor/synapse': 1.0.4
 
   '@capacitor/haptics@8.0.2(@capacitor/core@8.4.1)':
+    dependencies:
+      '@capacitor/core': 8.4.1
+
+  '@capacitor/ios@8.4.1(@capacitor/core@8.4.1)':
     dependencies:
       '@capacitor/core': 8.4.1
 
