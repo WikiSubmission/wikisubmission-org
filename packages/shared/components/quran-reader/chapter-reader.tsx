@@ -28,6 +28,7 @@ import { MultiSelectBar } from './multi-select-bar'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useTranslations } from 'next-intl'
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'
+import gsap from 'gsap'
 import {
   useQuranPlayer,
   useQuranPlayerCallbacks,
@@ -299,10 +300,49 @@ function VirtualizedVerseList({
 
   const showNav = !hasMore && atEnd
 
+  // First-load skeleton → staggered reveal. On mobile there is no SSR data,
+  // so the initial fetch (network or SQLite) paints into an empty container;
+  // skeleton cards hold the space and the real verses cascade in when they
+  // land. Web with SSR data never enters the empty state, so this is inert.
+  const listContainerRef = useRef<HTMLDivElement>(null)
+  const wasEmptyRef = useRef(verses.length === 0)
+  useLayoutEffect(() => {
+    if (verses.length === 0) {
+      wasEmptyRef.current = true
+      return
+    }
+    if (!wasEmptyRef.current) return
+    wasEmptyRef.current = false
+    // Virtuoso commits its item wrappers in this same frame; query on the
+    // next one so the cards exist, then cascade them in.
+    const raf = requestAnimationFrame(() => {
+      const cards = listContainerRef.current?.querySelectorAll<HTMLElement>('[data-index]')
+      if (!cards || cards.length === 0) return
+      gsap.fromTo(
+        cards,
+        { autoAlpha: 0, y: 10 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.35,
+          ease: 'power2.out',
+          stagger: 0.03,
+          clearProps: 'transform,opacity,visibility',
+        },
+      )
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [verses.length])
+
+  const showSkeleton = verses.length === 0 && loading
+
   return (
     <>
       <div>
-        <div className="relative bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden">
+        <div
+          ref={listContainerRef}
+          className="relative bg-muted/30 backdrop-blur-sm rounded-3xl border border-border/40 overflow-hidden"
+        >
           {/* Loading glow — pulsing inset ring along the card border. Pure CSS
               opacity animation (compositor-only); the previous GSAP box-shadow
               tween repainted the full-height list container every frame. */}
@@ -312,6 +352,23 @@ function VirtualizedVerseList({
               loading ? 'animate-pulse opacity-100' : 'opacity-0'
             }`}
           />
+          {showSkeleton && (
+            <div aria-hidden className="divide-y divide-border/30" data-verse-skeleton>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse space-y-3 p-5"
+                  // Cascading delays read as a wave moving down the card.
+                  style={{ animationDelay: `${i * 120}ms` }}
+                >
+                  <div className="bg-muted-foreground/15 h-3 w-14 rounded" />
+                  <div className="bg-muted-foreground/15 h-4 w-full rounded" />
+                  <div className="bg-muted-foreground/15 h-4 w-11/12 rounded" />
+                  <div className="bg-muted-foreground/10 h-4 w-2/3 rounded" />
+                </div>
+              ))}
+            </div>
+          )}
           <Virtuoso
             ref={virtuosoRef}
             useWindowScroll
