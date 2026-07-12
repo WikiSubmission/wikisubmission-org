@@ -1,15 +1,37 @@
-# CLAUDE.md — wikisubmission-org (Next.js Frontend)
+# CLAUDE.md — wikisubmission-org (Next.js Monorepo)
 
 ## Project Overview
 
-WikiSubmission.org frontend — a Next.js 16 (App Router) application serving as a multilingual Quran reader and faith-based platform. Built with React 19, TypeScript, Tailwind CSS 4, and Radix UI.
+WikiSubmission.org — a pnpm monorepo serving a multilingual Quran reader and faith-based platform. Built with Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, and Radix UI.
+
+```
+apps/web          SSR site (wikisubmission.org) — Next.js server, PWA via Serwist
+apps/mobile       Capacitor 8 app (iOS/Android) — Next.js static export (output: 'export'),
+                  no server features; the out/ bundle ships inside the native shell
+packages/shared   Everything reused by both: quran-reader, quran-player, hooks, lib, src/api,
+                  messages/ (i18n catalogs), ui primitives
+```
+
+The mobile tsconfig maps `@/*` to `["./*", "../../packages/shared/*"]` — a mobile-local file **shadows** the shared one of the same path (used deliberately, e.g. `apps/mobile/constants/fonts.ts`).
 
 **Live site:** wikisubmission.org
 **Backend API:** `https://ws-backend.wikisubmission.org/api/v1` (prod) / `http://localhost:8082/api/v1` (dev)
 **Backend repo:** `../ws-backend` (relative to this project root)
 **Backend OpenAPI spec:** `../ws-backend/openapi.yaml`
 
-> **Frontend redesign in progress.** New UI is being actively built on the `feat/new-ui` branch. Core data-fetching, audio, and performance patterns below must be preserved through the redesign.
+### Build tooling — webpack only, no Turbopack
+
+**All builds and dev servers must use webpack** (`next build --webpack` / `next dev --webpack`). Turbopack broke when the Capacitor plugins were added for the PWA and Android — it cannot resolve the dynamic imports in the Capacitor/sqlite offline stack (e.g. `@sqlite.org/sqlite-wasm`) and fails with `Module not found: Can't resolve <dynamic>`. Both apps' package.json scripts already pass `--webpack`; **never run bare `next build`/`next dev`** (Next 16 defaults to Turbopack).
+
+Common commands (run inside `apps/web` or `apps/mobile`):
+
+```bash
+pnpm dev            # next dev --webpack
+pnpm build          # next build --webpack (mobile: static export to out/)
+pnpm test           # vitest (both apps; mobile suite is node-env pure-logic tests in test/)
+pnpm sync           # mobile only: bundles + build + cap sync into ios/ + android/
+npx tsc --noEmit    # typecheck — MUST be run from the app dir, not the repo root
+```
 
 ---
 
@@ -17,20 +39,22 @@ WikiSubmission.org frontend — a Next.js 16 (App Router) application serving as
 
 ### App Router conventions
 
-- All pages live under `app/` with Next.js 16 App Router conventions
-- Server Components fetch data directly; Client Components use hooks/state
-- Route: `app/quran/[[...query]]/` — catch-all for all Quran reader pages
-- Route: `app/search/` — unified search page (Quran + Media + Newsletters)
+- Each app has its own `app/` tree with Next.js 16 App Router conventions
+- Server Components fetch data directly (web only); Client Components use hooks/state
+- Web route: `app/quran/[[...query]]/` — catch-all for all Quran reader pages; text queries are detected by `parseQueryType` in `page.tsx` and dispatch to the search results view (there is no separate `app/search/` route)
+- Web route: `app/bible/[[...query]]/` — Bible reader (web only; hidden on mobile for now)
+- Web marketing/content pages live in the `app/(site)/` route group
+- Mobile routes mirror a subset (`app/quran/[chapter]/` is SSG via `generateStaticParams` — all 114 chapters prerendered; search lives at `app/quran/search/`)
 
 ### Data layer
 
-Quran data is fetched directly from **ws-backend** via the type-safe `openapi-fetch` client at `src/api/`. The legacy `wikisubmission-sdk` package is still used for Media and Newsletter queries in `app/search/search-client.tsx`.
+Quran data is fetched directly from **ws-backend** via the type-safe `openapi-fetch` client at `packages/shared/src/api/`. The legacy `wikisubmission-sdk` package remains only in the web archive page (`app/(site)/archive/archive-client.tsx`).
 
 | Area | Client |
 | --- | --- |
-| Quran verses & search | `src/api/client.ts` (`wsApi`) — openapi-fetch |
-| Server-side Quran (SSR) | `src/api/server-client.ts` (`wsApiServer`) |
-| Media / Newsletters | `lib/wikisubmission-sdk.ts` (SDK, legacy) |
+| Quran verses & search | `packages/shared/src/api/client.ts` (`wsApi`) — openapi-fetch |
+| Server-side Quran (SSR, web) | `packages/shared/src/api/server-client.ts` (`wsApiServer`) |
+| Media / Newsletters (archive) | `wikisubmission-sdk` (legacy) |
 
 ---
 
@@ -92,25 +116,25 @@ interface VerseData {
 ### API client setup
 
 ```bash
-# Sync spec from backend repo, then regenerate types
-npm run sync-api   # cp ../ws-backend/openapi.yaml src/api/openapi.yaml
-npm run generate   # openapi-ts --input src/api/openapi.yaml --output src/api/types.gen.ts
+# From apps/web: sync spec from backend repo, then regenerate types
+pnpm sync-api   # cp ../../../ws-backend/openapi.yaml ../../packages/shared/src/api/openapi.yaml
+pnpm generate   # openapi-typescript → packages/shared/src/api/types.gen.ts
 ```
 
 ---
 
 ## Quran Reader — Architecture
 
-The Quran reader (`app/quran/[[...query]]/`) is the core feature. Understanding it is required before making any changes.
+The Quran reader (shared `packages/shared/components/quran-reader/`, mounted by both apps) is the core feature. Understanding it is required before making any changes.
 
 ### Scroll model — window scrolling
 
-The reader uses **window-level scrolling** via `useWindowVirtualizer` from `@tanstack/react-virtual` v3. The page itself scrolls (no inner scroll container). This means:
+The reader uses **window-level scrolling** via `react-virtuoso` v4 with the `useWindowScroll` prop. The page itself scrolls (no inner scroll container). This means:
 
 - `window.scrollY` / `window.innerHeight` / `document.documentElement.scrollHeight` are the scroll primitives everywhere
-- The virtual list container is a **fixed-height `position: relative` div** sized to `virtualizer.getTotalSize()` — it drives page height but does not scroll internally
-- Each virtual item uses `position: absolute; transform: translateY(item.start - scrollMargin)` where `scrollMargin` = distance from document top to the list container (measured via `useLayoutEffect`)
-- `scrollPaddingStart: 120` in virtualizer options keeps `scrollToIndex` results below the fixed header stack
+- Virtuoso owns item measurement and windowing; each rendered item wrapper carries `data-index`, which the skeleton-reveal and seek logic query
+- Seeking uses `virtuosoRef.current.scrollToIndex({ index, align, behavior })`
+- (`@tanstack/react-virtual` survives only in the web word-lab page, `apps/web/app/quran/words/word-lab.tsx` — not in the reader)
 
 **Do not revert to a contained scroll container.** Window scrolling was chosen so the browser's native scroll engine handles momentum/rubber-band/accessibility — no custom scroll logic needed.
 
@@ -129,7 +153,7 @@ The reader uses **window-level scrolling** via `useWindowVirtualizer` from `@tan
 </div>
 ```
 
-`quran-fixed-headers` is a CSS class defined in `globals.css`:
+`quran-fixed-headers` is a CSS class defined in `packages/shared/styles/globals.css` (all `globals.css` references in this document point there):
 
 ```css
 .quran-fixed-headers { position: fixed; top: 0; left: 0; right: 0; z-index: 50; transition: transform 280ms ease; }
@@ -147,45 +171,36 @@ html.quran-page::-webkit-scrollbar { display: none; }
 html.quran-page { scrollbar-width: none; }
 ```
 
-The minimap is the sole scroll indicator on Quran pages. Other pages (home, search) are unaffected.
+The minimap is the sole scroll indicator on Quran pages. Other pages (home, `(site)` pages) are unaffected.
 
 ### Data flow (chapter view)
 
-1. **SSR** (`page.tsx`): fetches first 50 verses with `en+ar` via `wsApiServer`
+1. **SSR** (web `page.tsx`): fetches a 50-verse window with `en+ar` via `wsApiServer`. With `?verse=N` the window starts 5 verses before the target so `scrollToIndex` only crosses a few unmeasured items. (Mobile has no SSR — `ChapterReader` loads client-side, showing first-load skeletons.)
 2. **`ChapterReader`** (client): receives `initialData`, mounts with verses already visible
-3. **`useChapterReader`** hook (`hooks/use-chapter-reader.ts`): manages verse windows, load-more, seek, prefetch
-4. **`useWindowVirtualizer`** (`@tanstack/react-virtual` v3): renders only visible verses; window is the scroll element
+3. **`useChapterReader`** hook (`packages/shared/hooks/use-chapter-reader.ts`): manages verse windows, load-more, seek, prefetch
+4. **`Virtuoso`** (`react-virtuoso` v4, `useWindowScroll`): renders only visible verses; window is the scroll element
 5. **Minimap** (`verse-minimap.tsx`): fixed right-edge overlay for fast seeking; uses pointer capture for drag-on-mobile
 
 ### SSR language mismatch
 
-SSR always fetches `en+ar` (can't know client prefs). On mount, `ChapterReader` checks if the user's primary language is present in the SSR data and reloads if not. This is handled in a one-time `useEffect([], [])`.
+SSR always fetches `en+ar` (can't know client prefs). Client preferences hydrate from localStorage (zustand persist) right after first paint; if they differ from the SSR defaults, the memoized `opts` object changes reference and the reload effect re-fetches — anchored to the `?verse=N` target (or the current centre verse) so the user isn't yanked back to the start of the SSR window. An `isFirstMount` guard prevents a spurious reload when the prefs already match.
 
-### URL sync
+### URL sync + current-verse tracking
 
-`?verse=N` is kept in sync with the verse at the viewport centre using `window.history.replaceState` (NOT `router.replace`). Using `router.replace` would re-render all `useSearchParams()` consumers — including all 114 sidebar chapter links.
+`?verse=N` is kept in sync with the verse at the viewport centre using `window.history.replaceState` (NOT `router.replace`). Using `router.replace` would re-render every `useSearchParams()` consumer on each scroll tick.
 
-**Overscan bias:** `useWindowVirtualizer` renders overscan items outside the viewport. The midpoint of `getVirtualItems()` is biased. Always use scroll position to find the truly visible centre item:
-```typescript
-const centerY = window.scrollY + window.innerHeight / 2
-const centerItem = items.find(v => v.start <= centerY && v.start + v.size > centerY)
-```
+`currentVerseNumber` (drives the minimap dot and the URL) is computed in a **dedicated `window.scroll` listener** (not in the render body), so it updates on every scroll event instead of waiting for a React re-render. The centre verse is found by hit-testing the viewport centre against the DOM:
 
-### Minimap sync
-
-`currentVerseNumber` is computed in a **dedicated `window.scroll` listener** (not in the render body). This means the minimap dot updates on every scroll event rather than waiting for React to re-render from the virtualizer's batched subscription.
-
-The listener reads `verses` and `virtualizer` through `minimapStateRef.current` (synced each render) — a stable `[]` listener with no stale closures.
+- Virtuoso reports the rendered window via `rangeChanged` into `visibleRangeRef`; the listener walks that index range and `getBoundingClientRect()`s each verse element (`document.getElementById(vk)`) to find the one straddling `scrollY + innerHeight / 2`
+- At the extremes (`scrollY <= 8` / bottom −8px) it clamps to the first/last loaded verse
+- The URL write is debounced 200ms, only after the user has actually scrolled, and suppressed while a seek is in flight
 
 Minimap dot transition is `0.08s linear` (not `0.35s cubic-bezier`) so it tracks the scroll position directly without visible lag.
 
-### Loading glow
+### Loading states
 
-While verses are loading, a pulsing inset ring (colored from `--primary`) is shown along the list container's border. It's a plain overlay div in `VirtualizedVerseList` (chapter-reader.tsx) animated with CSS `animate-pulse` + an opacity transition — compositor-only, no per-frame repaints. (Replaced the old GSAP `useChapterBorderLoader` box-shadow tween, which repainted the full-height container every frame and caused load stutter.)
-
-### Sidebar `useSearchParams` isolation
-
-`useSearchParams()` fires on every `window.history.replaceState` call (Next.js patches it). Putting it in a tiny sub-component (`BackToQuranLink`) prevents the 114 chapter links from re-rendering on every scroll.
+- **First load (no verses yet):** pulsing skeleton verse cards with staggered `animationDelay`; when real verses arrive, a GSAP stagger reveals the `[data-index]` item wrappers (`wasEmptyRef` gates it to the empty→filled transition only).
+- **Loading glow (subsequent loads):** a pulsing inset ring (colored from `--primary`) along the list container's border — a plain overlay div animated with CSS `animate-pulse` + an opacity transition, compositor-only. (Replaced the old GSAP box-shadow tween, which repainted the full-height container every frame and caused load stutter.)
 
 ---
 
@@ -261,21 +276,28 @@ const loadMore = useCallback((opts) => {
 
 ### `useMemo` for options objects
 
-`opts` in `ChapterReader` is memoized on `[primaryLanguage, secondaryLanguage, arabic]`. This prevents callbacks that list `opts` as a dep from recreating on unrelated re-renders.
-
-### `overscroll-contain` on verse list
-
-The `parentRef` scroll container has `overscroll-contain` to prevent the iOS rubber-band from propagating to the page when the user hits the top/bottom of the verse list.
+`opts` in `ChapterReader` is memoized on the API-relevant preferences (`primaryLanguage`, `secondaryLanguage`, `arabic`, `wordByWord`, `displayMode`). This prevents callbacks/effects that list `opts` as a dep from firing on unrelated re-renders — the reload-on-prefs-change effect keys off this reference.
 
 ### Global overflow
 
-`globals.css` sets `overflow-x: clip` on `html` to prevent any element from causing horizontal page scroll without breaking vertical scrolling or `position: fixed` elements.
+`packages/shared/styles/globals.css` sets `overflow-x: clip` on `html` to prevent any element from causing horizontal page scroll without breaking vertical scrolling or `position: fixed` elements.
+
+---
+
+## Mobile App (`apps/mobile`) — Essentials
+
+- **Static export inside Capacitor 8.** `output: 'export'` — no route handlers, server actions, middleware, or image optimizer. All 114 chapter pages are SSG'd. `pnpm sync` builds and copies `out/` into the native projects.
+- **Hydration discipline is critical.** The export prerenders at build time and hydrates in the webview; `useState` initializers must be side-effect-free and deterministic (React may replay them), or you get minified error #418.
+- **Auth:** native token flow (Google/Apple/email OTP) with the session in encrypted storage (`@aparajita/capacitor-secure-storage`); access tokens auto-refresh single-flight with a 60s expiry skew, and the shared API client replays 401'd GET/HEAD requests once after refresh.
+- **Offline content:** SQLite bundles downloaded from the backend, sha256-verified before install, staged via Filesystem cache then moved in by `@capacitor-community/sqlite`.
+- **Animations are GSAP-only** (`apps/mobile/lib/gsap.ts` is the single registration point; `GsapPresence` replaces `AnimatePresence`; Flip powers shared-element flights).
+- **Crash reporting:** global error/rejection listeners (`lib/crash-reporter.ts`) batch to `POST /api/v1/client-errors` on ws-backend; route + global error boundaries report too.
+- **Notifications:** a soft in-app card precedes the one-shot OS permission dialog; notification tap routes are whitelisted in `lib/notification-routes.ts`.
+- **Tests:** `pnpm test` — node-env Vitest suite over the pure logic in `apps/mobile/test/`.
 
 ---
 
 ## Key File Map
-
-> **Note:** This project is now a monorepo (`apps/web`, `apps/mobile`, `packages/shared`) — the rows below reflect files touched while researching the audio system. The rest of this document (Project Overview, App Router conventions, Data layer) still describes the pre-monorepo single-app layout and hasn't been fully reconciled yet.
 
 | File | Purpose |
 | --- | --- |
@@ -295,15 +317,27 @@ The `parentRef` scroll container has `overscroll-contain` to prevent the iOS rub
 | `packages/shared/src/api/server-client.ts` | openapi-fetch client (server/SSR) |
 | `packages/shared/src/api/types.gen.ts` | Generated TypeScript types from OpenAPI spec |
 | `packages/shared/src/api/openapi.yaml` | Synced OpenAPI spec from ws-backend |
+| `packages/shared/src/api/base-url.ts` | Resolves server vs browser API base URLs from env |
+| `apps/mobile/lib/mobile-auth-storage.ts` | Session persistence in Keychain/Keystore (secure storage) |
+| `apps/mobile/lib/register-api-auth-mobile.ts` | Token provider + single-flight refresh wired into the shared API client |
+| `apps/mobile/lib/crash-reporter.ts` | Global error listeners → `POST /api/v1/client-errors` on ws-backend |
+| `apps/mobile/lib/gsap.ts` | Single GSAP registration point (Flip plugin, shared eases) |
+| `apps/mobile/components/startup-zikr-overlay.tsx` | Startup splash animation (GSAP timeline + Flip flight to Today) |
 
 ---
 
 ## Environment Variables
 
+Resolved in `packages/shared/src/api/base-url.ts`:
+
 ```bash
-NEXT_PUBLIC_API_URL=https://ws-backend.wikisubmission.org/api/v1
-# or for local dev:
-NEXT_PUBLIC_API_URL=http://localhost:8082/api/v1
+# Server-side (SSR, apps/web): INTERNAL_API_URL wins (Railway-internal host),
+# NEXT_PUBLIC_API_URL is the fallback.
+NEXT_PUBLIC_API_URL=https://ws-backend.wikisubmission.org/api/v1   # dev: http://localhost:8082/api/v1
+
+# Browser-side: defaults to the same-origin /api/ws proxy on web. The mobile
+# static export has no proxy, so its next.config.ts bakes in an absolute URL.
+NEXT_PUBLIC_BROWSER_API_URL=https://ws-backend.wikisubmission.org/api/v1
 ```
 
 ---
@@ -312,17 +346,19 @@ NEXT_PUBLIC_API_URL=http://localhost:8082/api/v1
 
 | Concern | Library |
 | --- | --- |
-| Framework | Next.js 16 (App Router) |
+| Framework | Next.js 16 (App Router), **webpack builds only** |
 | Language | TypeScript + React 19 |
 | Styling | Tailwind CSS 4 + Radix UI |
-| Virtual list | `@tanstack/react-virtual` v3 |
+| Virtual list | `react-virtuoso` v4 (reader); `@tanstack/react-virtual` v3 only in web word-lab |
 | Data fetching | `@tanstack/react-query` v5 + `openapi-fetch` |
-| Auth | `next-auth` v5 (Auth.js) |
+| Auth | `next-auth` v5 (Auth.js) on web; native token flow + secure storage on mobile |
 | State | Zustand v5 |
-| Animation | Framer Motion v12 |
+| Animation | GSAP 3.15 (+ Flip plugin on mobile) — framer-motion has been removed |
 | Notifications | Sonner v2 |
 | Validation | Zod v4 |
-| i18n | `next-intl` v4 |
+| i18n | `next-intl` v4 (mobile lazy-loads non-`en` catalogs) |
+| Native shell | Capacitor 8 (`apps/mobile`) |
+| Tests | Vitest (both apps; `pnpm test`); Playwright e2e in web |
 
 ---
 
