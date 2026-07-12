@@ -99,6 +99,9 @@ export function MobileAuthProvider({ children }: { children: React.ReactNode }) 
       const stored = await loadSession()
       if (cancelled) return
       if (!stored) {
+        // Mark the signed-out state as resolved so the API client stops
+        // falling back to a Preferences read on every request.
+        setMobileAccessToken(undefined)
         setIsLoading(false)
         return
       }
