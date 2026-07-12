@@ -1,17 +1,16 @@
-import { Geist_Mono, Amiri, Cormorant_Garamond, Source_Serif_4, JetBrains_Mono } from 'next/font/google'
-import localFont from "next/font/local";
+import { Amiri, Cormorant_Garamond, Source_Serif_4, JetBrains_Mono } from 'next/font/google'
+import localFont from 'next/font/local'
 
+// Mobile-only font set. Shadows packages/shared/constants/fonts.ts (the
+// "@/*" path checks apps/mobile first): the shared module also instantiates
+// Geist Mono in 8 weights, which next/font would emit into this bundle even
+// though nothing on mobile references it. Every family below is used by the
+// shared globals (--font-arabic, --font-display/headline, --font-body,
+// --font-ref/mono-ish, --font-glacial).
 const glacial = localFont({
-    src: "../public/font/GlacialIndifference-Regular.ttf",
-    weight: '600',
-    variable: '--font-glacial',
-});
-
-// Only weights actually rendered (single call site: web home-utilities).
-// Loading 8 weights shipped 6 unused woff2 files with every page.
-const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
+  src: '../../../packages/shared/public/font/GlacialIndifference-Regular.ttf',
+  weight: '600',
+  variable: '--font-glacial',
 })
 
 const amiri = Amiri({
@@ -42,7 +41,6 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const Fonts = {
   glacial,
-  geistMono,
   amiri,
   cormorant,
   sourceSerif,
