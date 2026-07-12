@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "bundles": "node scripts/fetch-offline-bundles.mjs",
-    "sync": "node scripts/fetch-offline-bundles.mjs && next build && cap sync",
+    "sync": "node scripts/fetch-offline-bundles.mjs && next build --webpack && cap sync",
     "ios": "cap open ios",
     "android": "cap open android",
     "test": "vitest run",
