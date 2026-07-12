@@ -9,11 +9,17 @@ import { hideNativeSplash } from '@/lib/splash-handoff'
 import { setZikrFlightState, ZIKR_FLIP_ID } from '@/lib/zikr-flight'
 import { useStartupZikr } from '@/lib/startup-zikr-context'
 
-// Timeline (ms): text settles 0-700, holds to 900, flight begins at 900 and
-// the whole startup is over by ~1500. Tap anywhere skips.
+// Timeline (ms), measured from NAVIGATION START, not overlay mount: the time
+// the app already spent loading/hydrating counts against the hold, so the
+// startup animation runs concurrent with the load instead of stacking on top
+// of it. A fast launch gets the full settle (0-700) + hold (to 900); a slow
+// one collapses to MIN_HOLD_MS and the flight begins almost immediately.
 const FLIGHT_AT_MS = 900
-const FINISH_AT_MS = 1500
+const FLIGHT_DURATION_MS = 600
 const NON_TODAY_FADE_AT_MS = 900
+const MIN_HOLD_MS = 350
+/** The tap-to-skip affordance surfaces after the text has settled. */
+const HINT_AT_MS = 500
 
 /**
  * Full-screen startup overlay: the chosen zikr settles in centered, then (on
@@ -31,6 +37,7 @@ export function StartupZikrOverlay() {
   const rootRef = useRef<HTMLDivElement>(null)
   const heroWrapRef = useRef<HTMLDivElement>(null)
   const heroRef = useRef<HTMLParagraphElement>(null)
+  const hintRef = useRef<HTMLParagraphElement>(null)
   const skippingRef = useRef(false)
 
   const active = phase === 'overlay' || phase === 'flying'
@@ -38,8 +45,11 @@ export function StartupZikrOverlay() {
   // Capture launch conditions once; route changes mid-animation must not
   // re-trigger effects.
   const modeRef = useRef<'flight' | 'fade' | null>(null)
+  const holdMsRef = useRef<number | null>(null)
   if (active && modeRef.current === null) {
     modeRef.current = onToday && !reducedMotion ? 'flight' : 'fade'
+    // performance.now() ≈ time since navigation start = load already served.
+    holdMsRef.current = Math.max(MIN_HOLD_MS, FLIGHT_AT_MS - performance.now())
   }
 
   // Lift the native splash only after the overlay has painted (double rAF =
@@ -56,12 +66,13 @@ export function StartupZikrOverlay() {
     }
   }, [phase])
 
-  // Hero settle-in.
+  // Hero settle-in, compressed to fit inside whatever hold remains.
   useEffect(() => {
     const el = heroWrapRef.current
     if (phase !== 'overlay' || !el) return
+    const settleS = Math.min(0.7, ((holdMsRef.current ?? FLIGHT_AT_MS) * 0.8) / 1000)
     const tween = reducedMotion
-      ? gsap.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7 })
+      ? gsap.fromTo(el, { autoAlpha: 0 }, { autoAlpha: 1, duration: settleS })
       : gsap.fromTo(
           el,
           { autoAlpha: 0, filter: 'blur(8px)', letterSpacing: '0.12em' },
@@ -69,7 +80,7 @@ export function StartupZikrOverlay() {
             autoAlpha: 1,
             filter: 'blur(0px)',
             letterSpacing: '0.05em',
-            duration: 0.7,
+            duration: settleS,
             ease: EASE_SETTLE,
           },
         )
@@ -78,19 +89,37 @@ export function StartupZikrOverlay() {
     }
   }, [phase, reducedMotion])
 
+  // Skip affordance: users don't discover tap-to-skip without a hint.
+  useEffect(() => {
+    const el = hintRef.current
+    if (phase !== 'overlay' || !el) return
+    const tween = gsap.fromTo(
+      el,
+      { autoAlpha: 0 },
+      { autoAlpha: 0.6, duration: 0.4, delay: HINT_AT_MS / 1000, ease: 'power1.out' },
+    )
+    return () => {
+      tween.kill()
+    }
+  }, [phase])
+
   // Drive the timeline. The flight branch captures the hero's Flip state at
   // the moment of handoff; the strip (mounted in the same commit the hero
   // unmounts) consumes it and animates from this exact position.
   useEffect(() => {
     if (phase !== 'overlay') return
+    const hold = holdMsRef.current ?? FLIGHT_AT_MS
     if (modeRef.current === 'flight') {
       const flightTimer = window.setTimeout(() => {
         if (heroRef.current) setZikrFlightState(Flip.getState(heroRef.current))
         beginFlight()
-      }, FLIGHT_AT_MS)
+      }, hold)
       return () => window.clearTimeout(flightTimer)
     }
-    const fadeTimer = window.setTimeout(skip, NON_TODAY_FADE_AT_MS)
+    const fadeTimer = window.setTimeout(
+      skip,
+      Math.max(MIN_HOLD_MS, Math.min(hold, NON_TODAY_FADE_AT_MS)),
+    )
     return () => window.clearTimeout(fadeTimer)
   }, [phase, beginFlight, skip])
 
@@ -99,7 +128,7 @@ export function StartupZikrOverlay() {
     const el = rootRef.current
     if (phase !== 'flying' || !el) return
     const fade = gsap.to(el, { autoAlpha: 0, duration: 0.55, ease: 'power1.out' })
-    const finishTimer = window.setTimeout(finish, FINISH_AT_MS - FLIGHT_AT_MS)
+    const finishTimer = window.setTimeout(finish, FLIGHT_DURATION_MS)
     return () => {
       fade.kill()
       window.clearTimeout(finishTimer)
@@ -150,6 +179,15 @@ export function StartupZikrOverlay() {
             </p>
           )}
         </div>
+      )}
+      {phase === 'overlay' && (
+        <p
+          ref={hintRef}
+          className="text-muted-foreground absolute bottom-10 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.2em] uppercase"
+          style={{ visibility: 'hidden' }}
+        >
+          Tap to continue
+        </p>
       )}
     </div>
   )
