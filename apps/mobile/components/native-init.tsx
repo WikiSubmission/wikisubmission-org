@@ -5,7 +5,12 @@ import { useTheme } from 'next-themes'
 import { Capacitor } from '@capacitor/core'
 import { StatusBar, Style } from '@capacitor/status-bar'
 import { Keyboard } from '@capacitor/keyboard'
+import { installCrashReporter } from '@/lib/crash-reporter'
 import { hideNativeSplash } from '@/lib/splash-handoff'
+
+// Global error/rejection listeners: installed at module scope so they cover
+// everything from the first evaluated frame onwards, not just post-mount.
+installCrashReporter()
 
 // App chrome background per color scheme. Mirrors the themeColor values in the
 // root layout viewport so the native status bar matches the web header.
