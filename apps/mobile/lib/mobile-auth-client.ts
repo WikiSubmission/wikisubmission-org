@@ -1,5 +1,5 @@
 import { resolveBrowserApiBaseUrl } from '@/src/api/base-url'
-import type { MobileAuthUser } from './mobile-auth-storage'
+import type { MobileAuthUser, StoredSession } from './mobile-auth-storage'
 
 // Wire-level response from POST /auth/mobile/exchange and /auth/mobile/refresh
 // (mirror of mobileAuthResponse in api/handlers/auth_mobile.go).
@@ -12,6 +12,16 @@ export interface MobileAuthResponse {
 }
 
 export type AuthProvider = 'google' | 'apple'
+
+/** Maps a wire response to the persisted session shape (absolute expiry). */
+export function toStoredSession(res: MobileAuthResponse): StoredSession {
+  return {
+    accessToken: res.access_token,
+    refreshToken: res.refresh_token,
+    expiresAt: Date.now() + res.expires_in * 1000,
+    user: res.user,
+  }
+}
 
 /** Thrown when the native-auth endpoint returns a non-2xx response. */
 export class MobileAuthError extends Error {

@@ -10,11 +10,10 @@ import {
 } from 'react'
 import {
   exchangeIdToken,
-  refreshSession,
   requestEmailOtp,
+  toStoredSession,
   verifyEmailOtp,
   type AuthProvider,
-  type MobileAuthResponse,
 } from '@/lib/mobile-auth-client'
 import { isAppleSignInAvailable } from '@/lib/platform'
 import {
@@ -25,8 +24,10 @@ import {
   type StoredSession,
 } from '@/lib/mobile-auth-storage'
 import {
+  refreshMobileSession,
   registerMobileApiAuth,
-  setMobileAccessToken,
+  setMobileSession,
+  setMobileSessionListeners,
 } from '@/lib/register-api-auth-mobile'
 import { nativeSignIn, nativeSignOut } from '@/lib/native-social-login'
 
@@ -34,8 +35,8 @@ import { nativeSignIn, nativeSignOut } from '@/lib/native-social-login'
 // scope so it runs once, before any provider renders (mirrors the web app).
 registerMobileApiAuth()
 
-// Refresh a little before the hard expiry so an in-flight request never races
-// the deadline.
+// Mirror of the token manager's skew: sessions this close to expiry rotate
+// before first use instead of racing the deadline.
 const REFRESH_SKEW_MS = 60_000
 
 interface MobileAuthContextValue {
@@ -57,15 +58,6 @@ interface MobileAuthContextValue {
 
 const MobileAuthContext = createContext<MobileAuthContextValue | null>(null)
 
-function toSession(res: MobileAuthResponse): StoredSession {
-  return {
-    accessToken: res.access_token,
-    refreshToken: res.refresh_token,
-    expiresAt: Date.now() + res.expires_in * 1000,
-    user: res.user,
-  }
-}
-
 // Maps a stored user to the native provider whose SDK session must be cleared on
 // sign-out. Email-OTP users have no native SDK session, so this returns null and
 // the native logout is skipped.
@@ -79,58 +71,71 @@ export function MobileAuthProvider({ children }: { children: React.ReactNode }) 
   const [session, setSession] = useState<StoredSession | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Persist + publish a freshly minted/rotated session everywhere it is read.
+  // Persist + publish a freshly minted session everywhere it is read.
   const adoptSession = useCallback(async (next: StoredSession) => {
     await saveSession(next)
-    setMobileAccessToken(next.accessToken)
+    setMobileSession(next)
     setSession(next)
   }, [])
 
   const dropSession = useCallback(async () => {
     await clearSession()
-    setMobileAccessToken(undefined)
+    // null (not undefined): the signed-out state is resolved, so the API
+    // client stops falling back to a storage read on every request.
+    setMobileSession(null)
     setSession(null)
   }, [])
 
   // Hydrate from storage on mount, rotating the token if it has expired.
+  // Rotations can also happen inside the API client (401 recovery, proactive
+  // expiry refresh), so the React state subscribes to the token manager.
   useEffect(() => {
     let cancelled = false
+    let invalidated = false
+    setMobileSessionListeners({
+      onRotated: (rotated) => {
+        if (!cancelled) setSession(rotated)
+      },
+      onInvalidated: () => {
+        invalidated = true
+        if (!cancelled) setSession(null)
+      },
+    })
     ;(async () => {
       const stored = await loadSession()
       if (cancelled) return
       if (!stored) {
-        // Mark the signed-out state as resolved so the API client stops
-        // falling back to a Preferences read on every request.
-        setMobileAccessToken(undefined)
+        setMobileSession(null)
         setIsLoading(false)
         return
       }
+      setMobileSession(stored)
       if (stored.expiresAt - REFRESH_SKEW_MS > Date.now()) {
-        setMobileAccessToken(stored.accessToken)
         setSession(stored)
         setIsLoading(false)
         return
       }
-      try {
-        const rotated = toSession(await refreshSession(stored.refreshToken))
-        if (cancelled) return
-        await adoptSession(rotated)
-      } catch {
-        if (!cancelled) await dropSession()
-      } finally {
-        if (!cancelled) setIsLoading(false)
+      // Expired (or about to): rotate before first use. onRotated publishes
+      // success; a definitive backend rejection fires onInvalidated. A
+      // transient failure (offline relaunch) keeps the stored session so the
+      // user stays signed in — the expiry-aware provider retries per request.
+      const token = await refreshMobileSession()
+      if (!cancelled) {
+        if (!token && !invalidated) setSession(stored)
+        setIsLoading(false)
       }
     })()
     return () => {
       cancelled = true
+      setMobileSessionListeners({})
     }
-  }, [adoptSession, dropSession])
+  }, [])
 
   const signInWith = useCallback(
     async (provider: AuthProvider) => {
       const { idToken, nonce } = await nativeSignIn(provider)
       const res = await exchangeIdToken(provider, idToken, nonce)
-      await adoptSession(toSession(res))
+      await adoptSession(toStoredSession(res))
     },
     [adoptSession],
   )
@@ -152,7 +157,7 @@ export function MobileAuthProvider({ children }: { children: React.ReactNode }) 
       }
       const res = await verifyEmailOtp(token, code)
       pendingOtpRef.current = null
-      await adoptSession(toSession(res))
+      await adoptSession(toStoredSession(res))
     },
     [adoptSession],
   )

@@ -1,20 +1,18 @@
 import { resolveBrowserApiBaseUrl } from '@/src/api/base-url'
 import type { SyncRequest, SyncResponse } from '@/lib/offline/user/types'
-import { loadSession } from './mobile-auth-storage'
+import { getMobileAccessToken, refreshMobileSession } from './register-api-auth-mobile'
 
 /**
  * Native SyncTransport: POST the outbox batch to /me/sync with the mobile bearer
- * token. The token is read from the persisted session (kept current by
- * MobileAuthProvider on sign-in and refresh). /me/sync is an out-of-contract
- * route, so this uses a raw authenticated fetch rather than openapi-fetch — the
- * native counterpart to apps/web/lib/offline-sync-transport.ts.
+ * token. /me/sync is an out-of-contract route, so this uses a raw authenticated
+ * fetch rather than openapi-fetch — the native counterpart to
+ * apps/web/lib/offline-sync-transport.ts. Tokens come from the shared mobile
+ * token manager (expiry-aware, single-flight refresh), and a 401 triggers one
+ * rotation + replay since this bodied request is outside the API client's
+ * automatic GET-only retry.
  */
-export async function mobileSyncTransport(req: SyncRequest): Promise<SyncResponse> {
-  const session = await loadSession()
-  const token = session?.accessToken
-  if (!token) throw new Error('not authenticated')
-
-  const res = await fetch(`${resolveBrowserApiBaseUrl()}/me/sync`, {
+async function postSync(token: string, req: SyncRequest): Promise<Response> {
+  return fetch(`${resolveBrowserApiBaseUrl()}/me/sync`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -22,6 +20,17 @@ export async function mobileSyncTransport(req: SyncRequest): Promise<SyncRespons
     },
     body: JSON.stringify(req),
   })
+}
+
+export async function mobileSyncTransport(req: SyncRequest): Promise<SyncResponse> {
+  const token = await getMobileAccessToken()
+  if (!token) throw new Error('not authenticated')
+
+  let res = await postSync(token, req)
+  if (res.status === 401) {
+    const fresh = await refreshMobileSession()
+    if (fresh) res = await postSync(fresh, req)
+  }
   if (!res.ok) {
     throw new Error(`sync failed: ${res.status} ${res.statusText}`)
   }
