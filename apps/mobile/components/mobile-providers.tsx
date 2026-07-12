@@ -54,12 +54,14 @@ export function MobileProviders({
                   <NativeInit />
                   <MobileNotificationsBridge />
                   <MobileOfflineSyncBridge />
-                  <MobileBundleAutoload />
-                  <MobileWordBundleAutoload />
                   {/* The startup overlay is a sibling of the shell: the zikr
                       flight hands off between them via a captured GSAP Flip
-                      state (lib/zikr-flight.ts). */}
+                      state (lib/zikr-flight.ts). The bundle autoloaders sit
+                      inside the provider because they wait for the startup
+                      phase to settle before doing catalog/manifest I/O. */}
                   <StartupZikrProvider dailySeed={dailySeed}>
+                    <MobileBundleAutoload />
+                    <MobileWordBundleAutoload />
                     <MobileShell>{children}</MobileShell>
                     <StartupZikrOverlay />
                     <NotificationPermissionPrompt />

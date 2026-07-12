@@ -2,9 +2,11 @@
 
 import { useEffect, useRef } from 'react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { AUTOLOAD_IDLE_DELAY_MS } from '@/components/mobile-bundle-autoload'
 import { fetchManifest, OFFLINE_MANIFEST_URL } from '@/lib/offline/manifest'
 import { getRegisteredOfflineContentStore } from '@/lib/offline/registry'
 import { getConnectionKind, onConnectionChange } from '@/lib/network-status'
+import { useStartupZikr } from '@/lib/startup-zikr-context'
 import {
   installWordBundle,
   useWordBundleDownload,
@@ -20,15 +22,17 @@ import {
  */
 export function MobileWordBundleAutoload() {
   const primaryLanguage = useQuranPreferences((s) => s.primaryLanguage)
+  const { phase } = useStartupZikr()
+  const startupSettled = phase === 'done' || phase === 'skipped'
   const attempted = useRef<Set<string>>(new Set())
 
   useEffect(() => {
+    if (!startupSettled) return
     const store = getRegisteredOfflineContentStore()
     if (!store) return
     const lang =
       primaryLanguage === 'none' || primaryLanguage === 'xl' ? 'en' : primaryLanguage
     if (attempted.current.has(lang)) return
-    attempted.current.add(lang)
 
     // The reader's offline word path reads the English words bundle as a
     // fallback, so either the user's language or English satisfies word mode.
@@ -36,7 +40,9 @@ export function MobileWordBundleAutoload() {
     const { setState } = useWordBundleDownload.getState()
     let unsubscribe: (() => void) | null = null
 
-    void (async () => {
+    const run = async () => {
+      if (attempted.current.has(lang)) return
+      attempted.current.add(lang)
       try {
         setState({ status: 'checking' })
         const installed = await store.installedBundles()
@@ -74,12 +80,14 @@ export function MobileWordBundleAutoload() {
         setState({ status: 'failed' })
         attempted.current.delete(lang)
       }
-    })()
+    }
+    const timer = window.setTimeout(() => void run(), AUTOLOAD_IDLE_DELAY_MS)
 
     return () => {
+      window.clearTimeout(timer)
       unsubscribe?.()
     }
-  }, [primaryLanguage])
+  }, [primaryLanguage, startupSettled])
 
   return null
 }

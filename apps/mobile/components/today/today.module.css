@@ -105,3 +105,18 @@
     animation: none;
   }
 }
+
+/* Subdued pages (reader, settings) render the scene as a still: the loops are
+   full-screen blurred layers, and compositing them forever behind dense
+   content costs GPU/battery and can jank reader scrolling. */
+.still .drift,
+.still .driftSlow,
+.still .float,
+.still .floatDelayed,
+.still .shimmer,
+.still .shimmerDelayed,
+.still .morph,
+.still .morphDelayed,
+.still .spin {
+  animation: none;
+}

@@ -4,6 +4,11 @@ import { useEffect, useRef } from 'react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { fetchManifest, OFFLINE_MANIFEST_URL } from '@/lib/offline/manifest'
 import { getRegisteredOfflineContentStore } from '@/lib/offline/registry'
+import { useStartupZikr } from '@/lib/startup-zikr-context'
+
+/** Background installs wait out the startup window so catalog/manifest I/O
+ *  never competes with hydration and the splash animation. */
+export const AUTOLOAD_IDLE_DELAY_MS = 2_500
 
 /**
  * Keeps the offline text bundle for the user's primary Quran language on
@@ -16,18 +21,22 @@ import { getRegisteredOfflineContentStore } from '@/lib/offline/registry'
  */
 export function MobileBundleAutoload() {
   const primaryLanguage = useQuranPreferences((s) => s.primaryLanguage)
+  const { phase } = useStartupZikr()
+  const startupSettled = phase === 'done' || phase === 'skipped'
   const attempted = useRef<Set<string>>(new Set())
 
   useEffect(() => {
+    if (!startupSettled) return
     const store = getRegisteredOfflineContentStore()
     if (!store) return
     if (primaryLanguage === 'none' || primaryLanguage === 'xl') return
     if (typeof navigator !== 'undefined' && navigator.onLine === false) return
     if (attempted.current.has(primaryLanguage)) return
-    attempted.current.add(primaryLanguage)
 
     const bundleId = `quran-${primaryLanguage}`
-    void (async () => {
+    const run = async () => {
+      if (attempted.current.has(primaryLanguage)) return
+      attempted.current.add(primaryLanguage)
       try {
         const installed = await store.installedBundles()
         if (installed.some((b) => b.id === bundleId)) return
@@ -42,8 +51,10 @@ export function MobileBundleAutoload() {
         // retried next session (or when the language changes again).
         attempted.current.delete(primaryLanguage)
       }
-    })()
-  }, [primaryLanguage])
+    }
+    const timer = window.setTimeout(() => void run(), AUTOLOAD_IDLE_DELAY_MS)
+    return () => window.clearTimeout(timer)
+  }, [primaryLanguage, startupSettled])
 
   return null
 }

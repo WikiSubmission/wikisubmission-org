@@ -7,6 +7,7 @@ import { useTimeOfDay } from '@/hooks/use-time-of-day'
 import { ParchmentScene } from '@/components/today/motifs/parchment-scene'
 import { CrystalScene } from '@/components/today/motifs/crystal-scene'
 import { ChromeScene } from '@/components/today/motifs/chrome-scene'
+import styles from '@/components/today/today.module.css'
 import { cn } from '@/lib/utils'
 
 /**
@@ -35,7 +36,9 @@ export function AmbientBackdrop({ subdued = false }: { subdued?: boolean }) {
     <div
       className={cn(
         'fixed inset-0 z-0 transition-opacity duration-500',
-        subdued && 'opacity-50',
+        // Subdued pages get a still frame: the ambient loops composite
+        // full-screen blurred layers and would fight reader scrolling.
+        subdued && ['opacity-50', styles.still],
       )}
       aria-hidden="true"
     >

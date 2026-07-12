@@ -94,7 +94,6 @@ export function MobileNotificationsBridge() {
 
       void rescheduleAll('launch')
       void refreshZakatReminder()
-      void syncFcmRegistration()
 
       const { App } = await import('@capacitor/app')
       track(
@@ -106,11 +105,16 @@ export function MobileNotificationsBridge() {
 
     void setup()
 
+    // FCM registration is a network round-trip with no user-visible urgency;
+    // keep it off the startup window (local scheduling above stays immediate).
+    const fcmTimer = window.setTimeout(() => void syncFcmRegistration(), 3_000)
+
     const onLocationChanged = () => void rescheduleAll('location-change')
     window.addEventListener('prayer-location-changed', onLocationChanged)
 
     return () => {
       cancelled = true
+      window.clearTimeout(fcmTimer)
       handles.forEach((handle) => void handle.remove())
       window.removeEventListener('prayer-location-changed', onLocationChanged)
     }
