@@ -1,6 +1,14 @@
 'use client'
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { ZIKR_FALLBACK } from '@/constants/zikr-fallback'
 import { dailyZikrIndex, type ZikrItem } from '@/lib/zikr'
 
@@ -30,9 +38,13 @@ interface StartupZikrState {
   skip: () => void
 }
 
-// Module-level flag: the JS bundle re-evaluates only on a cold start, so this
-// is true exactly once per app process — client-side navigation never replays
-// the animation.
+// Module-level flag: the JS bundle re-evaluates only on a cold start, so the
+// startup slot is claimed exactly once per app process — client-side
+// navigation never replays the animation. Claimed in an effect, never in the
+// useState initializer: React can replay initializers (hydration retries,
+// StrictMode), and a replay that saw the flag already set would render
+// 'skipped' against server HTML built with 'overlay' — the minified #418
+// hydration mismatch that used to fire on every page.
 let startupConsumed = false
 
 const StartupZikrContext = createContext<StartupZikrState | null>(null)
@@ -46,11 +58,22 @@ export function StartupZikrProvider({
   dailySeed: number
   children: React.ReactNode
 }) {
-  const [phase, setPhase] = useState<StartupPhase>(() => {
-    if (startupConsumed) return 'skipped'
-    startupConsumed = true
-    return 'overlay'
-  })
+  // 'overlay' first, unconditionally, so the client's hydration render always
+  // matches the prerendered HTML (which is also built with 'overlay').
+  const [phase, setPhase] = useState<StartupPhase>('overlay')
+
+  // Post-hydration: claim the once-per-process startup slot, or stand down if
+  // another mount already owns it. The ref guards StrictMode's double effect.
+  const claimedRef = useRef(false)
+  useEffect(() => {
+    if (claimedRef.current) return
+    claimedRef.current = true
+    if (startupConsumed) {
+      setPhase((prev) => (prev === 'overlay' ? 'skipped' : prev))
+    } else {
+      startupConsumed = true
+    }
+  }, [])
 
   // The overlay's zikr must render identically on the prerender and on
   // hydration, so it is fully deterministic: the bundled fallback list indexed
