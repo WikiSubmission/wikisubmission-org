@@ -33,7 +33,8 @@ function phaseFor(minutes: number): DayPhase {
   return 'night'
 }
 
-function compute(minutes: number): TimeOfDay {
+/** Pure mapping from minutes-since-midnight to the sky model (exported for tests). */
+export function compute(minutes: number): TimeOfDay {
   const isDay = minutes >= DAY_START && minutes < DAY_END
   let luminaryX: number
   let luminaryAltitude: number

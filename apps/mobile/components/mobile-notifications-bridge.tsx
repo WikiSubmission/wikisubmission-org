@@ -8,34 +8,13 @@ import { ensureNotificationChannels } from '@/lib/notifications/channels'
 import { handleFcmToken, syncFcmRegistration } from '@/lib/notifications/fcm'
 import { rescheduleAll } from '@/lib/notifications/local-scheduler'
 import { refreshZakatReminder } from '@/lib/notifications/zakat'
+import { safeRoute } from '@/lib/notification-routes'
 
 /**
  * Lifecycle wiring for notifications, mounted once in MobileProviders (native
  * only, renders nothing): creates Android channels, keeps the local prayer
  * schedule and FCM registration fresh, and routes notification taps.
  */
-
-/** Static-export route prefixes a notification is allowed to open. */
-const ROUTE_WHITELIST = [
-  '/',
-  '/quran',
-  '/appendices',
-  '/more',
-  '/me',
-  '/proclamation',
-  '/introduction',
-  '/zakat',
-]
-
-function safeRoute(candidate: unknown): string | null {
-  if (typeof candidate !== 'string' || !candidate.startsWith('/')) return null
-  const normalized = candidate.replace(/\/+$/, '') || '/'
-  return ROUTE_WHITELIST.some((prefix) =>
-    prefix === '/' ? normalized === '/' : normalized === prefix || normalized.startsWith(`${prefix}/`),
-  )
-    ? normalized
-    : null
-}
 
 export function MobileNotificationsBridge() {
   const router = useRouter()
