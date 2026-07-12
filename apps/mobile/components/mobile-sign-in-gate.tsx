@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +14,10 @@ interface MobileSignInGateProps {
 }
 
 type Step = 'options' | 'code'
+
+/** Minimum wait between one-time-code emails. The backend rate-limits too;
+ *  this keeps eager tapping from burning through that budget. */
+const RESEND_COOLDOWN_MS = 45_000
 
 /**
  * Signed-out gate shared by the Profile and Games layouts. Offers Google, the
@@ -33,6 +37,17 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
   const [step, setStep] = useState<Step>('options')
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
+  const [cooldownUntil, setCooldownUntil] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
+
+  // Tick once a second while a cooldown is active so the button label counts down.
+  useEffect(() => {
+    if (cooldownUntil <= Date.now()) return
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [cooldownUntil])
+
+  const cooldownLeft = Math.max(0, Math.ceil((cooldownUntil - now) / 1000))
 
   async function run(action: () => Promise<void>) {
     setBusy(true)
@@ -51,8 +66,14 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
       toast.error('Enter your email')
       return
     }
+    if (cooldownLeft > 0) {
+      toast.error(`Wait ${cooldownLeft}s before requesting another code`)
+      return
+    }
     await run(async () => {
       await requestEmailCode(trimmed)
+      setCooldownUntil(Date.now() + RESEND_COOLDOWN_MS)
+      setNow(Date.now())
       setStep('code')
       toast.success('We sent a code to your email')
     })
@@ -155,11 +176,11 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
             </button>
             <button
               type="button"
-              className="text-muted-foreground hover:text-foreground"
-              disabled={busy}
+              className="text-muted-foreground hover:text-foreground disabled:opacity-50"
+              disabled={busy || cooldownLeft > 0}
               onClick={() => void onSendCode()}
             >
-              Resend code
+              {cooldownLeft > 0 ? `Resend code (${cooldownLeft}s)` : 'Resend code'}
             </button>
           </div>
         </>
