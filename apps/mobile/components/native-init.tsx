@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { Capacitor } from '@capacitor/core'
 import { StatusBar, Style } from '@capacitor/status-bar'
-import { Keyboard, KeyboardResize } from '@capacitor/keyboard'
+import { Keyboard } from '@capacitor/keyboard'
 import { hideNativeSplash } from '@/lib/splash-handoff'
 
 // App chrome background per color scheme. Mirrors the themeColor values in the
@@ -28,9 +28,8 @@ export function NativeInit() {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return
 
-    // Resize the webview (not just pan) so focused inputs stay visible above
-    // the keyboard — matters for search and the sign-in screen.
-    Keyboard.setResizeMode({ mode: KeyboardResize.Native }).catch(() => {})
+    // Resize mode is declared once in capacitor.config.ts (KeyboardResize.Native);
+    // only the accessory bar has no config-file equivalent.
     Keyboard.setAccessoryBarVisible({ isVisible: false }).catch(() => {})
 
     // The startup zikr overlay owns SplashScreen.hide(): it lifts the native
