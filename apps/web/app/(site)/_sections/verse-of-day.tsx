@@ -427,7 +427,7 @@ export function VerseOfTheDaySection() {
               </Link>
             </div>
 
-            <div aria-label={t('rotationLabel')} style={{ display: 'flex', gap: 6 }}>
+            <div aria-label={t('rotationLabel')} style={{ display: 'flex', gap: 0 }}>
               {current.verses.map((_, i) => (
                 <button
                   key={i}
@@ -438,18 +438,31 @@ export function VerseOfTheDaySection() {
                   }}
                   aria-label={t('verseAria', { n: i + 1 })}
                   aria-current={i === idx ? 'true' : undefined}
+                  // 24x24 minimum hit area (WCAG 2.5.8); the visible dot stays small.
                   style={{
-                    width: i === idx ? 20 : 8,
-                    height: 8,
-                    borderRadius: 4,
+                    width: i === idx ? 32 : 24,
+                    height: 24,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     border: 'none',
-                    background:
-                      i === idx ? 'var(--ed-accent)' : 'var(--ed-rule)',
+                    background: 'transparent',
                     cursor: 'pointer',
-                    transition: 'all 180ms',
                     padding: 0,
                   }}
-                />
+                >
+                  <span
+                    aria-hidden
+                    style={{
+                      width: i === idx ? 20 : 8,
+                      height: 8,
+                      borderRadius: 4,
+                      background:
+                        i === idx ? 'var(--ed-accent)' : 'var(--ed-rule)',
+                      transition: 'all 180ms',
+                    }}
+                  />
+                </button>
               ))}
             </div>
           </div>

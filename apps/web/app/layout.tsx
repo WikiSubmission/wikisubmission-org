@@ -65,12 +65,11 @@ export default async function RootLayout({
   )
 }
 
-// Prevent mobile browser zoom on input focus.
+// Pinch-zoom stays enabled (WCAG 1.4.4): no maximum-scale / user-scalable=no.
+// Zoom-on-input-focus on iOS is avoided by keeping input font sizes >= 16px.
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   // Draw edge-to-edge under the status bar / gesture nav when installed, so
   // safe-area-inset-* become meaningful (see globals.css .safe-* utilities).
   viewportFit: 'cover',

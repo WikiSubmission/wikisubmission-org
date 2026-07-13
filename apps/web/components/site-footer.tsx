@@ -102,7 +102,6 @@ export async function SiteFooter() {
               href="https://apps.apple.com/us/app/submission-religion-of-god/id6444260632"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`${t('appStorePrefix')} ${t('appStoreLabel')}`}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',

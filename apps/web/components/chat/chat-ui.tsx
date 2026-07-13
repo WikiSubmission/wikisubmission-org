@@ -285,6 +285,7 @@ export function ChatInput({
         <button
           type="submit"
           disabled={!input.trim() || isPending}
+          aria-label={t('send')}
           className="shrink-0 size-9 flex items-center justify-center rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
         >
           {isPending

@@ -70,7 +70,8 @@ export function LocaleSwitcher({
             (e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg-muted)'
             ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-rule)'
           }}
-          aria-label="Switch language"
+          // The visible text must lead the accessible name (WCAG 2.5.3 label in name).
+          aria-label={`${current.label}, switch language`}
         >
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
             <circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20M12 2a14.5 14.5 0 0 1 0 20M2 12h20" />
