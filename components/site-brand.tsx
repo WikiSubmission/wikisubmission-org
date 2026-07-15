@@ -74,34 +74,36 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
         data-brand-mark
         style={{
           display: 'inline-flex',
-          width: 'clamp(22px, 5vw, 30px)',
-          height: 'clamp(22px, 5vw, 30px)',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 'clamp(30px, 7vw, 36px)',
+          height: 'clamp(30px, 7vw, 36px)',
           transformOrigin: '50% 55%',
           willChange: 'transform',
           flexShrink: 0,
         }}
       >
         <Image
-          src="/brand-assets/logo-transparent.png"
+          src="/brand-assets/logo-mark.png"
           alt=""
-          width={30}
-          height={30}
-          style={{ width: '100%', height: '100%' }}
+          width={40}
+          height={40}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
         />
       </span>
 
       <span
         data-brand-wordmark
         aria-hidden="true"
-        className="hidden min-[420px]:inline-block"
+        className="hidden min-[420px]:inline-flex"
         style={{
+          alignItems: 'center',
           fontFamily: F.display,
-          fontSize: 'clamp(16px, 4.2vw, 24px)',
+          fontSize: 'clamp(17px, 4.6vw, 24px)',
           fontWeight: 600,
           letterSpacing: '-0.015em',
           color: 'var(--ed-fg)',
           lineHeight: 1,
-          paddingTop: 'clamp(1px, 0.4vw, 3px)',
           whiteSpace: 'nowrap',
           willChange: 'transform, opacity',
         }}
