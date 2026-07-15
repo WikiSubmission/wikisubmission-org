@@ -129,6 +129,8 @@ function MobileMenu({
   close,
   items,
   isRtl,
+  isAuthed,
+  locale,
 }: {
   open: boolean
   pathname: string | null
@@ -136,6 +138,8 @@ function MobileMenu({
   close: () => void
   items: NavItem[]
   isRtl: boolean
+  isAuthed: boolean
+  locale: string
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
   const [render, setRender] = useState(open)
@@ -379,6 +383,16 @@ function MobileMenu({
           </div>
         ),
       )}
+
+      {!isAuthed && (
+        <div
+          className="sm:hidden flex items-center gap-2 mt-2 pt-3"
+          style={{ borderTop: '1px solid var(--ed-rule)' }}
+        >
+          <LocaleSwitcher currentLocale={locale} onSelect={close} />
+          <PaletteThemeSwitcher />
+        </div>
+      )}
     </div>
   )
 }
@@ -458,7 +472,7 @@ export function SiteNav() {
           </div>
         </div>
 
-        <div className="flex-none flex items-center justify-end gap-1">
+        <div className="flex-none flex items-center justify-end gap-1.5 sm:gap-1">
           {isAuthed && (
             <button
               type="button"
@@ -498,7 +512,7 @@ export function SiteNav() {
           <UserMenu />
 
           {!isAuthed && (
-            <div className="flex items-center gap-0.5">
+            <div className="hidden sm:flex items-center gap-0.5">
               <LocaleSwitcher currentLocale={locale} />
               <PaletteThemeSwitcher />
             </div>
@@ -543,6 +557,8 @@ export function SiteNav() {
         close={close}
         items={navItems}
         isRtl={isRtlLocale(locale)}
+        isAuthed={isAuthed}
+        locale={locale}
       />
     </nav>
   )

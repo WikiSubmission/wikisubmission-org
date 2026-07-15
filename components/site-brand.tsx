@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import gsap from 'gsap'
@@ -16,28 +16,6 @@ type SiteBrandProps = {
 export function SiteBrand({ onClick }: SiteBrandProps) {
   const rootRef = useRef<HTMLAnchorElement | null>(null)
   const playedIntroRef = useRef(false)
-
-  const playPop = useCallback(() => {
-    const root = rootRef.current
-    if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return
-    }
-
-    const mark = root.querySelector('[data-brand-mark]')
-    const wordmark = root.querySelector('[data-brand-wordmark]')
-
-    gsap
-      .timeline({ defaults: { ease: 'power2.out' } })
-      .to(mark, { rotate: -8, scale: 1.08, duration: 0.18 })
-      .to(wordmark, { letterSpacing: '0.005em', duration: 0.16 }, '<')
-      .to([mark, wordmark], {
-        rotate: 0,
-        scale: 1,
-        letterSpacing: '-0.015em',
-        duration: 0.28,
-        ease: 'power3.out',
-      })
-  }, [])
 
   useEffect(() => {
     const root = rootRef.current
@@ -77,8 +55,6 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
       ref={rootRef}
       href="/"
       onClick={onClick}
-      onMouseEnter={playPop}
-      onFocus={playPop}
       aria-label="WikiSubmission"
       dir="ltr"
       style={{
@@ -117,9 +93,8 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
       <span
         data-brand-wordmark
         aria-hidden="true"
-        className="max-[480px]:hidden sm:inline-block"
+        className="hidden min-[420px]:inline-block"
         style={{
-          display: 'inline-block',
           fontFamily: F.display,
           fontSize: 'clamp(16px, 4.2vw, 24px)',
           fontWeight: 600,
