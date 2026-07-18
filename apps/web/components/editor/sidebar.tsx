@@ -19,10 +19,9 @@ import {
   ITag,
   ILibrary,
   IShield,
-  ILogout,
   type IconProps,
 } from './icons'
-import { SidebarSettings } from './sidebar-settings'
+import { EditorUserMenu } from './user-menu'
 
 interface ModuleMeta {
   label: string
@@ -117,24 +116,7 @@ export function Sidebar({ viewer, modules, signOutAction }: SidebarProps) {
           </div>
         ))}
       </div>
-      <SidebarSettings />
-      <div className="sb-user">
-        <span className="sb-avatar">{viewer.name.charAt(0).toUpperCase()}</span>
-        <span className="who">
-          <b>{viewer.name}</b>
-          <small>@{viewer.handle}</small>
-        </span>
-        <form action={signOutAction}>
-          <button
-            type="submit"
-            className="iconbtn"
-            style={{ width: 26, height: 26 }}
-            aria-label="Sign out"
-          >
-            <ILogout size={15} />
-          </button>
-        </form>
-      </div>
+      <EditorUserMenu viewer={viewer} signOutAction={signOutAction} />
     </aside>
   )
 }

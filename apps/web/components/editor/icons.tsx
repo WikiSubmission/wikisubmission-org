@@ -145,22 +145,11 @@ export const IGlobe = (p: IconProps) => (
   </Glyph>
 )
 
-export const ISun = (p: IconProps) => (
+export const IPalette = (p: IconProps) => (
   <Glyph {...p}>
-    <circle cx="12" cy="12" r="4" />
-    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-  </Glyph>
-)
-
-export const IMoon = (p: IconProps) => (
-  <Glyph {...p}>
-    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-  </Glyph>
-)
-
-export const IMonitor = (p: IconProps) => (
-  <Glyph {...p}>
-    <rect x="2.5" y="4" width="19" height="13" rx="2" />
-    <path d="M8 21h8M12 17v4" />
+    <path d="M12 3a9 9 0 1 0 0 18c1.4 0 2.2-.9 2.2-2 0-.6-.2-1-.6-1.4-.4-.4-.6-.8-.6-1.3 0-1 .8-1.8 1.8-1.8h1.5A4.7 4.7 0 0 0 21 9.8C21 6 16.9 3 12 3z" />
+    <circle cx="7.5" cy="11.5" r="1" fill="currentColor" stroke="none" />
+    <circle cx="10.5" cy="7.5" r="1" fill="currentColor" stroke="none" />
+    <circle cx="15.5" cy="8" r="1" fill="currentColor" stroke="none" />
   </Glyph>
 )

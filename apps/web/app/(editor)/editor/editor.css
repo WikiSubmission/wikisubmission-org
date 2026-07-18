@@ -124,55 +124,22 @@
 .sb-item.is-locked { opacity: 0.5; }
 .sb-item.is-locked .cnt { color: var(--ed-fg-muted); }
 
-/* language + theme controls, directly above the user block */
-.sb-settings {
-  border-top: 1px solid var(--ed-rule);
-  padding: 10px 14px;
-  display: flex; flex-direction: column; gap: 8px;
-}
-.sb-set-row { display: flex; align-items: center; gap: 10px; }
-.sb-set-k {
-  font-family: var(--font-glacial);
-  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--ed-fg-muted); flex: 1; min-width: 0;
-}
-.sb-set-select {
-  position: relative;
-  display: inline-flex; align-items: center; gap: 6px;
-  border: 1px solid var(--ed-rule); border-radius: var(--ed-radius-sm);
-  padding: 4px 8px; background: var(--ed-surface);
-  font-family: var(--font-source-serif); font-size: 12.5px; color: var(--ed-fg);
-  transition: border-color 140ms;
-  max-width: 108px;
-}
-.sb-set-select:hover, .sb-set-select:focus-within { border-color: var(--ed-fg-muted); }
-.sb-set-select svg { color: var(--ed-fg-muted); flex: 0 0 auto; }
-.sb-set-select .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* The native select sits invisibly on top so the picker stays the OS one. */
-.sb-set-select select {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  opacity: 0; cursor: pointer; -webkit-appearance: none; appearance: none;
-}
-.sb-set-seg {
-  display: inline-flex; border: 1px solid var(--ed-rule);
-  border-radius: var(--ed-radius-sm); overflow: hidden;
-}
-.sb-set-seg button {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 24px;
-  background: transparent; color: var(--ed-fg-muted);
-  border: 0; border-right: 1px solid var(--ed-rule);
-  transition: background 140ms, color 140ms;
-}
-.sb-set-seg button:last-child { border-right: 0; }
-.sb-set-seg button:hover { color: var(--ed-fg); background: color-mix(in oklab, var(--ed-fg) 6%, transparent); }
-.sb-set-seg button.is-on { background: var(--ed-fg); color: var(--ed-bg); }
-
+/* The user block is the trigger for the account menu (language + theme + sign
+   out), so it is a full-width button styled to read as a plain block. */
 .sb-user {
   border-top: 1px solid var(--ed-rule);
   padding: 12px 14px;
   display: grid; grid-template-columns: auto 1fr auto; gap: 11px; align-items: center;
+  width: 100%; text-align: left;
+  background: transparent; border-left: 0; border-right: 0; border-bottom: 0;
+  transition: background 140ms;
 }
+.sb-user:hover { background: color-mix(in oklab, var(--ed-fg) 5%, transparent); }
+.sb-user[data-state='open'] { background: var(--ed-accent-soft); }
+/* points up (the menu opens upward), flipping down once open */
+.sb-user-chev { display: inline-flex; color: var(--ed-fg-muted); transition: transform 160ms; }
+.sb-user[data-state='open'] .sb-user-chev { transform: rotate(180deg); }
+.sb-user:hover .sb-user-chev { color: var(--ed-fg); }
 .sb-avatar {
   width: 32px; height: 32px; border-radius: var(--ed-radius-sm);
   background: var(--ed-surface); border: 1px solid var(--ed-rule);
@@ -194,10 +161,7 @@
 .sidebar.rail .sb-item.is-active::before { left: 0; top: 0; bottom: 0; }
 .sidebar.rail .sb-user { grid-template-columns: 1fr; justify-items: center; }
 .sidebar.rail .sb-user .who { display: none; }
-.sidebar.rail .sb-settings { align-items: center; padding: 10px 6px; }
-.sidebar.rail .sb-set-k { display: none; }
-.sidebar.rail .sb-set-select { max-width: 100%; }
-.sidebar.rail .sb-set-select .v { display: none; }
+.sidebar.rail .sb-user-chev { display: none; }
 
 /* =========================================================
    MAIN COLUMN
