@@ -1,4 +1,4 @@
-WikiSubmission takes your privacy seriously. This Privacy Policy explains what information the WikiSubmission website (wikisubmission.org) and the WikiSubmission mobile app (`com.wikisubmission.app`) collect, how it is used, and the choices you have. Throughout this policy, "we," "us," and "our" refer to WikiSubmission, the developer of the website and the app.
+WikiSubmission takes your privacy seriously. This Privacy Policy explains what information the WikiSubmission website (wikisubmission.org) and the WikiSubmission mobile app (`org.wikisubmission.app`) collect, how it is used, and the choices you have. Throughout this policy, "we," "us," and "our" refer to WikiSubmission, the developer of the website and the app.
 
 We designed WikiSubmission to work without tracking you. We do not show ads, we do not use any advertising or analytics SDKs, and we do not sell or share your personal information with third parties for their own purposes. The sections below describe exactly what we do collect and why.
 

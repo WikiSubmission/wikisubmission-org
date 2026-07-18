@@ -53,7 +53,7 @@ cd apps/mobile/android
 ./gradlew assembleDebug --no-daemon  # -> app/build/outputs/apk/debug/app-debug.apk
 
 adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am start -n com.wikisubmission.app/.MainActivity
+adb shell am start -n org.wikisubmission.app/.MainActivity
 ```
 
 ## One-liner (after the env is exported and the emulator is up)
@@ -63,7 +63,7 @@ pnpm --filter mobile build \
   && (cd apps/mobile && npx cap sync android) \
   && (cd apps/mobile/android && ./gradlew assembleDebug --no-daemon) \
   && adb install -r apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk \
-  && adb shell am start -n com.wikisubmission.app/.MainActivity
+  && adb shell am start -n org.wikisubmission.app/.MainActivity
 ```
 
 ## Useful checks
@@ -71,12 +71,12 @@ pnpm --filter mobile build \
 ```bash
 adb exec-out screencap -p > /tmp/shot.png   # screenshot the device
 adb logcat -d | grep -iE "Capacitor|chromium.*ERROR"   # webview errors
-adb shell am force-stop com.wikisubmission.app          # kill the app
+adb shell am force-stop org.wikisubmission.app          # kill the app
 ```
 
 ## Notes
 
-- `appId` is `com.wikisubmission.app` (set in `capacitor.config.ts`).
+- `appId` is `org.wikisubmission.app` (set in `capacitor.config.ts`).
 - A one-off "Waited 5000ms for FocusEvent" ANR on cold start is an emulator
   webview focus-timeout artifact, not an app bug. Dismiss with Wait.
 - iOS builds need macOS + Xcode and cannot be done on this Linux machine.
