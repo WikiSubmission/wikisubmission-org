@@ -22,6 +22,7 @@ import {
   ILogout,
   type IconProps,
 } from './icons'
+import { SidebarSettings } from './sidebar-settings'
 
 interface ModuleMeta {
   label: string
@@ -116,6 +117,7 @@ export function Sidebar({ viewer, modules, signOutAction }: SidebarProps) {
           </div>
         ))}
       </div>
+      <SidebarSettings />
       <div className="sb-user">
         <span className="sb-avatar">{viewer.name.charAt(0).toUpperCase()}</span>
         <span className="who">

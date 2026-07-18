@@ -31,7 +31,9 @@
   --st-changes:  #6B3410;   /* accent / sienna */
   --st-danger:   #8C2C2C;   /* destructive */
 }
-[data-mode='dark'] {
+/* next-themes puts `dark` on <html> (attribute="class"), so that — not the
+   design pack's data-mode — is what flips the editor's status colours. */
+.dark {
   --st-draft:   #C9A24B;
   --st-pub:     #6FA86A;
   --st-changes: #D4A373;
@@ -122,6 +124,50 @@
 .sb-item.is-locked { opacity: 0.5; }
 .sb-item.is-locked .cnt { color: var(--ed-fg-muted); }
 
+/* language + theme controls, directly above the user block */
+.sb-settings {
+  border-top: 1px solid var(--ed-rule);
+  padding: 10px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.sb-set-row { display: flex; align-items: center; gap: 10px; }
+.sb-set-k {
+  font-family: var(--font-glacial);
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ed-fg-muted); flex: 1; min-width: 0;
+}
+.sb-set-select {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--ed-rule); border-radius: var(--ed-radius-sm);
+  padding: 4px 8px; background: var(--ed-surface);
+  font-family: var(--font-source-serif); font-size: 12.5px; color: var(--ed-fg);
+  transition: border-color 140ms;
+  max-width: 108px;
+}
+.sb-set-select:hover, .sb-set-select:focus-within { border-color: var(--ed-fg-muted); }
+.sb-set-select svg { color: var(--ed-fg-muted); flex: 0 0 auto; }
+.sb-set-select .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The native select sits invisibly on top so the picker stays the OS one. */
+.sb-set-select select {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0; cursor: pointer; -webkit-appearance: none; appearance: none;
+}
+.sb-set-seg {
+  display: inline-flex; border: 1px solid var(--ed-rule);
+  border-radius: var(--ed-radius-sm); overflow: hidden;
+}
+.sb-set-seg button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 24px;
+  background: transparent; color: var(--ed-fg-muted);
+  border: 0; border-right: 1px solid var(--ed-rule);
+  transition: background 140ms, color 140ms;
+}
+.sb-set-seg button:last-child { border-right: 0; }
+.sb-set-seg button:hover { color: var(--ed-fg); background: color-mix(in oklab, var(--ed-fg) 6%, transparent); }
+.sb-set-seg button.is-on { background: var(--ed-fg); color: var(--ed-bg); }
+
 .sb-user {
   border-top: 1px solid var(--ed-rule);
   padding: 12px 14px;
@@ -148,6 +194,10 @@
 .sidebar.rail .sb-item.is-active::before { left: 0; top: 0; bottom: 0; }
 .sidebar.rail .sb-user { grid-template-columns: 1fr; justify-items: center; }
 .sidebar.rail .sb-user .who { display: none; }
+.sidebar.rail .sb-settings { align-items: center; padding: 10px 6px; }
+.sidebar.rail .sb-set-k { display: none; }
+.sidebar.rail .sb-set-select { max-width: 100%; }
+.sidebar.rail .sb-set-select .v { display: none; }
 
 /* =========================================================
    MAIN COLUMN
@@ -1034,3 +1084,78 @@
 .pt-image { display: flex; flex-direction: column; gap: 8px; }
 .pt-note { margin: 0; font-size: 12.5px; font-style: italic; color: var(--ed-fg-muted); }
 .pt-add { display: flex; gap: 8px; margin-top: 2px; }
+
+/* =========================================================
+   LEGIBILITY PASS
+   The design pack leans on 8–10px uppercase micro-labels with 0.18–0.22em
+   tracking in the muted ink. At those sizes the tracking is what breaks the
+   word shape, so this layer lifts the floor to ~10px, pulls the tracking back,
+   and raises the muted ink's contrast against the paper — matching how the
+   rest of the site reads. Kept as one block (rather than edited into the ~40
+   rules above) so the design pack stays diffable against its source.
+   ========================================================= */
+.ed-scope {
+  /* ~7:1 against the page in both modes, vs. ~5:1 for the shared token */
+  --ed-fg-muted: color-mix(in oklab, var(--ed-fg) 74%, var(--ed-bg));
+  text-rendering: optimizeLegibility;
+}
+
+.ed-scope .sb-brand .wm small,
+.ed-scope .status-label,
+.ed-scope .badge,
+.ed-scope .tagchip,
+.ed-scope .vfield-label,
+.ed-scope .wtable-bar .ttl,
+.ed-scope .refblock .rk,
+.ed-scope .reffield-h,
+.ed-scope .reftabs button,
+.ed-scope .seg button,
+.ed-scope .permtable th,
+.ed-scope .rte-table th,
+.ed-scope .wstack-f .k,
+.ed-scope .rootpop-head .eg,
+.ed-scope .wtable th { font-size: 10px; letter-spacing: 0.12em; }
+
+.ed-scope .sb-group-label,
+.ed-scope .field > label,
+.ed-scope .fchip,
+.ed-scope .colchip,
+.ed-scope .pg-lbl,
+.ed-scope .dh-eyebrow,
+.ed-scope .disclosure-head,
+.ed-scope .refrail-head .eg,
+.ed-scope .refpick .rp-label,
+.ed-scope .tb-select .k { font-size: 10.5px; letter-spacing: 0.13em; }
+
+.ed-scope .tb-crumb { font-size: 11.5px; letter-spacing: 0.11em; }
+
+/* monospace metadata — small but not tracked-out, so only the size moves */
+.ed-scope .sb-item .cnt,
+.ed-scope .sb-user .who small,
+.ed-scope .row-meta,
+.ed-scope .gcard .gmeta,
+.ed-scope .chrow .cn,
+.ed-scope .master-title .n,
+.ed-scope .block-head .hint,
+.ed-scope .refverse .rvr-k,
+.ed-scope .reflang .rl-name,
+.ed-scope .rh-when,
+.ed-scope .rootpop-n,
+.ed-scope .permtable td:first-child small { font-size: 11px; }
+.ed-scope .save-pill { font-size: 11.5px; }
+.ed-scope .rect-result { font-size: 12px; }
+
+/* italic Cormorant loses too much at 12–13px for body-adjacent copy */
+.ed-scope .field .desc,
+.ed-scope .row-sub,
+.ed-scope .wcell-ref,
+.ed-scope .wbw-gloss { font-size: 13.5px; }
+.ed-scope .rte-figure figcaption { font-size: 13.5px; }
+
+/* rail labels are the smallest text in the shell — give them room */
+.ed-scope .sidebar.rail .sb-item .lbl { font-size: 9.5px; letter-spacing: 0.06em; }
+
+/* placeholders/empties were drawn in --ed-rule, which is a border colour and
+   effectively invisible as text */
+.ed-scope .wbw-input::placeholder,
+.ed-scope .reflang .rl-empty { color: var(--ed-fg-muted); }
