@@ -66,6 +66,7 @@ function getNavItems(t: (k: string) => string): NavItem[] {
     { kind: 'link', label: 'archive', href: '/archive' },
     { kind: 'link', label: 'music', href: '/music' },
     { kind: 'link', label: 'blog', href: '/blog' },
+    { kind: 'link', label: 'chat', href: '/chat' },
   ]
 }
 
