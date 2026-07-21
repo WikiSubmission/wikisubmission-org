@@ -1,297 +1,373 @@
 'use client'
 
 /**
- * Pragmatic Portable Text block editor. Text blocks are edited as plain
- * textareas with markdown-ish inline marks (see pt-text.ts); callout and image
- * blocks get dedicated small forms; anything else (tables, embeds) is shown as
- * a preserved card and passed through byte-identical, so no content is ever
- * lost by opening and saving a document.
+ * Article body editor — a Portable Text WYSIWYG built on Sanity's standalone
+ * @portabletext/editor. It reads and writes the SAME Portable Text stored by
+ * the previous form editor (see pt-schema.ts for the byte-compatibility
+ * contract) so no content migration is needed and the public
+ * @portabletext/react renderer is unchanged.
+ *
+ * Custom block objects: `callout` (tone + text) and `image` (url/alt/caption,
+ * with upload). Documents containing block types the schema cannot represent
+ * are opened read-only so nothing is ever dropped on save.
  */
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import { defineSchema, EditorProvider, PortableTextEditable, useEditor } from '@portabletext/editor'
+import type {
+  BlockAnnotationRenderProps,
+  BlockRenderProps,
+  PortableTextBlock,
+} from '@portabletext/editor'
+import { EventListenerPlugin } from '@portabletext/editor/plugins'
 
 import {
-  makeTextBlock,
-  randomKey,
-  serializeBlockText,
-  type PTBlock,
-} from './pt-text'
+  SCHEMA_DEFINITION,
+  STYLE_OPTIONS,
+  TONE_OPTIONS,
+  hasUnsupportedBlocks,
+  toInitialValue,
+} from './pt-schema'
+import { uploadEditorialImage } from './upload-image'
 
-type RawBlock = Record<string, unknown> & { _type?: string; _key?: string }
+const schemaDefinition = defineSchema(
+  SCHEMA_DEFINITION as unknown as Parameters<typeof defineSchema>[0],
+)
 
-interface TextItem {
-  id: string
-  kind: 'text'
-  text: string
-  style: string // normal | h2 | h3 | h4 | blockquote | bullet | number
-}
-interface CalloutItem {
-  id: string
-  kind: 'callout'
-  tone: string
-  text: string
-  raw: RawBlock
-}
-interface ImageItem {
-  id: string
-  kind: 'image'
-  url: string
-  alt: string
-  caption: string
-  raw: RawBlock
-}
-interface OpaqueItem {
-  id: string
-  kind: 'opaque'
-  raw: RawBlock
-}
-type Item = TextItem | CalloutItem | ImageItem | OpaqueItem
+type BlockPath = BlockRenderProps['path']
 
-const STYLE_OPTIONS = [
-  { value: 'normal', label: 'Paragraph' },
-  { value: 'h2', label: 'Heading 2' },
-  { value: 'h3', label: 'Heading 3' },
-  { value: 'h4', label: 'Heading 4' },
-  { value: 'blockquote', label: 'Quote' },
-  { value: 'bullet', label: 'Bullet item' },
-  { value: 'number', label: 'Numbered item' },
-]
-
-const TONE_OPTIONS = ['info', 'warning', 'tip', 'danger']
-
-function toItems(blocks: unknown): Item[] {
-  if (!Array.isArray(blocks)) return []
-  return blocks.map((raw: RawBlock) => {
-    const id = typeof raw._key === 'string' && raw._key ? raw._key : randomKey()
-    if (raw._type === 'block' && Array.isArray(raw.children)) {
-      const block = raw as unknown as PTBlock
-      const style = block.listItem
-        ? block.listItem === 'number'
-          ? 'number'
-          : 'bullet'
-        : (block.style ?? 'normal')
-      return { id, kind: 'text', text: serializeBlockText(block), style } satisfies TextItem
-    }
-    if (raw._type === 'callout') {
-      return {
-        id,
-        kind: 'callout',
-        tone: typeof raw.tone === 'string' ? raw.tone : 'info',
-        text: typeof raw.text === 'string' ? raw.text : '',
-        raw,
-      } satisfies CalloutItem
-    }
-    if (raw._type === 'image') {
-      return {
-        id,
-        kind: 'image',
-        url: typeof raw.url === 'string' ? raw.url : '',
-        alt: typeof raw.alt === 'string' ? raw.alt : '',
-        caption: typeof raw.caption === 'string' ? raw.caption : '',
-        raw,
-      } satisfies ImageItem
-    }
-    return { id, kind: 'opaque', raw } satisfies OpaqueItem
-  })
+interface BlockObjectValue {
+  _key: string
+  _type: string
+  tone?: string
+  text?: string
+  url?: string
+  alt?: string
+  caption?: string
 }
 
-function toBlocks(items: Item[]): RawBlock[] {
-  return items.map((item) => {
-    switch (item.kind) {
-      case 'text': {
-        const isList = item.style === 'bullet' || item.style === 'number'
-        return makeTextBlock(item.text, {
-          key: item.id,
-          style: isList ? 'normal' : item.style,
-          listItem: isList ? item.style : undefined,
-        }) as unknown as RawBlock
-      }
-      case 'callout':
-        return { ...item.raw, _type: 'callout', _key: item.id, tone: item.tone, text: item.text }
-      case 'image':
-        return {
-          ...item.raw,
-          _type: 'image',
-          _key: item.id,
-          url: item.url,
-          alt: item.alt,
-          caption: item.caption,
-        }
-      case 'opaque':
-        return item.raw
-    }
-  })
-}
-
-export function PTEditor({
-  initialValue,
-  onChange,
-  disabled,
-}: {
+interface PTEditorProps {
   initialValue: unknown
   onChange: (blocks: unknown[]) => void
   disabled?: boolean
-}) {
-  const initial = useMemo(() => toItems(initialValue), [initialValue])
-  const [items, setItems] = useState<Item[]>(initial)
+}
 
-  // Only ever called from event handlers, so this always sees the latest
-  // onChange prop.
-  const apply = (next: Item[]) => {
-    setItems(next)
-    onChange(toBlocks(next))
+export function PTEditor({ initialValue, onChange, disabled }: PTEditorProps) {
+  // Slate needs the DOM; render only after mount to avoid SSR/hydration issues.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  const initial = useMemo(() => toInitialValue(initialValue), [initialValue])
+  const unsupported = useMemo(() => hasUnsupportedBlocks(initialValue), [initialValue])
+
+  // Ignore no-op normalization mutations on mount: only surface real changes.
+  const lastSerialized = useRef(JSON.stringify(initial ?? []))
+  const handleMutation = useCallback(
+    (value: unknown[] | undefined) => {
+      const next = value ?? []
+      const serialized = JSON.stringify(next)
+      if (serialized === lastSerialized.current) return
+      lastSerialized.current = serialized
+      onChange(next)
+    },
+    [onChange],
+  )
+
+  if (!mounted) {
+    return <div className="pt-editor pt-editor-loading">Loading editor…</div>
   }
 
-  const update = (id: string, patch: Partial<Item>) => {
-    apply(items.map((it) => (it.id === id ? ({ ...it, ...patch } as Item) : it)))
-  }
-  const remove = (id: string) => apply(items.filter((it) => it.id !== id))
-  const move = (id: string, dir: -1 | 1) => {
-    const i = items.findIndex((it) => it.id === id)
-    const j = i + dir
-    if (i < 0 || j < 0 || j >= items.length) return
-    const next = [...items]
-    ;[next[i], next[j]] = [next[j], next[i]]
-    apply(next)
-  }
-  const insert = (kind: 'text' | 'callout' | 'image') => {
-    const id = randomKey()
-    const item: Item =
-      kind === 'text'
-        ? { id, kind, text: '', style: 'normal' }
-        : kind === 'callout'
-          ? { id, kind, tone: 'info', text: '', raw: {} }
-          : { id, kind, url: '', alt: '', caption: '', raw: {} }
-    apply([...items, item])
+  if (unsupported) {
+    return (
+      <div className="pt-editor pt-unsupported">
+        This document contains content types the visual editor cannot represent
+        (for example legacy tables or embeds). Editing the body here is disabled
+        so nothing is lost. The content is preserved exactly as stored.
+      </div>
+    )
   }
 
   return (
-    <div className="pt-editor">
-      {items.length === 0 && (
-        <p className="pt-empty">No content yet. Add a paragraph below.</p>
-      )}
-      {items.map((item, index) => (
-        <div className="pt-block" key={item.id}>
-          <div className="pt-block-bar">
-            {item.kind === 'text' ? (
-              <select
-                className="pt-style"
-                value={item.style}
-                disabled={disabled}
-                onChange={(e) => update(item.id, { style: e.target.value })}
-              >
-                {STYLE_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span className="pt-kind">{item.kind}</span>
-            )}
-            <span className="pt-spacer" />
-            {!disabled && (
-              <>
-                <button type="button" className="iconbtn" title="Move up" disabled={index === 0} onClick={() => move(item.id, -1)}>
-                  ↑
-                </button>
-                <button type="button" className="iconbtn" title="Move down" disabled={index === items.length - 1} onClick={() => move(item.id, 1)}>
-                  ↓
-                </button>
-                <button type="button" className="iconbtn" title="Remove block" onClick={() => remove(item.id)}>
-                  ✕
-                </button>
-              </>
-            )}
-          </div>
+    <div className={`pt-editor${disabled ? ' is-disabled' : ''}`}>
+      <EditorProvider
+        initialConfig={{ schemaDefinition, initialValue: initial as PortableTextBlock[] | undefined }}
+      >
+        <EventListenerPlugin
+          on={(event) => {
+            if (event.type === 'mutation') handleMutation(event.value)
+          }}
+        />
+        {!disabled && <Toolbar />}
+        <PortableTextEditable
+          className="pt-content"
+          readOnly={disabled}
+          renderStyle={(props) => renderStyle(props)}
+          renderDecorator={(props) => renderDecorator(props)}
+          renderAnnotation={(props) => renderAnnotation(props)}
+          renderListItem={(props) => <>{props.children}</>}
+          renderBlock={(props) => renderBlock(props)}
+        />
+      </EditorProvider>
+    </div>
+  )
+}
 
-          {item.kind === 'text' && (
-            <textarea
-              className="textarea pt-text"
-              rows={Math.max(2, item.text.split('\n').length + 1)}
-              value={item.text}
-              disabled={disabled}
-              placeholder="Write… (**bold**, *italic*, [link](https://…))"
-              onChange={(e) => update(item.id, { text: e.target.value })}
-            />
-          )}
+// ── render functions ─────────────────────────────────────────────────────────
 
-          {item.kind === 'callout' && (
-            <div className="pt-callout">
-              <select
-                className="pt-style"
-                value={item.tone}
-                disabled={disabled}
-                onChange={(e) => update(item.id, { tone: e.target.value })}
-              >
-                {TONE_OPTIONS.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-              <textarea
-                className="textarea pt-text"
-                rows={2}
-                value={item.text}
-                disabled={disabled}
-                onChange={(e) => update(item.id, { text: e.target.value })}
-              />
-            </div>
-          )}
+function renderStyle(props: { schemaType: { value?: string }; children: React.ReactNode }) {
+  switch (props.schemaType.value) {
+    case 'h2':
+      return <h2 className="pt-h2">{props.children}</h2>
+    case 'h3':
+      return <h3 className="pt-h3">{props.children}</h3>
+    case 'h4':
+      return <h4 className="pt-h4">{props.children}</h4>
+    case 'blockquote':
+      return <blockquote className="pt-quote">{props.children}</blockquote>
+    default:
+      return <>{props.children}</>
+  }
+}
 
-          {item.kind === 'image' && (
-            <div className="pt-image">
-              <input
-                className="input mono"
-                placeholder="Image URL"
-                value={item.url}
-                disabled={disabled}
-                onChange={(e) => update(item.id, { url: e.target.value })}
-              />
-              <div className="field-row">
-                <input
-                  className="input"
-                  placeholder="Alt text"
-                  value={item.alt}
-                  disabled={disabled}
-                  onChange={(e) => update(item.id, { alt: e.target.value })}
-                />
-                <input
-                  className="input"
-                  placeholder="Caption"
-                  value={item.caption}
-                  disabled={disabled}
-                  onChange={(e) => update(item.id, { caption: e.target.value })}
-                />
-              </div>
-              {!item.url && item.raw.asset != null && (
-                <p className="pt-note">Legacy image asset preserved from the previous CMS.</p>
-              )}
-            </div>
-          )}
+function renderDecorator(props: { value: string; children: React.ReactNode }) {
+  switch (props.value) {
+    case 'strong':
+      return <strong>{props.children}</strong>
+    case 'em':
+      return <em>{props.children}</em>
+    case 'underline':
+      return <u>{props.children}</u>
+    case 'strike-through':
+      return <s>{props.children}</s>
+    case 'code':
+      return <code className="pt-code">{props.children}</code>
+    default:
+      return <>{props.children}</>
+  }
+}
 
-          {item.kind === 'opaque' && (
-            <p className="pt-note">
-              Preserved {typeof item.raw._type === 'string' ? item.raw._type : 'block'} — not
-              editable here, kept exactly as stored.
-            </p>
-          )}
-        </div>
+function renderAnnotation(props: BlockAnnotationRenderProps) {
+  if (props.schemaType.name === 'link') {
+    const href = (props.value as { href?: string })?.href
+    return (
+      <span className="pt-link" title={href}>
+        {props.children}
+      </span>
+    )
+  }
+  return <>{props.children}</>
+}
+
+function renderBlock(props: BlockRenderProps) {
+  const value = props.value as BlockObjectValue
+  if (props.schemaType.name === 'callout') {
+    return <CalloutCard value={value} path={props.path} />
+  }
+  if (props.schemaType.name === 'image') {
+    return <ImageCard value={value} path={props.path} />
+  }
+  const meta = props.value as { listItem?: string; level?: number }
+  return (
+    <div className="pt-line" data-list={meta.listItem} data-level={meta.level}>
+      {props.children}
+    </div>
+  )
+}
+
+// ── toolbar ──────────────────────────────────────────────────────────────────
+
+function Toolbar() {
+  const editor = useEditor()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+
+  const toggleDecorator = (decorator: string) =>
+    editor.send({ type: 'decorator.toggle', decorator })
+  const toggleStyle = (style: string) => editor.send({ type: 'style.toggle', style })
+  const toggleList = (listItem: string) => editor.send({ type: 'list item.toggle', listItem })
+
+  const addLink = () => {
+    const href = window.prompt('Link URL')?.trim()
+    if (!href) return
+    editor.send({ type: 'annotation.add', annotation: { name: 'link', value: { href, blank: false } } })
+  }
+  const removeLink = () => editor.send({ type: 'annotation.remove', annotation: { name: 'link' } })
+
+  const insertCallout = () =>
+    editor.send({
+      type: 'insert.block object',
+      placement: 'auto',
+      blockObject: { name: 'callout', value: { tone: 'info', text: '' } },
+    })
+
+  const onPickImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploading(true)
+    try {
+      const url = await uploadEditorialImage(file)
+      editor.send({
+        type: 'insert.block object',
+        placement: 'auto',
+        blockObject: { name: 'image', value: { url, alt: '', caption: '' } },
+      })
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Image upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="pt-toolbar">
+      <button type="button" className="pt-tb" title="Bold" onClick={() => toggleDecorator('strong')}>
+        <b>B</b>
+      </button>
+      <button type="button" className="pt-tb" title="Italic" onClick={() => toggleDecorator('em')}>
+        <i>I</i>
+      </button>
+      <button type="button" className="pt-tb" title="Underline" onClick={() => toggleDecorator('underline')}>
+        <u>U</u>
+      </button>
+      <button type="button" className="pt-tb" title="Strikethrough" onClick={() => toggleDecorator('strike-through')}>
+        <s>S</s>
+      </button>
+      <button type="button" className="pt-tb" title="Code" onClick={() => toggleDecorator('code')}>
+        {'</>'}
+      </button>
+      <span className="pt-tb-sep" />
+      {STYLE_OPTIONS.map((s) => (
+        <button key={s.value} type="button" className="pt-tb" title={s.label} onClick={() => toggleStyle(s.value)}>
+          {s.value === 'normal' ? 'P' : s.value === 'blockquote' ? '❝' : s.value.toUpperCase()}
+        </button>
       ))}
+      <span className="pt-tb-sep" />
+      <button type="button" className="pt-tb" title="Bulleted list" onClick={() => toggleList('bullet')}>
+        •
+      </button>
+      <button type="button" className="pt-tb" title="Numbered list" onClick={() => toggleList('number')}>
+        1.
+      </button>
+      <span className="pt-tb-sep" />
+      <button type="button" className="pt-tb" title="Add link" onClick={addLink}>
+        🔗
+      </button>
+      <button type="button" className="pt-tb" title="Remove link" onClick={removeLink}>
+        ⛓️‍💥
+      </button>
+      <span className="pt-tb-sep" />
+      <button type="button" className="pt-tb pt-tb-wide" onClick={insertCallout}>
+        + Callout
+      </button>
+      <button type="button" className="pt-tb pt-tb-wide" disabled={uploading} onClick={() => fileRef.current?.click()}>
+        {uploading ? 'Uploading…' : '+ Image'}
+      </button>
+      <input ref={fileRef} type="file" accept="image/*" hidden onChange={onPickImage} />
+    </div>
+  )
+}
 
-      {!disabled && (
-        <div className="pt-add">
-          <button type="button" className="btn sm" onClick={() => insert('text')}>
-            + Paragraph
-          </button>
-          <button type="button" className="btn sm" onClick={() => insert('callout')}>
-            + Callout
-          </button>
-          <button type="button" className="btn sm" onClick={() => insert('image')}>
-            + Image
-          </button>
-        </div>
+// ── custom block cards ───────────────────────────────────────────────────────
+
+function CalloutCard({ value, path }: { value: BlockObjectValue; path: BlockPath }) {
+  const editor = useEditor()
+  const set = (props: Record<string, unknown>) => editor.send({ type: 'block.set', at: path, props })
+  const remove = () => editor.send({ type: 'delete.block', at: path })
+
+  return (
+    <div className={`pt-card pt-callout tone-${value.tone ?? 'info'}`} contentEditable={false}>
+      <div className="pt-card-bar">
+        <span className="pt-card-kind">Callout</span>
+        <select
+          className="pt-style"
+          value={value.tone ?? 'info'}
+          onChange={(e) => set({ tone: e.target.value })}
+        >
+          {TONE_OPTIONS.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+        <span className="pt-spacer" />
+        <button type="button" className="iconbtn" title="Remove" onClick={remove}>
+          ✕
+        </button>
+      </div>
+      <textarea
+        className="textarea pt-card-text"
+        rows={2}
+        value={value.text ?? ''}
+        placeholder="Callout text…"
+        onChange={(e) => set({ text: e.target.value })}
+      />
+    </div>
+  )
+}
+
+function ImageCard({ value, path }: { value: BlockObjectValue; path: BlockPath }) {
+  const editor = useEditor()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const set = (props: Record<string, unknown>) => editor.send({ type: 'block.set', at: path, props })
+  const remove = () => editor.send({ type: 'delete.block', at: path })
+
+  const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploading(true)
+    try {
+      set({ url: await uploadEditorialImage(file) })
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Image upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="pt-card pt-image" contentEditable={false}>
+      <div className="pt-card-bar">
+        <span className="pt-card-kind">Image</span>
+        <span className="pt-spacer" />
+        <button type="button" className="iconbtn" title="Remove" onClick={remove}>
+          ✕
+        </button>
+      </div>
+      {value.url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="pt-image-preview" src={value.url} alt={value.alt ?? ''} />
+      ) : (
+        <div className="pt-image-empty">No image yet</div>
       )}
+      <div className="pt-image-fields">
+        <button type="button" className="btn sm" disabled={uploading} onClick={() => fileRef.current?.click()}>
+          {uploading ? 'Uploading…' : value.url ? 'Replace image' : 'Upload image'}
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onPick} />
+        <input
+          className="input mono"
+          placeholder="or paste image URL"
+          value={value.url ?? ''}
+          onChange={(e) => set({ url: e.target.value })}
+        />
+        <div className="field-row">
+          <input
+            className="input"
+            placeholder="Alt text"
+            value={value.alt ?? ''}
+            onChange={(e) => set({ alt: e.target.value })}
+          />
+          <input
+            className="input"
+            placeholder="Caption"
+            value={value.caption ?? ''}
+            onChange={(e) => set({ caption: e.target.value })}
+          />
+        </div>
+      </div>
     </div>
   )
 }
