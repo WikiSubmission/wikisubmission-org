@@ -12,7 +12,7 @@ import {
 import { PRAYER_EVENT_ORDER, type PrayerEventKey } from '@/lib/prayer-events'
 import { anyEventEnabled, prefsHash, readNotificationPrefs } from './prefs'
 import { PRAYER_SOUNDS } from './sounds'
-import { computeUpcomingEventInstants } from './schedule-times'
+import { computeCurrentEventInstant, computeUpcomingEventInstants } from './schedule-times'
 
 /**
  * On-device prayer notification scheduler. Schedules the next few days of
@@ -88,6 +88,49 @@ async function writeState(state: ScheduleState | null): Promise<void> {
   }
 }
 
+/** Grace period around "now" when deciding the current prayer window, so a
+ * notification delivered a few seconds before its nominal instant (inexact
+ * alarms, clock skew) is not treated as belonging to the previous window. */
+const CURRENT_EVENT_SLACK_MS = 60 * 1000
+
+/**
+ * Removes delivered prayer notifications whose window has passed — every
+ * *prayer* notification in the tray except the one for the prayer event we
+ * are currently inside. Scoped strictly to the prayer id range: other
+ * notification types (zakat, future zikr, …) allocate ids outside it and are
+ * never touched. Best-effort tray hygiene: runs on launch/resume/reschedule
+ * and on foreground delivery; while the app is killed, Android gives us no JS
+ * at delivery time, so stale entries linger until the next app open.
+ */
+export async function removeStaleDeliveredPrayerNotifications(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return
+  try {
+    const delivered = await LocalNotifications.getDeliveredNotifications()
+    const prayer = delivered.notifications.filter(
+      (n) => n.id >= ID_BASE && n.id <= ID_RANGE_END,
+    )
+    if (prayer.length === 0) return
+
+    // Without a schedule we cannot tell which window is current — keep the
+    // tray untouched rather than dismiss a possibly-live notification.
+    const cached = readCachedPrayerResponse()
+    if (!cached) return
+    const current = computeCurrentEventInstant(
+      cached.response,
+      new Date(Date.now() + CURRENT_EVENT_SLACK_MS),
+    )
+    if (!current) return
+
+    const keepId = notificationId(current.at, current.event)
+    const stale = prayer.filter((n) => n.id !== keepId)
+    if (stale.length > 0) {
+      await LocalNotifications.removeDeliveredNotifications({ notifications: stale })
+    }
+  } catch {
+    // Tray cleanup is cosmetic; it must never break scheduling.
+  }
+}
+
 /** Cancels every pending notification in the prayer id range. */
 export async function cancelAllPrayerNotifications(): Promise<void> {
   const pending = await LocalNotifications.getPending()
@@ -136,6 +179,11 @@ export function rescheduleAll(reason: RescheduleReason): Promise<void> {
 
 async function doReschedule(reason: RescheduleReason): Promise<void> {
   try {
+    // Tray hygiene first: every trigger (launch, resume, prefs, location) is a
+    // moment the user may be looking at a stale delivered notification, and the
+    // dedupe below can return before the scheduling work runs.
+    await removeStaleDeliveredPrayerNotifications()
+
     const prefs = await readNotificationPrefs()
     if (!prefs.master || !anyEventEnabled(prefs)) {
       await cancelAllPrayerNotifications()

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { computeUpcomingEventInstants } from '@/lib/notifications/schedule-times'
+import {
+  computeCurrentEventInstant,
+  computeUpcomingEventInstants,
+} from '@/lib/notifications/schedule-times'
 import type { PrayerTimeSet, PrayerTimesResponse } from '@/lib/prayer-times'
 
 const deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -130,5 +133,69 @@ describe('computeUpcomingEventInstants — UTC fallback', () => {
   it('returns an empty list when there is nothing usable', () => {
     const data = response({})
     expect(computeUpcomingEventInstants(data, { days: 30, now: new Date() })).toEqual([])
+  })
+})
+
+describe('computeCurrentEventInstant', () => {
+  it('returns the most recent event at or before now', () => {
+    const data = response({
+      schedule: [
+        { date: '2026-07-11', day: 'Saturday', times: timeSet() },
+        { date: '2026-07-12', day: 'Sunday', times: timeSet() },
+      ],
+    })
+    // Mid-afternoon on the 12th: dhuhr (1:00 PM) has passed, asr (4:30 PM) has not.
+    const current = computeCurrentEventInstant(data, new Date(2026, 6, 12, 15, 0))
+    expect(current).toEqual({ event: 'dhuhr', at: new Date(2026, 6, 12, 13, 0) })
+  })
+
+  it('treats an event exactly at now as current', () => {
+    const data = response({
+      schedule: [{ date: '2026-07-12', day: 'Sunday', times: timeSet() }],
+    })
+    const current = computeCurrentEventInstant(data, new Date(2026, 6, 12, 13, 0))
+    expect(current?.event).toBe('dhuhr')
+  })
+
+  it("reaches back to the previous day's isha overnight", () => {
+    const data = response({
+      schedule: [
+        { date: '2026-07-11', day: 'Saturday', times: timeSet() },
+        { date: '2026-07-12', day: 'Sunday', times: timeSet() },
+      ],
+    })
+    // 2 AM on the 12th: nothing has happened today; latest is yesterday's isha.
+    const current = computeCurrentEventInstant(data, new Date(2026, 6, 12, 2, 0))
+    expect(current).toEqual({ event: 'isha', at: new Date(2026, 6, 11, 22, 0) })
+  })
+
+  it('returns null when now is before every scheduled event', () => {
+    const data = response({
+      schedule: [{ date: '2026-07-12', day: 'Sunday', times: timeSet() }],
+    })
+    expect(computeCurrentEventInstant(data, new Date(2026, 6, 12, 3, 0))).toBeNull()
+  })
+
+  it('degrades to times_in_utc when the response timezone differs from the device', () => {
+    const data = response({
+      local_timezone_id: otherTz,
+      times_in_utc: {
+        fajr: '2026-07-12T03:30:00Z',
+        sunrise: '2026-07-12T05:00:00Z',
+        dhuhr: '2026-07-12T12:00:00Z',
+        asr: '2026-07-12T15:30:00Z',
+        maghrib: '2026-07-12T19:30:00Z',
+        isha: '2026-07-12T21:00:00Z',
+        sunset: '2026-07-12T19:30:00Z',
+      },
+      schedule: [{ date: '2026-07-12', day: 'Sunday', times: timeSet() }],
+    })
+    const current = computeCurrentEventInstant(data, new Date('2026-07-12T13:00:00Z'))
+    expect(current?.event).toBe('dhuhr')
+    expect(current?.at.toISOString()).toBe('2026-07-12T12:00:00.000Z')
+  })
+
+  it('returns null when there is nothing usable', () => {
+    expect(computeCurrentEventInstant(response({}), new Date())).toBeNull()
   })
 })

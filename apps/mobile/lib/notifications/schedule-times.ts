@@ -65,6 +65,44 @@ function todayInstantsFromUtc(data: PrayerTimesResponse, now: Date): PrayerEvent
 }
 
 /**
+ * The most recent event instant at or before `now` — the prayer window the
+ * user is currently inside. Used to decide which delivered notifications are
+ * stale (everything older than the current window). Null when neither the
+ * schedule nor times_in_utc covers a past instant.
+ */
+export function computeCurrentEventInstant(
+  data: PrayerTimesResponse,
+  now: Date = new Date(),
+): PrayerEventInstant | null {
+  let latest: PrayerEventInstant | null = null
+  const consider = (event: PrayerEventKey, at: Date) => {
+    if (at <= now && (!latest || at > latest.at)) latest = { event, at }
+  }
+
+  const deviceTz = deviceTimezone()
+  const timezoneMismatch =
+    Boolean(data.local_timezone_id) && Boolean(deviceTz) && data.local_timezone_id !== deviceTz
+  if (timezoneMismatch || !data.schedule?.length) {
+    for (const event of PRAYER_EVENT_ORDER) {
+      const parsed = Date.parse(data.times_in_utc?.[event] ?? '')
+      if (Number.isFinite(parsed)) consider(event, new Date(parsed))
+    }
+    return latest
+  }
+
+  for (const day of data.schedule) {
+    const date = parseDate(day.date)
+    if (!date) continue
+    for (const event of PRAYER_EVENT_ORDER) {
+      const clock = parseClock(day.times?.[event])
+      if (!clock) continue
+      consider(event, new Date(date.y, date.m - 1, date.d, clock.hours, clock.minutes, 0, 0))
+    }
+  }
+  return latest
+}
+
+/**
  * Future event instants within the next `days` days, in chronological order.
  * Callers filter by per-event preference and minimum lead time.
  */

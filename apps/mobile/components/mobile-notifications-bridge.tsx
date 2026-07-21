@@ -6,7 +6,10 @@ import { Capacitor, type PluginListenerHandle } from '@capacitor/core'
 import { toast } from 'sonner'
 import { ensureNotificationChannels } from '@/lib/notifications/channels'
 import { handleFcmToken, syncFcmRegistration } from '@/lib/notifications/fcm'
-import { rescheduleAll } from '@/lib/notifications/local-scheduler'
+import {
+  removeStaleDeliveredPrayerNotifications,
+  rescheduleAll,
+} from '@/lib/notifications/local-scheduler'
 import { refreshZakatReminder } from '@/lib/notifications/zakat'
 import { safeRoute } from '@/lib/notification-routes'
 
@@ -40,6 +43,16 @@ export function MobileNotificationsBridge() {
         LocalNotifications.addListener('localNotificationActionPerformed', ({ notification }) => {
           const route = safeRoute(notification.extra?.route)
           if (route) router.push(route)
+        }),
+      )
+      track(
+        // A prayer notification delivered while the app is foregrounded ends
+        // the previous prayer's window — drop its notification right away
+        // instead of waiting for the next resume.
+        LocalNotifications.addListener('localNotificationReceived', (notification) => {
+          if (notification.extra?.type === 'prayer') {
+            void removeStaleDeliveredPrayerNotifications()
+          }
         }),
       )
 

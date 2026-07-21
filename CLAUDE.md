@@ -62,31 +62,7 @@ Quran data is fetched directly from **ws-backend** via the type-safe `openapi-fe
 
 Base URL: `process.env.NEXT_PUBLIC_API_URL`
 
-**GET `/quran`** — Fetch a range of verses
-
-| Param | Type | Required | Notes |
-| --- | --- | --- | --- |
-| `chapter_number_start` | integer | ✅ | |
-| `chapter_number_end` | integer | | |
-| `verse_start` | integer | | |
-| `verse_end` | integer | | |
-| `langs` | string[] | ✅ | e.g. `["en"]`, `["en","ar"]` |
-| `include_words` | boolean | | word-by-word breakdown |
-| `include_root` | boolean | | requires `include_words` |
-| `include_meaning` | boolean | | requires `include_words` |
-
-**GET `/search`** — Full-text search
-
-| Param | Type | Notes |
-| --- | --- | --- |
-| `q` | string | 2–200 chars |
-| `langs` | string[] | restrict to languages |
-| `scope` | `verses\|words` | default `verses` |
-| `limit` | integer | 1–100, default 20 |
-| `offset` | integer | for pagination |
-| `include_words` / `include_root` / `include_meaning` | boolean | |
-
-**GET `/chapters`**, **GET `/appendices`**, **GET `/languages`** — metadata endpoints used in SSR layout.
+Endpoints: **GET `/quran`** (verse ranges), **GET `/search`** (full-text), **GET `/chapters`** / **`/appendices`** / **`/languages`** (metadata, used in SSR layout). Full params live in the synced spec at `packages/shared/src/api/openapi.yaml` (regenerated types in `types.gen.ts`) — read those rather than duplicating the tables here.
 
 ### Response shape (Quran)
 
@@ -339,26 +315,6 @@ NEXT_PUBLIC_API_URL=https://ws-backend.wikisubmission.org/api/v1   # dev: http:/
 # static export has no proxy, so its next.config.ts bakes in an absolute URL.
 NEXT_PUBLIC_BROWSER_API_URL=https://ws-backend.wikisubmission.org/api/v1
 ```
-
----
-
-## Tech Stack
-
-| Concern | Library |
-| --- | --- |
-| Framework | Next.js 16 (App Router), **webpack builds only** |
-| Language | TypeScript + React 19 |
-| Styling | Tailwind CSS 4 + Radix UI |
-| Virtual list | `react-virtuoso` v4 (reader); `@tanstack/react-virtual` v3 only in web word-lab |
-| Data fetching | `@tanstack/react-query` v5 + `openapi-fetch` |
-| Auth | `next-auth` v5 (Auth.js) on web; native token flow + secure storage on mobile |
-| State | Zustand v5 |
-| Animation | GSAP 3.15 (+ Flip plugin on mobile) — framer-motion has been removed |
-| Notifications | Sonner v2 |
-| Validation | Zod v4 |
-| i18n | `next-intl` v4 (mobile lazy-loads non-`en` catalogs) |
-| Native shell | Capacitor 8 (`apps/mobile`) |
-| Tests | Vitest (both apps; `pnpm test`); Playwright e2e in web |
 
 ---
 

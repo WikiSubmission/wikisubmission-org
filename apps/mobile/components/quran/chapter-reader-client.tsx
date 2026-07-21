@@ -19,11 +19,28 @@ import { Flip } from '@/lib/gsap'
  * exact re-render storm ChapterReader avoids by reading `initialVerse` from a
  * prop. Reading once at mount keeps that stable.
  */
+
+function readVerseParam(): string | undefined {
+  if (typeof window === 'undefined') return undefined
+  return new URLSearchParams(window.location.search).get('verse') ?? undefined
+}
+
 export function ChapterReaderClient({ chapterNumber }: { chapterNumber: number }) {
-  const [initialVerse] = useState<string | undefined>(() => {
-    if (typeof window === 'undefined') return undefined
-    return new URLSearchParams(window.location.search).get('verse') ?? undefined
-  })
+  const [initialVerse, setInitialVerse] = useState<string | undefined>(readVerseParam)
+
+  // On client-side navigations the useState initializer above runs while
+  // window.location still points at the *previous* route — the App Router only
+  // calls history.pushState in an insertion effect during commit. Re-read the
+  // query after commit (layout effects run after insertion effects): on cold
+  // loads the value is unchanged and this is a no-op; on client navigations it
+  // picks up the ?verse=N the initializer missed (or drops one inherited from
+  // the previous route's URL). The `key` below remounts ChapterReader, which
+  // reads initialVerse once, so the corrected target seeds a fresh instance —
+  // all before first paint, so there is no visible flash.
+  useLayoutEffect(() => {
+    const verse = readVerseParam()
+    setInitialVerse((prev) => (prev === verse ? prev : verse))
+  }, [])
 
   // Index-card → reader title continuity: if the navigation captured a Flip
   // state of the tapped card's title, fly the chapter heading in from it.
@@ -41,6 +58,7 @@ export function ChapterReaderClient({ chapterNumber }: { chapterNumber: number }
 
   return (
     <ChapterReader
+      key={initialVerse ?? 'top'}
       chapterNumber={chapterNumber}
       initialData={null}
       initialVerse={initialVerse}
