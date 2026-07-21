@@ -25,15 +25,25 @@ interface Sqlite3 {
 
 const VFS_NAME = 'ws-offline-user'
 
-let pool: SAHPoolUtil | null = null
+let poolPromise: Promise<SAHPoolUtil> | null = null
 let db: Oo1Db | null = null
 let currentPath = ''
 
-async function ensurePool(): Promise<SAHPoolUtil> {
-  if (pool) return pool
-  const sqlite3 = (await sqlite3InitModule()) as unknown as Sqlite3
-  pool = await sqlite3.installOpfsSAHPoolVfs({ name: VFS_NAME, initialCapacity: 4 })
-  return pool
+// Memoize the in-flight install promise, not the resolved pool: the SAH-pool VFS
+// grabs exclusive OPFS access handles, and two concurrent callers each running
+// installOpfsSAHPoolVfs would collide ("Access Handles cannot be created if
+// there is another open Access Handle"). Sharing one promise serializes them.
+function ensurePool(): Promise<SAHPoolUtil> {
+  if (!poolPromise) {
+    poolPromise = (async () => {
+      const sqlite3 = (await sqlite3InitModule()) as unknown as Sqlite3
+      return sqlite3.installOpfsSAHPoolVfs({ name: VFS_NAME, initialCapacity: 4 })
+    })().catch((err) => {
+      poolPromise = null // allow a later retry instead of caching the failure
+      throw err
+    })
+  }
+  return poolPromise
 }
 
 const SCHEMA = [
@@ -61,14 +71,14 @@ function pathFor(userId: string): string {
 }
 
 async function open(userId: string): Promise<void> {
-  await ensurePool()
+  const pool = await ensurePool()
   const path = pathFor(userId)
   if (db && currentPath === path) return
   if (db) {
     db.close()
     db = null
   }
-  db = new pool!.OpfsSAHPoolDb(path)
+  db = new pool.OpfsSAHPoolDb(path)
   currentPath = path
   for (const sql of SCHEMA) db.exec({ sql })
 }
