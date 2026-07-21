@@ -6,10 +6,9 @@
 // independent. All writes go through here; the main thread only sends RPC.
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
-import { serveWorker } from '../../worker-serve'
 import type { OutboxEntry, UserMutation } from '../types'
 import type { BookmarkEntryMirror, NoteMirror } from '../user-store'
-import type { UserWorkerRequest } from './protocol'
+import type { UserWorkerRequest, UserWorkerResponse } from './protocol'
 
 interface Oo1Db {
   exec(opts: { sql: string; bind?: unknown[]; rowMode?: 'object' | 'array'; resultRows?: unknown[] }): unknown
@@ -333,4 +332,18 @@ function handle(req: UserWorkerRequest): Promise<unknown> | unknown {
   }
 }
 
-serveWorker<UserWorkerRequest>(handle)
+self.onmessage = async (e: MessageEvent<UserWorkerRequest>) => {
+  const req = e.data
+  try {
+    const result = await handle(req)
+    const res: UserWorkerResponse = { id: req.id, ok: true, result }
+    self.postMessage(res)
+  } catch (err) {
+    const res: UserWorkerResponse = {
+      id: req.id,
+      ok: false,
+      error: err instanceof Error ? err.message : String(err),
+    }
+    self.postMessage(res)
+  }
+}

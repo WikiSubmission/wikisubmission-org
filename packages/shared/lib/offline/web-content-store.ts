@@ -13,33 +13,68 @@ import type {
   WordRow,
 } from './types'
 import { verifySha256 } from './verify'
-import { WorkerRpc } from './worker-rpc'
-import type { WorkerRequestBody } from './worker/protocol'
+import { acquirePoolLease, OfflinePoolUnavailableError, orDefault } from './pool-lease'
+import type { WorkerRequest, WorkerRequestBody, WorkerResponse } from './worker/protocol'
+
+type Pending = { resolve: (v: unknown) => void; reject: (e: Error) => void }
 
 /**
  * Web implementation of OfflineContentStore: drives the sqlite-wasm worker over
  * RPC and runs the download/verify pipeline on the main thread (so fetch
  * progress is observable), handing verified bytes to the worker for OPFS import.
  *
+ * The worker's OPFS SAH-pool can only be opened by one tab at a time, so a
+ * per-origin Web Lock elects a single owner tab (see pool-lease.ts). A non-owning
+ * tab never creates the worker; its reads degrade to empty so the reader/search
+ * fall back to the network, and installs surface the failure (they are explicit
+ * user actions, normally done in the owner tab).
+ *
  * Browser-only. Not imported by apps/mobile (which gets a native adapter), and
  * not re-exported from the offline barrel, so non-browser builds never pull in
  * the worker or WASM.
  */
 export class WebOfflineContentStore implements OfflineContentStore {
-  // SharedWorker (with a dedicated-Worker fallback) so all tabs share one OPFS
-  // SAH-pool instead of colliding on its exclusive access handles.
-  private readonly transport = new WorkerRpc<WorkerRequestBody>(
-    'ws-offline',
-    () =>
-      new SharedWorker(new URL('./worker/sqlite.worker.ts', import.meta.url), {
-        type: 'module',
-        name: 'ws-offline',
-      }),
-    () => new Worker(new URL('./worker/sqlite.worker.ts', import.meta.url), { type: 'module' }),
-  )
+  private worker: Worker | null = null
+  private seq = 0
+  private readonly pending = new Map<number, Pending>()
+  private lease: Promise<boolean> | null = null
 
-  private rpc<T>(req: WorkerRequestBody, transfer: Transferable[] = []): Promise<T> {
-    return this.transport.rpc<T>(req, transfer)
+  /** Whether this tab owns the pool. Acquired once, held for the page lifetime. */
+  private owns(): Promise<boolean> {
+    if (!this.lease) this.lease = acquirePoolLease('ws-offline-content-pool')
+    return this.lease
+  }
+
+  private ensureWorker(): Worker {
+    if (this.worker) return this.worker
+    const worker = new Worker(new URL('./worker/sqlite.worker.ts', import.meta.url), {
+      type: 'module',
+    })
+    worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
+      const res = e.data
+      const p = this.pending.get(res.id)
+      if (!p) return
+      this.pending.delete(res.id)
+      if (res.ok) p.resolve(res.result)
+      else p.reject(new Error(res.error))
+    }
+    worker.onerror = (e) => {
+      const err = new Error(e.message || 'offline worker crashed')
+      for (const p of this.pending.values()) p.reject(err)
+      this.pending.clear()
+    }
+    this.worker = worker
+    return worker
+  }
+
+  private async rpc<T>(req: WorkerRequestBody, transfer: Transferable[] = []): Promise<T> {
+    if (!(await this.owns())) throw new OfflinePoolUnavailableError()
+    const worker = this.ensureWorker()
+    const id = ++this.seq
+    return new Promise<T>((resolve, reject) => {
+      this.pending.set(id, { resolve: resolve as Pending['resolve'], reject })
+      worker.postMessage({ ...req, id } as WorkerRequest, transfer)
+    })
   }
 
   private static bundleId(scripture: string, lang: string): string {
@@ -57,19 +92,19 @@ export class WebOfflineContentStore implements OfflineContentStore {
   async getVerses(scripture: string, lang: string, range: VerseRange): Promise<VerseRow[]> {
     const id = WebOfflineContentStore.bundleId(scripture, lang)
     if (!catalog.list().some((b) => b.id === id)) return []
-    return this.rpc<VerseRow[]>({ type: 'getVerses', bundleId: id, range })
+    return orDefault(this.rpc<VerseRow[]>({ type: 'getVerses', bundleId: id, range }), [])
   }
 
   async getWords(scripture: string, lang: string, range: VerseRange): Promise<WordRow[]> {
     const id = WebOfflineContentStore.wordsBundleId(scripture, lang)
     if (!catalog.list().some((b) => b.id === id)) return []
-    return this.rpc<WordRow[]>({ type: 'getWords', bundleId: id, range })
+    return orDefault(this.rpc<WordRow[]>({ type: 'getWords', bundleId: id, range }), [])
   }
 
   async getChapterTitle(scripture: string, lang: string, chapter: number): Promise<string | null> {
     const id = WebOfflineContentStore.bundleId(scripture, lang)
     if (!catalog.list().some((b) => b.id === id)) return null
-    return this.rpc<string | null>({ type: 'getChapterTitle', bundleId: id, chapter })
+    return orDefault(this.rpc<string | null>({ type: 'getChapterTitle', bundleId: id, chapter }), null)
   }
 
   async search(
@@ -88,13 +123,16 @@ export class WebOfflineContentStore implements OfflineContentStore {
       )
       .map((b) => b.id)
     if (ids.length === 0) return []
-    return this.rpc<SearchRow[]>({ type: 'search', bundleIds: ids, query: q, opts })
+    return orDefault(this.rpc<SearchRow[]>({ type: 'search', bundleIds: ids, query: q, opts }), [])
   }
 
   async searchDocs(lang: string, q: string, opts?: SearchOpts): Promise<DocSearchRow[]> {
     const rec = catalog.list().find((b) => b.kind === 'library' && b.lang === lang)
     if (!rec) return []
-    return this.rpc<DocSearchRow[]>({ type: 'searchDocs', bundleId: rec.id, query: q, opts })
+    return orDefault(
+      this.rpc<DocSearchRow[]>({ type: 'searchDocs', bundleId: rec.id, query: q, opts }),
+      [],
+    )
   }
 
   async install(
