@@ -10,8 +10,9 @@
 
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
 import { normalizeForSearch } from '../../text-normalization/normalize'
+import { serveWorker } from '../worker-serve'
 import type { DocSearchRow, SearchOpts, SearchRow, VerseRange, VerseRow, WordRow } from '../types'
-import type { WorkerRequest, WorkerResponse } from './protocol'
+import type { WorkerRequest } from './protocol'
 
 // Minimal local typings for the subset of the sqlite-wasm OO1 + SAH-pool API we
 // use. The package's own types are loose; this keeps our call sites checked.
@@ -263,18 +264,4 @@ async function handle(req: WorkerRequest): Promise<unknown> {
   }
 }
 
-self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
-  const req = e.data
-  try {
-    const result = await handle(req)
-    const res: WorkerResponse = { id: req.id, ok: true, result }
-    self.postMessage(res)
-  } catch (err) {
-    const res: WorkerResponse = {
-      id: req.id,
-      ok: false,
-      error: err instanceof Error ? err.message : String(err),
-    }
-    self.postMessage(res)
-  }
-}
+serveWorker<WorkerRequest>(handle)

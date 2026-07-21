@@ -1,51 +1,32 @@
+import { WorkerRpc } from '../worker-rpc'
 import type { OutboxEntry, UserMutation } from './types'
 import type { BookmarkEntryMirror, NoteMirror, OfflineUserStore } from './user-store'
-import type { UserWorkerRequestBody, UserWorkerResponse } from './worker/protocol'
-
-type Pending = { resolve: (v: unknown) => void; reject: (e: Error) => void }
+import type { UserWorkerRequestBody } from './worker/protocol'
 
 /**
  * Web implementation of OfflineUserStore: a writable per-user SQLite database
- * (mirror + outbox) driven over RPC to a dedicated worker. Outbox UUIDs and
- * timestamps are minted here so the worker stays deterministic.
+ * (mirror + outbox) driven over RPC to a worker. Outbox UUIDs and timestamps are
+ * minted here so the worker stays deterministic.
  *
  * Browser-only; not re-exported from the offline barrel and not imported by
  * apps/mobile, so the worker/WASM never enter the mobile bundle.
  */
 export class WebOfflineUserStore implements OfflineUserStore {
-  private worker: Worker | null = null
-  private seq = 0
-  private readonly pending = new Map<number, Pending>()
-
-  private ensureWorker(): Worker {
-    if (this.worker) return this.worker
-    const worker = new Worker(new URL('./worker/user-sqlite.worker.ts', import.meta.url), {
-      type: 'module',
-    })
-    worker.onmessage = (e: MessageEvent<UserWorkerResponse>) => {
-      const res = e.data
-      const p = this.pending.get(res.id)
-      if (!p) return
-      this.pending.delete(res.id)
-      if (res.ok) p.resolve(res.result)
-      else p.reject(new Error(res.error))
-    }
-    worker.onerror = (e) => {
-      const err = new Error(e.message || 'offline user worker crashed')
-      for (const p of this.pending.values()) p.reject(err)
-      this.pending.clear()
-    }
-    this.worker = worker
-    return worker
-  }
+  // SharedWorker (with a dedicated-Worker fallback) so all tabs share one OPFS
+  // SAH-pool instead of colliding on its exclusive access handles.
+  private readonly transport = new WorkerRpc<UserWorkerRequestBody>(
+    'ws-offline-user',
+    () =>
+      new SharedWorker(new URL('./worker/user-sqlite.worker.ts', import.meta.url), {
+        type: 'module',
+        name: 'ws-offline-user',
+      }),
+    () =>
+      new Worker(new URL('./worker/user-sqlite.worker.ts', import.meta.url), { type: 'module' }),
+  )
 
   private rpc<T>(req: UserWorkerRequestBody): Promise<T> {
-    const worker = this.ensureWorker()
-    const id = ++this.seq
-    return new Promise<T>((resolve, reject) => {
-      this.pending.set(id, { resolve: resolve as Pending['resolve'], reject })
-      worker.postMessage({ ...req, id })
-    })
+    return this.transport.rpc<T>(req)
   }
 
   open(userId: string): Promise<void> {
