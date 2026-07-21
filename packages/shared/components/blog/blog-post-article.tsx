@@ -343,9 +343,11 @@ function buildPortableTextComponents(scriptureRefsEnabled: boolean) {
     image: ({
       value,
     }: {
-      value: { asset?: { url?: string }; alt?: string; caption?: string }
+      value: { url?: string; asset?: { url?: string }; alt?: string; caption?: string }
     }) => {
-      const url = urlFor(value)
+      // First-party images carry a plain `url`; legacy Sanity draft images
+      // (preview) still resolve through urlFor's asset ref.
+      const url = value.url || urlFor(value)
       if (!url) return null
       return (
         <figure className="my-10">

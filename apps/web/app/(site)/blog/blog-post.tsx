@@ -1,19 +1,19 @@
 import { buildPageMetadata } from '@/constants/metadata'
-import { sanityPreviewServer, sanityServer } from '@/lib/sanity'
+import { sanityPreviewServer } from '@/lib/sanity'
 import type { Metadata } from 'next'
 import { timingSafeEqual } from 'node:crypto'
+import { fetchArticleBySlug, fetchRelatedArticles } from '@/lib/blog-backend'
 import {
-  POST_BY_SLUG_QUERY,
   PREVIEW_POST_BY_ID_QUERY,
-  RELATED_QUERY,
   type BlogPost,
   type RelatedBlogPost,
   type SanityLanguage,
 } from '@/lib/blog-queries'
 
-// The article view and its data shapes/queries are shared with mobile. This
-// module keeps the server-only concerns: direct/preview Sanity reads (private
-// token), the preview-secret gate, and SEO metadata builders.
+// The article view and its data shapes are shared with mobile. Published reads
+// come from ws-backend's public endpoints (blog-backend.ts); this module keeps
+// the server-only concerns: the preview-secret gate, the (still Sanity-backed)
+// draft preview read, and SEO metadata builders.
 export { BlogPostArticle } from '@/components/blog/blog-post-article'
 export { SANITY_LANGUAGES, toSanityLanguage } from '@/lib/blog-queries'
 export type { BlogPost, RelatedBlogPost, SanityLanguage } from '@/lib/blog-queries'
@@ -85,22 +85,13 @@ export function resolveBlogPreviewRequest(searchParams: PreviewSearchParams) {
 export async function fetchPublishedBlogPostBySlug(
   slug: string,
   language: SanityLanguage
-) {
-  let post = await sanityServer.fetch<BlogPost | null>(POST_BY_SLUG_QUERY, {
-    slug,
-    language,
-  })
-
-  if (!post && language !== 'en') {
-    post = await sanityServer.fetch<BlogPost | null>(POST_BY_SLUG_QUERY, {
-      slug,
-      language: 'en',
-    })
-  }
-
-  return post
+): Promise<BlogPost | null> {
+  return fetchArticleBySlug(slug, language)
 }
 
+// Draft preview via a shareable secret link still reads from Sanity. Once the
+// content is migrated, previewing happens inside /editor; a secret-gated backend
+// draft endpoint can replace this if the public preview link must stay.
 export async function fetchPreviewBlogPostById(documentId: string) {
   if (!sanityPreviewServer) return null
 
@@ -110,21 +101,13 @@ export async function fetchPreviewBlogPostById(documentId: string) {
 }
 
 export async function fetchRelatedBlogPosts({
-  categoryRef,
-  excludeId,
+  slug,
   language,
 }: {
-  categoryRef?: string
-  excludeId: string
+  slug: string
   language: string
-}) {
-  if (!categoryRef) return []
-
-  return sanityServer.fetch<RelatedBlogPost[]>(RELATED_QUERY, {
-    categoryRef,
-    excludeId,
-    language,
-  })
+}): Promise<RelatedBlogPost[]> {
+  return fetchRelatedArticles(slug, language)
 }
 
 export function buildBlogPostMetadata(

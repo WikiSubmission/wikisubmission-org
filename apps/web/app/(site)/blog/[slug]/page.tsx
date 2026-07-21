@@ -51,8 +51,7 @@ export default async function BlogPostPage({
   let related: RelatedBlogPost[] = []
   try {
     related = await fetchRelatedBlogPosts({
-      categoryRef: post.categoryRef,
-      excludeId: post._id,
+      slug,
       language: post.language ?? language,
     })
   } catch {

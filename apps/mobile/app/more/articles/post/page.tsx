@@ -10,7 +10,7 @@ import { toSanityLanguage, type BlogPost, type RelatedBlogPost } from '@/lib/blo
 
 // Article detail. The slug arrives via ?slug= (a static export cannot
 // pre-render the unbounded [slug] segment the web route uses); the post and its
-// related list are fetched client-side from the Sanity CDN.
+// related list are fetched client-side from the ws-backend public endpoints.
 function ArticleDetailInner() {
   const router = useRouter()
   const sp = useSearchParams()
@@ -41,8 +41,7 @@ function ArticleDetailInner() {
         setState('ready')
         try {
           const rel = await fetchRelatedPosts({
-            categoryRef: found.categoryRef,
-            excludeId: found._id,
+            slug,
             language: found.language ?? language,
           })
           if (!cancelled) setRelated(rel)

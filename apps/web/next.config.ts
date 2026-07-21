@@ -111,6 +111,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cdn.sanity.io',
       },
+      {
+        // First-party editorial images (article thumbnails + body images)
+        protocol: 'https',
+        hostname: 'cdn.wikisubmission.org',
+      },
     ],
   },
   async headers() {

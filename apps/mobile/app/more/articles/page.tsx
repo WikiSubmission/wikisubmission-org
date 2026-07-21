@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react'
 import { useLocale } from 'next-intl'
 import { BlogBrowser } from '@/components/blog/blog-browser'
 import { Spinner } from '@/components/ui/spinner'
-import { fetchAllArticles, fetchCategories } from '@/lib/blog-client'
+import { deriveCategories, fetchArticles } from '@/lib/blog-backend'
 import { toSanityLanguage, type Category, type Post } from '@/lib/blog-queries'
 
 // Articles index. The shared BlogBrowser runs without the web search route
 // (list + category filter only) and points article links at the mobile detail
-// route. Data is read client-side from the public Sanity CDN.
+// route. Data is read client-side from the ws-backend public endpoints.
 export default function ArticlesScreen() {
   const locale = useLocale()
   const [data, setData] = useState<{ articles: Post[]; categories: Category[] } | null>(null)
@@ -18,9 +18,9 @@ export default function ArticlesScreen() {
   useEffect(() => {
     let cancelled = false
     const language = toSanityLanguage(locale)
-    Promise.all([fetchAllArticles(language), fetchCategories(language)])
-      .then(([articles, categories]) => {
-        if (!cancelled) setData({ articles, categories })
+    fetchArticles(language)
+      .then((articles) => {
+        if (!cancelled) setData({ articles, categories: deriveCategories(articles) })
       })
       .catch(() => {
         if (!cancelled) setError(true)

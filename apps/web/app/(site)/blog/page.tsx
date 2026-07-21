@@ -1,22 +1,15 @@
 export const dynamic = 'force-dynamic'
 
-import { sanityServer } from '@/lib/sanity'
 import { Metadata } from 'next'
 import { getLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { BlogBrowser } from '@/components/blog/blog-browser'
-import {
-  ALL_ARTICLES_QUERY,
-  CATEGORIES_QUERY,
-  type Post,
-  type Category,
-} from '@/lib/blog-queries'
+import { deriveCategories, fetchArticles } from '@/lib/blog-backend'
+import { type Post, type Category } from '@/lib/blog-queries'
 import {
   BlogPostArticle,
-  type RelatedBlogPost,
   buildBlogPostMetadata,
   fetchPreviewBlogPostById,
-  fetchRelatedBlogPosts,
   getBlogIndexMetadata,
   hasBlogPreviewParams,
   resolveBlogPreviewRequest,
@@ -81,18 +74,9 @@ export default async function BlogPage({
 
     if (!post) notFound()
 
-    let related: RelatedBlogPost[] = []
-    try {
-      related = await fetchRelatedBlogPosts({
-        categoryRef: post.categoryRef,
-        excludeId: post._id,
-        language: post.language ?? 'en',
-      })
-    } catch {
-      // non-critical — preview still renders without related posts
-    }
-
-    return <BlogPostArticle post={post} related={related} preview />
+    // Draft previews render without related posts (related is a published-only
+    // backend lookup; drafts are not published).
+    return <BlogPostArticle post={post} related={[]} preview />
   }
 
   const locale = await getLocale()
@@ -102,14 +86,10 @@ export default async function BlogPage({
   let categories: Category[] = []
 
   try {
-    const [articlesData, categoriesData] = await Promise.all([
-      sanityServer.fetch<Post[]>(ALL_ARTICLES_QUERY, { language }),
-      sanityServer.fetch<Category[]>(CATEGORIES_QUERY, { language }),
-    ])
-    allArticles = articlesData
-    categories = categoriesData
+    allArticles = await fetchArticles(language)
+    categories = deriveCategories(allArticles)
   } catch (err) {
-    console.error('[blog] Sanity fetch failed:', err)
+    console.error('[blog] backend fetch failed:', err)
   }
 
   return <BlogBrowser articles={allArticles} categories={categories} />

@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
-import { sanityServer } from '@/lib/sanity'
+
+import { portableTextToPlain, searchArticles } from '@/lib/blog-backend'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,22 +16,8 @@ function sanitizeQuery(raw: string): string {
   return raw
     .trim()
     .slice(0, MAX_QUERY_LENGTH)
-    // Remove GROQ / regex special chars that could affect query parsing
     .replace(/[*@${}()|[\]\\^]/g, '')
     .trim()
-}
-
-interface RawResult {
-  _id: string
-  title: string
-  slug: string
-  excerpt?: string
-  bodyText?: string
-  publishedAt?: string
-  category?: string
-  categorySlug?: string
-  thumbnailUrl?: string
-  authorName?: string
 }
 
 export interface ArticleResult {
@@ -45,24 +32,6 @@ export interface ArticleResult {
   thumbnailUrl?: string
   authorName?: string
 }
-
-const SEARCH_QUERY = `
-  *[_type == "article" && language == $language && (title match $q || excerpt match $q || pt::text(body) match $q)]
-  | order(publishedAt desc)
-  [0...${MAX_RESULTS}]
-  {
-    _id,
-    title,
-    "slug": slug.current,
-    excerpt,
-    "bodyText": pt::text(body),
-    publishedAt,
-    "category": categories[0]->name,
-    "categorySlug": categories[0]->slug.current,
-    "thumbnailUrl": thumbnail.asset->url,
-    "authorName": author->firstName + " " + author->lastName
-  }
-`
 
 /** Extract up to `max` non-overlapping snippets (~180 chars each) around every match of `query`. */
 function extractSnippets(text: string, query: string, max = 5): string[] {
@@ -101,7 +70,6 @@ function isRateLimited(ip: string): boolean {
 }
 
 export async function GET(request: NextRequest) {
-  // Rate limit by IP
   const ip =
     request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
     request.headers.get('x-real-ip') ??
@@ -123,24 +91,30 @@ export async function GET(request: NextRequest) {
     : 'en'
 
   try {
-    const raw: RawResult[] = await sanityServer.fetch(SEARCH_QUERY, {
-      q: `${q}*`,
-      language,
+    const posts = await searchArticles(q, language, MAX_RESULTS)
+
+    const articles: ArticleResult[] = posts.map((post) => {
+      const bodyText = portableTextToPlain(post.body)
+      return {
+        _id: post._id,
+        title: post.title ?? '',
+        slug: post.slug?.current ?? '',
+        excerpt: post.excerpt,
+        snippets: bodyText ? extractSnippets(bodyText, q) : [],
+        publishedAt: post.publishedAt,
+        category: post.category,
+        categorySlug: post.categoryRef,
+        thumbnailUrl: post.thumbnailUrl,
+        authorName: post.authorName,
+      }
     })
 
-    const articles: ArticleResult[] = raw.map(({ bodyText, ...rest }) => {
-      const snippets = bodyText ? extractSnippets(bodyText, q) : []
-      return { ...rest, snippets }
-    })
-
-    return Response.json({ articles }, {
-      headers: {
-        'Cache-Control': 'no-store',
-        'X-Content-Type-Options': 'nosniff',
-      },
-    })
+    return Response.json(
+      { articles },
+      { headers: { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } },
+    )
   } catch (error) {
-    console.error('[search/blog] Sanity error:', error)
+    console.error('[search/blog] backend error:', error)
     return Response.json({ articles: [], error: 'Search failed' }, { status: 500 })
   }
 }
