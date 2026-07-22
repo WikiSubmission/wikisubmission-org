@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SessionProvider } from 'next-auth/react'
+import type { Session } from 'next-auth'
 import { useState } from 'react'
 import { ChatPanelProvider } from '@/components/chat-sidebar/panel-context'
 import { ChatSidebar } from '@/components/chat-sidebar/chat-sidebar'
@@ -20,7 +21,16 @@ registerWebApiAuth()
 // Make installed offline bundles available to the shared reader/search hooks.
 registerWebOfflineStore()
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+export default function Providers({
+  children,
+  session,
+}: {
+  children: React.ReactNode
+  // Hydrated from the server (root layout) so useSession() starts in the correct
+  // authenticated/unauthenticated state on first render — no signed-out → signed-in
+  // flash while the client fetches /api/auth/session.
+  session: Session | null
+}) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -33,7 +43,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   )
 
   return (
-    <SessionProvider>
+    <SessionProvider session={session}>
       <QueryClientProvider client={queryClient}>
         <ScriptureAuthBridge>
           <QuranPlayerProvider>

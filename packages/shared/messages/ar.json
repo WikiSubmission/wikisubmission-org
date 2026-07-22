@@ -1182,6 +1182,7 @@
   "userMenu": {
     "profile": "الملف الشخصي",
     "admin": "المدير",
+    "editor": "المحرر",
     "gamesStudio": "استوديو الألعاب",
     "language": "اللغة",
     "theme": "المظهر",

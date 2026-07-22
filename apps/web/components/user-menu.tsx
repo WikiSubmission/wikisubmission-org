@@ -19,7 +19,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut, User, Globe, Palette, Gamepad2, Shield } from 'lucide-react'
+import { LogOut, User, Globe, Palette, Gamepad2, Shield, SquarePen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const LOCALES = [
@@ -139,6 +139,14 @@ export function UserMenu() {
             {t('profile')}
           </a>
         </DropdownMenuItem>
+        {(isEditor || isAdmin) && (
+          <DropdownMenuItem asChild>
+            <a href="/editor" className="flex items-center gap-2">
+              <SquarePen className="w-4 h-4" />
+              {t('editor')}
+            </a>
+          </DropdownMenuItem>
+        )}
         {isAdmin ? (
           <DropdownMenuItem asChild>
             <a href="/admin" className="flex items-center gap-2">

@@ -1307,6 +1307,7 @@
   "userMenu": {
     "profile": "Profile",
     "admin": "Admin",
+    "editor": "Editor",
     "gamesStudio": "Games studio",
     "language": "Language",
     "theme": "Theme",

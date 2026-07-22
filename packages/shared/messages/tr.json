@@ -1117,6 +1117,7 @@
   "userMenu": {
     "profile": "Profil",
     "admin": "Yönetici",
+    "editor": "Editör",
     "gamesStudio": "Oyun Stüdyosu",
     "language": "Dil",
     "theme": "Tema",

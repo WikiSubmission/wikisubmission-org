@@ -1116,6 +1116,7 @@
   "userMenu": {
     "profile": "Profil",
     "admin": "Admin",
+    "editor": "Éditeur",
     "gamesStudio": "Studio de jeux",
     "language": "Langue",
     "theme": "Thème",

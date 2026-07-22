@@ -10,6 +10,7 @@ import Providers from '@/components/providers'
 import type { Viewport } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
+import { auth } from '@/auth'
 import { ReactScanInit } from '@/components/react-scan-init'
 import {
   PaletteProvider,
@@ -27,6 +28,7 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale()
   const messages = await getMessages()
+  const session = await auth()
   const dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'
 
   return (
@@ -50,7 +52,7 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <PaletteProvider>
-              <Providers>
+              <Providers session={session}>
                 <GeometryDots />
                 {children}
                 <ScrollToTop />
