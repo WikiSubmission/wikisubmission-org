@@ -22,8 +22,9 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
-import { IGlobe, IPalette, ILogout } from './icons'
+import { IGlobe, IPalette, ILogout, IChevD } from './icons'
 import type { EditorViewer } from './sidebar'
 
 const LOCALES = [
@@ -76,20 +77,28 @@ export function EditorUserMenu({ viewer, signOutAction }: EditorUserMenuProps) {
   }
 
   return (
+    <SidebarMenuItem>
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <button type="button" className="sb-user" aria-label="Account, language and theme">
-          <span className="sb-avatar">{viewer.name.charAt(0).toUpperCase()}</span>
-          <span className="who">
-            <b>{viewer.name}</b>
-            <small>@{viewer.handle}</small>
+        <SidebarMenuButton
+          size="lg"
+          tooltip={viewer.name}
+          aria-label="Account, language and theme"
+          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+        >
+          <span className="flex aspect-square size-8 items-center justify-center rounded-[2px] border bg-card font-[family-name:var(--font-cormorant)] text-[15px]">
+            {viewer.name.charAt(0).toUpperCase()}
           </span>
-          <span className="sb-user-chev" aria-hidden>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="m18 15-6-6-6 6" />
-            </svg>
+          <span className="flex min-w-0 flex-col leading-tight">
+            <span className="truncate text-[13.5px] font-semibold">{viewer.name}</span>
+            <span className="truncate font-mono text-[10px] text-muted-foreground">
+              @{viewer.handle}
+            </span>
           </span>
-        </button>
+          <span className="ml-auto text-muted-foreground" aria-hidden>
+            <IChevD size={14} />
+          </span>
+        </SidebarMenuButton>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent side="top" align="start" className="w-56">
@@ -190,5 +199,6 @@ export function EditorUserMenu({ viewer, signOutAction }: EditorUserMenuProps) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </SidebarMenuItem>
   )
 }
