@@ -240,7 +240,10 @@
 /* =========================================================
    WORKSPACE — master / detail / reference rail
    ========================================================= */
-.workspace { flex: 1; display: flex; min-height: 0; }
+/* overflow-y: auto is the fallback scroll region for plain `<section style={s.page}>`
+   pages (every editor route except master/detail layouts) — .app clips at the
+   shell level, so without this their content is unreachable once it overflows. */
+.workspace { flex: 1; display: flex; min-height: 0; overflow-y: auto; }
 
 .master {
   flex: 0 0 var(--master-w, 300px);
