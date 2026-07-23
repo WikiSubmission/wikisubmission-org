@@ -5,14 +5,22 @@
  * write), per-version Quran grants (with approve), per-version Bible grants
  * and the word-by-word reference preference. Saving replaces the user's
  * grants atomically on the backend.
+ *
+ * Built on shadcn primitives (Button, Badge) over semantic tokens; the brand
+ * type is preserved via font-family utilities. This is an admin-only surface —
+ * the backend re-checks the admin role on every save (see actions.ts).
  */
-import { useState, useTransition } from 'react'
+import { useState, useTransition, type ReactNode } from 'react'
 
 import type {
   EditorGrantsInput,
   EditorVersionGrant,
   EditorialEditor,
 } from '@/lib/editorial-content-client'
+import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { STATUS_META } from '@/components/editor/content/status'
 import { replaceEditorGrantsAction } from './actions'
 
 const MODULES = [
@@ -40,7 +48,7 @@ export function AdminGrantsClient({ editors, quranVersions, bibleVersions }: Adm
   const [openUserId, setOpenUserId] = useState<number | null>(null)
 
   return (
-    <div style={{ border: '1px solid var(--ed-rule)', borderRadius: 'var(--ed-radius)', background: 'var(--ed-surface)' }}>
+    <div className="overflow-hidden rounded-[3px] border border-border bg-card">
       {editors.map((editor) => (
         <EditorRow
           key={editor.user_id}
@@ -54,7 +62,7 @@ export function AdminGrantsClient({ editors, quranVersions, bibleVersions }: Adm
         />
       ))}
       {editors.length === 0 && (
-        <p style={{ padding: 16, margin: 0, color: 'var(--ed-fg-muted)' }}>No users found.</p>
+        <p className="m-0 p-4 text-[14px] text-muted-foreground">No users found.</p>
       )}
     </div>
   )
@@ -83,21 +91,34 @@ function EditorRow({
   onToggle: () => void
 }) {
   return (
-    <div style={{ borderBottom: '1px solid var(--ed-rule)' }}>
+    <div className="border-b border-border last:border-b-0">
       <button
         type="button"
-        className="row"
-        style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 0 }}
+        aria-expanded={open}
+        className="flex w-full flex-col gap-1 px-4 py-3 text-left transition-colors hover:bg-accent"
         onClick={onToggle}
       >
-        <div className="row-top">
-          <span className="row-title">{editor.display_name || editor.email}</span>
-          {editor.role === 'admin' && <span className="badge admin">admin</span>}
-          {!editor.is_active && <span className="badge">deactivated</span>}
+        <div className="flex items-center gap-2.5">
+          <span className="min-w-0 flex-1 truncate font-[family-name:var(--font-source-serif)] text-[15px] font-medium text-foreground">
+            {editor.display_name || editor.email}
+          </span>
+          {editor.role === 'admin' && (
+            <Badge className="font-[family-name:var(--font-glacial)] text-[9.5px] uppercase tracking-[0.1em]">
+              admin
+            </Badge>
+          )}
+          {!editor.is_active && (
+            <Badge
+              variant="outline"
+              className="font-[family-name:var(--font-glacial)] text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground"
+            >
+              deactivated
+            </Badge>
+          )}
         </div>
-        <div className="row-meta">
+        <div className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
           <span>{editor.email}</span>
-          <span className="sep">·</span>
+          <span className="opacity-45">·</span>
           <span>{grantSummary(editor)}</span>
         </div>
       </button>
@@ -162,6 +183,21 @@ function toInput(state: GrantState): EditorGrantsInput {
   }
 }
 
+function GrantSectionHeading({ children, hint }: { children: ReactNode; hint?: string }) {
+  return (
+    <div className="mt-[18px] mb-3 flex items-baseline gap-3 border-b border-border pb-2">
+      <h3 className="font-[family-name:var(--font-cormorant)] text-[20px] leading-none text-foreground">
+        {children}
+      </h3>
+      {hint && (
+        <span className="ml-auto font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+          {hint}
+        </span>
+      )}
+    </div>
+  )
+}
+
 function GrantPanel({
   editor,
   quranVersions,
@@ -199,42 +235,34 @@ function GrantPanel({
   const isAdmin = editor.role === 'admin'
 
   return (
-    <div style={{ padding: '4px 16px 18px', borderTop: '1px solid var(--ed-rule)' }}>
+    <div className="border-t border-border px-4 pt-1 pb-[18px]">
       {isAdmin && (
-        <p style={{ fontSize: 13, color: 'var(--ed-fg-muted)' }}>
+        <p className="mt-3 text-[13px] leading-snug text-muted-foreground">
           This user is an admin and bypasses grants; anything set here only
           applies if the admin role is ever removed.
         </p>
       )}
 
-      <div className="block-head" style={{ marginTop: 12 }}>
-        <h3>Modules</h3>
-      </div>
+      <GrantSectionHeading>Modules</GrantSectionHeading>
       {MODULES.map(({ key, label }) => (
-        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 0' }}>
-          <span style={{ width: 130, fontSize: 13.5 }}>{label}</span>
+        <GrantRow key={key} label={label}>
           <TriState
             value={state.modules[key]}
             disabled={pending}
             onChange={(v) => patch((p) => ({ ...p, modules: { ...p.modules, [key]: v } }))}
           />
-        </div>
+        </GrantRow>
       ))}
 
       {state.modules.quran !== 'none' && quranVersions.length > 0 && (
         <>
-          <div className="block-head" style={{ marginTop: 18 }}>
-            <h3>Quran versions</h3>
-            <span className="spacer" />
-            <span className="hint">access refines the module grant · approve covers publish requests</span>
-          </div>
+          <GrantSectionHeading hint="access refines the module grant · approve covers publish requests">
+            Quran versions
+          </GrantSectionHeading>
           {quranVersions.map((v) => {
             const grant = state.quran[v.id] ?? { access: 'none' as ModuleState, approve: false }
             return (
-              <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 0' }}>
-                <span style={{ width: 220, fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {v.name}
-                </span>
+              <GrantRow key={v.id} label={v.name} labelWidth="w-[220px]">
                 <TriState
                   value={grant.access}
                   disabled={pending}
@@ -242,9 +270,8 @@ function GrantPanel({
                     patch((p) => ({ ...p, quran: { ...p.quran, [v.id]: { ...grant, access } } }))
                   }
                 />
-                <button
-                  type="button"
-                  className={`fchip${grant.approve ? ' is-on' : ''}`}
+                <Chip
+                  active={grant.approve}
                   disabled={pending}
                   onClick={() =>
                     patch((p) => ({
@@ -254,23 +281,18 @@ function GrantPanel({
                   }
                 >
                   approver
-                </button>
-              </div>
+                </Chip>
+              </GrantRow>
             )
           })}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0 0' }}>
-            <span style={{ width: 220, fontSize: 13.5 }}>Word-by-word reference</span>
-            <select
-              className="selectbox"
-              style={{ maxWidth: 280 }}
+          <GrantRow label="Word-by-word reference" labelWidth="w-[220px]">
+            <NativeSelect
+              className="max-w-[280px]"
               value={state.reference === null ? '' : String(state.reference)}
               disabled={pending}
-              onChange={(e) =>
-                patch((p) => ({
-                  ...p,
-                  reference: e.target.value === '' ? null : Number(e.target.value),
-                }))
+              onChange={(raw) =>
+                patch((p) => ({ ...p, reference: raw === '' ? null : Number(raw) }))
               }
             >
               <option value="">Default</option>
@@ -279,38 +301,68 @@ function GrantPanel({
                   {v.name}
                 </option>
               ))}
-            </select>
-          </div>
+            </NativeSelect>
+          </GrantRow>
         </>
       )}
 
       {state.modules.bible !== 'none' && bibleVersions.length > 0 && (
         <>
-          <div className="block-head" style={{ marginTop: 18 }}>
-            <h3>Bible versions</h3>
-          </div>
+          <GrantSectionHeading>Bible versions</GrantSectionHeading>
           {bibleVersions.map((v) => (
-            <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 0' }}>
-              <span style={{ width: 220, fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {v.name}
-              </span>
+            <GrantRow key={v.id} label={v.name} labelWidth="w-[220px]">
               <TriState
                 value={state.bible[v.id] ?? 'none'}
                 disabled={pending}
                 onChange={(access) => patch((p) => ({ ...p, bible: { ...p.bible, [v.id]: access } }))}
               />
-            </div>
+            </GrantRow>
           ))}
         </>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18 }}>
-        <button type="button" className="btn primary sm" disabled={pending || !dirty} onClick={save}>
+      <div className="mt-[18px] flex items-center gap-3">
+        <Button type="button" size="sm" disabled={pending || !dirty} onClick={save}>
           {pending ? 'Saving…' : 'Save grants'}
-        </button>
-        {message && <span className="status-label pub">{message}</span>}
-        {error && <span className="status-label changes">{error}</span>}
+        </Button>
+        {message && (
+          <span
+            className={cn(
+              'font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.12em]',
+              STATUS_META.published.text,
+            )}
+          >
+            {message}
+          </span>
+        )}
+        {error && (
+          <span
+            className={cn(
+              'font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.12em]',
+              STATUS_META.changed.text,
+            )}
+          >
+            {error}
+          </span>
+        )}
       </div>
+    </div>
+  )
+}
+
+function GrantRow({
+  label,
+  labelWidth = 'w-[130px]',
+  children,
+}: {
+  label: string
+  labelWidth?: string
+  children: ReactNode
+}) {
+  return (
+    <div className="flex items-center gap-3 py-1.5">
+      <span className={cn('shrink-0 truncate text-[13.5px] text-foreground', labelWidth)}>{label}</span>
+      {children}
     </div>
   )
 }
@@ -330,18 +382,65 @@ function TriState({
     { v: 'write', label: 'Write' },
   ]
   return (
-    <span className="filterbar">
+    <span className="inline-flex gap-1.5">
       {options.map(({ v, label }) => (
-        <button
-          key={v}
-          type="button"
-          className={`fchip${value === v ? ' is-on' : ''}`}
-          disabled={disabled}
-          onClick={() => onChange(v)}
-        >
+        <Chip key={v} active={value === v} disabled={disabled} onClick={() => onChange(v)}>
           {label}
-        </button>
+        </Chip>
       ))}
     </span>
+  )
+}
+
+function Chip({
+  active,
+  disabled,
+  onClick,
+  children,
+}: {
+  active: boolean
+  disabled: boolean
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant={active ? 'default' : 'outline'}
+      disabled={disabled}
+      onClick={onClick}
+      className="h-8 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.1em]"
+    >
+      {children}
+    </Button>
+  )
+}
+
+function NativeSelect({
+  value,
+  disabled,
+  onChange,
+  className,
+  children,
+}: {
+  value: string
+  disabled: boolean
+  onChange: (value: string) => void
+  className?: string
+  children: ReactNode
+}) {
+  return (
+    <select
+      className={cn(
+        'h-9 w-full rounded-[2px] border border-input bg-transparent px-3 py-1 font-[family-name:var(--font-source-serif)] text-[14px] shadow-xs outline-none transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
+        className,
+      )}
+      value={value}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {children}
+    </select>
   )
 }

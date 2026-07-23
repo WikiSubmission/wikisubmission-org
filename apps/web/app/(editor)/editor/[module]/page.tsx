@@ -9,7 +9,11 @@ import {
   type EditorialContentStatus,
 } from '@/lib/editorial-content-client'
 import { CONTENT_MODULE_DEFS, docTitle } from '@/components/editor/content/module-defs'
-import * as s from '../quran/styles'
+import { EditorCrumb, EditorPageHeader } from '@/components/editor/content/page-chrome'
+import { STATUS_META } from '@/components/editor/content/status'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,12 +23,6 @@ const STATUS_FILTERS: Array<{ value: EditorialContentStatus | ''; label: string 
   { value: 'changed', label: 'Unpublished changes' },
   { value: 'published', label: 'Published' },
 ]
-
-const STATUS_DOT: Record<EditorialContentStatus, string> = {
-  draft: 'draft',
-  changed: 'changes',
-  published: 'pub',
-}
 
 interface PageProps {
   params: Promise<{ module: string }>
@@ -58,46 +56,54 @@ export default async function ContentModuleListPage({ params, searchParams }: Pa
   const groups = isArticle ? groupArticles(docs) : docs.map((doc) => [doc])
 
   return (
-    <section style={s.page}>
-      <Link href="/editor" style={s.crumb}>
-        ← Workspace
-      </Link>
-      <div className="dh">
-        <div className="dh-main">
-          <p className="dh-eyebrow">{def.label}</p>
-          <h1>
-            {def.label} <span className="hint">{total} total</span>
-          </h1>
-          <p className="dh-sub">{def.blurb}</p>
-        </div>
-        <div className="dh-actions">
-          {canWrite && (
-            <Link className="btn primary" href={`/editor/${module}/new`}>
-              New {def.labelSingular.toLowerCase()}
-            </Link>
-          )}
-        </div>
-      </div>
+    <section className="w-full max-w-5xl px-9 py-8">
+      <EditorCrumb href="/editor">Workspace</EditorCrumb>
+      <EditorPageHeader
+        eyebrow={def.label}
+        title={def.label}
+        meta={`${total} total`}
+        description={def.blurb}
+        actions={
+          canWrite && (
+            <Button
+              asChild
+              className="font-[family-name:var(--font-source-serif)] text-[13.5px]"
+            >
+              <Link href={`/editor/${module}/new`}>New {def.labelSingular.toLowerCase()}</Link>
+            </Button>
+          )
+        }
+      />
 
-      <form method="get" style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
-        <div className="search" style={{ minWidth: 260 }}>
-          <input name="q" defaultValue={q} placeholder={`Search ${def.label.toLowerCase()}…`} />
-        </div>
-        <div className="filterbar">
+      <form method="get" className="mb-4 flex flex-wrap items-center gap-2.5">
+        <Input
+          name="q"
+          defaultValue={q}
+          placeholder={`Search ${def.label.toLowerCase()}…`}
+          className="h-9 min-w-[260px] max-w-sm font-[family-name:var(--font-source-serif)]"
+        />
+        <div className="flex flex-wrap gap-1.5">
           {STATUS_FILTERS.map((f) => (
-            <FilterChip key={f.value || 'all'} module={module} q={q} value={f.value} label={f.label} current={statusFilter} />
+            <FilterChip
+              key={f.value || 'all'}
+              module={module}
+              q={q}
+              value={f.value}
+              label={f.label}
+              current={statusFilter}
+            />
           ))}
         </div>
       </form>
 
       {docs.length === 0 ? (
-        <p style={s.lede}>
+        <p className="max-w-[60ch] text-[14px] leading-relaxed text-muted-foreground">
           {q || statusFilter
             ? 'Nothing matches these filters.'
             : `No ${def.label.toLowerCase()} yet.${canWrite ? ' Create the first one.' : ''}`}
         </p>
       ) : (
-        <div style={{ border: '1px solid var(--ed-rule)', borderRadius: 'var(--ed-radius)', background: 'var(--ed-surface)' }}>
+        <div className="overflow-hidden rounded-[3px] border border-border bg-card">
           {groups.map((group) => (
             <DocGroup key={group[0].id} module={module} group={group} isArticle={isArticle} canWrite={canWrite} />
           ))}
@@ -124,10 +130,16 @@ function FilterChip({
   if (q) query.set('q', q)
   if (value) query.set('status', value)
   const qs = query.toString()
+  const active = current === value
   return (
-    <Link className={`fchip${current === value ? ' is-on' : ''}`} href={`/editor/${module}${qs ? `?${qs}` : ''}`}>
-      {label}
-    </Link>
+    <Button
+      asChild
+      size="sm"
+      variant={active ? 'default' : 'outline'}
+      className="h-8 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.1em]"
+    >
+      <Link href={`/editor/${module}${qs ? `?${qs}` : ''}`}>{label}</Link>
+    </Button>
   )
 }
 
@@ -157,26 +169,42 @@ function DocGroup({
   const def = CONTENT_MODULE_DEFS[module]
   const primary = group[0]
   return (
-    <div style={{ borderBottom: '1px solid var(--ed-rule)' }}>
+    <div className="border-b border-border last:border-b-0">
       {group.map((doc) => {
         const fields = doc.fields as Record<string, unknown>
         const language = typeof fields.language === 'string' ? fields.language : null
+        const meta = STATUS_META[doc.status]
         return (
-          <Link key={doc.id} href={`/editor/${module}/${doc.id}`} className="row">
-            <div className="row-top">
-              <span className={`sdot ${STATUS_DOT[doc.status]}`} />
-              <span className="row-title">{docTitle(def, fields)}</span>
-              {language && <span className="badge">{language.toUpperCase()}</span>}
+          <Link
+            key={doc.id}
+            href={`/editor/${module}/${doc.id}`}
+            className="relative flex flex-col gap-1 border-b border-border px-4 py-3 transition-colors last:border-b-0 hover:bg-accent"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className={`size-[7px] shrink-0 rounded-full ${meta.dot}`} aria-hidden />
+              <span className="min-w-0 flex-1 truncate font-[family-name:var(--font-source-serif)] text-[15px] font-medium text-foreground">
+                {docTitle(def, fields)}
+              </span>
+              {language && (
+                <Badge
+                  variant="outline"
+                  className="font-[family-name:var(--font-glacial)] text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground"
+                >
+                  {language.toUpperCase()}
+                </Badge>
+              )}
             </div>
-            <div className="row-meta">
-              <span className={`status-label ${STATUS_DOT[doc.status]}`}>{doc.status}</span>
-              <span className="sep">·</span>
+            <div className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+              <span className={`font-[family-name:var(--font-glacial)] uppercase tracking-[0.1em] ${meta.text}`}>
+                {doc.status}
+              </span>
+              <span className="opacity-45">·</span>
               <span>{subtitleOf(def.subtitleKey, fields)}</span>
-              <span className="sep">·</span>
+              <span className="opacity-45">·</span>
               <span>updated {new Date(doc.updated_at).toLocaleDateString()}</span>
               {doc.updated_by_email && (
                 <>
-                  <span className="sep">·</span>
+                  <span className="opacity-45">·</span>
                   <span>{doc.updated_by_email}</span>
                 </>
               )}
@@ -187,8 +215,7 @@ function DocGroup({
       {isArticle && canWrite && primary.translation_group && (
         <Link
           href={`/editor/${module}/new?group=${primary.translation_group}`}
-          className="row"
-          style={{ color: 'var(--ed-fg-muted)', fontSize: 13 }}
+          className="block px-4 py-2.5 font-[family-name:var(--font-source-serif)] text-[13px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           + Add a language variant
         </Link>

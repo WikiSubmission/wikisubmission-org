@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { getEditorialSession } from '@/lib/editorial-client'
@@ -9,7 +8,7 @@ import {
 import { DocForm } from '@/components/editor/content/doc-form'
 import { CONTENT_MODULE_DEFS } from '@/components/editor/content/module-defs'
 import { loadModuleOptions } from '@/components/editor/content/options'
-import * as s from '../../quran/styles'
+import { EditorCrumb } from '@/components/editor/content/page-chrome'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,10 +38,8 @@ export default async function EditContentDocPage({ params }: PageProps) {
   if (!doc) notFound()
 
   return (
-    <section style={s.page}>
-      <Link href={`/editor/${module}`} style={s.crumb}>
-        ← {def.label}
-      </Link>
+    <section className="w-full max-w-3xl px-9 py-8">
+      <EditorCrumb href={`/editor/${module}`}>{def.label}</EditorCrumb>
       <DocForm
         module={module as EditorialContentModule}
         def={def}

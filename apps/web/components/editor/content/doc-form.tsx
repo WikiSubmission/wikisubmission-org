@@ -5,9 +5,13 @@
  * FieldDef schema (module-defs.ts). Handles draft saving, publish/unpublish,
  * delete and slug auto-generation. The backend re-validates everything; this
  * form only provides friendly ergonomics.
+ *
+ * Presentation is composed from shadcn primitives (Button, Input, Textarea,
+ * Label, Badge) on semantic tokens; the editorial brand type (glacial labels,
+ * Cormorant titles, Source Serif body) is preserved via font-family utilities.
  */
 import { useRouter } from 'next/navigation'
-import { useState, useTransition } from 'react'
+import { useState, useTransition, type ReactNode } from 'react'
 
 import {
   deleteContentDocAction,
@@ -16,6 +20,12 @@ import {
   unpublishContentDocAction,
 } from '@/app/(editor)/editor/content-actions'
 import type { EditorialContentModule, EditorialContentStatus } from '@/lib/editorial-content-client'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { STATUS_META } from './status'
 import type { ContentModuleDef, FieldDef } from './module-defs'
 import { PTEditor } from './pt-editor'
 
@@ -40,12 +50,6 @@ function slugify(source: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 96)
-}
-
-const STATUS_LABEL: Record<EditorialContentStatus, { label: string; cls: string }> = {
-  draft: { label: 'Draft', cls: 'draft' },
-  changed: { label: 'Unpublished changes', cls: 'changes' },
-  published: { label: 'Published', cls: 'pub' },
 }
 
 export function DocForm({
@@ -134,49 +138,73 @@ export function DocForm({
     })
   }
 
-  const statusInfo = status ? STATUS_LABEL[status] : null
+  const statusMeta = status ? STATUS_META[status] : null
 
   return (
     <div>
-      <div className="dh">
-        <div className="dh-main">
-          <p className="dh-eyebrow">{def.labelSingular}</p>
-          <h1>{docId === null ? `New ${def.labelSingular.toLowerCase()}` : titleOf(def, fields)}</h1>
-          {statusInfo && (
-            <p className="dh-sub">
-              <span className={`status-label ${statusInfo.cls}`}>{statusInfo.label}</span>
-              {dirty && <span className="status-label changes"> · unsaved edits</span>}
+      <header className="mb-6 flex flex-wrap items-start gap-x-5 gap-y-3">
+        <div className="min-w-0 flex-1">
+          <p className="font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">
+            {def.labelSingular}
+          </p>
+          <h1 className="mt-2 font-[family-name:var(--font-cormorant)] text-[34px] leading-[1.05] text-foreground">
+            {docId === null ? `New ${def.labelSingular.toLowerCase()}` : titleOf(def, fields)}
+          </h1>
+          {statusMeta && (
+            <p className="mt-2 flex items-center gap-2 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.12em]">
+              <span className={statusMeta.text}>{statusMeta.label}</span>
+              {dirty && (
+                <span className={STATUS_META.changed.text}>· unsaved edits</span>
+              )}
             </p>
           )}
         </div>
-        <div className="dh-actions">
-          {canWrite && (
-            <>
-              <button type="button" className="btn primary" disabled={pending || !dirty} onClick={save}>
-                {pending ? 'Working…' : docId === null ? 'Create draft' : 'Save draft'}
-              </button>
-              {docId !== null && status !== 'published' && (
-                <button type="button" className="btn accent" disabled={pending || dirty} title={dirty ? 'Save first' : undefined} onClick={() => publish('publish')}>
-                  Publish
-                </button>
-              )}
-              {docId !== null && status !== 'draft' && (
-                <button type="button" className="btn" disabled={pending} onClick={() => publish('unpublish')}>
-                  Unpublish
-                </button>
-              )}
-              {docId !== null && (
-                <button type="button" className="btn danger" disabled={pending} onClick={destroy}>
-                  Delete
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
+        {canWrite && (
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <Button type="button" disabled={pending || !dirty} onClick={save}>
+              {pending ? 'Working…' : docId === null ? 'Create draft' : 'Save draft'}
+            </Button>
+            {docId !== null && status !== 'published' && (
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={pending || dirty}
+                title={dirty ? 'Save first' : undefined}
+                onClick={() => publish('publish')}
+              >
+                Publish
+              </Button>
+            )}
+            {docId !== null && status !== 'draft' && (
+              <Button type="button" variant="outline" disabled={pending} onClick={() => publish('unpublish')}>
+                Unpublish
+              </Button>
+            )}
+            {docId !== null && (
+              <Button
+                type="button"
+                variant="ghost"
+                className="text-destructive hover:bg-destructive hover:text-white"
+                disabled={pending}
+                onClick={destroy}
+              >
+                Delete
+              </Button>
+            )}
+          </div>
+        )}
+      </header>
 
-      {error && <p className="field"><span className="err">{error}</span></p>}
-      {!canWrite && <p className="dh-sub">Read only — you have not been granted write access to this module.</p>}
+      {error && (
+        <p role="alert" className="mb-4 text-[13px] text-destructive">
+          {error}
+        </p>
+      )}
+      {!canWrite && (
+        <p className="mb-4 text-[14px] text-muted-foreground">
+          Read only — you have not been granted write access to this module.
+        </p>
+      )}
 
       <FieldList
         defs={def.fields}
@@ -215,16 +243,24 @@ interface FieldListProps {
 function FieldList({ defs, fields, set, disabled, options, onSlugTouched }: FieldListProps) {
   // Sections gate the fields that follow them until the next section.
   let visible = true
-  const rendered: React.ReactNode[] = []
+  const rendered: ReactNode[] = []
   defs.forEach((fieldDef, i) => {
     if (fieldDef.kind === 'section') {
       visible = !fieldDef.when || fields[fieldDef.when.key] === fieldDef.when.equals
       if (visible) {
         rendered.push(
-          <div className="block-head" key={`s${i}`}>
-            <h3>{fieldDef.label}</h3>
-            <span className="spacer" />
-            {fieldDef.desc && <span className="hint">{fieldDef.desc}</span>}
+          <div
+            key={`s${i}`}
+            className="mt-8 mb-4 flex items-baseline gap-3 border-b border-border pb-2.5 first:mt-0"
+          >
+            <h3 className="font-[family-name:var(--font-cormorant)] text-[22px] leading-none text-foreground">
+              {fieldDef.label}
+            </h3>
+            {fieldDef.desc && (
+              <span className="ml-auto font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+                {fieldDef.desc}
+              </span>
+            )}
           </div>,
         )
       }
@@ -233,7 +269,7 @@ function FieldList({ defs, fields, set, disabled, options, onSlugTouched }: Fiel
     if (!visible) return
     if (fieldDef.kind === 'row') {
       rendered.push(
-        <div className="field-row" key={`r${i}`}>
+        <div key={`r${i}`} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {fieldDef.fields.map((sub) => (
             <Field key={keyOf(sub)} def={sub} fields={fields} set={set} disabled={disabled} options={options} onSlugTouched={onSlugTouched} />
           ))}
@@ -245,12 +281,44 @@ function FieldList({ defs, fields, set, disabled, options, onSlugTouched }: Fiel
       <Field key={keyOf(fieldDef)} def={fieldDef} fields={fields} set={set} disabled={disabled} options={options} onSlugTouched={onSlugTouched} />,
     )
   })
-  return <>{rendered}</>
+  return <div className="flex flex-col gap-[18px]">{rendered}</div>
 }
 
 function keyOf(def: FieldDef): string {
   return 'key' in def ? def.key : Math.random().toString(36)
 }
+
+interface FieldShellProps {
+  label: string
+  optional: boolean
+  desc?: string
+  children: ReactNode
+}
+
+/** Brand field frame: glacial uppercase label, control, muted italic hint. */
+function FieldShell({ label, optional, desc, children }: FieldShellProps) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label className="flex items-baseline justify-between gap-2.5 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.13em] text-muted-foreground">
+        <span>{label}</span>
+        {optional && (
+          <span className="font-[family-name:var(--font-cormorant)] text-[13px] normal-case italic tracking-normal">
+            optional
+          </span>
+        )}
+      </Label>
+      {children}
+      {desc && (
+        <p className="font-[family-name:var(--font-source-serif)] text-[13.5px] italic leading-snug text-muted-foreground">
+          {desc}
+        </p>
+      )}
+    </div>
+  )
+}
+
+const CONTROL_FONT = 'font-[family-name:var(--font-source-serif)] text-[15px]'
+const MONO_FONT = 'font-[family-name:var(--font-jetbrains)] text-[13px]'
 
 interface FieldProps {
   def: FieldDef
@@ -264,35 +332,35 @@ interface FieldProps {
 function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProps) {
   if (def.kind === 'row' || def.kind === 'section') return null
   const value = fields[def.key]
-
-  const label = (
-    <label>
-      {def.label}
-      {'required' in def && def.required ? '' : <span className="opt"> — optional</span>}
-    </label>
-  )
-  const desc = 'desc' in def && def.desc ? <p className="desc">{def.desc}</p> : null
+  const optional = !('required' in def && def.required)
+  const desc = 'desc' in def && def.desc ? def.desc : undefined
 
   switch (def.kind) {
     case 'text':
       return (
-        <div className="field">
-          {label}
-          <input
-            className={`input${def.mono ? ' mono' : ''}${def.title ? ' title-input' : ''}`}
-            value={typeof value === 'string' ? value : ''}
-            disabled={disabled}
-            onChange={(e) => set(def.key, e.target.value)}
-          />
-          {desc}
-        </div>
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          {def.title ? (
+            <Input
+              className="h-auto rounded-none border-0 border-b border-border bg-transparent px-0 py-2 font-[family-name:var(--font-cormorant)] text-[26px] font-medium tracking-[-0.02em] shadow-none focus-visible:border-primary focus-visible:ring-0"
+              value={typeof value === 'string' ? value : ''}
+              disabled={disabled}
+              onChange={(e) => set(def.key, e.target.value)}
+            />
+          ) : (
+            <Input
+              className={cn(def.mono ? MONO_FONT : CONTROL_FONT)}
+              value={typeof value === 'string' ? value : ''}
+              disabled={disabled}
+              onChange={(e) => set(def.key, e.target.value)}
+            />
+          )}
+        </FieldShell>
       )
     case 'slug':
       return (
-        <div className="field">
-          {label}
-          <input
-            className="input mono"
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <Input
+            className={MONO_FONT}
             value={typeof value === 'string' ? value : ''}
             disabled={disabled}
             onChange={(e) => {
@@ -300,37 +368,29 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
               set(def.key, slugify(e.target.value) || e.target.value.toLowerCase())
             }}
           />
-          {desc}
-        </div>
+        </FieldShell>
       )
     case 'textarea':
       return (
-        <div className="field">
-          {label}
-          <textarea
-            className="textarea"
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <Textarea
+            className={cn('resize-none leading-relaxed', CONTROL_FONT)}
             rows={def.rows ?? 3}
             value={typeof value === 'string' ? value : ''}
             disabled={disabled}
             onChange={(e) => set(def.key, e.target.value)}
           />
-          {desc}
-        </div>
+        </FieldShell>
       )
     case 'select': {
       const opts = def.options ?? (def.optionsKey ? (options[def.optionsKey] ?? []) : [])
       const numeric = def.key.endsWith('_id')
       return (
-        <div className="field">
-          {label}
-          <select
-            className="selectbox"
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <NativeSelect
             value={value === null || value === undefined ? '' : String(value)}
             disabled={disabled}
-            onChange={(e) => {
-              const raw = e.target.value
-              set(def.key, raw === '' ? null : numeric ? Number(raw) : raw)
-            }}
+            onChange={(raw) => set(def.key, raw === '' ? null : numeric ? Number(raw) : raw)}
           >
             <option value="">—</option>
             {opts.map((o) => (
@@ -338,9 +398,8 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
                 {o.label}
               </option>
             ))}
-          </select>
-          {desc}
-        </div>
+          </NativeSelect>
+        </FieldShell>
       )
     }
     case 'multiselect': {
@@ -354,32 +413,32 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
         )
       }
       return (
-        <div className="field">
-          {label}
-          <div className="filterbar">
-            {opts.length === 0 && <span className="hint">Nothing to pick yet.</span>}
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <div className="flex flex-wrap gap-1.5">
+            {opts.length === 0 && (
+              <span className="font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+                Nothing to pick yet.
+              </span>
+            )}
             {opts.map((o) => (
-              <button
+              <Chip
                 key={o.value}
-                type="button"
-                className={`fchip${selected.includes(o.value) ? ' is-on' : ''}`}
+                active={selected.includes(o.value)}
                 disabled={disabled}
                 onClick={() => toggle(o.value)}
               >
                 {o.label}
-              </button>
+              </Chip>
             ))}
           </div>
-          {desc}
-        </div>
+        </FieldShell>
       )
     }
     case 'number':
       return (
-        <div className="field">
-          {label}
-          <input
-            className="input mono"
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <Input
+            className={MONO_FONT}
             inputMode="numeric"
             value={value === null || value === undefined ? '' : String(value)}
             disabled={disabled}
@@ -393,41 +452,31 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
               if (Number.isInteger(n)) set(def.key, n)
             }}
           />
-          {desc}
-        </div>
+        </FieldShell>
       )
     case 'toggle':
       return (
-        <div className="field">
-          {label}
-          <div className="filterbar">
-            <button
-              type="button"
-              className={`fchip${value === true ? ' is-on' : ''}`}
-              disabled={disabled}
-              onClick={() => set(def.key, true)}
-            >
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <div className="flex flex-wrap gap-1.5">
+            <Chip active={value === true} disabled={disabled} onClick={() => set(def.key, true)}>
               Yes
-            </button>
-            <button
-              type="button"
-              className={`fchip${value === false || value === undefined || value === null ? ' is-on' : ''}`}
+            </Chip>
+            <Chip
+              active={value === false || value === undefined || value === null}
               disabled={disabled}
               onClick={() => set(def.key, false)}
             >
               No
-            </button>
+            </Chip>
           </div>
-          {desc}
-        </div>
+        </FieldShell>
       )
     case 'tags': {
       const text = Array.isArray(value) ? (value as unknown[]).join(', ') : ''
       return (
-        <div className="field">
-          {label}
-          <input
-            className="input"
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <Input
+            className={CONTROL_FONT}
             defaultValue={text}
             disabled={disabled}
             onBlur={(e) => {
@@ -438,23 +487,73 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
               set(def.key, tags)
             }}
           />
-          {desc}
-        </div>
+        </FieldShell>
       )
     }
     case 'pt':
       return (
-        <div className="field">
-          {label}
-          {desc}
+        <FieldShell label={def.label} optional={optional} desc={desc}>
           <PTEditor
             initialValue={value}
             disabled={disabled}
             onChange={(blocks) => set(def.key, blocks)}
           />
-        </div>
+        </FieldShell>
       )
     default:
       return null
   }
+}
+
+/** Toggle/filter chip built on Button, preserving the brand glacial micro-label. */
+function Chip({
+  active,
+  disabled,
+  onClick,
+  children,
+}: {
+  active: boolean
+  disabled: boolean
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant={active ? 'default' : 'outline'}
+      disabled={disabled}
+      onClick={onClick}
+      className="h-8 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.1em]"
+    >
+      {children}
+    </Button>
+  )
+}
+
+/** Native select styled to match the shadcn Input surface + brand type. */
+function NativeSelect({
+  value,
+  disabled,
+  onChange,
+  children,
+}: {
+  value: string
+  disabled: boolean
+  onChange: (value: string) => void
+  children: ReactNode
+}) {
+  return (
+    <select
+      className={cn(
+        'h-9 w-full rounded-[2px] border border-input bg-transparent px-3 py-1 shadow-xs outline-none transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
+        CONTROL_FONT,
+      )}
+      value={value}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {children}
+    </select>
+  )
 }

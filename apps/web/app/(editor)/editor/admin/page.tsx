@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import {
@@ -8,7 +7,7 @@ import {
 } from '@/lib/editorial-client'
 import { listEditorialEditors } from '@/lib/editorial-content-client'
 import { AdminGrantsClient } from './admin-client'
-import * as s from '../quran/styles'
+import { EditorCrumb, EditorPageHeader } from '@/components/editor/content/page-chrome'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,20 +29,13 @@ export default async function EditorAdminPage() {
   ])
 
   return (
-    <section style={s.page}>
-      <Link href="/editor" style={s.crumb}>
-        ← Workspace
-      </Link>
-      <div className="dh">
-        <div className="dh-main">
-          <p className="dh-eyebrow">System</p>
-          <h1>Admin Tools</h1>
-          <p className="dh-sub">
-            Grant editorial access per module and per version. Admins bypass
-            grants entirely; everyone else sees only what is granted here.
-          </p>
-        </div>
-      </div>
+    <section className="w-full max-w-5xl px-9 py-8">
+      <EditorCrumb href="/editor">Workspace</EditorCrumb>
+      <EditorPageHeader
+        eyebrow="System"
+        title="Admin Tools"
+        description="Grant editorial access per module and per version. Admins bypass grants entirely; everyone else sees only what is granted here."
+      />
 
       <AdminGrantsClient
         editors={editors}
