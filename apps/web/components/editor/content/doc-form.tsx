@@ -11,7 +11,7 @@
  * Cormorant titles, Source Serif body) is preserved via font-family utilities.
  */
 import { useRouter } from 'next/navigation'
-import { useState, useTransition, type ReactNode } from 'react'
+import { useRef, useState, useTransition, type ReactNode } from 'react'
 
 import {
   deleteContentDocAction,
@@ -21,6 +21,7 @@ import {
 } from '@/app/(editor)/editor/content-actions'
 import type { EditorialContentModule, EditorialContentStatus } from '@/lib/editorial-content-client'
 import { cn } from '@/lib/utils'
+import { sanitizeUrl } from '@/lib/safe-url'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,6 +29,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { STATUS_META } from './status'
 import type { ContentModuleDef, FieldDef } from './module-defs'
 import { PTEditor } from './pt-editor'
+import { uploadEditorialImage } from './upload-image'
 
 type Fields = Record<string, unknown>
 
@@ -490,6 +492,17 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
         </FieldShell>
       )
     }
+    case 'image':
+      return (
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <ImageField
+            value={typeof value === 'string' ? value : ''}
+            aspect={def.aspect}
+            disabled={disabled}
+            onChange={(url) => set(def.key, url)}
+          />
+        </FieldShell>
+      )
     case 'pt':
       return (
         <FieldShell label={def.label} optional={optional} desc={desc}>
@@ -503,6 +516,104 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
     default:
       return null
   }
+}
+
+/**
+ * Image field: uploads through the same authenticated ws-lib path as the body
+ * image blocks (uploadEditorialImage -> /api/editorial/upload -> ws-backend
+ * /editorial/uploads -> ws-lib), storing the returned CDN URL. A manual URL box
+ * remains as a fallback; pasted URLs are scheme-checked before being stored.
+ */
+function ImageField({
+  value,
+  aspect,
+  disabled,
+  onChange,
+}: {
+  value: string
+  aspect?: string
+  disabled: boolean
+  onChange: (url: string) => void
+}) {
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const pick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploading(true)
+    setError(null)
+    try {
+      onChange(await uploadEditorialImage(file))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Image upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      <div
+        className="flex items-center justify-center overflow-hidden rounded-[3px] border border-border bg-muted"
+        style={{ aspectRatio: aspect ?? '16 / 9' }}
+      >
+        {value ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={value} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <span className="font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+            No image
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={disabled || uploading}
+          onClick={() => fileRef.current?.click()}
+        >
+          {uploading ? 'Uploading…' : value ? 'Replace image' : 'Upload image'}
+        </Button>
+        {value && (
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="text-destructive hover:bg-destructive hover:text-white"
+            disabled={disabled || uploading}
+            onClick={() => onChange('')}
+          >
+            Remove
+          </Button>
+        )}
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={pick} />
+      </div>
+
+      <Input
+        className={MONO_FONT}
+        placeholder="or paste a hosted image URL"
+        value={value}
+        disabled={disabled || uploading}
+        onChange={(e) => {
+          setError(null)
+          onChange(e.target.value)
+        }}
+        onBlur={(e) => {
+          const raw = e.target.value.trim()
+          if (raw && !sanitizeUrl(raw)) {
+            setError('That URL uses an unsupported or unsafe scheme.')
+          }
+        }}
+      />
+      {error && <p className="text-[13px] text-destructive">{error}</p>}
+    </div>
+  )
 }
 
 /** Toggle/filter chip built on Button, preserving the brand glacial micro-label. */
