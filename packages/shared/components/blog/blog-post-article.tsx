@@ -6,6 +6,7 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { Children, type ReactNode } from 'react'
 import { ScriptureText } from '@/components/scripture-text'
 import { urlFor } from '@/lib/sanity'
+import { sanitizeUrl } from '@/lib/safe-url'
 import type { BlogPost, RelatedBlogPost } from '@/lib/blog-queries'
 import { BlogReadingProgressBar } from './blog-reading-progress-bar'
 
@@ -326,10 +327,14 @@ function buildPortableTextComponents(scriptureRefsEnabled: boolean) {
       children?: ReactNode
       value?: { href?: string; blank?: boolean }
     }) => {
-      const isExternal = value?.href?.startsWith('http')
+      // Defense-in-depth: reject javascript:/data:/etc. at render even if an
+      // unsafe href somehow reached storage. Unsafe → render plain text.
+      const href = sanitizeUrl(value?.href)
+      if (!href) return <>{children}</>
+      const isExternal = href.startsWith('http')
       return (
         <a
-          href={value?.href}
+          href={href}
           target={isExternal || value?.blank ? '_blank' : undefined}
           rel={isExternal ? 'noopener noreferrer' : undefined}
           className="text-primary underline underline-offset-4 decoration-primary/40 hover:decoration-primary transition-colors break-words [overflow-wrap:anywhere]"
@@ -347,7 +352,7 @@ function buildPortableTextComponents(scriptureRefsEnabled: boolean) {
     }) => {
       // First-party images carry a plain `url`; legacy Sanity draft images
       // (preview) still resolve through urlFor's asset ref.
-      const url = value.url || urlFor(value)
+      const url = sanitizeUrl(value.url || urlFor(value))
       if (!url) return null
       return (
         <figure className="my-10">

@@ -28,6 +28,7 @@ import {
   hasUnsupportedBlocks,
   toInitialValue,
 } from './pt-schema'
+import { sanitizeUrl } from '@/lib/safe-url'
 import { uploadEditorialImage } from './upload-image'
 
 const schemaDefinition = defineSchema(
@@ -187,8 +188,15 @@ function Toolbar() {
   const toggleList = (listItem: string) => editor.send({ type: 'list item.toggle', listItem })
 
   const addLink = () => {
-    const href = window.prompt('Link URL')?.trim()
-    if (!href) return
+    const raw = window.prompt('Link URL')?.trim()
+    if (!raw) return
+    // Reject javascript:/data:/etc. at entry so an unsafe href is never stored
+    // (the public renderer re-checks — see blog-post-article.tsx).
+    const href = sanitizeUrl(raw)
+    if (!href) {
+      window.alert('That link uses an unsupported or unsafe URL scheme. Use http(s), mailto, tel, or a relative path.')
+      return
+    }
     editor.send({ type: 'annotation.add', annotation: { name: 'link', value: { href, blank: false } } })
   }
   const removeLink = () => editor.send({ type: 'annotation.remove', annotation: { name: 'link' } })
