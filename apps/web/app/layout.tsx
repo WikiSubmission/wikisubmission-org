@@ -1,0 +1,84 @@
+import '@/styles/globals.css'
+import Script from 'next/script'
+import { Fonts } from '@/constants/fonts'
+import { Metadata } from '@/constants/metadata'
+import { Toaster } from '@/components/ui/sonner'
+import { ThemeProvider } from '@/components/theme-provider'
+import { ScrollToTop } from '@/components/scroll-to-top'
+import { GeometryDots } from '@/components/geometry-dots'
+import Providers from '@/components/providers'
+import type { Viewport } from 'next'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
+import { auth } from '@/auth'
+import { ReactScanInit } from '@/components/react-scan-init'
+import {
+  PaletteProvider,
+  PALETTE_INIT_SCRIPT,
+} from '@/lib/theme-palette-context'
+
+export const metadata = Metadata
+
+const RTL_LOCALES = ['ar', 'fa', 'ur', 'ku']
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+  const session = await auth()
+  const dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'
+
+  return (
+    <html lang={locale} dir={dir} suppressHydrationWarning>
+      <head>
+        {/* Runs before hydration so [data-palette] is on <html> for the first paint. */}
+        <Script
+          id="palette-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: PALETTE_INIT_SCRIPT }}
+        />
+      </head>
+      <body
+        className={`${Fonts.amiri.variable} ${Fonts.cormorant.variable} ${Fonts.sourceSerif.variable} ${Fonts.jetbrainsMono.variable} ${Fonts.glacial.variable} antialiased wrap-break-words`}
+        suppressHydrationWarning
+      >
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            disableTransitionOnChange
+          >
+            <PaletteProvider>
+              <Providers session={session}>
+                <GeometryDots />
+                {children}
+                <ScrollToTop />
+                <Toaster />
+                {process.env.NODE_ENV === 'development' && <ReactScanInit />}
+              </Providers>
+            </PaletteProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  )
+}
+
+// Pinch-zoom stays enabled (WCAG 1.4.4): no maximum-scale / user-scalable=no.
+// Zoom-on-input-focus on iOS is avoided by keeping input font sizes >= 16px.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  // Draw edge-to-edge under the status bar / gesture nav when installed, so
+  // safe-area-inset-* become meaningful (see globals.css .safe-* utilities).
+  viewportFit: 'cover',
+  // Status bar / toolbar tint when installed as a PWA. Matches the app
+  // background per color scheme for a seamless, app-like surface.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F6F2EA' },
+    { media: '(prefers-color-scheme: dark)', color: '#14110E' },
+  ],
+}

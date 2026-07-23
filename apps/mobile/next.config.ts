@@ -1,0 +1,46 @@
+import type { NextConfig } from 'next'
+import createNextIntlPlugin from 'next-intl/plugin'
+
+// The mobile app ships as a static export bundled inside a native Capacitor
+// shell. There is no Node server in the webview, so every server-only Next
+// feature (route handlers, server actions, middleware, redirects/headers,
+// image optimization) is unavailable here. The whole app/ tree is compiled to
+// static HTML/JS under `out/`, which `cap sync` copies into the native
+// projects. SSR stays exclusively in apps/web.
+const nextConfig: NextConfig = {
+  output: 'export',
+  // Dev-only: allow loading /_next/* dev resources (HMR, on-demand chunks) when
+  // previewing on a phone over the LAN host. Next 16 blocks cross-origin dev
+  // resource access by default; without this the device shell loads but client
+  // chunks are blocked, so data-fetching hooks never run. No effect on the
+  // production static export.
+  allowedDevOrigins: ['192.168.100.3'],
+  // Static export cannot run the on-demand image optimizer.
+  images: { unoptimized: true },
+  // Capacitor serves the bundle from capacitor://localhost (iOS) and
+  // https://localhost (Android), so emit relative asset URLs.
+  trailingSlash: true,
+  // No Serwist here: Capacitor owns the native shell and a service worker
+  // inside the webview conflicts with it. PWA/offline concerns live in web.
+  env: {
+    // There is no same-origin /api/ws proxy in a static export, so the shared
+    // API client must target the backend absolutely. Committed default,
+    // overridable by a real NEXT_PUBLIC_BROWSER_API_URL at build time.
+    NEXT_PUBLIC_BROWSER_API_URL:
+      process.env.NEXT_PUBLIC_BROWSER_API_URL ??
+      'https://ws-backend.wikisubmission.org/api/v1',
+    // Sanity project id/dataset are public configuration (they appear in every
+    // browser request to the Sanity CDN). Without them the shared client falls
+    // back to the 'buildtime' placeholder and article fetches hang forever.
+    NEXT_PUBLIC_SANITY_PROJECT_ID:
+      process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? 'puy3ce80',
+    NEXT_PUBLIC_SANITY_DATASET:
+      process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production',
+  },
+}
+
+// Locale messages are provided purely on the client (see app/intl-provider.tsx);
+// the request config returns a static default for the build-time render.
+const withNextIntl = createNextIntlPlugin()
+
+export default withNextIntl(nextConfig)
