@@ -66,8 +66,8 @@
     "html-to-image": "^1.11.13",
     "jose": "^6.2.3",
     "lucide-react": "1.24.0",
-    "next": "16.2.10",
-    "next-auth": "5.0.0-beta.31",
+    "next": "16.2.12",
+    "next-auth": "5.0.0-beta.32",
     "next-intl": "^4.13.1",
     "next-themes": "^0.4.6",
     "openapi-fetch": "^0.17.0",
@@ -85,7 +85,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "16.2.10",
+    "@next/bundle-analyzer": "16.2.12",
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4.3.2",
     "@testing-library/jest-dom": "^6.9.1",
@@ -98,7 +98,7 @@
     "@vitejs/plugin-react": "^6.0.3",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.2.12",
     "html-to-text": "^10.0.0",
     "jsdom": "^29.1.1",
     "openapi-typescript": "^7.13.0",
