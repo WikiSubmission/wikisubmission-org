@@ -3,7 +3,12 @@ import type { CSSProperties } from 'react'
 // Shared inline-style tokens for the Quran editor screens. Uses the editor
 // scope's --ed-* CSS variables (defined in editor.css / globals.css).
 
-export const page: CSSProperties = { padding: '32px 36px', width: '100%' }
+export const page: CSSProperties = {
+  padding: '32px 36px 96px',
+  width: '100%',
+  maxWidth: 1180,
+  marginInline: 'auto',
+}
 
 export const kicker: CSSProperties = {
   margin: 0,

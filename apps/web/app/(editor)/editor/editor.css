@@ -125,10 +125,22 @@
 /* =========================================================
    WORKSPACE — master / detail / reference rail
    ========================================================= */
-/* overflow-y: auto is the fallback scroll region for plain `<section style={s.page}>`
-   pages (every editor route except master/detail layouts) — .app clips at the
-   shell level, so without this their content is unreachable once it overflows. */
-.workspace { flex: 1; display: flex; min-height: 0; overflow-y: auto; }
+/* overflow-y: auto is the scroll region for the page `<section>`s — the shell
+   clips at SidebarInset, so without this their content is unreachable once it
+   overflows.
+
+   Block, not flex: as a flex container it stretched the page section to exactly
+   the workspace height, so anything past the fold — including the section's own
+   bottom padding — fell outside the scrollable overflow area and could not be
+   reached. Block flow lets the section grow with its content, which is what the
+   scroll height is measured from. (No route uses the master/detail flex row
+   below any more; those rules are kept only for the layout they describe.) */
+.workspace { flex: 1; display: block; min-height: 0; overflow-y: auto; }
+/* Page width cap, centred. .ed-page-wide suits lists/tables, .ed-page-narrow
+   keeps form + prose columns at a readable measure. */
+.ed-page-wide, .ed-page-narrow { width: 100%; margin-inline: auto; }
+.ed-page-wide { max-width: 1180px; }
+.ed-page-narrow { max-width: 900px; }
 
 .master {
   flex: 0 0 var(--master-w, 300px);

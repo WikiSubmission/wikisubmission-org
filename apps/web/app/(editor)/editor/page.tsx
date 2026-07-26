@@ -32,7 +32,7 @@ export default async function EditorLandingPage() {
   )
 
   return (
-    <section className="w-full px-9 py-8">
+    <section className="ed-page-wide px-9 pt-8 pb-24">
       <header className="mb-7">
         <p className="font-[family-name:var(--font-glacial)] text-[12.5px] uppercase tracking-[0.14em] text-muted-foreground">
           Editorial

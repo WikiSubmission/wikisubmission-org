@@ -29,7 +29,7 @@ export default async function EditorAdminPage() {
   ])
 
   return (
-    <section className="w-full px-9 py-8">
+    <section className="ed-page-wide px-9 pt-8 pb-24">
       <EditorCrumb href="/editor">Workspace</EditorCrumb>
       <EditorPageHeader
         eyebrow="System"
