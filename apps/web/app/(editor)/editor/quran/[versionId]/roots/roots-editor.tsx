@@ -49,7 +49,7 @@ export function RootsEditor({ versionId, canWrite, canApprove, roots }: RootsEdi
       </header>
 
       {banner && (
-        <p role="status" style={{ margin: '0 0 16px', fontSize: 13, color: banner.kind === 'ok' ? 'var(--ed-accent)' : '#b04444' }}>
+        <p role="status" style={{ margin: '0 0 16px', fontSize: 15, color: banner.kind === 'ok' ? 'var(--ed-accent)' : '#b04444' }}>
           {banner.text}
         </p>
       )}
@@ -116,7 +116,7 @@ function RootRow({ versionId, root, readOnly }: RootRowProps) {
           <span style={{ ...s.pillBase(), ...s.statusPill.pending }}>draft</span>
         ) : null}
         {status && (
-          <span style={{ marginLeft: 'auto', fontSize: 11, color: status.kind === 'err' ? '#b04444' : 'var(--ed-fg-muted)' }}>
+          <span style={{ marginLeft: 'auto', fontSize: 12.5, color: status.kind === 'err' ? '#b04444' : 'var(--ed-fg-muted)' }}>
             {status.text}
           </span>
         )}
@@ -147,16 +147,16 @@ const head: CSSProperties = {
   marginBottom: 8,
 }
 const letters: CSSProperties = {
-  fontSize: 18,
+  fontSize: 20.5,
   color: 'var(--ed-fg)',
 }
 const occ: CSSProperties = {
   fontFamily: 'var(--font-glacial)',
-  fontSize: 11,
+  fontSize: 12.5,
   color: 'var(--ed-fg-muted)',
 }
 const refLine: CSSProperties = {
   margin: '0 0 8px',
-  fontSize: 12,
+  fontSize: 14,
   color: 'var(--ed-fg-muted)',
 }

@@ -86,12 +86,12 @@ export function EditorUserMenu({ viewer, signOutAction }: EditorUserMenuProps) {
           aria-label="Account, language and theme"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <span className="flex aspect-square size-8 items-center justify-center rounded-[2px] border bg-card font-[family-name:var(--font-cormorant)] text-[15px]">
+          <span className="flex aspect-square size-8 items-center justify-center rounded-[2px] border bg-card font-[family-name:var(--font-cormorant)] text-[17px]">
             {viewer.name.charAt(0).toUpperCase()}
           </span>
           <span className="flex min-w-0 flex-col leading-tight">
-            <span className="truncate text-[13.5px] font-semibold">{viewer.name}</span>
-            <span className="truncate font-mono text-[10px] text-muted-foreground">
+            <span className="truncate text-[15.5px] font-semibold">{viewer.name}</span>
+            <span className="truncate font-mono text-[11.5px] text-muted-foreground">
               @{viewer.handle}
             </span>
           </span>
@@ -121,7 +121,7 @@ export function EditorUserMenu({ viewer, signOutAction }: EditorUserMenuProps) {
                   locale.code === currentLocale && 'text-primary',
                 )}
               >
-                <span className="font-mono text-[10px] tracking-widest uppercase">
+                <span className="font-mono text-[11.5px] tracking-widest uppercase">
                   {locale.label}
                 </span>
                 <span className="text-sm">{locale.name}</span>

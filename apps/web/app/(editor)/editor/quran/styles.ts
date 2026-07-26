@@ -3,12 +3,12 @@ import type { CSSProperties } from 'react'
 // Shared inline-style tokens for the Quran editor screens. Uses the editor
 // scope's --ed-* CSS variables (defined in editor.css / globals.css).
 
-export const page: CSSProperties = { padding: '32px 36px', maxWidth: 1040, width: '100%' }
+export const page: CSSProperties = { padding: '32px 36px', width: '100%' }
 
 export const kicker: CSSProperties = {
   margin: 0,
   fontFamily: 'var(--font-glacial)',
-  fontSize: 11,
+  fontSize: 12.5,
   letterSpacing: '0.14em',
   textTransform: 'uppercase',
   color: 'var(--ed-fg-muted)',
@@ -17,7 +17,7 @@ export const kicker: CSSProperties = {
 export const heading: CSSProperties = {
   margin: '6px 0 10px',
   fontFamily: 'var(--font-cormorant)',
-  fontSize: 34,
+  fontSize: 36,
   lineHeight: 1.05,
   color: 'var(--ed-fg)',
 }
@@ -25,7 +25,7 @@ export const heading: CSSProperties = {
 export const lede: CSSProperties = {
   margin: 0,
   maxWidth: 620,
-  fontSize: 14,
+  fontSize: 16,
   lineHeight: 1.55,
   color: 'var(--ed-fg-muted)',
 }
@@ -36,7 +36,7 @@ export const crumb: CSSProperties = {
   alignItems: 'center',
   marginBottom: 18,
   fontFamily: 'var(--font-glacial)',
-  fontSize: 11,
+  fontSize: 12.5,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
   color: 'var(--ed-fg-muted)',
@@ -50,7 +50,7 @@ export const surface: CSSProperties = {
 
 export const tag: CSSProperties = {
   fontFamily: 'var(--font-glacial)',
-  fontSize: 10,
+  fontSize: 11.5,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
   color: 'var(--ed-accent)',
@@ -64,7 +64,7 @@ export const mutedTag: CSSProperties = {
 export const label: CSSProperties = {
   display: 'block',
   fontFamily: 'var(--font-glacial)',
-  fontSize: 10,
+  fontSize: 11.5,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
   color: 'var(--ed-fg-muted)',
@@ -88,7 +88,7 @@ export const button: CSSProperties = {
   background: 'var(--ed-accent)',
   color: 'var(--ed-bg)',
   fontFamily: 'var(--font-glacial)',
-  fontSize: 12,
+  fontSize: 14,
   letterSpacing: '0.04em',
 }
 
@@ -113,7 +113,7 @@ export function pillBase(): CSSProperties {
     border: '1px solid',
     borderRadius: 999,
     fontFamily: 'var(--font-glacial)',
-    fontSize: 10,
+    fontSize: 11.5,
     letterSpacing: '0.08em',
     textTransform: 'uppercase',
   }

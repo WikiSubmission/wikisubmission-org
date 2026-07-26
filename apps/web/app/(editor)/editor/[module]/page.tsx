@@ -56,7 +56,7 @@ export default async function ContentModuleListPage({ params, searchParams }: Pa
   const groups = isArticle ? groupArticles(docs) : docs.map((doc) => [doc])
 
   return (
-    <section className="w-full max-w-5xl px-9 py-8">
+    <section className="w-full px-9 py-8">
       <EditorCrumb href="/editor">Workspace</EditorCrumb>
       <EditorPageHeader
         eyebrow={def.label}
@@ -67,7 +67,7 @@ export default async function ContentModuleListPage({ params, searchParams }: Pa
           canWrite && (
             <Button
               asChild
-              className="font-[family-name:var(--font-source-serif)] text-[13.5px]"
+              className="font-[family-name:var(--font-source-serif)] text-[15.5px]"
             >
               <Link href={`/editor/${module}/new`}>New {def.labelSingular.toLowerCase()}</Link>
             </Button>
@@ -97,7 +97,7 @@ export default async function ContentModuleListPage({ params, searchParams }: Pa
       </form>
 
       {docs.length === 0 ? (
-        <p className="max-w-[60ch] text-[14px] leading-relaxed text-muted-foreground">
+        <p className="max-w-[60ch] text-[16px] leading-relaxed text-muted-foreground">
           {q || statusFilter
             ? 'Nothing matches these filters.'
             : `No ${def.label.toLowerCase()} yet.${canWrite ? ' Create the first one.' : ''}`}
@@ -136,7 +136,7 @@ function FilterChip({
       asChild
       size="sm"
       variant={active ? 'default' : 'outline'}
-      className="h-8 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.1em]"
+      className="h-8 font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.1em]"
     >
       <Link href={`/editor/${module}${qs ? `?${qs}` : ''}`}>{label}</Link>
     </Button>
@@ -182,19 +182,19 @@ function DocGroup({
           >
             <div className="flex items-center gap-2.5">
               <span className={`size-[7px] shrink-0 rounded-full ${meta.dot}`} aria-hidden />
-              <span className="min-w-0 flex-1 truncate font-[family-name:var(--font-source-serif)] text-[15px] font-medium text-foreground">
+              <span className="min-w-0 flex-1 truncate font-[family-name:var(--font-source-serif)] text-[17px] font-medium text-foreground">
                 {docTitle(def, fields)}
               </span>
               {language && (
                 <Badge
                   variant="outline"
-                  className="font-[family-name:var(--font-glacial)] text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground"
+                  className="font-[family-name:var(--font-glacial)] text-[11px] uppercase tracking-[0.1em] text-muted-foreground"
                 >
                   {language.toUpperCase()}
                 </Badge>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[12.5px] text-muted-foreground">
               <span className={`font-[family-name:var(--font-glacial)] uppercase tracking-[0.1em] ${meta.text}`}>
                 {doc.status}
               </span>
@@ -215,7 +215,7 @@ function DocGroup({
       {isArticle && canWrite && primary.translation_group && (
         <Link
           href={`/editor/${module}/new?group=${primary.translation_group}`}
-          className="block px-4 py-2.5 font-[family-name:var(--font-source-serif)] text-[13px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="block px-4 py-2.5 font-[family-name:var(--font-source-serif)] text-[15px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           + Add a language variant
         </Link>

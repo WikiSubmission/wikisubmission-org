@@ -18,7 +18,7 @@ export function EditorCrumb({ href, children }: EditorCrumbProps) {
   return (
     <Link
       href={href}
-      className="mb-4 inline-flex items-center gap-1.5 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.13em] text-muted-foreground transition-colors hover:text-foreground"
+      className="mb-4 inline-flex items-center gap-1.5 font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.13em] text-muted-foreground transition-colors hover:text-foreground"
     >
       <ArrowLeftIcon className="size-3.5" aria-hidden />
       {children}
@@ -45,19 +45,19 @@ export function EditorPageHeader({
   return (
     <header className="mb-6 flex items-start gap-5">
       <div className="min-w-0 flex-1">
-        <p className="font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
           {eyebrow}
         </p>
-        <h1 className="mt-2 flex items-baseline gap-3 font-[family-name:var(--font-cormorant)] text-[34px] leading-[1.05] text-foreground">
+        <h1 className="mt-2 flex items-baseline gap-3 font-[family-name:var(--font-cormorant)] text-[36px] leading-[1.05] text-foreground">
           <span className="min-w-0">{title}</span>
           {meta && (
-            <span className="font-[family-name:var(--font-jetbrains)] text-[11px] font-normal tracking-normal text-muted-foreground">
+            <span className="font-[family-name:var(--font-jetbrains)] text-[12.5px] font-normal tracking-normal text-muted-foreground">
               {meta}
             </span>
           )}
         </h1>
         {description && (
-          <p className="mt-2.5 max-w-[60ch] text-[14.5px] leading-relaxed text-muted-foreground">
+          <p className="mt-2.5 max-w-[60ch] text-[16.5px] leading-relaxed text-muted-foreground">
             {description}
           </p>
         )}

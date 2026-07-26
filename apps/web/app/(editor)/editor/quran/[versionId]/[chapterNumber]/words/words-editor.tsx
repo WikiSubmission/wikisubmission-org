@@ -111,7 +111,7 @@ function WordRow({ versionId, chapterNumber, word, readOnly }: WordRowProps) {
         )}
         {word.reference?.word && <span style={refWord}>ref: {word.reference.word}</span>}
         {status && (
-          <span style={{ marginLeft: 'auto', fontSize: 11, color: status.kind === 'err' ? '#b04444' : 'var(--ed-fg-muted)' }}>
+          <span style={{ marginLeft: 'auto', fontSize: 12.5, color: status.kind === 'err' ? '#b04444' : 'var(--ed-fg-muted)' }}>
             {status.text}
           </span>
         )}
@@ -148,7 +148,7 @@ function WordRow({ versionId, chapterNumber, word, readOnly }: WordRowProps) {
 const verseNum: CSSProperties = {
   margin: '0 0 10px',
   fontFamily: 'var(--font-glacial)',
-  fontSize: 12,
+  fontSize: 14,
   letterSpacing: '0.06em',
   color: 'var(--ed-accent)',
 }
@@ -166,20 +166,20 @@ const canonical: CSSProperties = {
 }
 const wIndex: CSSProperties = {
   fontFamily: 'var(--font-glacial)',
-  fontSize: 11,
+  fontSize: 12.5,
   color: 'var(--ed-fg-muted)',
   minWidth: 18,
 }
 const arabic: CSSProperties = {
-  fontSize: 20,
+  fontSize: 23,
   color: 'var(--ed-fg)',
 }
 const rootChip: CSSProperties = {
-  fontSize: 13,
+  fontSize: 15,
   color: 'var(--ed-fg-muted)',
 }
 const refWord: CSSProperties = {
-  fontSize: 12,
+  fontSize: 14,
   color: 'var(--ed-fg-muted)',
   fontStyle: 'italic',
 }
@@ -190,6 +190,6 @@ const fieldGrid: CSSProperties = {
 }
 const rootMeaningLine: CSSProperties = {
   margin: '6px 0 0',
-  fontSize: 12,
+  fontSize: 14,
   color: 'var(--ed-fg-muted)',
 }

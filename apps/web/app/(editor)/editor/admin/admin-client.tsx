@@ -62,7 +62,7 @@ export function AdminGrantsClient({ editors, quranVersions, bibleVersions }: Adm
         />
       ))}
       {editors.length === 0 && (
-        <p className="m-0 p-4 text-[14px] text-muted-foreground">No users found.</p>
+        <p className="m-0 p-4 text-[16px] text-muted-foreground">No users found.</p>
       )}
     </div>
   )
@@ -99,24 +99,24 @@ function EditorRow({
         onClick={onToggle}
       >
         <div className="flex items-center gap-2.5">
-          <span className="min-w-0 flex-1 truncate font-[family-name:var(--font-source-serif)] text-[15px] font-medium text-foreground">
+          <span className="min-w-0 flex-1 truncate font-[family-name:var(--font-source-serif)] text-[17px] font-medium text-foreground">
             {editor.display_name || editor.email}
           </span>
           {editor.role === 'admin' && (
-            <Badge className="font-[family-name:var(--font-glacial)] text-[9.5px] uppercase tracking-[0.1em]">
+            <Badge className="font-[family-name:var(--font-glacial)] text-[11px] uppercase tracking-[0.1em]">
               admin
             </Badge>
           )}
           {!editor.is_active && (
             <Badge
               variant="outline"
-              className="font-[family-name:var(--font-glacial)] text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground"
+              className="font-[family-name:var(--font-glacial)] text-[11px] uppercase tracking-[0.1em] text-muted-foreground"
             >
               deactivated
             </Badge>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[12.5px] text-muted-foreground">
           <span>{editor.email}</span>
           <span className="opacity-45">·</span>
           <span>{grantSummary(editor)}</span>
@@ -186,11 +186,11 @@ function toInput(state: GrantState): EditorGrantsInput {
 function GrantSectionHeading({ children, hint }: { children: ReactNode; hint?: string }) {
   return (
     <div className="mt-[18px] mb-3 flex items-baseline gap-3 border-b border-border pb-2">
-      <h3 className="font-[family-name:var(--font-cormorant)] text-[20px] leading-none text-foreground">
+      <h3 className="font-[family-name:var(--font-cormorant)] text-[23px] leading-none text-foreground">
         {children}
       </h3>
       {hint && (
-        <span className="ml-auto font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+        <span className="ml-auto font-[family-name:var(--font-jetbrains)] text-[12.5px] text-muted-foreground">
           {hint}
         </span>
       )}
@@ -237,7 +237,7 @@ function GrantPanel({
   return (
     <div className="border-t border-border px-4 pt-1 pb-[18px]">
       {isAdmin && (
-        <p className="mt-3 text-[13px] leading-snug text-muted-foreground">
+        <p className="mt-3 text-[15px] leading-snug text-muted-foreground">
           This user is an admin and bypasses grants; anything set here only
           applies if the admin role is ever removed.
         </p>
@@ -328,7 +328,7 @@ function GrantPanel({
         {message && (
           <span
             className={cn(
-              'font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.12em]',
+              'font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.12em]',
               STATUS_META.published.text,
             )}
           >
@@ -338,7 +338,7 @@ function GrantPanel({
         {error && (
           <span
             className={cn(
-              'font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.12em]',
+              'font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.12em]',
               STATUS_META.changed.text,
             )}
           >
@@ -361,7 +361,7 @@ function GrantRow({
 }) {
   return (
     <div className="flex items-center gap-3 py-1.5">
-      <span className={cn('shrink-0 truncate text-[13.5px] text-foreground', labelWidth)}>{label}</span>
+      <span className={cn('shrink-0 truncate text-[15.5px] text-foreground', labelWidth)}>{label}</span>
       {children}
     </div>
   )
@@ -410,7 +410,7 @@ function Chip({
       variant={active ? 'default' : 'outline'}
       disabled={disabled}
       onClick={onClick}
-      className="h-8 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.1em]"
+      className="h-8 font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.1em]"
     >
       {children}
     </Button>
@@ -433,7 +433,7 @@ function NativeSelect({
   return (
     <select
       className={cn(
-        'h-9 w-full rounded-[2px] border border-input bg-transparent px-3 py-1 font-[family-name:var(--font-source-serif)] text-[14px] shadow-xs outline-none transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
+        'h-9 w-full rounded-[2px] border border-input bg-transparent px-3 py-1 font-[family-name:var(--font-source-serif)] text-[16px] shadow-xs outline-none transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
         className,
       )}
       value={value}

@@ -98,7 +98,7 @@ export function ChapterEditor({ versionId, chapterNumber, initial, canApprove }:
 
       {pending && (
         <div style={{ ...s.surface, padding: '12px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 13, color: 'var(--ed-fg-muted)' }}>
+          <span style={{ fontSize: 15, color: 'var(--ed-fg-muted)' }}>
             <span style={{ ...s.pillBase(), ...s.statusPill.pending, marginRight: 8 }}>pending</span>
             Submitted for publishing (request #{pending.id}).
           </span>
@@ -120,7 +120,7 @@ export function ChapterEditor({ versionId, chapterNumber, initial, canApprove }:
           role="status"
           style={{
             margin: '0 0 16px',
-            fontSize: 13,
+            fontSize: 15,
             color: banner.kind === 'ok' ? 'var(--ed-accent)' : '#b04444',
           }}
         >
@@ -146,7 +146,7 @@ export function ChapterEditor({ versionId, chapterNumber, initial, canApprove }:
           )}
         </div>
         {initial.title_published != null && initial.title_published !== title && (
-          <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--ed-fg-muted)' }}>
+          <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--ed-fg-muted)' }}>
             Published: {initial.title_published}
           </p>
         )}
@@ -200,7 +200,7 @@ function VerseRow({ versionId, chapterNumber, verse, readOnly, disabled }: Verse
           {chapterNumber}:{verse.verse_number}
         </span>
         {status && (
-          <span style={{ fontSize: 12, color: status.kind === 'ok' ? 'var(--ed-accent)' : '#b04444' }}>
+          <span style={{ fontSize: 14, color: status.kind === 'ok' ? 'var(--ed-accent)' : '#b04444' }}>
             {status.text}
           </span>
         )}
@@ -264,7 +264,7 @@ const verseHead: CSSProperties = {
 }
 const verseNum: CSSProperties = {
   fontFamily: 'var(--font-glacial)',
-  fontSize: 12,
+  fontSize: 14,
   letterSpacing: '0.06em',
   color: 'var(--ed-accent)',
 }
@@ -277,7 +277,7 @@ const referenceBox: CSSProperties = {
 }
 const refLine: CSSProperties = {
   margin: '4px 0 0',
-  fontSize: 13,
+  fontSize: 15,
   lineHeight: 1.5,
   color: 'var(--ed-fg-muted)',
 }

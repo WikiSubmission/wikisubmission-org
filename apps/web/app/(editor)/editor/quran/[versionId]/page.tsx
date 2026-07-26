@@ -102,7 +102,7 @@ const row: CSSProperties = {
 }
 const num: CSSProperties = {
   fontFamily: 'var(--font-glacial)',
-  fontSize: 13,
+  fontSize: 15,
   color: 'var(--ed-fg-muted)',
   width: 28,
   textAlign: 'right',
@@ -111,13 +111,13 @@ const num: CSSProperties = {
 const title: CSSProperties = {
   display: 'block',
   fontFamily: 'var(--font-cormorant)',
-  fontSize: 18,
+  fontSize: 20.5,
   color: 'var(--ed-fg)',
 }
 const meta: CSSProperties = {
   display: 'block',
   fontFamily: 'var(--font-glacial)',
-  fontSize: 11,
+  fontSize: 12.5,
   letterSpacing: '0.03em',
   color: 'var(--ed-fg-muted)',
 }

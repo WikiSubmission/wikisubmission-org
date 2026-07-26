@@ -103,13 +103,13 @@ const tile: CSSProperties = {
 }
 const tileTitle: CSSProperties = {
   fontFamily: 'var(--font-cormorant)',
-  fontSize: 22,
+  fontSize: 25.5,
   color: 'var(--ed-fg)',
 }
 const tileMeta: CSSProperties = {
   margin: 0,
   fontFamily: 'var(--font-glacial)',
-  fontSize: 11,
+  fontSize: 12.5,
   letterSpacing: '0.04em',
   color: 'var(--ed-fg-muted)',
 }

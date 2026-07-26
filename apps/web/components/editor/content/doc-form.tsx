@@ -146,14 +146,14 @@ export function DocForm({
     <div>
       <header className="mb-6 flex flex-wrap items-start gap-x-5 gap-y-3">
         <div className="min-w-0 flex-1">
-          <p className="font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
             {def.labelSingular}
           </p>
-          <h1 className="mt-2 font-[family-name:var(--font-cormorant)] text-[34px] leading-[1.05] text-foreground">
+          <h1 className="mt-2 font-[family-name:var(--font-cormorant)] text-[36px] leading-[1.05] text-foreground">
             {docId === null ? `New ${def.labelSingular.toLowerCase()}` : titleOf(def, fields)}
           </h1>
           {statusMeta && (
-            <p className="mt-2 flex items-center gap-2 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.12em]">
+            <p className="mt-2 flex items-center gap-2 font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.12em]">
               <span className={statusMeta.text}>{statusMeta.label}</span>
               {dirty && (
                 <span className={STATUS_META.changed.text}>· unsaved edits</span>
@@ -198,12 +198,12 @@ export function DocForm({
       </header>
 
       {error && (
-        <p role="alert" className="mb-4 text-[13px] text-destructive">
+        <p role="alert" className="mb-4 text-[15px] text-destructive">
           {error}
         </p>
       )}
       {!canWrite && (
-        <p className="mb-4 text-[14px] text-muted-foreground">
+        <p className="mb-4 text-[16px] text-muted-foreground">
           Read only — you have not been granted write access to this module.
         </p>
       )}
@@ -255,11 +255,11 @@ function FieldList({ defs, fields, set, disabled, options, onSlugTouched }: Fiel
             key={`s${i}`}
             className="mt-8 mb-4 flex items-baseline gap-3 border-b border-border pb-2.5 first:mt-0"
           >
-            <h3 className="font-[family-name:var(--font-cormorant)] text-[22px] leading-none text-foreground">
+            <h3 className="font-[family-name:var(--font-cormorant)] text-[25.5px] leading-none text-foreground">
               {fieldDef.label}
             </h3>
             {fieldDef.desc && (
-              <span className="ml-auto font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+              <span className="ml-auto font-[family-name:var(--font-jetbrains)] text-[12.5px] text-muted-foreground">
                 {fieldDef.desc}
               </span>
             )}
@@ -301,17 +301,17 @@ interface FieldShellProps {
 function FieldShell({ label, optional, desc, children }: FieldShellProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label className="flex items-baseline justify-between gap-2.5 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.13em] text-muted-foreground">
+      <Label className="flex items-baseline justify-between gap-2.5 font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.13em] text-muted-foreground">
         <span>{label}</span>
         {optional && (
-          <span className="font-[family-name:var(--font-cormorant)] text-[13px] normal-case italic tracking-normal">
+          <span className="font-[family-name:var(--font-cormorant)] text-[15px] normal-case italic tracking-normal">
             optional
           </span>
         )}
       </Label>
       {children}
       {desc && (
-        <p className="font-[family-name:var(--font-source-serif)] text-[13.5px] italic leading-snug text-muted-foreground">
+        <p className="font-[family-name:var(--font-source-serif)] text-[15.5px] italic leading-snug text-muted-foreground">
           {desc}
         </p>
       )}
@@ -319,8 +319,8 @@ function FieldShell({ label, optional, desc, children }: FieldShellProps) {
   )
 }
 
-const CONTROL_FONT = 'font-[family-name:var(--font-source-serif)] text-[15px]'
-const MONO_FONT = 'font-[family-name:var(--font-jetbrains)] text-[13px]'
+const CONTROL_FONT = 'font-[family-name:var(--font-source-serif)] text-[17px]'
+const MONO_FONT = 'font-[family-name:var(--font-jetbrains)] text-[15px]'
 
 interface FieldProps {
   def: FieldDef
@@ -343,7 +343,7 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
         <FieldShell label={def.label} optional={optional} desc={desc}>
           {def.title ? (
             <Input
-              className="h-auto rounded-none border-0 border-b border-border bg-transparent px-0 py-2 font-[family-name:var(--font-cormorant)] text-[26px] font-medium tracking-[-0.02em] shadow-none focus-visible:border-primary focus-visible:ring-0"
+              className="h-auto rounded-none border-0 border-b border-border bg-transparent px-0 py-2 font-[family-name:var(--font-cormorant)] text-[27.5px] font-medium tracking-[-0.02em] shadow-none focus-visible:border-primary focus-visible:ring-0"
               value={typeof value === 'string' ? value : ''}
               disabled={disabled}
               onChange={(e) => set(def.key, e.target.value)}
@@ -418,7 +418,7 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
         <FieldShell label={def.label} optional={optional} desc={desc}>
           <div className="flex flex-wrap gap-1.5">
             {opts.length === 0 && (
-              <span className="font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+              <span className="font-[family-name:var(--font-jetbrains)] text-[12.5px] text-muted-foreground">
                 Nothing to pick yet.
               </span>
             )}
@@ -564,7 +564,7 @@ function ImageField({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={value} alt="" className="h-full w-full object-cover" />
         ) : (
-          <span className="font-[family-name:var(--font-jetbrains)] text-[11px] text-muted-foreground">
+          <span className="font-[family-name:var(--font-jetbrains)] text-[12.5px] text-muted-foreground">
             No image
           </span>
         )}
@@ -611,7 +611,7 @@ function ImageField({
           }
         }}
       />
-      {error && <p className="text-[13px] text-destructive">{error}</p>}
+      {error && <p className="text-[15px] text-destructive">{error}</p>}
     </div>
   )
 }
@@ -635,7 +635,7 @@ function Chip({
       variant={active ? 'default' : 'outline'}
       disabled={disabled}
       onClick={onClick}
-      className="h-8 font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.1em]"
+      className="h-8 font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.1em]"
     >
       {children}
     </Button>

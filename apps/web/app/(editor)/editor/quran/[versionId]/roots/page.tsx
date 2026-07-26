@@ -75,7 +75,7 @@ export default async function QuranRootsPage({ params, searchParams }: PageProps
           ) : (
             <span />
           )}
-          <span style={{ fontSize: 12, color: 'var(--ed-fg-muted)' }}>
+          <span style={{ fontSize: 14, color: 'var(--ed-fg-muted)' }}>
             {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}
           </span>
           {hasNext ? (

@@ -48,7 +48,7 @@ export default async function QuranApprovalsPage() {
                   <div>
                     <Link
                       href={`/editor/quran/${r.version_id}/${r.chapter_number}`}
-                      style={{ fontFamily: 'var(--font-cormorant)', fontSize: 20, color: 'var(--ed-fg)' }}
+                      style={{ fontFamily: 'var(--font-cormorant)', fontSize: 23, color: 'var(--ed-fg)' }}
                     >
                       Version {r.version_id} · Chapter {r.chapter_number}
                     </Link>
@@ -79,13 +79,13 @@ const rowHead: CSSProperties = {
 const meta: CSSProperties = {
   margin: '4px 0 0',
   fontFamily: 'var(--font-glacial)',
-  fontSize: 11,
+  fontSize: 12.5,
   letterSpacing: '0.03em',
   color: 'var(--ed-fg-muted)',
 }
 const note: CSSProperties = {
   margin: '10px 0 0',
-  fontSize: 13,
+  fontSize: 15,
   fontStyle: 'italic',
   color: 'var(--ed-fg-muted)',
 }

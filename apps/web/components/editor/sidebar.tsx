@@ -112,10 +112,10 @@ export function EditorSidebar({ viewer, modules, signOutAction }: EditorSidebarP
                   W
                 </span>
                 <span className="flex flex-col leading-tight">
-                  <span className="font-[family-name:var(--font-cormorant)] text-[18px] font-semibold tracking-[-0.015em]">
+                  <span className="font-[family-name:var(--font-cormorant)] text-[20.5px] font-semibold tracking-[-0.015em]">
                     WikiSubmission
                   </span>
-                  <span className="font-[family-name:var(--font-glacial)] text-[9px] uppercase tracking-[0.22em] text-primary">
+                  <span className="font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.22em] text-primary">
                     Editor
                   </span>
                 </span>
@@ -128,7 +128,7 @@ export function EditorSidebar({ viewer, modules, signOutAction }: EditorSidebarP
       <SidebarContent>
         {GROUP_ORDER.filter((g) => nav.has(g)).map((group) => (
           <SidebarGroup key={group}>
-            <SidebarGroupLabel className="font-[family-name:var(--font-glacial)] text-[9.5px] uppercase tracking-[0.2em]">
+            <SidebarGroupLabel className="font-[family-name:var(--font-glacial)] text-[11px] uppercase tracking-[0.2em]">
               {group}
             </SidebarGroupLabel>
             <SidebarMenu>
@@ -143,7 +143,7 @@ export function EditorSidebar({ viewer, modules, signOutAction }: EditorSidebarP
                     >
                       <Link href={item.href}>
                         <Ico size={17} />
-                        <span className="font-[family-name:var(--font-source-serif)] text-[14.5px]">
+                        <span className="font-[family-name:var(--font-source-serif)] text-[16.5px]">
                           {item.label}
                         </span>
                       </Link>

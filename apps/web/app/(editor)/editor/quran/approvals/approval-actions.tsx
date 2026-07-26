@@ -39,7 +39,7 @@ export function ApprovalActions({ requestId }: ApprovalActionsProps) {
           Reject
         </button>
       </div>
-      {error && <p style={{ margin: '8px 0 0', fontSize: 12, color: '#b04444' }}>{error}</p>}
+      {error && <p style={{ margin: '8px 0 0', fontSize: 14, color: '#b04444' }}>{error}</p>}
     </div>
   )
 }

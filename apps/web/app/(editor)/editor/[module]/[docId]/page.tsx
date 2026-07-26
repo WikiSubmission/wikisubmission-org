@@ -38,7 +38,7 @@ export default async function EditContentDocPage({ params }: PageProps) {
   if (!doc) notFound()
 
   return (
-    <section className="w-full max-w-3xl px-9 py-8">
+    <section className="w-full px-9 py-8">
       <EditorCrumb href={`/editor/${module}`}>{def.label}</EditorCrumb>
       <DocForm
         module={module as EditorialContentModule}

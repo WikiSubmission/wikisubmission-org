@@ -86,7 +86,7 @@ export function RectifyPanel({ versionId, report }: RectifyPanelProps) {
       </header>
 
       {banner && (
-        <p id="rectify-banner" role="status" style={{ margin: '0 0 16px', fontSize: 13, color: banner.kind === 'ok' ? 'var(--ed-accent)' : '#b04444' }}>
+        <p id="rectify-banner" role="status" style={{ margin: '0 0 16px', fontSize: 15, color: banner.kind === 'ok' ? 'var(--ed-accent)' : '#b04444' }}>
           {banner.text}
         </p>
       )}
@@ -102,7 +102,7 @@ export function RectifyPanel({ versionId, report }: RectifyPanelProps) {
           <button type="button" style={{ ...s.button, opacity: busy ? 0.5 : 1 }} disabled={busy} onClick={syncRoots}>
             {isSyncing ? 'Syncing…' : 'Sync roots master'}
           </button>
-          <span style={{ fontSize: 12, color: 'var(--ed-fg-muted)' }}>
+          <span style={{ fontSize: 14, color: 'var(--ed-fg-muted)' }}>
             {report.missing_roots > 0
               ? 'New canonical roots are not yet in the master.'
               : 'Up to date with the corpus.'}
@@ -140,7 +140,7 @@ export function RectifyPanel({ versionId, report }: RectifyPanelProps) {
               onChange={(e) => setChapter(e.target.value)}
             />
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--ed-fg)' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, color: 'var(--ed-fg)' }}>
             <input
               type="checkbox"
               checked={seedRoots}
@@ -180,7 +180,7 @@ function Stat({ label, value, suffix, warn }: StatProps) {
 const sectionTitle: CSSProperties = {
   margin: '0 0 12px',
   fontFamily: 'var(--font-cormorant)',
-  fontSize: 18,
+  fontSize: 20.5,
   color: 'var(--ed-fg)',
 }
 const grid: CSSProperties = {
@@ -199,15 +199,15 @@ const stat: CSSProperties = {
 }
 const statValue: CSSProperties = {
   fontFamily: 'var(--font-cormorant)',
-  fontSize: 24,
+  fontSize: 25.5,
 }
 const statSuffix: CSSProperties = {
-  fontSize: 14,
+  fontSize: 16,
   color: 'var(--ed-fg-muted)',
 }
 const statLabel: CSSProperties = {
   fontFamily: 'var(--font-glacial)',
-  fontSize: 11,
+  fontSize: 12.5,
   letterSpacing: '0.03em',
   color: 'var(--ed-fg-muted)',
 }
