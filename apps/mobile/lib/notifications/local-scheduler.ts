@@ -11,7 +11,8 @@ import {
 } from '@/lib/prayer-times-cache'
 import { PRAYER_EVENT_ORDER, type PrayerEventKey } from '@/lib/prayer-events'
 import { anyEventEnabled, prefsHash, readNotificationPrefs } from './prefs'
-import { PRAYER_SOUNDS } from './sounds'
+import { PRAYER_CHANNEL_ID } from './channels'
+import { PRAYER_SOUNDS, type PrayerSoundId } from './sounds'
 import { computeCurrentEventInstant, computeUpcomingEventInstants } from './schedule-times'
 
 /**
@@ -60,6 +61,17 @@ const EVENT_LABELS: Record<PrayerEventKey, string> = {
 function notificationId(at: Date, event: PrayerEventKey): number {
   const epochDay = Math.floor(at.getTime() / (24 * 60 * 60 * 1000))
   return ID_BASE + (epochDay % 1000) * 10 + PRAYER_EVENT_ORDER.indexOf(event)
+}
+
+/**
+ * Sunrise is not a prayer — it marks the end of the Fajr window — so it never
+ * plays the adhan even when the user has picked one. It always goes out on the
+ * plain `prayer-times` channel (system default sound); the selected adhan
+ * channel is used for the five prayers only.
+ */
+function channelForEvent(event: PrayerEventKey, sound: PrayerSoundId): string {
+  if (event === 'sunrise') return PRAYER_CHANNEL_ID
+  return PRAYER_SOUNDS[sound].channelId
 }
 
 function notificationBody(event: PrayerEventKey, city: string | undefined): string {
@@ -230,7 +242,7 @@ async function doReschedule(reason: RescheduleReason): Promise<void> {
       id: notificationId(at, event),
       title: EVENT_LABELS[event],
       body: notificationBody(event, response.city),
-      channelId: PRAYER_SOUNDS[prefs.sound].channelId,
+      channelId: channelForEvent(event, prefs.sound),
       schedule: { at, allowWhileIdle: true },
       extra: { type: 'prayer', event, route: '/' },
     }))

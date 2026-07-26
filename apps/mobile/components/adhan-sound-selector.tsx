@@ -59,7 +59,8 @@ export function AdhanSoundSelector({ value, disabled = false, onChange }: AdhanS
         Sound
       </p>
       <p className="text-muted-foreground mt-0.5 text-xs">
-        Played when a prayer time arrives
+        Played when a prayer time arrives. Sunrise always uses your device&apos;s
+        default sound.
       </p>
       <ul
         className={cn(
