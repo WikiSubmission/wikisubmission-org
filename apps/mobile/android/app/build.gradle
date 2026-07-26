@@ -7,8 +7,8 @@ android {
         applicationId "com.wikisubmission.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
-        versionName "1.3"
+        versionCode 5
+        versionName "1.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -29,8 +29,19 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            minifyEnabled false
+            // R8 shrink+obfuscate. Deliberately the non-"optimize" default
+            // config: the aggressive one is a separate step to evaluate once
+            // this has proven itself on-device.
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // No `ndk { debugSymbolLevel }` here on purpose: the only native code
+            // in the bundle is prebuilt, already-stripped .so files from AARs
+            // (libsqlcipher via @capacitor-community/sqlite, libdatastore_shared_counter).
+            // They carry .dynsym only — no .symtab/.debug_* — so AGP extracts nothing
+            // and the bundle is byte-identical either way (verified). Play's
+            // "no debug symbols uploaded" warning cannot be cleared until some
+            // native code is built from source.
         }
     }
 }
