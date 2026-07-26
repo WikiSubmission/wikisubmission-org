@@ -12,7 +12,14 @@
     "format:check": "pnpm --filter web format:check",
     "test": "pnpm --filter web test",
     "test:coverage": "pnpm --filter web test:coverage",
-    "test:contract": "pnpm --filter web test:contract"
+    "test:contract": "pnpm --filter web test:contract",
+    "audit:full": "node tools/audit.mjs",
+    "audit:prod": "node tools/audit.mjs --prod --audit-level=high",
+    "audit:test": "node --test tools/audit.test.mjs"
+  },
+  "devDependencies": {
+    "js-yaml": "^4.3.0",
+    "semver": "^7.8.4"
   },
   "pnpm": {
     "overrides": {
