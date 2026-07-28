@@ -14,6 +14,7 @@ import { ArrowRight, BookOpen } from 'lucide-react'
 import { VerseListFetcher } from './mini-components/verse-list-fetcher'
 import { VerseListSkeleton } from './mini-components/verse-list-skeleton'
 import { QuranAccordions } from './mini-components/quran-accordions'
+import { ContinueCoverToCoverSection } from './mini-components/continue-cover-to-cover-section'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { ActivityRecorder } from '@/components/activity-recorder'
 
@@ -86,6 +87,12 @@ export default async function QuranPage({
       .filter(Boolean)
       .sort((a, b) => (a.code ?? 0) - (b.code ?? 0))
 
+    // Localized titles for the continue card — reuses the /chapters fetch above
+    // so the client card needs no request of its own.
+    const chapterTitles: Record<number, string> = Object.fromEntries(
+      chapters.map((c) => [c.chapter_number, c.title ?? '']),
+    )
+
     return (
       <main className="py-12 px-4">
         <div className="max-w-4xl mx-auto space-y-12">
@@ -101,6 +108,9 @@ export default async function QuranPage({
             </div>
             <QuranSearchBar large />
           </section>
+
+          {/* ── Continue cover to cover (signed in, once marked) ──────── */}
+          <ContinueCoverToCoverSection chapterTitles={chapterTitles} />
 
           {/* ── Preview cards ─────────────────────────────────────────── */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">

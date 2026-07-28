@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { BookMarked, ListOrdered, Megaphone, Search } from 'lucide-react'
+import { ContinueCoverToCover } from '@/components/quran-reader/continue-cover-to-cover'
 import { CHAPTER_TRANSLITERATIONS, VERSE_COUNTS } from '@/constants/quran-chapters'
 import { setChapterFlightState } from '@/lib/chapter-flight'
 import { Flip } from '@/lib/gsap'
@@ -107,36 +108,45 @@ export function ChapterIndex() {
       )}
 
       {!query.trim() && (
-        <ul className="mb-4 flex flex-col gap-1.5">
-          {LIBRARY_LINKS.map((link) => {
-            const Icon = link.icon
-            return (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  prefetch={false}
-                  onClick={() => haptic('light')}
-                  className={cn(
-                    'flex items-center gap-3 rounded-2xl border border-border/40 bg-muted/30 p-3',
-                    'transition-colors active:bg-muted/60'
-                  )}
-                >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Icon className="size-4" aria-hidden="true" />
-                  </span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate font-serif text-base font-semibold leading-tight">
-                      {link.label}
+        <>
+          <ContinueCoverToCover
+            getChapterTitle={(n) => CHAPTER_TITLES_EN[n]}
+            className="mb-4"
+            linkClassName="transition-colors active:bg-muted/60"
+            onNavigate={() => haptic('light')}
+          />
+
+          <ul className="mb-4 flex flex-col gap-1.5">
+            {LIBRARY_LINKS.map((link) => {
+              const Icon = link.icon
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    prefetch={false}
+                    onClick={() => haptic('light')}
+                    className={cn(
+                      'flex items-center gap-3 rounded-2xl border border-border/40 bg-muted/30 p-3',
+                      'transition-colors active:bg-muted/60'
+                    )}
+                  >
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <Icon className="size-4" aria-hidden="true" />
                     </span>
-                    <span className="truncate text-sm text-muted-foreground">
-                      {link.description}
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate font-serif text-base font-semibold leading-tight">
+                        {link.label}
+                      </span>
+                      <span className="truncate text-sm text-muted-foreground">
+                        {link.description}
+                      </span>
                     </span>
-                  </span>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </>
       )}
 
       <ul className="flex flex-col gap-1.5">
