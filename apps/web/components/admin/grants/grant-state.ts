@@ -86,22 +86,34 @@ export function grantStateToInput(state: GrantState): EditorGrantsInput {
   if (state.allGames !== 'none')
     modules[GAME_MODULE_KEY] = state.allGames === 'write'
 
-  // A version row is kept when it grants access OR carries an approve flag —
+  // Version grants only ever refine their module grant, so revoking the module
+  // must discard them rather than leave them persisted and invisible. Otherwise
+  // setting Quran to None looks like a full revoke, and re-granting the module
+  // later silently restores the user's old per-version access and approver
+  // flags. The rows are hidden in the UI at that point, so nobody would see it.
+  //
+  // A row is otherwise kept when it grants access OR carries an approve flag:
   // approve is a capability of its own and must survive access === 'none'.
-  const quran_versions: EditorVersionGrant[] = Object.entries(state.quran)
-    .filter(([, g]) => g.access !== 'none' || g.approve)
-    .map(([id, g]) => ({
-      version_id: Number(id),
-      can_write: g.access === 'write',
-      can_approve: g.approve,
-    }))
+  const quran_versions: EditorVersionGrant[] =
+    state.modules.quran === 'none'
+      ? []
+      : Object.entries(state.quran)
+          .filter(([, g]) => g.access !== 'none' || g.approve)
+          .map(([id, g]) => ({
+            version_id: Number(id),
+            can_write: g.access === 'write',
+            can_approve: g.approve,
+          }))
 
-  const bible_versions: EditorVersionGrant[] = Object.entries(state.bible)
-    .filter(([, access]) => access !== 'none')
-    .map(([id, access]) => ({
-      version_id: Number(id),
-      can_write: access === 'write',
-    }))
+  const bible_versions: EditorVersionGrant[] =
+    state.modules.bible === 'none'
+      ? []
+      : Object.entries(state.bible)
+          .filter(([, access]) => access !== 'none')
+          .map(([id, access]) => ({
+            version_id: Number(id),
+            can_write: access === 'write',
+          }))
 
   const games: EditorGameGrant[] = Object.entries(state.games)
     .filter(([, access]) => access !== 'none')
