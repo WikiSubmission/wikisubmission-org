@@ -5,6 +5,7 @@ import { Capacitor } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Preferences } from '@capacitor/preferences'
 import { BellRing } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { GsapPresence } from '@/components/gsap-presence'
 import { useStartupZikr } from '@/lib/startup-zikr-context'
@@ -46,6 +47,7 @@ async function maybeAskExactAlarm(): Promise<void> {
 }
 
 export function NotificationPermissionPrompt() {
+  const t = useTranslations('mobile.notifications')
   const { phase } = useStartupZikr()
   const ranRef = useRef(false)
   const [visible, setVisible] = useState(false)
@@ -101,7 +103,7 @@ export function NotificationPermissionPrompt() {
     >
       <div
         role="dialog"
-        aria-label="Enable prayer notifications"
+        aria-label={t('promptDialogLabel')}
         className="bg-background/95 glass-nav rounded-2xl border p-4 shadow-lg"
       >
         <div className="flex items-start gap-3">
@@ -109,19 +111,18 @@ export function NotificationPermissionPrompt() {
             <BellRing className="size-5" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-display text-base leading-snug">Prayer reminders</p>
+            <p className="font-display text-base leading-snug">{t('promptTitle')}</p>
             <p className="text-muted-foreground mt-1 text-sm leading-snug">
-              Get a gentle notification at each prayer time. You can fine-tune
-              or turn these off anytime in Settings.
+              {t('promptBody')}
             </p>
           </div>
         </div>
         <div className="mt-3 flex justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={decline}>
-            Not now
+            {t('promptNotNow')}
           </Button>
           <Button size="sm" onClick={enable}>
-            Enable
+            {t('promptEnable')}
           </Button>
         </div>
       </div>

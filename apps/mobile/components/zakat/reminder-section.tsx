@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { BellRing } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { Switch } from '@/components/ui/switch'
 import { ensureNotificationPermission } from '@/lib/notification-permission'
@@ -17,10 +18,10 @@ import {
 } from '@/lib/zakat-reminder'
 import { cn } from '@/lib/utils'
 
-const FREQUENCIES: { value: ZakatFrequency; label: string }[] = [
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'biweekly', label: 'Biweekly' },
-  { value: 'monthly', label: 'Monthly' },
+const FREQUENCIES: { value: ZakatFrequency; labelKey: string }[] = [
+  { value: 'weekly', labelKey: 'weekly' },
+  { value: 'biweekly', labelKey: 'biweekly' },
+  { value: 'monthly', labelKey: 'monthly' },
 ]
 
 function todayISO(): string {
@@ -34,6 +35,10 @@ function todayISO(): string {
  * (Preferences + local notifications) — works signed out, no backend involved.
  */
 export function ZakatReminderSection() {
+  const t = useTranslations('mobile.zakat.reminder')
+  // The app locale, not the device locale — the two diverge as soon as the user
+  // picks a UI language in settings.
+  const locale = useLocale()
   const [enabled, setEnabled] = useState(false)
   const [frequency, setFrequency] = useState<ZakatFrequency>('monthly')
   const [anchor, setAnchor] = useState(todayISO)
@@ -62,21 +67,21 @@ export function ZakatReminderSection() {
 
   async function save() {
     if (!preview) {
-      toast.error('Pick a valid date and time first.')
+      toast.error(t('invalidDate'))
       return
     }
     setSaving(true)
     try {
       const granted = await ensureNotificationPermission({ force: true })
       if (!granted) {
-        toast.error('Notifications are blocked. Enable them in system settings first.')
+        toast.error(t('blocked'))
         return
       }
       const prefs: ZakatReminderPrefs = { version: 1, enabled: true, frequency, anchor, timeOfDay }
       await writeZakatReminderPrefs(prefs)
       await scheduleZakatReminder(prefs)
       setEnabled(true)
-      toast.success('Zakat reminder set.')
+      toast.success(t('saved'))
     } finally {
       setSaving(false)
     }
@@ -88,7 +93,7 @@ export function ZakatReminderSection() {
       await writeZakatReminderPrefs({ version: 1, enabled: false, frequency, anchor, timeOfDay })
       await cancelZakatReminder()
       setEnabled(false)
-      toast('Zakat reminder turned off.')
+      toast(t('turnedOff'))
     } finally {
       setSaving(false)
     }
@@ -104,23 +109,21 @@ export function ZakatReminderSection() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BellRing className="text-primary size-4" aria-hidden="true" />
-          <h2 className="text-foreground text-sm font-semibold">Reminder</h2>
+          <h2 className="text-foreground text-sm font-semibold">{t('heading')}</h2>
         </div>
         <Switch
           checked={enabled}
           disabled={saving}
           onCheckedChange={(on) => void (on ? save() : disable())}
-          aria-label="Zakat reminder"
+          aria-label={t('toggleLabel')}
         />
       </div>
-      <p className="text-muted-foreground mt-1 text-xs">
-        A gentle nudge on this device when your zakat is due.
-      </p>
+      <p className="text-muted-foreground mt-1 text-xs">{t('body')}</p>
 
       <div className="mt-4 space-y-4">
         <div>
           <p className="text-muted-foreground mb-2 text-[10px] font-medium tracking-widest uppercase">
-            How often
+            {t('howOften')}
           </p>
           <div className="border-border/50 grid grid-cols-3 overflow-hidden rounded-full border text-xs">
             {FREQUENCIES.map((f) => (
@@ -135,7 +138,7 @@ export function ZakatReminderSection() {
                     : 'text-muted-foreground',
                 )}
               >
-                {f.label}
+                {t(f.labelKey)}
               </button>
             ))}
           </div>
@@ -144,7 +147,7 @@ export function ZakatReminderSection() {
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className="text-muted-foreground mb-2 block text-[10px] font-medium tracking-widest uppercase">
-              {frequency === 'monthly' ? 'Due date' : 'First due day'}
+              {t(frequency === 'monthly' ? 'dueDate' : 'firstDueDay')}
             </span>
             <input
               type="date"
@@ -155,7 +158,7 @@ export function ZakatReminderSection() {
           </label>
           <label className="block">
             <span className="text-muted-foreground mb-2 block text-[10px] font-medium tracking-widest uppercase">
-              Time
+              {t('time')}
             </span>
             <input
               type="time"
@@ -167,23 +170,21 @@ export function ZakatReminderSection() {
         </div>
 
         {frequency === 'monthly' && Number.parseInt(anchor.slice(8, 10), 10) > 28 && (
-          <p className="text-muted-foreground text-xs">
-            In shorter months the reminder lands on the last day of the month.
-          </p>
+          <p className="text-muted-foreground text-xs">{t('shortMonthNote')}</p>
         )}
 
         {preview && (
           <div className="border-border/40 flex items-baseline justify-between border-t pt-3">
-            <span className="text-muted-foreground text-xs">Next due</span>
+            <span className="text-muted-foreground text-xs">{t('nextDue')}</span>
             <span className="text-foreground text-sm">
-              {preview.next.toLocaleDateString(undefined, {
+              {preview.next.toLocaleDateString(locale, {
                 weekday: 'short',
                 month: 'short',
                 day: 'numeric',
               })}
               <span className="text-muted-foreground">
                 {' '}
-                · {preview.days <= 0 ? 'today' : `in ${preview.days} day${preview.days === 1 ? '' : 's'}`}
+                · {preview.days <= 0 ? t('dueToday') : t('dueInDays', { days: preview.days })}
               </span>
             </span>
           </div>
@@ -196,7 +197,7 @@ export function ZakatReminderSection() {
             disabled={saving}
             className="text-primary text-sm font-medium"
           >
-            Save changes
+            {t('saveChanges')}
           </button>
         )}
       </div>

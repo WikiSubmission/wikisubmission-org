@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import type { StatsView } from './theme'
 
 interface StatsTabsProps {
@@ -7,25 +8,26 @@ interface StatsTabsProps {
   onChange: (next: StatsView) => void
 }
 
-const TABS: { value: StatsView; label: string }[] = [
-  { value: 'quran', label: 'Quran' },
-  { value: 'bible', label: 'Bible' },
-  { value: 'combined', label: 'Combined' },
+const TABS: { value: StatsView; labelKey: string }[] = [
+  { value: 'quran', labelKey: 'navbar.quran' },
+  { value: 'bible', labelKey: 'navbar.bible' },
+  { value: 'combined', labelKey: 'meStats.combined' },
 ]
 
 export function StatsTabs({ value, onChange }: StatsTabsProps) {
+  const t = useTranslations()
   return (
-    <div role="tablist" aria-label="Scripture" className="rs-tabs">
-      {TABS.map((t) => (
+    <div role="tablist" aria-label={t('meCollections.scripture')} className="rs-tabs">
+      {TABS.map((tab) => (
         <button
-          key={t.value}
+          key={tab.value}
           type="button"
           role="tab"
-          aria-selected={value === t.value}
+          aria-selected={value === tab.value}
           className="rs-tab"
-          onClick={() => onChange(t.value)}
+          onClick={() => onChange(tab.value)}
         >
-          {t.label}
+          {t(tab.labelKey)}
         </button>
       ))}
     </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
@@ -67,6 +68,8 @@ export function AddVerseRefDialog({
   categoryId,
   categoryName,
 }: AddVerseRefDialogProps) {
+  const t = useTranslations('meCollections')
+  const tActions = useTranslations('actions')
   const [rawInput, setRawInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const qc = useQueryClient()
@@ -125,7 +128,7 @@ export function AddVerseRefDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md" aria-describedby={undefined}>
         <DialogHeader>
-          <DialogTitle>Add verses to {categoryName}</DialogTitle>
+          <DialogTitle>{t('addVersesTo', { category: categoryName })}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
@@ -176,7 +179,7 @@ export function AddVerseRefDialog({
             <span className="text-xs text-muted-foreground">
               {totalVerses > 0
                 ? `${totalVerses} verse${totalVerses === 1 ? '' : 's'} will be added`
-                : 'No valid references'}
+                : t('noValidReferences')}
             </span>
             <div className="flex gap-2">
               <Button
@@ -185,7 +188,7 @@ export function AddVerseRefDialog({
                 onClick={() => handleClose(false)}
                 disabled={isSubmitting}
               >
-                Cancel
+                {tActions('cancel')}
               </Button>
               <Button
                 size="sm"
@@ -194,8 +197,8 @@ export function AddVerseRefDialog({
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" />
-                    Adding...
+                    <Loader2 className="w-3.5 h-3.5 me-1 animate-spin" />
+                    {tActions('adding')}
                   </>
                 ) : (
                   'Add'

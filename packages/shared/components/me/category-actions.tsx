@@ -20,6 +20,7 @@ import {
   useDeleteBookmarkCategory,
   useUpdateBookmarkCategory,
 } from '@/hooks/use-bookmark-categories'
+import { useTranslations } from 'next-intl'
 import type { BookmarkCategoryData } from '@/types/bookmarks'
 
 const PALETTE = [
@@ -38,6 +39,8 @@ export function CategoryActions({
 }) {
   const [editOpen, setEditOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const t = useTranslations('meBookmarks')
+  const tActions = useTranslations('actions')
   const [name, setName] = useState(category.name)
   const [color, setColor] = useState(category.color)
   const { mutate: update, isPending: updating } = useUpdateBookmarkCategory()
@@ -76,15 +79,15 @@ export function CategoryActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-32">
           <DropdownMenuItem onClick={handleEdit}>
-            <Pencil className="w-3.5 h-3.5 mr-2" />
-            Edit
+            <Pencil className="w-3.5 h-3.5 me-2" />
+            {tActions('edit')}
           </DropdownMenuItem>
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onClick={() => setConfirmOpen(true)}
           >
-            <Trash2 className="w-3.5 h-3.5 mr-2" />
-            Delete
+            <Trash2 className="w-3.5 h-3.5 me-2" />
+            {tActions('delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -92,12 +95,12 @@ export function CategoryActions({
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Edit category</DialogTitle>
+            <DialogTitle>{t('editCategory')}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 pt-2">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-muted-foreground">
-                Name
+                {tActions('name')}
               </label>
               <input
                 autoFocus
@@ -108,7 +111,7 @@ export function CategoryActions({
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-muted-foreground">
-                Color
+                {tActions('color')}
               </label>
               <div className="flex flex-wrap gap-2">
                 {PALETTE.map((c) => (
@@ -133,10 +136,10 @@ export function CategoryActions({
               size="sm"
               onClick={() => setEditOpen(false)}
             >
-              Cancel
+              {tActions('cancel')}
             </Button>
             <Button size="sm" disabled={updating || !name.trim()} onClick={handleSave}>
-              Save
+              {tActions('save')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -145,11 +148,10 @@ export function CategoryActions({
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Delete &ldquo;{category.name}&rdquo;?</DialogTitle>
+            <DialogTitle>{t('deleteTitle', { name: category.name })}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            This removes the category and every bookmark inside it. This action
-            cannot be undone.
+            {t('deleteBody')}
           </p>
           <DialogFooter className="gap-2 pt-2">
             <Button
@@ -157,7 +159,7 @@ export function CategoryActions({
               size="sm"
               onClick={() => setConfirmOpen(false)}
             >
-              Cancel
+              {tActions('cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -165,7 +167,7 @@ export function CategoryActions({
               disabled={deleting}
               onClick={handleDelete}
             >
-              Delete
+              {tActions('delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

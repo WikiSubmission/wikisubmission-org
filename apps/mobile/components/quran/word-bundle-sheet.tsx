@@ -1,6 +1,7 @@
 'use client'
 
 import { Download, Wifi } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import {
   Sheet,
   SheetContent,
@@ -24,10 +25,11 @@ function formatMb(bytes: number): string {
   return `${Math.max(1, Math.round(bytes / 1_000_000))} MB`
 }
 
-const PHASE_LABELS: Record<string, string> = {
-  download: 'Downloading',
-  verify: 'Verifying',
-  import: 'Preparing',
+/** Download-phase message keys under `mobile.reader`. */
+const PHASE_KEYS: Record<string, string> = {
+  download: 'wordBundleDownloading',
+  verify: 'wordBundleVerifying',
+  import: 'wordBundlePreparing',
 }
 
 /**
@@ -36,6 +38,7 @@ const PHASE_LABELS: Record<string, string> = {
  * explains the Wi-Fi deferral and offers an immediate download.
  */
 export function WordBundleSheet({ open, onOpenChange }: WordBundleSheetProps) {
+  const t = useTranslations('mobile.reader')
   const { status, bundle, progress } = useWordBundleDownload()
   const online = typeof navigator === 'undefined' || navigator.onLine !== false
   const sizeLabel = bundle ? formatMb(bundle.bytes) : '~24 MB'
@@ -52,18 +55,15 @@ export function WordBundleSheet({ open, onOpenChange }: WordBundleSheetProps) {
         className="rounded-t-2xl pb-[max(env(safe-area-inset-bottom),1rem)]"
       >
         <SheetHeader className="pb-0 text-left">
-          <SheetTitle>Word-by-word data</SheetTitle>
-          <SheetDescription>
-            The word-by-word breakdown ({sizeLabel}) is stored on your device so
-            it also works offline.
-          </SheetDescription>
+          <SheetTitle>{t('wordBundleTitle')}</SheetTitle>
+          <SheetDescription>{t('wordBundleBody', { size: sizeLabel })}</SheetDescription>
         </SheetHeader>
 
         <div className="space-y-4 px-4 pb-2 pt-3">
           {status === 'downloading' && (
             <div className="space-y-2">
               <div className="text-muted-foreground flex items-center justify-between text-xs">
-                <span>{PHASE_LABELS[progress?.phase ?? 'download'] ?? 'Downloading'}…</span>
+                <span>{t(PHASE_KEYS[progress?.phase ?? 'download'] ?? 'wordBundleDownloading')}…</span>
                 {percent !== null && <span>{percent}%</span>}
               </div>
               <div className="bg-muted h-1.5 overflow-hidden rounded-full">
@@ -73,23 +73,19 @@ export function WordBundleSheet({ open, onOpenChange }: WordBundleSheetProps) {
                 />
               </div>
               <p className="text-muted-foreground text-xs">
-                {online
-                  ? 'Word mode already works while this finishes.'
-                  : 'Download in progress.'}
+                {t(online ? 'wordBundleWorksMeanwhile' : 'wordBundleInProgress')}
               </p>
             </div>
           )}
 
           {status === 'installed' && (
-            <p className="text-muted-foreground text-sm">
-              Word-by-word data is ready — it now works offline too.
-            </p>
+            <p className="text-muted-foreground text-sm">{t('wordBundleReady')}</p>
           )}
 
           {status === 'checking' && (
             <div className="flex items-center gap-2">
               <Spinner className="size-4" />
-              <p className="text-muted-foreground text-sm">Checking downloads…</p>
+              <p className="text-muted-foreground text-sm">{t('wordBundleChecking')}</p>
             </div>
           )}
 
@@ -97,11 +93,7 @@ export function WordBundleSheet({ open, onOpenChange }: WordBundleSheetProps) {
             <div className="space-y-3">
               <div className="text-muted-foreground flex items-start gap-3 text-sm">
                 <Wifi className="mt-0.5 size-4 shrink-0" />
-                <p>
-                  {online
-                    ? `It will download automatically next time you're on Wi-Fi. Until then, word mode needs a connection.`
-                    : `You're offline. It will download automatically next time you're online over Wi-Fi.`}
-                </p>
+                <p>{t(online ? 'wordBundleWifiOnline' : 'wordBundleWifiOffline')}</p>
               </div>
               {online && bundle && (
                 <Button
@@ -111,17 +103,14 @@ export function WordBundleSheet({ open, onOpenChange }: WordBundleSheetProps) {
                   }}
                 >
                   <Download className="size-4" />
-                  Download now ({sizeLabel})
+                  {t('wordBundleDownloadNow', { size: sizeLabel })}
                 </Button>
               )}
             </div>
           )}
 
           {status === 'unavailable' && (
-            <p className="text-muted-foreground text-sm">
-              No offline word-by-word data is published for your language yet —
-              word mode uses the network.
-            </p>
+            <p className="text-muted-foreground text-sm">{t('wordBundleUnavailable')}</p>
           )}
         </div>
       </SheetContent>

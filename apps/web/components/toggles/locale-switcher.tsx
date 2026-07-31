@@ -10,15 +10,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { UI_LOCALES } from '@/constants/ui-locales'
 
-const LOCALES = [
-  { code: 'en', label: 'EN', name: 'English' },
-  { code: 'ar', label: 'AR', name: 'العربية' },
-  { code: 'de', label: 'DE', name: 'Deutsch' },
-  { code: 'fr', label: 'FR', name: 'Français' },
-  { code: 'ku', label: 'KU', name: 'کوردی' },
-  { code: 'tr', label: 'TR', name: 'Türkçe' },
-]
+const LOCALES = UI_LOCALES
 
 const mono = 'var(--font-jetbrains), ui-monospace, monospace'
 const serif = 'var(--font-source-serif), Georgia, serif'

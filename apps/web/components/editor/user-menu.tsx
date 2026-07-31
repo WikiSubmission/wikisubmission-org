@@ -26,15 +26,9 @@ import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 import { IGlobe, IPalette, ILogout, IChevD } from './icons'
 import type { EditorViewer } from './sidebar'
+import { UI_LOCALES } from '@/constants/ui-locales'
 
-const LOCALES = [
-  { code: 'en', label: 'EN', name: 'English' },
-  { code: 'ar', label: 'AR', name: 'العربية' },
-  { code: 'de', label: 'DE', name: 'Deutsch' },
-  { code: 'fr', label: 'FR', name: 'Français' },
-  { code: 'ku', label: 'KU', name: 'کوردی' },
-  { code: 'tr', label: 'TR', name: 'Türkçe' },
-]
+const LOCALES = UI_LOCALES
 
 type Mode = 'light' | 'dark'
 

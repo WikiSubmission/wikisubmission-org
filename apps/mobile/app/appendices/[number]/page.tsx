@@ -1,8 +1,7 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { APPENDICES } from '@/constants/appendices'
 import { getAppendixContent } from '@/content/library'
+import { AppendixEmptyState, AppendixPagination } from './appendix-chrome'
 
 // All 38 appendices are known at build time, so the static export pre-renders
 // one page per appendix (the same pattern as the 114 quran chapter pages).
@@ -48,42 +47,13 @@ export default async function AppendixPage({
           <Content />
         </div>
       ) : (
-        <p className="text-muted-foreground py-8 text-center text-sm">
-          Content for this appendix is coming soon.
-        </p>
+        <AppendixEmptyState />
       )}
 
-      <div className="border-border/40 flex items-center justify-between gap-4 border-t pt-4">
-        {prev ? (
-          <Link
-            href={`/appendices/${prev.number}`}
-            className="text-muted-foreground hover:text-primary flex min-w-0 items-center gap-2 text-sm transition-colors"
-          >
-            <ChevronLeft className="size-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">
-              <span className="block text-xs">Appendix {prev.number}</span>
-              <span className="font-medium">{prev.title}</span>
-            </span>
-          </Link>
-        ) : (
-          <span />
-        )}
-
-        {next ? (
-          <Link
-            href={`/appendices/${next.number}`}
-            className="text-muted-foreground hover:text-primary flex min-w-0 items-center gap-2 text-right text-sm transition-colors"
-          >
-            <span className="truncate">
-              <span className="block text-xs">Appendix {next.number}</span>
-              <span className="font-medium">{next.title}</span>
-            </span>
-            <ChevronRight className="size-4 shrink-0" aria-hidden="true" />
-          </Link>
-        ) : (
-          <span />
-        )}
-      </div>
+      <AppendixPagination
+        prev={prev && { number: prev.number, title: prev.title }}
+        next={next && { number: next.number, title: next.title }}
+      />
     </article>
   )
 }

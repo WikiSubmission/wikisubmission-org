@@ -6,11 +6,10 @@ import Link from 'next/link'
 import { RandomVerseTile } from './random-verse-tile'
 import { useLocale, useTranslations } from 'next-intl'
 import type { components } from '@/src/api/types.gen'
+import { directionForUiLocale } from '@/constants/ui-locales'
 
 type Chapter = components['schemas']['Chapter']
 type Appendix = components['schemas']['Appendix']
-
-const RTL_LOCALES = new Set(['ar', 'ku', 'fa', 'ur'])
 
 interface Props {
   chapters: Chapter[]
@@ -29,7 +28,7 @@ export function QuranAccordions({
   const [appendicesOpen, setAppendicesOpen] = useState(initAp)
   const tSidebar = useTranslations('sidebar')
   const locale = useLocale()
-  const titleDir = RTL_LOCALES.has(locale) ? 'rtl' : 'ltr'
+  const titleDir = directionForUiLocale(locale)
 
   function syncUrl(key: 'ch' | 'ap', open: boolean) {
     const url = new URL(window.location.href)

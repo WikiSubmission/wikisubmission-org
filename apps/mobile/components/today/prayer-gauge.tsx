@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { gsap } from '@/lib/gsap'
 import type { PrayerTimesResponse } from '@/lib/prayer-times'
-import { deriveEventCycle } from '@/lib/prayer-events'
+import { deriveEventCycle, isPrayerEventKey } from '@/lib/prayer-events'
 import { useNow } from '@/hooks/use-now'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { parseDurationToSeconds, formatRemaining } from '@/lib/duration'
@@ -25,6 +26,8 @@ const ARC_PATH = 'M 16 100 A 84 84 0 0 1 184 100'
  */
 export function PrayerGauge({ data, dataUpdatedAt, onExpired }: PrayerGaugeProps) {
   const now = useNow()
+  const t = useTranslations('mobile.today')
+  const tEvent = useTranslations('prayertimes')
   const reducedMotion = usePrefersReducedMotion()
   const expiredRef = useRef(false)
 
@@ -109,7 +112,7 @@ export function PrayerGauge({ data, dataUpdatedAt, onExpired }: PrayerGaugeProps
 
   return (
     <div className="relative mx-auto w-full max-w-70">
-      <svg viewBox="0 0 200 110" className="w-full" role="img" aria-label="Time until next prayer">
+      <svg viewBox="0 0 200 110" className="w-full" role="img" aria-label={t('timeUntilNext')}>
         <path
           d={ARC_PATH}
           fill="none"
@@ -147,12 +150,14 @@ export function PrayerGauge({ data, dataUpdatedAt, onExpired }: PrayerGaugeProps
 
       <div className="absolute inset-x-0 bottom-0 pb-1 text-center">
         <p className="text-muted-foreground text-[10px] tracking-[0.2em] uppercase">
-          {upcomingLabel.toLowerCase() === 'sunrise' ? 'Up next' : 'Next prayer'}
+          {upcomingLabel.toLowerCase() === 'sunrise' ? t('upNext') : t('nextPrayer')}
         </p>
-        <p className="font-display mt-0.5 text-3xl capitalize">{upcomingLabel}</p>
+        <p className="font-display mt-0.5 text-3xl capitalize">
+          {isPrayerEventKey(upcomingLabel) ? tEvent(upcomingLabel.toLowerCase()) : upcomingLabel}
+        </p>
         {remaining !== null ? (
           <p ref={countdownRef} className="text-primary mt-0.5 font-mono text-sm tabular-nums">
-            in {formatRemaining(remaining)}
+            {tEvent('inTimeLeft', { timeLeft: formatRemaining(remaining) })}
           </p>
         ) : null}
         {data.city ? (

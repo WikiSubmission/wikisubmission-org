@@ -38,7 +38,7 @@ export function AppLanguageSelector() {
               type="button"
               onClick={() => select(code)}
               aria-pressed={isActive}
-              className="flex w-full items-center justify-between px-3 py-2.5 text-left"
+              className="flex w-full items-center justify-between px-3 py-2.5 text-start"
             >
               <span className="text-foreground text-sm">{LOCALE_LABELS[code]}</span>
               <Check

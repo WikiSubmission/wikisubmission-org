@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Check, Square, Volume2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import {
   PRAYER_SOUND_ORDER,
   PRAYER_SOUNDS,
@@ -21,6 +22,7 @@ interface AdhanSoundSelectorProps {
  * stops it. Preview audio comes from the webview copy in public/audio/.
  */
 export function AdhanSoundSelector({ value, disabled = false, onChange }: AdhanSoundSelectorProps) {
+  const t = useTranslations('mobile.notifications')
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [previewing, setPreviewing] = useState<PrayerSoundId | null>(null)
 
@@ -56,12 +58,9 @@ export function AdhanSoundSelector({ value, disabled = false, onChange }: AdhanS
   return (
     <div className="py-3">
       <p className={cn('text-sm font-medium', disabled ? 'text-muted-foreground' : 'text-foreground')}>
-        Sound
+        {t('soundHeading')}
       </p>
-      <p className="text-muted-foreground mt-0.5 text-xs">
-        Played when a prayer time arrives. Sunrise always uses your device&apos;s
-        default sound.
-      </p>
+      <p className="text-muted-foreground mt-0.5 text-xs">{t('soundBody')}</p>
       <ul
         className={cn(
           'divide-border/40 border-border/40 mt-3 divide-y rounded-xl border',
@@ -91,13 +90,17 @@ export function AdhanSoundSelector({ value, disabled = false, onChange }: AdhanS
                   {isSelected && <Check className="size-3" />}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="text-foreground block text-sm">{sound.label}</span>
-                  <span className="text-muted-foreground block text-xs">{sound.description}</span>
+                  <span className="text-foreground block text-sm">{t(sound.labelKey)}</span>
+                  <span className="text-muted-foreground block text-xs">
+                    {t(sound.descriptionKey)}
+                  </span>
                 </span>
                 {sound.previewUrl && (
                   <span
                     role="button"
-                    aria-label={isPreviewing ? `Stop ${sound.label} preview` : `Preview ${sound.label}`}
+                    aria-label={t(isPreviewing ? 'soundStopPreview' : 'soundPreview', {
+                      name: t(sound.labelKey),
+                    })}
                     onClick={(e) => {
                       e.stopPropagation()
                       if (isPreviewing) stopPreview()

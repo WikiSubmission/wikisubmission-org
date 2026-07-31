@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { normalizePath } from '@/constants/navigation'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { EASE_SETTLE, Flip, gsap } from '@/lib/gsap'
@@ -31,6 +32,7 @@ const HINT_AT_MS = 500
  */
 export function StartupZikrOverlay() {
   const { phase, items, initialIndex, beginFlight, finish, skip } = useStartupZikr()
+  const t = useTranslations('mobile.today')
   const pathname = usePathname()
   const reducedMotion = usePrefersReducedMotion()
 
@@ -186,7 +188,7 @@ export function StartupZikrOverlay() {
           className="text-muted-foreground absolute bottom-10 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.2em] uppercase"
           style={{ visibility: 'hidden' }}
         >
-          Tap to continue
+          {t('tapToContinue')}
         </p>
       )}
     </div>

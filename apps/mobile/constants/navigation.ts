@@ -12,16 +12,18 @@ import type { LucideIcon } from 'lucide-react'
 export interface TabItem {
   key: string
   href: string
-  label: string
+  /** Dotted message key, resolved at the render site — a module constant
+   *  cannot call useTranslations(). */
+  labelKey: string
   icon: LucideIcon
 }
 
 export const TABS: readonly TabItem[] = [
-  { key: 'today', href: '/', label: 'Today', icon: Sunrise },
-  { key: 'quran', href: '/quran', label: 'Quran', icon: BookOpen },
-  { key: 'games', href: '/quran/games', label: 'Games', icon: Gamepad2 },
-  { key: 'profile', href: '/me', label: 'Profile', icon: User },
-  { key: 'more', href: '/more', label: 'More', icon: LayoutGrid },
+  { key: 'today', href: '/', labelKey: 'mobile.tabs.today', icon: Sunrise },
+  { key: 'quran', href: '/quran', labelKey: 'mobile.tabs.quran', icon: BookOpen },
+  { key: 'games', href: '/quran/games', labelKey: 'mobile.tabs.games', icon: Gamepad2 },
+  { key: 'profile', href: '/me', labelKey: 'mobile.tabs.profile', icon: User },
+  { key: 'more', href: '/more', labelKey: 'mobile.tabs.more', icon: LayoutGrid },
 ]
 
 /** Strip a trailing slash so `output: 'export'` paths match the tab hrefs. */
@@ -35,14 +37,14 @@ const QURAN_ALIAS_PREFIXES = ['/introduction', '/proclamation', '/appendices'] a
 /** Screens reached from the Today tab (pushed, so the back chevron shows). */
 const TODAY_ALIAS_PREFIXES = ['/zakat'] as const
 
-/** Titles for pushed screens that are not tab roots. */
-const SCREEN_TITLES: Record<string, string> = {
-  '/zakat': 'Zakat',
+/** Message keys for pushed screens that are not tab roots. */
+const SCREEN_TITLE_KEYS: Record<string, string> = {
+  '/zakat': 'mobile.nav.zakatScreen',
 }
 
-/** Top-bar title for a pushed screen, when it has one. */
-export function screenTitle(pathname: string): string | undefined {
-  return SCREEN_TITLES[normalizePath(pathname)]
+/** Message key for a pushed screen's top-bar title, when it has one. */
+export function screenTitleKey(pathname: string): string | undefined {
+  return SCREEN_TITLE_KEYS[normalizePath(pathname)]
 }
 
 /**

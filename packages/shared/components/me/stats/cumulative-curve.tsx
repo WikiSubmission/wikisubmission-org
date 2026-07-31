@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { scaleTime, scaleLinear } from '@visx/scale'
 import { LinePath, AreaClosed } from '@visx/shape'
 import { AxisBottom, AxisLeft } from '@visx/axis'
@@ -31,9 +32,18 @@ const MILESTONES: Record<Scripture, number[]> = {
   bible: [5000, 15000, 31102],
 }
 
-const MILESTONE_LABEL: Record<Scripture, Record<number, string>> = {
-  quran: { 6236: 'Full Quran', 3000: 'Halfway', 1000: 'First 1k' },
-  bible: { 31102: 'Full Bible', 15000: 'Halfway', 5000: 'First 5k' },
+/** Message keys under `meStats` for each milestone threshold. */
+const MILESTONE_LABEL_KEY: Record<Scripture, Record<number, string>> = {
+  quran: {
+    6236: 'milestoneFullQuran',
+    3000: 'milestoneHalfway',
+    1000: 'milestoneFirst1k',
+  },
+  bible: {
+    31102: 'milestoneFullBible',
+    15000: 'milestoneHalfway',
+    5000: 'milestoneFirst5k',
+  },
 }
 
 interface Point {
@@ -42,6 +52,7 @@ interface Point {
 }
 
 export function CumulativeCurve({ width, height, scripture, data }: CumulativeCurveProps) {
+  const t = useTranslations('meStats')
   const innerW = Math.max(0, width - MARGIN.left - MARGIN.right)
   const innerH = Math.max(0, height - MARGIN.top - MARGIN.bottom)
   const color = SCRIPTURE_COLORS[scripture]
@@ -67,7 +78,7 @@ export function CumulativeCurve({ width, height, scripture, data }: CumulativeCu
     .map((threshold) => {
       const hit = points.find((p) => p.total >= threshold)
       if (!hit) return null
-      return { threshold, point: hit, label: MILESTONE_LABEL[scripture][threshold] }
+      return { threshold, point: hit, label: t(MILESTONE_LABEL_KEY[scripture][threshold]) }
     })
     .filter((m): m is { threshold: number; point: Point; label: string } => m !== null)
 

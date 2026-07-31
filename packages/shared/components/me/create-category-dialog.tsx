@@ -10,15 +10,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { useTranslations } from 'next-intl'
 import { useCreateBookmarkCategory } from '@/hooks/use-bookmark-categories'
 
 const PALETTE = [
-  { name: 'Amber', value: '#f59e0b' },
-  { name: 'Rose', value: '#f43f5e' },
-  { name: 'Violet', value: '#8b5cf6' },
-  { name: 'Sky', value: '#0ea5e9' },
-  { name: 'Emerald', value: '#10b981' },
-  { name: 'Slate', value: '#64748b' },
+  { nameKey: 'colorAmber', value: '#f59e0b' },
+  { nameKey: 'colorRose', value: '#f43f5e' },
+  { nameKey: 'colorViolet', value: '#8b5cf6' },
+  { nameKey: 'colorSky', value: '#0ea5e9' },
+  { nameKey: 'colorEmerald', value: '#10b981' },
+  { nameKey: 'colorSlate', value: '#64748b' },
 ]
 
 function lighten(hex: string): string {
@@ -38,6 +39,8 @@ export function CreateCategoryDialog({
   onOpenChange: (v: boolean) => void
   onCreated?: (id: number) => void
 }) {
+  const t = useTranslations('meBookmarks')
+  const tActions = useTranslations('actions')
   const [name, setName] = useState('')
   const [color, setColor] = useState(PALETTE[0].value)
   const { mutate: create, isPending } = useCreateBookmarkCategory()
@@ -62,20 +65,20 @@ export function CreateCategoryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>New bookmark category</DialogTitle>
+          <DialogTitle>{t('newCategory')}</DialogTitle>
           <DialogDescription>
-            Group verses you want to revisit. Pick a name and a color.
+            {t('newCategoryHint')}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 pt-2">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Name
+              {tActions('name')}
             </label>
             <input
               autoFocus
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="e.g. Favorites, To memorize"
+              placeholder={t('namePlaceholder')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
@@ -85,7 +88,7 @@ export function CreateCategoryDialog({
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Color
+              {tActions('color')}
             </label>
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap gap-2">
@@ -93,7 +96,7 @@ export function CreateCategoryDialog({
                   <button
                     key={c.value}
                     type="button"
-                    aria-label={c.name}
+                    aria-label={t(c.nameKey)}
                     onClick={() => setColor(c.value)}
                     className={`h-7 w-7 rounded-full transition-all ${
                       color === c.value
@@ -111,7 +114,7 @@ export function CreateCategoryDialog({
                     <button
                       key={light}
                       type="button"
-                      aria-label={`${c.name} light`}
+                      aria-label={`${t(c.nameKey)} light`}
                       onClick={() => setColor(light)}
                       className={`h-7 w-7 rounded-full transition-all ${
                         color === light
@@ -125,7 +128,7 @@ export function CreateCategoryDialog({
               </div>
               <div className="flex items-center gap-2 pt-1">
                 <label className="text-xs text-muted-foreground" htmlFor="cat-color-picker">
-                  Custom
+                  {tActions('custom')}
                 </label>
                 <input
                   id="cat-color-picker"
@@ -141,14 +144,14 @@ export function CreateCategoryDialog({
         </div>
         <DialogFooter className="gap-2 pt-2">
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tActions('cancel')}
           </Button>
           <Button
             size="sm"
             disabled={isPending || !name.trim()}
             onClick={handleCreate}
           >
-            Create
+            {tActions('create')}
           </Button>
         </DialogFooter>
       </DialogContent>

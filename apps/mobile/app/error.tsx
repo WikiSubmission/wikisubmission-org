@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { RefreshCw } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { reportClientError } from '@/lib/crash-reporter'
 
@@ -17,20 +18,19 @@ export default function RouteError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const t = useTranslations()
+
   useEffect(() => {
     reportClientError(error, 'error-boundary')
   }, [error])
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4 px-8 text-center">
-      <h2 className="font-display text-xl">Something went wrong</h2>
-      <p className="text-muted-foreground text-sm">
-        The screen hit an unexpected error. Your data is safe — try again, or
-        restart the app if this keeps happening.
-      </p>
+      <h2 className="font-display text-xl">{t('common.error')}</h2>
+      <p className="text-muted-foreground text-sm">{t('mobile.errors.routeBody')}</p>
       <Button onClick={reset} className="gap-2">
         <RefreshCw className="size-4" aria-hidden="true" />
-        Try again
+        {t('mobile.errors.retry')}
       </Button>
     </div>
   )

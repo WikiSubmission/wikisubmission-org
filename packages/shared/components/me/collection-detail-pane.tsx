@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import {
   BookOpen,
@@ -53,6 +54,8 @@ function SyncDialog({
   onSync: (categoryId: number) => void
   syncing: boolean
 }) {
+  const t = useTranslations('meCollections')
+  const tActions = useTranslations('actions')
   const categories = useBookmarkCategories()
   const [selected, setSelected] = useState<number | null>(null)
 
@@ -60,7 +63,7 @@ function SyncDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Sync to bookmark category</DialogTitle>
+          <DialogTitle>{t('syncToCategory')}</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
           All verses in this collection will be added to the selected category.
@@ -70,7 +73,7 @@ function SyncDialog({
           <p className="text-sm text-muted-foreground italic">
             No bookmark categories yet.{' '}
             <Link href="/me/bookmarks" className="text-primary hover:underline">
-              Create one first.
+              {t('createOneFirst')}
             </Link>
           </p>
         ) : (
@@ -80,7 +83,7 @@ function SyncDialog({
                 key={cat.id}
                 type="button"
                 onClick={() => setSelected(cat.id)}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border text-sm transition-colors text-left ${
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border text-sm transition-colors text-start ${
                   selected === cat.id
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:bg-accent/30'
@@ -100,14 +103,14 @@ function SyncDialog({
         )}
         <DialogFooter className="gap-2">
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tActions('cancel')}
           </Button>
           <Button
             size="sm"
             disabled={selected === null || syncing || categories.length === 0}
             onClick={() => selected !== null && onSync(selected)}
           >
-            Sync
+            {tActions('sync')}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -137,6 +140,7 @@ function VisibilityDropdown({
   isPublic: boolean
   editPolicy: string
 }) {
+  const t = useTranslations('meCollections')
   const { mutate: update, isPending } = useUpdateCollection()
   const current = currentVisibility(isPublic, editPolicy)
 
@@ -159,32 +163,32 @@ function VisibilityDropdown({
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" disabled={isPending} className="gap-1.5">
           <Icon className="w-3.5 h-3.5" />
-          {isPublic ? (editPolicy === 'everyone' ? 'Anyone edits' : 'Public') : 'Private'}
+          {isPublic ? t(editPolicy === 'everyone' ? 'anyoneEdits' : 'public') : t('private')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">Visibility</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs text-muted-foreground">{t('visibility')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={() => choose('private')}
           className={current === 'private' ? 'font-medium' : ''}
         >
-          <Lock className="w-4 h-4 mr-2" />
-          Private
+          <Lock className="w-4 h-4 me-2" />
+          {t('private')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={() => choose('public_owner')}
           className={current === 'public_owner' ? 'font-medium' : ''}
         >
-          <Globe className="w-4 h-4 mr-2" />
-          Public — only you edit
+          <Globe className="w-4 h-4 me-2" />
+          {t('publicOnlyYouEdit')}
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={() => choose('public_everyone')}
           className={current === 'public_everyone' ? 'font-medium' : ''}
         >
-          <Users className="w-4 h-4 mr-2" />
-          Public — anyone edits
+          <Users className="w-4 h-4 me-2" />
+          {t('publicAnyoneEdits')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -200,6 +204,8 @@ export function CollectionDetailPane({
   collectionId: number
   onBack?: () => void
 }) {
+  const t = useTranslations('meCollections')
+  const tCommon = useTranslations('common')
   const { data, isLoading } = useCollectionDetail(collectionId)
   const { mutate: removeVerse } = useRemoveVerseFromCollection()
   const { mutate: unsubscribe } = useUnsubscribeCollection()
@@ -238,7 +244,7 @@ export function CollectionDetailPane({
     setSyncing(false)
     setSyncOpen(false)
     if (failed === 0) {
-      toast.success(`${added} verse${added !== 1 ? 's' : ''} synced to category`)
+      toast.success(t('versesSynced', { count: added }))
     } else {
       toast.warning(`${added} synced, ${failed} skipped (already bookmarked)`)
     }
@@ -247,7 +253,7 @@ export function CollectionDetailPane({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">
-        Loading...
+        {tCommon('loading')}
       </div>
     )
   }
@@ -255,7 +261,7 @@ export function CollectionDetailPane({
   if (!col) {
     return (
       <div className="flex flex-col items-center justify-center h-40 gap-2 text-sm text-muted-foreground text-center">
-        <p>Collection not found.</p>
+        <p>{t('notFound')}</p>
       </div>
     )
   }
@@ -264,7 +270,7 @@ export function CollectionDetailPane({
     if (!col?.share_token) return
     const url = `${window.location.origin}/collections/${col.share_token}`
     navigator.clipboard.writeText(url)
-    toast.success('Share link copied')
+    toast.success(t('shareLinkCopied'))
   }
 
   return (
@@ -288,7 +294,7 @@ export function CollectionDetailPane({
             {col.relation === 'subscriber' && !canEdit && (
               <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                 <Eye className="w-3 h-3" />
-                Read only
+                {t('readOnly')}
               </span>
             )}
           </div>
@@ -318,33 +324,33 @@ export function CollectionDetailPane({
           )}
           {col.is_public && col.share_token && (
             <Button variant="ghost" size="sm" onClick={copyShareLink} className="gap-1.5">
-              Share link
+              {t('shareLink')}
             </Button>
           )}
           {canEdit && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Plus className="w-3.5 h-3.5 mr-1.5" />
-                  Add verses
+                  <Plus className="w-3.5 h-3.5 me-1.5" />
+                  {t('addVerses')}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" sideOffset={6}>
                 <DropdownMenuItem onSelect={() => setAddRefsOpen(true)}>
                   <BookOpen className="w-4 h-4" />
-                  From references
+                  {t('fromReferences')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setAddCatOpen(true)}>
                   <Download className="w-4 h-4" />
-                  From bookmark category
+                  {t('fromBookmarkCategory')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
           {col.verses.length > 0 && (
             <Button variant="outline" size="sm" onClick={() => setSyncOpen(true)}>
-              <Download className="w-3.5 h-3.5 mr-1.5" />
-              Sync to bookmarks
+              <Download className="w-3.5 h-3.5 me-1.5" />
+              {t('syncToBookmarks')}
             </Button>
           )}
         </div>
@@ -355,18 +361,18 @@ export function CollectionDetailPane({
         <div className="flex flex-col items-center gap-3 py-10 text-center rounded-xl border border-dashed border-border">
           <p className="text-sm text-muted-foreground">
             {canEdit
-              ? 'No verses yet. Add from references or a bookmark category.'
-              : 'This collection has no verses yet.'}
+              ? t('noVersesYet')
+              : t('emptyCollection')}
           </p>
           {canEdit && (
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setAddRefsOpen(true)}>
-                <BookOpen className="w-3.5 h-3.5 mr-1.5" />
-                From references
+                <BookOpen className="w-3.5 h-3.5 me-1.5" />
+                {t('fromReferences')}
               </Button>
               <Button variant="outline" size="sm" onClick={() => setAddCatOpen(true)}>
-                <Download className="w-3.5 h-3.5 mr-1.5" />
-                From category
+                <Download className="w-3.5 h-3.5 me-1.5" />
+                {t('fromCategory')}
               </Button>
             </div>
           )}
@@ -420,11 +426,11 @@ export function CollectionDetailPane({
             className="text-muted-foreground hover:text-destructive text-xs"
             onClick={() => {
               unsubscribe(collectionId, {
-                onSuccess: () => toast.success('Removed from your collections'),
+                onSuccess: () => toast.success(t('removedFromMine')),
               })
             }}
           >
-            Remove from my collections
+            {t('removeFromMine')}
           </Button>
         </div>
       )}

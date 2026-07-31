@@ -15,6 +15,7 @@ import {
   verifyEmailOtp,
   type AuthProvider,
 } from '@/lib/mobile-auth-client'
+import { translate } from '@/lib/i18n-runtime'
 import { isAppleSignInAvailable } from '@/lib/platform'
 import {
   clearSession,
@@ -153,7 +154,7 @@ export function MobileAuthProvider({ children }: { children: React.ReactNode }) 
     async (code: string) => {
       const token = pendingOtpRef.current
       if (!token) {
-        throw new Error('Request a code before verifying')
+        throw new Error(translate('mobile.auth.requestCodeFirst'))
       }
       const res = await verifyEmailOtp(token, code)
       pendingOtpRef.current = null

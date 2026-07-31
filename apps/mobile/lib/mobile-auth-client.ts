@@ -1,4 +1,5 @@
 import { resolveBrowserApiBaseUrl } from '@/src/api/base-url'
+import { translate } from '@/lib/i18n-runtime'
 import type { MobileAuthUser, StoredSession } from './mobile-auth-storage'
 
 // Wire-level response from POST /auth/mobile/exchange and /auth/mobile/refresh
@@ -42,12 +43,17 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
   })
 
   if (!res.ok) {
-    let message = `request failed with status ${res.status}`
+    // The gate surfaces `message` in a toast, so the fallback is localized
+    // rather than a bare status line; `status` stays on the error for
+    // crash-report triage. A backend-supplied `error` wins — it is the specific
+    // reason — but it arrives in English, since ws-backend does not localize
+    // its error strings.
+    let message = translate('mobile.auth.requestFailed')
     try {
       const data = (await res.json()) as { error?: string }
       if (data?.error) message = data.error
     } catch {
-      // Non-JSON error body; the status-derived message stands.
+      // Non-JSON error body; the generic message stands.
     }
     throw new MobileAuthError(res.status, message)
   }

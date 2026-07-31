@@ -2,32 +2,25 @@
 
 import { useLayoutEffect, useRef, useState } from 'react'
 import { Bell, LocateFixed, MapPin, RefreshCw, Sunrise } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { gsap } from '@/lib/gsap'
 import { NotificationSettingsSheet } from '@/components/today/notification-settings-sheet'
 import { ZakatBadge } from '@/components/today/zakat-badge'
-import { PRAYER_EVENT_ORDER, deriveEventCycle, type PrayerEventKey } from '@/lib/prayer-events'
+import { PRAYER_EVENT_ORDER, deriveEventCycle } from '@/lib/prayer-events'
 import { usePrayerTimes } from '@/hooks/use-prayer-times'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { cn } from '@/lib/utils'
 import { PrayerGauge } from '@/components/today/prayer-gauge'
 
-const EVENT_LABELS: Record<PrayerEventKey, string> = {
-  fajr: 'Fajr',
-  sunrise: 'Sunrise',
-  dhuhr: 'Dhuhr',
-  asr: 'Asr',
-  maghrib: 'Maghrib',
-  isha: 'Isha',
-}
-
 function LocationSplash() {
+  const t = useTranslations('mobile.today')
   return (
     <div className="space-y-3 py-10 text-center">
       <LocateFixed
         className="text-primary mx-auto size-8 animate-pulse"
         aria-hidden="true"
       />
-      <p className="text-muted-foreground text-sm">Finding your location…</p>
+      <p className="text-muted-foreground text-sm">{t('findingLocation')}</p>
     </div>
   )
 }
@@ -39,18 +32,16 @@ function LocationPrompt({
   status: 'denied' | 'unavailable'
   onRequest: () => void
 }) {
+  const t = useTranslations('mobile.today')
+  const denied = status === 'denied'
   return (
     <div className="space-y-3 py-8 text-center">
       <MapPin className="text-muted-foreground mx-auto size-8" aria-hidden="true" />
       <p className="text-foreground text-sm font-medium">
-        {status === 'denied'
-          ? 'Allow approximate location to see prayer times'
-          : 'Your location is unavailable'}
+        {t(denied ? 'locationDeniedTitle' : 'locationUnavailableTitle')}
       </p>
       <p className="text-muted-foreground px-4 text-xs">
-        {status === 'denied'
-          ? 'Only your approximate location is used, just enough to know your city. If nothing happens, enable Location for this app in system settings.'
-          : 'Make sure location services are turned on, then try again.'}
+        {t(denied ? 'locationDeniedBody' : 'locationUnavailableBody')}
       </p>
       <button
         type="button"
@@ -58,7 +49,7 @@ function LocationPrompt({
         className="text-primary inline-flex items-center gap-1.5 text-sm font-medium"
       >
         <LocateFixed className="size-4" aria-hidden="true" />
-        {status === 'denied' ? 'Enable location' : 'Try again'}
+        {t(denied ? 'enableLocation' : 'tryAgain')}
       </button>
     </div>
   )
@@ -69,12 +60,16 @@ export function PrayerSchedule() {
     data,
     isLoading,
     isError,
-    error,
     dataUpdatedAt,
     locationStatus,
     requestLocation,
     refetch,
   } = usePrayerTimes()
+  const t = useTranslations('mobile.today')
+  // PrayerEventKey values match the prayertimes.* key names one-for-one, so an
+  // event key can be translated directly.
+  const tEvent = useTranslations('prayertimes')
+  const tNotifications = useTranslations('mobile.notifications')
   const reducedMotion = usePrefersReducedMotion()
   // Sunrise-aware current event, with a client-side fallback while the
   // deployed API predates the event fields.
@@ -123,8 +118,8 @@ export function PrayerSchedule() {
           <button
             type="button"
             onClick={() => setNotificationsOpen(true)}
-            className="text-muted-foreground hover:text-foreground absolute top-4 right-4 z-10 p-1 transition-colors"
-            aria-label="Notification settings"
+            className="text-muted-foreground hover:text-foreground absolute top-4 end-4 z-10 p-1 transition-colors"
+            aria-label={tNotifications('settingsLabel')}
           >
             <Bell className="size-4" aria-hidden="true" />
           </button>
@@ -138,16 +133,18 @@ export function PrayerSchedule() {
           />
         ) : isError ? (
           <div className="space-y-3 py-6 text-center">
-            <p className="text-muted-foreground text-sm">
-              {error?.message ?? 'Could not load prayer times.'}
-            </p>
+            {/* Deliberately not error.message: PrayerTimesError only ever
+                carries generic English infrastructure text ("service returned
+                502", "timed out"), which is untranslatable and not actionable.
+                The specifics stay on the error object for crash reporting. */}
+            <p className="text-muted-foreground text-sm">{t('prayerTimesError')}</p>
             <button
               type="button"
               onClick={() => refetch()}
               className="text-primary inline-flex items-center gap-1.5 text-sm font-medium"
             >
               <RefreshCw className="size-4" aria-hidden="true" />
-              Try again
+              {t('tryAgain')}
             </button>
           </div>
         ) : data ? (
@@ -181,7 +178,7 @@ export function PrayerSchedule() {
                           )}
                         >
                           {isSunrise && <Sunrise className="size-3" aria-hidden="true" />}
-                          {EVENT_LABELS[key]}
+                          {tEvent(key)}
                         </span>
                         <span
                           className={cn(

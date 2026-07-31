@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { ZOOM_WIDTH_CLASS, ZOOM_FONT } from '@/lib/quran-zoom'
 import type { VerseData } from '@/hooks/use-chapter-reader'
@@ -39,6 +40,7 @@ function FootnoteDialogContent({
   initialEntry: HistoryEntry
   onClose: () => void
 }) {
+  const tChrome = useTranslations('readerChrome')
   const prefs = useQuranPreferences()
   const primaryCode =
     prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
@@ -99,7 +101,7 @@ function FootnoteDialogContent({
               variant="ghost"
               size="icon-sm"
               onClick={handleBack}
-              aria-label="Go back"
+              aria-label={tChrome('goBack')}
             >
               <ArrowLeft className="size-4" />
             </Button>

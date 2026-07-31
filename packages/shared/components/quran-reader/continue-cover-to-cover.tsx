@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ArrowRight, BookMarked } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useCoverToCoverProgress } from '@/hooks/use-reading-progress'
 import { useScriptureAuth } from '@/lib/scripture-auth-context'
 import { parseCoverToCover } from '@/lib/cover-to-cover'
@@ -15,16 +16,9 @@ export interface ContinueCoverToCoverLabels {
   chapter: (chapterNumber: number, title: string) => string
 }
 
-const DEFAULT_LABELS: ContinueCoverToCoverLabels = {
-  eyebrow: 'Continue cover to cover',
-  cta: 'Continue reading',
-  currentlyAt: (verseKey) => `Currently at ${verseKey}`,
-  chapter: (chapterNumber, title) =>
-    title ? `Sura ${chapterNumber}: ${title}` : `Sura ${chapterNumber}`,
-}
-
 export interface ContinueCoverToCoverProps {
   getChapterTitle?: (chapterNumber: number) => string | undefined
+  /** Per-caller copy overrides; defaults come from the `quran` catalog. */
   labels?: Partial<ContinueCoverToCoverLabels>
   /** Applied to the root element — spacing is the caller's business. */
   className?: string
@@ -48,11 +42,21 @@ export function ContinueCoverToCover({
 }: ContinueCoverToCoverProps) {
   const { isSignedIn } = useScriptureAuth()
   const progress = useCoverToCoverProgress('quran')
+  const t = useTranslations('quran')
 
   const position = parseCoverToCover(progress?.verse_key)
   if (!isSignedIn || !position) return null
 
-  const l = { ...DEFAULT_LABELS, ...labels }
+  // Copy lives in the catalog so both apps are localized by default; the
+  // labels prop stays for callers that need to deviate.
+  const l: ContinueCoverToCoverLabels = {
+    eyebrow: t('continueEyebrow'),
+    cta: t('continueCta'),
+    currentlyAt: (verseKey) => t('continueCurrentlyAt', { verseKey }),
+    chapter: (chapterNumber, title) =>
+      title ? t('chapter', { number: chapterNumber, title }) : t('sura', { number: chapterNumber }),
+    ...labels,
+  }
   const { chapter, verse, percent } = position
   const verseKey = `${chapter}:${verse}`
   const title = getChapterTitle?.(chapter) ?? ''
@@ -76,7 +80,7 @@ export function ContinueCoverToCover({
               {l.chapter(chapter, title)}
             </span>
           </div>
-          <ArrowRight className="ml-auto size-4 shrink-0 text-muted-foreground transition-all group-hover:text-foreground group-hover:translate-x-0.5" />
+          <ArrowRight className="rtl-flip ms-auto size-4 shrink-0 text-muted-foreground transition-all group-hover:text-foreground group-hover:translate-x-0.5" />
         </div>
 
         <div className="h-1 w-full overflow-hidden rounded-full bg-muted">

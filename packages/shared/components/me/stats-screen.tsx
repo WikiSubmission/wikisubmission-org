@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useReadingStats } from '@/hooks/use-reading-stats'
 import { useStreak } from '@/hooks/use-reading-streak'
 import { italicizeLast } from '@/components/editorial/section-header'
@@ -35,6 +36,7 @@ function formatBestDay(day?: string, verses?: number): string | null {
 }
 
 export default function StatsPageClient() {
+  const t = useTranslations('meStats')
   const [view, setView] = useState<StatsView>('quran')
   const [range, setRange] = useState<ReadingStatsRange>('30d')
 
@@ -77,31 +79,31 @@ export default function StatsPageClient() {
 
       <div className="rs-stat-grid">
         <StatCard
-          label="Current streak"
+          label={t('currentStreak')}
           value={`${focusedStreak?.current_streak ?? 0}`}
           note={focusedStreak?.current_streak ? 'days in a row' : 'start one today'}
         />
         <StatCard
-          label="Verses in range"
+          label={t('versesInRange')}
           value={formatNumber(total)}
           note={range === 'all' ? 'all time' : `last ${range}`}
         />
         <StatCard
-          label="Active days"
+          label={t('activeDays')}
           value={`${activeDays}`}
           note={activeDays === 0 ? '—' : `in this range`}
         />
         <StatCard
-          label="Best day"
+          label={t('bestDay')}
           value={focusedStats?.best_day ? formatNumber(focusedStats.best_day.verses_read) : '—'}
           note={bestDayText ?? 'no readings yet'}
         />
       </div>
 
       <ChartCard
-        title="Daily readings"
-        subtitle={view === 'combined' ? 'Quran + Bible' : focused.toUpperCase()}
-        ariaLabel="Daily verses read line chart"
+        title={t('dailyReadings')}
+        subtitle={view === 'combined' ? t('quranPlusBible') : focused.toUpperCase()}
+        ariaLabel={t('dailyChartAria')}
         full
         minHeight={260}
         isEmpty={dailyEmpty}
@@ -113,9 +115,9 @@ export default function StatsPageClient() {
 
       <div className="rs-grid">
         <ChartCard
-          title="Hour of day"
-          subtitle="when you read"
-          ariaLabel="Reading frequency by hour of day"
+          title={t('hourOfDay')}
+          subtitle={t('whenYouRead')}
+          ariaLabel={t('hourChartAria')}
           minHeight={260}
           isEmpty={!focusedStats || focusedStats.hourly.length === 0}
         >
@@ -130,9 +132,9 @@ export default function StatsPageClient() {
         </ChartCard>
 
         <ChartCard
-          title="By weekday"
-          subtitle="average verses"
-          ariaLabel="Reading frequency by weekday"
+          title={t('byWeekday')}
+          subtitle={t('averageVerses')}
+          ariaLabel={t('weekdayChartAria')}
           minHeight={260}
           isEmpty={!focusedStats || focusedStats.weekday.length === 0}
         >
@@ -147,9 +149,9 @@ export default function StatsPageClient() {
         </ChartCard>
 
         <ChartCard
-          title="Daily heatmap"
-          subtitle="calendar"
-          ariaLabel="Reading intensity calendar heatmap"
+          title={t('dailyHeatmap')}
+          subtitle={t('calendar')}
+          ariaLabel={t('heatmapAria')}
           minHeight={200}
           isEmpty={!focusedStats || focusedStats.daily.length === 0}
         >
@@ -164,9 +166,9 @@ export default function StatsPageClient() {
         </ChartCard>
 
         <ChartCard
-          title="Cumulative"
-          subtitle="total verses over time"
-          ariaLabel="Cumulative verses read curve with milestones"
+          title={t('cumulative')}
+          subtitle={t('totalVersesOverTime')}
+          ariaLabel={t('cumulativeAria')}
           minHeight={260}
           isEmpty={!focusedStats || focusedStats.cumulative.length === 0}
         >

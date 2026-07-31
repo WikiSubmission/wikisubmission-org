@@ -2,11 +2,17 @@
 
 import { useEffect } from 'react'
 import { reportClientError } from '@/lib/crash-reporter'
+import { activeTranslationLocale, translate } from '@/lib/i18n-runtime'
+import { directionFor } from '@/constants/locales'
 
 /**
  * Last-resort boundary: catches throws in the root layout itself, where the
  * app shell (and its styling) may be gone — hence plain inline styles and a
  * full reload instead of reset(). Must render its own <html>/<body>.
+ *
+ * IntlProvider lives inside the layout that just failed, so useTranslations()
+ * is unavailable here. The imperative translator keeps whatever locale was last
+ * applied, and falls back to English if the crash happened before hydration.
  */
 export default function GlobalError({
   error,
@@ -17,8 +23,10 @@ export default function GlobalError({
     reportClientError(error, 'global-error')
   }, [error])
 
+  const locale = activeTranslationLocale()
+
   return (
-    <html lang="en">
+    <html lang={locale} dir={directionFor(locale)}>
       <body
         style={{
           display: 'flex',
@@ -34,9 +42,9 @@ export default function GlobalError({
           color: '#2A241C',
         }}
       >
-        <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Something went wrong</h2>
+        <h2 style={{ fontSize: '1.25rem', margin: 0 }}>{translate('common.error')}</h2>
         <p style={{ fontSize: '0.875rem', opacity: 0.7, margin: 0 }}>
-          The app hit an unexpected error and needs to reload.
+          {translate('mobile.errors.globalBody')}
         </p>
         <button
           type="button"
@@ -50,7 +58,7 @@ export default function GlobalError({
             fontSize: '0.875rem',
           }}
         >
-          Reload
+          {translate('mobile.errors.reload')}
         </button>
       </body>
     </html>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState, useMemo } from 'react'
 import { AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
@@ -96,6 +97,9 @@ export function AddFromReferencesDialog({
   open,
   onOpenChange,
 }: AddFromReferencesDialogProps) {
+  const t = useTranslations('meCollections')
+  const tActions = useTranslations('actions')
+  const tNav = useTranslations('navbar')
   const [scripture, setScripture] = useState<Scripture>('quran')
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -132,9 +136,9 @@ export function AddFromReferencesDialog({
     onOpenChange(false)
     setInput('')
     if (failed === 0) {
-      toast.success(`${added} verse${added !== 1 ? 's' : ''} added`)
+      toast.success(t('versesAdded', { count: added }))
     } else {
-      toast.warning(`${added} added, ${failed} failed`)
+      toast.warning(t('addedFailed', { added, failed }))
     }
   }
 
@@ -146,16 +150,16 @@ export function AddFromReferencesDialog({
   const placeholder =
     scripture === 'quran'
       ? 'e.g. 1:1-7, 2:255, 3:1-10'
-      : 'e.g. Genesis 1:1-5, John 3:16, Ps 23:1'
+      : t('bibleRefPlaceholder')
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Add from references</DialogTitle>
+          <DialogTitle>{t('addFromReferences')}</DialogTitle>
           <DialogDescription>
             Enter verse references. Ranges like{' '}
-            {scripture === 'quran' ? '1:1-7' : 'Gen 1:1-5'} expand automatically.
+            {t('refsExpandHint', { example: scripture === 'quran' ? '1:1-7' : 'Gen 1:1-5' })}
           </DialogDescription>
         </DialogHeader>
 
@@ -164,7 +168,7 @@ export function AddFromReferencesDialog({
           <div
             className="flex rounded-md border border-border overflow-hidden text-xs font-medium"
             role="group"
-            aria-label="Scripture"
+            aria-label={t('scripture')}
           >
             {(['quran', 'bible'] as Scripture[]).map((s) => (
               <button
@@ -180,7 +184,7 @@ export function AddFromReferencesDialog({
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
                 }`}
               >
-                {s === 'quran' ? 'Quran' : 'Bible'}
+                {tNav(s)}
               </button>
             ))}
           </div>
@@ -205,7 +209,7 @@ export function AddFromReferencesDialog({
 
         <DialogFooter className="gap-2 pt-2">
           <Button variant="outline" size="sm" onClick={() => handleOpenChange(false)}>
-            Cancel
+            {tActions('cancel')}
           </Button>
           <Button
             size="sm"

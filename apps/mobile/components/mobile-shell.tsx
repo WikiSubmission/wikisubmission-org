@@ -2,12 +2,13 @@
 
 import { useRef } from 'react'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   activeTab,
   isQuranReaderRoute,
   isTabRoot,
   normalizePath,
-  screenTitle,
+  screenTitleKey,
 } from '@/constants/navigation'
 import { MobileTopBar } from '@/components/mobile-top-bar'
 import { QuranPlayer } from '@/components/quran-player/now-playing-bar'
@@ -27,6 +28,9 @@ import { useReaderChromeScroll } from '@/hooks/use-reader-chrome-scroll'
  */
 export function MobileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  // Root-scoped translator: the nav constants carry full dotted keys so a
+  // pushed-screen title and a tab label resolve through the same call.
+  const t = useTranslations()
   const tab = activeTab(pathname)
   const atRoot = isTabRoot(pathname)
   const reading = isQuranReaderRoute(pathname)
@@ -37,15 +41,16 @@ export function MobileShell({ children }: { children: React.ReactNode }) {
 
   const onToday = normalizePath(pathname) === '/'
 
+  const titleKey = screenTitleKey(pathname) ?? tab?.labelKey
+  // 'WikiSubmission' is the brand name — deliberately not translated.
+  const title = titleKey ? t(titleKey) : 'WikiSubmission'
+
   return (
     <div className="flex min-h-dvh flex-col">
       {/* Time-of-day scene behind every screen; full strength on Today, faded
           back elsewhere so dense content stays legible. */}
       <AmbientBackdrop subdued={!onToday} />
-      <MobileTopBar
-        title={screenTitle(pathname) ?? tab?.label ?? 'WikiSubmission'}
-        showBack={!atRoot}
-      />
+      <MobileTopBar title={title} showBack={!atRoot} />
       <main
         ref={mainRef}
         className="relative z-10 flex flex-1 flex-col"

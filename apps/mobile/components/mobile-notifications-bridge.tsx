@@ -12,6 +12,7 @@ import {
 } from '@/lib/notifications/local-scheduler'
 import { refreshZakatReminder } from '@/lib/notifications/zakat'
 import { safeRoute } from '@/lib/notification-routes'
+import { onActiveLocaleChange } from '@/lib/i18n-runtime'
 
 /**
  * Lifecycle wiring for notifications, mounted once in MobileProviders (native
@@ -104,11 +105,23 @@ export function MobileNotificationsBridge() {
     const onLocationChanged = () => void rescheduleAll('location-change')
     window.addEventListener('prayer-location-changed', onLocationChanged)
 
+    // Queued notifications carry the text they were scheduled with, and Android
+    // channel names are whatever they were last created with — neither follows
+    // a locale switch on its own, so rewrite both. Subscribing to the runtime
+    // store (not LOCALE_CHANGED_EVENT) guarantees the translator already holds
+    // the new catalog when this runs.
+    const unsubscribeLocale = onActiveLocaleChange(() => {
+      void ensureNotificationChannels()
+      void rescheduleAll('locale-change')
+      void refreshZakatReminder()
+    })
+
     return () => {
       cancelled = true
       window.clearTimeout(fcmTimer)
       handles.forEach((handle) => void handle.remove())
       window.removeEventListener('prayer-location-changed', onLocationChanged)
+      unsubscribeLocale()
     }
   }, [router])
 

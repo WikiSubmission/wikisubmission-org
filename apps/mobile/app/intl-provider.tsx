@@ -6,33 +6,40 @@ import { Preferences } from '@capacitor/preferences'
 import {
   DEFAULT_LOCALE,
   directionFor,
-  isLocale,
   LOCALE_CHANGED_EVENT,
   LOCALE_PREF_KEY,
+  resolveLocale,
   type Locale,
 } from '@/constants/locales'
+import { mergeMessages, type MessageCatalog } from '@/lib/merge-messages'
+import { onIntlError } from '@/lib/intl-error'
+import { setActiveMessages } from '@/lib/i18n-runtime'
 
 import en from '@/messages/en.json'
 
 type Messages = Record<string, unknown>
 
-// Only the default catalog is bundled into the startup chunk. The other five
-// (~330 KB of source combined) load on demand: locale switching already goes
+// Only the default catalog is bundled into the startup chunk. The other six
+// (~380 KB of source combined) load on demand: locale switching already goes
 // through an async preference read, so one more dynamic import is invisible —
 // and webpack keeps each catalog in its own chunk inside the static export,
 // so switching still works fully offline in the webview.
 const LOADERS: Record<Exclude<Locale, 'en'>, () => Promise<{ default: Messages }>> = {
   ar: () => import('@/messages/ar.json'),
+  ckb: () => import('@/messages/ckb.json'),
   de: () => import('@/messages/de.json'),
   fr: () => import('@/messages/fr.json'),
-  ku: () => import('@/messages/ku.json'),
+  kmr: () => import('@/messages/kmr.json'),
   tr: () => import('@/messages/tr.json'),
 }
 
 async function loadMessages(locale: Locale): Promise<Messages> {
   if (locale === 'en') return en as Messages
   const mod = await LOADERS[locale]()
-  return mod.default
+  // Layered over English so a key the translated catalog has not caught up on
+  // renders real copy instead of its dotted path. en is already in the startup
+  // chunk, so this costs nothing extra to download.
+  return mergeMessages(en as MessageCatalog, mod.default as MessageCatalog) as Messages
 }
 
 /**
@@ -63,8 +70,16 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false
     Preferences.get({ key: LOCALE_PREF_KEY })
       .then(({ value }) => {
-        if (cancelled || !value || !isLocale(value)) return
-        applyLocale(value)
+        if (cancelled) return
+        // resolveLocale, not isLocale: a build before the Kurdish split stored
+        // `ku`, which must land on Sorani rather than fall back to English.
+        const stored = resolveLocale(value)
+        if (!stored) return
+        applyLocale(stored)
+        if (stored !== value) {
+          // Rewrite the preference so the alias is followed only once.
+          void Preferences.set({ key: LOCALE_PREF_KEY, value: stored }).catch(() => {})
+        }
       })
       .catch(() => {
         // No stored preference / bridge unavailable: keep the default locale.
@@ -78,8 +93,8 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
   // preference and fires this event).
   useEffect(() => {
     const onLocaleChanged = (event: Event) => {
-      const next = (event as CustomEvent<string>).detail
-      if (isLocale(next)) applyLocale(next)
+      const next = resolveLocale((event as CustomEvent<string>).detail)
+      if (next) applyLocale(next)
     }
     window.addEventListener(LOCALE_CHANGED_EVENT, onLocaleChanged)
     return () => window.removeEventListener(LOCALE_CHANGED_EVENT, onLocaleChanged)
@@ -91,10 +106,17 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
     root.dir = directionFor(locale)
   }, [locale])
 
+  // Hand the resolved catalog to the imperative translator so notification
+  // copy, Android channel names and auth errors follow the UI language.
+  useEffect(() => {
+    setActiveMessages(locale, messages as Parameters<typeof setActiveMessages>[1])
+  }, [locale, messages])
+
   return (
     <NextIntlClientProvider
       locale={locale}
       messages={messages}
+      onError={onIntlError}
       // Pinned so the static-export prerender (build machine tz) and the client
       // render agree, avoiding next-intl markup-mismatch warnings. All in-app
       // date/time formatting is locale-driven, not tz-sensitive.

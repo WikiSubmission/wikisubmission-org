@@ -3,24 +3,12 @@
 import { useEffect, useState } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
+import { useTranslations } from 'next-intl'
 import { Switch } from '@/components/ui/switch'
-import { PRAYER_EVENT_ORDER, type PrayerEventKey } from '@/lib/prayer-events'
+import { PRAYER_EVENT_ORDER } from '@/lib/prayer-events'
 import { useNotificationPrefs } from '@/hooks/use-notification-prefs'
 import { AdhanSoundSelector } from '@/components/adhan-sound-selector'
 import { cn } from '@/lib/utils'
-
-const EVENT_LABELS: Record<PrayerEventKey, string> = {
-  fajr: 'Fajr',
-  sunrise: 'Sunrise',
-  dhuhr: 'Dhuhr',
-  asr: 'Asr',
-  maghrib: 'Maghrib',
-  isha: 'Isha',
-}
-
-const EVENT_HINTS: Partial<Record<PrayerEventKey, string>> = {
-  sunrise: 'Marks the end of the Fajr window',
-}
 
 /**
  * The notification toggle list shared by the Today-screen sheet and the
@@ -30,6 +18,9 @@ const EVENT_HINTS: Partial<Record<PrayerEventKey, string>> = {
 export function NotificationPreferencesList() {
   const { prefs, loading, permissionBlocked, setMaster, setEvent, setSound, setAnnouncements } =
     useNotificationPrefs()
+  const t = useTranslations('mobile.notifications')
+  // PrayerEventKey values double as prayertimes.* message keys.
+  const tEvent = useTranslations('prayertimes')
   const [exactAlarmDenied, setExactAlarmDenied] = useState(false)
 
   // Android 14+ denies SCHEDULE_EXACT_ALARM by default; without it the OS may
@@ -57,47 +48,42 @@ export function NotificationPreferencesList() {
   return (
     <div className={cn('space-y-1', loading && 'pointer-events-none opacity-60')}>
       <div className="flex items-center justify-between py-3">
-        <div className="pr-4">
-          <p className="text-foreground text-sm font-medium">Prayer notifications</p>
-          <p className="text-muted-foreground mt-0.5 text-xs">
-            Reminders at each prayer time for your location
-          </p>
+        <div className="pe-4">
+          <p className="text-foreground text-sm font-medium">{t('prayerHeading')}</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">{t('prayerBody')}</p>
         </div>
         <Switch
           checked={prefs.master}
           onCheckedChange={(on) => void setMaster(on)}
-          aria-label="Prayer notifications"
+          aria-label={t('prayerHeading')}
         />
       </div>
 
       {permissionBlocked && (
-        <p className="text-destructive pb-2 text-xs">
-          Notifications are blocked. Enable them for WikiSubmission in system settings, then try
-          again.
-        </p>
+        <p className="text-destructive pb-2 text-xs">{t('blocked')}</p>
       )}
 
       <ul className="divide-border/40 border-border/40 divide-y border-y">
         {PRAYER_EVENT_ORDER.map((event) => (
           <li key={event} className="flex items-center justify-between py-2.5">
-            <div className="pr-4">
+            <div className="pe-4">
               <p
                 className={cn(
                   'text-sm',
                   prefs.master ? 'text-foreground' : 'text-muted-foreground',
                 )}
               >
-                {EVENT_LABELS[event]}
+                {tEvent(event)}
               </p>
-              {EVENT_HINTS[event] && (
-                <p className="text-muted-foreground mt-0.5 text-xs">{EVENT_HINTS[event]}</p>
+              {event === 'sunrise' && (
+                <p className="text-muted-foreground mt-0.5 text-xs">{t('sunriseHint')}</p>
               )}
             </div>
             <Switch
               checked={prefs.events[event]}
               disabled={!prefs.master}
               onCheckedChange={(on) => void setEvent(event, on)}
-              aria-label={`${EVENT_LABELS[event]} notification`}
+              aria-label={t('eventToggle', { event: tEvent(event) })}
             />
           </li>
         ))}
@@ -111,41 +97,37 @@ export function NotificationPreferencesList() {
 
       {exactAlarmDenied && (
         <div className="flex items-center justify-between py-3">
-          <div className="pr-4">
-            <p className="text-foreground text-sm font-medium">Exact timing</p>
-            <p className="text-muted-foreground mt-0.5 text-xs">
-              Without the alarm permission, reminders can arrive a few minutes late
-            </p>
+          <div className="pe-4">
+            <p className="text-foreground text-sm font-medium">{t('exactTiming')}</p>
+            <p className="text-muted-foreground mt-0.5 text-xs">{t('exactTimingBody')}</p>
           </div>
           <button
             type="button"
             onClick={() => void openExactAlarmSettings()}
             className="text-primary shrink-0 text-sm font-medium"
           >
-            Allow
+            {t('allow')}
           </button>
         </div>
       )}
 
       <div className="flex items-center justify-between py-3">
-        <div className="pr-4">
+        <div className="pe-4">
           <p
             className={cn(
               'text-sm font-medium',
               prefs.master ? 'text-foreground' : 'text-muted-foreground',
             )}
           >
-            Announcements
+            {t('announcements')}
           </p>
-          <p className="text-muted-foreground mt-0.5 text-xs">
-            Occasional news and reminders from WikiSubmission
-          </p>
+          <p className="text-muted-foreground mt-0.5 text-xs">{t('announcementsBody')}</p>
         </div>
         <Switch
           checked={prefs.announcements}
           disabled={!prefs.master}
           onCheckedChange={(on) => void setAnnouncements(on)}
-          aria-label="Announcement notifications"
+          aria-label={t('announcementsToggle')}
         />
       </div>
     </div>

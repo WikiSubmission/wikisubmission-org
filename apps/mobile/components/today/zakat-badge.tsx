@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { GsapPresence } from '@/components/gsap-presence'
 import { EASE_STANDARD } from '@/lib/gsap'
+import { useTranslations } from 'next-intl'
 import { haptic } from '@/lib/haptics'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { useZakatReminder } from '@/hooks/use-zakat-reminder'
@@ -24,6 +25,8 @@ const LABEL_FIRST_MS = 4_000
  */
 export function ZakatBadge() {
   const router = useRouter()
+  const t = useTranslations('mobile.zakat')
+  const tNavbar = useTranslations('navbar')
   const reducedMotion = usePrefersReducedMotion()
   const { prefs, daysLeft } = useZakatReminder()
   const [labelVisible, setLabelVisible] = useState(false)
@@ -61,9 +64,9 @@ export function ZakatBadge() {
         haptic('light')
         router.push('/zakat')
       }}
-      className="absolute top-4 left-4 z-10 flex items-center gap-1.5"
+      className="absolute top-4 start-4 z-10 flex items-center gap-1.5"
       aria-label={
-        dueToday ? 'Zakat due today' : `Zakat in ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'}`
+        dueToday ? t('dueToday') : t('inDays', { days: daysLeft })
       }
     >
       <span
@@ -86,7 +89,7 @@ export function ZakatBadge() {
           dueToday ? 'text-primary' : 'text-muted-foreground',
         )}
       >
-        {dueToday ? 'Zakat due' : 'Zakat'}
+        {dueToday ? t('dueLabel') : tNavbar('zakat')}
       </GsapPresence>
     </button>
   )

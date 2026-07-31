@@ -5,11 +5,13 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus, Search, Share2 } from 'lucide-react'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
+import { useTranslations } from 'next-intl'
 import { CategoryVerseList } from '@/components/me/category-verse-list'
 import { CategoryActions } from '@/components/me/category-actions'
 import { AddVerseRefDialog } from '@/components/me/add-verse-ref-dialog'
 
 function CategoryDetail({ categoryId }: { categoryId: number }) {
+  const t = useTranslations('meBookmarks')
   const categories = useBookmarkCategories()
   const category = categories.find((c) => c.id === categoryId)
   const [addOpen, setAddOpen] = useState(false)
@@ -55,11 +57,11 @@ function CategoryDetail({ categoryId }: { categoryId: number }) {
             </span>
           </div>
           <h1>
-            <em>{category?.name ?? 'Category'}</em>
+            <em>{category?.name ?? t('category')}</em>
           </h1>
           {category ? (
             <div className="profile-mast-meta">
-              {createdAt ? <span>Created {createdAt}</span> : null}
+              {createdAt ? <span>{t('created', { date: createdAt })}</span> : null}
               <span className="sep">·</span>
               <CategoryActions category={category} />
             </div>
@@ -72,11 +74,11 @@ function CategoryDetail({ categoryId }: { categoryId: number }) {
             onClick={() => setAddOpen(true)}
           >
             <Plus className="w-3.5 h-3.5" aria-hidden />
-            Add verses
+            {t('addVerses')}
           </button>
           <Link href="/me/collections" className="section-action">
             <Share2 className="w-3.5 h-3.5" aria-hidden />
-            Make a Collection
+            {t('makeCollection')}
           </Link>
         </div>
       </div>
@@ -88,7 +90,7 @@ function CategoryDetail({ categoryId }: { categoryId: number }) {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search verses in this category…"
+            placeholder={t('searchInCategory')}
             className="flex-1 bg-transparent outline-none py-2 font-[var(--font-source-serif)] text-[14px] text-[var(--ed-fg)] placeholder:text-[var(--ed-fg-muted)]"
           />
         </label>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { RefreshCw } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { gsap } from '@/lib/gsap'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 
@@ -27,6 +28,7 @@ export function PullToRefresh({
   onRefresh: () => Promise<unknown>
   children: ReactNode
 }) {
+  const t = useTranslations('mobile.today')
   const wrapRef = useRef<HTMLDivElement>(null)
   const spinnerRef = useRef<HTMLDivElement>(null)
   const reducedMotion = usePrefersReducedMotion()
@@ -125,7 +127,7 @@ export function PullToRefresh({
         className="pointer-events-none absolute inset-x-0 top-2 z-0 flex justify-center"
         style={{ visibility: 'hidden' }}
       >
-        <RefreshCw className="text-primary size-5" aria-label="Refreshing" />
+        <RefreshCw className="text-primary size-5" aria-label={t('refreshing')} />
       </div>
       <div ref={wrapRef} className="relative z-10">
         {children}

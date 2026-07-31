@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { AArrowDown, AArrowUp } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { QuranModeSelector } from '@/components/quran-reader/mode-selector'
 import type { QuranModeId } from '@/components/quran-reader/mode-selector'
 import {
@@ -23,6 +24,7 @@ import { ZOOM_LEVELS } from '@/lib/quran-zoom'
  * offline the switch is cancelled because there is no data source at all.
  */
 export function ChapterToolbar() {
+  const t = useTranslations('mobile.reader')
   const primaryLanguage = useQuranPreferences((s) => s.primaryLanguage)
   const zoomLevel = useQuranPreferences((s) => s.zoomLevel ?? 'comfortable')
   const [announcement, setAnnouncement] = useState<ModeAnnouncement | null>(null)
@@ -79,7 +81,7 @@ export function ChapterToolbar() {
       <div className="flex w-18 justify-end gap-1">
         <button
           type="button"
-          aria-label="Decrease text size"
+          aria-label={t('decreaseTextSize')}
           disabled={zoomIndex <= 0}
           onClick={() => stepZoom(-1)}
           className="text-muted-foreground active:bg-accent flex size-8 items-center justify-center rounded-full disabled:opacity-35"
@@ -88,7 +90,7 @@ export function ChapterToolbar() {
         </button>
         <button
           type="button"
-          aria-label="Increase text size"
+          aria-label={t('increaseTextSize')}
           disabled={zoomIndex >= ZOOM_LEVELS.length - 1}
           onClick={() => stepZoom(1)}
           className="text-muted-foreground active:bg-accent flex size-8 items-center justify-center rounded-full disabled:opacity-35"

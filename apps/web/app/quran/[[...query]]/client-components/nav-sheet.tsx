@@ -27,11 +27,10 @@ import {
   CHAPTER_TITLES_EN,
   APPENDIX_TITLES_EN,
 } from '@/lib/quran-titles-en'
+import { directionForUiLocale } from '@/constants/ui-locales'
 
 type Chapter = components['schemas']['Chapter']
 type Appendix = components['schemas']['Appendix']
-
-const RTL_LOCALES = new Set(['ar', 'ku', 'fa', 'ur'])
 
 function NavSheetContent({
   chapters,
@@ -43,7 +42,7 @@ function NavSheetContent({
   const t = useTranslations('sidebar')
   const tNav = useTranslations('nav')
   const locale = useLocale()
-  const titleDir = RTL_LOCALES.has(locale) ? 'rtl' : 'ltr'
+  const titleDir = directionForUiLocale(locale)
   const [chapterSearchQuery, setChapterSearchQuery] = useState('')
   const [appendixSearchQuery, setAppendixSearchQuery] = useState('')
   const [chaptersOpen, setChaptersOpen] = useLocalStorage<boolean>(

@@ -21,7 +21,7 @@ export default function AppendicesIndexPage() {
               ) : null}
             </div>
             <ChevronRight
-              className="text-muted-foreground/50 ml-auto size-4 shrink-0"
+              className="rtl-flip text-muted-foreground/50 ms-auto size-4 shrink-0"
               aria-hidden="true"
             />
           </Link>

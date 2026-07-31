@@ -1,5 +1,6 @@
 import { Capacitor } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
+import { translate } from '@/lib/i18n-runtime'
 import { PRAYER_SOUNDS } from './sounds'
 
 /**
@@ -8,20 +9,28 @@ import { PRAYER_SOUNDS } from './sounds'
  * Android 8+ silently drops notifications sent to a channel that does not
  * exist on the device.
  *
- * Channel settings (importance, sound) are immutable after creation — pick
+ * Channel *settings* (importance, sound) are immutable after creation — pick
  * before shipping; changing later requires a new channel id. That is why each
- * selectable adhan sound in PRAYER_SOUNDS has its own channel.
+ * selectable adhan sound in PRAYER_SOUNDS has its own channel. The user-visible
+ * name and description, however, ARE updatable: re-calling createChannel with
+ * the same id rewrites them, which is how a locale switch relabels the channels
+ * the user sees in Android's notification settings.
+ *
+ * Channel ids stay hardcoded English constants — the backend addresses
+ * `announcements` by id and a translated id would drop every push.
  */
 export const PRAYER_CHANNEL_ID = 'prayer-times'
 export const ANNOUNCEMENTS_CHANNEL_ID = 'announcements'
 
 export async function ensureNotificationChannels(): Promise<void> {
   if (Capacitor.getPlatform() !== 'android') return
+  const prayerName = translate('mobile.notifications.channelPrayer')
+  const prayerDescription = translate('mobile.notifications.channelPrayerDesc')
   try {
     await LocalNotifications.createChannel({
       id: PRAYER_CHANNEL_ID,
-      name: 'Prayer times',
-      description: 'Reminders at each prayer time',
+      name: prayerName,
+      description: prayerDescription,
       importance: 4, // HIGH: heads-up with sound
       visibility: 1, // public on the lock screen
     })
@@ -29,8 +38,10 @@ export async function ensureNotificationChannels(): Promise<void> {
       if (!sound.rawResource) continue // default sound = the base channel above
       await LocalNotifications.createChannel({
         id: sound.channelId,
-        name: `Prayer times (${sound.label})`,
-        description: 'Reminders at each prayer time',
+        name: translate('mobile.notifications.channelPrayerWithSound', {
+          sound: translate(`mobile.notifications.${sound.labelKey}`),
+        }),
+        description: prayerDescription,
         importance: 4,
         visibility: 1,
         sound: sound.rawResource,
@@ -38,8 +49,8 @@ export async function ensureNotificationChannels(): Promise<void> {
     }
     await LocalNotifications.createChannel({
       id: ANNOUNCEMENTS_CHANNEL_ID,
-      name: 'Announcements',
-      description: 'News and reminders from WikiSubmission',
+      name: translate('mobile.notifications.channelAnnouncements'),
+      description: translate('mobile.notifications.channelAnnouncementsDesc'),
       importance: 3, // DEFAULT
       visibility: 1,
     })

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { useQueries } from '@tanstack/react-query'
@@ -33,6 +34,7 @@ export function CategoryVerseList({
   hideAudio = false,
   hideNotes = false,
 }: CategoryVerseListProps) {
+  const tNav = useTranslations('navbar')
   const { entries, isLoading } = useBookmarkCategoryEntries(categoryId)
   const { primaryLanguage, secondaryLanguage, arabic, wordByWord, zoomLevel } =
     useQuranPreferences()
@@ -202,7 +204,7 @@ export function CategoryVerseList({
         <section className="flex flex-col gap-2 px-4 sm:px-0 mt-4 pb-4">
           {sortedQuranEntries.length > 0 ? (
             <p className="font-[var(--font-glacial)] text-[10px] tracking-[0.18em] uppercase text-[var(--ed-fg-muted)] mb-1 px-4 sm:px-0">
-              Bible
+              {tNav('bible')}
             </p>
           ) : null}
           {filteredBibleEntries.map((entry) => (

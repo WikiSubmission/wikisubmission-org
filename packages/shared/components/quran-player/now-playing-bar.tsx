@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useTranslations } from 'next-intl'
 import {
   useQuranPlayer,
   useQuranProgress,
@@ -60,6 +61,8 @@ interface QuranPlayerProps {
 }
 
 export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayerProps) {
+  // Reciter proper names stay untranslated; only the chrome around them moves.
+  const tPlayer = useTranslations('player')
   const {
     currentVerse,
     isPlaying,
@@ -201,7 +204,7 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
                   <DialogTrigger asChild>
                     <button
                       type="button"
-                      aria-label="Select reciter"
+                      aria-label={tPlayer('selectReciter')}
                       className="flex md:hidden items-center gap-3 min-w-0 rounded-xl -mx-1 px-1 py-0.5 active:opacity-70 transition-opacity"
                     >
                       {verseInfo}
@@ -209,10 +212,10 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
                   </DialogTrigger>
                   <DialogContent className="w-[90%] max-w-sm rounded-2xl p-6">
                     <DialogHeader className="mb-4">
-                      <DialogTitle className="text-left">Select Reciter</DialogTitle>
+                      <DialogTitle className="text-left">{tPlayer('selectReciterTitle')}</DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-2">
-                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 pt-1">English</p>
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 pt-1">{tPlayer('english')}</p>
                       {ENGLISH_RECITERS.map((r) => (
                         <Button
                           key={r}
@@ -224,7 +227,7 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
                           {RECITER_NAMES[r]}
                         </Button>
                       ))}
-                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 pt-2">Arabic</p>
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1 pt-2">{tPlayer('arabic')}</p>
                       {ARABIC_RECITERS.map((r) => (
                         <Button
                           key={r}
@@ -245,7 +248,7 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      aria-label="Select reciter"
+                      aria-label={tPlayer('selectReciter')}
                       className="hidden md:flex items-center gap-3 min-w-0 rounded-xl -mx-1 px-1 py-0.5 hover:bg-muted/40 transition-colors"
                     >
                       {verseInfo}
@@ -257,7 +260,7 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
                     className="w-56 p-1.5 bg-background/90 backdrop-blur-xl border-border/30 shadow-xl rounded-xl"
                   >
                     <p className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
-                      English
+                      {tPlayer('english')}
                     </p>
                     {ENGLISH_RECITERS.map((r) => (
                       <DropdownMenuItem
@@ -273,7 +276,7 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
                       </DropdownMenuItem>
                     ))}
                     <p className="px-2 pt-2 pb-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
-                      Arabic
+                      {tPlayer('arabic')}
                     </p>
                     {ARABIC_RECITERS.map((r) => (
                       <DropdownMenuItem
@@ -331,7 +334,7 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
                     size="icon"
                     className="h-9 w-9 rounded-full text-muted-foreground"
                     onClick={dismiss}
-                    aria-label="Close player"
+                    aria-label={tPlayer('closePlayer')}
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -436,7 +439,7 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
                   size="icon"
                   className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
                   onClick={dismiss}
-                  aria-label="Close player"
+                  aria-label={tPlayer('closePlayer')}
                 >
                   <X className="w-4 h-4" />
                 </Button>

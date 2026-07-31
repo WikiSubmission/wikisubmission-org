@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { Group } from '@visx/group'
 import { Arc } from '@visx/shape'
 import { scaleLinear } from '@visx/scale'
@@ -24,6 +25,7 @@ interface HourRadialProps {
 const HOUR_TICKS = [0, 6, 12, 18]
 
 export function HourRadial({ width, height, scripture, data }: HourRadialProps) {
+  const t = useTranslations('meStats')
   const size = Math.min(width, height)
   const cx = width / 2
   const cy = height / 2
@@ -106,7 +108,7 @@ export function HourRadial({ width, height, scripture, data }: HourRadialProps) 
             fill: 'var(--ed-fg-muted)',
           }}
         >
-          Peaks at
+          {t('peaksAt')}
         </text>
         <text
           x={0}

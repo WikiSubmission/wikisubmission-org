@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,6 +34,8 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
     verifyEmailCode,
   } = useMobileAuth()
 
+  const t = useTranslations('mobile.auth')
+  const tCommon = useTranslations('common')
   const [busy, setBusy] = useState(false)
   const [step, setStep] = useState<Step>('options')
   const [email, setEmail] = useState('')
@@ -54,7 +57,7 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
     try {
       await action()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Something went wrong')
+      toast.error(error instanceof Error ? error.message : tCommon('error'))
     } finally {
       setBusy(false)
     }
@@ -63,11 +66,11 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
   async function onSendCode() {
     const trimmed = email.trim()
     if (!trimmed) {
-      toast.error('Enter your email')
+      toast.error(t('enterEmail'))
       return
     }
     if (cooldownLeft > 0) {
-      toast.error(`Wait ${cooldownLeft}s before requesting another code`)
+      toast.error(t('waitBeforeResend', { seconds: cooldownLeft }))
       return
     }
     await run(async () => {
@@ -75,14 +78,14 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
       setCooldownUntil(Date.now() + RESEND_COOLDOWN_MS)
       setNow(Date.now())
       setStep('code')
-      toast.success('We sent a code to your email')
+      toast.success(t('codeSent'))
     })
   }
 
   async function onVerify() {
     const trimmed = code.trim()
     if (trimmed.length !== 6) {
-      toast.error('Enter the 6-digit code')
+      toast.error(t('enterCode'))
       return
     }
     await run(() => verifyEmailCode(trimmed))
@@ -98,7 +101,7 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
       {step === 'options' ? (
         <>
           <Button className="w-full" disabled={busy} onClick={() => run(signInWithGoogle)}>
-            Continue with Google
+            {t('continueGoogle')}
           </Button>
 
           {appleSignInAvailable ? (
@@ -108,13 +111,13 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
               disabled={busy}
               onClick={() => run(signInWithApple)}
             >
-              Continue with Apple
+              {t('continueApple')}
             </Button>
           ) : null}
 
           <div className="my-1 flex w-full items-center gap-3">
             <span className="bg-border h-px flex-1" />
-            <span className="text-muted-foreground text-xs">or</span>
+            <span className="text-muted-foreground text-xs">{t('or')}</span>
             <span className="bg-border h-px flex-1" />
           </div>
 
@@ -136,14 +139,20 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
             disabled={busy}
             onClick={() => void onSendCode()}
           >
-            Continue with email
+            {t('continueEmail')}
           </Button>
         </>
       ) : (
         <>
           <p className="text-muted-foreground text-sm">
-            Enter the 6-digit code sent to{' '}
-            <span className="text-foreground font-medium">{email.trim()}</span>.
+            {/* Rich variant so the address keeps its emphasis. The catalogs
+                wrap the {email} value in an <em> tag, styled here — word order
+                around it differs by language, so the tag travels with the
+                message rather than being concatenated in JSX. */}
+            {t.rich('codeSentTo', {
+              email: email.trim(),
+              em: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+            })}
           </p>
           <Input
             type="text"
@@ -160,7 +169,7 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
             }}
           />
           <Button className="w-full" disabled={busy} onClick={() => void onVerify()}>
-            Verify and sign in
+            {t('verify')}
           </Button>
           <div className="flex w-full items-center justify-between text-xs">
             <button
@@ -172,7 +181,7 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
                 setCode('')
               }}
             >
-              Use a different method
+              {t('useAnotherMethod')}
             </button>
             <button
               type="button"
@@ -180,7 +189,7 @@ export function MobileSignInGate({ title, description }: MobileSignInGateProps) 
               disabled={busy || cooldownLeft > 0}
               onClick={() => void onSendCode()}
             >
-              {cooldownLeft > 0 ? `Resend code (${cooldownLeft}s)` : 'Resend code'}
+              {cooldownLeft > 0 ? t('resendIn', { seconds: cooldownLeft }) : t('resend')}
             </button>
           </div>
         </>

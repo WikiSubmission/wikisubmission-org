@@ -12,8 +12,11 @@ export type PrayerSoundId = 'default' | 'adhan_alafasy' | 'adhan_omar_hisham'
 
 export interface PrayerSoundOption {
   id: PrayerSoundId
-  label: string
-  description: string
+  /** Message keys under `mobile.notifications` — the label is shown in the
+   *  picker and inside the Android channel name, so it must follow the UI
+   *  language rather than being baked in here. */
+  labelKey: string
+  descriptionKey: string
   channelId: string
   rawResource?: string
   previewUrl?: string
@@ -22,22 +25,22 @@ export interface PrayerSoundOption {
 export const PRAYER_SOUNDS: Record<PrayerSoundId, PrayerSoundOption> = {
   default: {
     id: 'default',
-    label: 'System default',
-    description: "Your device's standard notification sound",
+    labelKey: 'soundDefault',
+    descriptionKey: 'soundDefaultDesc',
     channelId: 'prayer-times',
   },
   adhan_alafasy: {
     id: 'adhan_alafasy',
-    label: 'Adhan — Alafasy',
-    description: 'Call to prayer recited by Mishary Alafasy',
+    labelKey: 'soundAlafasy',
+    descriptionKey: 'soundAlafasyDesc',
     channelId: 'prayer-adhan-alafasy',
     rawResource: 'adhan_alafasy.mp3',
     previewUrl: '/audio/adhan_alafasy.mp3',
   },
   adhan_omar_hisham: {
     id: 'adhan_omar_hisham',
-    label: 'Adhan — Omar Hisham',
-    description: 'Call to prayer recited by Omar Hisham Al Arabi',
+    labelKey: 'soundOmarHisham',
+    descriptionKey: 'soundOmarHishamDesc',
     channelId: 'prayer-adhan-omar-hisham',
     rawResource: 'adhan_omar_hisham.mp3',
     previewUrl: '/audio/adhan_omar_hisham.mp3',

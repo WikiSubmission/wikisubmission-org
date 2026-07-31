@@ -1,15 +1,18 @@
 'use client'
 
 import { useTheme } from 'next-themes'
+import { useTranslations } from 'next-intl'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { PALETTES, usePalette, type PaletteKey } from '@/lib/theme-palette-context'
 import { useMounted } from '@/hooks/use-mounted'
 import { cn } from '@/lib/utils'
 
+// 'Auto' is mobile-specific wording for the system-follows mode; light/dark
+// reuse the shared reader settings labels.
 const MODES = [
-  { id: 'light', label: 'Light', icon: Sun },
-  { id: 'dark', label: 'Dark', icon: Moon },
-  { id: 'system', label: 'Auto', icon: Monitor },
+  { id: 'light', labelKey: 'settings.light', icon: Sun },
+  { id: 'dark', labelKey: 'settings.dark', icon: Moon },
+  { id: 'system', labelKey: 'mobile.theme.auto', icon: Monitor },
 ] as const
 
 const PALETTE_ORDER: PaletteKey[] = ['ink', 'violet', 'mono']
@@ -22,6 +25,7 @@ const PALETTE_ORDER: PaletteKey[] = ['ink', 'violet', 'mono']
 export function ThemeSelector() {
   const { theme, setTheme, resolvedTheme } = useTheme()
   const { palette, setPalette } = usePalette()
+  const t = useTranslations()
   const mounted = useMounted()
 
   if (!mounted) return <div className="h-28" aria-hidden="true" />
@@ -31,7 +35,7 @@ export function ThemeSelector() {
   return (
     <div className="space-y-4">
       <div className="bg-muted/50 border-border/40 flex items-center gap-0.5 rounded-lg border p-0.5">
-        {MODES.map(({ id, label, icon: Icon }) => (
+        {MODES.map(({ id, labelKey, icon: Icon }) => (
           <button
             key={id}
             type="button"
@@ -45,7 +49,7 @@ export function ThemeSelector() {
             )}
           >
             <Icon className="size-3.5" aria-hidden="true" />
-            {label}
+            {t(labelKey)}
           </button>
         ))}
       </div>

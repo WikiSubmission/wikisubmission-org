@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { BlogBrowser } from '@/components/blog/blog-browser'
 import { Spinner } from '@/components/ui/spinner'
 import { deriveCategories, fetchArticles } from '@/lib/blog-backend'
@@ -12,6 +12,7 @@ import { toSanityLanguage, type Category, type Post } from '@/lib/blog-queries'
 // route. Data is read client-side from the ws-backend public endpoints.
 export default function ArticlesScreen() {
   const locale = useLocale()
+  const t = useTranslations('mobile.more')
   const [data, setData] = useState<{ articles: Post[]; categories: Category[] } | null>(null)
   const [error, setError] = useState(false)
 
@@ -33,8 +34,8 @@ export default function ArticlesScreen() {
   if (error) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 py-16 text-center">
-        <p className="font-display text-lg">Could not load articles</p>
-        <p className="text-muted-foreground text-sm">Check your connection and try again.</p>
+        <p className="font-display text-lg">{t('articlesLoadError')}</p>
+        <p className="text-muted-foreground text-sm">{t('articlesLoadErrorBody')}</p>
       </div>
     )
   }

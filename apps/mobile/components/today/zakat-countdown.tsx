@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { ChevronRight, HandCoins } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { haptic } from '@/lib/haptics'
 import { useZakatReminder } from '@/hooks/use-zakat-reminder'
 import { cn } from '@/lib/utils'
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils'
  */
 export function ZakatCountdown() {
   const router = useRouter()
+  const t = useTranslations('mobile.zakat')
   const { prefs, loading, daysLeft } = useZakatReminder()
 
   const configured = prefs?.enabled && daysLeft !== null
@@ -34,7 +36,7 @@ export function ZakatCountdown() {
           'border-border/50 bg-background/55 flex h-10 w-full items-center justify-between gap-3 rounded-full border px-4 backdrop-blur-md transition-colors',
           loading && 'opacity-0',
         )}
-        aria-label={configured ? 'Zakat countdown' : 'Set up zakat reminder'}
+        aria-label={t(configured ? 'countdown' : 'setUpReminder')}
       >
         <span className="flex min-w-0 items-center gap-2">
           <HandCoins
@@ -43,21 +45,13 @@ export function ZakatCountdown() {
           />
           {configured ? (
             <span className={cn('truncate text-xs', dueToday ? 'text-primary font-medium' : 'text-foreground')}>
-              {dueToday ? (
-                'Zakat due today'
-              ) : (
-                <>
-                  Zakat in{' '}
-                  <span className="font-mono font-medium tabular-nums">{daysLeft}</span>
-                  {daysLeft === 1 ? ' day' : ' days'}
-                </>
-              )}
+              {dueToday ? t('dueToday') : t('inDays', { days: daysLeft })}
             </span>
           ) : (
-            <span className="text-muted-foreground truncate text-xs">Set up zakat reminder</span>
+            <span className="text-muted-foreground truncate text-xs">{t('setUpReminder')}</span>
           )}
         </span>
-        <ChevronRight className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+        <ChevronRight className="rtl-flip text-muted-foreground size-4 shrink-0" aria-hidden="true" />
       </button>
     </div>
   )

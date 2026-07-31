@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { SearchLoadingBar } from './search-loading-bar'
 
@@ -15,6 +16,7 @@ function CopyableText({
   className?: string
   ariaLabel?: string
 }) {
+  const tChrome = useTranslations('readerChrome')
   const valueToCopy = copyText ?? text
   return (
     <button
@@ -23,9 +25,9 @@ function CopyableText({
         e.stopPropagation()
         try {
           await navigator.clipboard.writeText(valueToCopy)
-          toast.success(`Copied: ${valueToCopy}`)
+          toast.success(tChrome('copiedValue', { value: valueToCopy }))
         } catch {
-          toast.error('Could not copy to clipboard')
+          toast.error(tChrome('copyFailed'))
         }
       }}
       className={`text-left cursor-copy hover:text-primary active:scale-[0.98] transition-all ${className ?? ''}`}

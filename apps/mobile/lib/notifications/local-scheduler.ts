@@ -9,6 +9,7 @@ import {
   readCachedPrayerResponse,
   writeCachedPrayerResponse,
 } from '@/lib/prayer-times-cache'
+import { translate } from '@/lib/i18n-runtime'
 import { PRAYER_EVENT_ORDER, type PrayerEventKey } from '@/lib/prayer-events'
 import { anyEventEnabled, prefsHash, readNotificationPrefs } from './prefs'
 import { PRAYER_CHANNEL_ID } from './channels'
@@ -24,7 +25,14 @@ import { computeCurrentEventInstant, computeUpcomingEventInstants } from './sche
  * who does not open the app past the scheduled window.
  */
 
-export type RescheduleReason = 'launch' | 'resume' | 'prefs-change' | 'location-change'
+export type RescheduleReason =
+  | 'launch'
+  | 'resume'
+  | 'prefs-change'
+  | 'location-change'
+  // Notification titles and bodies are baked in at schedule time, so anything
+  // already queued is still in the old language until it is rewritten.
+  | 'locale-change'
 
 /** Days of events scheduled ahead (≤ 42 alarms — well under Android's cap). */
 const WINDOW_DAYS = 7
@@ -49,13 +57,11 @@ interface ScheduleState {
   scheduledAt: number
 }
 
-const EVENT_LABELS: Record<PrayerEventKey, string> = {
-  fajr: 'Fajr',
-  sunrise: 'Sunrise',
-  dhuhr: 'Dhuhr',
-  asr: 'Asr',
-  maghrib: 'Maghrib',
-  isha: 'Isha',
+/** Prayer names, in the active UI language. PrayerEventKey values double as
+ *  prayertimes.* message keys. Resolved per call rather than cached, so a
+ *  locale switch followed by a reschedule picks up the new language. */
+function eventLabel(event: PrayerEventKey): string {
+  return translate(`prayertimes.${event}`)
 }
 
 function notificationId(at: Date, event: PrayerEventKey): number {
@@ -75,9 +81,17 @@ function channelForEvent(event: PrayerEventKey, sound: PrayerSoundId): string {
 }
 
 function notificationBody(event: PrayerEventKey, city: string | undefined): string {
-  const where = city ? ` in ${city}` : ''
-  if (event === 'sunrise') return `The sun has risen${where}. The Fajr window has ended.`
-  return `It is time for the ${EVENT_LABELS[event]} prayer${where}.`
+  // Separate keys per city/no-city rather than an interpolated optional
+  // clause: word order around the place name differs by language.
+  if (event === 'sunrise') {
+    return city
+      ? translate('mobile.notifications.sunriseDueIn', { city })
+      : translate('mobile.notifications.sunriseDue')
+  }
+  const prayer = eventLabel(event)
+  return city
+    ? translate('mobile.notifications.prayerDueIn', { prayer, city })
+    : translate('mobile.notifications.prayerDue', { prayer })
 }
 
 async function readState(): Promise<ScheduleState | null> {
@@ -240,7 +254,7 @@ async function doReschedule(reason: RescheduleReason): Promise<void> {
 
     const notifications: LocalNotificationSchema[] = toSchedule.map(({ event, at }) => ({
       id: notificationId(at, event),
-      title: EVENT_LABELS[event],
+      title: eventLabel(event),
       body: notificationBody(event, response.city),
       channelId: channelForEvent(event, prefs.sound),
       schedule: { at, allowWhileIdle: true },

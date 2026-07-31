@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Library, Plus, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import {
   useCollections,
   useCreateCollection,
@@ -29,6 +30,7 @@ function CollectionListItem({
   onSelect: () => void
   onDelete: () => void
 }) {
+  const tRow = useTranslations('meCollections')
   return (
     <div
       className={`group flex items-center gap-2.5 px-3 py-2.5 rounded-lg border transition-colors cursor-pointer ${
@@ -43,7 +45,7 @@ function CollectionListItem({
         <p className="text-sm font-medium truncate">{col.name}</p>
         {col.relation === 'subscriber' && col.owner_display_name ? (
           <p className="text-[11px] text-muted-foreground/70 truncate">
-            Shared by {col.owner_display_name}
+            {tRow('sharedBy', { name: col.owner_display_name })}
           </p>
         ) : col.description ? (
           <p className="text-[11px] text-muted-foreground/70 truncate">{col.description}</p>
@@ -67,6 +69,9 @@ function CollectionListItem({
 }
 
 export function CollectionsMasterDetail({ initialId }: { initialId?: number }) {
+  const t = useTranslations('meCollections')
+  const tActions = useTranslations('actions')
+  const tHeader = useTranslations('meHeader')
   const collections = useCollections()
   const { mutate: del } = useDeleteCollection()
   const { mutate: create, isPending: creating } = useCreateCollection()
@@ -107,10 +112,10 @@ export function CollectionsMasterDetail({ initialId }: { initialId?: number }) {
         className={`flex flex-col gap-3 lg:hidden ${selectedId !== null ? 'hidden' : ''}`}
       >
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold">Collections</h1>
+          <h1 className="text-lg font-semibold">{tHeader('collections')}</h1>
           <Button size="sm" onClick={() => setNewOpen(true)}>
-            <Plus className="w-3.5 h-3.5 mr-1.5" />
-            New
+            <Plus className="w-3.5 h-3.5 me-1.5" />
+            {tActions('new')}
           </Button>
         </div>
         {isEmpty ? (
@@ -145,10 +150,10 @@ export function CollectionsMasterDetail({ initialId }: { initialId?: number }) {
         {/* Left: list */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold">Collections</h1>
+            <h1 className="text-lg font-semibold">{tHeader('collections')}</h1>
             <Button size="sm" onClick={() => setNewOpen(true)}>
-              <Plus className="w-3.5 h-3.5 mr-1.5" />
-              New
+              <Plus className="w-3.5 h-3.5 me-1.5" />
+              {tActions('new')}
             </Button>
           </div>
           {isEmpty ? (
@@ -169,14 +174,14 @@ export function CollectionsMasterDetail({ initialId }: { initialId?: number }) {
         </div>
 
         {/* Right: detail */}
-        <div className="border-l border-border pl-6">
+        <div className="border-s border-border ps-6">
           {selectedId !== null ? (
             <CollectionDetailPane collectionId={selectedId} />
           ) : (
             <div className="flex flex-col items-center justify-center text-center gap-2 py-16">
               <Library className="w-8 h-8 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">
-                Select a collection to view its verses.
+                {t('selectToView')}
               </p>
             </div>
           )}
@@ -186,30 +191,30 @@ export function CollectionsMasterDetail({ initialId }: { initialId?: number }) {
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>New collection</DialogTitle>
+            <DialogTitle>{t('newCollection')}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
             <input
               autoFocus
               className="w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Collection name"
+              placeholder={t('collectionName')}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             />
             <input
               className="w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Description (optional)"
+              placeholder={t('descriptionOptional')}
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
             />
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" size="sm" onClick={() => setNewOpen(false)}>
-              Cancel
+              {tActions('cancel')}
             </Button>
             <Button size="sm" disabled={creating || !newName.trim()} onClick={handleCreate}>
-              Create
+              {tActions('create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -219,13 +224,14 @@ export function CollectionsMasterDetail({ initialId }: { initialId?: number }) {
 }
 
 function EmptyState({ onNew }: { onNew: () => void }) {
+  const tEmpty = useTranslations('meCollections')
   return (
     <div className="flex flex-col items-center gap-2 py-10 text-center rounded-xl border border-dashed border-border">
       <Library className="w-5 h-5 text-muted-foreground/40" />
-      <p className="text-sm text-muted-foreground">No collections yet.</p>
+      <p className="text-sm text-muted-foreground">{tEmpty('noneYet')}</p>
       <Button variant="outline" size="sm" onClick={onNew}>
-        <Plus className="w-3.5 h-3.5 mr-1.5" />
-        Create one
+        <Plus className="w-3.5 h-3.5 me-1.5" />
+        {tEmpty('createOne')}
       </Button>
     </div>
   )

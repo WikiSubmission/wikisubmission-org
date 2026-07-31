@@ -1,11 +1,14 @@
+'use client'
+
 import Link from 'next/link'
 import { ChevronRight, ScrollText, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface MoreItem {
   key: string
-  label: string
-  description: string
+  labelKey: string
+  descriptionKey: string
   icon: LucideIcon
   href?: string
 }
@@ -13,15 +16,15 @@ interface MoreItem {
 const MORE_ITEMS: readonly MoreItem[] = [
   {
     key: 'miracle',
-    label: 'Miracle',
-    description: 'The mathematical structure of the Quran',
+    labelKey: 'navbar.miracle',
+    descriptionKey: 'mobile.more.miracleDesc',
     icon: Sparkles,
     href: '/more/miracle',
   },
   {
     key: 'articles',
-    label: 'Articles',
-    description: 'Essays and writings',
+    labelKey: 'mobile.more.articlesLabel',
+    descriptionKey: 'mobile.more.articlesDesc',
     icon: ScrollText,
     href: '/more/articles',
   },
@@ -29,6 +32,8 @@ const MORE_ITEMS: readonly MoreItem[] = [
 ]
 
 export default function MorePage() {
+  const t = useTranslations()
+
   return (
     <ul className="divide-border mx-auto w-full max-w-md divide-y px-2 py-2">
       {MORE_ITEMS.map((item) => {
@@ -37,14 +42,14 @@ export default function MorePage() {
           <>
             <Icon className="text-muted-foreground size-5 shrink-0" aria-hidden="true" />
             <div className="min-w-0">
-              <p className="font-medium">{item.label}</p>
-              <p className="text-muted-foreground truncate text-xs">{item.description}</p>
+              <p className="font-medium">{t(item.labelKey)}</p>
+              <p className="text-muted-foreground truncate text-xs">{t(item.descriptionKey)}</p>
             </div>
             {item.href ? (
-              <ChevronRight className="text-muted-foreground/50 ml-auto size-4" aria-hidden="true" />
+              <ChevronRight className="rtl-flip text-muted-foreground/50 ms-auto size-4" aria-hidden="true" />
             ) : (
-              <span className="text-muted-foreground ml-auto text-[0.625rem] font-medium tracking-wide uppercase">
-                Soon
+              <span className="text-muted-foreground ms-auto text-[0.625rem] font-medium tracking-wide uppercase">
+                {t('mobile.more.soon')}
               </span>
             )}
           </>

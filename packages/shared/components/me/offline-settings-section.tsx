@@ -1,10 +1,8 @@
 'use client'
 
+import { useLocale, useTranslations } from 'next-intl'
 import { useOfflineContent } from '@/hooks/use-offline-content'
 import type { BundleDescriptor } from '@/lib/offline/types'
-
-// NOTE: copy is English-only for now; move into the meSettings i18n namespace
-// once the offline feature is verified on-device (Phase 2 follow-up).
 
 function formatBytes(n: number): string {
   if (n <= 0) return '0 MB'
@@ -13,21 +11,23 @@ function formatBytes(n: number): string {
   return `${mb.toFixed(1)} MB`
 }
 
-const languageNames = new Intl.DisplayNames(['en'], { type: 'language' })
-
-function languageName(code: string): string {
+/** Endonym-free language name in the reader's own UI language, e.g. the code
+ *  `fr` renders as "Französisch" for a German user. */
+function languageName(code: string, locale: string): string {
   try {
-    return languageNames.of(code) ?? code
+    return new Intl.DisplayNames([locale], { type: 'language' }).of(code) ?? code
   } catch {
     return code
   }
 }
 
+type Translate = ReturnType<typeof useTranslations<'meSettings.offline'>>
+
 /** Friendly label for non-grouped bundles. The library bundle (introduction,
  * proclamation, appendices) is a known kind; anything else falls back to id. */
-function orphanLabel(bundle: BundleDescriptor): string {
+function orphanLabel(bundle: BundleDescriptor, t: Translate, locale: string): string {
   if (bundle.kind === 'library') {
-    return `Introduction, Proclamation & Appendices (${languageName(bundle.lang)})`
+    return t('libraryBundle', { language: languageName(bundle.lang, locale) })
   }
   return bundle.id
 }
@@ -63,16 +63,17 @@ function groupBundles(bundles: BundleDescriptor[]): {
 }
 
 export function OfflineSettingsSection() {
+  const t = useTranslations('meSettings.offline')
+  const tCommon = useTranslations('common')
+  const tSettings = useTranslations('settings')
+  const locale = useLocale()
   const offline = useOfflineContent()
 
   if (!offline.loading && !offline.supported) {
     return (
       <section style={cardStyle}>
-        <h2 style={h2Style}>Offline reading</h2>
-        <p style={bodyStyle}>
-          Offline downloads are not available in this browser. Reading still works
-          while you are online.
-        </p>
+        <h2 style={h2Style}>{t('heading')}</h2>
+        <p style={bodyStyle}>{t('unsupported')}</p>
       </section>
     )
   }
@@ -96,35 +97,35 @@ export function OfflineSettingsSection() {
 
   return (
     <section style={cardStyle}>
-      <h2 style={h2Style}>Offline reading</h2>
-      <p style={bodyStyle}>
-        Download translations to read and search the Quran without a connection.
-        Add the word-by-word data of a language to keep its word breakdown
-        available offline too.
-      </p>
+      <h2 style={h2Style}>{t('heading')}</h2>
+      <p style={bodyStyle}>{t('body')}</p>
 
       {offline.usage && (
         <p style={mutedStyle}>
-          Using {formatBytes(offline.usage.usage)}
-          {offline.usage.quota > 0 ? ` of ${formatBytes(offline.usage.quota)} available` : ''}.
+          {offline.usage.quota > 0
+            ? t('usageWithQuota', {
+                used: formatBytes(offline.usage.usage),
+                quota: formatBytes(offline.usage.quota),
+              })
+            : t('usage', { used: formatBytes(offline.usage.usage) })}
         </p>
       )}
 
       {offline.error && <p style={{ ...bodyStyle, color: 'var(--destructive, #b91c1c)' }}>{offline.error}</p>}
 
-      {offline.loading && <p style={mutedStyle}>Loading…</p>}
+      {offline.loading && <p style={mutedStyle}>{tCommon('loading')}</p>}
 
       {!offline.loading && bundles.length === 0 && (
-        <p style={mutedStyle}>No downloadable content is available right now.</p>
+        <p style={mutedStyle}>{t('empty')}</p>
       )}
 
       {groups.map((group) => (
         <div key={group.lang} style={groupStyle}>
-          <h3 style={groupHeadingStyle}>{languageName(group.lang)}</h3>
+          <h3 style={groupHeadingStyle}>{languageName(group.lang, locale)}</h3>
           <ul style={listStyle}>
-            <BundleRow {...rowProps(group.text)} label="Quran text" />
+            <BundleRow {...rowProps(group.text)} label={t('quranText')} />
             {group.words && (
-              <BundleRow {...rowProps(group.words)} label="Word by word" nested />
+              <BundleRow {...rowProps(group.words)} label={tSettings('wordByWord')} nested />
             )}
           </ul>
         </div>
@@ -133,7 +134,11 @@ export function OfflineSettingsSection() {
       {orphans.length > 0 && (
         <ul style={{ ...listStyle, marginTop: 16 }}>
           {orphans.map((bundle) => (
-            <BundleRow key={bundle.id} {...rowProps(bundle)} label={orphanLabel(bundle)} />
+            <BundleRow
+              key={bundle.id}
+              {...rowProps(bundle)}
+              label={orphanLabel(bundle, t, locale)}
+            />
           ))}
         </ul>
       )}
@@ -170,6 +175,12 @@ function BundleRow({
   onInstall,
   onRemove,
 }: BundleRowProps) {
+  const t = useTranslations('meSettings.offline')
+  const PHASE_KEYS = {
+    download: 'phaseDownload',
+    verify: 'phaseVerify',
+    import: 'phaseImport',
+  } as const
   return (
     <li style={nested ? nestedRowStyle : rowStyle}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -180,21 +191,21 @@ function BundleRow({
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {busy && progressPhase && (
           <span style={statusStyle}>
-            {progressPhase}
+            {t(PHASE_KEYS[progressPhase])}
             {progressPhase === 'download' && progressPct != null ? ` ${progressPct}%` : '…'}
           </span>
         )}
         {!busy && installed && (
           <button type="button" onClick={onRemove} style={ghostButtonStyle}>
-            Remove
+            {t('remove')}
           </button>
         )}
         {!busy && !installed && (
           <button type="button" onClick={onInstall} style={buttonStyle}>
-            Download
+            {t('download')}
           </button>
         )}
-        {busy && <span style={statusStyle}>Working…</span>}
+        {busy && <span style={statusStyle}>{t('working')}</span>}
       </div>
     </li>
   )

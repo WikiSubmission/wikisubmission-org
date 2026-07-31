@@ -22,6 +22,19 @@ export const PRAYER_EVENT_ORDER: readonly PrayerEventKey[] = [
   'isha',
 ]
 
+/**
+ * Narrows an API-supplied event name (`upcoming_event`, `current_event`) to a
+ * known key. The API returns these capitalised and may add events this build
+ * does not know, so callers translating the name must check first and fall back
+ * to the raw string rather than emitting a missing-message key path.
+ */
+export function isPrayerEventKey(value: string | undefined): value is PrayerEventKey {
+  return (
+    value !== undefined &&
+    (PRAYER_EVENT_ORDER as readonly string[]).includes(value.toLowerCase())
+  )
+}
+
 export interface EventCycle {
   currentEvent: PrayerEventKey
   upcomingEvent: PrayerEventKey

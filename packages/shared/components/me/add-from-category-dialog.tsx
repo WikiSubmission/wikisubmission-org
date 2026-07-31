@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -28,6 +29,8 @@ export function AddFromCategoryDialog({
   open,
   onOpenChange,
 }: AddFromCategoryDialogProps) {
+  const t = useTranslations('meCollections')
+  const tActions = useTranslations('actions')
   const categories = useBookmarkCategories()
   const [selected, setSelected] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
@@ -58,7 +61,7 @@ export function AddFromCategoryDialog({
       }
     } catch {
       setLoading(false)
-      toast.error('Failed to load category entries')
+      toast.error(t('failedLoadEntries'))
       return
     }
 
@@ -67,13 +70,13 @@ export function AddFromCategoryDialog({
     setSelected(null)
 
     if (added === 0 && skipped > 0 && failed === 0) {
-      toast.info(`All ${skipped} verse${skipped !== 1 ? 's' : ''} already in collection`)
+      toast.info(t('allAlreadyIn', { count: skipped }))
     } else if (failed === 0) {
       const parts = [`${added} verse${added !== 1 ? 's' : ''} added`]
       if (skipped > 0) parts.push(`${skipped} already in collection`)
       toast.success(parts.join(', '))
     } else {
-      toast.warning(`${added} added, ${skipped} already in collection, ${failed} failed`)
+      toast.warning(t('addedSkippedFailed', { added, skipped, failed }))
     }
   }
 
@@ -86,7 +89,7 @@ export function AddFromCategoryDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Add from bookmark category</DialogTitle>
+          <DialogTitle>{t('addFromCategory')}</DialogTitle>
           <DialogDescription>
             All verses from the selected category will be added. Duplicates are skipped.
           </DialogDescription>
@@ -96,7 +99,7 @@ export function AddFromCategoryDialog({
           <p className="text-sm text-muted-foreground italic">
             No bookmark categories yet.{' '}
             <Link href="/me/bookmarks" className="text-primary hover:underline">
-              Create one first.
+              {t('createOneFirst')}
             </Link>
           </p>
         ) : (
@@ -106,7 +109,7 @@ export function AddFromCategoryDialog({
                 key={cat.id}
                 type="button"
                 onClick={() => setSelected(cat.id)}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border text-sm transition-colors text-left ${
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border text-sm transition-colors text-start ${
                   selected === cat.id
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:bg-accent/30'
@@ -127,14 +130,14 @@ export function AddFromCategoryDialog({
 
         <DialogFooter className="gap-2 pt-2">
           <Button variant="outline" size="sm" onClick={() => handleOpenChange(false)}>
-            Cancel
+            {tActions('cancel')}
           </Button>
           <Button
             size="sm"
             disabled={selected === null || loading || categories.length === 0}
             onClick={handleImport}
           >
-            {loading ? 'Importing…' : 'Import'}
+            {loading ? tActions('importing') : tActions('import')}
           </Button>
         </DialogFooter>
       </DialogContent>

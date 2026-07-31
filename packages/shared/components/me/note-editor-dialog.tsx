@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTheme } from 'next-themes'
 import { Trash2 } from 'lucide-react'
@@ -31,6 +32,8 @@ export function NoteEditorDialog({
   open: boolean
   onOpenChange: (v: boolean) => void
 }) {
+  const t = useTranslations('meNoteEditor')
+  const tActions = useTranslations('actions')
   const editor = useCreateBlockNote()
   const { resolvedTheme } = useTheme()
   const blockNoteTheme = resolvedTheme === 'dark' ? 'dark' : 'light'
@@ -121,7 +124,7 @@ export function NoteEditorDialog({
         <DialogHeader className="px-5 pt-4 pb-3 border-b shrink-0">
           <DialogTitle className="flex items-center gap-2 text-base font-semibold">
             <span className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
-              Note
+              {t('note')}
             </span>
             <span className="text-muted-foreground/50">·</span>
             <span className="font-mono text-sm">{verseKey}</span>
@@ -162,15 +165,15 @@ export function NoteEditorDialog({
         <DialogFooter className="px-5 py-3 border-t flex flex-row items-center gap-2 shrink-0">
           <div
             aria-live="polite"
-            className="mr-auto text-xs text-muted-foreground"
+            className="me-auto text-xs text-muted-foreground"
           >
             {saveState === 'saving'
-              ? 'Saving...'
+              ? tActions('saving')
               : saveState === 'error'
-                ? 'Save failed'
+                ? t('saveFailed')
                 : saveState === 'unsaved'
-                  ? 'Unsaved changes'
-                  : 'Saved'}
+                  ? t('unsavedChanges')
+                  : tActions('saved')}
           </div>
           {note && (
             <Button
@@ -180,15 +183,15 @@ export function NoteEditorDialog({
               disabled={deleting}
               onClick={handleDelete}
             >
-              <Trash2 className="w-3.5 h-3.5 mr-1" />
-              Delete
+              <Trash2 className="w-3.5 h-3.5 me-1" />
+              {tActions('delete')}
             </Button>
           )}
           <Button size="sm" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tActions('cancel')}
           </Button>
           <Button size="sm" disabled={saving} onClick={handleSave}>
-            {note ? 'Save' : 'Add note'}
+            {note ? tActions('save') : t('addNote')}
           </Button>
         </DialogFooter>
       </DialogContent>

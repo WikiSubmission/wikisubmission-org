@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useMobileAuth } from '@/components/mobile-auth-context'
 import { MobileSignInGate } from '@/components/mobile-sign-in-gate'
 
@@ -12,11 +13,12 @@ import { MobileSignInGate } from '@/components/mobile-sign-in-gate'
  */
 export default function GamesLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useMobileAuth()
+  const t = useTranslations()
 
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center px-6">
-        <p className="text-muted-foreground text-sm">Loading…</p>
+        <p className="text-muted-foreground text-sm">{t('common.loading')}</p>
       </div>
     )
   }
@@ -24,8 +26,8 @@ export default function GamesLayout({ children }: { children: React.ReactNode })
   if (!isAuthenticated) {
     return (
       <MobileSignInGate
-        title="Sign in to play"
-        description="Quran games track your scores, streak, and leaderboard rank."
+        title={t('mobile.auth.gamesGateTitle')}
+        description={t('mobile.auth.gamesGateBody')}
       />
     )
   }

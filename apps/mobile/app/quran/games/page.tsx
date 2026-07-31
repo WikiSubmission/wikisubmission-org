@@ -33,7 +33,7 @@ export default function GamesLobbyPage() {
               </span>
               <span className="truncate text-sm text-muted-foreground">{t('fillBlankSub')}</span>
             </span>
-            <ChevronRight className="rtl-flip ml-auto size-4 shrink-0 text-muted-foreground" />
+            <ChevronRight className="rtl-flip ms-auto size-4 shrink-0 text-muted-foreground" />
           </Link>
         </li>
 
@@ -52,7 +52,7 @@ export default function GamesLobbyPage() {
                 {t('leaderboardTitle')}
               </span>
             </span>
-            <ChevronRight className="rtl-flip ml-auto size-4 shrink-0 text-muted-foreground" />
+            <ChevronRight className="rtl-flip ms-auto size-4 shrink-0 text-muted-foreground" />
           </Link>
         </li>
       </ul>

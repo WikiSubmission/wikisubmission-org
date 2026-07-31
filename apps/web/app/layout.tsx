@@ -16,10 +16,9 @@ import {
   PaletteProvider,
   PALETTE_INIT_SCRIPT,
 } from '@/lib/theme-palette-context'
+import { directionForUiLocale } from '@/constants/ui-locales'
 
 export const metadata = Metadata
-
-const RTL_LOCALES = ['ar', 'fa', 'ur', 'ku']
 
 export default async function RootLayout({
   children,
@@ -29,7 +28,7 @@ export default async function RootLayout({
   const locale = await getLocale()
   const messages = await getMessages()
   const session = await auth()
-  const dir = RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'
+  const dir = directionForUiLocale(locale)
 
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>

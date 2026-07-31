@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Flame, Info, Plus, Search, Share2 } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { useCoverToCoverProgress } from '@/hooks/use-reading-progress'
 import { useStreak } from '@/hooks/use-reading-streak'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
@@ -29,7 +30,10 @@ function chapterFromKey(key: string | undefined | null): number {
   return Number.isFinite(n) ? n : 0
 }
 
-function relativeTime(iso: string | undefined): string {
+type Translate = ReturnType<typeof useTranslations<'meDashboard'>>
+
+/** Compact "x ago" stamp; falls back to a locale-formatted date past 30 days. */
+function relativeTime(iso: string | undefined, t: Translate, locale: string): string {
   if (!iso) return ''
   const now = Date.now()
   const then = new Date(iso).getTime()
@@ -37,13 +41,16 @@ function relativeTime(iso: string | undefined): string {
   const minute = 60_000
   const hour = 60 * minute
   const day = 24 * hour
-  if (diff < hour) return `${Math.max(1, Math.round(diff / minute))}m ago`
-  if (diff < day) return `${Math.round(diff / hour)}h ago`
-  if (diff < 30 * day) return `${Math.round(diff / day)}d ago`
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  if (diff < hour) return t('minutesAgo', { minutes: Math.max(1, Math.round(diff / minute)) })
+  if (diff < day) return t('hoursAgo', { hours: Math.round(diff / hour) })
+  if (diff < 30 * day) return t('daysAgo', { days: Math.round(diff / day) })
+  return new Date(iso).toLocaleDateString(locale, { month: 'short', day: 'numeric' })
 }
 
 function CoverToCoverCard({ scripture }: { scripture: 'quran' | 'bible' }) {
+  const t = useTranslations('meDashboard')
+  const tNav = useTranslations('navbar')
+  const tQuran = useTranslations('quran')
   const progress = useCoverToCoverProgress(scripture)
   const streak = useStreak(scripture)
   const chapterNum = chapterFromKey(progress?.verse_key)
@@ -57,14 +64,16 @@ function CoverToCoverCard({ scripture }: { scripture: 'quran' | 'bible' }) {
     : scripture === 'quran'
       ? '/quran/1'
       : '/bible'
-  const label = scripture === 'quran' ? 'Quran' : 'Bible'
+  const label = tNav(scripture)
+  // The mono rail keeps a stable Latin tag; the scripture name above it is translated.
+  const monoLabel = scripture === 'quran' ? 'QURAN' : 'BIBLE'
 
   return (
     <div className="c2c-card">
       <div className="c2c-head">
         <span className="c2c-title">{label}</span>
         <span className="c2c-mono">
-          {label.toUpperCase()} · {percent}%
+          {monoLabel} · {percent}%
         </span>
       </div>
       <div className="c2c-progress">
@@ -73,11 +82,11 @@ function CoverToCoverCard({ scripture }: { scripture: 'quran' | 'bible' }) {
         </div>
         <div className="c2c-progress-meta">
           <span>
-            {progress?.verse_key ? `Currently at ${progress.verse_key}` : 'Not started yet'}
+            {progress?.verse_key
+              ? tQuran('continueCurrentlyAt', { verseKey: progress.verse_key })
+              : t('notStarted')}
           </span>
-          <span>
-            {chapterNum} of {totalChapters}
-          </span>
+          <span>{t('chapterOf', { current: chapterNum, total: totalChapters })}</span>
         </div>
       </div>
       <div className="c2c-foot">
@@ -85,14 +94,14 @@ function CoverToCoverCard({ scripture }: { scripture: 'quran' | 'bible' }) {
           {streak?.current_streak ? (
             <>
               <Flame className="w-3.5 h-3.5 text-[var(--ed-accent)]" aria-hidden />
-              {streak.current_streak}-day streak
+              {t('streakDays', { days: streak.current_streak })}
             </>
           ) : (
-            'Begin a streak today'
+            t('beginStreak')
           )}
         </span>
         <Link href={continueHref} className="c2c-continue">
-          Continue reading →
+          {t('continueReading')}
         </Link>
       </div>
     </div>
@@ -100,14 +109,13 @@ function CoverToCoverCard({ scripture }: { scripture: 'quran' | 'bible' }) {
 }
 
 function CoverToCoverSection({ hideBible = false }: { hideBible?: boolean }) {
+  const t = useTranslations('meDashboard')
   return (
     <section className="section" id="cover-to-cover">
       <div className="section-head">
         <span className="section-roman">I</span>
-        <span className="section-eyebrow">Cover</span>
-        <h2 className="section-title">
-          Cover <em>to cover</em>
-        </h2>
+        <span className="section-eyebrow">{t('coverEyebrow')}</span>
+        <h2 className="section-title">{t.rich('coverTitle', { em: (c) => <em>{c}</em> })}</h2>
         <span className="section-spacer" />
       </div>
       <div className="c2c-grid">
@@ -120,14 +128,22 @@ function CoverToCoverSection({ hideBible = false }: { hideBible?: boolean }) {
 }
 
 function RhythmTeaser({ scripture, label }: { scripture: 'quran' | 'bible'; label: string }) {
+  const t = useTranslations('meDashboard')
+  const locale = useLocale()
   const { data } = useReadingStats(scripture, '30d')
   const daily = data?.daily ?? []
   const total = data?.total ?? 0
   return (
-    <Link href={`/me/stats?scripture=${scripture}`} className="c2c-card" aria-label={`${label} reading rhythm`}>
+    <Link
+      href={`/me/stats?scripture=${scripture}`}
+      className="c2c-card"
+      aria-label={t('rhythmAria', { scripture: label })}
+    >
       <div className="c2c-head">
         <span className="c2c-title">{label}</span>
-        <span className="c2c-mono">{label.toUpperCase()} · 30 DAYS</span>
+        <span className="c2c-mono">
+          {scripture === 'quran' ? 'QURAN' : 'BIBLE'} · {t('last30Days')}
+        </span>
       </div>
       <div style={{ height: 48 }}>
         {daily.length > 0 ? (
@@ -140,42 +156,43 @@ function RhythmTeaser({ scripture, label }: { scripture: 'quran' | 'bible'; labe
           </ParentSize>
         ) : (
           <div className="rs-card-empty" style={{ padding: '12px 0', border: 'none' }}>
-            No readings yet
+            {t('noReadingsYet')}
           </div>
         )}
       </div>
       <div className="c2c-foot">
-        <span>{total.toLocaleString()} verses in last 30 days</span>
-        <span className="c2c-continue">View breakdown →</span>
+        <span>{t('versesLast30', { count: total.toLocaleString(locale) })}</span>
+        <span className="c2c-continue">{t('viewBreakdown')}</span>
       </div>
     </Link>
   )
 }
 
 function RhythmSection({ hideBible = false }: { hideBible?: boolean }) {
+  const t = useTranslations('meDashboard')
+  const tNav = useTranslations('navbar')
   return (
     <section className="section" id="rhythm">
       <div className="section-head">
         <span className="section-roman">II</span>
-        <span className="section-eyebrow">Rhythm</span>
-        <h2 className="section-title">
-          Reading <em>rhythm</em>
-        </h2>
+        <span className="section-eyebrow">{t('rhythmEyebrow')}</span>
+        <h2 className="section-title">{t.rich('rhythmTitle', { em: (c) => <em>{c}</em> })}</h2>
         <span className="section-spacer" />
         <Link href="/me/stats" className="section-action-link">
-          Full breakdown →
+          {t('fullBreakdown')}
         </Link>
       </div>
       <div className="c2c-grid">
-        <RhythmTeaser scripture="quran" label="Quran" />
+        <RhythmTeaser scripture="quran" label={tNav('quran')} />
         {/* Bible is not shipped on mobile yet (no /bible route) — hidden there. */}
-        {!hideBible && <RhythmTeaser scripture="bible" label="Bible" />}
+        {!hideBible && <RhythmTeaser scripture="bible" label={tNav('bible')} />}
       </div>
     </section>
   )
 }
 
 function CategoriesSection() {
+  const t = useTranslations('meDashboard')
   const categories = useBookmarkCategories()
   const [createOpen, setCreateOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -190,16 +207,16 @@ function CategoriesSection() {
     <section className="section" id="bookmarks">
       <div className="section-head">
         <span className="section-roman">III</span>
-        <span className="section-eyebrow">Bookmarks</span>
+        <span className="section-eyebrow">{t('bookmarksEyebrow')}</span>
         <h2 className="section-title">
           <Link href="/me/bookmarks" className="hover:text-[var(--ed-accent)] transition-colors">
-            Bookmarks <em>by category</em>
+            {t.rich('bookmarksTitle', { em: (c) => <em>{c}</em> })}
           </Link>
         </h2>
         <span className="section-spacer" />
         <button type="button" className="section-action" onClick={() => setCreateOpen(true)}>
           <Plus className="w-3.5 h-3.5" aria-hidden />
-          New category
+          {t('newCategory')}
         </button>
       </div>
       {categories.length > 4 && (
@@ -209,7 +226,7 @@ function CategoriesSection() {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search categories…"
+            placeholder={t('searchCategories')}
             className="flex-1 bg-transparent outline-none py-2 font-[var(--font-source-serif)] text-[14px] text-[var(--ed-fg)] placeholder:text-[var(--ed-fg-muted)]"
           />
         </label>
@@ -229,11 +246,11 @@ function CategoriesSection() {
                 <span className="num">{String(cat.entry_count).padStart(3, '0')}</span>
               </div>
             </div>
-            <span className="cat-action">Open →</span>
+            <span className="cat-action">{t('open')}</span>
           </Link>
         ))}
         {filtered.length === 0 && (
-          <p className="text-[var(--ed-fg-muted)] text-sm py-2">No categories match.</p>
+          <p className="text-[var(--ed-fg-muted)] text-sm py-2">{t('noCategoriesMatch')}</p>
         )}
       </div>
       <CreateCategoryDialog open={createOpen} onOpenChange={setCreateOpen} />
@@ -242,6 +259,7 @@ function CategoriesSection() {
 }
 
 function NotesPreviewSection() {
+  const t = useTranslations('meDashboard')
   const notes = useAllNotes()
   if (notes.length === 0) return null
 
@@ -251,13 +269,11 @@ function NotesPreviewSection() {
     <section className="section" id="notes">
       <div className="section-head">
         <span className="section-roman">IV</span>
-        <span className="section-eyebrow">Notes · {notes.length} total</span>
-        <h2 className="section-title">
-          Notes <em>&amp; marginalia</em>
-        </h2>
+        <span className="section-eyebrow">{t('notesEyebrow', { count: notes.length })}</span>
+        <h2 className="section-title">{t.rich('notesTitle', { em: (c) => <em>{c}</em> })}</h2>
         <span className="section-spacer" />
         <Link href="/me/notes" className="section-action-link">
-          Open all {notes.length} →
+          {t('openAllNotes', { count: notes.length })}
         </Link>
       </div>
       <div className="notes-preview">
@@ -270,6 +286,8 @@ function NotesPreviewSection() {
 }
 
 function NotePreviewCard({ note }: { note: NoteData }) {
+  const t = useTranslations('meDashboard')
+  const locale = useLocale()
   const tags = note.tags ?? []
   const href =
     note.scripture === 'quran'
@@ -281,7 +299,7 @@ function NotePreviewCard({ note }: { note: NoteData }) {
     <Link href={href} className="note-card">
       <div className="note-card-head">
         <span>{note.verse_key}</span>
-        <span className="date">{relativeTime(note.updated_at)}</span>
+        <span className="date">{relativeTime(note.updated_at, t, locale)}</span>
       </div>
       {firstLine ? <p className="note-card-body">{firstLine}</p> : null}
       {tags.length > 0 ? (
@@ -298,6 +316,7 @@ function NotePreviewCard({ note }: { note: NoteData }) {
 }
 
 function CollectionsSection() {
+  const t = useTranslations('meDashboard')
   const collections = useCollections()
   if (collections.length === 0) return null
 
@@ -305,15 +324,15 @@ function CollectionsSection() {
     <section className="section" id="collections">
       <div className="section-head">
         <span className="section-roman">V</span>
-        <span className="section-eyebrow">Collections</span>
+        <span className="section-eyebrow">{t('collectionsEyebrow')}</span>
         <h2 className="section-title">
           <Link href="/me/collections" className="hover:text-[var(--ed-accent)] transition-colors">
-            Curated <em>collections</em>
+            {t.rich('collectionsTitle', { em: (c) => <em>{c}</em> })}
           </Link>
         </h2>
         <span className="section-spacer" />
         <Link href="/me/collections" className="section-action-link">
-          View all {collections.length} →
+          {t('viewAllCollections', { count: collections.length })}
         </Link>
       </div>
       <div className="coll-list">
@@ -328,10 +347,10 @@ function CollectionsSection() {
             {col.is_public ? (
               <span className="coll-public inline-flex items-center gap-1">
                 <Share2 className="w-3 h-3" aria-hidden />
-                Public
+                {t('public')}
               </span>
             ) : (
-              <span className="coll-meta">Private</span>
+              <span className="coll-meta">{t('private')}</span>
             )}
           </Link>
         ))}
@@ -359,12 +378,13 @@ function roman(n: number): string {
 }
 
 function StreakInfoIcon() {
+  const t = useTranslations('meDashboard')
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <button
           type="button"
-          aria-label="How streaks are updated"
+          aria-label={t('streakInfoAria')}
           className="stat-info"
           onClick={(e) => e.preventDefault()}
         >
@@ -372,8 +392,7 @@ function StreakInfoIcon() {
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-[240px] text-[11px] leading-snug">
-        Streaks update when you advance your cover-to-cover position through the
-        reader.
+        {t('streakInfoBody')}
       </TooltipContent>
     </Tooltip>
   )
@@ -392,44 +411,47 @@ function StatsGrid({
   totalBookmarks: number
   hideBible?: boolean
 }) {
+  const t = useTranslations('meDashboard')
+  const tHeader = useTranslations('meHeader')
+  const tCommon = useTranslations('common')
   const cells = (
     <>
       <div>
         <Flame className="stat-flame" aria-hidden />
         <p className="stat-eyebrow">
-          Quran streak
+          {t('quranStreak')}
           <StreakInfoIcon />
         </p>
         <div className="stat-num">
           {quranStreak}
-          <span className="unit">days</span>
+          <span className="unit">{t('days')}</span>
         </div>
-        <p className="stat-sub">Final Testament</p>
+        <p className="stat-sub">{tCommon('finalTestament')}</p>
       </div>
       {/* Bible is not shipped on mobile yet (no /bible route) — hidden there. */}
       {!hideBible && (
         <div>
           <Flame className="stat-flame" aria-hidden />
           <p className="stat-eyebrow">
-            Bible streak
+            {t('bibleStreak')}
             <StreakInfoIcon />
           </p>
           <div className="stat-num">
             {bibleStreak}
-            <span className="unit">days</span>
+            <span className="unit">{t('days')}</span>
           </div>
-          <p className="stat-sub">Old &amp; New Testament</p>
+          <p className="stat-sub">{t('oldNewTestament')}</p>
         </div>
       )}
       <Link href="/me/notes">
-        <p className="stat-eyebrow">Notes</p>
+        <p className="stat-eyebrow">{tHeader('notes')}</p>
         <div className="stat-num">{noteCount}</div>
-        <p className="stat-sub">Across both scriptures</p>
+        <p className="stat-sub">{t('acrossBothScriptures')}</p>
       </Link>
       <Link href="/me#bookmarks">
-        <p className="stat-eyebrow">Bookmarks</p>
+        <p className="stat-eyebrow">{tHeader('bookmarks')}</p>
         <div className="stat-num">{totalBookmarks}</div>
-        <p className="stat-sub">Saved verses</p>
+        <p className="stat-sub">{t('savedVerses')}</p>
       </Link>
     </>
   )
@@ -442,11 +464,12 @@ function StatsGrid({
 }
 
 function ProfileMast({ name, email }: { name?: string | null; email?: string | null }) {
+  const t = useTranslations('meDashboard')
   return (
     <>
       <div className="profile-mast">
         <div>
-          <h1>{name ? italicizeLast(name) : <em>Reader</em>}</h1>
+          <h1>{name ? italicizeLast(name) : <em>{t('readerFallback')}</em>}</h1>
           {email ? (
             <div className="profile-mast-meta">
               <span>{email}</span>
@@ -455,7 +478,7 @@ function ProfileMast({ name, email }: { name?: string | null; email?: string | n
         </div>
       </div>
       <div className="profile-mast-mobile">
-        <h1>{name ? italicizeLast(name) : <em>Reader</em>}</h1>
+        <h1>{name ? italicizeLast(name) : <em>{t('readerFallback')}</em>}</h1>
         {email ? (
           <div className="profile-mast-meta">
             <span>{email}</span>
@@ -467,26 +490,24 @@ function ProfileMast({ name, email }: { name?: string | null; email?: string | n
 }
 
 function NewUserStarter() {
+  const t = useTranslations('meDashboard')
+  const tNotes = useTranslations('meNotes')
+  const em = { em: (c: React.ReactNode) => <em>{c}</em> }
   return (
     <>
       <section className="section">
         <div className="section-head">
           <span className="section-roman">I</span>
-          <span className="section-eyebrow">Welcome</span>
-          <h2 className="section-title">
-            Begin <em>to read</em>
-          </h2>
+          <span className="section-eyebrow">{t('welcomeEyebrow')}</span>
+          <h2 className="section-title">{t.rich('beginTitle', em)}</h2>
         </div>
         <div className="empty">
           <span className="empty-glyph">§</span>
-          <h3 className="empty-title">Welcome to the commentary</h3>
-          <p className="empty-verse">
-            &ldquo;Read what you can of the Quran. He knew that some of you would be ill,
-            others traveling in the land seeking God&apos;s bounty…&rdquo;
-          </p>
-          <span className="empty-cite">— 73:20</span>
+          <h3 className="empty-title">{t('welcomeTitle')}</h3>
+          <p className="empty-verse">{t('welcomeVerse')}</p>
+          <span className="empty-cite">{t('welcomeCite')}</span>
           <Link href="/quran/1" className="empty-cta">
-            Open chapter one →
+            {tNotes('emptyCta')}
           </Link>
         </div>
       </section>
@@ -494,32 +515,24 @@ function NewUserStarter() {
       <section className="section">
         <div className="section-head">
           <span className="section-roman">II</span>
-          <span className="section-eyebrow">Three first steps</span>
-          <h2 className="section-title">
-            Three <em>first steps</em>
-          </h2>
+          <span className="section-eyebrow">{t('threeStepsEyebrow')}</span>
+          <h2 className="section-title">{t.rich('threeStepsTitle', em)}</h2>
         </div>
         <div className="c2c-grid">
           <div className="c2c-card">
             <span className="c2c-mono">I</span>
-            <h3 className="c2c-title">Open a chapter</h3>
-            <p className="text-[var(--ed-fg-muted)] text-[14px]">
-              Pick any of the 114 suras and start reading. Your place is saved automatically.
-            </p>
+            <h3 className="c2c-title">{t('step1Title')}</h3>
+            <p className="text-[var(--ed-fg-muted)] text-[14px]">{t('step1Body')}</p>
           </div>
           <div className="c2c-card">
             <span className="c2c-mono">II</span>
-            <h3 className="c2c-title">Bookmark a verse</h3>
-            <p className="text-[var(--ed-fg-muted)] text-[14px]">
-              Tap the bookmark icon on any verse to add it to a category.
-            </p>
+            <h3 className="c2c-title">{t('step2Title')}</h3>
+            <p className="text-[var(--ed-fg-muted)] text-[14px]">{t('step2Body')}</p>
           </div>
           <div className="c2c-card">
             <span className="c2c-mono">III</span>
-            <h3 className="c2c-title">Write a note</h3>
-            <p className="text-[var(--ed-fg-muted)] text-[14px]">
-              Add your own thoughts. Notes appear in the margin of the verse, and in your profile.
-            </p>
+            <h3 className="c2c-title">{t('step3Title')}</h3>
+            <p className="text-[var(--ed-fg-muted)] text-[14px]">{t('step3Body')}</p>
           </div>
         </div>
       </section>
@@ -533,6 +546,9 @@ interface MeDashboardProps {
   // Sign-out is platform-specific: web wraps next-auth signOut, mobile uses the
   // native MobileAuthProvider. The dashboard stays auth-library agnostic.
   onSignOut: () => void
+  /** Provider name shown under the sign-out button. Provider names (Google,
+   *  Apple, Email) are proper nouns and passed through untranslated; omitting
+   *  this falls back to the translated "Magic link". */
   providerLabel?: string
   // Hide all Bible-specific content. The mobile app has no /bible route yet, so
   // it opts in; web leaves this false and shows Bible as before.
@@ -543,9 +559,10 @@ export default function MeDashboard({
   name,
   email,
   onSignOut,
-  providerLabel = 'Magic link',
+  providerLabel,
   hideBible = false,
 }: MeDashboardProps) {
+  const t = useTranslations('meDashboard')
   const quranStreak = useStreak('quran')
   const bibleStreak = useStreak('bible')
   const categories = useBookmarkCategories()
@@ -585,9 +602,11 @@ export default function MeDashboard({
 
       <div className="signout">
         <button type="button" onClick={onSignOut}>
-          Sign out
+          {t('signOut')}
         </button>
-        <span className="signout-meta">Signed in via {providerLabel}</span>
+        <span className="signout-meta">
+          {t('signedInVia', { provider: providerLabel ?? t('providerMagicLink') })}
+        </span>
       </div>
     </>
   )

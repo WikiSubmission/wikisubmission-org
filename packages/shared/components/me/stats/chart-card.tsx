@@ -1,6 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { useTranslations } from 'next-intl'
 import { ParentSize } from '@visx/responsive'
 
 interface ChartCardProps {
@@ -11,6 +12,7 @@ interface ChartCardProps {
   minHeight?: number
   children: (size: { width: number; height: number }) => ReactNode
   isEmpty?: boolean
+  /** Overrides the translated default empty-state line. */
   emptyLabel?: string
 }
 
@@ -22,8 +24,9 @@ export function ChartCard({
   minHeight = 220,
   children,
   isEmpty,
-  emptyLabel = 'No readings logged in this range.',
+  emptyLabel,
 }: ChartCardProps) {
+  const t = useTranslations('meStats')
   return (
     <section
       className={full ? 'rs-card rs-card-full' : 'rs-card'}
@@ -35,7 +38,7 @@ export function ChartCard({
         {subtitle ? <span className="rs-card-sub">{subtitle}</span> : null}
       </header>
       {isEmpty ? (
-        <div className="rs-card-empty">{emptyLabel}</div>
+        <div className="rs-card-empty">{emptyLabel ?? t('noReadingsInRange')}</div>
       ) : (
         <div style={{ width: '100%', minHeight }}>
           <ParentSize>

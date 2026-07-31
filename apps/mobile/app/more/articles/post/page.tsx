@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { BlogPostArticle } from '@/components/blog/blog-post-article'
 import { Spinner } from '@/components/ui/spinner'
 import { fetchPostBySlug, fetchRelatedPosts } from '@/lib/blog-client'
@@ -16,6 +16,7 @@ function ArticleDetailInner() {
   const sp = useSearchParams()
   const slug = sp.get('slug')
   const locale = useLocale()
+  const t = useTranslations('mobile.more')
 
   const [post, setPost] = useState<BlogPost | null>(null)
   const [related, setRelated] = useState<RelatedBlogPost[]>([])
@@ -68,8 +69,8 @@ function ArticleDetailInner() {
   if (state === 'missing' || !post) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 py-16 text-center">
-        <p className="font-display text-lg">Article not found</p>
-        <p className="text-muted-foreground text-sm">It may have been moved or unpublished.</p>
+        <p className="font-display text-lg">{t('articleNotFound')}</p>
+        <p className="text-muted-foreground text-sm">{t('articleNotFoundBody')}</p>
       </div>
     )
   }

@@ -3,16 +3,19 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { BookMarked, ListOrdered, Megaphone, Search } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { ContinueCoverToCover } from '@/components/quran-reader/continue-cover-to-cover'
 import { CHAPTER_TRANSLITERATIONS, VERSE_COUNTS } from '@/constants/quran-chapters'
 import { setChapterFlightState } from '@/lib/chapter-flight'
 import { Flip } from '@/lib/gsap'
 import { CHAPTER_TITLES_EN } from '@/lib/quran-titles-en'
+import { useChapterTitles } from '@/hooks/use-chapter-titles'
 import { haptic } from '@/lib/haptics'
 import { cn } from '@/lib/utils'
 
 interface ChapterRow {
   number: number
+  /** Bundled English title — the search haystack, always present. */
   english: string
   transliteration: string
   verses: number
@@ -30,30 +33,36 @@ const CHAPTERS: ChapterRow[] = CHAPTER_TRANSLITERATIONS.map((transliteration, i)
 const LIBRARY_LINKS = [
   {
     href: '/introduction',
-    label: 'Introduction',
-    description: 'Introduction to Quran: The Final Testament',
+    labelKey: 'nav.introduction',
+    descriptionKey: 'quran.introductionDesc',
     icon: BookMarked,
   },
   {
     href: '/proclamation',
-    label: 'Proclamation',
-    description: 'One unified religion for all the people',
+    labelKey: 'nav.proclamation',
+    descriptionKey: 'quran.proclamationDesc',
     icon: Megaphone,
   },
   {
     href: '/appendices',
-    label: 'Appendices',
-    description: 'All 38 appendices of the Final Testament',
+    labelKey: 'sidebar.appendices',
+    descriptionKey: 'mobile.reader.appendicesDesc',
     icon: ListOrdered,
   },
 ] as const
 
-function matches(chapter: ChapterRow, query: string): boolean {
+/**
+ * Matches on the number, the localized title, the bundled English title and the
+ * transliteration. English and transliteration stay in the haystack in every
+ * locale so a shared link or a half-remembered "Al-Fatihah" still finds the row.
+ */
+function matches(chapter: ChapterRow, localizedTitle: string, query: string): boolean {
   if (!query) return true
   const q = query.toLowerCase()
   return (
     String(chapter.number) === q ||
     String(chapter.number).startsWith(q) ||
+    localizedTitle.toLowerCase().includes(q) ||
     chapter.english.toLowerCase().includes(q) ||
     chapter.transliteration.toLowerCase().includes(q)
   )
@@ -64,25 +73,27 @@ function matches(chapter: ChapterRow, query: string): boolean {
  * constants so it works offline; tapping a row opens the shared reader.
  */
 export function ChapterIndex() {
+  const t = useTranslations()
+  const titles = useChapterTitles()
   const [query, setQuery] = useState('')
 
   const filtered = useMemo(
-    () => CHAPTERS.filter((c) => matches(c, query.trim())),
-    [query]
+    () => CHAPTERS.filter((c) => matches(c, titles[c.number] ?? '', query.trim())),
+    [query, titles]
   )
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pt-3 pb-6">
       <div className="relative mb-4">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
           type="text"
           inputMode="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search chapters or verses"
-          aria-label="Search chapters or verses"
-          className="h-11 w-full rounded-xl border border-border/50 bg-muted/40 pl-10 pr-3 text-base outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/60"
+          placeholder={t('mobile.reader.searchPlaceholder')}
+          aria-label={t('mobile.reader.searchPlaceholder')}
+          className="h-11 w-full rounded-xl border border-border/50 bg-muted/40 ps-10 pe-3 text-base outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/60"
         />
       </div>
 
@@ -98,10 +109,10 @@ export function ChapterIndex() {
           </span>
           <span className="flex min-w-0 flex-col">
             <span className="truncate text-base font-semibold leading-tight text-primary">
-              Search all verses
+              {t('mobile.reader.searchAllVerses')}
             </span>
             <span className="truncate text-sm text-muted-foreground">
-              Find “{query.trim()}” across the Quran
+              {t('mobile.reader.searchAcross', { query: query.trim() })}
             </span>
           </span>
         </Link>
@@ -110,7 +121,7 @@ export function ChapterIndex() {
       {!query.trim() && (
         <>
           <ContinueCoverToCover
-            getChapterTitle={(n) => CHAPTER_TITLES_EN[n]}
+            getChapterTitle={(n) => titles[n]}
             className="mb-4"
             linkClassName="transition-colors active:bg-muted/60"
             onNavigate={() => haptic('light')}
@@ -135,10 +146,10 @@ export function ChapterIndex() {
                     </span>
                     <span className="flex min-w-0 flex-col">
                       <span className="truncate font-serif text-base font-semibold leading-tight">
-                        {link.label}
+                        {t(link.labelKey)}
                       </span>
                       <span className="truncate text-sm text-muted-foreground">
-                        {link.description}
+                        {t(link.descriptionKey)}
                       </span>
                     </span>
                   </Link>
@@ -178,7 +189,7 @@ export function ChapterIndex() {
                   data-flip-id="chapter-title"
                   className="truncate font-serif text-base font-semibold leading-tight"
                 >
-                  {chapter.english}
+                  {titles[chapter.number] ?? chapter.english}
                 </span>
                 <span className="truncate text-sm text-muted-foreground">
                   {chapter.transliteration} · {chapter.verses} verses

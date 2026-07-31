@@ -5,6 +5,7 @@ import {
   upcomingDueDates,
   type ZakatReminderPrefs,
 } from '@/lib/zakat-reminder'
+import { translate } from '@/lib/i18n-runtime'
 import { ANNOUNCEMENTS_CHANNEL_ID } from './channels'
 
 /**
@@ -40,8 +41,8 @@ export async function scheduleZakatReminder(prefs: ZakatReminderPrefs): Promise<
   await LocalNotifications.schedule({
     notifications: dues.map((at, index) => ({
       id: ID_BASE + index,
-      title: 'Zakat reminder',
-      body: 'Your zakat is due today. God loves the charitable. (2:276)',
+      title: translate('mobile.notifications.zakatTitle'),
+      body: translate('mobile.notifications.zakatBody'),
       channelId: ANNOUNCEMENTS_CHANNEL_ID,
       schedule: { at, allowWhileIdle: true },
       extra: { type: 'zakat', route: '/zakat' },

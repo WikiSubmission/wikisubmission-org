@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { activeTab, TABS } from '@/constants/navigation'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { gsap } from '@/lib/gsap'
@@ -17,6 +18,7 @@ import { cn } from '@/lib/utils'
  */
 export function TabBar() {
   const pathname = usePathname()
+  const t = useTranslations()
   const current = activeTab(pathname)
   const reducedMotion = usePrefersReducedMotion()
 
@@ -55,12 +57,17 @@ export function TabBar() {
 
   return (
     <nav
-      aria-label="Primary"
+      aria-label={t('mobile.nav.primary')}
       className="glass-nav bg-background/80 fixed inset-x-0 bottom-0 z-40 border-t"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="relative mx-auto max-w-md">
-        {/* Active-tab pill; positioned by the effect above. */}
+        {/* Active-tab pill; positioned by the effect above.
+            `left-0` is deliberately physical, not `start-0`: the effect drives
+            this with GSAP `x` computed from `offsetLeft`, which stays measured
+            from the physical left edge under dir="rtl". Anchoring to the
+            inline-start edge instead would flip the origin while offsetLeft did
+            not, landing the pill on the mirrored tab. */}
         <span
           ref={indicatorRef}
           aria-hidden="true"
@@ -83,7 +90,7 @@ export function TabBar() {
                   )}
                 >
                   <Icon className="size-5" aria-hidden="true" />
-                  {tab.label}
+                  {t(tab.labelKey)}
                 </Link>
               </li>
             )

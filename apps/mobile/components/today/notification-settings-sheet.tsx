@@ -7,6 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { useTranslations } from 'next-intl'
 import { NotificationPreferencesList } from '@/components/notification-preferences-list'
 
 interface NotificationSettingsSheetProps {
@@ -16,6 +17,8 @@ interface NotificationSettingsSheetProps {
 
 /** Bottom sheet opened from the bell on the prayer card. */
 export function NotificationSettingsSheet({ open, onOpenChange }: NotificationSettingsSheetProps) {
+  const t = useTranslations('mobile.notifications')
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -23,10 +26,8 @@ export function NotificationSettingsSheet({ open, onOpenChange }: NotificationSe
         className="max-h-[85dvh] overflow-y-auto rounded-t-2xl pb-[max(env(safe-area-inset-bottom),1rem)]"
       >
         <SheetHeader className="pb-0 text-left">
-          <SheetTitle>Notifications</SheetTitle>
-          <SheetDescription>
-            Prayer reminders are scheduled on this device for your location.
-          </SheetDescription>
+          <SheetTitle>{t('heading')}</SheetTitle>
+          <SheetDescription>{t('sheetBody')}</SheetDescription>
         </SheetHeader>
         <div className="px-4 pb-2">
           <NotificationPreferencesList />
