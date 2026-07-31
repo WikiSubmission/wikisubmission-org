@@ -1,6 +1,16 @@
 'use client'
 
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from 'react'
+import { createPortal } from 'react-dom'
 
 type ThemedSelectOption = {
   type?: 'option'
@@ -64,6 +74,36 @@ function firstEnabledIndex(options: FlatOption[]): number {
   return options.findIndex((opt) => !opt.disabled)
 }
 
+interface MenuPosition {
+  top: number
+  left: number
+  minWidth: number
+  maxHeight: number
+  dropUp: boolean
+}
+
+const MENU_GAP = 6
+const VIEWPORT_MARGIN = 8
+
+/**
+ * The listbox renders in a portal on <body>, so it is never clipped by an
+ * ancestor with `overflow: hidden`. That means its coordinates have to be
+ * measured off the trigger each time it opens (and on scroll/resize).
+ */
+function measureMenu(trigger: HTMLButtonElement): MenuPosition {
+  const rect = trigger.getBoundingClientRect()
+  const spaceBelow = window.innerHeight - rect.bottom - MENU_GAP - VIEWPORT_MARGIN
+  const spaceAbove = rect.top - MENU_GAP - VIEWPORT_MARGIN
+  const dropUp = spaceBelow < 160 && spaceAbove > spaceBelow
+  return {
+    top: dropUp ? rect.top - MENU_GAP : rect.bottom + MENU_GAP,
+    left: rect.left,
+    minWidth: rect.width,
+    maxHeight: Math.max(120, dropUp ? spaceAbove : spaceBelow),
+    dropUp,
+  }
+}
+
 export function ThemedSelect({
   id,
   name,
@@ -79,7 +119,10 @@ export function ThemedSelect({
   const selectId = id ?? `themed-select-${generatedId}`
   const listboxId = `${selectId}-listbox`
   const rootRef = useRef<HTMLDivElement | null>(null)
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const listboxRef = useRef<HTMLUListElement | null>(null)
   const [open, setOpen] = useState(false)
+  const [position, setPosition] = useState<MenuPosition | null>(null)
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [searchBuffer, setSearchBuffer] = useState('')
 
@@ -99,25 +142,53 @@ export function ThemedSelect({
     return () => window.clearTimeout(timer)
   }, [searchBuffer])
 
+  const closeMenu = useCallback(() => {
+    setOpen(false)
+    setPosition(null)
+    setActiveIndex(null)
+    setSearchBuffer('')
+  }, [])
+
+  const openMenu = useCallback(() => {
+    const trigger = buttonRef.current
+    if (!trigger) return
+    setPosition(measureMenu(trigger))
+    setOpen(true)
+    setSearchBuffer('')
+  }, [])
+
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false)
-        setActiveIndex(null)
-        setSearchBuffer('')
-      }
+      const target = event.target as Node
+      if (rootRef.current?.contains(target)) return
+      if (listboxRef.current?.contains(target)) return
+      closeMenu()
     }
     window.addEventListener('pointerdown', handlePointerDown)
     return () => window.removeEventListener('pointerdown', handlePointerDown)
-  }, [])
+  }, [closeMenu])
+
+  // Keep the portalled menu glued to the trigger while the page moves.
+  useEffect(() => {
+    if (!open) return
+    function reposition() {
+      const trigger = buttonRef.current
+      if (!trigger) return
+      setPosition(measureMenu(trigger))
+    }
+    window.addEventListener('scroll', reposition, true)
+    window.addEventListener('resize', reposition)
+    return () => {
+      window.removeEventListener('scroll', reposition, true)
+      window.removeEventListener('resize', reposition)
+    }
+  }, [open])
 
   function commit(index: number) {
     const next = flatOptions[index]
     if (!next || next.disabled) return
     if (next.value !== value) onChange(next.value)
-    setOpen(false)
-    setActiveIndex(null)
-    setSearchBuffer('')
+    closeMenu()
   }
 
   function findNextEnabled(start: number, step: number): number {
@@ -175,7 +246,7 @@ export function ThemedSelect({
     if (event.key === 'ArrowDown') {
       event.preventDefault()
       if (!open) {
-        setOpen(true)
+        openMenu()
         setActiveIndex(selectedIndex)
       }
       move(1)
@@ -184,7 +255,7 @@ export function ThemedSelect({
     if (event.key === 'ArrowUp') {
       event.preventDefault()
       if (!open) {
-        setOpen(true)
+        openMenu()
         setActiveIndex(selectedIndex)
       }
       move(-1)
@@ -192,13 +263,13 @@ export function ThemedSelect({
     }
     if (event.key === 'Home') {
       event.preventDefault()
-      if (!open) setOpen(true)
+      if (!open) openMenu()
       jumpToEdge('start')
       return
     }
     if (event.key === 'End') {
       event.preventDefault()
-      if (!open) setOpen(true)
+      if (!open) openMenu()
       jumpToEdge('end')
       return
     }
@@ -206,16 +277,14 @@ export function ThemedSelect({
       event.preventDefault()
       if (open) commit(currentIndex)
       else {
-        setOpen(true)
+        openMenu()
         setActiveIndex(selectedIndex)
       }
       return
     }
     if (event.key === 'Escape' && open) {
       event.preventDefault()
-      setOpen(false)
-      setActiveIndex(null)
-      setSearchBuffer('')
+      closeMenu()
       return
     }
     if (event.key.length === 1 && /\S/.test(event.key)) {
@@ -224,6 +293,16 @@ export function ThemedSelect({
   }
 
   const selected = selectedIndex >= 0 ? flatOptions[selectedIndex] : null
+
+  const menuStyle: CSSProperties | undefined = position
+    ? {
+        top: position.top,
+        left: position.left,
+        minWidth: position.minWidth,
+        maxHeight: position.maxHeight,
+        transform: position.dropUp ? 'translateY(-100%)' : undefined,
+      }
+    : undefined
 
   return (
     <div ref={rootRef} className="themed-select">
@@ -236,80 +315,98 @@ export function ThemedSelect({
         aria-expanded={open}
         aria-controls={listboxId}
         className="themed-select-trigger"
-        ref={triggerRef}
+        ref={(el) => {
+          buttonRef.current = el
+          triggerRef?.(el)
+        }}
         onClick={() => {
-          setOpen((v) => {
-            const next = !v
-            setActiveIndex(next ? selectedIndex : null)
-            setSearchBuffer('')
-            return next
-          })
+          if (open) {
+            closeMenu()
+            return
+          }
+          openMenu()
+          setActiveIndex(selectedIndex)
         }}
         onKeyDown={onTriggerKeyDown}
       >
         <span>{selected?.label ?? placeholder ?? ''}</span>
         <span aria-hidden>▾</span>
       </button>
-      {open ? (
-        <ul id={listboxId} role="listbox" className="themed-select-listbox">
-          {options.map((item, groupIndex) => {
-            if (item.type === 'group') {
-              return (
-                <li key={`group-${item.label}-${groupIndex}`} className="themed-select-group-wrap">
-                  <div className="themed-select-group-label">{item.label}</div>
-                  <ul className="themed-select-group-list" role="presentation">
-                    {item.options.map((opt) => {
-                      const index = flatOptions.findIndex(
-                        (candidate) => candidate.value === opt.value && candidate.groupLabel === item.label,
-                      )
-                      const isSelected = opt.value === value
-                      const isActive = index === currentIndex
-                      const isDisabled = item.disabled || opt.disabled
-                      return (
-                        <li key={`${item.label}-${opt.value}`}>
-                          <button
-                            type="button"
-                            role="option"
-                            aria-selected={isSelected}
-                            aria-disabled={isDisabled}
-                            disabled={isDisabled}
-                            className={`themed-select-option${isSelected ? ' is-selected' : ''}${isActive ? ' is-active' : ''}`}
-                            onMouseEnter={() => setActiveIndex(index)}
-                            onClick={() => commit(index)}
-                          >
-                            {opt.label}
-                          </button>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </li>
-              )
-            }
+      {open && position
+        ? createPortal(
+            <ul
+              ref={listboxRef}
+              id={listboxId}
+              role="listbox"
+              className="themed-select-listbox"
+              style={menuStyle}
+            >
+              {options.map((item, groupIndex) => {
+                if (item.type === 'group') {
+                  return (
+                    <li
+                      key={`group-${item.label}-${groupIndex}`}
+                      className="themed-select-group-wrap"
+                    >
+                      <div className="themed-select-group-label">{item.label}</div>
+                      <ul className="themed-select-group-list" role="presentation">
+                        {item.options.map((opt) => {
+                          const index = flatOptions.findIndex(
+                            (candidate) =>
+                              candidate.value === opt.value && candidate.groupLabel === item.label,
+                          )
+                          const isSelected = opt.value === value
+                          const isActive = index === currentIndex
+                          const isDisabled = item.disabled || opt.disabled
+                          return (
+                            <li key={`${item.label}-${opt.value}`}>
+                              <button
+                                type="button"
+                                role="option"
+                                aria-selected={isSelected}
+                                aria-disabled={isDisabled}
+                                disabled={isDisabled}
+                                className={`themed-select-option${isSelected ? ' is-selected' : ''}${isActive ? ' is-active' : ''}`}
+                                onMouseEnter={() => setActiveIndex(index)}
+                                onClick={() => commit(index)}
+                              >
+                                {opt.label}
+                              </button>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </li>
+                  )
+                }
 
-            const index = flatOptions.findIndex((opt) => opt.value === item.value && !opt.groupLabel)
-            const isSelected = item.value === value
-            const isActive = index === currentIndex
-            const isDisabled = item.disabled
-            return (
-              <li key={item.value}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={isSelected}
-                  aria-disabled={isDisabled}
-                  disabled={isDisabled}
-                  className={`themed-select-option${isSelected ? ' is-selected' : ''}${isActive ? ' is-active' : ''}`}
-                  onMouseEnter={() => setActiveIndex(index)}
-                  onClick={() => commit(index)}
-                >
-                  {item.label}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      ) : null}
+                const index = flatOptions.findIndex(
+                  (opt) => opt.value === item.value && !opt.groupLabel,
+                )
+                const isSelected = item.value === value
+                const isActive = index === currentIndex
+                const isDisabled = item.disabled
+                return (
+                  <li key={item.value}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      aria-disabled={isDisabled}
+                      disabled={isDisabled}
+                      className={`themed-select-option${isSelected ? ' is-selected' : ''}${isActive ? ' is-active' : ''}`}
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onClick={() => commit(index)}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }
