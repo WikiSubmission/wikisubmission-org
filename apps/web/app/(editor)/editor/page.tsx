@@ -4,7 +4,11 @@ import { auth } from '@/auth'
 import { getEditorialSession } from '@/lib/editorial-client'
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { canReadModule, canWriteModule } from '@/lib/editorial-access'
+import {
+  canReadModule,
+  canWriteModule,
+  hasEditorWorkspaceAccess,
+} from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +30,9 @@ export default async function EditorLandingPage() {
   const session = await auth()
   if (!session?.accessToken) redirect('/auth/sign-in?next=/editor')
   const editorial = await getEditorialSession(session.accessToken)
-  if (!editorial) redirect('/')
+  // Mirrors the layout gate: a games-only editor holds a snapshot but has no
+  // workspace here, so they would see an empty grid.
+  if (!editorial || !hasEditorWorkspaceAccess(editorial)) redirect('/')
 
   const accessible = MODULE_ORDER.filter((key) => canReadModule(editorial, key))
 

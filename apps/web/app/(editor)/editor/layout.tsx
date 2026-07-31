@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { auth, signOut } from '@/auth'
 import { getEditorialSession } from '@/lib/editorial-client'
+import { hasAnyGameAccess, hasEditorWorkspaceAccess } from '@/lib/editorial-access'
 import { AppShell, type EditorViewer } from '@/components/editor/shell'
 
 // Session-dependent: never statically render the editor.
@@ -25,10 +26,19 @@ export default async function EditorLayout({ children }: { children: ReactNode }
   }
 
   // Gate 2 — authorization. The backend is authoritative: a null snapshot means
-  // no editorial access (403, deactivated, or unknown), so deny by default.
+  // no access at all (403, deactivated, or unknown), so deny by default.
+  //
+  // A non-null snapshot is not sufficient on its own. /editorial/session also
+  // serves games-only editors, because the games studio reads it to resolve
+  // per-game grants — but games have no content documents, so such a caller
+  // would land on an empty workspace here. Require a content module and send
+  // them to the studio they can actually use.
   const editorial = await getEditorialSession(session.accessToken)
   if (!editorial) {
     redirect('/')
+  }
+  if (!hasEditorWorkspaceAccess(editorial)) {
+    redirect(hasAnyGameAccess(editorial) ? '/admin/games' : '/')
   }
 
   const email = session.user?.email ?? ''
