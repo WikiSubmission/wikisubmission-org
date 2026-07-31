@@ -1106,6 +1106,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/editorial/games": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the game registry (editorial)
+         * @description Admin-only. Returns the games that have an editorial surface so the access console can offer a per-game grant row for each. Keys match the {gameKey} segment of the /admin/games routes.
+         */
+        get: operations["listEditorialGames"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/editorial/quran/versions/{versionId}/chapters": {
         parameters: {
             query?: never;
@@ -2839,8 +2859,12 @@ export interface components {
         };
         EditorialSession: {
             is_admin: boolean;
-            /** @description Module key (article, quran, ...) mapped to can_write. Presence of a key implies read access. */
+            /** @description Module key (article, quran, ...) mapped to can_write. Presence of a key implies read access. The `game` key is the global games tier and grants every game at once. */
             modules: {
+                [key: string]: boolean;
+            };
+            /** @description Game key (as in the /admin/games/{gameKey} route) mapped to can_write. Presence implies read access. Games differ from versions: access is a UNION, so either the `game` module key above or an entry here is sufficient on its own. Admins and global games editors hold no entries here — check is_admin and modules.game first. */
+            games: {
                 [key: string]: boolean;
             };
             /** @description Quran version id (as string key) mapped to can_write. Presence implies read access. */
@@ -2913,13 +2937,29 @@ export interface components {
             /** @description Quran only — publish-request approve capability. */
             can_approve?: boolean;
         };
+        EditorGameGrant: {
+            /** @description Key from the game registry (GET /editorial/games). */
+            game_key: string;
+            can_write: boolean;
+        };
+        EditorGame: {
+            /** @description Matches the {gameKey} segment of the /admin/games routes. */
+            key: string;
+            name: string;
+            sort_order?: number;
+        };
+        EditorGameListEnvelope: {
+            data: components["schemas"]["EditorGame"][];
+        };
         EditorGrantsInput: {
-            /** @description Module key mapped to can_write. Presence of a key grants read. */
+            /** @description Module key mapped to can_write. Presence of a key grants read. Include the `game` key to grant every game at once. */
             modules: {
                 [key: string]: boolean;
             };
             quran_versions: components["schemas"]["EditorVersionGrant"][];
             bible_versions: components["schemas"]["EditorVersionGrant"][];
+            /** @description Per-game grants. Omit (or send an empty array) to revoke them all; unknown game keys are rejected with 400. */
+            games?: components["schemas"]["EditorGameGrant"][];
             /** Format: int64 */
             quran_reference_version_id?: number | null;
         };
@@ -2936,6 +2976,8 @@ export interface components {
             };
             quran_versions: components["schemas"]["EditorVersionGrant"][];
             bible_versions: components["schemas"]["EditorVersionGrant"][];
+            /** @description Per-game grants. The global tier appears as the `game` key in modules. */
+            games: components["schemas"]["EditorGameGrant"][];
             /** Format: int64 */
             quran_reference_version_id?: number | null;
         };
@@ -5671,6 +5713,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
             500: components["responses"]["InternalServerErrror"];
         };
     };
@@ -5699,6 +5742,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             500: components["responses"]["InternalServerErrror"];
         };
@@ -5763,6 +5807,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EditorialBibleVersionListEnvelope"];
+                };
+            };
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    listEditorialGames: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorGameListEnvelope"];
                 };
             };
             403: components["responses"]["Forbidden"];

@@ -4,6 +4,7 @@ import { auth } from '@/auth'
 import { getEditorialSession } from '@/lib/editorial-client'
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { canReadModule, canWriteModule } from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,9 +28,7 @@ export default async function EditorLandingPage() {
   const editorial = await getEditorialSession(session.accessToken)
   if (!editorial) redirect('/')
 
-  const accessible = MODULE_ORDER.filter(
-    (key) => editorial.is_admin || editorial.modules[key] !== undefined,
-  )
+  const accessible = MODULE_ORDER.filter((key) => canReadModule(editorial, key))
 
   return (
     <section className="ed-page-wide px-9 pt-8 pb-24">
@@ -54,7 +53,7 @@ export default async function EditorLandingPage() {
         <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3.5 p-0">
           {accessible.map((key) => {
             const info = MODULE_INFO[key] ?? { label: key, blurb: '' }
-            const canWrite = editorial.is_admin || editorial.modules[key] === true
+            const canWrite = canWriteModule(editorial, key)
             return (
               <li key={key}>
                 <Link href={`/editor/${key}`} className="group block h-full">

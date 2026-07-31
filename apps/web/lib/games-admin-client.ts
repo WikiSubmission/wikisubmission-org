@@ -77,15 +77,20 @@ function parseRetryAfterHeader(value: string | null): number | undefined {
 }
 
 /**
- * Calls an `/admin/games` endpoint and unwraps the `{ data }` envelope.
+ * Calls an `/admin/games/{gameKey}` endpoint and unwraps the `{ data }` envelope.
  * Throws with the backend status code prefix so callers can map 401/403/500.
+ *
+ * The game key is part of the path because that is what the backend gates on:
+ * `auth.RequireGameEditor` reads it from the route and checks the caller's grant
+ * for that specific game, so a grant on one game cannot reach another's data.
  */
 async function call<T>(
   token: string,
+  gameKey: string,
   path: string,
   init?: { method?: string; body?: unknown; query?: Record<string, string | undefined> },
 ): Promise<T> {
-  const url = new URL(`${baseUrl}/admin/games${path}`)
+  const url = new URL(`${baseUrl}/admin/games/${gameKey}${path}`)
   if (init?.query) {
     for (const [key, value] of Object.entries(init.query)) {
       if (value !== undefined && value !== '') url.searchParams.set(key, value)
@@ -119,42 +124,48 @@ async function call<T>(
   return json.data
 }
 
-export function gamesAdminClient(token: string) {
+/**
+ * Builds a client scoped to one game. `gameKey` must be a key from the registry
+ * (GET /editorial/games) — it becomes a path segment the backend authorizes
+ * against, so callers must resolve the caller's grant for this same key before
+ * using the client.
+ */
+export function gamesAdminClient(token: string, gameKey: string) {
   return {
     listPassages: (opts?: { status?: string; chapter?: string }): Promise<ReviewPassage[]> =>
-      call<ReviewPassage[]>(token, '/passages', {
+      call<ReviewPassage[]>(token, gameKey, '/passages', {
         query: { status: opts?.status, chapter: opts?.chapter },
       }),
 
     getPassage: (id: number): Promise<ReviewPassage> =>
-      call<ReviewPassage>(token, `/passages/${id}`),
+      call<ReviewPassage>(token, gameKey, `/passages/${id}`),
 
     setStatus: (id: number, status: ReviewStatus): Promise<SetStatusResult> =>
-      call<SetStatusResult>(token, `/passages/${id}/status`, {
+      call<SetStatusResult>(token, gameKey, `/passages/${id}/status`, {
         method: 'POST',
         body: { status },
       }),
 
     frequencyStats: (): Promise<LanguageStat[]> =>
-      call<LanguageStat[]>(token, '/maintenance/frequency-stats'),
+      call<LanguageStat[]>(token, gameKey, '/maintenance/frequency-stats'),
 
     lemmaStats: (): Promise<LanguageStat[]> =>
-      call<LanguageStat[]>(token, '/maintenance/lemma-stats'),
+      call<LanguageStat[]>(token, gameKey, '/maintenance/lemma-stats'),
 
     seedFrequency: (language: string): Promise<SeedFrequencyResult> =>
-      call<SeedFrequencyResult>(token, '/maintenance/seed-frequency', {
+      call<SeedFrequencyResult>(token, gameKey, '/maintenance/seed-frequency', {
         method: 'POST',
         query: { language },
       }),
 
     loadLemmas: (language: string): Promise<LoadLemmasResult> =>
-      call<LoadLemmasResult>(token, '/maintenance/load-lemmas', {
+      call<LoadLemmasResult>(token, gameKey, '/maintenance/load-lemmas', {
         method: 'POST',
         query: { language },
       }),
 
     curate: (chapter: number, afterVerse: number): Promise<CurateResult> =>
-      call<CurateResult>(token, '/curate', {
+      call<CurateResult>(token, gameKey, '/curate', {
         method: 'POST',
         body: { chapter, after_verse: afterVerse },
       }),

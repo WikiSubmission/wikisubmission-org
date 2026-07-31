@@ -1,17 +1,20 @@
-import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { GamesMaintenance } from './games-maintenance'
+import { FILL_BLANK, resolveGameAccess } from '@/lib/games-access'
 import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-dynamic'
 
 export default async function GamesFillBlankMaintenancePage() {
-  const session = await auth()
-  if (!session?.accessToken) redirect('/auth/sign-in?next=/admin/games/fill-blank/maintenance')
-
   const t = await getTranslations('adminGames')
+  const resolved = await resolveGameAccess(FILL_BLANK)
 
-  if (!session.isAdmin && !session.isEditor) {
+  // Every job on this page rewrites shared tables, so read access alone is not
+  // enough to be here — require write on the game.
+  if ('error' in resolved || !resolved.access.canWrite) {
+    if ('error' in resolved && resolved.error === 'not_authenticated') {
+      redirect('/auth/sign-in?next=/admin/games/fill-blank/maintenance')
+    }
     return (
       <main style={notAuthorizedWrap}>
         <p style={kicker}>{t('studio')}</p>

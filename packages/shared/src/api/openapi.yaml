@@ -2401,6 +2401,8 @@ paths:
                 $ref: '#/components/schemas/UserListEnvelope'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
@@ -2433,6 +2435,8 @@ paths:
                 $ref: '#/components/schemas/UserEnvelope'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -2495,6 +2499,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EditorialBibleVersionListEnvelope'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
+  /editorial/games:
+    get:
+      tags: [Editorial]
+      operationId: listEditorialGames
+      summary: List the game registry (editorial)
+      description: >
+        Admin-only. Returns the games that have an editorial surface so the
+        access console can offer a per-game grant row for each. Keys match the
+        {gameKey} segment of the /admin/games routes.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorGameListEnvelope'
         '403':
           $ref: '#/components/responses/Forbidden'
         '500':
@@ -5587,7 +5614,7 @@ components:
 
     EditorialSession:
       type: object
-      required: [is_admin, modules, quran_versions, bible_versions, quran_approver_versions]
+      required: [is_admin, modules, quran_versions, bible_versions, quran_approver_versions, games]
       properties:
         is_admin:
           type: boolean
@@ -5595,7 +5622,20 @@ components:
           type: object
           additionalProperties:
             type: boolean
-          description: Module key (article, quran, ...) mapped to can_write. Presence of a key implies read access.
+          description: >
+            Module key (article, quran, ...) mapped to can_write. Presence of a
+            key implies read access. The `game` key is the global games tier and
+            grants every game at once.
+        games:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: >
+            Game key (as in the /admin/games/{gameKey} route) mapped to
+            can_write. Presence implies read access. Games differ from versions:
+            access is a UNION, so either the `game` module key above or an entry
+            here is sufficient on its own. Admins and global games editors hold
+            no entries here — check is_admin and modules.game first.
         quran_versions:
           type: object
           additionalProperties:
@@ -5720,6 +5760,37 @@ components:
           type: boolean
           description: Quran only — publish-request approve capability.
 
+    EditorGameGrant:
+      type: object
+      required: [game_key, can_write]
+      properties:
+        game_key:
+          type: string
+          description: Key from the game registry (GET /editorial/games).
+        can_write:
+          type: boolean
+
+    EditorGame:
+      type: object
+      required: [key, name]
+      properties:
+        key:
+          type: string
+          description: Matches the {gameKey} segment of the /admin/games routes.
+        name:
+          type: string
+        sort_order:
+          type: integer
+
+    EditorGameListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditorGame'
+
     EditorGrantsInput:
       type: object
       required: [modules, quran_versions, bible_versions]
@@ -5728,7 +5799,9 @@ components:
           type: object
           additionalProperties:
             type: boolean
-          description: Module key mapped to can_write. Presence of a key grants read.
+          description: >
+            Module key mapped to can_write. Presence of a key grants read. Include
+            the `game` key to grant every game at once.
         quran_versions:
           type: array
           items:
@@ -5737,6 +5810,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EditorVersionGrant'
+        games:
+          type: array
+          description: >
+            Per-game grants. Omit (or send an empty array) to revoke them all;
+            unknown game keys are rejected with 400.
+          items:
+            $ref: '#/components/schemas/EditorGameGrant'
         quran_reference_version_id:
           type: integer
           format: int64
@@ -5744,7 +5824,7 @@ components:
 
     EditorialEditor:
       type: object
-      required: [user_id, email, role, is_active, modules, quran_versions, bible_versions]
+      required: [user_id, email, role, is_active, modules, quran_versions, bible_versions, games]
       properties:
         user_id:
           type: integer
@@ -5771,6 +5851,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EditorVersionGrant'
+        games:
+          type: array
+          description: Per-game grants. The global tier appears as the `game` key in modules.
+          items:
+            $ref: '#/components/schemas/EditorGameGrant'
         quran_reference_version_id:
           type: integer
           format: int64

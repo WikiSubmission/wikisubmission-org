@@ -1098,7 +1098,8 @@
   },
   "adminGames": {
     "notAuthorized": "Not authorized",
-    "notAuthorizedDesc": "This page is restricted to the games editorial team. Ask an administrator to grant you the games_editor permission from the admin access page.",
+    "notAuthorizedDesc": "You do not have access to this game. Ask an administrator to grant it to you from the admin access page.",
+    "readOnlyNotice": "You have read-only access to this game. You can browse passages but not curate or change their status.",
     "studio": "Studio",
     "hubKicker": "Administration / Games",
     "hubTitle": "Games",

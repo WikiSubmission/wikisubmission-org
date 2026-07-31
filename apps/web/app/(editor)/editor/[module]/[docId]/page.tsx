@@ -9,6 +9,7 @@ import { DocForm } from '@/components/editor/content/doc-form'
 import { CONTENT_MODULE_DEFS } from '@/components/editor/content/module-defs'
 import { loadModuleOptions } from '@/components/editor/content/options'
 import { EditorCrumb } from '@/components/editor/content/page-chrome'
+import { canReadModule, canWriteModule } from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,10 +27,10 @@ export default async function EditContentDocPage({ params }: PageProps) {
   const session = await auth()
   if (!session?.accessToken) redirect(`/auth/sign-in?next=/editor/${module}/${docId}`)
   const editorial = await getEditorialSession(session.accessToken)
-  if (!editorial || (!editorial.is_admin && editorial.modules[module] === undefined)) {
+  if (!editorial || !canReadModule(editorial, module)) {
     redirect('/editor')
   }
-  const canWrite = editorial.is_admin || editorial.modules[module] === true
+  const canWrite = canWriteModule(editorial, module)
 
   const [doc, options] = await Promise.all([
     getContentDoc(session.accessToken, module as EditorialContentModule, docId),

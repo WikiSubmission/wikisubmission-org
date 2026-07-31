@@ -36,7 +36,10 @@ export function UserMenu() {
   const { user, isAuthenticated, isLoading } = useUser()
   const { data: session } = useSession()
   const isAdmin = session?.isAdmin === true
+  // isEditor means games access; isEditorialEditor means /editor content access.
+  // They are separate grants, so a games editor must not be shown /editor.
   const isEditor = session?.isEditor === true
+  const isEditorialEditor = session?.isEditorialEditor === true
   const openSignIn = useSignInPromptStore((s) => s.open)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -133,7 +136,7 @@ export function UserMenu() {
             {t('profile')}
           </a>
         </DropdownMenuItem>
-        {(isEditor || isAdmin) && (
+        {(isEditorialEditor || isAdmin) && (
           <DropdownMenuItem asChild>
             <a href="/editor" className="flex items-center gap-2">
               <SquarePen className="w-4 h-4" />
@@ -150,7 +153,9 @@ export function UserMenu() {
           </DropdownMenuItem>
         ) : isEditor ? (
           <DropdownMenuItem asChild>
-            <a href="/admin/games/fill-blank" className="flex items-center gap-2">
+            {/* The hub lists only the games this user may open, so it works for
+                a one-game grant as well as a global one. */}
+            <a href="/admin/games" className="flex items-center gap-2">
               <Gamepad2 className="w-4 h-4" />
               {t('gamesStudio')}
             </a>

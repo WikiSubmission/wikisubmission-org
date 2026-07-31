@@ -5,10 +5,15 @@ import { auth } from '@/auth'
 import {
   getEditorialSession,
   listQuranVersions,
-  type EditorialSession,
-  type QuranVersion,
 } from '@/lib/editorial-client'
 import * as s from './styles'
+import {
+  canApproveAnyQuranVersion,
+  canApproveQuranVersion,
+  canReadModule,
+  canReadQuranVersion,
+  canWriteQuranVersion,
+} from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,15 +21,13 @@ export default async function QuranVersionsPage() {
   const session = await auth()
   if (!session?.accessToken) redirect('/auth/sign-in?next=/editor/quran')
   const editorial = await getEditorialSession(session.accessToken)
-  if (!editorial || (!editorial.is_admin && editorial.modules.quran === undefined)) {
+  if (!editorial || !canReadModule(editorial, 'quran')) {
     redirect('/editor')
   }
 
   const versions = await listQuranVersions(session.accessToken)
-  const accessible = versions.filter((v) => canRead(editorial, v.id))
-  const canApproveAny =
-    editorial.is_admin ||
-    Object.values(editorial.quran_approver_versions ?? {}).some(Boolean)
+  const accessible = versions.filter((v) => canReadQuranVersion(editorial, v.id))
+  const canApproveAny = canApproveAnyQuranVersion(editorial)
 
   return (
     <section style={s.page}>
@@ -52,9 +55,8 @@ export default async function QuranVersionsPage() {
       ) : (
         <ul style={grid}>
           {accessible.map((v) => {
-            const canWrite = editorial.is_admin || editorial.quran_versions[String(v.id)] === true
-            const canApprove =
-              editorial.is_admin || editorial.quran_approver_versions?.[String(v.id)] === true
+            const canWrite = canWriteQuranVersion(editorial, v.id)
+            const canApprove = canApproveQuranVersion(editorial, v.id)
             return (
               <li key={v.id}>
                 <Link href={`/editor/quran/${v.id}`} style={tile}>
@@ -76,10 +78,6 @@ export default async function QuranVersionsPage() {
       )}
     </section>
   )
-}
-
-function canRead(editorial: EditorialSession, versionId: QuranVersion['id']): boolean {
-  return editorial.is_admin || editorial.quran_versions[String(versionId)] !== undefined
 }
 
 const grid: CSSProperties = {

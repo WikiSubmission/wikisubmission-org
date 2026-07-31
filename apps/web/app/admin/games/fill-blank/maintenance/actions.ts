@@ -1,26 +1,25 @@
 'use server'
 
-import { auth } from '@/auth'
-import { AdminApiError, gamesAdminClient, type LanguageStat } from '@/lib/games-admin-client'
+import { AdminApiError, type LanguageStat } from '@/lib/games-admin-client'
+import { FILL_BLANK, gameClient } from '@/lib/games-access'
 
 export type ActionResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string }
 
-async function editorClient() {
-  const session = await auth()
-  if (!session?.accessToken) return { error: 'not_authenticated' as const }
-  if (!session.isAdmin && !session.isEditor) return { error: 'not_authorized' as const }
-  return { client: gamesAdminClient(session.accessToken) }
+// Stats are reads; seeding and lemma loading rewrite shared tables, so they
+// require write on this game rather than mere read.
+function editorClient(mode: 'read' | 'write' = 'read') {
+  return gameClient(FILL_BLANK, mode)
 }
 
 function describe(err: unknown): string {
   if (err === 'not_authenticated') return 'Your session expired. Please sign in again.'
-  if (err === 'not_authorized') return 'You do not have games editor access.'
+  if (err === 'not_authorized') return 'You do not have access to this game.'
   if (err instanceof AdminApiError) {
     switch (err.status) {
       case 401: return 'Your session expired. Please sign in again.'
-      case 403: return 'You do not have games editor access.'
+      case 403: return 'You do not have access to this game.'
       default: return err.serverMessage ?? 'The request failed. Please try again.'
     }
   }
@@ -52,7 +51,7 @@ export async function lemmaStatsAction(): Promise<ActionResult<LanguageStat[]>> 
 export async function seedFrequencyAction(
   language: string,
 ): Promise<ActionResult<{ language: string; tokens: number }>> {
-  const ctx = await editorClient()
+  const ctx = await editorClient('write')
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
   try {
     const data = await ctx.client.seedFrequency(language)
@@ -65,7 +64,7 @@ export async function seedFrequencyAction(
 export async function loadLemmasAction(
   language: string,
 ): Promise<ActionResult<{ language: string; lemma_rows: number }>> {
-  const ctx = await editorClient()
+  const ctx = await editorClient('write')
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
   try {
     const data = await ctx.client.loadLemmas(language)

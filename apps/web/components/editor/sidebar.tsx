@@ -77,7 +77,8 @@ function buildNav(modules: Record<string, boolean>, isAdmin: boolean): Map<strin
   }
 
   if (isAdmin) {
-    push('System', { key: 'admin', label: 'Admin Tools', href: '/editor/admin', icon: IShield })
+    // Grants live in the unified access console, outside the editor route tree.
+    push('System', { key: 'admin', label: 'Access', href: '/admin/access', icon: IShield })
   }
 
   return groups

@@ -5,10 +5,14 @@ import { auth } from '@/auth'
 import {
   getEditorialSession,
   listQuranRoots,
-  type EditorialSession,
 } from '@/lib/editorial-client'
 import * as s from '../../styles'
 import { RootsEditor } from './roots-editor'
+import {
+  canApproveQuranVersion,
+  canReadQuranVersion,
+  canWriteQuranVersion,
+} from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +32,7 @@ export default async function QuranRootsPage({ params, searchParams }: PageProps
   const session = await auth()
   if (!session?.accessToken) redirect(`/auth/sign-in?next=/editor/quran/${versionId}/roots`)
   const editorial = await getEditorialSession(session.accessToken)
-  if (!editorial || !canRead(editorial, versionId)) redirect('/editor/quran')
+  if (!editorial || !canReadQuranVersion(editorial, versionId)) redirect('/editor/quran')
 
   const q = qRaw?.trim() || undefined
   const offset = Math.max(0, Number(offsetRaw) || 0)
@@ -38,9 +42,8 @@ export default async function QuranRootsPage({ params, searchParams }: PageProps
     offset,
   })
 
-  const canWrite = editorial.is_admin || editorial.quran_versions[String(versionId)] === true
-  const canApprove =
-    editorial.is_admin || editorial.quran_approver_versions?.[String(versionId)] === true
+  const canWrite = canWriteQuranVersion(editorial, versionId)
+  const canApprove = canApproveQuranVersion(editorial, versionId)
 
   const base = `/editor/quran/${versionId}/roots`
   const qParam = q ? `&q=${encodeURIComponent(q)}` : ''
@@ -89,10 +92,6 @@ export default async function QuranRootsPage({ params, searchParams }: PageProps
       )}
     </section>
   )
-}
-
-function canRead(editorial: EditorialSession, versionId: number): boolean {
-  return editorial.is_admin || editorial.quran_versions[String(versionId)] !== undefined
 }
 
 const searchForm: CSSProperties = {

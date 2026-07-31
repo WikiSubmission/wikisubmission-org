@@ -1,21 +1,23 @@
-import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { gamesAdminClient } from '@/lib/games-admin-client'
+import { FILL_BLANK, resolveGameAccess } from '@/lib/games-access'
 import { type ReviewPassage } from '@/lib/games-editor'
 import { GamesReview } from './games-review'
 import { getTranslations } from 'next-intl/server'
 
-// Editorial review console for the Quran Games catalog. Soft check below is
-// UX only; the backend RequireEditor middleware enforces the real gate.
+// Editorial review console for the Quran Games catalog. Access is resolved from
+// the caller's grants on every request (not from the session token, which lags a
+// revoke by up to 55 minutes); the backend gates enforce the real boundary.
 export const dynamic = 'force-dynamic'
 
 export default async function GamesFillBlankStudioPage() {
-  const session = await auth()
-  if (!session?.accessToken) redirect('/auth/sign-in?next=/admin/games/fill-blank')
-
   const t = await getTranslations('adminGames')
+  const resolved = await resolveGameAccess(FILL_BLANK)
 
-  if (!session.isAdmin && !session.isEditor) {
+  if ('error' in resolved) {
+    if (resolved.error === 'not_authenticated') {
+      redirect('/auth/sign-in?next=/admin/games/fill-blank')
+    }
     return (
       <main style={notAuthorizedWrap}>
         <p style={kicker}>{t('studio')}</p>
@@ -25,12 +27,14 @@ export default async function GamesFillBlankStudioPage() {
     )
   }
 
+  const { token, canWrite } = resolved.access
+
   // Default view mirrors the CLI: passages awaiting review. The proposed list
   // also seeds the "chapters with proposals" summary (no extra request).
   let initial: ReviewPassage[] = []
   let initialError: string | null = null
   try {
-    initial = await gamesAdminClient(session.accessToken).listPassages({ status: 'proposed' })
+    initial = await gamesAdminClient(token, FILL_BLANK).listPassages({ status: 'proposed' })
   } catch {
     initialError = t('loadError')
   }
@@ -46,6 +50,7 @@ export default async function GamesFillBlankStudioPage() {
       initialPassages={initial}
       initialError={initialError}
       initialProposedChapters={initialProposedChapters}
+      canWrite={canWrite}
     />
   )
 }

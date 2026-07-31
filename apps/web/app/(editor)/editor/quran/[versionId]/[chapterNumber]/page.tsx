@@ -4,10 +4,10 @@ import { auth } from '@/auth'
 import {
   getQuranChapter,
   getEditorialSession,
-  type EditorialSession,
 } from '@/lib/editorial-client'
 import * as s from '../../styles'
 import { ChapterEditor } from './chapter-editor'
+import { canApproveQuranVersion, canReadQuranVersion } from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,13 +26,12 @@ export default async function QuranChapterEditorPage({ params }: PageProps) {
     redirect(`/auth/sign-in?next=/editor/quran/${versionId}/${chapterNumber}`)
   }
   const editorial = await getEditorialSession(session.accessToken)
-  if (!editorial || !canRead(editorial, versionId)) redirect('/editor/quran')
+  if (!editorial || !canReadQuranVersion(editorial, versionId)) redirect('/editor/quran')
 
   const chapter = await getQuranChapter(session.accessToken, versionId, chapterNumber)
   if (!chapter) notFound()
 
-  const canApprove =
-    editorial.is_admin || editorial.quran_approver_versions?.[String(versionId)] === true
+  const canApprove = canApproveQuranVersion(editorial, versionId)
 
   return (
     <section style={s.page}>
@@ -59,6 +58,3 @@ export default async function QuranChapterEditorPage({ params }: PageProps) {
   )
 }
 
-function canRead(editorial: EditorialSession, versionId: number): boolean {
-  return editorial.is_admin || editorial.quran_versions[String(versionId)] !== undefined
-}

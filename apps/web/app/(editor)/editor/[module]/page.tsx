@@ -14,6 +14,7 @@ import { STATUS_META } from '@/components/editor/content/status'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { canReadModule, canWriteModule } from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,10 +38,10 @@ export default async function ContentModuleListPage({ params, searchParams }: Pa
   const session = await auth()
   if (!session?.accessToken) redirect(`/auth/sign-in?next=/editor/${module}`)
   const editorial = await getEditorialSession(session.accessToken)
-  if (!editorial || (!editorial.is_admin && editorial.modules[module] === undefined)) {
+  if (!editorial || !canReadModule(editorial, module)) {
     redirect('/editor')
   }
-  const canWrite = editorial.is_admin || editorial.modules[module] === true
+  const canWrite = canWriteModule(editorial, module)
 
   const { q = '', status = '' } = await searchParams
   const statusFilter = STATUS_FILTERS.some((f) => f.value === status)

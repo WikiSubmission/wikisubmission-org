@@ -5,6 +5,10 @@ import { auth } from '@/auth'
 import { getEditorialSession, listQuranPublishRequests } from '@/lib/editorial-client'
 import * as s from '../styles'
 import { ApprovalActions } from './approval-actions'
+import {
+  canApproveAnyQuranVersion,
+  canApproveQuranVersion,
+} from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,9 +18,7 @@ export default async function QuranApprovalsPage() {
   const editorial = await getEditorialSession(session.accessToken)
   if (!editorial) redirect('/')
 
-  const canApproveAny =
-    editorial.is_admin ||
-    Object.values(editorial.quran_approver_versions ?? {}).some(Boolean)
+  const canApproveAny = canApproveAnyQuranVersion(editorial)
   if (!canApproveAny) redirect('/editor/quran')
 
   const requests = await listQuranPublishRequests(session.accessToken, { status: 'pending' })
@@ -40,8 +42,7 @@ export default async function QuranApprovalsPage() {
       ) : (
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
           {requests.map((r) => {
-            const canApprove =
-              editorial.is_admin || editorial.quran_approver_versions?.[String(r.version_id)] === true
+            const canApprove = canApproveQuranVersion(editorial, r.version_id)
             return (
               <li key={r.id} style={{ ...s.surface, padding: '14px 16px' }}>
                 <div style={rowHead}>

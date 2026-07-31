@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
+import { getEditorialSession } from '@/lib/editorial-client'
+import { canReadGame, canWriteGame } from '@/lib/editorial-access'
+import { FILL_BLANK } from '@/lib/games-access'
 import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-dynamic'
@@ -8,11 +11,30 @@ export const dynamic = 'force-dynamic'
 export default async function AdminGamesHubPage() {
   const session = await auth()
   if (!session?.accessToken) redirect('/auth/sign-in?next=/admin/games')
-  // Admins only. Non-admin editors reach their specific game studio directly
-  // (for example /admin/games/fill-blank) without seeing this hub.
-  if (!session.isAdmin) redirect('/admin/games/fill-blank')
+
+  // The hub shows one tile per game the caller may open, so a user granted a
+  // single game sees just that one. Resolved per request rather than from the
+  // session flags, which lag a grant change by up to 55 minutes.
+  const editorial = await getEditorialSession(session.accessToken)
+  if (!editorial) redirect('/')
 
   const t = await getTranslations('adminGames')
+
+  const tiles = [
+    canReadGame(editorial, FILL_BLANK) && {
+      href: '/admin/games/fill-blank',
+      title: t('fillBlankTile'),
+      body: t('fillBlankTileBody'),
+    },
+    // Maintenance rewrites shared tables, so it is a write-only surface.
+    canWriteGame(editorial, FILL_BLANK) && {
+      href: '/admin/games/fill-blank/maintenance',
+      title: t('maintenanceTile'),
+      body: t('maintenanceTileBody'),
+    },
+  ].filter((tile): tile is { href: string; title: string; body: string } => Boolean(tile))
+
+  if (tiles.length === 0) redirect('/')
 
   return (
     <section style={wrap}>
@@ -23,18 +45,14 @@ export default async function AdminGamesHubPage() {
       </header>
 
       <ul style={grid}>
-        <li>
-          <Link href="/admin/games/fill-blank" style={tileStyle}>
-            <div style={tileTitle}>{t('fillBlankTile')}</div>
-            <p style={tileBody}>{t('fillBlankTileBody')}</p>
-          </Link>
-        </li>
-        <li>
-          <Link href="/admin/games/fill-blank/maintenance" style={tileStyle}>
-            <div style={tileTitle}>{t('maintenanceTile')}</div>
-            <p style={tileBody}>{t('maintenanceTileBody')}</p>
-          </Link>
-        </li>
+        {tiles.map((tile) => (
+          <li key={tile.href}>
+            <Link href={tile.href} style={tileStyle}>
+              <div style={tileTitle}>{tile.title}</div>
+              <p style={tileBody}>{tile.body}</p>
+            </Link>
+          </li>
+        ))}
       </ul>
     </section>
   )

@@ -1,13 +1,17 @@
 /**
  * Editor-facing types for the games review surface.
  *
- * Access control was previously gated on a GAMES_EDITOR_EMAILS env allowlist
- * hashed in-app. That gate has moved to the database (users.role +
- * users.permissions.games_editor) and is surfaced as `session.isEditor` /
- * `session.isAdmin`. This file now only re-exports the type shapes the
- * editorial UI consumes.
+ * Access control has moved twice: first off a GAMES_EDITOR_EMAILS env allowlist
+ * onto a single users.permissions.games_editor flag, and now onto per-game grant
+ * tables (backend migration 027). Resolve access with the predicates in
+ * apps/web/lib/editorial-access.ts — `canReadGame` / `canWriteGame` — or the
+ * helpers in apps/web/lib/games-access.ts. `session.isEditor` survives only as a
+ * coarse nav hint and goes stale for up to 55 minutes.
  *
- * The real security boundary remains the backend's RequireEditor middleware.
+ * This file now only re-exports the type shapes the editorial UI consumes.
+ *
+ * The real security boundary remains the backend's per-game middleware
+ * (auth.RequireGameEditor for reads, auth.RequireGameWriter for mutations).
  */
 
 // Mirrors the backend `reviewPassage` JSON in api/handlers/games_admin.go.

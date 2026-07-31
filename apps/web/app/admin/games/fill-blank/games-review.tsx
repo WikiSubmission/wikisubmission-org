@@ -29,10 +29,13 @@ export function GamesReview({
   initialPassages,
   initialError,
   initialProposedChapters,
+  canWrite,
 }: {
   initialPassages: ReviewPassage[]
   initialError: string | null
   initialProposedChapters: ProposedChapter[]
+  /** Read-only reviewers can browse passages but not curate or change status. */
+  canWrite: boolean
 }) {
   const t = useTranslations('adminGames')
   const statusLabels: Record<string, string> = {
@@ -250,13 +253,17 @@ export function GamesReview({
         <p style={kicker}>{t('editorialKicker')}</p>
         <h1 style={heading}>{t('editorialTitle')}</h1>
         <p style={muted}>{t('editorialDesc')}</p>
-        <div style={{ marginTop: 12 }}>
-          <Link href="/admin/games/fill-blank/maintenance" style={maintLink}>
-            {t('maintenanceLink')}
-          </Link>
-        </div>
+        {canWrite && (
+          <div style={{ marginTop: 12 }}>
+            <Link href="/admin/games/fill-blank/maintenance" style={maintLink}>
+              {t('maintenanceLink')}
+            </Link>
+          </div>
+        )}
+        {!canWrite && <p style={muted}>{t('readOnlyNotice')}</p>}
       </header>
 
+      {canWrite && (
       <section style={curatePanel}>
         <div style={maintRow}>
           <label style={fieldLabel}>
@@ -324,6 +331,7 @@ export function GamesReview({
           )}
         </div>
       </section>
+      )}
 
       <section style={filterBar}>
         <label style={fieldLabel}>
@@ -365,7 +373,7 @@ export function GamesReview({
 
       {error && <p style={errorText}>{error}</p>}
 
-      {passages.length > 0 && (
+      {passages.length > 0 && canWrite && (
         <section style={bulkBar}>
           <div style={maintRow}>
             <span style={mono}>
@@ -420,6 +428,7 @@ export function GamesReview({
               passage={p}
               pending={rowPending === p.id || (bulkPending !== null && selectedIds.has(p.id))}
               selected={selectedIds.has(p.id)}
+              canWrite={canWrite}
               onToggleSelected={() => toggleSelected(p.id)}
               onSetStatus={(status) => changeStatus(p.id, status)}
             />
@@ -435,12 +444,14 @@ function PassageCard({
   passage,
   pending,
   selected,
+  canWrite,
   onToggleSelected,
   onSetStatus,
 }: {
   passage: ReviewPassage
   pending: boolean
   selected: boolean
+  canWrite: boolean
   onToggleSelected: () => void
   onSetStatus: (status: ReviewStatus) => void
 }) {
@@ -461,14 +472,16 @@ function PassageCard({
     <li style={selected ? { ...card, ...cardSelected } : card}>
       <div style={cardTop}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <input
-            type="checkbox"
-            checked={selected}
-            onChange={onToggleSelected}
-            disabled={pending}
-            aria-label={`Select passage ${passage.id}`}
-            style={checkbox}
-          />
+          {canWrite && (
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={onToggleSelected}
+              disabled={pending}
+              aria-label={`Select passage ${passage.id}`}
+              style={checkbox}
+            />
+          )}
           <span style={verseRange}>{range}</span>
           <span style={statusBadge(passage.status)}>{statusLabels[passage.status] ?? passage.status}</span>
         </div>
@@ -499,6 +512,7 @@ function PassageCard({
         <span style={mono}>source: {passage.source}</span>
       </div>
 
+      {canWrite && (
       <div style={actions}>
         <button
           type="button"
@@ -526,6 +540,7 @@ function PassageCard({
         </button>
         {pending && <span style={mono}>saving…</span>}
       </div>
+      )}
     </li>
   )
 }

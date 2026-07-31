@@ -1,7 +1,7 @@
 'use server'
 
-import { auth } from '@/auth'
-import { AdminApiError, gamesAdminClient } from '@/lib/games-admin-client'
+import { AdminApiError } from '@/lib/games-admin-client'
+import { FILL_BLANK, gameClient } from '@/lib/games-access'
 import { type ReviewPassage, type ReviewStatus } from '@/lib/games-editor'
 
 export type ActionResult<T> =
@@ -9,32 +9,26 @@ export type ActionResult<T> =
   | { ok: false; error: string; rateLimited?: boolean; retryAfterSeconds?: number }
 
 /**
- * Resolves an authenticated editor session and returns a bound admin client.
- * Every action re-checks the session flags (set from DB role + permissions);
- * the backend RequireEditor middleware is still the real gate.
+ * Resolves a client scoped to this game. Reads need read access; mutations need
+ * write access on this specific game. Grants are re-resolved from the backend on
+ * every call, so a revoked editor stops working immediately instead of when
+ * their session token next refreshes. The backend re-checks regardless.
  */
-async function editorClient() {
-  const session = await auth()
-  if (!session?.accessToken) {
-    return { error: 'not_authenticated' as const }
-  }
-  if (!session.isAdmin && !session.isEditor) {
-    return { error: 'not_authorized' as const }
-  }
-  return { client: gamesAdminClient(session.accessToken) }
+function editorClient(mode: 'read' | 'write' = 'read') {
+  return gameClient(FILL_BLANK, mode)
 }
 
 function describe(err: unknown): string {
   // Gating failures from editorClient() arrive as plain string codes.
   if (err === 'not_authenticated') return 'Your session expired. Please sign in again.'
-  if (err === 'not_authorized') return 'You do not have games editor access.'
+  if (err === 'not_authorized') return 'You do not have access to this game.'
 
   if (err instanceof AdminApiError) {
     switch (err.status) {
       case 401:
         return 'Your session expired. Please sign in again.'
       case 403:
-        return 'You do not have games editor access.'
+        return 'You do not have access to this game.'
       case 404:
         return 'Not found.'
       case 429:
@@ -92,7 +86,7 @@ export async function setStatusAction(
   id: number,
   status: ReviewStatus,
 ): Promise<ActionResult<{ id: number; status: string }>> {
-  const ctx = await editorClient()
+  const ctx = await editorClient('write')
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
   try {
     const data = await ctx.client.setStatus(id, status)
@@ -116,7 +110,7 @@ export async function bulkSetStatusAction(
   ids: number[],
   status: ReviewStatus,
 ): Promise<ActionResult<BulkStatusResult>> {
-  const ctx = await editorClient()
+  const ctx = await editorClient('write')
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
   if (ids.length === 0) {
     return { ok: false, error: 'No passages selected.' }
@@ -162,7 +156,7 @@ export async function curateAction(
   chapter: number,
   afterVerse: number,
 ): Promise<ActionResult<CurateWindowResult>> {
-  const ctx = await editorClient()
+  const ctx = await editorClient('write')
   if ('error' in ctx) return { ok: false, error: describe(ctx.error) }
   if (!Number.isInteger(chapter) || chapter < 1 || chapter > 114) {
     return { ok: false, error: 'Chapter must be between 1 and 114.' }

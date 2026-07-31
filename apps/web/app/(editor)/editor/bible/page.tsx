@@ -4,6 +4,11 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { getEditorialSession, listBibleVersions } from '@/lib/editorial-client'
 import * as s from '../quran/styles'
+import {
+  canReadBibleVersion,
+  canReadModule,
+  canWriteBibleVersion,
+} from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,14 +22,12 @@ export default async function BibleVersionsPage() {
   const session = await auth()
   if (!session?.accessToken) redirect('/auth/sign-in?next=/editor/bible')
   const editorial = await getEditorialSession(session.accessToken)
-  if (!editorial || (!editorial.is_admin && editorial.modules.bible === undefined)) {
+  if (!editorial || !canReadModule(editorial, 'bible')) {
     redirect('/editor')
   }
 
   const versions = await listBibleVersions(session.accessToken)
-  const accessible = versions.filter(
-    (v) => editorial.is_admin || editorial.bible_versions[String(v.id)] !== undefined,
-  )
+  const accessible = versions.filter((v) => canReadBibleVersion(editorial, v.id))
 
   return (
     <section style={s.page}>
@@ -47,8 +50,7 @@ export default async function BibleVersionsPage() {
       ) : (
         <ul style={grid}>
           {accessible.map((v) => {
-            const canWrite =
-              editorial.is_admin || editorial.bible_versions[String(v.id)] === true
+            const canWrite = canWriteBibleVersion(editorial, v.id)
             return (
               <li key={v.id}>
                 <div style={tile}>

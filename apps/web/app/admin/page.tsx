@@ -14,7 +14,7 @@ const TILES: Tile[] = [
   {
     href: '/admin/access',
     title: 'Access',
-    body: 'Grant or revoke per-feature access for any account. Today this controls the games editor permission; more features will appear here as they ship.',
+    body: 'Grant or revoke access for any account: site role, games (all of them or one at a time), and editorial modules down to individual Quran versions.',
   },
   {
     href: '/admin/games',

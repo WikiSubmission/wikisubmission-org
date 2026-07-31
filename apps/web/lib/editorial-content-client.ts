@@ -18,6 +18,8 @@ export type EditorialContentInput = components['schemas']['EditorialContentInput
 export type EditorialEditor = components['schemas']['EditorialEditor']
 export type EditorGrantsInput = components['schemas']['EditorGrantsInput']
 export type EditorVersionGrant = components['schemas']['EditorVersionGrant']
+export type EditorGameGrant = components['schemas']['EditorGameGrant']
+export type EditorGame = components['schemas']['EditorGame']
 
 export type MutationResult<T> = { ok: true; data: T } | { ok: false; error: string }
 
@@ -207,6 +209,26 @@ export async function listEditorialEditors(
     return { editors: data.data, total: data.total }
   } catch {
     return { editors: [], total: 0 }
+  }
+}
+
+/**
+ * Lists the games that have an editorial surface (admin). Empty on denial.
+ *
+ * The access console needs this to render a per-game grant row for each game —
+ * it cannot infer the list from a user's grants, since admins and global games
+ * editors hold no per-game rows at all.
+ */
+export async function listEditorialGames(
+  token: string | undefined,
+): Promise<EditorGame[]> {
+  if (!API_BASE || !token) return []
+  try {
+    const { data, error, response } = await authedClient(token).GET('/editorial/games')
+    if (error || !response.ok || !data?.data) return []
+    return data.data
+  } catch {
+    return []
   }
 }
 

@@ -189,6 +189,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const access = await fetchUserAccess(token.accessToken as string)
         token.isAdmin = access.isAdmin
         token.isEditor = access.isEditor
+        token.isEditorialEditor = access.isEditorialEditor
         return token
       }
 
@@ -206,6 +207,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const access = await fetchUserAccess(token.accessToken as string)
         token.isAdmin = access.isAdmin
         token.isEditor = access.isEditor
+        token.isEditorialEditor = access.isEditorialEditor
       }
 
       return token
@@ -216,11 +218,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // requests to ws-backend. Migrating to a server-side proxy would eliminate this
       // exposure but requires refactoring all /me/* hooks to server actions.
       session.accessToken = (token.accessToken as string | undefined) ?? ''
-      // Access flags come from the backend (role + permissions) and are baked
-      // into the JWT for the life of its refresh window. UI-only signals; the
-      // backend enforces real access on every request.
+      // Access flags come from the backend's grant snapshot and are baked into
+      // the JWT for the life of its refresh window, so they lag a grant change
+      // by up to 55 minutes. Nav-gating signals only — pages and server actions
+      // re-resolve per request; the backend enforces real access regardless.
       session.isAdmin = token.isAdmin === true
       session.isEditor = token.isEditor === true
+      session.isEditorialEditor = token.isEditorialEditor === true
       return session
     },
   },
