@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { fetchManifest, OFFLINE_MANIFEST_URL } from '@/lib/offline/manifest'
 import type { Manifest } from '@/lib/offline/types'
 import type { PublishedState, RebuildStatus } from '@/lib/offline-admin-client'
+import { callAdminAction } from '@/lib/call-admin-action'
 import { publishedFilesAction, rebuildBundlesAction, rebuildStatusAction } from './actions'
 
 function formatBytes(n: number): string {
@@ -50,7 +51,7 @@ export function OfflineBundlesClient() {
   }, [])
 
   const loadStatus = useCallback(async () => {
-    const result = await rebuildStatusAction()
+    const result = await callAdminAction(rebuildStatusAction)
     if (result.ok) {
       setJob(result.data)
       setActionError(null)
@@ -60,7 +61,7 @@ export function OfflineBundlesClient() {
   }, [])
 
   const loadPublished = useCallback(async () => {
-    const result = await publishedFilesAction()
+    const result = await callAdminAction(publishedFilesAction)
     if (result.ok) {
       setPublished(result.data)
       setPublishedError(null)
@@ -98,7 +99,7 @@ export function OfflineBundlesClient() {
     setStarting(true)
     setActionError(null)
     try {
-      const result = await rebuildBundlesAction()
+      const result = await callAdminAction(rebuildBundlesAction)
       if (result.ok) setJob(result.data)
       else setActionError(result.error)
     } finally {

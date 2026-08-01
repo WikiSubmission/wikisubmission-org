@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { callAdminAction } from '@/lib/call-admin-action'
 import {
   frequencyStatsAction,
   lemmaStatsAction,
@@ -60,7 +61,7 @@ export function GamesMaintenance() {
 
   async function seedLanguage(code: string) {
     setSeedState((prev) => new Map(prev).set(code, 'seeding'))
-    const res = await seedFrequencyAction(code)
+    const res = await callAdminAction(() => seedFrequencyAction(code))
     if (res.ok) {
       setFreqStats((prev) => new Map(prev).set(code, res.data.tokens))
       setSeedState((prev) => {
@@ -75,7 +76,7 @@ export function GamesMaintenance() {
 
   async function runLoadLemmas(code: string) {
     setLemmaState((prev) => new Map(prev).set(code, 'loading'))
-    const res = await loadLemmasAction(code)
+    const res = await callAdminAction(() => loadLemmasAction(code))
     if (res.ok) {
       if (res.data.lemma_rows > 0) {
         setLemmaStats((prev) => new Map(prev).set(code, res.data.lemma_rows))

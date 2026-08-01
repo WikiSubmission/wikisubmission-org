@@ -16,15 +16,25 @@ vi.mock('next-intl', () => ({
 }))
 
 // next/navigation
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    refresh: vi.fn(),
-    back: vi.fn(),
-    prefetch: vi.fn(),
-  }),
-  usePathname: () => '/',
-  useSearchParams: () => new URLSearchParams(),
-  useParams: () => ({}),
-}))
+vi.mock('next/navigation', async () => {
+  // Real implementation: it is an instanceof check against the error class the
+  // router throws on a client/server build mismatch, so a stub would make
+  // call-admin-action's skew branch untestable.
+  const { unstable_isUnrecognizedActionError } = await import(
+    'next/dist/client/components/unrecognized-action-error'
+  )
+
+  return {
+    useRouter: () => ({
+      push: vi.fn(),
+      replace: vi.fn(),
+      refresh: vi.fn(),
+      back: vi.fn(),
+      prefetch: vi.fn(),
+    }),
+    usePathname: () => '/',
+    useSearchParams: () => new URLSearchParams(),
+    useParams: () => ({}),
+    unstable_isUnrecognizedActionError,
+  }
+})

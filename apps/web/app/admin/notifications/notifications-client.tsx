@@ -9,6 +9,7 @@ import type {
   ZikrEntry,
 } from '@/lib/notifications-admin-client'
 import { ThemedSelect } from '@/components/ui/themed-select'
+import { callAdminAction } from '@/lib/call-admin-action'
 import {
   createScheduleAction,
   createZikrAction,
@@ -193,8 +194,8 @@ export function NotificationsClient({
     report(null)
     const input = scheduleToInput(scheduleForm)
     const result = editingScheduleId
-      ? await updateScheduleAction(editingScheduleId, input)
-      : await createScheduleAction(input)
+      ? await callAdminAction(() => updateScheduleAction(editingScheduleId, input))
+      : await callAdminAction(() => createScheduleAction(input))
     setBusy(null)
     if (!result.ok) {
       report(result.error)
@@ -213,7 +214,9 @@ export function NotificationsClient({
   async function toggleScheduleEnabled(s: ScheduledNotification) {
     setBusy(`schedule-${s.id}`)
     report(null)
-    const result = await updateScheduleAction(s.id, { enabled: !s.enabled })
+    const result = await callAdminAction(() =>
+      updateScheduleAction(s.id, { enabled: !s.enabled })
+    )
     setBusy(null)
     if (!result.ok) report(result.error)
     else patchSchedule(result.data)
@@ -223,7 +226,7 @@ export function NotificationsClient({
     if (!window.confirm(`Delete the schedule "${s.title}"? This cannot be undone.`)) return
     setBusy(`schedule-${s.id}`)
     report(null)
-    const result = await deleteScheduleAction(s.id)
+    const result = await callAdminAction(() => deleteScheduleAction(s.id))
     setBusy(null)
     if (!result.ok) {
       report(result.error)
@@ -238,7 +241,7 @@ export function NotificationsClient({
       return
     setBusy(`schedule-${s.id}`)
     report(null)
-    const result = await sendNowAction(s.id)
+    const result = await callAdminAction(() => sendNowAction(s.id))
     setBusy(null)
     if (!result.ok) {
       report(result.error)
@@ -266,11 +269,13 @@ export function NotificationsClient({
     }
     setBusy('schedule-test')
     report(null)
-    const result = await sendTestAction({
-      title: scheduleForm.title.trim(),
-      body: scheduleForm.body.trim(),
-      url: scheduleForm.url.trim() || undefined,
-    })
+    const result = await callAdminAction(() =>
+      sendTestAction({
+        title: scheduleForm.title.trim(),
+        body: scheduleForm.body.trim(),
+        url: scheduleForm.url.trim() || undefined,
+      })
+    )
     setBusy(null)
     if (!result.ok) {
       report(result.error)
@@ -320,8 +325,8 @@ export function NotificationsClient({
     setBusy('zikr-save')
     report(null)
     const result = editingZikrId
-      ? await updateZikrAction(editingZikrId, input)
-      : await createZikrAction(input)
+      ? await callAdminAction(() => updateZikrAction(editingZikrId, input))
+      : await callAdminAction(() => createZikrAction(input))
     setBusy(null)
     if (!result.ok) {
       report(result.error)
@@ -340,7 +345,9 @@ export function NotificationsClient({
   async function toggleZikrActive(entry: ZikrEntry) {
     setBusy(`zikr-${entry.id}`)
     report(null)
-    const result = await updateZikrAction(entry.id, { active: !entry.active })
+    const result = await callAdminAction(() =>
+      updateZikrAction(entry.id, { active: !entry.active })
+    )
     setBusy(null)
     if (!result.ok) report(result.error)
     else setZikr((prev) => prev.map((z) => (z.id === result.data.id ? result.data : z)))
@@ -350,7 +357,7 @@ export function NotificationsClient({
     if (!window.confirm('Delete this zikr entry? This cannot be undone.')) return
     setBusy(`zikr-${entry.id}`)
     report(null)
-    const result = await deleteZikrAction(entry.id)
+    const result = await callAdminAction(() => deleteZikrAction(entry.id))
     setBusy(null)
     if (!result.ok) {
       report(result.error)

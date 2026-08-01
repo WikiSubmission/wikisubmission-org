@@ -5,6 +5,7 @@ import { useRef, useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { ThemedSelect } from '@/components/ui/themed-select'
 import type { ReviewPassage, ReviewStatus } from '@/lib/games-editor'
+import { callAdminAction } from '@/lib/call-admin-action'
 import {
   listPassagesAction,
   setStatusAction,
@@ -59,7 +60,7 @@ export function GamesReview({
   const [bulkMsg, setBulkMsg] = useState<string | null>(null)
 
   async function refreshProposedSummary() {
-    const res = await proposedSummaryAction()
+    const res = await callAdminAction(proposedSummaryAction)
     if (res.ok) setProposedChapters(res.data)
   }
 
@@ -70,10 +71,12 @@ export function GamesReview({
 
   function applyFilters(status: StatusFilter, chapter: string) {
     startFetch(async () => {
-      const res = await listPassagesAction({
-        status: status === 'all' ? undefined : status,
-        chapter: chapter.trim() || undefined,
-      })
+      const res = await callAdminAction(() =>
+        listPassagesAction({
+          status: status === 'all' ? undefined : status,
+          chapter: chapter.trim() || undefined,
+        })
+      )
       if (res.ok) {
         setPassages(res.data)
         setError(null)
@@ -110,7 +113,7 @@ export function GamesReview({
     setBulkPending(status)
     setBulkMsg(`Updating ${ids.length}…`)
     try {
-      const res = await bulkSetStatusAction(ids, status)
+      const res = await callAdminAction(() => bulkSetStatusAction(ids, status))
       if (!res.ok) {
         setBulkMsg(res.error)
         return
@@ -138,7 +141,7 @@ export function GamesReview({
 
   async function changeStatus(id: number, status: ReviewStatus) {
     setRowPending(id)
-    const res = await setStatusAction(id, status)
+    const res = await callAdminAction(() => setStatusAction(id, status))
     if (res.ok) {
       setError(null)
       setPassages((prev) =>
@@ -197,12 +200,17 @@ export function GamesReview({
           break
         }
 
-        const res = await curateAction(chapter, afterVerse)
+        const res = await callAdminAction(() => curateAction(chapter, afterVerse))
         if (!res.ok) {
-          if (res.rateLimited) {
+          // Absent on the failures callAdminAction synthesises (stale bundle,
+          // unreachable server) — neither is a rate limit, so retrying blind
+          // would be wrong; those fall through to the message below.
+          if ('rateLimited' in res && res.rateLimited) {
             // Server's hint wins when present; otherwise grow exponentially up
             // to BACKOFF_MAX_MS so repeated denials stretch the wait out.
-            const hintMs = res.retryAfterSeconds ? res.retryAfterSeconds * 1000 : 0
+            const retryAfter =
+              'retryAfterSeconds' in res ? res.retryAfterSeconds : undefined
+            const hintMs = retryAfter ? retryAfter * 1000 : 0
             const waitMs = hintMs > 0 ? hintMs : backoffMs
             const label =
               hintMs > 0

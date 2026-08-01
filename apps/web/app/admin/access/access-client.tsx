@@ -41,6 +41,7 @@ import {
   initialGrantState,
   type GrantState,
 } from '@/components/admin/grants/grant-state'
+import { callAdminAction } from '@/lib/call-admin-action'
 import { saveAccessAction } from './actions'
 
 export type UserRole = 'admin' | 'editor' | 'member'
@@ -245,12 +246,14 @@ function AccessPanel({
 
   const save = () => {
     startTransition(async () => {
-      const result = await saveAccessAction({
-        userId: editor.user_id,
-        // Omitted when unchanged so a grants-only edit does not touch the role.
-        role: role === normalizeRole(editor.role) ? undefined : role,
-        grants: grantStateToInput(state),
-      })
+      const result = await callAdminAction(() =>
+        saveAccessAction({
+          userId: editor.user_id,
+          // Omitted when unchanged so a grants-only edit does not touch the role.
+          role: role === normalizeRole(editor.role) ? undefined : role,
+          grants: grantStateToInput(state),
+        })
+      )
       if (!result.ok) {
         setError(result.error)
         return
