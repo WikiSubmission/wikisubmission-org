@@ -13,12 +13,22 @@ const monorepoRoot = path.join(
   '../../'
 )
 
-// Revision for the precached /offline fallback. Tied to the commit so the
-// fallback is re-fetched on each deploy rather than served stale forever.
+// Revision for the precached /offline and /quran/1 fallbacks. Serwist re-fetches
+// a precache entry only when its revision changes, so a constant here freezes
+// those two documents in every installed service worker forever.
+//
+// The git call only works locally: the deploy image is built from a context with
+// .git excluded (.dockerignore) on an alpine base that has no git binary, so it
+// silently yielded the literal 'dev' on every build — exactly the staleness it
+// was meant to prevent. Coolify exposes the commit as SOURCE_COMMIT at build
+// time; the build timestamp is the last resort so the value is never constant
+// across deploys even if no commit is available.
 const buildRevision =
+  process.env.SOURCE_COMMIT?.trim() ||
   spawnSync('git', ['rev-parse', 'HEAD'], {
     encoding: 'utf-8',
-  }).stdout?.trim() || 'dev'
+  }).stdout?.trim() ||
+  `build-${Date.now()}`
 
 const securityHeaders = [
   {
