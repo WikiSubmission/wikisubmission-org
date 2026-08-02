@@ -38,11 +38,21 @@ export const wsApi = createClient<paths>({
   baseUrl: resolveBrowserApiBaseUrl(),
 })
 
+// Bodied requests (POST/PUT/PATCH) have their body stream consumed once
+// fetch() sends them, so a 401 retry needs a pristine copy captured before
+// that happens. Cloned here (onRequest fires before the send), read back
+// in onResponse if a replay is needed. WeakMap keys are GC'd with the
+// request, so no manual cleanup is needed.
+const bodyClones = new WeakMap<Request, Request>()
+
 const authMiddleware: Middleware = {
   async onRequest({ request }) {
     const token = await accessTokenProvider()
     if (token) {
       request.headers.set('Authorization', `Bearer ${token}`)
+    }
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      bodyClones.set(request, request.clone())
     }
     return request
   },
@@ -54,14 +64,17 @@ const authMiddleware: Middleware = {
     const fresh = await authRefreshHandler()
     if (!fresh) return response
 
-    // The original Request's body stream is already consumed by the failed
-    // attempt, so only bodyless methods can be replayed. Bodied calls still
-    // benefit: the session is rotated, so the caller's retry succeeds.
-    if (request.method !== 'GET' && request.method !== 'HEAD') return response
-
     const headers = new Headers(request.headers)
     headers.set('Authorization', `Bearer ${fresh}`)
-    return fetch(new Request(request.url, { method: request.method, headers }))
+
+    if (request.method === 'GET' || request.method === 'HEAD') {
+      return fetch(new Request(request.url, { method: request.method, headers }))
+    }
+
+    const clone = bodyClones.get(request)
+    if (!clone) return response
+    const body = await clone.text()
+    return fetch(clone.url, { method: clone.method, headers, body })
   },
 }
 
