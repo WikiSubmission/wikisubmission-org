@@ -379,6 +379,8 @@ export type GameStats = components['schemas']['GameStats']
 
 type StartGameVariantRequest = components['schemas']['StartGameVariantRequest']
 type SubmitGameAttemptRequest = components['schemas']['SubmitGameAttemptRequest']
+export type GameStartRequest = StartGameVariantRequest
+export type GameSubmitRequest = SubmitGameAttemptRequest
 type GameLeaderboardQuery = NonNullable<
   paths['/games/fill-blank/leaderboard']['get']['parameters']['query']
 >
@@ -402,25 +404,64 @@ type GamesCheckApi = {
 }
 const gamesCheckApi = wsApi as unknown as GamesCheckApi
 
+/**
+ * Outcome of a single submit attempt, classified so the caller can decide
+ * whether replaying is safe. `transient` means the round may or may not have
+ * reached the server (network error, timeout, 5xx) — the caller reconciles
+ * against history before retrying, since submits are not idempotent.
+ */
+export type GameSubmitAttemptOutcome =
+  | { kind: 'ok'; data: GameSubmitResult }
+  | { kind: 'rate_limited' }
+  | { kind: 'rejected'; status: number }
+  | { kind: 'transient'; status?: number }
+
 const gamesApi = {
   listPassages: (
     opts?: { language?: GameLanguage; theme?: string; chapter?: number }
   ): Promise<GamePassageListEnvelope> =>
     unwrap(wsApi.GET('/games/fill-blank/passages', { params: { query: opts ?? {} } })),
 
-  startVariant: (body: StartGameVariantRequest): Promise<GameVariantEnvelope> =>
-    unwrap(wsApi.POST('/games/fill-blank/variants', { body })),
+  startVariant: (
+    body: StartGameVariantRequest,
+    init?: { signal?: AbortSignal },
+  ): Promise<GameVariantEnvelope> =>
+    unwrap(wsApi.POST('/games/fill-blank/variants', { body, signal: init?.signal })),
 
   submitVariant: (body: SubmitGameAttemptRequest): Promise<GameSubmitResultEnvelope> =>
     unwrap(wsApi.POST('/games/fill-blank/submit', { body })),
+
+  // Status-aware submit used by the durable submit runner. Never throws: an
+  // aborted or failed request comes back as `transient` so the round stays
+  // queued instead of being lost to an unhandled rejection.
+  submitVariantChecked: async (
+    body: SubmitGameAttemptRequest,
+    init?: { signal?: AbortSignal },
+  ): Promise<GameSubmitAttemptOutcome> => {
+    try {
+      const { data, response } = await wsApi.POST('/games/fill-blank/submit', {
+        body,
+        signal: init?.signal,
+      })
+      if (response.ok && data?.data) return { kind: 'ok', data: data.data }
+      if (response.status === 429) return { kind: 'rate_limited' }
+      if (response.status >= 500 || response.status === 408) {
+        return { kind: 'transient', status: response.status }
+      }
+      return { kind: 'rejected', status: response.status }
+    } catch {
+      return { kind: 'transient' }
+    }
+  },
 
   getLeaderboard: (query: GameLeaderboardQuery): Promise<GameLeaderboardEnvelope> =>
     unwrap(wsApi.GET('/games/fill-blank/leaderboard', { params: { query } })),
 
   getHistory: (
-    opts?: { limit?: number; cursor?: string }
+    opts?: { limit?: number; cursor?: string },
+    init?: { signal?: AbortSignal }
   ): Promise<GameHistoryEnvelope> =>
-    unwrap(wsApi.GET('/me/games/history', { params: { query: opts ?? {} } })),
+    unwrap(wsApi.GET('/me/games/history', { params: { query: opts ?? {} }, signal: init?.signal })),
 
   getStats: (): Promise<GameStatsEnvelope> => unwrap(wsApi.GET('/me/games/stats')),
 

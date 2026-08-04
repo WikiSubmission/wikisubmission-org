@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { App } from '@capacitor/app'
 import { getRegisteredOfflineUserStore } from '@/lib/offline/user/registry'
 import { flushOutbox } from '@/lib/offline/user/sync-runner'
+import { flushPendingGameSubmits } from '@/lib/games-submit'
 import { mobileSyncTransport } from '@/lib/offline-sync-transport-mobile'
 import { registerMobileOfflineStore } from '@/lib/register-offline-mobile'
 import { useMobileAuth } from '@/components/mobile-auth-context'
@@ -38,6 +39,18 @@ export function MobileOfflineSyncBridge() {
     }
   }, [])
 
+  // Game rounds have their own localStorage outbox (they are not part of the
+  // user-store mutation set), so they drain independently of the store being
+  // open — a round submitted on a dead connection must reach the leaderboard.
+  const doFlushGames = useCallback(() => {
+    if (!isAuthenticated) return
+    void flushPendingGameSubmits()
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    doFlushGames()
+  }, [doFlushGames])
+
   // Open the per-user store on sign-in (then flush anything queued); clear on sign-out.
   useEffect(() => {
     const store = getRegisteredOfflineUserStore()
@@ -57,12 +70,14 @@ export function MobileOfflineSyncBridge() {
   // web tab becoming visible).
   useEffect(() => {
     const handle = App.addListener('appStateChange', ({ isActive }) => {
-      if (isActive) void doFlush()
+      if (!isActive) return
+      void doFlush()
+      doFlushGames()
     })
     return () => {
       void handle.then((h) => h.remove())
     }
-  }, [doFlush])
+  }, [doFlush, doFlushGames])
 
   return null
 }

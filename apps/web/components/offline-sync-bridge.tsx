@@ -6,6 +6,7 @@ import { getRegisteredOfflineUserStore } from '@/lib/offline/user/registry'
 import { registerSyncTransport } from '@/lib/offline/user/transport'
 import { flushOutbox } from '@/lib/offline/user/sync-runner'
 import { webSyncTransport } from '@/lib/offline-sync-transport'
+import { flushPendingGameSubmits } from '@/lib/games-submit'
 
 /**
  * Wires the offline user store to the session lifecycle (web): opens the
@@ -55,11 +56,29 @@ export function OfflineSyncBridge() {
     }
   }, [status, userKey, doFlush])
 
+  // Game rounds queue in their own localStorage outbox (they are not part of
+  // the user-store mutation set), so they drain on the same triggers but
+  // independently of the store being open.
+  const doFlushGames = useCallback(() => {
+    if (status !== 'authenticated') return
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return
+    void flushPendingGameSubmits()
+  }, [status])
+
+  useEffect(() => {
+    doFlushGames()
+  }, [doFlushGames])
+
   // Replay on reconnect and when the tab becomes visible again.
   useEffect(() => {
-    const onOnline = () => void doFlush()
+    const onOnline = () => {
+      void doFlush()
+      doFlushGames()
+    }
     const onVisible = () => {
-      if (document.visibilityState === 'visible') void doFlush()
+      if (document.visibilityState !== 'visible') return
+      void doFlush()
+      doFlushGames()
     }
     window.addEventListener('online', onOnline)
     document.addEventListener('visibilitychange', onVisible)
@@ -67,7 +86,7 @@ export function OfflineSyncBridge() {
       window.removeEventListener('online', onOnline)
       document.removeEventListener('visibilitychange', onVisible)
     }
-  }, [doFlush])
+  }, [doFlush, doFlushGames])
 
   return null
 }

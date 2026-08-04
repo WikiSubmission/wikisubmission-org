@@ -25,8 +25,18 @@ import {
   type GameBlank,
   type GameSubmitResult,
   type GamePerBlankResult,
+  type GameSubmitRequest,
 } from '@/src/api/me-client'
 import { readVariant, stashVariant, parseVariantId } from '@/lib/games-session'
+import {
+  readPendingSubmit,
+  readRoundProgress,
+  readRoundResult,
+  saveRoundProgress,
+} from '@/lib/games-outbox'
+import { flushPendingGameSubmits, onGamesOutboxChange, submitRound } from '@/lib/games-submit'
+import { TapButton } from '@/components/games/tap-button'
+import { DEFAULT_REQUEST_TIMEOUT_MS, withTimeout } from '@/lib/with-timeout'
 import { encodeSharePayload } from '@/lib/games-share'
 
 const BLANK_TOKEN = /__BLANK_(\d+)__/g
@@ -44,6 +54,15 @@ type LoadState =
   | { status: 'loading' }
   | { status: 'error' }
   | { status: 'ready'; variant: GameVariant }
+
+// idle → submitting → (scored | queued). `queued` means the round is safe on
+// this device and waiting on the network; `syncing` is a manual drain of it.
+type SyncState = 'idle' | 'submitting' | 'queued' | 'syncing' | 'error'
+
+// How long answers may sit unsaved before the local snapshot is written. Long
+// enough that typing never hits synchronous localStorage, short enough that an
+// abrupt kill loses at most a word.
+const PROGRESS_SAVE_DEBOUNCE_MS = 400
 
 export function FillBlankRound({ variantId }: { variantId: string }) {
   const t = useTranslations('games')
@@ -67,8 +86,13 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   // Tracks the last guess value that was sent to checkBlank per blank, so we
   // don't consume an attempt when the same wrong guess is re-checked on blur.
   const lastCheckedRef = useRef<Record<number, string>>({})
-  const [submitting, setSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [syncState, setSyncState] = useState<SyncState>('idle')
+  const [notice, setNotice] = useState<string | null>(null)
+  // Set when the backend turns out to already hold this round (a replay of a
+  // submit whose response never made it back). Closes the round without a
+  // per-blank breakdown, which only the original response carried.
+  const [recordedScore, setRecordedScore] = useState<number | null>(null)
+  const [restartFailed, setRestartFailed] = useState(false)
   const [quitting, setQuitting] = useState(false)
   // Round result is held in-place and shown inline + as a dialog. The verse
   // text becomes a review pane (correct guesses in green, wrong guesses with
@@ -77,6 +101,15 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [restarting, setRestarting] = useState(false)
   const startedAt = useRef<number>(0)
+  // Play time carried over from a restored round, added to the time since
+  // `startedAt` so a reload doesn't reset the clock to zero.
+  const elapsedBase = useRef<number>(0)
+  // Synchronous single-flight guards. A tap fires on pointerdown and again on
+  // the click that follows it (see TapButton), and a fast connection can settle
+  // the request in between — state flags would be too slow to catch that.
+  const submitLock = useRef(false)
+  const restartLock = useRef(false)
+  const progressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   // DOM refs for each blank, keyed by index, so Enter can advance focus.
   const inputRefs = useRef<Map<number, HTMLInputElement | HTMLButtonElement>>(new Map())
   // Mirrors feedback/attemptsRemaining/guesses so that advanceFrom, invoked
@@ -91,35 +124,105 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     stateRef.current = { feedback, attemptsRemaining }
   }, [attemptsRemaining, feedback])
 
+  // Wipe every trace of the previous round. "Play again" only changes the `?v=`
+  // query, and on the static mobile export that navigation does not remount the
+  // route — without this the finished round's result, dialog and pending
+  // "Starting…" label would stay on screen over the new variant forever.
+  const resetRound = useCallback(() => {
+    setGuesses({})
+    setFeedback({})
+    setHintsRevealed({})
+    setAttemptsRemaining({})
+    setWrongAttempts({})
+    setChecking({})
+    setResult(null)
+    setRecordedScore(null)
+    setDialogOpen(false)
+    setQuitting(false)
+    setNotice(null)
+    setSyncState('idle')
+    setRestartFailed(false)
+    setRestarting(false)
+    lastCheckedRef.current = {}
+    stateRef.current = { feedback: {}, attemptsRemaining: {} }
+    submitLock.current = false
+    restartLock.current = false
+    elapsedBase.current = 0
+    startedAt.current = performance.now()
+  }, [])
+
   useEffect(() => {
     let active = true
+    resetRound()
     // Resolve the variant: prefer the stash, else resume from the deterministic
     // slug (cold open via shared link / refresh after the stash was evicted).
     const resolve = async (): Promise<GameVariant | null> => {
       const cached = readVariant(variantId)
-      if (cached) {
-        startedAt.current = performance.now()
-        return cached
-      }
+      if (cached) return cached
       const parsed = parseVariantId(variantId)
       if (!parsed) return null
-      const { data } = await meApi.games.startVariant({ ...parsed, variant_id: variantId })
+      const { data } = await withTimeout(DEFAULT_REQUEST_TIMEOUT_MS, (signal) =>
+        meApi.games.startVariant({ ...parsed, variant_id: variantId }, { signal }),
+      )
       stashVariant(data)
-      startedAt.current = performance.now()
       return data
     }
     resolve()
       .then((variant) => {
         if (!active) return
-        if (variant) {
-          setLoad({ status: 'ready', variant })
-          if (variant.difficulty !== 'easy') {
-            const init: Record<number, number> = {}
-            for (const b of variant.blanks) init[b.index] = MAX_BLANK_ATTEMPTS
-            setAttemptsRemaining(init)
-          }
-        } else {
+        if (!variant) {
           setLoad({ status: 'error' })
+          return
+        }
+        setLoad({ status: 'ready', variant })
+        startedAt.current = performance.now()
+
+        // Restore whatever was typed before the app was closed or reloaded.
+        const saved = readRoundProgress(variantId)
+
+        // A scored round wins over anything else: show it instead of handing
+        // the player a fresh grid for a round they already finished. The review
+        // needs the player's own guesses, which only the snapshot has.
+        const storedResult = readRoundResult(variantId)
+        if (storedResult) {
+          if (saved) {
+            setGuesses(saved.guesses)
+            setWrongAttempts(saved.wrongAttempts)
+          }
+          setResult(storedResult)
+          return
+        }
+
+        if (saved) {
+          setGuesses(saved.guesses)
+          setFeedback(saved.feedback)
+          setHintsRevealed(saved.hintsRevealed)
+          setWrongAttempts(saved.wrongAttempts)
+          elapsedBase.current = saved.elapsedMs
+          stateRef.current = {
+            feedback: saved.feedback,
+            attemptsRemaining: saved.attemptsRemaining,
+          }
+          // Remember which guesses were already checked, so blurring a restored
+          // blank doesn't spend an attempt re-checking the same word.
+          const checked: Record<number, string> = {}
+          for (const [key, value] of Object.entries(saved.guesses)) {
+            const index = Number(key)
+            if (saved.feedback[index] !== undefined) checked[index] = value.trim()
+          }
+          lastCheckedRef.current = checked
+        }
+        if (variant.difficulty !== 'easy') {
+          const init: Record<number, number> = {}
+          for (const b of variant.blanks) init[b.index] = MAX_BLANK_ATTEMPTS
+          setAttemptsRemaining({ ...init, ...(saved?.attemptsRemaining ?? {}) })
+        }
+
+        // A round submitted earlier that never got an answer from the backend:
+        // show it as queued and try to drain it now.
+        if (readPendingSubmit(variantId)) {
+          setSyncState('queued')
+          void flushPendingGameSubmits()
         }
       })
       .catch(() => {
@@ -128,7 +231,7 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     return () => {
       active = false
     }
-  }, [variantId])
+  }, [variantId, resetRound])
 
   const variant = load.status === 'ready' ? load.variant : null
   const blanksByIndex = useMemo(
@@ -148,6 +251,88 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     () => Object.values(hintsRevealed).reduce((sum, n) => sum + n, 0),
     [hintsRevealed],
   )
+  const roundClosed = result !== null || recordedScore !== null
+
+  const elapsedMs = useCallback(
+    () => Math.max(0, Math.round(elapsedBase.current + (performance.now() - startedAt.current))),
+    [],
+  )
+
+  // Mirror the round onto the device, debounced. An Android app can be killed
+  // from the background at any moment; this is what makes that survivable.
+  useEffect(() => {
+    if (!variant || roundClosed) return
+    if (progressTimer.current) clearTimeout(progressTimer.current)
+    progressTimer.current = setTimeout(() => {
+      saveRoundProgress(variant.variant_id, {
+        guesses,
+        feedback,
+        hintsRevealed,
+        attemptsRemaining,
+        wrongAttempts,
+        elapsedMs: elapsedMs(),
+        updatedAt: Date.now(),
+      })
+    }, PROGRESS_SAVE_DEBOUNCE_MS)
+    return () => {
+      if (progressTimer.current) clearTimeout(progressTimer.current)
+    }
+  }, [
+    variant,
+    roundClosed,
+    guesses,
+    feedback,
+    hintsRevealed,
+    attemptsRemaining,
+    wrongAttempts,
+    elapsedMs,
+  ])
+
+  const showResult = useCallback((data: GameSubmitResult, openDialog: boolean) => {
+    setResult(data)
+    setSyncState('idle')
+    setNotice(null)
+    if (openDialog) setDialogOpen(true)
+    // Drop focus off any input so the review styling is what the player sees.
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+  }, [])
+
+  // Pick up a result that arrived from a background flush, and retry the queue
+  // whenever the device comes back — reconnect on web, resume on mobile (the
+  // webview fires visibilitychange when the app returns to the foreground).
+  useEffect(() => {
+    // Nothing left to wait for once the round is scored — and staying
+    // subscribed would re-open the dialog on an unrelated round's flush.
+    if (!variant || result) return
+    const id = variant.variant_id
+    const sync = () => {
+      const stored = readRoundResult(id)
+      if (stored) {
+        showResult(stored, true)
+        return
+      }
+      if (!readPendingSubmit(id)) {
+        setSyncState((prev) => (prev === 'queued' || prev === 'syncing' ? 'idle' : prev))
+      }
+    }
+    const drain = () => {
+      if (!readPendingSubmit(id)) return
+      void flushPendingGameSubmits()
+    }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') drain()
+    }
+    const unsubscribe = onGamesOutboxChange(sync)
+    window.addEventListener('online', drain)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      unsubscribe()
+      window.removeEventListener('online', drain)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [variant, result, showResult])
 
   const revealHint = useCallback((index: number, max: number) => {
     setHintsRevealed((prev) => ({ ...prev, [index]: Math.min((prev[index] ?? 0) + 1, max) }))
@@ -268,45 +453,89 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     submit()
   }
 
+  // Hand the round to the durable submit path: it is written to the local
+  // outbox before the request goes out, so a failure here is a delay, never a
+  // lost round.
   async function submit() {
-    if (!variant || submitting || result) return
-    setSubmitting(true)
-    setSubmitError(null)
+    if (!variant || roundClosed || submitLock.current) return
+    submitLock.current = true
+    setSyncState('submitting')
+    setNotice(null)
+    const payload: GameSubmitRequest = {
+      variant_id: variant.variant_id,
+      session_id: variant.session_id,
+      guesses: variant.blanks.map((b) => ({ index: b.index, value: (guesses[b.index] ?? '').trim() })),
+      hints_used: hintsUsed,
+      elapsed_ms: elapsedMs(),
+    }
     try {
-      const elapsedMs = Math.max(0, performance.now() - startedAt.current)
-      const { data } = await meApi.games.submitVariant({
-        variant_id: variant.variant_id,
-        session_id: variant.session_id,
-        guesses: variant.blanks.map((b) => ({ index: b.index, value: (guesses[b.index] ?? '').trim() })),
-        hints_used: hintsUsed,
-        elapsed_ms: elapsedMs,
-      })
-      setResult(data)
-      setDialogOpen(true)
-      // Drop focus off any input so the review styling is what the player sees.
-      if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur()
+      const outcome = await submitRound(payload)
+      switch (outcome.status) {
+        case 'recorded':
+          showResult(outcome.result, true)
+          break
+        case 'already_recorded':
+          setRecordedScore(outcome.score)
+          setSyncState('idle')
+          setNotice(t('alreadyRecorded'))
+          break
+        case 'queued':
+          setSyncState('queued')
+          setNotice(outcome.reason === 'rate_limited' ? t('rateLimited') : null)
+          break
+        case 'rejected':
+          setSyncState('error')
+          setNotice(t('submitError'))
+          break
       }
-    } catch (err) {
-      setSubmitError(err instanceof Error && err.message.startsWith('429') ? t('rateLimited') : t('submitError'))
     } finally {
-      setSubmitting(false)
+      submitLock.current = false
     }
   }
 
-  // Start a new round with the same language, difficulty, and size.
+  // Manual drain of the queued round.
+  async function syncNow() {
+    if (syncState === 'syncing') return
+    setSyncState('syncing')
+    setNotice(null)
+    await flushPendingGameSubmits()
+    // The outbox subscription resolves the outcome (result or still queued);
+    // this only reverts the label if nothing changed.
+    setSyncState((prev) => (prev === 'syncing' ? 'queued' : prev))
+  }
+
+  // Start a new round with the same language, difficulty, and size. The new
+  // variant is adopted in place rather than waiting on the navigation, because
+  // the mobile export keeps this route mounted across a `?v=` change.
   async function startAgain() {
-    if (!variant || restarting) return
+    if (!variant || restartLock.current) return
+    restartLock.current = true
     setRestarting(true)
+    setRestartFailed(false)
     try {
-      const { data } = await meApi.games.startVariant({
-        language: variant.language,
-        difficulty: variant.difficulty,
-        size: variant.size,
-      })
+      const { data } = await withTimeout(DEFAULT_REQUEST_TIMEOUT_MS, (signal) =>
+        meApi.games.startVariant(
+          {
+            language: variant.language,
+            difficulty: variant.difficulty,
+            size: variant.size,
+          },
+          { signal },
+        ),
+      )
       stashVariant(data)
+      resetRound()
+      setLoad({ status: 'ready', variant: data })
+      if (data.difficulty !== 'easy') {
+        const init: Record<number, number> = {}
+        for (const b of data.blanks) init[b.index] = MAX_BLANK_ATTEMPTS
+        setAttemptsRemaining(init)
+      }
       router.push(`/quran/games/fill-blank/play?v=${encodeURIComponent(data.variant_id)}`)
     } catch {
+      setRestartFailed(true)
+    } finally {
+      restartLock.current = false
       setRestarting(false)
     }
   }
@@ -348,9 +577,9 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
     return (
       <div>
         <p style={{ color: 'var(--ed-fg-muted)' }}>{t('roundError')}</p>
-        <button type="button" onClick={() => router.push('/quran/games/fill-blank')} style={ghostButton}>
+        <TapButton onTap={() => router.push('/quran/games/fill-blank')} style={ghostButton}>
           {t('startRound')}
-        </button>
+        </TapButton>
       </div>
     )
   }
@@ -394,24 +623,54 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
 
       {result ? (
         <div style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <button type="button" onClick={() => setDialogOpen(true)} style={primaryButton}>
+          <TapButton onTap={() => setDialogOpen(true)} style={primaryButton}>
             {t('viewResult')}
-          </button>
+          </TapButton>
           <span style={monoLabel}>
             {t('correctOf', { correct: result.correct_count, total: result.total_count })}
           </span>
         </div>
+      ) : recordedScore !== null ? (
+        // Recovered round: the backend has the score, but the per-blank
+        // breakdown only existed in the response we never received.
+        <div style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <span style={monoLabel}>
+            {t('scoreLabel')}: {recordedScore ?? '—'}
+          </span>
+          <TapButton onTap={startAgain} disabled={restarting} style={primaryButton}>
+            {restarting ? t('starting') : t('playAgain')}
+          </TapButton>
+          <Link href="/quran/games/leaderboard" style={ghostLink}>
+            {t('leaderboardLink')}
+          </Link>
+        </div>
+      ) : syncState === 'queued' || syncState === 'syncing' ? (
+        <div style={{ marginTop: 32, display: 'grid', gap: 12 }}>
+          <div style={queuedBanner}>
+            <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--ed-fg)' }}>
+              {t('submitQueued')}
+            </span>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              <TapButton onTap={syncNow} disabled={syncState === 'syncing'} style={primaryButton}>
+                {syncState === 'syncing' ? t('syncing') : t('syncNow')}
+              </TapButton>
+              <TapButton onTap={startAgain} disabled={restarting} style={ghostLinkButton}>
+                {restarting ? t('starting') : t('playAgain')}
+              </TapButton>
+            </div>
+          </div>
+        </div>
       ) : (
         <div style={{ marginTop: 32, display: 'grid', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <button type="button" onClick={submit} disabled={submitting} style={primaryButton}>
-              {submitting ? t('submitting') : t('submitRound')}
-            </button>
+            <TapButton onTap={submit} disabled={syncState === 'submitting'} style={primaryButton}>
+              {syncState === 'submitting' ? t('submitting') : t('submitRound')}
+            </TapButton>
             <span style={monoLabel}>{t('progress', { filled: filledCount, total: totalBlanks })}</span>
             {hintsUsed > 0 && <span style={monoLabel}>{t('hintsUsed', { count: hintsUsed })}</span>}
-            <button type="button" onClick={() => setQuitting(true)} style={quitButton}>
+            <TapButton onTap={() => setQuitting(true)} style={quitButton}>
               {t('quitRound')}
-            </button>
+            </TapButton>
           </div>
           {quitting && (
             <div style={quitConfirm}>
@@ -419,14 +678,26 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
               <Link href="/quran/games/fill-blank" style={quitConfirmYes}>
                 {t('quitConfirmYes')}
               </Link>
-              <button type="button" onClick={() => setQuitting(false)} style={quitConfirmNo}>
+              <TapButton onTap={() => setQuitting(false)} style={quitConfirmNo}>
                 {t('quitConfirmNo')}
-              </button>
+              </TapButton>
             </div>
           )}
         </div>
       )}
-      {submitError && <p style={{ marginTop: 12, color: 'var(--ed-accent, #b91c1c)' }}>{submitError}</p>}
+      {notice && (
+        <p
+          style={{
+            marginTop: 12,
+            color: syncState === 'error' ? 'var(--ed-accent, #b91c1c)' : 'var(--ed-fg-muted)',
+          }}
+        >
+          {notice}
+        </p>
+      )}
+      {restartFailed && (
+        <p style={{ marginTop: 12, color: 'var(--ed-accent, #b91c1c)' }}>{t('startError')}</p>
+      )}
 
       {result && (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -552,14 +823,9 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
             })()}
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 4, alignItems: 'center' }}>
               <div style={{ display: 'inline-flex' }}>
-                <button
-                  type="button"
-                  onClick={startAgain}
-                  disabled={restarting}
-                  style={splitButtonMain}
-                >
+                <TapButton onTap={startAgain} disabled={restarting} style={splitButtonMain}>
                   {restarting ? t('starting') : t('playAgain')}
-                </button>
+                </TapButton>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button type="button" style={splitButtonArrow} aria-label={t('playAgainOptions')}>
@@ -578,9 +844,9 @@ export function FillBlankRound({ variantId }: { variantId: string }) {
               <Link href="/quran/games/leaderboard" style={ghostLink}>
                 {t('leaderboardLink')}
               </Link>
-              <button type="button" onClick={shareResult} style={ghostLink}>
+              <TapButton onTap={() => void shareResult()} style={ghostLinkButton}>
                 {t('share')}
-              </button>
+              </TapButton>
             </div>
           </DialogContent>
         </Dialog>
@@ -960,6 +1226,18 @@ const ghostLink: React.CSSProperties = {
   fontSize: 14,
   textDecoration: 'none',
   cursor: 'pointer',
+}
+
+// Same look as ghostLink, for the <button> siblings of those links.
+const ghostLinkButton: React.CSSProperties = { ...ghostLink, font: 'inherit', fontSize: 14 }
+
+const queuedBanner: React.CSSProperties = {
+  display: 'grid',
+  gap: 12,
+  padding: '14px 16px',
+  border: '1px solid var(--ed-rule)',
+  borderRadius: 2,
+  background: 'var(--ed-surface)',
 }
 
 const reviewCorrect: React.CSSProperties = {

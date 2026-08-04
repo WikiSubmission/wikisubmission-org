@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { meApi, type GameDifficulty, type GameRoundSize, type GameLanguage } from '@/src/api/me-client'
 import { stashVariant } from '@/lib/games-session'
+import { DEFAULT_REQUEST_TIMEOUT_MS, withTimeout } from '@/lib/with-timeout'
+import { TapButton } from '@/components/games/tap-button'
 
 const DIFFICULTIES: GameDifficulty[] = ['adaptive', 'easy', 'medium', 'hard', 'professional']
 const SIZES: GameRoundSize[] = ['adaptive', 'short', 'medium', 'long']
@@ -32,18 +34,28 @@ export function FillBlankPicker() {
   const [size, setSize] = useState<GameRoundSize>('adaptive')
   const [starting, setStarting] = useState(false)
   const [startFailed, setStartFailed] = useState(false)
+  // Synchronous guard: the tap handler below fires on pointerdown and again on
+  // the click of the same gesture, which a state flag can't catch in time.
+  const startLock = useRef(false)
 
   async function start() {
-    if (starting) return
+    if (startLock.current) return
+    startLock.current = true
     setStarting(true)
     setStartFailed(false)
     try {
-      const { data } = await meApi.games.startVariant({ language, difficulty, size })
+      // Bounded: without a deadline a stalled request leaves the button on
+      // "Starting…" forever with no way back.
+      const { data } = await withTimeout(DEFAULT_REQUEST_TIMEOUT_MS, (signal) =>
+        meApi.games.startVariant({ language, difficulty, size }, { signal }),
+      )
       stashVariant(data)
       router.push(`/quran/games/fill-blank/play?v=${encodeURIComponent(data.variant_id)}`)
     } catch {
       setStartFailed(true)
       setStarting(false)
+    } finally {
+      startLock.current = false
     }
   }
 
@@ -78,9 +90,9 @@ export function FillBlankPicker() {
       </Field>
 
       <div>
-        <button type="button" onClick={start} disabled={starting} style={primaryButton}>
+        <TapButton onTap={() => void start()} disabled={starting} style={primaryButton}>
           {starting ? t('starting') : t('startRound')}
-        </button>
+        </TapButton>
         {startFailed && (
           <p style={{ marginTop: 12, color: 'var(--ed-accent, #b91c1c)' }}>{t('startError')}</p>
         )}
