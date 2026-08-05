@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resources that only ever get resolved at runtime by name, so the resource
+     shrinker (shrinkResources true) sees no reference and strips them from
+     release builds.
+
+     - ic_stat_notify: read as a string from assets/capacitor.config.json and
+       resolved via AssetUtil.getResourceID. When it is missing, Capacitor's
+       LocalNotificationManager falls back to android.R.drawable.ic_dialog_info
+       (the exclamation-mark circle).
+     - adhan_*: prayer notification sounds, named in lib/notifications/sounds.ts
+       and passed through to the channel as a raw resource name. When missing,
+       the channel silently falls back to the default notification sound. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_notify,@raw/adhan_alafasy,@raw/adhan_omar_hisham" />

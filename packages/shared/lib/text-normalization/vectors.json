@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "description": "Canonical test vectors for normalizeForSearch. The single source of truth shared by the TypeScript implementation (org/packages/shared) and the Go implementation (ws-backend). Both must produce `out` for every `in`. See docs/text-normalization.md.",
+  "cases": [
+    { "name": "empty string", "in": "", "out": "" },
+    { "name": "ascii passthrough", "in": "mercy", "out": "mercy" },
+    { "name": "latin lowercased", "in": "MERCY", "out": "mercy" },
+    { "name": "latin accents folded (precomposed)", "in": "Café", "out": "cafe" },
+    { "name": "latin diaeresis folded", "in": "naïve", "out": "naive" },
+    { "name": "whitespace collapsed and trimmed", "in": "  the   mercy ", "out": "the mercy" },
+    { "name": "digits and verse keys preserved", "in": "2:255", "out": "2:255" },
+    { "name": "harakat stripped (al-rahman)", "in": "الرَّحْمَٰن", "out": "الرحمن" },
+    { "name": "harakat stripped (bism)", "in": "بِسْمِ", "out": "بسم" },
+    { "name": "alef hamza above folded", "in": "أَحْمَد", "out": "احمد" },
+    { "name": "alef hamza below folded", "in": "إِنَّ", "out": "ان" },
+    { "name": "alef madda folded", "in": "آمَنُوا", "out": "امنوا" },
+    { "name": "alef wasla folded", "in": "ٱللَّه", "out": "الله" },
+    { "name": "alef maqsura folded to ya (with dagger alef)", "in": "مُوسَىٰ", "out": "موسي" },
+    { "name": "ta marbuta folded to ha", "in": "صَلَاة", "out": "صلاه" },
+    { "name": "waw hamza folded to waw", "in": "مُؤْمِن", "out": "مومن" },
+    { "name": "ya hamza folded to ya", "in": "أَئِمَّة", "out": "ايمه" },
+    { "name": "standalone hamza removed (with tanwin)", "in": "جُزْءٌ", "out": "جز" },
+    { "name": "tatweel removed", "in": "مـــحـمـد", "out": "محمد" },
+    { "name": "mixed arabic phrase", "in": "إِنَّا أَعْطَيْنَاكَ ٱلْكَوْثَرَ", "out": "انا اعطيناك الكوثر" }
+  ]
+}

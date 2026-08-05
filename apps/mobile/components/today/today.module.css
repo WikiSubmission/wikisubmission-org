@@ -1,0 +1,122 @@
+/* Slow ambient motion for the Today backdrop motifs. All loops are long and
+   transform-only (GPU-friendly), and every animation is disabled under
+   prefers-reduced-motion so the scene stays static for motion-sensitive users. */
+
+.layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Parchment: ink washes drift gently across the page. */
+.drift {
+  animation: drift 48s ease-in-out infinite alternate;
+}
+.driftSlow {
+  animation: drift 72s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(-3%, 2%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4%, -3%, 0) scale(1.08);
+  }
+}
+
+/* Crystals: facets float and turn slowly; glints fade in and out. */
+.float {
+  animation: float 26s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+.floatDelayed {
+  animation: float 34s ease-in-out infinite alternate-reverse;
+  transform-origin: center;
+}
+
+@keyframes float {
+  from {
+    transform: translateY(2%) rotate(-4deg);
+  }
+  to {
+    transform: translateY(-3%) rotate(5deg);
+  }
+}
+
+.shimmer {
+  animation: shimmer 9s ease-in-out infinite;
+}
+.shimmerDelayed {
+  animation: shimmer 11s ease-in-out infinite 3s;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* Chrome: liquid-metal blobs morph and rotate under a goo filter. */
+.morph {
+  animation: morph 30s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+.morphDelayed {
+  animation: morph 40s ease-in-out infinite alternate-reverse;
+  transform-origin: center;
+}
+
+@keyframes morph {
+  from {
+    transform: translate3d(-4%, 3%, 0) scale(0.95);
+  }
+  to {
+    transform: translate3d(5%, -4%, 0) scale(1.12);
+  }
+}
+
+.spin {
+  animation: spin 90s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drift,
+  .driftSlow,
+  .float,
+  .floatDelayed,
+  .shimmer,
+  .shimmerDelayed,
+  .morph,
+  .morphDelayed,
+  .spin {
+    animation: none;
+  }
+}
+
+/* Subdued pages (reader, settings) render the scene as a still: the loops are
+   full-screen blurred layers, and compositing them forever behind dense
+   content costs GPU/battery and can jank reader scrolling. */
+.still .drift,
+.still .driftSlow,
+.still .float,
+.still .floatDelayed,
+.still .shimmer,
+.still .shimmerDelayed,
+.still .morph,
+.still .morphDelayed,
+.still .spin {
+  animation: none;
+}

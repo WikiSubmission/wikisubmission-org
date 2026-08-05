@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Backups disabled: Capacitor Preferences (SharedPreferences) and the
+         offline SQLite stores hold session/user data that must not leave the
+         device via cloud or device-transfer backup. Server sync is the source
+         of truth for user data, so nothing of value is lost. -->
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTask"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+
+    <!-- Permissions -->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Approximate location only: prayer times need city-level accuracy. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Background audio: the media-session plugin contributes its
+         MediaSessionService (foregroundServiceType="mediaPlayback") via
+         manifest merge; the typed FGS permission must be declared app-side. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Android 13+: required for the lock-screen media notification. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- User-scheduled prayer reminders. The user-grantable variant (never
+         USE_EXACT_ALARM): granted at install on Android 12/13, denied by
+         default on 14+ where the plugin falls back to inexact alarms and the
+         notification settings UI offers the special-access screen. Declare
+         the use case in the Play Console app content form. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+</manifest>

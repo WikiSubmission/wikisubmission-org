@@ -1,0 +1,45 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.13.0'
+        classpath 'com.google.gms:google-services:4.4.4'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+apply from: "variables.gradle"
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// @capgo/capacitor-social-login ships its own gradle.properties inside the
+// plugin's projectDir, and a subproject's own gradle.properties wins over the
+// root one — so the socialLogin.* flags in ../gradle.properties never reach it.
+// Inject them as extra properties before the plugin is evaluated instead.
+// Dropping the unused facebook/twitter SDKs keeps the Facebook SDK's
+// com.google.android.gms.permission.AD_ID + ACCESS_ADSERVICES_* permissions out
+// of the merged manifest (Play Console flags AD_ID as an advertising-ID declaration).
+subprojects { subproject ->
+    if (subproject.name == 'capgo-capacitor-social-login') {
+        subproject.beforeEvaluate {
+            subproject.ext['socialLogin.facebook.include'] = 'false'
+            subproject.ext['socialLogin.twitter.include'] = 'false'
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
