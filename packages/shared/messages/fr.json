@@ -884,8 +884,8 @@
       "androidDesc": "Lire et écouter sur tout appareil Android.",
       "discordTitle": "Bot Discord",
       "discordDesc": "Recherche de versets et réponses IA pour votre serveur.",
-      "githubTitle": "Source Code",
-      "githubDesc": "Every app, dataset, and tool on this site is open source. Read it, fork it, build on it."
+      "githubTitle": "Code source",
+      "githubDesc": "Chaque application, jeu de données et outil de ce site est open source. Lisez-le, forkez-le, construisez dessus."
     },
     "closing": {
       "quote": "« Dis : il m'est ordonné d'adorer Dieu, lui consacrant ma religion absolument à Lui seul. »",

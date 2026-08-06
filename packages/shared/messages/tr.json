@@ -739,8 +739,8 @@
   "homePage": {
     "hero": {
       "headline1": "Mutluluk,",
-      "headline2": "Allah'a Teslimiyettir",
-      "headline3": ".",
+      "headline2": "Allah'a",
+      "headline3": "Teslimiyettir.",
       "verseKicker": "Kuran · 2:62 ve 5:69",
       "verse": "Şüphesiz, inananlar, Yahudi olanlar, Hristiyanlar ve dönüşüm yapanlar; (1) Allah'a inanan, (2) Ahiret Gününe inanan ve (3) doğru bir yaşam süren herkes, Rablerinden ödüllerini alacaktır. Onlara korku yoktur ve üzülmeyeceklerdir.",
       "lede": "Tüm insanlar için tek bir dine — yalnızca Allah'a Teslimiyete — davet edildiniz. WikiSubmission, Son Ahit, Kutsal Kitap ve 19 sayısının matematiksel mucizesi için ücretsiz, açık kaynaklı bir evdir — aracı olmadan doğrudan Allah'ı arayan herkes için araçlar.",
@@ -884,8 +884,8 @@
       "androidDesc": "Her Android cihazda okuyun ve dinleyin.",
       "discordTitle": "Discord Botu",
       "discordDesc": "Sunucunuz için ayet araması ve AI yanıtları.",
-      "githubTitle": "Source Code",
-      "githubDesc": "Every app, dataset, and tool on this site is open source. Read it, fork it, build on it."
+      "githubTitle": "Kaynak Kodu",
+      "githubDesc": "Bu sitedeki her uygulama, veri kümesi ve araç açık kaynaktır. Okuyun, fork edin, üzerine geliştirin."
     },
     "closing": {
       "quote": "\"De ki: Bana, dinimi yalnızca O'na adayarak Allah'a ibadet etmem emrolundu.\"",
