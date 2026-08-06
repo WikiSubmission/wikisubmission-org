@@ -784,7 +784,7 @@
       "dividerSub": "A physical proof",
       "heading": "Over it is nineteen.",
       "ref": "Sura 74, verse 30",
-      "desc": "Readers have long observed a numerical pattern in the Quran built on the number nineteen, running through its chapters, its opening formula, and its letter counts. Within the Submission tradition this is read as a sign of divine authorship. We present the data and let you weigh it.",
+      "desc": "The Quran is mathematically composed: its chapters, its opening formula, and its letter counts interlock through the number nineteen. The structure is measurable, reproducible, and beyond human authorship.",
       "cta": "Explore the evidence",
       "fact1k": "114",
       "fact1v": "chapters",
@@ -883,7 +883,7 @@
       "dividerTitle": "Free & open source",
       "dividerSub": "Tools, apps & code",
       "open": "Open",
-      "aiTitle": "SubmissionAI",
+      "aiTitle": "Submission AI",
       "aiDesc": "Ask any question about the Quran or Submission, grounded in scripture, not opinion.",
       "downloadsTitle": "Downloads",
       "downloadsDesc": "PDFs, audio recitations, and printable editions.",
@@ -898,7 +898,6 @@
     },
     "closing": {
       "quote": "“Say, ‘O followers of the scripture, let us come to a common agreement between us and you: that we shall not worship except GOD.’”",
-      "quoteEmphasis": "devoting",
       "ref": "Quran 3:64",
       "ctaPrimary": "Start at chapter 1",
       "ctaSecondary": "Support the mission"
