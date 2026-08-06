@@ -886,7 +886,9 @@
       "androidTitle": "ئەپی Android",
       "androidDesc": "بخوێنەرەوە و گوێبگرە لە هەر ئامێرێکی Android.",
       "discordTitle": "بۆتی Discord",
-      "discordDesc": "گەڕانی ئایەت و وەڵامی AI بۆ سێرڤەرت."
+      "discordDesc": "گەڕانی ئایەت و وەڵامی AI بۆ سێرڤەرت.",
+      "githubTitle": "Source Code",
+      "githubDesc": "Every app, dataset, and tool on this site is open source. Read it, fork it, build on it."
     },
     "closing": {
       "quote": "«بڵێ: من ڕێنمایی کراوم بۆ پەرستنی خودا، بە تەواوی ئاینم بۆ ئەو تەرخان بکەم.»",

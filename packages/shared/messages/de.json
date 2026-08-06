@@ -883,7 +883,9 @@
       "androidTitle": "Android-App",
       "androidDesc": "Lesen und Hören auf jedem Android-Gerät.",
       "discordTitle": "Discord-Bot",
-      "discordDesc": "Verssuche und KI-Antworten für Ihren Server."
+      "discordDesc": "Verssuche und KI-Antworten für Ihren Server.",
+      "githubTitle": "Source Code",
+      "githubDesc": "Every app, dataset, and tool on this site is open source. Read it, fork it, build on it."
     },
     "closing": {
       "quote": "„Sprich: Mir wurde befohlen, Gott anzubeten und meine Religion ihm allein zu widmen.\"",

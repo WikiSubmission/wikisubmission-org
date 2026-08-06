@@ -883,7 +883,9 @@
       "androidTitle": "Android Uygulaması",
       "androidDesc": "Her Android cihazda okuyun ve dinleyin.",
       "discordTitle": "Discord Botu",
-      "discordDesc": "Sunucunuz için ayet araması ve AI yanıtları."
+      "discordDesc": "Sunucunuz için ayet araması ve AI yanıtları.",
+      "githubTitle": "Source Code",
+      "githubDesc": "Every app, dataset, and tool on this site is open source. Read it, fork it, build on it."
     },
     "closing": {
       "quote": "\"De ki: Bana, dinimi yalnızca O'na adayarak Allah'a ibadet etmem emrolundu.\"",

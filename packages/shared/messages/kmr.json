@@ -338,7 +338,9 @@
     },
     "tools": {
       "dividerNum": "VI",
-      "aiTitle": "SubmissionAI"
+      "aiTitle": "SubmissionAI",
+      "githubTitle": "Source Code",
+      "githubDesc": "Every app, dataset, and tool on this site is open source. Read it, fork it, build on it."
     }
   },
   "meNotes": {

@@ -883,7 +883,9 @@
       "androidTitle": "تطبيق أندرويد",
       "androidDesc": "اقرأ واستمع على كل أجهزة أندرويد.",
       "discordTitle": "بوت Discord",
-      "discordDesc": "بحث عن الآيات وإجابات الذكاء الاصطناعي لخادمك."
+      "discordDesc": "بحث عن الآيات وإجابات الذكاء الاصطناعي لخادمك.",
+      "githubTitle": "Source Code",
+      "githubDesc": "Every app, dataset, and tool on this site is open source. Read it, fork it, build on it."
     },
     "closing": {
       "quote": "«قُلْ إِنِّي أُمِرْتُ أَنْ أَعْبُدَ اللَّهَ مُخْلِصًا لَهُ الدِّينَ.»",

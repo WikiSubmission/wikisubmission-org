@@ -14,7 +14,7 @@ import { ContinueReadingSection } from './_sections/continue-reading'
 export const metadata = buildPageMetadata({
   title: 'WikiSubmission',
   description:
-    'WikiSubmission is a faith-based nonprofit providing free and open-source tools for the Final Testament (Quran), Bible, and religious education.',
+    'WikiSubmission is a nonprofit building free, open-source tools for scripture: the Quran, the Bible, and the common ground between the world’s monotheistic faiths.',
   url: '/',
 })
 
