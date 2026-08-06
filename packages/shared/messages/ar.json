@@ -1433,6 +1433,8 @@
       "searchPlaceholder": "ابحث في السور أو الآيات",
       "searchAllVerses": "ابحث في كل الآيات",
       "searchAcross": "ابحث عن «{query}» في القرآن",
+      "goToReference": "الانتقال إلى هذا المقطع",
+      "previewBibleVerse": "معاينة هذه الآية من الكتاب المقدس",
       "appendicesDesc": "جميع الملاحق الـ38 للعهد الأخير",
       "decreaseTextSize": "تصغير حجم النص",
       "increaseTextSize": "تكبير حجم النص",

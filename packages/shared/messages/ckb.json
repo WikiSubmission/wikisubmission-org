@@ -1423,6 +1423,8 @@
       "searchPlaceholder": "بەدوای سورەت یان ئایەت بگەڕێ",
       "searchAllVerses": "لە هەموو ئایەتەکان بگەڕێ",
       "searchAcross": "«{query}» لە هەموو قورئاندا بدۆزەوە",
+      "goToReference": "بڕۆ بۆ ئەم بەشە",
+      "previewBibleVerse": "پێشبینینی ئەم ئایەتەی کتێبی پیرۆز",
       "appendicesDesc": "هەموو ٣٨ پاشکۆی کۆتا پەیمان",
       "decreaseTextSize": "بچووککردنی قەبارەی دەق",
       "increaseTextSize": "گەورەکردنی قەبارەی دەق",

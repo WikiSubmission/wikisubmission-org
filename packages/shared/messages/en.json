@@ -1485,6 +1485,8 @@
       "searchPlaceholder": "Search chapters or verses",
       "searchAllVerses": "Search all verses",
       "searchAcross": "Find “{query}” across the Quran",
+      "goToReference": "Go to this passage",
+      "previewBibleVerse": "Preview this Bible verse",
       "appendicesDesc": "All 38 appendices of the Final Testament",
       "decreaseTextSize": "Decrease text size",
       "increaseTextSize": "Increase text size",

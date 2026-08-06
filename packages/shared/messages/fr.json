@@ -1433,6 +1433,8 @@
       "searchPlaceholder": "Rechercher des sourates ou des versets",
       "searchAllVerses": "Rechercher dans tous les versets",
       "searchAcross": "Trouver « {query} » dans tout le Coran",
+      "goToReference": "Aller à ce passage",
+      "previewBibleVerse": "Aperçu de ce verset biblique",
       "appendicesDesc": "Les 38 annexes du Testament Final",
       "decreaseTextSize": "Réduire la taille du texte",
       "increaseTextSize": "Augmenter la taille du texte",

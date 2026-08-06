@@ -1433,6 +1433,8 @@
       "searchPlaceholder": "Sure veya ayet ara",
       "searchAllVerses": "Tüm ayetlerde ara",
       "searchAcross": "Kuran'ın tamamında \"{query}\" ara",
+      "goToReference": "Bu bölüme git",
+      "previewBibleVerse": "Bu İncil ayetini önizle",
       "appendicesDesc": "Son Ahit’in 38 ekinin tamamı",
       "decreaseTextSize": "Yazıyı küçült",
       "increaseTextSize": "Yazıyı büyüt",
