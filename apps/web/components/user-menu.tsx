@@ -1,6 +1,7 @@
 'use client'
 
 import { signOut, useSession } from 'next-auth/react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTransition, useSyncExternalStore } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
@@ -138,10 +139,10 @@ export function UserMenu() {
         </DropdownMenuItem>
         {(isEditorialEditor || isAdmin) && (
           <DropdownMenuItem asChild>
-            <a href="/editor" className="flex items-center gap-2">
+            <Link href="/editor" className="flex items-center gap-2">
               <SquarePen className="w-4 h-4" />
               {t('editor')}
-            </a>
+            </Link>
           </DropdownMenuItem>
         )}
         {isAdmin ? (

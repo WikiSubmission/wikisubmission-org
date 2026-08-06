@@ -11,7 +11,7 @@
  * with upload). Documents containing block types the schema cannot represent
  * are opened read-only so nothing is ever dropped on save.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 
 import { defineSchema, EditorProvider, PortableTextEditable, useEditor } from '@portabletext/editor'
 import type {
@@ -55,8 +55,11 @@ interface PTEditorProps {
 
 export function PTEditor({ initialValue, onChange, disabled }: PTEditorProps) {
   // Slate needs the DOM; render only after mount to avoid SSR/hydration issues.
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  )
 
   const initial = useMemo(() => toInitialValue(initialValue), [initialValue])
   const unsupported = useMemo(() => hasUnsupportedBlocks(initialValue), [initialValue])
