@@ -149,24 +149,24 @@ function LocationPrayerTimes({ location, title }: { location: string; title: str
 
 export function MiniPrayerTimes() {
   return (
-    <aside className="border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-2 md:mt-8">
+    <aside className="border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-2 md:p-2.5">
       <div className="border border-[var(--ed-rule)] bg-[var(--ed-bg)] h-full flex flex-col">
-        
-        <div className="flex items-start justify-between gap-6 p-6 md:p-8 border-b border-[var(--ed-rule)] bg-[var(--ed-surface)]/50">
-          <div>
+
+        <div className="flex items-start justify-between gap-6 p-6 sm:p-7 md:p-8 border-b border-[var(--ed-rule)] bg-[var(--ed-accent-soft)]">
+          <div className="min-w-0">
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-1.5 w-1.5 bg-[var(--ed-accent)]" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--ed-fg-muted)]" style={{ fontFamily: F.glacial }}>
+              <span className="h-1.5 w-1.5 bg-[var(--ed-accent)]" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ed-fg-muted)]" style={{ fontFamily: F.glacial }}>
                 [ Network ]
               </p>
             </div>
-            <p className="text-3xl font-medium tracking-tight text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
+            <p className="text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
               Live Times
             </p>
           </div>
-          <div className="flex size-10 shrink-0 items-center justify-center border border-[var(--ed-rule)] bg-[var(--ed-bg)] text-[var(--ed-accent)] relative">
+          <div className="flex size-11 shrink-0 items-center justify-center border border-[var(--ed-rule)] bg-[var(--ed-bg)] text-[var(--ed-accent)] relative">
             <span className="absolute -top-1 -right-1 inline-flex h-1.5 w-1.5 bg-[var(--ed-accent)]"></span>
-            <Clock size={18} strokeWidth={1.5} />
+            <Clock size={20} strokeWidth={1.6} />
           </div>
         </div>
 

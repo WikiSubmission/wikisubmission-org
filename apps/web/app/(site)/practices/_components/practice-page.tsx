@@ -80,6 +80,15 @@ export function RefList({ refs }: { refs?: string[] }) {
   )
 }
 
+export function HeroGradient() {
+  return (
+    <>
+      <div className="absolute inset-0 -z-10 opacity-50 [background:radial-gradient(circle_at_15%_20%,var(--ed-accent-soft),transparent_40%),radial-gradient(circle_at_85%_80%,color-mix(in_oklab,var(--ed-surface),transparent_60%),transparent_50%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-[var(--ed-rule)]" />
+    </>
+  )
+}
+
 export function PracticeHero({
   active,
   eyebrow,
@@ -95,9 +104,8 @@ export function PracticeHero({
 }) {
   return (
     <section className="relative isolate overflow-hidden border-b border-[var(--ed-rule)]">
-      <div className="absolute inset-0 -z-10 opacity-50 [background:radial-gradient(circle_at_15%_20%,var(--ed-accent-soft),transparent_40%),radial-gradient(circle_at_85%_80%,color-mix(in_oklab,var(--ed-surface),transparent_60%),transparent_50%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-px bg-[var(--ed-rule)]" />
-      
+      <HeroGradient />
+
       <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-16 pt-20 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(300px,420px)] md:pb-24 md:pt-28 lg:gap-16">
         <FadeUp distance={16} duration={0.65} className="max-w-3xl space-y-8">
           <SectionLabel>{eyebrow}</SectionLabel>

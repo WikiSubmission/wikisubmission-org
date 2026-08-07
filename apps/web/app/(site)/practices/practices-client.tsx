@@ -21,6 +21,7 @@ import RamadanClient from "./ramadan-client";
 import { ZakatCalculator } from "@/components/zakat-calculator";
 import type { components } from "@/src/api/types.gen";
 import { F } from "../_sections/shared";
+import { HeroGradient, SectionLabel } from "./_components/practice-page";
 
 type VerseData = components["schemas"]["VerseData"];
 
@@ -121,20 +122,6 @@ const QUICK_LINKS: QuickLink[] = [
 ];
 
 // ── SHARED UI ─────────────────────────────────────────────────────────
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mb-8 flex items-center gap-4">
-      <span className="h-px w-10 bg-[var(--ed-accent)]" />
-      <span
-        className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--ed-accent)]"
-        style={{ fontFamily: F.glacial }}
-      >
-        {children}
-      </span>
-    </div>
-  );
-}
 
 function RefPill({ reference }: { reference: string }) {
   return (
@@ -330,15 +317,14 @@ export default function PracticesClient({
     <main className="min-h-screen bg-[var(--ed-bg)] text-[var(--ed-fg)]">
       {/* ── Hero / Hub Introduction ───────────────────────────────────── */}
       <section className="relative isolate overflow-hidden border-b border-[var(--ed-rule)]">
-        <div className="absolute inset-0 -z-10 opacity-60 [background:radial-gradient(circle_at_20%_25%,var(--ed-accent-soft),transparent_40%),radial-gradient(circle_at_80%_80%,color-mix(in_oklab,var(--ed-surface),transparent_60%),transparent_50%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-[var(--ed-rule)]" />
-        
+        <HeroGradient />
+
         <div className="mx-auto grid max-w-6xl gap-14 px-5 pb-20 pt-24 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(280px,390px)] md:pb-28 md:pt-32 lg:gap-20">
           <FadeUp distance={10} duration={0.5} className="flex flex-col justify-between gap-10">
             <div className="space-y-8">
               <SectionLabel>{t('hub')}</SectionLabel>
               <h1
-                className="max-w-3xl text-[3.25rem] font-medium leading-[1.05] tracking-tight text-[var(--ed-fg)] md:text-[4.5rem] lg:text-[5rem]"
+                className="max-w-3xl text-5xl font-medium leading-[1.05] tracking-tight text-[var(--ed-fg)] sm:text-6xl md:text-7xl lg:text-8xl"
                 style={{ fontFamily: F.display }}
               >
                 {t("heading")}

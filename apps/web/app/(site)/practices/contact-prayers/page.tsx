@@ -180,10 +180,14 @@ export default function ContactPrayersPage() {
             appointment cannot be recreated.
           </p>
 
-          <div className="border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-6 md:p-8">
+          <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-6 md:p-8">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-[var(--ed-accent)]/40" />
             <div className="mb-5 flex items-center gap-3 border-b border-[var(--ed-rule)] pb-4">
-              <AlertTriangle className="text-[var(--ed-accent)]" size={22} />
-              <h3 className="text-xl font-medium text-[var(--ed-fg)]">
+              <AlertTriangle className="shrink-0 text-[var(--ed-accent)]" size={22} strokeWidth={1.6} />
+              <h3
+                className="text-xl font-medium text-[var(--ed-fg)]"
+                style={{ fontFamily: F.display }}
+              >
                 Keep the prayer for God alone
               </h3>
             </div>
@@ -221,14 +225,17 @@ export default function ContactPrayersPage() {
           </div>
         </section>
 
-        <section className="space-y-12">
-          <div className="space-y-8">
+        <section className="mx-auto max-w-6xl space-y-8">
+          <div className="space-y-4">
+            <SectionLabel>Preparation</SectionLabel>
             <h2
-              className="text-center text-balance text-4xl font-medium tracking-tight md:text-5xl underline underline-offset-8 decoration-[var(--ed-accent)]"
+              className="text-balance text-3xl font-medium tracking-tight md:text-4xl"
               style={{ fontFamily: F.display }}
             >
               The Pre-Prayer Rituals
             </h2>
+          </div>
+          <div className="space-y-8">
             <div className="border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-4 md:p-8">
               <AblutionSlideshow />
             </div>
@@ -238,20 +245,23 @@ export default function ContactPrayersPage() {
           </div>
         </section>
 
-        <section className="space-y-12">
-          <div className="space-y-8">
+        <section className="mx-auto max-w-6xl space-y-8">
+          <div className="space-y-4">
+            <SectionLabel>Performance</SectionLabel>
             <h2
-              className="text-center text-balance text-4xl font-medium tracking-tight md:text-5xl underline underline-offset-8 decoration-[var(--ed-accent)]"
+              className="text-balance text-3xl font-medium tracking-tight md:text-4xl"
               style={{ fontFamily: F.display }}
             >
               The Contact Prayer (Salat)
             </h2>
+          </div>
+          <div className="space-y-8">
             <div className="border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-4 md:p-8">
               <PrayerDemos />
             </div>
-          </div>
-          <div className="py-2 md:py-6">
-            <FatihaAudio />
+            <div className="py-2 md:py-6">
+              <FatihaAudio />
+            </div>
           </div>
         </section>
 

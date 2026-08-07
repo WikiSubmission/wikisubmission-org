@@ -205,7 +205,7 @@ export default function HajjPage() {
                       <ShieldCheck
                         size={18}
                         className="text-[var(--ed-accent)]"
-                        strokeWidth={1.8}
+                        strokeWidth={1.6}
                       />
                       <h3
                         className="font-medium text-[var(--ed-fg)]"
@@ -229,7 +229,7 @@ export default function HajjPage() {
                       <CalendarDays
                         size={18}
                         className="text-[var(--ed-accent)]"
-                        strokeWidth={1.8}
+                        strokeWidth={1.6}
                       />
                       <h3
                         className="font-medium text-[var(--ed-fg)]"

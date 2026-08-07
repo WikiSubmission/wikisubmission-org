@@ -165,26 +165,11 @@ export default function ZakatPage() {
             <div className="grid gap-10 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px] lg:items-start">
               {/* Left: Featured quote */}
               <div className="space-y-8">
-                <div className="relative border-l-[3px] border-[var(--ed-accent)] bg-[var(--ed-surface)]/30 p-6 sm:p-8 md:p-10">
-                  <p
-                    className="text-lg sm:text-xl md:text-2xl font-medium leading-[1.5] text-[var(--ed-fg)] italic"
-                    style={{ fontFamily: F.serif }}
-                  >
-                    &ldquo;My mercy encompasses all things. However, I will
-                    specify it for those who lead a righteous life, give the
-                    obligatory charity (Zakat), and believe in our
-                    revelations.&rdquo;
-                  </p>
-                  <div className="mt-6 flex items-center gap-3">
-                    <span className="h-px w-8 bg-[var(--ed-accent)]" />
-                    <span
-                      className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-accent)]"
-                      style={{ fontFamily: F.glacial }}
-                    >
-                      7:156
-                    </span>
-                  </div>
-                </div>
+                <QuoteCallout reference="7:156">
+                  My mercy encompasses all things. However, I will specify it
+                  for those who lead a righteous life, give the obligatory
+                  charity (Zakat), and believe in our revelations.
+                </QuoteCallout>
                 <p className="text-base leading-[1.7] text-[var(--ed-fg-muted)]">
                   Zakat is not optional charity. The Quran places it among the
                   defining traits of those who receive God&apos;s specified mercy.
@@ -417,7 +402,7 @@ export default function ZakatPage() {
             <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-6 sm:p-8 md:p-10">
               <div className="absolute inset-x-0 top-0 h-[2px] bg-[var(--ed-accent)]/40" />
               <div className="mb-6 flex items-center gap-3 border-b border-[var(--ed-rule)] pb-5">
-                <AlertTriangle className="shrink-0 text-[var(--ed-accent)]" size={22} />
+                <AlertTriangle className="shrink-0 text-[var(--ed-accent)]" size={22} strokeWidth={1.6} />
                 <h3
                   className="text-lg sm:text-xl font-medium text-[var(--ed-fg)]"
                   style={{ fontFamily: F.display }}

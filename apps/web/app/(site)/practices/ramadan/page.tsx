@@ -11,6 +11,7 @@ import {
   FactGrid,
   PracticeHero,
   PracticeHeroPanel,
+  QuoteCallout,
   ReadingSection,
   SectionLabel,
   VerseGrid,
@@ -117,24 +118,10 @@ export default function RamadanPage() {
               </p>
             </div>
 
-            <div className="relative border-l-[3px] border-[var(--ed-accent)] bg-[var(--ed-surface)]/30 p-6 sm:p-8 md:p-10">
-              <p
-                className="text-lg sm:text-xl md:text-2xl font-medium leading-[1.5] text-[var(--ed-fg)] italic"
-                style={{ fontFamily: F.serif }}
-              >
-                &ldquo;O you who believe, fasting is decreed for you, as it was
-                decreed for those before you, that you may attain salvation.&rdquo;
-              </p>
-              <div className="mt-6 flex items-center gap-3">
-                <span className="h-px w-8 bg-[var(--ed-accent)]" />
-                <span
-                  className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-accent)]"
-                  style={{ fontFamily: F.glacial }}
-                >
-                  2:183
-                </span>
-              </div>
-            </div>
+            <QuoteCallout reference="2:183">
+              O you who believe, fasting is decreed for you, as it was decreed
+              for those before you, that you may attain salvation.
+            </QuoteCallout>
 
             <p className="text-base leading-[1.7] text-[var(--ed-fg-muted)]">
               Ramadan commemorates the revelation of the Quran and reinforces the
@@ -175,25 +162,11 @@ export default function RamadanPage() {
               </p>
             </div>
 
-            <div className="relative border-l-[3px] border-[var(--ed-accent)] bg-[var(--ed-surface)]/30 p-6 sm:p-8 md:p-10">
-              <p
-                className="text-lg sm:text-xl md:text-2xl font-medium leading-[1.5] text-[var(--ed-fg)] italic"
-                style={{ fontFamily: F.serif }}
-              >
-                &ldquo;You may eat and drink until the white thread of light
-                becomes distinguishable from the dark thread of night at dawn.
-                Then, you shall fast until sunset.&rdquo;
-              </p>
-              <div className="mt-6 flex items-center gap-3">
-                <span className="h-px w-8 bg-[var(--ed-accent)]" />
-                <span
-                  className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-accent)]"
-                  style={{ fontFamily: F.glacial }}
-                >
-                  2:187
-                </span>
-              </div>
-            </div>
+            <QuoteCallout reference="2:187">
+              You may eat and drink until the white thread of light becomes
+              distinguishable from the dark thread of night at dawn. Then, you
+              shall fast until sunset.
+            </QuoteCallout>
 
             <p className="text-base leading-[1.7] text-[var(--ed-fg-muted)]">
               From dawn until sunset, the believer abstains from food, drink, and
@@ -303,24 +276,10 @@ export default function RamadanPage() {
               </p>
             </div>
 
-            <div className="relative border-l-[3px] border-[var(--ed-accent)] bg-[var(--ed-surface)]/30 p-6 sm:p-8 md:p-10">
-              <p
-                className="text-lg sm:text-xl md:text-2xl font-medium leading-[1.5] text-[var(--ed-fg)] italic"
-                style={{ fontFamily: F.serif }}
-              >
-                &ldquo;Permitted for you is sexual intercourse with your wives
-                during the nights of fasting.&rdquo;
-              </p>
-              <div className="mt-6 flex items-center gap-3">
-                <span className="h-px w-8 bg-[var(--ed-accent)]" />
-                <span
-                  className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-accent)]"
-                  style={{ fontFamily: F.glacial }}
-                >
-                  2:187
-                </span>
-              </div>
-            </div>
+            <QuoteCallout reference="2:187">
+              Permitted for you is sexual intercourse with your wives during
+              the nights of fasting.
+            </QuoteCallout>
 
             <p className="text-base leading-[1.7] text-[var(--ed-fg-muted)]">
               By returning to these permitted bounties after sunset, the believer
