@@ -42,7 +42,7 @@ export default async function BlogPostPage({
   try {
     post = await fetchPublishedBlogPostBySlug(slug, language)
   } catch (err) {
-    console.error('[blog/slug] Sanity fetch failed:', err)
+    console.error('[blog/slug] article fetch failed:', err)
     notFound()
   }
 
