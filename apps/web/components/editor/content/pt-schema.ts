@@ -12,7 +12,7 @@
 
 export interface SchemaField {
   name: string
-  type: 'string' | 'boolean' | 'number'
+  type: 'string' | 'boolean' | 'number' | 'array'
 }
 
 export interface SchemaObject {
@@ -74,6 +74,18 @@ export const SCHEMA_DEFINITION: PortableTextSchemaDefinition = {
         { name: 'caption', type: 'string' },
       ],
     },
+    // Authored in the retired Studio by sanity-plugin-rich-table. Declared so a
+    // body containing one opens normally instead of locking the whole document
+    // read-only; the editor shows it as a preview and leaves the value alone.
+    {
+      name: 'richTableBlock',
+      fields: [
+        { name: 'rows', type: 'array' },
+        { name: 'columnHeaders', type: 'array' },
+        { name: 'hasColumnTitles', type: 'boolean' },
+        { name: 'hasRowTitles', type: 'boolean' },
+      ],
+    },
   ],
 }
 
@@ -82,7 +94,7 @@ export const SCHEMA_DEFINITION: PortableTextSchemaDefinition = {
  * embeds) is unsupported: the editor refuses to load such a document so the
  * unknown blocks are never dropped on save.
  */
-export const KNOWN_BLOCK_TYPES: readonly string[] = ['block', 'callout', 'image']
+export const KNOWN_BLOCK_TYPES: readonly string[] = ['block', 'callout', 'image', 'richTableBlock']
 
 /** True if `value` contains any block whose _type the editor cannot represent. */
 export function hasUnsupportedBlocks(value: unknown): boolean {

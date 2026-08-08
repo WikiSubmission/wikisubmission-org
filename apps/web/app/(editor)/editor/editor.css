@@ -1012,6 +1012,19 @@
 .pt-callout.tone-tip     { border-left-color: var(--st-pub); }
 .pt-callout.tone-danger  { border-left-color: var(--st-danger); }
 
+/* rich table card (read-only preview of Studio-authored tables) */
+.pt-table-label {
+  font-family: var(--font-glacial); font-size: 11.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ed-fg-muted); margin-bottom: 8px;
+}
+.pt-table-scroll { overflow-x: auto; }
+.pt-table table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.pt-table th, .pt-table td {
+  border: 1px solid var(--ed-rule); padding: 6px 9px; text-align: left; vertical-align: top;
+}
+.pt-table th { font-weight: 600; }
+.pt-table-empty { padding: 16px; text-align: center; color: var(--ed-fg-muted); font-size: 14px; }
+
 /* image card */
 .pt-image { display: flex; flex-direction: column; gap: 8px; }
 .pt-image-preview { max-width: 100%; border-radius: var(--ed-radius-sm); display: block; }

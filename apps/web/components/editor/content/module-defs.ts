@@ -15,10 +15,11 @@ export type FieldDef =
   | { kind: 'select'; key: string; label: string; required?: boolean; options?: Array<{ value: string; label: string }>; optionsKey?: string; desc?: string }
   | { kind: 'multiselect'; key: string; label: string; optionsKey: string; desc?: string }
   | { kind: 'number'; key: string; label: string; desc?: string }
-  | { kind: 'toggle'; key: string; label: string; desc?: string }
+  | { kind: 'toggle'; key: string; label: string; desc?: string; defaultOn?: boolean }
   | { kind: 'tags'; key: string; label: string; desc?: string }
   | { kind: 'image'; key: string; label: string; required?: boolean; desc?: string; aspect?: string }
   | { kind: 'pt'; key: string; label: string; desc?: string }
+  | { kind: 'geo'; key: string; label: string; desc?: string }
   | { kind: 'row'; fields: FieldDef[] }
   | { kind: 'section'; label: string; desc?: string; when?: { key: string; equals: string } }
 
@@ -62,6 +63,13 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
       { kind: 'image', key: 'thumbnail_url', label: 'Thumbnail', aspect: '16 / 9', desc: 'Upload an image (stored on our CDN) or paste a hosted URL. 16:9 recommended.' },
       { kind: 'pt', key: 'thumbnail_text', label: 'Thumbnail text', desc: 'Short rich-text teaser shown on the thumbnail.' },
       { kind: 'pt', key: 'body', label: 'Body' },
+      {
+        kind: 'toggle',
+        key: 'enable_scripture_refs',
+        label: 'Link scripture references',
+        defaultOn: true,
+        desc: 'Turn verse references in the body into links. On unless you turn it off.',
+      },
     ],
   },
 
@@ -168,6 +176,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
           { kind: 'text', key: 'country', label: 'Country' },
         ],
       },
+      { kind: 'geo', key: 'geo', label: 'Coordinates', desc: 'Decimal degrees, e.g. 43.6548 / -79.3886. Leave both blank for none.' },
       { kind: 'text', key: 'meeting_schedule', label: 'Meeting schedule' },
       {
         kind: 'row',

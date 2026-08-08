@@ -170,6 +170,9 @@ function renderBlock(props: BlockRenderProps) {
   if (props.schemaType.name === 'image') {
     return <ImageCard value={value} path={props.path} />
   }
+  if (props.schemaType.name === 'richTableBlock') {
+    return <RichTablePreview value={props.value as RichTableValue} />
+  }
   const meta = props.value as { listItem?: string; level?: number }
   return (
     <div className="pt-line" data-list={meta.listItem} data-level={meta.level}>
@@ -379,6 +382,65 @@ function ImageCard({ value, path }: { value: BlockObjectValue; path: BlockPath }
           />
         </div>
       </div>
+    </div>
+  )
+}
+
+// ── Rich table (read-only) ────────────────────────────────────────────────────
+// Tables were authored in the retired Studio. Cell-level editing is not built
+// here; the block renders as a preview so the surrounding article stays fully
+// editable and the table value round-trips untouched on save.
+
+interface RichTableCell {
+  content?: Array<{ children?: Array<{ text?: string }> }>
+}
+interface RichTableRow {
+  title?: string
+  cells?: RichTableCell[]
+}
+export interface RichTableValue {
+  rows?: RichTableRow[]
+  columnHeaders?: Array<{ title?: string }>
+  hasColumnTitles?: boolean
+}
+
+function cellText(cell: RichTableCell): string {
+  return (cell.content ?? [])
+    .flatMap((block) => block.children ?? [])
+    .map((child) => child.text ?? '')
+    .join(' ')
+    .trim()
+}
+
+function RichTablePreview({ value }: { value: RichTableValue }) {
+  const rows = value.rows ?? []
+  const headers = value.columnHeaders ?? []
+  return (
+    <div className="pt-card pt-table" contentEditable={false}>
+      <div className="pt-table-label">Table — read-only</div>
+      <div className="pt-table-scroll">
+        <table>
+          {headers.length > 0 && (
+            <thead>
+              <tr>
+                {headers.map((h, i) => (
+                  <th key={i}>{h.title ?? ''}</th>
+                ))}
+              </tr>
+            </thead>
+          )}
+          <tbody>
+            {rows.map((row, r) => (
+              <tr key={r}>
+                {(row.cells ?? []).map((cell, c) => (
+                  <td key={c}>{cellText(cell)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {rows.length === 0 && <div className="pt-table-empty">Empty table</div>}
     </div>
   )
 }
