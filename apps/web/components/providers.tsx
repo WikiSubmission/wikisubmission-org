@@ -11,6 +11,7 @@ import { SignInPrompt } from '@/components/sign-in-prompt'
 import { ScriptureAuthBridge } from '@/components/scripture-auth-bridge'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { NavigationReferrerTracker } from '@/components/navigation-referrer-tracker'
+import { PointerEventsRecovery } from '@/components/pointer-events-recovery'
 import { OfflineSyncBridge } from '@/components/offline-sync-bridge'
 import { OfflineSyncStatus } from '@/components/offline-sync-status'
 import { registerWebApiAuth } from '@/lib/register-api-auth'
@@ -50,6 +51,7 @@ export default function Providers({
             <ChatPanelProvider>
               <ChatProvider>
                 <NavigationReferrerTracker />
+                <PointerEventsRecovery />
                 <OfflineSyncBridge />
                 <OfflineSyncStatus />
                 {children}

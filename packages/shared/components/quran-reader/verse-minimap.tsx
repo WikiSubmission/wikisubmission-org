@@ -96,8 +96,20 @@ export function VerseMinimap({
     [pointToVerse, onPreview]
   )
 
+  // Capture is taken on pointer down; release it explicitly so a drag that ends
+  // off-track (or is cancelled by the OS) can't keep routing pointer events here.
+  const releaseCapture = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId)
+      }
+    },
+    []
+  )
+
   const handlePointerUp = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
+      releaseCapture(e)
       if (isDragging.current) {
         onSeek(pointToVerse(e.clientY))
       }
@@ -106,14 +118,18 @@ export function VerseMinimap({
       // Brief delay before fading out so the user sees the confirmed position
       setTimeout(() => setIsActive(false), 300)
     },
-    [onSeek, pointToVerse]
+    [onSeek, pointToVerse, releaseCapture]
   )
 
-  const handlePointerCancel = useCallback(() => {
-    isDragging.current = false
-    setPreviewVerse(null)
-    setIsActive(false)
-  }, [])
+  const handlePointerCancel = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      releaseCapture(e)
+      isDragging.current = false
+      setPreviewVerse(null)
+      setIsActive(false)
+    },
+    [releaseCapture]
+  )
 
   const progressPct = verseToPercent(currentVerseNumber)
   const previewPct = previewVerse !== null ? verseToPercent(previewVerse) : null

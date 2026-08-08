@@ -17,6 +17,7 @@ import { MobileBundleAutoload } from '@/components/mobile-bundle-autoload'
 import { MobileWordBundleAutoload } from '@/components/mobile-word-bundle-autoload'
 import { NotificationPermissionPrompt } from '@/components/notification-permission-prompt'
 import { StartupZikrOverlay } from '@/components/startup-zikr-overlay'
+import { PointerEventsRecovery } from '@/components/pointer-events-recovery'
 import { StartupZikrProvider } from '@/lib/startup-zikr-context'
 
 /**
@@ -52,6 +53,7 @@ export function MobileProviders({
               <MobileScriptureAuthBridge>
                 <QuranPlayerProvider>
                   <NativeInit />
+                  <PointerEventsRecovery />
                   <MobileNotificationsBridge />
                   <MobileOfflineSyncBridge />
                   {/* The startup overlay is a sibling of the shell: the zikr
