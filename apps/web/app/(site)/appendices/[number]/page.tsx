@@ -2,10 +2,16 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, FileText, Download } from 'lucide-react'
 import { Metadata } from 'next'
-import { APPENDICES, appendixPdfUrl } from '@/constants/appendices'
+import {
+  APPENDICES,
+  appendixPdfUrl,
+  resolveAppendixMeta,
+} from '@/constants/appendices'
 import { buildPageMetadata } from '@/constants/metadata'
 import { ArticleAnimations } from '@/components/article-animations'
 import { getAppendixContent } from '@/content/library'
+import { AppendixMarkdown } from '@/components/library/appendix-markdown'
+import { fetchAppendix, hasEditorialBody } from '@/lib/appendices-backend'
 
 interface Props {
   params: Promise<{ number: string }>
@@ -14,12 +20,15 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { number } = await params
   const n = parseInt(number, 10)
-  const appendix = APPENDICES.find((a) => a.number === n)
+  const editorial = await fetchAppendix(n)
+  const appendix = resolveAppendixMeta(n, editorial?.title)
   if (!appendix) return {}
 
   return buildPageMetadata({
     title: `Appendix ${appendix.number}: ${appendix.title} | WikiSubmission`,
-    description: `Appendix ${appendix.number} of the Final Testament — ${appendix.title}.`,
+    description:
+      editorial?.snippet ??
+      `Appendix ${appendix.number} of the Final Testament: ${appendix.title}.`,
     url: `/appendices/${appendix.number}`,
   })
 }
@@ -34,16 +43,22 @@ export default async function AppendixPage({ params }: Props) {
 
   if (isNaN(n) || n < 1 || n > 38) notFound()
 
-  const appendix = APPENDICES.find((a) => a.number === n)
+  // The editorial store (edited at /editor) is the preferred source. Rows
+  // migrated from the legacy seed carry a title and a snippet but no body yet,
+  // so the hardcoded components below stay the fallback until one is written.
+  const editorial = await fetchAppendix(n)
+  const appendix = resolveAppendixMeta(n, editorial?.title)
   if (!appendix) notFound()
 
-  const prev = APPENDICES.find((a) => a.number === n - 1)
-  const next = APPENDICES.find((a) => a.number === n + 1)
+  const prev = resolveAppendixMeta(n - 1)
+  const next = resolveAppendixMeta(n + 1)
 
   // Content components live in packages/shared/content/library (shared with
   // the mobile app); the registry lazy-loads one appendix per page and returns
   // null (→ "coming soon" shell) if a file is ever absent.
-  const Content = await getAppendixContent(n)
+  const Content = hasEditorialBody(editorial)
+    ? null
+    : await getAppendixContent(n)
 
   return (
     <ArticleAnimations>
@@ -98,7 +113,9 @@ export default async function AppendixPage({ params }: Props) {
           <hr className="border-border/40" />
 
           {/* ── Content ──────────────────────────────────────────────────────── */}
-          {Content ? (
+          {editorial && hasEditorialBody(editorial) ? (
+            <AppendixMarkdown content={editorial.body} />
+          ) : Content ? (
             <Content />
           ) : (
             <section className="rounded-xl border border-border/60 bg-surface-container-lowest p-8 text-center space-y-3">

@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
-import { APPENDICES } from '@/constants/appendices'
+import { APPENDICES, resolveAppendixMeta } from '@/constants/appendices'
 import { getAppendixContent } from '@/content/library'
+import { AppendixMarkdown } from '@/components/library/appendix-markdown'
+import { fetchAppendix, hasEditorialBody } from '@/lib/appendices-backend'
 import { AppendixEmptyState, AppendixPagination } from './appendix-chrome'
 
 // All 38 appendices are known at build time, so the static export pre-renders
@@ -19,12 +21,17 @@ export default async function AppendixPage({
   const { number } = await params
   const n = parseInt(number, 10)
 
-  const appendix = APPENDICES.find((a) => a.number === n)
+  // Static export: this read happens at build time, so an /editor change
+  // reaches the app on its next release rather than instantly. Rows with no
+  // body yet keep rendering the hardcoded components.
+  const editorial = await fetchAppendix(n)
+  const appendix = resolveAppendixMeta(n, editorial?.title)
   if (!appendix) notFound()
 
-  const prev = APPENDICES.find((a) => a.number === n - 1)
-  const next = APPENDICES.find((a) => a.number === n + 1)
-  const Content = await getAppendixContent(n)
+  const prev = resolveAppendixMeta(n - 1)
+  const next = resolveAppendixMeta(n + 1)
+  const showMarkdown = hasEditorialBody(editorial)
+  const Content = showMarkdown ? null : await getAppendixContent(n)
 
   return (
     <article className="mx-auto w-full max-w-2xl space-y-8 px-4 py-8">
@@ -42,7 +49,9 @@ export default async function AppendixPage({
 
       <hr className="border-border/40" />
 
-      {Content ? (
+      {showMarkdown && editorial ? (
+        <AppendixMarkdown content={editorial.body} />
+      ) : Content ? (
         <div className="space-y-10">
           <Content />
         </div>
