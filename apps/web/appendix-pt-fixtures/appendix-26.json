@@ -1,0 +1,6507 @@
+{
+  "code": "26",
+  "body_pt": [
+    {
+      "_type": "appendixVerseCards",
+      "_key": "a1",
+      "align": "center",
+      "size": "base",
+      "gap": "xs",
+      "divided": false,
+      "entries": [
+        {
+          "body": {
+            "children": [
+              {
+                "_type": "span",
+                "_key": "a2",
+                "text": "“God took a covenant from the prophets, saying, ‘After I have given you the scripture and wisdom, a messenger will come to confirm what you have. You shall believe in him and support him.’”"
+              }
+            ]
+          },
+          "reference": "3:81"
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "ae",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "a4",
+          "text": "This appendix provides the Quranic mathematical evidence that (1) Abraham was the original messenger of Islam, i.e., Submission ("
+        },
+        {
+          "_type": "quranRef",
+          "_key": "a5",
+          "reference": "22:78"
+        },
+        {
+          "_type": "span",
+          "_key": "a6",
+          "text": "), (2) Muhammad was the scripture-delivering messenger ("
+        },
+        {
+          "_type": "quranRef",
+          "_key": "a7",
+          "reference": "47:2"
+        },
+        {
+          "_type": "span",
+          "_key": "a8",
+          "text": "), and (3) Rashad is the purifying and consolidating messenger who delivered the religion's authenticating proof ("
+        },
+        {
+          "_type": "quranRef",
+          "_key": "a9",
+          "reference": "3:81"
+        },
+        {
+          "_type": "span",
+          "_key": "aa",
+          "text": " & "
+        },
+        {
+          "_type": "span",
+          "_key": "ac",
+          "text": "Appendix 2",
+          "marks": [
+            "ab"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "ad",
+          "text": ")."
+        }
+      ],
+      "markDefs": [
+        {
+          "_key": "ab",
+          "_type": "link",
+          "href": "/appendices/2"
+        }
+      ]
+    },
+    {
+      "_type": "appendixDivider",
+      "_key": "af",
+      "title": {
+        "children": [
+          {
+            "_type": "span",
+            "_key": "ag",
+            "text": "Perpetual and Verifiable Evidence"
+          }
+        ]
+      }
+    },
+    {
+      "_type": "block",
+      "_key": "al",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "ah",
+          "text": "[1] As pointed out in "
+        },
+        {
+          "_type": "span",
+          "_key": "aj",
+          "text": "Appendix 2",
+          "marks": [
+            "ai"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "ak",
+          "text": ", the gematrical value of “Abraham” is 258, the gematrical value of “Muhammad” is 92, the gematrical value of “Rashad” is 505, and 258+92+505 = 855 = 19×45."
+        }
+      ],
+      "markDefs": [
+        {
+          "_key": "ai",
+          "_type": "link",
+          "href": "/appendices/2"
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "an",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "am",
+          "text": "[2] If we include “Ismail,” whose gematrical value is 211, and “Isaac,” whose gematrical value is 169, we still end up with a total gematrical value of 855+211+169 = 1235 = 19×65. The total gematrical value of the three messengers, or the five, cannot conform with the Quran's 19-based mathematical code if either Abraham, Muhammad, or Rashad is not included."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "at",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "ao",
+          "text": "[3] The first and last occurrences of “Abraham” are in "
+        },
+        {
+          "_type": "quranRef",
+          "_key": "ap",
+          "reference": "2:124"
+        },
+        {
+          "_type": "span",
+          "_key": "aq",
+          "text": " and "
+        },
+        {
+          "_type": "quranRef",
+          "_key": "ar",
+          "reference": "87:19"
+        },
+        {
+          "_type": "span",
+          "_key": "as",
+          "text": ". By adding the sura numbers, plus the number of verses, plus the sum of verse numbers from the first occurrence to the last occurrence, the grand total is 333,260 = 19×17540 (Table 1)."
+        }
+      ]
+    },
+    {
+      "_type": "appendixDivider",
+      "_key": "au",
+      "title": {
+        "children": [
+          {
+            "_type": "span",
+            "_key": "av",
+            "text": "Table 1: Suras & Verses — First to Last Occurrence of Abraham"
+          }
+        ]
+      }
+    },
+    {
+      "_type": "appendixGridTable",
+      "_key": "a2c",
+      "headers": [
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "aw",
+              "text": "Sura No."
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "ax",
+              "text": "No. of Verses"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "ay",
+              "text": "Sum of Verse #s"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "az",
+              "text": "Total"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a10",
+                    "text": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a11",
+                    "text": "163"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a12",
+                    "text": "33415"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a13",
+                    "text": "33580"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a14",
+                    "text": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a15",
+                    "text": "200"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a16",
+                    "text": "20100"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a17",
+                    "text": "20303"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a18",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a19",
+                    "text": "176"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1a",
+                    "text": "15576"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1b",
+                    "text": "15756"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1c",
+                    "text": "5"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1d",
+                    "text": "120"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1e",
+                    "text": "7260"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1f",
+                    "text": "7385"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1g",
+                    "text": "…"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1h",
+                    "text": "…"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1i",
+                    "text": "…"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1j",
+                    "text": "…"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1k",
+                    "text": "9"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1l",
+                    "text": "127"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1m",
+                    "text": "8128"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1n",
+                    "text": "8264"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1o",
+                    "text": "…"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1p",
+                    "text": "…"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1q",
+                    "text": "…"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1r",
+                    "text": "…"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1s",
+                    "text": "84"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1t",
+                    "text": "25"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1u",
+                    "text": "325"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1v",
+                    "text": "434"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1w",
+                    "text": "85"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1x",
+                    "text": "22"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1y",
+                    "text": "253"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1z",
+                    "text": "360"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a20",
+                    "text": "86"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a21",
+                    "text": "17"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a22",
+                    "text": "153"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a23",
+                    "text": "256"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a24",
+                    "text": "87"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a25",
+                    "text": "19"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a26",
+                    "text": "190"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a27",
+                    "text": "296"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "total",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a28",
+                    "text": "3827"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a29",
+                    "text": "5835"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2a",
+                    "text": "323598"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2b",
+                    "text": "333260 (19×17540)"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "a2k",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "a2d",
+          "text": "[4] As pointed out in "
+        },
+        {
+          "_type": "span",
+          "_key": "a2f",
+          "text": "Appendix 2",
+          "marks": [
+            "a2e"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "a2g",
+          "text": ", the name of God's Messenger of the Covenant is introduced to the computer age through mathematical coding. If the name was specified in the Quran, as is the case with past messengers, millions of people would have named their children “Rashad Khalifa.” Thus, the root word “Rashada” is mentioned in the Quran 19 times ("
+        },
+        {
+          "_type": "span",
+          "_key": "a2i",
+          "text": "Appendix 2",
+          "marks": [
+            "a2h"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "a2j",
+          "text": ")."
+        }
+      ],
+      "markDefs": [
+        {
+          "_key": "a2e",
+          "_type": "link",
+          "href": "/appendices/2"
+        },
+        {
+          "_key": "a2h",
+          "_type": "link",
+          "href": "/appendices/2"
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "a2m",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "a2l",
+          "text": "[5] “Abraham” is mentioned in 25 suras, “Muhammad” is mentioned in 4 suras, and “Rashada” occurs in 9 suras. The total of these suras is 25+4+9 = 38 = 19×2 (INDEX TO THE WORDS OF QURAN, Abdul Baqi)."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "a2o",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "a2n",
+          "text": "[6] If we add the numbers of the suras where Abraham, Muhammad, and Rashada occur, plus the number of occurrences per sura, the total comes to 1083 = 19×19×3 (Table 2)."
+        }
+      ]
+    },
+    {
+      "_type": "appendixDivider",
+      "_key": "a2p",
+      "title": {
+        "children": [
+          {
+            "_type": "span",
+            "_key": "a2q",
+            "text": "Table 2: Suras & Occurrences of Abraham, Muhammad, and Rashada"
+          }
+        ]
+      }
+    },
+    {
+      "_type": "appendixGridTable",
+      "_key": "a6k",
+      "headers": [
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a2r",
+              "text": "Sura No."
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a2s",
+              "text": "Abraham"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a2t",
+              "text": "Muhammad"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a2u",
+              "text": "Rashada"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2v",
+                    "text": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2w",
+                    "text": "15"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2x",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2y",
+                    "text": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2z",
+                    "text": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a30",
+                    "text": "7"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a31",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a32",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a33",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a34",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a35",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a36",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a37",
+                    "text": "6"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a38",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a39",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3a",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3b",
+                    "text": "7"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3c",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3d",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3e",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3f",
+                    "text": "9"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3g",
+                    "text": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3h",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3i",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3j",
+                    "text": "11"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3k",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3l",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3m",
+                    "text": "3"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3n",
+                    "text": "12"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3o",
+                    "text": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3p",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3q",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3r",
+                    "text": "14"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3s",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3t",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3u",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3v",
+                    "text": "15"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3w",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3x",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3y",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3z",
+                    "text": "16"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a40",
+                    "text": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a41",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a42",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a43",
+                    "text": "18"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a44",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a45",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a46",
+                    "text": "4"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a47",
+                    "text": "19"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a48",
+                    "text": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a49",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4a",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4b",
+                    "text": "21"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4c",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4d",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4e",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4f",
+                    "text": "22"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4g",
+                    "text": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4h",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4i",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4j",
+                    "text": "26"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4k",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4l",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4m",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4n",
+                    "text": "29"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4o",
+                    "text": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4p",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4q",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4r",
+                    "text": "33"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4s",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4t",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4u",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4v",
+                    "text": "37"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4w",
+                    "text": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4x",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4y",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4z",
+                    "text": "38"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a50",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a51",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a52",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a53",
+                    "text": "40"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a54",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a55",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a56",
+                    "text": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a57",
+                    "text": "42"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a58",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a59",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5a",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5b",
+                    "text": "43"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5c",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5d",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5e",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5f",
+                    "text": "47"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5g",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5h",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5i",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5j",
+                    "text": "48"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5k",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5l",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5m",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5n",
+                    "text": "49"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5o",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5p",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5q",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5r",
+                    "text": "51"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5s",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5t",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5u",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5v",
+                    "text": "53"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5w",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5x",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5y",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5z",
+                    "text": "57"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a60",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a61",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a62",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a63",
+                    "text": "60"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a64",
+                    "text": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a65",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a66",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a67",
+                    "text": "72"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a68",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a69",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6a",
+                    "text": "4"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6b",
+                    "text": "87"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6c",
+                    "text": "1"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6d",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6e",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "total",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6f",
+                    "text": "991"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6g",
+                    "text": "69"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6h",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6i",
+                    "text": "19"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "notes": [
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a6j",
+              "text": "991+69+4+19 = 1083 = 19×19×3 (the 3 messengers). “Rashada” occurs 19 times."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "a6m",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "a6l",
+          "text": "[7] If we take all the suras where Abraham, Muhammad, and the root word “Rashada” are mentioned, and add the sura numbers, plus the number of the first verse in each sura where each of the three words is mentioned, the total comes to 2793 = 19×147 (Table 3)."
+        }
+      ]
+    },
+    {
+      "_type": "appendixDivider",
+      "_key": "a6n",
+      "title": {
+        "children": [
+          {
+            "_type": "span",
+            "_key": "a6o",
+            "text": "Table 3: Suras & First Verse Where Abraham, Muhammad, & Rashada Occur"
+          }
+        ]
+      }
+    },
+    {
+      "_type": "appendixGridTable",
+      "_key": "aaj",
+      "headers": [
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a6p",
+              "text": "Sura No."
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a6q",
+              "text": "Abraham"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a6r",
+              "text": "Muhammad"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a6s",
+              "text": "Rashada"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6t",
+                    "text": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6u",
+                    "text": "124"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6v",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6w",
+                    "text": "186"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6x",
+                    "text": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6y",
+                    "text": "33"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a6z",
+                    "text": "144"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a70",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a71",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a72",
+                    "text": "54"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a73",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a74",
+                    "text": "6"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a75",
+                    "text": "6"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a76",
+                    "text": "74"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a77",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a78",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a79",
+                    "text": "7"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7a",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7b",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7c",
+                    "text": "146"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7d",
+                    "text": "9"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7e",
+                    "text": "70"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7f",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7g",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7h",
+                    "text": "11"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7i",
+                    "text": "69"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7j",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7k",
+                    "text": "78"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7l",
+                    "text": "12"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7m",
+                    "text": "6"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7n",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7o",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7p",
+                    "text": "14"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7q",
+                    "text": "35"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7r",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7s",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7t",
+                    "text": "15"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7u",
+                    "text": "51"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7v",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7w",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7x",
+                    "text": "16"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7y",
+                    "text": "120"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a7z",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a80",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a81",
+                    "text": "18"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a82",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a83",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a84",
+                    "text": "10"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a85",
+                    "text": "19"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a86",
+                    "text": "41"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a87",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a88",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a89",
+                    "text": "21"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8a",
+                    "text": "51"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8b",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8c",
+                    "text": "51*"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8d",
+                    "text": "22"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8e",
+                    "text": "26"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8f",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8g",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8h",
+                    "text": "26"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8i",
+                    "text": "69"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8j",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8k",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8l",
+                    "text": "29"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8m",
+                    "text": "16"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8n",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8o",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8p",
+                    "text": "33"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8q",
+                    "text": "7"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8r",
+                    "text": "40"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8s",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8t",
+                    "text": "37"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8u",
+                    "text": "83"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8v",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8w",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8x",
+                    "text": "38"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8y",
+                    "text": "45"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a8z",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a90",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a91",
+                    "text": "40"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a92",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a93",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a94",
+                    "text": "29"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a95",
+                    "text": "42"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a96",
+                    "text": "13"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a97",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a98",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a99",
+                    "text": "43"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9a",
+                    "text": "26"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9b",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9c",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9d",
+                    "text": "47"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9e",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9f",
+                    "text": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9g",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9h",
+                    "text": "48"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9i",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9j",
+                    "text": "29"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9k",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9l",
+                    "text": "49"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9m",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9n",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9o",
+                    "text": "7"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9p",
+                    "text": "51"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9q",
+                    "text": "24"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9r",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9s",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9t",
+                    "text": "53"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9u",
+                    "text": "37"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9v",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9w",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9x",
+                    "text": "57"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9y",
+                    "text": "26"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a9z",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aa0",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aa1",
+                    "text": "60"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aa2",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aa3",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aa4",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aa5",
+                    "text": "72"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aa6",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aa7",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aa8",
+                    "text": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aa9",
+                    "text": "87"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aaa",
+                    "text": "19"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aab",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aac",
+                    "text": "-"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "total",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aad",
+                    "text": "991"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aae",
+                    "text": "1123"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aaf",
+                    "text": "215"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aag",
+                    "text": "464"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "notes": [
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "aah",
+              "text": "991+1123+215+464 = 2793 = 19×147."
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "aai",
+              "text": "* Verse 21:51 cannot be added twice."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "aal",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "aak",
+          "text": "[8] The sum of all sura numbers where the three words occur, without repetition, plus the sum of all the verse numbers, without repetition, add up to 6479 = 19×341. The suras are 2, 3, 4, 6, 7, 9, 11, 12, 14, 15, 16, 18, 19, 21, 22, 26, 29, 33, 37, 38, 40, 42, 43, 47, 48, 49, 51, 53, 57, 60, 72, and 87. The sum of these numbers is 991 (see Table 3). The verses where the three words are mentioned, without repetition, are 2, 4, 6, 7, 10, 13, 14, 16, 17, 19, 21, 24, 26, 29, 31, 33, 35, 37, 38, 40, 41, 43, 45, 46, 51, 54, 58, 60, 62, 65, 66, 67, 68, 69, 70, 74, 75, 76, 78, 83, 84, 87, 95, 97, 104, 109, 114, 120, 123, 124, 125, 126, 127, 130, 132, 133, 135, 136, 140, 144, 146, 161, 163, 186, 256, 258, and 260. The sum of these numbers is 5488, and: 5488 + 991 = 6479 = 19×341."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "aan",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "aam",
+          "text": "[9] If we add the sura number, plus the verse number, plus the number of verses where Abraham, Muhammad, and Rashada occur, we get a grand total that equals 7505 = 19×395 (Table 4)."
+        }
+      ]
+    },
+    {
+      "_type": "appendixDivider",
+      "_key": "aao",
+      "title": {
+        "children": [
+          {
+            "_type": "span",
+            "_key": "aap",
+            "text": "Table 4: Suras, Verses & Occurrences of Abraham, Muhammad, & Rashada"
+          }
+        ]
+      }
+    },
+    {
+      "_type": "appendixGridTable",
+      "_key": "afh",
+      "headers": [
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "aaq",
+              "text": "Sura No."
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "aar",
+              "text": "Abraham"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "aas",
+              "text": "Muhammad"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "aat",
+              "text": "Rashada"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "aau",
+              "text": "No. of Verses"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aav",
+                    "text": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aaw",
+                    "text": "124, 125, 126, 127, 130, 132, 133, 135, 136, 140, 258, 260"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aax",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aay",
+                    "text": "186, 256"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aaz",
+                    "text": "14"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ab0",
+                    "text": "3"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ab1",
+                    "text": "33, 65, 67, 68, 84, 95, 97"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ab2",
+                    "text": "144"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ab3",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ab4",
+                    "text": "8"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ab5",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ab6",
+                    "text": "54, 125, 163"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ab7",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ab8",
+                    "text": "6"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ab9",
+                    "text": "4"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aba",
+                    "text": "6"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abb",
+                    "text": "74, 75, 83, 161"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abc",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abd",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abe",
+                    "text": "4"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abf",
+                    "text": "7"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abg",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abh",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abi",
+                    "text": "146"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abj",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abk",
+                    "text": "9"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abl",
+                    "text": "70, 114"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abm",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abn",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abo",
+                    "text": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abp",
+                    "text": "11"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abq",
+                    "text": "69, 74, 75, 76"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abr",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abs",
+                    "text": "78, 87, 97"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abt",
+                    "text": "7"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abu",
+                    "text": "12"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abv",
+                    "text": "6, 38"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abw",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abx",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aby",
+                    "text": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "abz",
+                    "text": "14"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ac0",
+                    "text": "35"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ac1",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ac2",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ac3",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ac4",
+                    "text": "15"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ac5",
+                    "text": "51"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ac6",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ac7",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ac8",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ac9",
+                    "text": "16"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aca",
+                    "text": "120, 123"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acb",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acc",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acd",
+                    "text": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ace",
+                    "text": "18"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acf",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acg",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ach",
+                    "text": "10, 17, 24, 66"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aci",
+                    "text": "4"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acj",
+                    "text": "19"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ack",
+                    "text": "41, 46, 58"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acl",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acm",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acn",
+                    "text": "3"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aco",
+                    "text": "21"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acp",
+                    "text": "51, 60, 62, 69"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acq",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acr",
+                    "text": "51"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acs",
+                    "text": "5"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "act",
+                    "text": "22"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acu",
+                    "text": "26, 43, 78"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acv",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acw",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acx",
+                    "text": "3"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acy",
+                    "text": "26"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "acz",
+                    "text": "69"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ad0",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ad1",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ad2",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ad3",
+                    "text": "29"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ad4",
+                    "text": "16, 31"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ad5",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ad6",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ad7",
+                    "text": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ad8",
+                    "text": "33"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ad9",
+                    "text": "7"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ada",
+                    "text": "40"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adb",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adc",
+                    "text": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "add",
+                    "text": "37"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ade",
+                    "text": "83, 104, 109"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adf",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adg",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adh",
+                    "text": "3"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adi",
+                    "text": "38"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adj",
+                    "text": "45"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adk",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adl",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adm",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adn",
+                    "text": "40"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ado",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adp",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adq",
+                    "text": "29, 38"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adr",
+                    "text": "2"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ads",
+                    "text": "42"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adt",
+                    "text": "13"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adu",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adv",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adw",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adx",
+                    "text": "43"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ady",
+                    "text": "26"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "adz",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ae0",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ae1",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ae2",
+                    "text": "47"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ae3",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ae4",
+                    "text": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ae5",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ae6",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ae7",
+                    "text": "48"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ae8",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ae9",
+                    "text": "29"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aea",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aeb",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aec",
+                    "text": "49"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aed",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aee",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aef",
+                    "text": "7"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aeg",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aeh",
+                    "text": "51"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aei",
+                    "text": "24"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aej",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aek",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "ael",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aem",
+                    "text": "53"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aen",
+                    "text": "37"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aeo",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aep",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aeq",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aer",
+                    "text": "57"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aes",
+                    "text": "26"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aet",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aeu",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aev",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aew",
+                    "text": "60"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aex",
+                    "text": "4"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aey",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aez",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "af0",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "af1",
+                    "text": "72"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "af2",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "af3",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "af4",
+                    "text": "2, 10, 14, 21"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "af5",
+                    "text": "4"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "alignTop": true,
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "af6",
+                    "text": "87"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "af7",
+                    "text": "19"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "af8",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "af9",
+                    "text": "-"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "afa",
+                    "text": "1"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "total",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "afb",
+                    "text": "991"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "afc",
+                    "text": "5068"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "afd",
+                    "text": "215"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "afe",
+                    "text": "1145"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "aff",
+                    "text": "86"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "notes": [
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "afg",
+              "text": "991+5068+215+1145+86 = 7505 = 19×395."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "afj",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "afi",
+          "text": "Thus, it is mathematically coded into the Quran that Abraham, Muhammad, and Rashad are the three messengers of Islam (Submission)."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "afl",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "afk",
+          "text": "[10] As shown in Table 4, the 19 occurrences of the root word “Rashada” are in verses 186, 256, 6, 146, 78, 87, 97, 10, 17, 24, 66, 51, 29, 38, 7, 2, 10, 14, and 21. These are 38 digits = 19×2."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "afn",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "afm",
+          "text": "[11] Table 4 shows that the sum of the verse numbers where we see the 19 occurrences of the root word “Rashada” is 1145. By adding this total of verse numbers (1145), to the gematrical value of the name “Rashad” (505), plus the gematrical value of the name “Khalifa” (725), we get 1145+505+725 = 2375 = 19×125."
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "afp",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "afo",
+          "text": "[12] If we write down these numbers next to each other, i.e., the total of verse numbers (1145), followed by the gematrical value of the name “Rashad” (505), followed by the gematrical value of the name “Khalifa” (725), we also get a number that is a multiple of 19: 1145505725 = 19×60289775."
+        }
+      ]
+    },
+    {
+      "_type": "appendixCallout",
+      "_key": "afv",
+      "tone": "primary",
+      "style": "arithmetic",
+      "paragraphs": [
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "afq",
+              "text": "Sum of Verse Numbers Where the 19 “Rashada” Occur = 1145"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "afr",
+              "text": "Gematrical Value of the Name “Rashad” = 505"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "afs",
+              "text": "Gematrical Value of the Name “Khalifa” = 725"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "aft",
+              "text": "1145 + 505 + 725 = 2375 = 19 × 125"
+            }
+          ],
+          "emphasis": "result",
+          "spaced": true
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "afu",
+              "text": "1145 505 725 = 1145505725 = 19 × 60289775"
+            }
+          ],
+          "emphasis": "result"
+        }
+      ]
+    }
+  ],
+  "video_id": null,
+  "video_title": null
+}

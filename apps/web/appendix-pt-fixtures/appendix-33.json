@@ -1,0 +1,1710 @@
+{
+  "code": "33",
+  "body_pt": [
+    {
+      "_type": "appendixSection",
+      "_key": "ac",
+      "gap": "lg",
+      "prose": true,
+      "content": [
+        {
+          "_type": "block",
+          "_key": "a7",
+          "style": "normal",
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a1",
+              "text": "As stated in "
+            },
+            {
+              "_type": "quranRef",
+              "_key": "a2",
+              "reference": "3:81"
+            },
+            {
+              "_type": "span",
+              "_key": "a3",
+              "text": ", and in "
+            },
+            {
+              "_type": "span",
+              "_key": "a5",
+              "text": "Appendix 2",
+              "marks": [
+                "a4"
+              ]
+            },
+            {
+              "_type": "span",
+              "_key": "a6",
+              "text": ", God has sent a messenger to consolidate the messages delivered by all the prophets, purify them, and unify them into one religion: Submission. The timing is certainly ripe for fulfillment of this important prophecy, for the following reasons:"
+            }
+          ],
+          "markDefs": [
+            {
+              "_key": "a4",
+              "_type": "link",
+              "href": "/appendices/2"
+            }
+          ]
+        },
+        {
+          "_type": "appendixBadgeList",
+          "_key": "ab",
+          "tone": "primary",
+          "ordered": true,
+          "density": "compact",
+          "items": [
+            {
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "a8",
+                  "text": "Judaism, Christianity, and Islam have been corrupted beyond recognition."
+                }
+              ]
+            },
+            {
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "a9",
+                  "text": "All God's messages have been delivered; the Quran is the Final Testament."
+                }
+              ]
+            },
+            {
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "aa",
+                  "text": "More than 93% of the human beings destined to live in this world are yet to come. As illustrated in the Introduction, the people who have lived on this earth since Adam are only one-fifteenth of the total projected human population."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "appendixDivider",
+      "_key": "ad",
+      "title": {
+        "children": [
+          {
+            "_type": "span",
+            "_key": "ae",
+            "text": "Judaism"
+          }
+        ]
+      }
+    },
+    {
+      "_type": "block",
+      "_key": "ai",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "af",
+          "text": "The best illustration of today's corrupted Judaism can be found in the books of a famous Rabbi; Harold S. Kushner. In his best seller "
+        },
+        {
+          "_type": "span",
+          "_key": "ag",
+          "text": "When Bad Things Happen to Good People",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "ah",
+          "text": ", Avon Books, 1981, Rabbi Kushner states the following:"
+        }
+      ]
+    },
+    {
+      "_type": "appendixCallout",
+      "_key": "ap",
+      "tone": "primary",
+      "style": "quotation",
+      "paragraphs": [
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "aj",
+              "text": "“…, we would be advised to take this world as seriously as we can, in case it turns out to be the only one we will ever have, and to look for meaning and justice here. (P. 29)”"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "ak",
+              "text": "“Bad things do happen to good people in this world, but it is not God who wills it. God would like people to get what they deserve, but He cannot always arrange it. (P. 42)”"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "al",
+              "text": "“God does not reach down to interrupt the workings of laws of nature to protect the righteous from harm. This is a second area of our world which causes bad things to happen to good people, and God does not cause it and cannot stop it. (P. 58)”"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "am",
+              "text": "“God can't do everything, but He can do some important things. (P. 113)”"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "an",
+              "text": "“We can't ask Him to make us immune to disease, because He can't do that. (P. 125)”"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "ao",
+              "text": "“I recognize His limitations. He is limited in what He can do by law of nature, and by the evolution of human nature and human moral freedom. (P. 134)”"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "appendixDivider",
+      "_key": "aq",
+      "title": {
+        "children": [
+          {
+            "_type": "span",
+            "_key": "ar",
+            "text": "Christianity"
+          }
+        ]
+      }
+    },
+    {
+      "_type": "block",
+      "_key": "av",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "as",
+          "text": "If Jesus came back to life today, the Christians would crucify him. Outstanding Christian scholars have reached solid conclusions that today's Christianity has nothing to do with Jesus, and that its doctrine was mortally distorted at the infamous Nicene Conferences (325 A.D.). See "
+        },
+        {
+          "_type": "span",
+          "_key": "at",
+          "text": "The Myth of God Incarnate",
+          "marks": [
+            "em"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "au",
+          "text": ", Westminster Press, Philadelphia, 1977."
+        }
+      ]
+    },
+    {
+      "_type": "appendixDivider",
+      "_key": "aw",
+      "title": {
+        "children": [
+          {
+            "_type": "span",
+            "_key": "ax",
+            "text": "Islam"
+          }
+        ]
+      }
+    },
+    {
+      "_type": "block",
+      "_key": "a18",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "ay",
+          "text": "If Muhammad came back to this world, the “Muslims” would stone him to death. The religion they follow today has nothing to do with the Islam, i.e., Submission, preached by Abraham and Muhammad. Everything the “Muslims” do is wrong: the First Pillar (Shahaadah), the call to Salat prayer (Azan), the ablution (Wudu), the daily Salat prayers, the Zakat charity, Hajj, and all other practices of Islam (see "
+        },
+        {
+          "_type": "span",
+          "_key": "a10",
+          "text": "Appendices 2",
+          "marks": [
+            "az"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "a11",
+          "text": ", "
+        },
+        {
+          "_type": "span",
+          "_key": "a13",
+          "text": "13",
+          "marks": [
+            "a12"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "a14",
+          "text": ", & "
+        },
+        {
+          "_type": "span",
+          "_key": "a16",
+          "text": "15",
+          "marks": [
+            "a15"
+          ]
+        },
+        {
+          "_type": "span",
+          "_key": "a17",
+          "text": ")."
+        }
+      ],
+      "markDefs": [
+        {
+          "_key": "az",
+          "_type": "link",
+          "href": "/appendices/2"
+        },
+        {
+          "_key": "a12",
+          "_type": "link",
+          "href": "/appendices/13"
+        },
+        {
+          "_key": "a15",
+          "_type": "link",
+          "href": "/appendices/15"
+        }
+      ]
+    },
+    {
+      "_type": "appendixDivider",
+      "_key": "a19",
+      "title": {
+        "children": [
+          {
+            "_type": "span",
+            "_key": "a1a",
+            "text": "“A Religion Never Authorized by God” ("
+          },
+          {
+            "_type": "quranRef",
+            "_key": "a1b",
+            "reference": "42:21"
+          },
+          {
+            "_type": "span",
+            "_key": "a1c",
+            "text": ")"
+          }
+        ]
+      }
+    },
+    {
+      "_type": "block",
+      "_key": "a1e",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "a1d",
+          "text": "The extent to which Islam has been corrupted is illustrated in the following table:"
+        }
+      ]
+    },
+    {
+      "_type": "appendixGridTable",
+      "_key": "a5y",
+      "headers": [
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a1f",
+              "text": "Innovation"
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "_type": "span",
+              "_key": "a1g",
+              "text": "Violated Quranic Principles"
+            }
+          ]
+        }
+      ],
+      "rows": [
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a1h",
+                    "text": "Hadith & Sunna"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a1i",
+                    "reference": "6:19"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a1j",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a1k",
+                    "reference": "6:38"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a1l",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a1m",
+                    "reference": "6:114"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a1n",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a1o",
+                    "reference": "7:1-3"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a1p",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a1q",
+                    "reference": "12:111"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a1r",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a1s",
+                    "reference": "17:46"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a1t",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a1u",
+                    "reference": "31:6"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a1v",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a1w",
+                    "reference": "45:6"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a1x",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a1y",
+                    "reference": "69:38-47"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a1z",
+                    "text": "; plus more."
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a20",
+                    "text": "Killing whomever they consider an apostate"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a21",
+                    "reference": "2:256"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a22",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a23",
+                    "reference": "4:90"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a24",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a25",
+                    "reference": "10:99"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a26",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a27",
+                    "reference": "18:29"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a28",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a29",
+                    "reference": "88:21-22"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "group",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2a",
+                    "text": "Vicious criminal justice system:"
+                  }
+                ]
+              },
+              "colSpan": 2
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2b",
+                    "text": "Cutting off the hand of the thief"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2c",
+                    "reference": "5:38"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a2d",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2e",
+                    "reference": "12:31"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2f",
+                    "text": "Stoning the adulterers to death"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2g",
+                    "reference": "24:2"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a2h",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2i",
+                    "reference": "4:25"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2j",
+                    "text": "Killing anyone who does not observe Salat"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2k",
+                    "reference": "2:256"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a2l",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2m",
+                    "reference": "18:29"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2n",
+                    "text": "Killing one who drinks alcohol for the 4th time"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2o",
+                    "reference": "2:256"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a2p",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2q",
+                    "reference": "18:29"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2r",
+                    "text": "Forbidding menstruating women from worshiping"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2s",
+                    "reference": "2:222"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2t",
+                    "text": "Forbidding women from the Friday Prayer"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2u",
+                    "reference": "62:9"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "group",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2v",
+                    "text": "Idolizing Muhammad against his will:"
+                  }
+                ]
+              },
+              "colSpan": 2
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2w",
+                    "text": "calling him “the most honorable messenger”"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2x",
+                    "reference": "2:285"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a2y",
+                    "text": "claiming that he was infallible"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a2z",
+                    "reference": "4:79"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a30",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a31",
+                    "reference": "9:117"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a32",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a33",
+                    "reference": "17:73-74"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a34",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a35",
+                    "reference": "33:37"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a36",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a37",
+                    "reference": "40:66"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a38",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a39",
+                    "reference": "66:1"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3a",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3b",
+                    "reference": "80:1-10"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3c",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3d",
+                    "reference": "93:7"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3e",
+                    "text": "setting up his tomb as a “Sacred Mosque”"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3f",
+                    "reference": "2:149-150"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a3g",
+                    "text": "claiming that he possesses power of intercession"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3h",
+                    "reference": "2:48"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3i",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3j",
+                    "reference": "2:123"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3k",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3l",
+                    "reference": "2:254"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3m",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3n",
+                    "reference": "6:70"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3o",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3p",
+                    "reference": "6:94"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3q",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3r",
+                    "reference": "7:53"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3s",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3t",
+                    "reference": "10:3"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3u",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3v",
+                    "reference": "39:44"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3w",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3x",
+                    "reference": "43:86"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a3y",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a3z",
+                    "reference": "74:48"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a40",
+                    "text": "Inventing an indefensible story about his ascension to the heavens on a horse, at the speed of light, and talking God out of 50 Salat prayers. At the speed of light, he would still be traveling within the Milky Way Galaxy."
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a41",
+                    "reference": "17:1"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a42",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a43",
+                    "reference": "53:1-18"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a44",
+                    "text": "Adding his name in the Salat prayers & Azan"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a45",
+                    "reference": "20:14"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a46",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a47",
+                    "reference": "72:18"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a48",
+                    "text": "Adding his name to the First Pillar of Islam"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a49",
+                    "reference": "3:18"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a4a",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a4b",
+                    "reference": "37:35"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a4c",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a4d",
+                    "reference": "39:45"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "group",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4e",
+                    "text": "Insulting Muhammad by depicting him as a vicious man:"
+                  }
+                ]
+              },
+              "colSpan": 2
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4f",
+                    "text": "they claim he gouged out people's eyes"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a4g",
+                    "reference": "3:159"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a4h",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a4i",
+                    "reference": "68:4"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4j",
+                    "text": "Claiming he possessed sexual power of 30 men"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a4k",
+                    "reference": "18:110"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a4l",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a4m",
+                    "reference": "25:20"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4n",
+                    "text": "Nullifying the fact that Muhammad was the last prophet by teaching that Jesus will come back to this world. This makes Jesus the last prophet."
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a4o",
+                    "reference": "33:40"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4p",
+                    "text": "Claiming that Muhammad was illiterate, un-intelligent."
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4q",
+                    "text": "See "
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a4s",
+                    "text": "Appendix 28",
+                    "marks": [
+                      "a4r"
+                    ]
+                  }
+                ],
+                "markDefs": [
+                  {
+                    "_key": "a4r",
+                    "_type": "link",
+                    "href": "/appendices/28"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4t",
+                    "text": "A bizarre dietary system with multitudes of prohibitions"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a4u",
+                    "reference": "6:145-150"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a4v",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a4w",
+                    "reference": "16:115-116"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4x",
+                    "text": "Altering the Sacred Months"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a4y",
+                    "reference": "9:37"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a4z",
+                    "text": "Neglecting the Zakat charity through distortion"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a50",
+                    "reference": "6:141"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a51",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a53",
+                    "text": "Appendix 15",
+                    "marks": [
+                      "a52"
+                    ]
+                  }
+                ],
+                "markDefs": [
+                  {
+                    "_key": "a52",
+                    "_type": "link",
+                    "href": "/appendices/15"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a54",
+                    "text": "Oppressing women and forcing them to wear head-covers and unreasonable clothes; and depriving them of all rights in marriage, divorce, inheritance, etc."
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a55",
+                    "reference": "2:228"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a56",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a57",
+                    "reference": "3:195"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a58",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a59",
+                    "reference": "4:19"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a5a",
+                    "text": ", "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5b",
+                    "reference": "4:32"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a5c",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5d",
+                    "reference": "9:71"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5e",
+                    "text": "Insulting women by instituting that “if a monkey, dog, or a woman passes in front of a praying person, his prayer is nullified” (Hadith)"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": []
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5f",
+                    "text": "Inventing numerous rules from ablution, to prayer, to sleeping, to cutting one's nails"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5g",
+                    "reference": "5:101"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a5h",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5i",
+                    "reference": "42:21"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a5j",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5k",
+                    "reference": "2:67-71"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5l",
+                    "text": "Prohibiting gold and silk for men"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5m",
+                    "reference": "5:48-49"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a5n",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5o",
+                    "reference": "7:31-32"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5p",
+                    "text": "Prohibiting music and the arts"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5q",
+                    "reference": "7:32"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a5r",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5s",
+                    "reference": "34:13"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a5t",
+                    "text": "; "
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5u",
+                    "reference": "42:21"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "variant": "data",
+          "cells": [
+            {
+              "content": {
+                "children": [
+                  {
+                    "_type": "span",
+                    "_key": "a5v",
+                    "text": "Ridiculing Islam by stating that the earth is built on top of a giant whale!! ("
+                  },
+                  {
+                    "_type": "quranRef",
+                    "_key": "a5w",
+                    "reference": "79:30"
+                  },
+                  {
+                    "_type": "span",
+                    "_key": "a5x",
+                    "text": "; Ibn Kathir, 1200 AD & Ben Baz, 1975 AD)"
+                  }
+                ]
+              }
+            },
+            {
+              "content": {
+                "children": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_type": "block",
+      "_key": "a60",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "_key": "a5z",
+          "text": "This is only a minute sample of the violations committed by the “Muslims” on a daily basis. This is why God has sent His Messenger of the Covenant now."
+        }
+      ]
+    }
+  ],
+  "video_id": "qaJTFggUvDU",
+  "video_title": "Appendix 33 — Why Did God Send A Messenger Now?"
+}
