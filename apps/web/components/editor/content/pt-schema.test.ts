@@ -51,18 +51,33 @@ describe('SCHEMA_DEFINITION', () => {
 
     const image = SCHEMA_DEFINITION.blockObjects.find((b) => b.name === 'image')
     expect(image?.fields.map((f) => f.name)).toEqual(['url', 'alt', 'caption'])
+
+    // Tables came from the retired Studio; the field names are the plugin's.
+    const table = SCHEMA_DEFINITION.blockObjects.find((b) => b.name === 'richTableBlock')
+    expect(table?.fields.map((f) => f.name)).toEqual([
+      'rows',
+      'columnHeaders',
+      'hasColumnTitles',
+      'hasRowTitles',
+    ])
   })
 })
 
 describe('hasUnsupportedBlocks', () => {
-  it('accepts documents of block, callout and image only', () => {
+  it('accepts block, callout, image and rich tables', () => {
     const value = [
       { _type: 'block', children: [] },
       { _type: 'callout', tone: 'info', text: 'x' },
       { _type: 'image', url: 'https://cdn/x.png' },
+      { _type: 'richTableBlock', rows: [] },
     ]
     expect(hasUnsupportedBlocks(value)).toBe(false)
-    expect(KNOWN_BLOCK_TYPES).toEqual(['block', 'callout', 'image'])
+    expect(KNOWN_BLOCK_TYPES).toEqual(['block', 'callout', 'image', 'richTableBlock'])
+  })
+
+  // A migrated table must not lock the document; that was the whole point.
+  it('does not flag an article that contains only a table', () => {
+    expect(hasUnsupportedBlocks([{ _type: 'richTableBlock', rows: [] }])).toBe(false)
   })
 
   it('flags documents with any other block type', () => {

@@ -25,6 +25,7 @@ interface PublicArticleDTO {
   thumbnail_url: string
   thumbnail_text: PortableTextBlock[]
   body?: PortableTextBlock[]
+  enable_scripture_refs?: boolean
   category: string
   category_slug: string
   author_name: string
@@ -76,8 +77,8 @@ function toBlogPost(dto: PublicArticleDTO): BlogPost {
     publishedAt: dto.published_at ?? undefined,
     updatedAt: dto.updated_at,
     language: dto.language,
-    // Scripture-ref linkifying stays on by default (no per-article field yet).
-    enableScriptureRefs: true,
+    // Absent means on: articles predating the field keep linkifying.
+    enableScriptureRefs: dto.enable_scripture_refs ?? true,
     category: orEmpty(dto.category),
     categoryRef: orEmpty(dto.category_slug),
     body: dto.body ?? [],
