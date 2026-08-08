@@ -2,8 +2,7 @@ import type { PortableTextBlock } from '@portabletext/types'
 
 // Shared blog data shapes. Both platforms read published articles from
 // ws-backend's public editorial endpoints via blog-backend.ts; these types are
-// the view model those responses are mapped onto. The names still say "Sanity"
-// because they predate the migration and are load-bearing across both apps.
+// the view model those responses are mapped onto.
 
 /**
  * The language reads fall back to when the reader's locale has nothing
@@ -17,7 +16,7 @@ export const DEFAULT_BLOG_LANGUAGE = 'en'
  * A content language code. Every language the editorial registry can publish to
  * is valid, so this is deliberately a plain string and not a fixed union.
  */
-export type SanityLanguage = string
+export type BlogLanguage = string
 
 /** Shape of a BCP-47 code: two or three letters, optional subtags. */
 const LANGUAGE_CODE = /^[a-z]{2,3}(?:-[a-z0-9]+)*$/
@@ -32,7 +31,7 @@ const LANGUAGE_CODE = /^[a-z]{2,3}(?:-[a-z0-9]+)*$/
  * blog-backend falls back to English only when the language turns up empty, so
  * a newly published language reaches readers with no frontend change.
  */
-export function toSanityLanguage(locale: string | null | undefined): SanityLanguage {
+export function toBlogLanguage(locale: string | null | undefined): BlogLanguage {
   const code = locale?.trim().toLowerCase() ?? ''
   return LANGUAGE_CODE.test(code) ? code : DEFAULT_BLOG_LANGUAGE
 }

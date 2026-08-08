@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { fetchArticleBySlug, fetchArticles, searchArticles } from '@/lib/blog-backend'
-import { DEFAULT_BLOG_LANGUAGE, toSanityLanguage } from '@/lib/blog-queries'
+import { DEFAULT_BLOG_LANGUAGE, toBlogLanguage } from '@/lib/blog-queries'
 
 /**
  * The public blog used to clamp the reader's locale to a hardcoded en/fr/ar/tr
@@ -61,26 +61,26 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe('toSanityLanguage', () => {
+describe('toBlogLanguage', () => {
   it('passes through languages outside the retired en/fr/ar/tr list', () => {
     for (const code of ['de', 'ckb', 'kmr', 'fa', 'ur', 'pt-br']) {
-      expect(toSanityLanguage(code)).toBe(code)
+      expect(toBlogLanguage(code)).toBe(code)
     }
   })
 
   it('normalizes case and surrounding whitespace', () => {
-    expect(toSanityLanguage('  DE ')).toBe('de')
+    expect(toBlogLanguage('  DE ')).toBe('de')
   })
 
   it('falls back to English for a missing or malformed locale', () => {
     for (const value of ['', '   ', '../en', 'not a locale', null, undefined]) {
-      expect(toSanityLanguage(value)).toBe(DEFAULT_BLOG_LANGUAGE)
+      expect(toBlogLanguage(value)).toBe(DEFAULT_BLOG_LANGUAGE)
     }
   })
 
   it('never returns an empty code, which the backend reads as every language', () => {
     for (const value of ['', null, undefined, '!!']) {
-      expect(toSanityLanguage(value)).not.toBe('')
+      expect(toBlogLanguage(value)).not.toBe('')
     }
   })
 })

@@ -1,6 +1,6 @@
 import { buildPageMetadata } from '@/constants/metadata'
 import { fetchArticles } from '@/lib/blog-backend'
-import { toSanityLanguage } from '@/lib/blog-queries'
+import { toBlogLanguage } from '@/lib/blog-queries'
 import { getLocale } from 'next-intl/server'
 import { HeroManifesto } from './_sections/hero'
 import { ScriptureSection } from './_sections/scripture'
@@ -37,7 +37,7 @@ export default async function Home() {
   let latestArticles: LatestArticle[] = []
   try {
     // Published articles come back newest-first from ws-backend's editorial store.
-    const articles = await fetchArticles(toSanityLanguage(locale))
+    const articles = await fetchArticles(toBlogLanguage(locale))
     latestArticles = articles.slice(0, LATEST_ARTICLE_COUNT)
   } catch {
     // non-critical — page renders without journal section

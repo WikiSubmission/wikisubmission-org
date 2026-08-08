@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 
 import { portableTextToPlain, searchArticles } from '@/lib/blog-backend'
-import { toSanityLanguage } from '@/lib/blog-queries'
+import { toBlogLanguage } from '@/lib/blog-queries'
 
 export const dynamic = 'force-dynamic'
 
@@ -84,10 +84,10 @@ export async function GET(request: NextRequest) {
   const q = sanitizeQuery(rawQ)
   if (q.length < 2) return Response.json({ articles: [] })
 
-  // Any published language is searchable; toSanityLanguage only rejects codes
+  // Any published language is searchable; toBlogLanguage only rejects codes
   // that are not shaped like a locale, and searchArticles retries in English
   // when the language has no matches.
-  const language = toSanityLanguage(localeParam)
+  const language = toBlogLanguage(localeParam)
 
   try {
     const posts = await searchArticles(q, language, MAX_RESULTS)

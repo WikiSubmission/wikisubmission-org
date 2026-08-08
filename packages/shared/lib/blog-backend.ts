@@ -3,11 +3,11 @@ import type { PortableTextBlock } from '@portabletext/types'
 import { resolveBrowserApiBaseUrl, resolveServerApiBaseUrl } from '@/src/api/base-url'
 import { DEFAULT_BLOG_LANGUAGE } from '@/lib/blog-queries'
 import type {
+  BlogLanguage,
   BlogPost,
   Category,
   Post,
   RelatedBlogPost,
-  SanityLanguage,
 } from '@/lib/blog-queries'
 
 // First-party blog reads from ws-backend's public editorial endpoints (Sanity
@@ -112,8 +112,8 @@ function toRelated(dto: PublicArticleDTO): RelatedBlogPost {
  * which is the same trade fetchArticleBySlug already makes per slug.
  */
 async function withEnglishFallback<T>(
-  language: SanityLanguage,
-  load: (lang: SanityLanguage) => Promise<T[]>,
+  language: BlogLanguage,
+  load: (lang: BlogLanguage) => Promise<T[]>,
 ): Promise<T[]> {
   const rows = await load(language)
   if (rows.length > 0 || language === DEFAULT_BLOG_LANGUAGE) return rows
@@ -121,7 +121,7 @@ async function withEnglishFallback<T>(
 }
 
 /** All published articles for a language, newest first, English if it has none. */
-export async function fetchArticles(language: SanityLanguage): Promise<Post[]> {
+export async function fetchArticles(language: BlogLanguage): Promise<Post[]> {
   return withEnglishFallback(language, async (lang) => {
     const data = await getData<PublicArticleDTO[]>(
       `/editorial/public/articles?language=${encodeURIComponent(lang)}`,
@@ -133,7 +133,7 @@ export async function fetchArticles(language: SanityLanguage): Promise<Post[]> {
 /** One published article by slug, with an English fallback. */
 export async function fetchArticleBySlug(
   slug: string,
-  language: SanityLanguage,
+  language: BlogLanguage,
 ): Promise<BlogPost | null> {
   const path = (lang: string) =>
     `/editorial/public/articles/${encodeURIComponent(lang)}/${encodeURIComponent(slug)}`
@@ -163,7 +163,7 @@ export async function fetchRelatedArticles(
  */
 export async function searchArticles(
   q: string,
-  language: SanityLanguage,
+  language: BlogLanguage,
   limit = 8,
 ): Promise<BlogPost[]> {
   return withEnglishFallback(language, async (lang) => {

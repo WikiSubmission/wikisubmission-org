@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { BlogPostArticle } from '@/components/blog/blog-post-article'
 import { Spinner } from '@/components/ui/spinner'
 import { fetchPostBySlug, fetchRelatedPosts } from '@/lib/blog-client'
-import { toSanityLanguage, type BlogPost, type RelatedBlogPost } from '@/lib/blog-queries'
+import { toBlogLanguage, type BlogPost, type RelatedBlogPost } from '@/lib/blog-queries'
 
 // Article detail. The slug arrives via ?slug= (a static export cannot
 // pre-render the unbounded [slug] segment the web route uses); the post and its
@@ -28,7 +28,7 @@ function ArticleDetailInner() {
       return
     }
     let cancelled = false
-    const language = toSanityLanguage(locale)
+    const language = toBlogLanguage(locale)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setState('loading')
     fetchPostBySlug(slug, language)
