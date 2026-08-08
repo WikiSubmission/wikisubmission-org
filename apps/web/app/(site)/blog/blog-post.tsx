@@ -10,7 +10,7 @@ import { type BlogPost, type RelatedBlogPost, type SanityLanguage } from '@/lib/
 // Drafts are previewed in /editor, which renders the working copy with the same
 // Portable Text schema. There is no public preview link.
 export { BlogPostArticle } from '@/components/blog/blog-post-article'
-export { SANITY_LANGUAGES, toSanityLanguage } from '@/lib/blog-queries'
+export { toSanityLanguage } from '@/lib/blog-queries'
 export type { BlogPost, RelatedBlogPost, SanityLanguage } from '@/lib/blog-queries'
 
 const BLOG_INDEX_METADATA = buildPageMetadata({

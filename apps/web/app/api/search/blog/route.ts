@@ -1,11 +1,9 @@
 import { NextRequest } from 'next/server'
 
 import { portableTextToPlain, searchArticles } from '@/lib/blog-backend'
+import { toSanityLanguage } from '@/lib/blog-queries'
 
 export const dynamic = 'force-dynamic'
-
-const ALLOWED_LOCALES = ['en', 'fr', 'ar', 'tr'] as const
-type AllowedLocale = (typeof ALLOWED_LOCALES)[number]
 
 // Hard caps to limit scraping / query abuse
 const MAX_QUERY_LENGTH = 80
@@ -86,9 +84,10 @@ export async function GET(request: NextRequest) {
   const q = sanitizeQuery(rawQ)
   if (q.length < 2) return Response.json({ articles: [] })
 
-  const language: AllowedLocale = ALLOWED_LOCALES.includes(localeParam as AllowedLocale)
-    ? (localeParam as AllowedLocale)
-    : 'en'
+  // Any published language is searchable; toSanityLanguage only rejects codes
+  // that are not shaped like a locale, and searchArticles retries in English
+  // when the language has no matches.
+  const language = toSanityLanguage(localeParam)
 
   try {
     const posts = await searchArticles(q, language, MAX_RESULTS)
