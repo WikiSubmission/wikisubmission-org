@@ -206,6 +206,15 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
       },
       { kind: 'textarea', key: 'snippet', label: 'Snippet', rows: 2, desc: 'One-line teaser shown in appendix lists.' },
       { kind: 'textarea', key: 'body', label: 'Body (markdown)', rows: 24 },
+      // An appendix carries at most one video, always trailing. It is metadata
+      // rather than body markdown, so the reader appends it below the body.
+      {
+        kind: 'row',
+        fields: [
+          { kind: 'text', key: 'video_id', label: 'Video ID', mono: true, desc: 'Bare 11-character YouTube id, not a URL. Leave blank for no video.' },
+          { kind: 'text', key: 'video_title', label: 'Video title', desc: 'Accessible label for the embed.' },
+        ],
+      },
     ],
   },
 }

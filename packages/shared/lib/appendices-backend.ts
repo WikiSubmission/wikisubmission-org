@@ -8,6 +8,11 @@ import { resolveBrowserApiBaseUrl, resolveServerApiBaseUrl } from '@/src/api/bas
  *
  * `body` is markdown text, not Portable Text (ws-backend commit c54d4db).
  *
+ * An appendix's single trailing YouTube embed rides alongside the body as
+ * metadata (`video_id` / `video_title`) rather than as body syntax, so the
+ * reader renders it below the markdown with the same YouTubeEmbed the
+ * hardcoded TSX uses.
+ *
  * This is deliberately separate from the legacy `GET /appendices` metadata
  * endpoint (title + snippet only), which still backs the Quran nav listing.
  */
@@ -19,6 +24,9 @@ interface PublicAppendixDTO {
   snippet: string
   /** Markdown. Absent on listings and on rows that have no body yet. */
   body?: string
+  /** Bare 11-char YouTube id. Absent when the appendix has no video. */
+  video_id?: string
+  video_title?: string
   language: string
   version_slug: string
   version_name: string
@@ -37,6 +45,9 @@ export interface EditorialAppendix {
   snippet?: string
   /** Markdown body. Empty string when the row carries no body. */
   body: string
+  /** Bare YouTube id of the appendix's trailing video, or undefined. */
+  videoId?: string
+  videoTitle?: string
   language: string
   versionSlug: string
   versionName: string
@@ -75,6 +86,8 @@ function toAppendix(dto: PublicAppendixDTO): EditorialAppendix {
     title: dto.title,
     snippet: dto.snippet || undefined,
     body: dto.body ?? '',
+    videoId: dto.video_id?.trim() || undefined,
+    videoTitle: dto.video_title?.trim() || undefined,
     language: dto.language,
     versionSlug: dto.version_slug,
     versionName: dto.version_name,

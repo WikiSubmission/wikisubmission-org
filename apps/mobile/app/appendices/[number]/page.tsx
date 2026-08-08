@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { APPENDICES, resolveAppendixMeta } from '@/constants/appendices'
 import { getAppendixContent } from '@/content/library'
 import { AppendixMarkdown } from '@/components/library/appendix-markdown'
+import { AppendixVideo } from '@/components/library/appendix-video'
 import { fetchAppendix, hasEditorialBody } from '@/lib/appendices-backend'
 import { AppendixEmptyState, AppendixPagination } from './appendix-chrome'
 
@@ -50,7 +51,12 @@ export default async function AppendixPage({
       <hr className="border-border/40" />
 
       {showMarkdown && editorial ? (
-        <AppendixMarkdown content={editorial.body} />
+        <>
+          <AppendixMarkdown content={editorial.body} />
+          {/* The video is payload metadata, not body markdown, so it is
+              rendered here: trailing, exactly where the TSX puts it. */}
+          <AppendixVideo videoId={editorial.videoId} videoTitle={editorial.videoTitle} />
+        </>
       ) : Content ? (
         <div className="space-y-10">
           <Content />

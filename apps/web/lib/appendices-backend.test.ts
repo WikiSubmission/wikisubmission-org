@@ -106,6 +106,37 @@ describe('fetchAppendix', () => {
     expect((await fetchAppendix('intro'))?.number).toBeNull()
   })
 
+  it('maps the trailing video, which is metadata rather than body markdown', async () => {
+    fetchMock.mockResolvedValueOnce(
+      ok(
+        dto({
+          body: 'text',
+          video_id: '2UxqrtHtYd0',
+          video_title: 'Appendix 19 — Hadith & Sunna',
+        })
+      )
+    )
+
+    const appendix = await fetchAppendix(19)
+
+    expect(appendix?.videoId).toBe('2UxqrtHtYd0')
+    expect(appendix?.videoTitle).toBe('Appendix 19 — Hadith & Sunna')
+  })
+
+  it('leaves the video undefined when the row carries none', async () => {
+    fetchMock.mockResolvedValueOnce(ok(dto({ body: 'text' })))
+
+    const appendix = await fetchAppendix(19)
+
+    expect(appendix?.videoId).toBeUndefined()
+    expect(appendix?.videoTitle).toBeUndefined()
+  })
+
+  it('treats a blank video id as no video', async () => {
+    fetchMock.mockResolvedValueOnce(ok(dto({ video_id: '  ', video_title: '' })))
+    expect((await fetchAppendix(19))?.videoId).toBeUndefined()
+  })
+
   it('normalizes an unexpected direction to ltr', async () => {
     fetchMock.mockResolvedValueOnce(ok(dto({ direction: 'sideways' })))
     expect((await fetchAppendix(19))?.direction).toBe('ltr')

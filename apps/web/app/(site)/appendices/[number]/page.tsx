@@ -11,6 +11,7 @@ import { buildPageMetadata } from '@/constants/metadata'
 import { ArticleAnimations } from '@/components/article-animations'
 import { getAppendixContent } from '@/content/library'
 import { AppendixMarkdown } from '@/components/library/appendix-markdown'
+import { AppendixVideo } from '@/components/library/appendix-video'
 import { fetchAppendix, hasEditorialBody } from '@/lib/appendices-backend'
 
 interface Props {
@@ -114,7 +115,15 @@ export default async function AppendixPage({ params }: Props) {
 
           {/* ── Content ──────────────────────────────────────────────────────── */}
           {editorial && hasEditorialBody(editorial) ? (
-            <AppendixMarkdown content={editorial.body} />
+            <>
+              <AppendixMarkdown content={editorial.body} />
+              {/* The video is payload metadata, not body markdown, so it is
+                  rendered here: trailing, exactly where the TSX puts it. */}
+              <AppendixVideo
+                videoId={editorial.videoId}
+                videoTitle={editorial.videoTitle}
+              />
+            </>
           ) : Content ? (
             <Content />
           ) : (
