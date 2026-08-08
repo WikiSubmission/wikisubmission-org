@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { ArrowLeftIcon } from 'lucide-react'
 import { Children, type ReactNode } from 'react'
 import { ScriptureText } from '@/components/scripture-text'
-import { urlFor } from '@/lib/sanity'
 import { sanitizeUrl } from '@/lib/safe-url'
 import type { BlogPost, RelatedBlogPost } from '@/lib/blog-queries'
 import { BlogReadingProgressBar } from './blog-reading-progress-bar'
@@ -40,13 +39,11 @@ function readingTime(body?: PortableTextBlock[]): string {
 export function BlogPostArticle({
   post,
   related = [],
-  preview = false,
   backHref = '/blog',
   hrefForRelated = (slug: string) => `/blog/${slug}`,
 }: {
   post: BlogPost
   related?: RelatedBlogPost[]
-  preview?: boolean
   backHref?: string
   hrefForRelated?: (slug: string) => string
 }) {
@@ -76,12 +73,6 @@ export function BlogPostArticle({
 
       {/* ── Title block (centered, magazine style) ──────────────────────── */}
       <section className="px-6 md:px-12 pt-8 pb-10 max-w-[760px] mx-auto text-center">
-        {preview && (
-          <div className="mb-8 rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-950 text-left">
-            Draft preview. This article is being loaded from unpublished Sanity content through a secret link.
-          </div>
-        )}
-
         {post.category && (
           <span className="inline-block mb-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
             {post.category}
@@ -348,11 +339,9 @@ function buildPortableTextComponents(scriptureRefsEnabled: boolean) {
     image: ({
       value,
     }: {
-      value: { url?: string; asset?: { url?: string }; alt?: string; caption?: string }
+      value: { url?: string; alt?: string; caption?: string }
     }) => {
-      // First-party images carry a plain `url`; legacy Sanity draft images
-      // (preview) still resolve through urlFor's asset ref.
-      const url = sanitizeUrl(value.url || urlFor(value))
+      const url = sanitizeUrl(value.url)
       if (!url) return null
       return (
         <figure className="my-10">

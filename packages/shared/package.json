@@ -22,7 +22,6 @@
     "@radix-ui/react-toggle": "^1.1.14",
     "@radix-ui/react-toggle-group": "^1.1.15",
     "@radix-ui/react-tooltip": "^1.2.12",
-    "@sanity/client": "^7.23.0",
     "@sqlite.org/sqlite-wasm": "3.53.0-build1",
     "@visx/axis": "^4.0.0",
     "@visx/curve": "^4.0.0",
