@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": "..",
+    "paths": {
+      "@/components/quran-ref": [
+        "./scripts/md-stubs/quran-ref.tsx"
+      ],
+      "@/components/youtube-embed": [
+        "./scripts/md-stubs/youtube-embed.tsx"
+      ],
+      "@/*": [
+        "./*",
+        "../../packages/shared/*"
+      ],
+      "next/image": [
+        "./scripts/md-stubs/image.mjs"
+      ]
+    }
+  }
+}
