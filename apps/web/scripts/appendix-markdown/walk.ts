@@ -30,8 +30,20 @@ export interface ConvertOptions {
   embeds: EmbedMode
 }
 
+/** An appendix's single trailing YouTube embed, lifted out as metadata. */
+export interface EmbedRef {
+  videoId: string
+  videoTitle: string
+}
+
 export interface ConvertResult {
   markdown: string
+  /**
+   * Every YouTube embed found, in document order. An appendix carries at most
+   * one, so callers take the first; more than one means the corpus changed and
+   * the metadata model no longer holds.
+   */
+  embeds: EmbedRef[]
   /** Everything the conversion could not carry over losslessly. */
   warnings: string[]
 }
@@ -90,6 +102,7 @@ function str(value: unknown): string | undefined {
 }
 
 export function convertTree(root: ReactNode, options: ConvertOptions): ConvertResult {
+  const embeds: EmbedRef[] = []
   const warnings: string[] = []
   const warn = (message: string) => {
     if (!warnings.includes(message)) warnings.push(message)
@@ -292,11 +305,27 @@ export function convertTree(root: ReactNode, options: ConvertOptions): ConvertRe
     }
   }
 
+  /** A block that is nothing but an ATX heading. */
+  const isHeadingBlock = (block: string) => /^#{1,6} \S/.test(block) && !block.includes('\n')
+
   /** div / section / figure and friends: card, divider, mono block, or passthrough. */
   function divBlocks(element: ReactElement): string[] {
     const props = propsOf(element)
     const children = props.children as ReactNode
     const kids = childArray(children).filter((child) => isValidElement(child))
+
+    // The video sits in its own `<section>` under a "Video" heading. When the
+    // embed is lifted out into metadata, that heading would be left labelling
+    // nothing, and the reader prints its own heading above the embed, so the
+    // whole section goes with it.
+    if (
+      options.embeds === 'drop' &&
+      kids.some((child) => nameOf((child as ReactElement).type) === 'YouTubeEmbed')
+    ) {
+      const blocks = blocksOf(children)
+      if (blocks.every(isHeadingBlock)) return []
+      return blocks
+    }
 
     // SectionDivider / Divider shape: <hr /><h2>Title</h2><hr />
     const rule = kids.find((child) => (child as ReactElement).type === 'hr')
@@ -459,8 +488,11 @@ export function convertTree(root: ReactNode, options: ConvertOptions): ConvertRe
     const videoId = str(props.videoId)
     if (!videoId) return []
     const title = collapse(str(props.title) ?? '').trim()
+    // Recorded whatever the mode: the manifest is how the video reaches the
+    // editorial payload once the body itself has stopped carrying it.
+    embeds.push({ videoId, videoTitle: title })
     if (options.embeds === 'drop') {
-      warn(`YouTube embed ${videoId} dropped`)
+      warn(`YouTube embed ${videoId} lifted out of the body into video metadata`)
       return []
     }
     if (options.embeds === 'shortcode') {
@@ -503,5 +535,5 @@ export function convertTree(root: ReactNode, options: ConvertOptions): ConvertRe
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 
-  return { markdown: `${markdown}\n`, warnings }
+  return { markdown: `${markdown}\n`, embeds, warnings }
 }
