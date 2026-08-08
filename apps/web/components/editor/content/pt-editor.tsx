@@ -7,11 +7,20 @@
  * contract) so no content migration is needed and the public
  * @portabletext/react renderer is unchanged.
  *
- * Custom block objects: `callout` (tone + text) and `image` (url/alt/caption,
- * with upload). Documents containing block types the schema cannot represent
- * are opened read-only so nothing is ever dropped on save.
+ * Custom block objects: `callout` (tone + text), `image` (url/alt/caption, with
+ * upload) and `richTableBlock` (tables migrated from the Studio, edited by
+ * rich-table-card.tsx). Documents containing block types the schema cannot
+ * represent are opened read-only so nothing is ever dropped on save.
  */
-import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 
 import { defineSchema, EditorProvider, PortableTextEditable, useEditor } from '@portabletext/editor'
 import type {
@@ -29,6 +38,8 @@ import {
   toInitialValue,
 } from './pt-schema'
 import { sanitizeUrl } from '@/lib/safe-url'
+import { RichTableCard } from './rich-table-card'
+import type { RichTableValue } from './pt-table'
 import { uploadEditorialImage } from './upload-image'
 
 const schemaDefinition = defineSchema(
@@ -36,6 +47,10 @@ const schemaDefinition = defineSchema(
 )
 
 type BlockPath = BlockRenderProps['path']
+
+// renderBlock is called outside the component tree's props, so the read-only
+// state of the document reaches the block cards through context.
+const ReadOnlyContext = createContext(false)
 
 interface BlockObjectValue {
   _key: string
@@ -85,34 +100,39 @@ export function PTEditor({ initialValue, onChange, disabled }: PTEditorProps) {
     return (
       <div className="pt-editor pt-unsupported">
         This document contains content types the visual editor cannot represent
-        (for example legacy tables or embeds). Editing the body here is disabled
-        so nothing is lost. The content is preserved exactly as stored.
+        (for example an embed or a legacy block type). Editing the body here is
+        disabled so nothing is lost. The content is preserved exactly as stored.
       </div>
     )
   }
 
   return (
-    <div className={`pt-editor${disabled ? ' is-disabled' : ''}`}>
-      <EditorProvider
-        initialConfig={{ schemaDefinition, initialValue: initial as PortableTextBlock[] | undefined }}
-      >
-        <EventListenerPlugin
-          on={(event) => {
-            if (event.type === 'mutation') handleMutation(event.value)
+    <ReadOnlyContext.Provider value={disabled === true}>
+      <div className={`pt-editor${disabled ? ' is-disabled' : ''}`}>
+        <EditorProvider
+          initialConfig={{
+            schemaDefinition,
+            initialValue: initial as PortableTextBlock[] | undefined,
           }}
-        />
-        {!disabled && <Toolbar />}
-        <PortableTextEditable
-          className="pt-content"
-          readOnly={disabled}
-          renderStyle={(props) => renderStyle(props)}
-          renderDecorator={(props) => renderDecorator(props)}
-          renderAnnotation={(props) => renderAnnotation(props)}
-          renderListItem={(props) => <>{props.children}</>}
-          renderBlock={(props) => renderBlock(props)}
-        />
-      </EditorProvider>
-    </div>
+        >
+          <EventListenerPlugin
+            on={(event) => {
+              if (event.type === 'mutation') handleMutation(event.value)
+            }}
+          />
+          {!disabled && <Toolbar />}
+          <PortableTextEditable
+            className="pt-content"
+            readOnly={disabled}
+            renderStyle={(props) => renderStyle(props)}
+            renderDecorator={(props) => renderDecorator(props)}
+            renderAnnotation={(props) => renderAnnotation(props)}
+            renderListItem={(props) => <>{props.children}</>}
+            renderBlock={(props) => renderBlock(props)}
+          />
+        </EditorProvider>
+      </div>
+    </ReadOnlyContext.Provider>
   )
 }
 
@@ -171,7 +191,7 @@ function renderBlock(props: BlockRenderProps) {
     return <ImageCard value={value} path={props.path} />
   }
   if (props.schemaType.name === 'richTableBlock') {
-    return <RichTablePreview value={props.value as RichTableValue} />
+    return <TableBlock value={props.value as RichTableValue} path={props.path} />
   }
   const meta = props.value as { listItem?: string; level?: number }
   return (
@@ -386,61 +406,12 @@ function ImageCard({ value, path }: { value: BlockObjectValue; path: BlockPath }
   )
 }
 
-// ── Rich table (read-only) ────────────────────────────────────────────────────
-// Tables were authored in the retired Studio. Cell-level editing is not built
-// here; the block renders as a preview so the surrounding article stays fully
-// editable and the table value round-trips untouched on save.
+// ── Rich table ───────────────────────────────────────────────────────────────
+// Tables were authored in the retired Studio by sanity-plugin-rich-table. The
+// card in rich-table-card.tsx edits rows, columns and cells in place and writes
+// back only the fields it touched, so Studio-only fields survive a save.
 
-interface RichTableCell {
-  content?: Array<{ children?: Array<{ text?: string }> }>
-}
-interface RichTableRow {
-  title?: string
-  cells?: RichTableCell[]
-}
-export interface RichTableValue {
-  rows?: RichTableRow[]
-  columnHeaders?: Array<{ title?: string }>
-  hasColumnTitles?: boolean
-}
-
-function cellText(cell: RichTableCell): string {
-  return (cell.content ?? [])
-    .flatMap((block) => block.children ?? [])
-    .map((child) => child.text ?? '')
-    .join(' ')
-    .trim()
-}
-
-function RichTablePreview({ value }: { value: RichTableValue }) {
-  const rows = value.rows ?? []
-  const headers = value.columnHeaders ?? []
-  return (
-    <div className="pt-card pt-table" contentEditable={false}>
-      <div className="pt-table-label">Table — read-only</div>
-      <div className="pt-table-scroll">
-        <table>
-          {headers.length > 0 && (
-            <thead>
-              <tr>
-                {headers.map((h, i) => (
-                  <th key={i}>{h.title ?? ''}</th>
-                ))}
-              </tr>
-            </thead>
-          )}
-          <tbody>
-            {rows.map((row, r) => (
-              <tr key={r}>
-                {(row.cells ?? []).map((cell, c) => (
-                  <td key={c}>{cellText(cell)}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {rows.length === 0 && <div className="pt-table-empty">Empty table</div>}
-    </div>
-  )
+function TableBlock({ value, path }: { value: RichTableValue; path: BlockPath }) {
+  const readOnly = useContext(ReadOnlyContext)
+  return <RichTableCard value={value} path={path} readOnly={readOnly} />
 }
