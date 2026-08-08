@@ -1,17 +1,5 @@
 import { MetadataRoute } from 'next'
-import { sanityServer } from '@/lib/sanity'
-
-const SITEMAP_POSTS_QUERY = `*[_type == "article" && language == "en"] | order(publishedAt desc) {
-  "slug": slug.current,
-  publishedAt,
-  _updatedAt
-}`
-
-type SitemapPost = {
-  slug: string
-  publishedAt?: string
-  _updatedAt?: string
-}
+import { fetchArticles } from '@/lib/blog-backend'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://wikisubmission.org'
@@ -120,15 +108,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }))
 
-  // Blog posts from Sanity
+  // Published blog posts from ws-backend's editorial store
   let blogPosts: MetadataRoute.Sitemap = []
   try {
-    const posts = await sanityServer.fetch<SitemapPost[]>(SITEMAP_POSTS_QUERY)
+    const posts = await fetchArticles('en')
     blogPosts = posts
-      .filter((p) => p.slug)
+      .filter((p) => p.slug.current)
       .map((p) => ({
-        url: `${baseUrl}/blog/${p.slug}`,
-        lastModified: p.publishedAt ? new Date(p.publishedAt) : p._updatedAt ? new Date(p._updatedAt) : new Date(),
+        url: `${baseUrl}/blog/${p.slug.current}`,
+        lastModified: p.publishedAt ? new Date(p.publishedAt) : new Date(),
         changeFrequency: 'monthly' as const,
         priority: 0.6,
       }))
