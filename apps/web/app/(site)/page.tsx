@@ -1,5 +1,6 @@
 import { buildPageMetadata } from '@/constants/metadata'
-import { sanityServer } from '@/lib/sanity'
+import { fetchArticles } from '@/lib/blog-backend'
+import { toSanityLanguage } from '@/lib/blog-queries'
 import { getLocale } from 'next-intl/server'
 import { HeroManifesto } from './_sections/hero'
 import { ScriptureSection } from './_sections/scripture'
@@ -18,12 +19,6 @@ export const metadata = buildPageMetadata({
   url: '/',
 })
 
-const LATEST_ARTICLES_QUERY = `*[_type == "article" && language == $language] | order(publishedAt desc) [0...3] {
-  _id, title, slug, excerpt, publishedAt,
-  "category": categories[0]->name,
-  "thumbnailUrl": thumbnail.asset->url
-}`
-
 type LatestArticle = {
   _id: string
   title: string
@@ -34,16 +29,16 @@ type LatestArticle = {
   thumbnailUrl?: string
 }
 
+const LATEST_ARTICLE_COUNT = 3
+
 export default async function Home() {
   const locale = await getLocale()
-  const language = ['en', 'fr', 'ar', 'tr'].includes(locale) ? locale : 'en'
 
   let latestArticles: LatestArticle[] = []
   try {
-    latestArticles = await sanityServer.fetch<LatestArticle[]>(
-      LATEST_ARTICLES_QUERY,
-      { language }
-    )
+    // Published articles come back newest-first from ws-backend's editorial store.
+    const articles = await fetchArticles(toSanityLanguage(locale))
+    latestArticles = articles.slice(0, LATEST_ARTICLE_COUNT)
   } catch {
     // non-critical — page renders without journal section
   }
