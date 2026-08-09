@@ -19,6 +19,7 @@ export type FieldDef =
   | { kind: 'tags'; key: string; label: string; desc?: string }
   | { kind: 'image'; key: string; label: string; required?: boolean; desc?: string; aspect?: string }
   | { kind: 'pt'; key: string; label: string; desc?: string }
+  | { kind: 'appendixPt'; key: string; label: string; desc?: string }
   | { kind: 'geo'; key: string; label: string; desc?: string }
   | { kind: 'row'; fields: FieldDef[] }
   | { kind: 'section'; label: string; desc?: string; when?: { key: string; equals: string } }
@@ -205,7 +206,16 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
         ],
       },
       { kind: 'textarea', key: 'snippet', label: 'Snippet', rows: 2, desc: 'One-line teaser shown in appendix lists.' },
-      { kind: 'textarea', key: 'body', label: 'Body (markdown)', rows: 24 },
+      // Two body carriers while the Portable Text migration is in flight. The
+      // reader prefers body_pt and falls back to the markdown, so an appendix
+      // that has not been converted keeps rendering from the carrier it has.
+      {
+        kind: 'appendixPt',
+        key: 'body_pt',
+        label: 'Body (Portable Text)',
+        desc: 'Typed blocks. Preferred over the markdown body when present; clear every block to fall back to it.',
+      },
+      { kind: 'textarea', key: 'body', label: 'Body (markdown)', rows: 24, desc: 'Fallback, used only when there is no Portable Text body.' },
       // An appendix carries at most one video, always trailing. It is metadata
       // rather than body markdown, so the reader appends it below the body.
       {

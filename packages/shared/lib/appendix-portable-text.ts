@@ -6,22 +6,42 @@
  * collapse into it. The two false verses of appendix 24 stopped being
  * distinguishable from genuine scripture, four separate closing scripture cards
  * merged into one undivided quote, and 42 table totals rows became ordinary
- * data rows. A typed block carries `tone`, `caption` and `totals` as fields, so
- * none of that has to be re-derived from prose.
+ * data rows. A typed block carries `tone`, the entry wrapper and the totals row
+ * style as fields, so none of that has to be re-derived from prose.
  *
- * Every block type here maps 1:1 onto one component in
- * `components/library/appendix-blocks.tsx`, and each of those components is a
- * verbatim copy of the markup the hardcoded TSX already draws. The renderer
- * never invents styling: a block that cannot be expressed is a converter
- * warning, not an approximation.
+ * Every visual variant here is a name in `lib/appendix-styles.ts`, which holds
+ * the one copy of each class string. The converter recognises a card by looking
+ * a class string up in that registry and the renderer draws it by looking the
+ * same name back out, so a block cannot render as something other than what it
+ * was converted from. Anything not in the registry is a converter warning, not
+ * an approximation.
  *
- * Layout variants (`gap`, `size`, `density`, `style`) are closed enums, not
- * free-form class names. The hardcoded corpus is not internally consistent —
- * the same kind of card is written with `space-y-2` in one appendix and
- * `space-y-4` in another — and pixel fidelity with it is the acceptance bar, so
- * the variants that actually occur are named and typed rather than smoothed
- * over. Anything outside the enum is rejected by the converter.
+ * Cards hold blocks rather than paragraphs. The corpus nests freely — appendix
+ * 5 puts a comparison grid inside a card, appendix 7 two labelled groups,
+ * appendix 19 a pair of term/definition groups — so a card whose content were
+ * a flat paragraph list could not carry them.
  */
+
+import type {
+  AppendixCardStyle,
+  AppendixCodeStyle,
+  AppendixCodeTextStyle,
+  AppendixGroupStyle,
+  AppendixListContentStyle,
+  AppendixListItemStyle,
+  AppendixListStyle,
+  AppendixMarkerStyle,
+  AppendixParagraphStyle,
+  AppendixTableCellStyle,
+  AppendixTableHeaderStyle,
+  AppendixTableNoteStyle,
+  AppendixTableRowStyle,
+  AppendixTableStyle,
+  AppendixVerseBodyStyle,
+  AppendixVerseCardStyle,
+  AppendixVerseEntryStyle,
+  AppendixVerseRefStyle,
+} from './appendix-styles'
 
 // ── inline content ───────────────────────────────────────────────────────────
 
@@ -60,14 +80,14 @@ export interface AppendixLinkMarkDef {
 /**
  * A run of inline content: the `children` + `markDefs` pair of a Portable Text
  * block, reused wherever a field holds rich text that is not a paragraph of its
- * own (a table cell, a divider title, a card label).
+ * own (a table cell, a divider title, a verse reference).
  */
 export interface AppendixRichText {
   children: AppendixInlineChild[]
   markDefs?: AppendixLinkMarkDef[]
 }
 
-// ── shared enums ─────────────────────────────────────────────────────────────
+// ── shared ───────────────────────────────────────────────────────────────────
 
 /**
  * Card colour. The load-bearing one is `destructive`: it is what keeps the two
@@ -76,30 +96,48 @@ export interface AppendixRichText {
  */
 export type AppendixTone = 'primary' | 'destructive' | 'neutral' | 'muted'
 
-/** Vertical rhythm inside a card or section. */
-export type AppendixGap = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+/**
+ * Whether the card is revealed by the article's scroll animation. Mirrors the
+ * `data-card` attribute, which the corpus sets on most but not all of its
+ * cards; carried rather than normalised so the converted page animates exactly
+ * as the hardcoded one did.
+ */
+export interface AppendixRevealable {
+  reveal?: boolean
+}
 
 // ── blocks ───────────────────────────────────────────────────────────────────
 
-/** Standard Portable Text paragraph. Runs of these become one prose section. */
+/**
+ * Standard Portable Text paragraph. `style` names a paragraph recipe from the
+ * registry; `normal` is unstyled body prose, which is what keeps ordinary
+ * paragraphs editable as ordinary Portable Text.
+ */
 export interface AppendixParagraphBlock extends AppendixRichText {
   _type: 'block'
   _key: string
-  style: 'normal'
+  style: AppendixParagraphStyle
+  /**
+   * Rendered without a `<p>` of its own. A handful of cards write their prose
+   * straight into the card element, and wrapping that in a paragraph would add
+   * an element the source never had.
+   */
+  bare?: boolean
   children: AppendixInlineChild[]
 }
 
 /**
- * An explicit `<section>`. Emitted only when a section does not match the
- * default prose rhythm — a run of plain paragraphs is grouped implicitly by the
- * renderer instead, so ordinary prose stays flat and editable.
+ * A plain grouping wrapper: a `<section>` of prose, or one of the bare `<div>`s
+ * the corpus groups a run of blocks with. Emitted only where the group carries
+ * a rhythm of its own; a plain run of paragraphs is regrouped by the renderer
+ * instead, so ordinary prose stays flat.
  */
 export interface AppendixSectionBlock {
   _type: 'appendixSection'
   _key: string
-  gap: AppendixGap
-  /** Whether the section carries the base prose type scale. */
-  prose: boolean
+  style: AppendixGroupStyle
+  /** Which element the source wrote the group as. Inert visually, kept exact. */
+  tag: 'section' | 'div'
   content: AppendixBlock[]
 }
 
@@ -108,6 +146,8 @@ export interface AppendixDividerBlock {
   _type: 'appendixDivider'
   _key: string
   title: AppendixRichText
+  /** The corpus writes the heading both centred and not; it shows when it wraps. */
+  centered?: boolean
 }
 
 /** A numbered piece of evidence: badge on the left, nested content on the right. */
@@ -115,7 +155,22 @@ export interface AppendixEvidenceBlock {
   _type: 'appendixEvidence'
   _key: string
   n: number
+  marker: AppendixMarkerStyle
+  body: AppendixGroupStyle
   content: AppendixBlock[]
+}
+
+/**
+ * A term/definition row: a fixed-width term on the left, its explanation on the
+ * right. Appendix 5 compares the two Heavens with a column of these.
+ */
+export interface AppendixDefinitionRowBlock {
+  _type: 'appendixDefinitionRow'
+  _key: string
+  term: AppendixRichText
+  termStyle: AppendixMarkerStyle
+  body: AppendixRichText
+  bodyStyle: AppendixListContentStyle
 }
 
 /** An unattached editorial aside sitting between evidence items. */
@@ -125,7 +180,7 @@ export interface AppendixInterludeBlock {
   text: AppendixRichText
 }
 
-/** A single centred monospace assertion, e.g. "15 + 99 = 114 = 19×6." */
+/** A single centred monospace assertion, e.g. "15 + 99 = 114 = 19x6." */
 export interface AppendixStatementBlock {
   _type: 'appendixStatement'
   _key: string
@@ -133,70 +188,49 @@ export interface AppendixStatementBlock {
 }
 
 /**
- * Named card recipes. Each maps to exactly one entry in `CALLOUT_STYLE` in
- * appendix-blocks.tsx, and each of those is a card that exists verbatim in the
- * hardcoded corpus.
- */
-export type AppendixCalloutStyle =
-  | 'statement'
-  | 'summary'
-  | 'aside'
-  | 'quotation'
-  | 'source'
-  | 'arithmetic'
-  | 'remark'
-  | 'result'
-
-/** One line of a callout. `emphasis` is what marks an arithmetic result line. */
-export interface AppendixCalloutParagraph extends AppendixRichText {
-  emphasis?: 'result' | 'mono' | 'caption' | 'passage'
-  /** Extra space above, used to separate a result from its operands. */
-  spaced?: boolean
-}
-
-/**
  * A bordered prose card. `tone` is a typed field precisely so the destructive
  * variant survives: appendix 24's whole argument depends on the two false
- * verses reading as forgeries and not as scripture.
+ * verses reading as forgeries and not as scripture. `style` names the exact
+ * surface; the converter checks the two agree.
  */
-export interface AppendixCalloutBlock {
+export interface AppendixCalloutBlock extends AppendixRevealable {
   _type: 'appendixCallout'
   _key: string
   tone: AppendixTone
-  style: AppendixCalloutStyle
-  /** Small uppercase eyebrow, coloured from `tone`. */
-  label?: AppendixRichText
-  paragraphs: AppendixCalloutParagraph[]
-  /** Trailing monospace attribution, e.g. "[Insert 3]". */
-  footnote?: AppendixRichText
-  /** Whether the attribution is pushed away from the passage above it. */
-  footnoteSpaced?: boolean
+  style: AppendixCardStyle
+  content: AppendixBlock[]
 }
 
 /** One quotation inside a scripture card stack. */
 export interface AppendixVerseEntry {
+  _key: string
   body: AppendixRichText
-  /** Verse key rendered as a QuranRef badge under the quote. */
-  reference?: string
+  /** The reference line under the quote. Rich: it is often several refs. */
+  reference?: AppendixRichText
+  /**
+   * The wrapper this quotation sits in. `divided` is what keeps appendix 24's
+   * four closing verses as four cards separated by a rule instead of one
+   * continuous quotation.
+   */
+  wrapper: AppendixVerseEntryStyle
 }
 
-/**
- * One or more scripture quotations in a tinted card. `divided` is what keeps
- * appendix 24's four closing verses as four cards separated by a rule instead
- * of one continuous quotation.
- */
-export interface AppendixVerseCardsBlock {
+/** One or more scripture quotations in a tinted card. */
+export interface AppendixVerseCardsBlock extends AppendixRevealable {
   _type: 'appendixVerseCards'
   _key: string
-  align: 'start' | 'center'
-  size: 'sm' | 'base'
-  gap: AppendixGap
-  divided: boolean
+  style: AppendixVerseCardStyle
+  body: AppendixVerseBodyStyle
+  /** Named `refStyle`, not `ref`: `ref` is reserved once it reaches a component. */
+  refStyle: AppendixVerseRefStyle
+  /** An eyebrow above the quotations, used by appendix 1. */
+  heading?: AppendixRichText
+  headingStyle?: AppendixParagraphStyle
   entries: AppendixVerseEntry[]
 }
 
 /** A figure: framed image, with either a caption or a translated-source card. */
-export interface AppendixFigureBlock {
+export interface AppendixFigureBlock extends AppendixRevealable {
   _type: 'appendixFigure'
   _key: string
   src: string
@@ -207,36 +241,99 @@ export interface AppendixFigureBlock {
   frame: 'full' | 'sm'
   caption?: AppendixRichText
   /** A bordered translation card beneath the image. */
-  source?: { body: AppendixRichText; footnote?: AppendixRichText }
+  source?: AppendixCalloutBlock
 }
 
-/** A numbered list whose markers are badges rather than list markers. */
+/**
+ * One item of a list. `text` carries an inline body; `content` carries the
+ * blocks of an item whose body is a group. Which one is set follows the list's
+ * `contentTag`.
+ */
+export interface AppendixListItem {
+  _key: string
+  text?: AppendixRichText
+  content?: AppendixBlock[]
+}
+
+/** A list whose markers are badges or bullets rather than list markers. */
 export interface AppendixBadgeListBlock {
   _type: 'appendixBadgeList'
   _key: string
-  tone: AppendixTone
   ordered: boolean
-  density: 'compact' | 'comfortable'
-  items: AppendixRichText[]
+  style: AppendixListStyle
+  item: AppendixListItemStyle
+  /** Absent for a plain list that draws no marker of its own. */
+  marker?: AppendixMarkerStyle
+  content: AppendixListContentStyle
+  /** The element carrying the content class. `none` writes into the `<li>`. */
+  contentTag: 'none' | 'span' | 'p' | 'div'
+  /** The literal bullet character, when `marker` is the bullet style. */
+  bullet?: string
+  items: AppendixListItem[]
 }
 
-/** A cell of a math table. Numbers are kept as-is; everything else is text. */
-export type AppendixMathCell = string | number
+/** A column of a data table: its header and its cell recipe. */
+export interface AppendixTableColumn {
+  header?: AppendixRichText
+  headerStyle: AppendixTableHeaderStyle
+  cellStyle: AppendixTableCellStyle
+}
 
 /**
- * The math table of appendix 24: caption bar, monospace grid, optional totals.
- * `totals` is a separate field rather than trailing rows, which is the whole
- * point — in markdown those 42 totals rows became byte-identical to data rows
- * in a document whose entire argument is arithmetic.
+ * A row of a data table. `style` is what marks a totals row: the `totals*`
+ * recipes are the ones that band and embolden it, and keeping them named is
+ * what stops a total from reading as one more data row — the distinction
+ * markdown lost across 42 tables in appendix 24 alone.
  */
-export interface AppendixMathTableBlock {
-  _type: 'appendixMathTable'
+export interface AppendixTableRow {
   _key: string
-  caption: string
-  headers: string[]
-  rows: AppendixMathCell[][]
-  totals?: AppendixMathCell[][]
-  note?: AppendixRichText
+  style: AppendixTableRowStyle
+  cells: AppendixRichText[]
+  /** Set where a row's cells depart from their column's recipe. */
+  cellStyles?: AppendixTableCellStyle[]
+}
+
+/**
+ * A captioned table.
+ *
+ * Cell recipes hang off the column, because that is how the source reads: a
+ * column is monospace, or right-aligned, or the primary-coloured one carrying
+ * the count. A row that departs from its columns overrides them per cell.
+ */
+export interface AppendixDataTableBlock extends AppendixRevealable {
+  _type: 'appendixDataTable'
+  _key: string
+  caption?: AppendixRichText
+  table: AppendixTableStyle
+  columns: AppendixTableColumn[]
+  rows: AppendixTableRow[]
+  /**
+   * The footer strip. `inside` places it within the horizontal scroller beside
+   * the table rather than under it, which is where some appendices write it and
+   * which decides whether the note scrolls with a table too wide to fit.
+   */
+  note?: { style: AppendixTableNoteStyle; inside?: boolean; content: AppendixBlock[] }
+}
+
+/** A captioned card whose rows are list items rather than table cells. */
+export interface AppendixListCardBlock extends AppendixRevealable {
+  _type: 'appendixListCard'
+  _key: string
+  caption?: AppendixRichText
+  item: AppendixListItemStyle
+  marker?: AppendixMarkerStyle
+  content: AppendixListContentStyle
+  contentTag: 'none' | 'span' | 'p' | 'div'
+  items: AppendixListItem[]
+}
+
+/** A scrolling strip of monospace text, e.g. a digit sequence. */
+export interface AppendixCodeBlock {
+  _type: 'appendixCode'
+  _key: string
+  style: AppendixCodeStyle
+  text: AppendixCodeTextStyle
+  value: string
 }
 
 export interface AppendixGridCell {
@@ -252,10 +349,11 @@ export interface AppendixGridRow {
 }
 
 /**
- * The bordered-grid table of appendices 26 and 33: rich cells (they are full of
- * QuranRefs), colSpan sub-headings, a bold totals row, and trailing notes.
+ * The bordered-grid table of appendices 26, 29 and 33: rich cells (they are
+ * full of QuranRefs), colSpan sub-headings, a bold totals row, and trailing
+ * notes.
  */
-export interface AppendixGridTableBlock {
+export interface AppendixGridTableBlock extends AppendixRevealable {
   _type: 'appendixGridTable'
   _key: string
   headers: AppendixRichText[]
@@ -268,13 +366,16 @@ export type AppendixBlock =
   | AppendixSectionBlock
   | AppendixDividerBlock
   | AppendixEvidenceBlock
+  | AppendixDefinitionRowBlock
   | AppendixInterludeBlock
   | AppendixStatementBlock
   | AppendixCalloutBlock
   | AppendixVerseCardsBlock
   | AppendixFigureBlock
   | AppendixBadgeListBlock
-  | AppendixMathTableBlock
+  | AppendixDataTableBlock
+  | AppendixListCardBlock
+  | AppendixCodeBlock
   | AppendixGridTableBlock
 
 /** Every custom `_type` in the appendix body schema. */
@@ -282,13 +383,16 @@ export const APPENDIX_BLOCK_TYPES = [
   'appendixSection',
   'appendixDivider',
   'appendixEvidence',
+  'appendixDefinitionRow',
   'appendixInterlude',
   'appendixStatement',
   'appendixCallout',
   'appendixVerseCards',
   'appendixFigure',
   'appendixBadgeList',
-  'appendixMathTable',
+  'appendixDataTable',
+  'appendixListCard',
+  'appendixCode',
   'appendixGridTable',
 ] as const
 

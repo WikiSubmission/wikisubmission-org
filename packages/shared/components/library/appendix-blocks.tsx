@@ -1,103 +1,132 @@
 /**
  * The presentational primitives an appendix body is built from.
  *
- * Every component here is a verbatim copy of markup that already exists in
- * `content/library/appendices/appendix-*.tsx`, class string for class string.
- * That is deliberate and is the whole point of the file: a Portable Text
- * appendix has to render pixel-identically to the hardcoded one, so the
- * Portable Text renderer draws *through* these rather than inventing its own
- * approximation of the same card.
+ * Every class string these draw with comes from `lib/appendix-styles.ts`, the
+ * same registry the converter matched the hardcoded TSX against. That is the
+ * whole point of the arrangement: a Portable Text appendix has to render
+ * identically to the hardcoded one, and looking the class string back out of
+ * the registry the converter looked it up in makes that true by construction
+ * rather than by a second table someone has to keep in agreement.
  *
- * The hardcoded corpus is not internally consistent — the same kind of card is
- * written with `space-y-2` in one appendix and `space-y-4` in another — so the
- * variant props below are closed enums covering the shapes that actually
- * occur. Adding a new appendix may add a variant; it must never add a free-form
- * class name, or the fidelity guarantee is gone.
- *
- * Class strings are written out in full in the lookup tables rather than
- * assembled from fragments, because Tailwind only generates classes it can see
- * literally in the source.
+ * These components never invent styling. A card the corpus grows that is not in
+ * the registry is reported by the converter as a warning; it is not
+ * approximated here.
  */
 import Image from 'next/image'
 import Link from 'next/link'
 import { Fragment, type ReactNode } from 'react'
 
-import type { AppendixGap, AppendixTone } from '@/lib/appendix-portable-text'
+import {
+  CARD_STYLES,
+  CODE_STYLES,
+  CODE_TEXT_STYLES,
+  DIVIDER_ROW,
+  DIVIDER_RULE,
+  DIVIDER_TITLE,
+  DIVIDER_TITLE_CENTERED,
+  EVIDENCE_INTERLUDE,
+  EVIDENCE_ROW,
+  FIGURE_CAPTION,
+  FIGURE_CARD,
+  FIGURE_FRAME,
+  FIGURE_FRAME_SM,
+  FIGURE_IMAGE,
+  GRID_CELL,
+  GRID_NOTE,
+  GRID_TABLE,
+  GRID_TABLE_CARD,
+  GROUP_STYLES,
+  LIST_CONTENT_STYLES,
+  LIST_ITEM_STYLES,
+  LIST_STYLES,
+  MARKER_STYLES,
+  PARAGRAPH_STYLES,
+  STATEMENT_BOX,
+  TABLE_CAPTION_BAR,
+  TABLE_CAPTION_TEXT,
+  TABLE_CELL_STYLES,
+  TABLE_HEADER_STYLES,
+  TABLE_HEAD_ROW,
+  TABLE_LIST_STYLE,
+  TABLE_NOTE_STYLES,
+  TABLE_ROW_STYLES,
+  TABLE_SCROLLER,
+  TABLE_SHELL,
+  TABLE_STYLES,
+  VERSE_BODY_STYLES,
+  VERSE_CARD_STYLES,
+  VERSE_ENTRY_STYLES,
+  VERSE_REF_STYLES,
+  type AppendixCardStyle,
+  type AppendixCodeStyle,
+  type AppendixCodeTextStyle,
+  type AppendixGroupStyle,
+  type AppendixListContentStyle,
+  type AppendixListItemStyle,
+  type AppendixListStyle,
+  type AppendixMarkerStyle,
+  type AppendixParagraphStyle,
+  type AppendixTableCellStyle,
+  type AppendixTableHeaderStyle,
+  type AppendixTableNoteStyle,
+  type AppendixTableRowStyle,
+  type AppendixTableStyle,
+  type AppendixVerseBodyStyle,
+  type AppendixVerseCardStyle,
+  type AppendixVerseEntryStyle,
+  type AppendixVerseRefStyle,
+} from '@/lib/appendix-styles'
 
-// ── shared recipes ───────────────────────────────────────────────────────────
+/** An empty class string has to become `undefined`, not `class=""`. */
+const cls = (value: string) => (value === '' ? undefined : value)
 
-/** Card border + fill per tone. */
-const TONE_SURFACE: Record<AppendixTone, string> = {
-  primary: 'border-primary/20 bg-primary/5',
-  destructive: 'border-destructive/20 bg-destructive/5',
-  neutral: 'border-border/60',
-  muted: 'border-border/60 bg-muted/20',
-}
+// ── paragraph ────────────────────────────────────────────────────────────────
 
-/** Eyebrow label colour per tone. */
-const TONE_LABEL: Record<AppendixTone, string> = {
-  primary: 'font-semibold text-primary/80 uppercase tracking-widest text-xs',
-  destructive: 'font-semibold text-destructive/80 uppercase tracking-widest text-xs',
-  neutral: 'font-semibold text-foreground/80 uppercase tracking-widest text-xs',
-  muted: 'font-semibold text-muted-foreground uppercase tracking-widest text-xs',
-}
-
-/** Badge colour per tone. */
-const TONE_BADGE: Record<AppendixTone, string> = {
-  primary: 'bg-primary/10 text-primary',
-  destructive: 'bg-destructive/10 text-destructive',
-  neutral: 'bg-muted text-foreground',
-  muted: 'bg-muted text-muted-foreground',
-}
-
-const GAP: Record<AppendixGap, string> = {
-  none: '',
-  xs: 'space-y-2',
-  sm: 'space-y-3',
-  md: 'space-y-4',
-  lg: 'space-y-5',
-  xl: 'space-y-6',
-}
-
-const join = (...parts: Array<string | false | undefined>) =>
-  parts.filter(Boolean).join(' ')
-
-// ── section ──────────────────────────────────────────────────────────────────
-
-/**
- * `<section>` wrapper. Runs of plain paragraphs are grouped into one of these
- * by the renderer; explicit sections exist for the handful that carry a
- * different rhythm or hold something other than paragraphs.
- */
-export function AppendixSection({
-  gap,
-  prose,
+export function AppendixParagraph({
+  style,
   children,
 }: {
-  gap: AppendixGap
-  prose: boolean
+  style: AppendixParagraphStyle
   children: ReactNode
 }) {
-  return (
-    <section
-      className={join(GAP[gap], prose && 'text-base leading-relaxed text-foreground/90')}
-    >
-      {children}
-    </section>
-  )
+  return <p className={cls(PARAGRAPH_STYLES[style])}>{children}</p>
+}
+
+// ── group ────────────────────────────────────────────────────────────────────
+
+/**
+ * A plain wrapper. Runs of paragraphs are grouped into one of these by the
+ * renderer; explicit groups exist for the ones that carry a rhythm of their own
+ * or hold something other than paragraphs.
+ */
+export function AppendixGroup({
+  style,
+  as = 'section',
+  children,
+}: {
+  style: AppendixGroupStyle
+  as?: 'section' | 'div'
+  children: ReactNode
+}) {
+  const Tag = as
+  return <Tag className={cls(GROUP_STYLES[style])}>{children}</Tag>
 }
 
 // ── divider ──────────────────────────────────────────────────────────────────
 
 /** `<hr/> TITLE <hr/>` band that opens a part of an appendix. */
-export function SectionDivider({ children }: { children: ReactNode }) {
+export function SectionDivider({
+  centered,
+  children,
+}: {
+  centered?: boolean
+  children: ReactNode
+}) {
   return (
-    <div className="flex items-center gap-4" data-parallax>
-      <hr className="flex-1 border-border/50" />
-      <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground shrink-0 text-center">
-        {children}
-      </h2>
-      <hr className="flex-1 border-border/50" />
+    <div className={DIVIDER_ROW} data-parallax>
+      <hr className={DIVIDER_RULE} />
+      <h2 className={centered ? DIVIDER_TITLE_CENTERED : DIVIDER_TITLE}>{children}</h2>
+      <hr className={DIVIDER_RULE} />
     </div>
   )
 }
@@ -105,35 +134,56 @@ export function SectionDivider({ children }: { children: ReactNode }) {
 // ── evidence ─────────────────────────────────────────────────────────────────
 
 /** One numbered item of physical evidence: badge, then its own content column. */
-export function EvidenceItem({ n, children }: { n: number; children: ReactNode }) {
+export function EvidenceItem({
+  n,
+  marker,
+  body,
+  children,
+}: {
+  n: number
+  marker: AppendixMarkerStyle
+  body: AppendixGroupStyle
+  children: ReactNode
+}) {
   return (
-    <div className="flex items-start gap-3">
-      <span className="shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold mt-0.5">
-        {n}
-      </span>
-      <div className="text-sm leading-relaxed text-foreground/85 space-y-3 flex-1 min-w-0">
-        {children}
-      </div>
+    <div className={EVIDENCE_ROW}>
+      <span className={MARKER_STYLES[marker]}>{n}</span>
+      <div className={GROUP_STYLES[body]}>{children}</div>
+    </div>
+  )
+}
+
+/** A term/definition row: fixed-width term on the left, explanation right. */
+export function DefinitionRow({
+  term,
+  termStyle,
+  bodyStyle,
+  children,
+}: {
+  term: ReactNode
+  termStyle: AppendixMarkerStyle
+  bodyStyle: AppendixListContentStyle
+  children: ReactNode
+}) {
+  return (
+    <div className={EVIDENCE_ROW}>
+      <span className={MARKER_STYLES[termStyle]}>{term}</span>
+      <span className={cls(LIST_CONTENT_STYLES[bodyStyle])}>{children}</span>
     </div>
   )
 }
 
 /** An editorial aside between evidence items, indented to clear their badges. */
 export function EvidenceInterlude({ children }: { children: ReactNode }) {
-  return (
-    <p className="text-sm leading-relaxed text-foreground/85 italic pl-10">{children}</p>
-  )
+  return <p className={EVIDENCE_INTERLUDE}>{children}</p>
 }
 
 // ── statement ────────────────────────────────────────────────────────────────
 
-/** A single centred monospace assertion, e.g. "15 + 99 = 114 = 19×6." */
+/** A single centred monospace assertion, e.g. "15 + 99 = 114 = 19x6." */
 export function StatementBox({ children }: { children: ReactNode }) {
   return (
-    <div
-      data-card
-      className="rounded-xl border border-primary/20 bg-primary/5 px-5 py-4 text-center font-mono text-sm text-primary leading-relaxed"
-    >
+    <div data-card className={STATEMENT_BOX}>
       {children}
     </div>
   )
@@ -142,91 +192,30 @@ export function StatementBox({ children }: { children: ReactNode }) {
 // ── callout ──────────────────────────────────────────────────────────────────
 
 /**
- * Padding, rhythm and type scale per named callout style. Each entry is one
- * card recipe that exists in the hardcoded corpus.
- */
-export const CALLOUT_STYLE: Record<string, string> = {
-  /** Labelled quotation card — appendix 24's two false verses. */
-  statement: 'p-5 space-y-2 text-sm',
-  /** Enumerated conclusions. */
-  summary: 'p-5 space-y-2 text-sm text-foreground/85',
-  /** Closing acknowledgement. */
-  aside: 'p-5 text-sm italic text-foreground/75 leading-relaxed',
-  /** A run of quoted passages from an outside source. */
-  quotation: 'p-5 space-y-4 text-sm italic text-foreground/80',
-  /** A single translated source passage under a figure. */
-  source: 'p-5 text-sm italic text-foreground/80 leading-relaxed',
-  /** Centred arithmetic. */
-  arithmetic: 'p-5 space-y-2 text-sm text-center font-mono',
-  /** An inline remark attached to a table or an evidence item. */
-  remark: 'px-5 py-4 text-sm leading-relaxed text-foreground/80',
-  /** A computed result plus its explanation. */
-  result: 'px-5 py-4 space-y-2',
-}
-
-const PARAGRAPH_EMPHASIS: Record<string, string> = {
-  result: 'font-bold text-base',
-  mono: 'font-mono text-sm text-primary break-words',
-  caption: 'text-xs text-muted-foreground leading-relaxed',
-  passage: 'italic text-foreground/80 leading-relaxed',
-}
-
-export interface CalloutParagraph {
-  key: string
-  content: ReactNode
-  emphasis?: string
-  spaced?: boolean
-}
-
-/**
  * A bordered prose card.
  *
- * `tone` is the field that matters: `destructive` is what marks appendix 24's
- * two injected verses as forgeries. In markdown that distinction was gone —
- * they rendered as an ordinary blockquote, identical to genuine scripture.
+ * The surface is whatever `style` names in the registry. The destructive-
+ * surfaced `statement` is the one that carries an argument rather than a look:
+ * it marks appendix 24's two injected verses as forgeries. In markdown that
+ * distinction was gone, and they rendered as an ordinary blockquote, identical
+ * to the genuine scripture quoted around them.
  */
 export function AppendixCallout({
-  tone,
   style,
-  label,
-  paragraphs,
-  footnote,
-  footnoteSpaced,
+  reveal = true,
+  as = 'div',
+  children,
 }: {
-  tone: AppendixTone
-  style: string
-  label?: ReactNode
-  paragraphs: CalloutParagraph[]
-  footnote?: ReactNode
-  /** `source` cards separate the tag from the quote it follows. */
-  footnoteSpaced?: boolean
+  style: AppendixCardStyle
+  reveal?: boolean
+  as?: 'div' | 'blockquote'
+  children: ReactNode
 }) {
-  const recipe = CALLOUT_STYLE[style] ?? CALLOUT_STYLE.statement
+  const Tag = as
   return (
-    <div data-card className={join('rounded-xl border', TONE_SURFACE[tone], recipe)}>
-      {label !== undefined && <p className={TONE_LABEL[tone]}>{label}</p>}
-      {paragraphs.map((paragraph) => (
-        <p
-          key={paragraph.key}
-          className={join(
-            paragraph.emphasis ? PARAGRAPH_EMPHASIS[paragraph.emphasis] : undefined,
-            paragraph.spaced && 'pt-2',
-          )}
-        >
-          {paragraph.content}
-        </p>
-      ))}
-      {footnote !== undefined && (
-        <p
-          className={join(
-            'text-xs not-italic text-muted-foreground font-mono',
-            footnoteSpaced && 'mt-2',
-          )}
-        >
-          {footnote}
-        </p>
-      )}
-    </div>
+    <Tag data-card={reveal ? '' : undefined} className={CARD_STYLES[style]}>
+      {children}
+    </Tag>
   )
 }
 
@@ -236,65 +225,58 @@ export interface VerseCardEntry {
   key: string
   body: ReactNode
   reference?: ReactNode
+  wrapper: AppendixVerseEntryStyle
 }
 
 /**
  * One or more scripture quotations in a tinted card.
  *
- * `divided` is the field the markdown conversion lost. Appendix 24 closes with
- * four verses, each its own card separated by a rule; as markdown they merged
- * into a single continuous blockquote with no separation at all.
+ * The per-entry `wrapper` is the field the markdown conversion lost. Appendix
+ * 24 closes with four verses, each its own card separated by a rule; as
+ * markdown they merged into a single continuous blockquote with no separation
+ * at all.
  */
 export function VerseCards({
-  align,
-  size,
-  gap,
-  divided,
+  style,
+  body,
+  refStyle,
+  heading,
+  headingStyle,
+  reveal = true,
   entries,
 }: {
-  align: 'start' | 'center'
-  size: 'sm' | 'base'
-  gap: AppendixGap
-  divided: boolean
+  style: AppendixVerseCardStyle
+  body: AppendixVerseBodyStyle
+  refStyle: AppendixVerseRefStyle
+  heading?: ReactNode
+  headingStyle?: AppendixParagraphStyle
+  reveal?: boolean
   entries: VerseCardEntry[]
 }) {
-  const bodyClass =
-    size === 'base'
-      ? 'text-base leading-relaxed italic text-foreground/90'
-      : 'text-sm leading-relaxed italic text-foreground/90'
-
   return (
-    <div
-      data-card
-      className={join(
-        'rounded-xl border border-primary/20 bg-primary/5 p-6',
-        align === 'center' && 'text-center',
-        GAP[gap],
+    <div data-card={reveal ? '' : undefined} className={VERSE_CARD_STYLES[style]}>
+      {heading !== undefined && (
+        <p className={cls(PARAGRAPH_STYLES[headingStyle ?? 'normal'])}>{heading}</p>
       )}
-    >
-      {entries.map((entry, i) => {
-        const body = (
+      {entries.map((entry) => {
+        const quote = (
           <>
-            <p className={bodyClass}>{entry.body}</p>
+            <p className={VERSE_BODY_STYLES[body]}>{entry.body}</p>
             {entry.reference !== undefined && (
-              <p
-                className={join(
-                  'text-xs text-muted-foreground font-mono',
-                  divided && 'mt-1',
-                )}
-              >
-                {entry.reference}
-              </p>
+              <p className={VERSE_REF_STYLES[refStyle]}>{entry.reference}</p>
             )}
           </>
         )
-        // Undivided single-quote cards keep the paragraphs as direct children so
-        // the card's own rhythm sets the gap; a divided stack needs the wrapper
-        // to hang the rule on.
-        if (!divided) return <Fragment key={entry.key}>{body}</Fragment>
+        // An unwrapped quotation keeps its paragraphs as direct children of the
+        // card, so the card's own `space-y` rhythm sets the gap between them. A
+        // wrapper element here would capture that rhythm and change the layout,
+        // which is why this is a Fragment and not a `display: contents` span.
+        if (entry.wrapper === 'none') {
+          return <Fragment key={entry.key}>{quote}</Fragment>
+        }
         return (
-          <div key={entry.key} className={i > 0 ? 'border-t border-border/40 pt-4' : undefined}>
-            {body}
+          <div key={entry.key} className={cls(VERSE_ENTRY_STYLES[entry.wrapper])}>
+            {quote}
           </div>
         )
       })}
@@ -311,6 +293,7 @@ export function AppendixFigure({
   width,
   height,
   frame,
+  reveal = true,
   caption,
   source,
 }: {
@@ -319,32 +302,26 @@ export function AppendixFigure({
   width: number
   height: number
   frame: 'full' | 'sm'
+  reveal?: boolean
   caption?: ReactNode
   source?: ReactNode
 }) {
   const image = (
-    <Image src={src} alt={alt} width={width} height={height} className="w-full h-auto" />
+    <Image src={src} alt={alt} width={width} height={height} className={FIGURE_IMAGE} />
   )
 
   if (frame === 'sm') {
     return (
-      <div
-        data-card
-        className="rounded-lg border border-border/30 overflow-hidden bg-muted/20 max-w-sm mx-auto"
-      >
+      <div data-card={reveal ? '' : undefined} className={FIGURE_FRAME_SM}>
         {image}
       </div>
     )
   }
 
   return (
-    <div data-card className="space-y-3">
-      <div className="rounded-lg border border-border/30 overflow-hidden bg-muted/20">
-        {image}
-      </div>
-      {caption !== undefined && (
-        <p className="text-xs text-muted-foreground leading-relaxed">{caption}</p>
-      )}
+    <div data-card={reveal ? '' : undefined} className={FIGURE_CARD}>
+      <div className={FIGURE_FRAME}>{image}</div>
+      {caption !== undefined && <p className={FIGURE_CAPTION}>{caption}</p>}
       {source}
     </div>
   )
@@ -357,138 +334,211 @@ export interface BadgeListItem {
   content: ReactNode
 }
 
-/** A numbered list whose markers are tinted badges rather than list markers. */
+/**
+ * Wraps an item's body in whatever element the source used. A `<p>` and a
+ * `<span>` are not interchangeable here: the corpus writes both, and the
+ * paragraph ones carry their own type scale and leading.
+ */
+function ItemBody({
+  tag,
+  style,
+  children,
+}: {
+  tag: 'none' | 'span' | 'p' | 'div'
+  style: AppendixListContentStyle
+  children: ReactNode
+}) {
+  if (tag === 'none') return <>{children}</>
+  const Tag = tag
+  return <Tag className={cls(LIST_CONTENT_STYLES[style])}>{children}</Tag>
+}
+
+/** A list whose markers are tinted badges or bullets rather than list markers. */
 export function BadgeList({
-  tone,
   ordered,
-  density,
+  style,
+  item,
+  marker,
+  content,
+  contentTag,
+  bullet,
   items,
 }: {
-  tone: AppendixTone
   ordered: boolean
-  density: 'compact' | 'comfortable'
+  style: AppendixListStyle
+  item: AppendixListItemStyle
+  marker?: AppendixMarkerStyle
+  content: AppendixListContentStyle
+  contentTag: 'none' | 'span' | 'p' | 'div'
+  bullet?: string
   items: BadgeListItem[]
 }) {
   const List = ordered ? 'ol' : 'ul'
-  const compact = density === 'compact'
-  const badge = compact
-    ? join(
-        'shrink-0 flex items-center justify-center size-6 rounded-md',
-        TONE_BADGE[tone],
-        'font-mono text-xs font-semibold',
-      )
-    : join(
-        'shrink-0 flex items-center justify-center size-7 rounded-md',
-        TONE_BADGE[tone],
-        'font-mono text-xs font-semibold mt-0.5',
-      )
-
   return (
-    <List className={compact ? 'space-y-2 list-none' : 'space-y-2'}>
-      {items.map((item, i) => (
-        <li
-          key={item.key}
-          className={compact ? 'flex items-baseline gap-3' : 'flex items-start gap-3'}
-        >
-          <span className={badge}>{i + 1}</span>
-          {compact ? (
-            <p>{item.content}</p>
-          ) : (
-            <span className="text-sm leading-relaxed">{item.content}</span>
+    <List className={cls(LIST_STYLES[style])}>
+      {items.map((entry, i) => (
+        <li key={entry.key} className={cls(LIST_ITEM_STYLES[item])}>
+          {marker !== undefined && (
+            <span className={MARKER_STYLES[marker]}>{bullet ?? i + 1}</span>
           )}
+          <ItemBody tag={contentTag} style={content}>
+            {entry.content}
+          </ItemBody>
         </li>
       ))}
     </List>
   )
 }
 
-// ── math table ───────────────────────────────────────────────────────────────
+// ── data table ───────────────────────────────────────────────────────────────
+
+export interface DataTableColumn {
+  key: string
+  header?: ReactNode
+  headerStyle: AppendixTableHeaderStyle
+  cellStyle: AppendixTableCellStyle
+}
+
+export interface DataTableRow {
+  key: string
+  style: AppendixTableRowStyle
+  cells: Array<{ key: string; content: ReactNode }>
+  cellStyles?: AppendixTableCellStyle[]
+}
 
 /**
- * The captioned monospace table of appendix 24.
+ * The captioned tables the corpus writes out by hand.
  *
- * `totals` is a field rather than trailing rows, and that is the fix this work
- * exists for: converted to markdown, all 42 totals rows in this appendix became
- * byte-identical to ordinary data rows in a document whose entire argument is
- * arithmetic.
+ * Cell recipes hang off the column rather than the cell, because that is how
+ * the source is written: a column is monospace, or right-aligned, or the
+ * primary-coloured one carrying the count. A row that departs from its columns
+ * (a totals row, usually) overrides them, and the `totals*` row styles are what
+ * keep a total from reading as one more data row.
  */
-export function MathTable({
+export function DataTable({
   caption,
-  headers,
+  table,
+  columns,
   rows,
-  totals,
   note,
+  noteStyle,
+  noteInside,
+  reveal = true,
 }: {
-  caption: string
-  headers: string[]
-  rows: Array<Array<string | number>>
-  totals?: Array<Array<string | number>>
+  caption?: ReactNode
+  table: AppendixTableStyle
+  columns: DataTableColumn[]
+  rows: DataTableRow[]
   note?: ReactNode
+  noteStyle?: AppendixTableNoteStyle
+  noteInside?: boolean
+  reveal?: boolean
 }) {
+  const hasHeaders = columns.some((column) => column.header !== undefined)
+  const noteBlock =
+    note === undefined ? null : <div className={TABLE_NOTE_STYLES[noteStyle ?? 'plain']}>{note}</div>
   return (
-    <div data-card className="rounded-xl border border-border/60 overflow-hidden">
-      <div className="px-4 py-3 bg-primary/5 border-b border-border/40">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          {caption}
-        </p>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="border-b border-border/40 bg-muted/30">
-              {headers.map((h, i) => (
-                <th
-                  key={i}
-                  className="text-left px-4 py-2 font-medium text-muted-foreground whitespace-nowrap"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, i) => (
-              <tr
-                key={i}
-                className="border-b border-border/20 hover:bg-muted/20 transition-colors"
-              >
-                {row.map((cell, j) => (
-                  <td
-                    key={j}
-                    className={`px-4 py-1.5 font-mono text-xs whitespace-nowrap ${
-                      j === 0 ? 'text-primary' : 'text-foreground/80'
-                    }`}
-                  >
-                    {cell}
-                  </td>
+    <div data-card={reveal ? '' : undefined} className={TABLE_SHELL}>
+      {caption !== undefined && (
+        <div className={TABLE_CAPTION_BAR}>
+          <p className={TABLE_CAPTION_TEXT}>{caption}</p>
+        </div>
+      )}
+      <div className={TABLE_SCROLLER}>
+        <table className={TABLE_STYLES[table]}>
+          {hasHeaders && (
+            <thead>
+              <tr className={TABLE_HEAD_ROW}>
+                {columns.map((column) => (
+                  <th key={column.key} className={TABLE_HEADER_STYLES[column.headerStyle]}>
+                    {column.header}
+                  </th>
                 ))}
               </tr>
-            ))}
-            {totals?.map((t, i) => (
-              <tr
-                key={`t-${i}`}
-                className={`bg-primary/5 font-semibold ${
-                  i === 0 ? 'border-t border-border/40' : ''
-                }`}
-              >
-                {t.map((cell, j) => (
+            </thead>
+          )}
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.key} className={TABLE_ROW_STYLES[row.style]}>
+                {row.cells.map((cell, j) => (
                   <td
-                    key={j}
-                    className="px-4 py-2 font-mono text-xs text-primary whitespace-nowrap"
+                    key={cell.key}
+                    className={
+                      TABLE_CELL_STYLES[
+                        row.cellStyles?.[j] ?? columns[j]?.cellStyle ?? 'plain'
+                      ]
+                    }
                   >
-                    {cell}
+                    {cell.content}
                   </td>
                 ))}
               </tr>
             ))}
           </tbody>
         </table>
+        {noteInside ? noteBlock : null}
       </div>
-      {note !== undefined && (
-        <div className="px-4 py-2.5 border-t border-border/40 bg-muted/20 text-xs text-muted-foreground leading-relaxed">
-          {note}
+      {noteInside ? null : noteBlock}
+    </div>
+  )
+}
+
+// ── list card ────────────────────────────────────────────────────────────────
+
+/** A captioned card whose rows are list items rather than table cells. */
+export function ListCard({
+  caption,
+  item,
+  marker,
+  content,
+  contentTag,
+  items,
+  reveal = true,
+}: {
+  caption?: ReactNode
+  item: AppendixListItemStyle
+  marker?: AppendixMarkerStyle
+  content: AppendixListContentStyle
+  contentTag: 'none' | 'span' | 'p' | 'div'
+  items: BadgeListItem[]
+  reveal?: boolean
+}) {
+  return (
+    <div data-card={reveal ? '' : undefined} className={TABLE_SHELL}>
+      {caption !== undefined && (
+        <div className={TABLE_CAPTION_BAR}>
+          <p className={TABLE_CAPTION_TEXT}>{caption}</p>
         </div>
       )}
+      <ul className={TABLE_LIST_STYLE}>
+        {items.map((entry, i) => (
+          <li key={entry.key} className={cls(LIST_ITEM_STYLES[item])}>
+            {marker !== undefined && <span className={MARKER_STYLES[marker]}>{i + 1}</span>}
+            <ItemBody tag={contentTag} style={content}>
+              {entry.content}
+            </ItemBody>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// ── code ─────────────────────────────────────────────────────────────────────
+
+/** A scrolling strip of monospace text, e.g. a digit sequence. */
+export function AppendixCode({
+  style,
+  text,
+  value,
+}: {
+  style: AppendixCodeStyle
+  text: AppendixCodeTextStyle
+  value: string
+}) {
+  return (
+    <div className={CODE_STYLES[style]}>
+      <code className={CODE_TEXT_STYLES[text]}>{value}</code>
     </div>
   )
 }
@@ -509,29 +559,28 @@ export interface GridTableRow {
 }
 
 /**
- * The bordered-grid table of appendices 26 and 33: rich cells full of scripture
- * badges, `colSpan` sub-headings, and a bold totals row.
+ * The bordered-grid table of appendices 26, 29 and 33: rich cells full of
+ * scripture badges, `colSpan` sub-headings, and a bold totals row.
  */
 export function GridTable({
   headers,
   rows,
   notes,
+  reveal = true,
 }: {
   headers: Array<{ key: string; content: ReactNode }>
   rows: GridTableRow[]
   notes?: Array<{ key: string; content: ReactNode }>
+  reveal?: boolean
 }) {
   return (
-    <div
-      data-card
-      className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 text-sm overflow-x-auto"
-    >
-      <table className="w-full text-sm border-collapse">
+    <div data-card={reveal ? '' : undefined} className={GRID_TABLE_CARD}>
+      <table className={GRID_TABLE}>
         {headers.length > 0 && (
           <thead>
             <tr>
               {headers.map((header) => (
-                <th key={header.key} className="border border-border/40 px-3 py-2 text-left">
+                <th key={header.key} className={GRID_CELL}>
                   {header.content}
                 </th>
               ))}
@@ -545,11 +594,13 @@ export function GridTable({
                 <td
                   key={cell.key}
                   colSpan={cell.colSpan}
-                  className={join(
-                    'border border-border/40 px-3 py-2 text-left',
-                    row.variant === 'group' && 'font-semibold',
-                    row.alignTop && 'align-top',
-                  )}
+                  className={
+                    row.variant === 'group'
+                      ? `${GRID_CELL} font-semibold`
+                      : row.alignTop
+                        ? `${GRID_CELL} align-top`
+                        : GRID_CELL
+                  }
                 >
                   {cell.content}
                 </td>
@@ -559,7 +610,7 @@ export function GridTable({
         </tbody>
       </table>
       {notes?.map((note) => (
-        <p key={note.key} className="text-xs text-muted-foreground">
+        <p key={note.key} className={GRID_NOTE}>
           {note.content}
         </p>
       ))}

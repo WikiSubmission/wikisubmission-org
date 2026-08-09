@@ -14,7 +14,10 @@
  * reader draws it through the same AppendixVideo component.
  *
  * Run from apps/web:
- *   pnpm appendices:pt -- --out <dir> [numbers...]
+ *   pnpm appendices:pt -- --out <dir> [numbers...]   # write the fixtures
+ *   pnpm appendices:backfill-pt                      # regenerate the SQL artifact
+ *
+ * The SQL always describes the whole corpus, so it ignores any numbers passed.
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
@@ -26,16 +29,22 @@ import React, { type ReactNode } from 'react'
 ;(globalThis as { React?: typeof React }).React = React
 import { APPENDICES } from '@/constants/appendices'
 import { convertTree, type ConvertResult } from './appendix-portable-text/walk'
+import {
+  buildPortableTextBackfillSql,
+  type PortableTextBackfillRow,
+} from './appendix-portable-text/sql'
 
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/
 
 interface Cli {
-  outDir: string
+  outDir: string | null
+  sqlFile: string | null
   numbers: number[]
 }
 
 function parseArgs(argv: readonly string[]): Cli {
   let outDir: string | null = null
+  let sqlFile: string | null = null
   const numbers: number[] = []
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -48,6 +57,13 @@ function parseArgs(argv: readonly string[]): Cli {
       i += 1
     } else if (arg.startsWith('--out=')) {
       outDir = path.resolve(process.cwd(), arg.slice('--out='.length))
+    } else if (arg === '--sql') {
+      const value = argv[i + 1]
+      if (!value) throw new Error('--sql requires a file path')
+      sqlFile = path.resolve(process.cwd(), value)
+      i += 1
+    } else if (arg.startsWith('--sql=')) {
+      sqlFile = path.resolve(process.cwd(), arg.slice('--sql='.length))
     } else if (/^\d+$/.test(arg)) {
       numbers.push(Number(arg))
     } else {
@@ -55,8 +71,10 @@ function parseArgs(argv: readonly string[]): Cli {
     }
   }
 
-  if (!outDir) throw new Error('nothing to do: pass --out <dir>')
-  return { outDir, numbers }
+  if (!outDir && !sqlFile) {
+    throw new Error('nothing to do: pass --out <dir> and/or --sql <file>')
+  }
+  return { outDir, sqlFile, numbers }
 }
 
 async function convertAppendix(number: number): Promise<ConvertResult> {
@@ -85,13 +103,19 @@ function soleEmbed(number: number, result: ConvertResult) {
 
 async function main() {
   const cli = parseArgs(process.argv.slice(2))
-  const known = new Set(APPENDICES.map((a) => a.number))
-  const targets = cli.numbers.length > 0 ? cli.numbers : APPENDICES.map((a) => a.number)
+  const known = new Map(APPENDICES.map((a) => [a.number, a.title]))
+  // The SQL artifact always describes the whole corpus, so a subset selected on
+  // the command line only narrows the fixtures.
+  const selected = cli.numbers.length > 0 ? cli.numbers : APPENDICES.map((a) => a.number)
+  const targets = cli.sqlFile ? APPENDICES.map((a) => a.number) : selected
 
-  const unknown = targets.filter((n) => !known.has(n))
+  const unknown = selected.filter((n) => !known.has(n))
   if (unknown.length > 0) throw new Error(`unknown appendix number(s): ${unknown.join(', ')}`)
 
-  mkdirSync(cli.outDir, { recursive: true })
+  if (cli.outDir) mkdirSync(cli.outDir, { recursive: true })
+  if (cli.sqlFile) mkdirSync(path.dirname(cli.sqlFile), { recursive: true })
+
+  const backfill: PortableTextBackfillRow[] = []
 
   for (const number of targets) {
     const result = await convertAppendix(number)
@@ -105,10 +129,33 @@ async function main() {
       video_id: embed?.videoId ?? null,
       video_title: embed?.videoTitle || null,
     }
-    const file = path.join(cli.outDir, `appendix-${number}.json`)
-    writeFileSync(file, `${JSON.stringify(payload, null, 2)}\n`)
-    console.log(`appendix ${number}: ${result.blocks.length} top-level blocks → ${file}`)
+
+    if (cli.outDir && selected.includes(number)) {
+      const file = path.join(cli.outDir, `appendix-${number}.json`)
+      writeFileSync(file, `${JSON.stringify(payload, null, 2)}\n`)
+      console.log(`appendix ${number}: ${result.blocks.length} top-level blocks → ${file}`)
+    } else {
+      console.log(`appendix ${number}: ${result.blocks.length} top-level blocks`)
+    }
     for (const warning of result.warnings) console.log(`  ! ${warning}`)
+
+    backfill.push({
+      code: String(number),
+      title: known.get(number) ?? '',
+      bodyPtJson: JSON.stringify(result.blocks),
+      videoId: embed?.videoId ?? null,
+      videoTitle: embed?.videoTitle || null,
+    })
+  }
+
+  if (cli.sqlFile) {
+    const sql = buildPortableTextBackfillSql(backfill)
+    writeFileSync(cli.sqlFile, sql)
+    const withVideo = backfill.filter((row) => row.videoId !== null).length
+    console.log(
+      `backfill sql: ${backfill.length} appendices, ${withVideo} with a video, ` +
+        `${sql.length} chars → ${cli.sqlFile}`,
+    )
   }
 }
 

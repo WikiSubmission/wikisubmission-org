@@ -1,35 +1,76 @@
 /**
  * Walks a rendered appendix's React element tree and emits Portable Text.
  *
- * Adapted from the markdown walk in ../appendix-markdown/walk.ts, and for the
- * same reason: the appendix TSX builds its tables from structured props
- * (`MathTable` takes `headers`/`rows`/`totals`) and its embeds carry a
- * `videoId`, so reading props off the elements keeps structure that an HTML
- * round-trip would already have flattened into divs.
+ * Reading props off elements rather than round-tripping HTML is what keeps
+ * structure the appendix TSX already has: `MathTable` takes `headers`/`rows`/
+ * `totals`, `YouTubeEmbed` carries a `videoId`, and an HTML pass would have
+ * flattened all of it into divs.
  *
- * The difference is what it emits. Markdown has one container, the blockquote,
- * so five distinct card meanings collapsed into it and the totals rows of 42
- * tables became ordinary data rows. Portable Text blocks carry `tone`,
- * `divided`, `caption` and `totals` as typed fields instead.
+ * Recognition is by exact class string, looked up in `lib/appendix-styles.ts` —
+ * the same registry the renderer draws from. Anything not in the registry
+ * produces a warning naming the class rather than a best-effort guess, because
+ * a silent approximation is exactly the failure mode this conversion exists to
+ * fix: converted to markdown, appendix 24's two forged verses became
+ * indistinguishable from the genuine scripture around them, and a word-level
+ * diff called that lossless.
  *
- * This walk is deliberately strict. Cards are recognised by their exact class
- * string against a closed table, and anything unrecognised produces a warning
- * naming the class rather than a best-effort guess, because a silent
- * approximation is exactly the failure mode this conversion exists to fix.
+ * Lookup is order-insensitive (see `classKey`), so the couple of class strings
+ * appendix 1 assembles from a template literal land on the same entry as the
+ * ones written out by hand.
  */
 import { isValidElement, type ReactElement, type ReactNode } from 'react'
 
+import {
+  CARD_STYLES,
+  CARD_TONES,
+  CODE_STYLES,
+  CODE_TEXT_STYLES,
+  DIVIDER_ROW,
+  DIVIDER_TITLE,
+  DIVIDER_TITLE_CENTERED,
+  EVIDENCE_INTERLUDE,
+  EVIDENCE_ROW,
+  FIGURE_CAPTION,
+  FIGURE_CARD,
+  FIGURE_FRAME,
+  FIGURE_FRAME_SM,
+  GRID_CELL,
+  GRID_NOTE,
+  GRID_TABLE_CARD,
+  GROUP_STYLES,
+  INLINE_MARK_STYLES,
+  LIST_CONTENT_STYLES,
+  LIST_ITEM_STYLES,
+  LIST_STYLES,
+  MARKER_STYLES,
+  PARAGRAPH_STYLES,
+  STATEMENT_BOX,
+  TABLE_CAPTION_BAR,
+  TABLE_CAPTION_TEXT,
+  TABLE_CELL_STYLES,
+  TABLE_HEADER_STYLES,
+  TABLE_LIST_STYLE,
+  TABLE_NOTE_STYLES,
+  TABLE_ROW_STYLES,
+  TABLE_SCROLLER,
+  TABLE_SHELL,
+  TABLE_STYLES,
+  VERSE_BODY_STYLES,
+  VERSE_CARD_STYLES,
+  VERSE_ENTRY_STYLES,
+  VERSE_REF_STYLES,
+  classKey,
+  reverseStyles,
+} from '@/lib/appendix-styles'
 import type {
   AppendixBlock,
-  AppendixCalloutParagraph,
-  AppendixCalloutStyle,
-  AppendixGap,
   AppendixGridRow,
   AppendixInlineChild,
   AppendixLinkMarkDef,
-  AppendixMathCell,
+  AppendixListItem,
   AppendixRichText,
-  AppendixTone,
+  AppendixTableColumn,
+  AppendixTableRow,
   AppendixVerseEntry,
 } from '@/lib/appendix-portable-text'
 
@@ -73,134 +114,55 @@ function childArray(node: ReactNode): ReactNode[] {
   return Array.isArray(node) ? ((node.flat(Infinity) as ReactNode[]) ?? []) : [node]
 }
 
-/** Element children only, with whitespace-only text dropped. */
-function elementChildren(node: ReactNode): ReactElement[] {
-  return childArray(node).filter(
-    (child) => isValidElement(child) && !isFragment(child as ReactElement),
-  ) as ReactElement[]
-}
-
-// ── the closed class tables ──────────────────────────────────────────────────
-
-type CardSpec =
-  | { kind: 'verseCards'; align: 'start' | 'center'; size: 'sm' | 'base'; gap: AppendixGap; divided: boolean }
-  | { kind: 'callout'; tone: AppendixTone; style: AppendixCalloutStyle }
-  | { kind: 'gridTable' }
-  | { kind: 'figure'; frame: 'full' | 'sm' }
-
 /**
- * Every card class string that occurs in the corpus, mapped to the typed block
- * it becomes. Matching on the exact string is what makes the conversion
- * verifiable: a card the corpus grows that is not in this table is reported,
- * never approximated.
+ * Element children only, with text dropped and fragments flattened into their
+ * contents. Flattening matters: appendix 23 emits every pair of table cells
+ * inside a `React.Fragment`, so a walk that treated a fragment as an opaque
+ * child would read that table as having no cells at all.
  */
-const CARD_CLASSES: Record<string, CardSpec> = {
-  'rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-4': {
-    kind: 'verseCards', align: 'start', size: 'sm', gap: 'md', divided: true,
-  },
-  'rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-5': {
-    kind: 'verseCards', align: 'start', size: 'sm', gap: 'lg', divided: true,
-  },
-  'rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-2': {
-    kind: 'verseCards', align: 'center', size: 'base', gap: 'xs', divided: false,
-  },
-  'rounded-xl border border-destructive/20 bg-destructive/5 p-5 space-y-2 text-sm': {
-    kind: 'callout', tone: 'destructive', style: 'statement',
-  },
-  'rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-2 text-sm text-foreground/85': {
-    kind: 'callout', tone: 'primary', style: 'summary',
-  },
-  'rounded-xl border border-border/60 p-5 text-sm italic text-foreground/75 leading-relaxed': {
-    kind: 'callout', tone: 'neutral', style: 'aside',
-  },
-  'rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-4 text-sm italic text-foreground/80': {
-    kind: 'callout', tone: 'primary', style: 'quotation',
-  },
-  'rounded-xl border border-border/60 p-5 text-sm italic text-foreground/80 leading-relaxed': {
-    kind: 'callout', tone: 'neutral', style: 'source',
-  },
-  'rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-2 text-sm text-center font-mono': {
-    kind: 'callout', tone: 'primary', style: 'arithmetic',
-  },
-  'rounded-xl border border-border/60 bg-muted/20 px-5 py-4 text-sm leading-relaxed text-foreground/80': {
-    kind: 'callout', tone: 'muted', style: 'remark',
-  },
-  'rounded-xl border border-border/60 bg-muted/20 px-5 py-4 space-y-2': {
-    kind: 'callout', tone: 'muted', style: 'result',
-  },
-  'rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-3 text-sm overflow-x-auto': {
-    kind: 'gridTable',
-  },
-  'space-y-3': { kind: 'figure', frame: 'full' },
-  'rounded-lg border border-border/30 overflow-hidden bg-muted/20 max-w-sm mx-auto': {
-    kind: 'figure', frame: 'sm',
-  },
+function elementChildren(node: ReactNode): ReactElement[] {
+  const out: ReactElement[] = []
+  for (const child of childArray(node)) {
+    if (!isValidElement(child)) continue
+    const element = child as ReactElement
+    if (isFragment(element)) {
+      out.push(...elementChildren(propsOf(element).children as ReactNode))
+      continue
+    }
+    out.push(element)
+  }
+  return out
 }
 
-/** Class of the frame a figure's image sits in. */
-const FIGURE_FRAME = 'rounded-lg border border-border/30 overflow-hidden bg-muted/20'
+// ── reverse lookups ──────────────────────────────────────────────────────────
 
-/** Paragraph classes inside a card, mapped to the typed emphasis they become. */
-const PARAGRAPH_CLASSES: Record<string, { emphasis?: AppendixCalloutParagraph['emphasis']; spaced?: boolean }> = {
-  '': {},
-  'font-bold text-base': { emphasis: 'result' },
-  'font-bold text-base pt-2': { emphasis: 'result', spaced: true },
-  'font-mono text-sm text-primary break-words': { emphasis: 'mono' },
-  'text-xs text-muted-foreground leading-relaxed': { emphasis: 'caption' },
-  'italic text-foreground/80 leading-relaxed': { emphasis: 'passage' },
-}
+const CARDS = reverseStyles(CARD_STYLES)
+const VERSE_CARDS = reverseStyles(VERSE_CARD_STYLES)
+const VERSE_BODIES = reverseStyles(VERSE_BODY_STYLES)
+const VERSE_REFS = reverseStyles(VERSE_REF_STYLES)
+const GROUPS = reverseStyles(GROUP_STYLES)
+const PARAGRAPHS = reverseStyles(PARAGRAPH_STYLES)
+const LISTS = reverseStyles(LIST_STYLES)
+const LIST_ITEMS = reverseStyles(LIST_ITEM_STYLES)
+const MARKERS = reverseStyles(MARKER_STYLES)
+const LIST_CONTENTS = reverseStyles(LIST_CONTENT_STYLES)
+const TABLES = reverseStyles(TABLE_STYLES)
+const TABLE_HEADERS = reverseStyles(TABLE_HEADER_STYLES)
+const TABLE_CELLS = reverseStyles(TABLE_CELL_STYLES)
+const TABLE_ROWS = reverseStyles(TABLE_ROW_STYLES)
+const TABLE_NOTES = reverseStyles(TABLE_NOTE_STYLES)
+const CODES = reverseStyles(CODE_STYLES)
+const INLINE_MARKS = reverseStyles(INLINE_MARK_STYLES)
+const CODE_TEXTS = reverseStyles(CODE_TEXT_STYLES)
 
-/** The eyebrow label of a card, per tone. */
-const LABEL_CLASSES = new Set([
-  'font-semibold text-destructive/80 uppercase tracking-widest text-xs',
-  'font-semibold text-primary/80 uppercase tracking-widest text-xs',
+/** A verse-entry wrapper is matched on its own, since two names share a class. */
+const VERSE_WRAPPERS = new Map<string, keyof typeof VERSE_ENTRY_STYLES>([
+  ['', 'plain'],
+  [classKey(VERSE_ENTRY_STYLES.grouped), 'grouped'],
+  [classKey(VERSE_ENTRY_STYLES.divided), 'divided'],
 ])
 
-/** The trailing monospace attribution of a card. */
-const FOOTNOTE_CLASSES: Record<string, boolean> = {
-  'text-xs not-italic text-muted-foreground font-mono': false,
-  'text-xs not-italic text-muted-foreground font-mono mt-2': true,
-}
-
-/** A scripture quotation's body paragraph, and the size it implies. */
-const VERSE_BODY_CLASSES: Record<string, 'sm' | 'base'> = {
-  'text-sm leading-relaxed italic text-foreground/90': 'sm',
-  'text-base leading-relaxed italic text-foreground/90': 'base',
-}
-
-/** A scripture quotation's reference paragraph. */
-const VERSE_REF_CLASSES = new Set([
-  'text-xs text-muted-foreground font-mono',
-  'text-xs text-muted-foreground font-mono mt-1',
-])
-
-/** `<section>` classes, mapped to the rhythm they carry. */
-const SECTION_CLASSES: Record<string, { gap: AppendixGap; prose: boolean }> = {
-  'space-y-5 text-base leading-relaxed text-foreground/90': { gap: 'lg', prose: true },
-  'space-y-4 text-base leading-relaxed text-foreground/90': { gap: 'md', prose: true },
-  'space-y-4 text-sm leading-relaxed text-foreground/90': { gap: 'md', prose: true },
-  'space-y-6': { gap: 'xl', prose: false },
-  'space-y-3': { gap: 'sm', prose: false },
-}
-
-/** The interlude paragraph that sits unattached between evidence items. */
-const INTERLUDE_CLASS = 'text-sm leading-relaxed text-foreground/85 italic pl-10'
-
-/** Badge span classes inside a numbered list, mapped to tone and density. */
-const BADGE_CLASSES: Record<string, { tone: AppendixTone; density: 'compact' | 'comfortable' }> = {
-  'shrink-0 flex items-center justify-center size-7 rounded-md bg-destructive/10 text-destructive font-mono text-xs font-semibold mt-0.5': {
-    tone: 'destructive', density: 'comfortable',
-  },
-  'shrink-0 flex items-center justify-center size-7 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold mt-0.5': {
-    tone: 'primary', density: 'comfortable',
-  },
-  'shrink-0 flex items-center justify-center size-6 rounded-md bg-primary/10 text-primary font-mono text-xs font-semibold': {
-    tone: 'primary', density: 'compact',
-  },
-}
-
-const GRID_CELL_CLASS = 'border border-border/40 px-3 py-2 text-left'
-const GRID_NOTE_CLASS = 'text-xs text-muted-foreground'
+const is = (className: string, style: string) => classKey(className) === classKey(style)
 
 // ── the walk ─────────────────────────────────────────────────────────────────
 
@@ -228,6 +190,10 @@ export function convertTree(root: ReactNode): ConvertResult {
     return propsOf(element).children as ReactNode
   }
 
+  /** Whether the source marked this card for the article's reveal animation. */
+  const revealOf = (element: ReactElement) =>
+    propsOf(element)['data-card'] !== undefined ? {} : { reveal: false }
+
   // ── inline ─────────────────────────────────────────────────────────────────
 
   /** Collects a node's inline content into spans, refs and link annotations. */
@@ -238,11 +204,7 @@ export function convertTree(root: ReactNode): ConvertResult {
     const push = (text: string, marks: string[]) => {
       if (text === '') return
       const last = children[children.length - 1]
-      if (
-        last &&
-        last._type === 'span' &&
-        (last.marks ?? []).join(' ') === marks.join(' ')
-      ) {
+      if (last && last._type === 'span' && (last.marks ?? []).join(' ') === marks.join(' ')) {
         last.text += text
         return
       }
@@ -280,7 +242,21 @@ export function convertTree(root: ReactNode): ConvertResult {
           case 'code':
             return visit(kids, [...marks, 'code'])
           case 'br':
-            return push(' ', marks)
+            // A newline in the span text, rendered back as a <br/>. Collapsing
+            // it to a space would silently reflow the card it sits in.
+            return push('\n', marks)
+          case 'span': {
+            // An unclassed span is a grouping wrapper with no visual effect; a
+            // classed one is an inline style and becomes a decorator mark.
+            const cls = classOf(element)
+            if (cls === '') return visit(kids, marks)
+            const mark = INLINE_MARKS.get(classKey(cls))
+            if (!mark) {
+              warn(`unmapped inline span class "${cls}"`)
+              return visit(kids, marks)
+            }
+            return visit(kids, [...marks, mark])
+          }
           case 'a': {
             const href = typeof props.href === 'string' ? props.href : undefined
             if (!href) return visit(kids, marks)
@@ -332,19 +308,6 @@ export function convertTree(root: ReactNode): ConvertResult {
       .trim()
   }
 
-  /** The verse key of a `<QuranRef>` sitting alone in a paragraph. */
-  function soleReference(node: ReactNode): string | undefined {
-    const rich = inline(node)
-    const refs = rich.children.filter((child) => child._type === 'quranRef')
-    const rest = rich.children.filter(
-      (child) => child._type === 'span' && child.text.trim() !== '',
-    )
-    if (refs.length === 1 && rest.length === 0) {
-      return (refs[0] as { reference: string }).reference
-    }
-    return undefined
-  }
-
   // ── blocks ─────────────────────────────────────────────────────────────────
 
   function blocks(node: ReactNode): AppendixBlock[] {
@@ -353,9 +316,10 @@ export function convertTree(root: ReactNode): ConvertResult {
       if (child === null || child === undefined || typeof child === 'boolean') continue
       if (typeof child === 'string' && child.trim() === '') continue
       if (typeof child === 'string' || typeof child === 'number') {
-        // Bare text at block level: the acknowledgement card and a couple of
-        // remark cards write their prose without a wrapping <p>.
-        out.push({ _type: 'block', _key: key(), style: 'normal', ...inline(child) })
+        // Bare text at block level: a few cards write their prose straight into
+        // the card. `bare` keeps it that way — wrapping it in a paragraph would
+        // add an element the source never had.
+        out.push({ _type: 'block', _key: key(), style: 'normal', bare: true, ...inline(child) })
         continue
       }
       if (!isValidElement(child)) continue
@@ -394,10 +358,10 @@ export function convertTree(root: ReactNode): ConvertResult {
     }
   }
 
-  function paragraph(node: ReactNode): AppendixBlock[] {
+  function paragraph(node: ReactNode, style: keyof typeof PARAGRAPH_STYLES): AppendixBlock[] {
     const rich = inline(node)
     if (isEmpty(rich)) return []
-    return [{ _type: 'block', _key: key(), style: 'normal', ...rich }]
+    return [{ _type: 'block', _key: key(), style, ...rich }]
   }
 
   function hostBlocks(element: ReactElement): AppendixBlock[] {
@@ -407,55 +371,30 @@ export function convertTree(root: ReactNode): ConvertResult {
     const className = classOf(element)
 
     switch (tag) {
-      case 'p':
-        if (className === INTERLUDE_CLASS) {
+      case 'p': {
+        if (is(className, EVIDENCE_INTERLUDE)) {
           return [{ _type: 'appendixInterlude', _key: key(), text: inline(children) }]
         }
-        if (className !== '') {
+        const style = PARAGRAPHS.get(classKey(className))
+        if (!style) {
           warn(`unmapped paragraph class "${className}"`)
+          return paragraph(children, 'normal')
         }
-        return paragraph(children)
-
-      case 'section': {
-        // The video sits in its own section under a "Video" heading. The embed
-        // is lifted into payload metadata and AppendixVideo draws its own
-        // heading, so the whole section goes with it.
-        if (hasEmbed(children)) {
-          collectEmbeds(children)
-          return []
-        }
-        const spec = SECTION_CLASSES[className]
-        if (!spec) {
-          warn(`unmapped section class "${className}"`)
-          return blocks(children)
-        }
-        const content = blocks(children)
-        if (content.length === 0) return []
-        // A prose section of nothing but paragraphs, and an evidence section of
-        // nothing but evidence, are the shapes the renderer regroups on its own,
-        // so they stay flat and stay editable as ordinary Portable Text.
-        if (
-          spec.gap === 'lg' &&
-          spec.prose &&
-          content.every((block) => block._type === 'block')
-        ) {
-          return content
-        }
-        if (
-          spec.gap === 'xl' &&
-          !spec.prose &&
-          content.every(
-            (block) =>
-              block._type === 'appendixEvidence' || block._type === 'appendixInterlude',
-          )
-        ) {
-          return content
-        }
-        return [{ _type: 'appendixSection', _key: key(), gap: spec.gap, prose: spec.prose, content }]
+        return paragraph(children, style)
       }
 
+      case 'section':
       case 'div':
-        return divBlocks(element)
+        return containerBlocks(element, tag)
+
+      case 'blockquote': {
+        const style = CARDS.get(classKey(className))
+        if (!style) {
+          warn(`unmapped blockquote class "${className}"`)
+          return blocks(children)
+        }
+        return [calloutBlock(element, style)]
+      }
 
       case 'ul':
       case 'ol':
@@ -472,181 +411,231 @@ export function convertTree(root: ReactNode): ConvertResult {
     }
   }
 
-  /** `<hr/> title <hr/>` written inline rather than through a component. */
-  function dividerBlocks(element: ReactElement): AppendixBlock[] | null {
-    const kids = elementChildren(propsOf(element).children as ReactNode)
+  // ── containers ─────────────────────────────────────────────────────────────
+
+  function containerBlocks(element: ReactElement, tag: 'section' | 'div'): AppendixBlock[] {
+    const children = propsOf(element).children as ReactNode
+    const className = classOf(element)
+    const kids = elementChildren(children)
+
+    // The video sits in its own section under a "Video" heading. The embed is
+    // lifted into payload metadata and AppendixVideo draws its own heading, so
+    // the whole section goes with it.
+    if (hasEmbed(children)) {
+      collectEmbeds(children)
+      return []
+    }
+
+    if (is(className, DIVIDER_ROW)) {
+      const divider = dividerBlocks(kids)
+      if (divider) return divider
+    }
+
+    // A scripture card and appendix 1's highlight card are written with the
+    // same class, so a verse body is what tells them apart.
+    const verseStyle = VERSE_CARDS.get(classKey(className))
+    if (verseStyle && kids.some((child) => holdsVerseBody(child))) {
+      return [verseCardsBlock(element, verseStyle)]
+    }
+
+    const cardStyle = CARDS.get(classKey(className))
+    if (cardStyle) return [calloutBlock(element, cardStyle)]
+
+    if (is(className, TABLE_SHELL)) return shellBlocks(element)
+
+    if (is(className, GRID_TABLE_CARD)) return [gridTableBlock(element)]
+
+    const codeStyle = CODES.get(classKey(className))
+    if (codeStyle) return codeBlocks(element, codeStyle)
+
+    if (is(className, FIGURE_FRAME_SM)) return figureBlocks(element, 'sm')
+
+    // `space-y-3` is both a plain group and the wrapper of a full figure, so a
+    // framed image decides which this is.
+    if (
+      is(className, FIGURE_CARD) &&
+      kids.some((child) => is(classOf(child), FIGURE_FRAME))
+    ) {
+      return figureBlocks(element, 'full')
+    }
+
+    if (is(className, EVIDENCE_ROW)) return rowBlocks(element)
+
+    if (is(className, STATEMENT_BOX)) {
+      return [{ _type: 'appendixStatement', _key: key(), text: inline(children) }]
+    }
+
+    const groupStyle = GROUPS.get(classKey(className))
+    if (groupStyle) {
+      const content = blocks(children)
+      if (content.length === 0) return []
+      // A prose group of nothing but plain paragraphs, and an evidence group of
+      // nothing but evidence, are the shapes the renderer regroups on its own,
+      // so they stay flat and stay editable as ordinary Portable Text.
+      //
+      // `style === 'normal'` is load-bearing: the renderer only regroups plain
+      // paragraphs, so flattening a group that also holds a styled one would
+      // leave that paragraph outside any section and drop the `leading-relaxed`
+      // it inherited.
+      if (
+        groupStyle === 'prose' &&
+        content.every((block) => block._type === 'block' && block.style === 'normal')
+      ) {
+        return content
+      }
+      if (
+        groupStyle === 'stackXl' &&
+        content.every(
+          (block) =>
+            block._type === 'appendixEvidence' || block._type === 'appendixInterlude',
+        )
+      ) {
+        return content
+      }
+      return [{ _type: 'appendixSection', _key: key(), style: groupStyle, tag, content }]
+    }
+
+    warn(`unmapped container <${tag}> class "${className}"`)
+    return blocks(children)
+  }
+
+  /** Whether a card child is, or wraps, a scripture quotation's body. */
+  function holdsVerseBody(child: ReactElement): boolean {
+    if (child.type === 'p') return VERSE_BODIES.has(classKey(classOf(child)))
+    if (child.type !== 'div') return false
+    if (!VERSE_WRAPPERS.has(classKey(classOf(child)))) return false
+    return elementChildren(propsOf(child).children as ReactNode).some(holdsVerseBody)
+  }
+
+  /** `<hr/> title <hr/>`. */
+  function dividerBlocks(kids: ReactElement[]): AppendixBlock[] | null {
     const rules = kids.filter((child) => child.type === 'hr')
     const heading = kids.find((child) => child.type === 'h2')
     if (rules.length !== 2 || !heading) return null
+    const cls = classOf(heading)
+    const centered = is(cls, DIVIDER_TITLE_CENTERED)
+    if (!centered && !is(cls, DIVIDER_TITLE)) {
+      warn(`unmapped divider title class "${cls}"`)
+    }
     return [
       {
         _type: 'appendixDivider',
         _key: key(),
         title: inline(propsOf(heading).children as ReactNode),
+        ...(centered ? { centered: true } : {}),
       },
     ]
   }
 
-  function divBlocks(element: ReactElement): AppendixBlock[] {
-    const props = propsOf(element)
-    const children = props.children as ReactNode
-    const className = classOf(element)
-
-    if (className === 'flex items-center gap-4') {
-      const divider = dividerBlocks(element)
-      if (divider) return divider
-    }
-
-    const spec = CARD_CLASSES[className]
-    if (!spec) {
-      warn(`unmapped card class "${className}"`)
-      return blocks(children)
-    }
-
-    switch (spec.kind) {
-      case 'verseCards':
-        return [
-          {
-            _type: 'appendixVerseCards',
-            _key: key(),
-            align: spec.align,
-            size: spec.size,
-            gap: spec.gap,
-            divided: spec.divided,
-            entries: verseEntries(children),
-          },
-        ]
-      case 'callout':
-        return [calloutBlock(spec.tone, spec.style, children)]
-      case 'gridTable':
-        return [gridTableBlock(children)]
-      case 'figure':
-        return figureBlocks(spec.frame, children)
-    }
-  }
-
   // ── scripture cards ────────────────────────────────────────────────────────
 
-  function verseEntries(children: ReactNode): AppendixVerseEntry[] {
+  function verseCardsBlock(
+    element: ReactElement,
+    style: keyof typeof VERSE_CARD_STYLES,
+  ): AppendixBlock {
+    const kids = elementChildren(propsOf(element).children as ReactNode)
     const entries: AppendixVerseEntry[] = []
-    const consume = (nodes: ReactElement[]) => {
+    let body: keyof typeof VERSE_BODY_STYLES = 'sm'
+    let refStyle: keyof typeof VERSE_REF_STYLES = 'plain'
+    let heading: AppendixRichText | undefined
+    let headingStyle: keyof typeof PARAGRAPH_STYLES | undefined
+
+    const consume = (nodes: ReactElement[], wrapper: keyof typeof VERSE_ENTRY_STYLES) => {
       for (let i = 0; i < nodes.length; i += 1) {
         const node = nodes[i]
         const cls = classOf(node)
-        if (node.type === 'p' && VERSE_BODY_CLASSES[cls]) {
-          const entry: AppendixVerseEntry = { body: inline(propsOf(node).children as ReactNode) }
-          const next = nodes[i + 1]
-          if (next && next.type === 'p' && VERSE_REF_CLASSES.has(classOf(next))) {
-            entry.reference = soleReference(propsOf(next).children as ReactNode)
-            i += 1
+
+        if (node.type === 'p') {
+          const bodyStyle = VERSE_BODIES.get(classKey(cls))
+          if (bodyStyle) {
+            body = bodyStyle
+            const entry: AppendixVerseEntry = {
+              _key: key(),
+              body: inline(propsOf(node).children as ReactNode),
+              wrapper,
+            }
+            const next = nodes[i + 1]
+            const nextRef = next && next.type === 'p' ? VERSE_REFS.get(classKey(classOf(next))) : undefined
+            if (next && nextRef) {
+              refStyle = nextRef
+              entry.reference = inline(propsOf(next).children as ReactNode)
+              i += 1
+            }
+            entries.push(entry)
+            continue
           }
-          entries.push(entry)
-          continue
+          // A card may open with an eyebrow above its quotations.
+          const paragraphStyle = PARAGRAPHS.get(classKey(cls))
+          if (paragraphStyle && entries.length === 0 && heading === undefined) {
+            heading = inline(propsOf(node).children as ReactNode)
+            headingStyle = paragraphStyle
+            continue
+          }
         }
+
         if (node.type === 'div') {
-          // A divided stack wraps each quotation so the rule has something to
-          // hang on; the wrapper carries no meaning of its own.
-          consume(elementChildren(propsOf(node).children as ReactNode))
-          continue
+          const inner = VERSE_WRAPPERS.get(classKey(cls))
+          if (inner) {
+            consume(elementChildren(propsOf(node).children as ReactNode), inner)
+            continue
+          }
         }
+
         warn(`unmapped scripture-card child <${String(node.type)}> class "${cls}"`)
       }
     }
-    consume(elementChildren(children))
-    return entries
+
+    consume(kids, 'none')
+
+    return {
+      _type: 'appendixVerseCards',
+      _key: key(),
+      style,
+      body,
+      refStyle,
+      ...(heading ? { heading, headingStyle } : {}),
+      entries,
+      ...revealOf(element),
+    }
   }
 
   // ── callouts ───────────────────────────────────────────────────────────────
 
   function calloutBlock(
-    tone: AppendixTone,
-    style: AppendixCalloutStyle,
-    children: ReactNode,
-  ): AppendixBlock {
-    let label: AppendixRichText | undefined
-    let footnote: AppendixRichText | undefined
-    let footnoteSpaced = false
-    const paragraphs: AppendixCalloutParagraph[] = []
-
-    for (const child of childArray(children)) {
-      if (typeof child === 'string') {
-        if (child.trim() === '') continue
-        paragraphs.push(inline(child))
-        continue
-      }
-      if (typeof child === 'number') {
-        paragraphs.push(inline(String(child)))
-        continue
-      }
-      if (!isValidElement(child)) continue
-      const element = child as ReactElement
-      const cls = classOf(element)
-
-      if (element.type !== 'p') {
-        warn(`unmapped callout child <${String(element.type)}> class "${cls}"`)
-        continue
-      }
-      if (LABEL_CLASSES.has(cls)) {
-        label = inline(propsOf(element).children as ReactNode)
-        continue
-      }
-      if (cls in FOOTNOTE_CLASSES) {
-        footnote = inline(propsOf(element).children as ReactNode)
-        footnoteSpaced = FOOTNOTE_CLASSES[cls]
-        continue
-      }
-      const emphasis = PARAGRAPH_CLASSES[cls]
-      if (!emphasis) {
-        warn(`unmapped callout paragraph class "${cls}"`)
-        paragraphs.push(inline(propsOf(element).children as ReactNode))
-        continue
-      }
-      paragraphs.push({
-        ...inline(propsOf(element).children as ReactNode),
-        ...(emphasis.emphasis ? { emphasis: emphasis.emphasis } : {}),
-        ...(emphasis.spaced ? { spaced: true } : {}),
-      })
-    }
-
+    element: ReactElement,
+    style: keyof typeof CARD_STYLES,
+  ): Extract<AppendixBlock, { _type: 'appendixCallout' }> {
     return {
       _type: 'appendixCallout',
       _key: key(),
-      tone,
+      tone: CARD_TONES[style],
       style,
-      ...(label ? { label } : {}),
-      paragraphs,
-      ...(footnote ? { footnote } : {}),
-      ...(footnoteSpaced ? { footnoteSpaced: true } : {}),
+      content: blocks(propsOf(element).children as ReactNode),
+      ...revealOf(element),
     }
   }
 
   // ── figures ────────────────────────────────────────────────────────────────
 
-  function imageProps(node: ReactNode): ReactElement | null {
+  function findImage(node: ReactNode): ReactElement | null {
     for (const child of childArray(node)) {
       if (!isValidElement(child)) continue
       const element = child as ReactElement
       if (nameOf(element.type) === 'Image' || element.type === 'img') return element
-      const nested = imageProps(propsOf(element).children as ReactNode)
+      const nested = findImage(propsOf(element).children as ReactNode)
       if (nested) return nested
     }
     return null
   }
 
-  function figureBlocks(frame: 'full' | 'sm', children: ReactNode): AppendixBlock[] {
+  function figureBlocks(element: ReactElement, frame: 'full' | 'sm'): AppendixBlock[] {
+    const children = propsOf(element).children as ReactNode
     const kids = elementChildren(children)
-    // A `sm` figure is the frame itself, so its image sits directly inside;
-    // a `full` figure wraps the frame in a card alongside its caption.
-    const frameNode =
-      frame === 'sm' ? null : kids.find((child) => classOf(child) === FIGURE_FRAME)
-    if (frame === 'full' && !frameNode) {
-      warn('a figure card had no framed image')
-      return blocks(children)
-    }
+    // A `sm` figure is the frame itself, so its image sits directly inside; a
+    // `full` figure wraps the frame in a card alongside its caption.
+    const frameNode = frame === 'sm' ? null : kids.find((child) => is(classOf(child), FIGURE_FRAME))
 
-    const image = imageProps(
-      frameNode ? (propsOf(frameNode).children as ReactNode) : children,
-    )
+    const image = findImage(frameNode ? (propsOf(frameNode).children as ReactNode) : children)
     if (!image) {
       warn('a figure frame had no image')
       return blocks(children)
@@ -666,78 +655,409 @@ export function convertTree(root: ReactNode): ConvertResult {
       width: typeof props.width === 'number' ? props.width : 0,
       height: typeof props.height === 'number' ? props.height : 0,
       frame,
+      ...revealOf(element),
     }
 
     if (frame === 'sm') return [block]
 
     let caption: AppendixRichText | undefined
-    let source: { body: AppendixRichText; footnote?: AppendixRichText } | undefined
+    let source: Extract<AppendixBlock, { _type: 'appendixCallout' }> | undefined
 
     for (const child of kids) {
       if (child === frameNode) continue
       const cls = classOf(child)
-      if (child.type === 'p' && cls === 'text-xs text-muted-foreground leading-relaxed') {
+      if (child.type === 'p' && is(cls, FIGURE_CAPTION)) {
         caption = inline(propsOf(child).children as ReactNode)
         continue
       }
-      if (CARD_CLASSES[cls]?.kind === 'callout') {
-        const callout = calloutBlock('neutral', 'source', propsOf(child).children as ReactNode)
-        if (callout._type !== 'appendixCallout') continue
-        source = {
-          body: { children: callout.paragraphs.flatMap((p) => p.children) },
-          ...(callout.footnote ? { footnote: callout.footnote } : {}),
-        }
+      const cardStyle = CARDS.get(classKey(cls))
+      if (cardStyle) {
+        source = calloutBlock(child, cardStyle)
         continue
       }
       warn(`unmapped figure child <${String(child.type)}> class "${cls}"`)
     }
 
+    return [{ ...block, ...(caption ? { caption } : {}), ...(source ? { source } : {}) }]
+  }
+
+  // ── rows ───────────────────────────────────────────────────────────────────
+
+  /**
+   * `flex items-start gap-3`: a numbered evidence item, or a term/definition
+   * row. The marker tells them apart — a badge holds a number, a term holds
+   * words.
+   */
+  function rowBlocks(element: ReactElement): AppendixBlock[] {
+    const kids = elementChildren(propsOf(element).children as ReactNode)
+    const marker = kids.find((child) => MARKERS.has(classKey(classOf(child))))
+    if (!marker) {
+      warn(`a row had no recognised marker (class "${classOf(element)}")`)
+      return blocks(propsOf(element).children as ReactNode)
+    }
+    const markerStyle = MARKERS.get(classKey(classOf(marker)))!
+    const rest = kids.filter((child) => child !== marker)
+
+    if (markerStyle === 'term') {
+      const body = rest[0]
+      const bodyStyle = body ? LIST_CONTENTS.get(classKey(classOf(body))) : undefined
+      if (!body || !bodyStyle) {
+        warn(`unmapped definition-row body class "${body ? classOf(body) : ''}"`)
+        return blocks(propsOf(element).children as ReactNode)
+      }
+      return [
+        {
+          _type: 'appendixDefinitionRow',
+          _key: key(),
+          term: inline(propsOf(marker).children as ReactNode),
+          termStyle: markerStyle,
+          body: inline(propsOf(body).children as ReactNode),
+          bodyStyle,
+        },
+      ]
+    }
+
+    const column = rest[0]
+    const columnStyle = column ? GROUPS.get(classKey(classOf(column))) : undefined
+    if (!column || !columnStyle) {
+      warn(`unmapped evidence body class "${column ? classOf(column) : ''}"`)
+      return blocks(propsOf(element).children as ReactNode)
+    }
     return [
       {
-        ...block,
-        ...(caption ? { caption } : {}),
-        ...(source ? { source } : {}),
+        _type: 'appendixEvidence',
+        _key: key(),
+        n: Number(text(propsOf(marker).children as ReactNode)) || 0,
+        marker: markerStyle,
+        body: columnStyle,
+        content: blocks(propsOf(column).children as ReactNode),
       },
     ]
   }
 
-  // ── badge lists ────────────────────────────────────────────────────────────
+  // ── lists ──────────────────────────────────────────────────────────────────
 
   function listBlocks(element: ReactElement, ordered: boolean): AppendixBlock[] {
+    const className = classOf(element)
+    const style = LISTS.get(classKey(className))
+    if (!style) {
+      warn(`unmapped list class "${className}"`)
+      return []
+    }
     const items = elementChildren(propsOf(element).children as ReactNode).filter(
       (child) => child.type === 'li',
     )
     if (items.length === 0) {
-      warn(`an empty list was dropped (class "${classOf(element)}")`)
+      warn(`an empty list was dropped (class "${className}")`)
       return []
     }
 
-    let tone: AppendixTone = 'primary'
-    let density: 'compact' | 'comfortable' = 'comfortable'
-    const contents: AppendixRichText[] = []
+    let item: keyof typeof LIST_ITEM_STYLES = 'none'
+    let marker: keyof typeof MARKER_STYLES | undefined
+    let bullet: string | undefined
+    const body = { style: 'none' as keyof typeof LIST_CONTENT_STYLES, tag: 'none' as ItemTag }
+    const contents: AppendixListItem[] = []
 
-    for (const item of items) {
-      const kids = elementChildren(propsOf(item).children as ReactNode)
-      const badge = kids.find((child) => child.type === 'span' && BADGE_CLASSES[classOf(child)])
-      if (badge) {
-        const spec = BADGE_CLASSES[classOf(badge)]
-        tone = spec.tone
-        density = spec.density
-      } else {
-        warn(`a list item had no recognised badge (class "${classOf(item)}")`)
+    for (const li of items) {
+      const itemStyle = LIST_ITEMS.get(classKey(classOf(li)))
+      if (itemStyle === undefined) warn(`unmapped list item class "${classOf(li)}"`)
+      else item = itemStyle
+
+      const kids = elementChildren(propsOf(li).children as ReactNode)
+      const markerNode = kids.find(
+        (child) => child.type === 'span' && MARKERS.has(classKey(classOf(child))),
+      )
+      if (markerNode) {
+        marker = MARKERS.get(classKey(classOf(markerNode)))
+        if (marker === 'bullet') bullet = text(propsOf(markerNode).children as ReactNode)
       }
-      const body = kids.filter((child) => child !== badge)
-      contents.push(inline(body.map((child) => propsOf(child).children as ReactNode)))
+
+      const rest = childArray(propsOf(li).children as ReactNode).filter(
+        (child) => child !== markerNode,
+      )
+      contents.push(itemBody(rest, body))
     }
 
     return [
-      { _type: 'appendixBadgeList', _key: key(), tone, ordered, density, items: contents },
+      {
+        _type: 'appendixBadgeList',
+        _key: key(),
+        ordered,
+        style,
+        item,
+        ...(marker ? { marker } : {}),
+        content: body.style,
+        contentTag: body.tag,
+        ...(bullet ? { bullet } : {}),
+        items: contents,
+      },
+    ]
+  }
+
+  type ItemTag = 'none' | 'span' | 'p' | 'div'
+
+  /**
+   * The body of one list item, and the wrapper it sits in.
+   *
+   * The wrapper is not decoration: the corpus writes it as a `<span>`, a `<p>`
+   * carrying its own type scale, or a `<div>` holding several paragraphs, and
+   * collapsing all three to a span reflowed six appendices. The tag and class
+   * are recorded on the list rather than per item, which is how the source
+   * writes them; a list that disagreed with itself would be reported.
+   */
+  function itemBody(
+    rest: ReactNode[],
+    body: { style: keyof typeof LIST_CONTENT_STYLES; tag: ItemTag },
+  ): AppendixListItem {
+    const sole =
+      rest.filter((child) => typeof child !== 'string' || child.trim() !== '').length === 1 &&
+      isValidElement(rest.find(isValidElement))
+        ? (rest.find(isValidElement) as ReactElement)
+        : null
+    const tag = sole && typeof sole.type === 'string' ? (sole.type as ItemTag) : null
+    const style =
+      sole && (tag === 'span' || tag === 'p' || tag === 'div')
+        ? LIST_CONTENTS.get(classKey(classOf(sole)))
+        : undefined
+
+    if (sole && tag && style) {
+      if (body.tag !== 'none' && (body.tag !== tag || body.style !== style)) {
+        warn(`a list mixes item bodies (<${body.tag}>.${body.style} and <${tag}>.${style})`)
+      }
+      body.tag = tag
+      body.style = style
+      const children = propsOf(sole).children as ReactNode
+      return tag === 'div'
+        ? { _key: key(), content: blocks(children) }
+        : { _key: key(), text: inline(children) }
+    }
+
+    return { _key: key(), text: inline(rest) }
+  }
+
+  // ── captioned shells: data tables and list cards ───────────────────────────
+
+  function shellBlocks(element: ReactElement): AppendixBlock[] {
+    const kids = elementChildren(propsOf(element).children as ReactNode)
+    let caption: AppendixRichText | undefined
+    let table: ReactElement | null = null
+    let list: ReactElement | null = null
+    let note:
+      | { style: keyof typeof TABLE_NOTE_STYLES; inside?: boolean; content: AppendixBlock[] }
+      | undefined
+
+    for (const child of kids) {
+      const cls = classOf(child)
+      if (is(cls, TABLE_CAPTION_BAR)) {
+        const line = elementChildren(propsOf(child).children as ReactNode)[0]
+        if (line && is(classOf(line), TABLE_CAPTION_TEXT)) {
+          caption = inline(propsOf(line).children as ReactNode)
+        } else {
+          warn(`unmapped table caption class "${line ? classOf(line) : ''}"`)
+        }
+        continue
+      }
+      if (is(cls, TABLE_SCROLLER)) {
+        // The footer note sits beside the table inside the scroller in some
+        // appendices and beside the scroller in others, so both are scanned.
+        for (const inner of elementChildren(propsOf(child).children as ReactNode)) {
+          if (inner.type === 'table') {
+            table = inner
+            continue
+          }
+          const innerNote = TABLE_NOTES.get(classKey(classOf(inner)))
+          if (innerNote) {
+            note = {
+              style: innerNote,
+              inside: true,
+              content: blocks(propsOf(inner).children as ReactNode),
+            }
+            continue
+          }
+          warn(`unmapped table-scroller child <${String(inner.type)}> class "${classOf(inner)}"`)
+        }
+        if (!table) warn('a table scroller held no table')
+        continue
+      }
+      if (child.type === 'table') {
+        table = child
+        continue
+      }
+      if (child.type === 'ul' && is(cls, TABLE_LIST_STYLE)) {
+        list = child
+        continue
+      }
+      const noteStyle = TABLE_NOTES.get(classKey(cls))
+      if (noteStyle) {
+        note = { style: noteStyle, content: blocks(propsOf(child).children as ReactNode) }
+        continue
+      }
+      warn(`unmapped table-shell child <${String(child.type)}> class "${cls}"`)
+    }
+
+    if (list) return [listCardBlock(element, caption, list)]
+    if (!table) {
+      warn('a captioned shell held neither a table nor a list')
+      return []
+    }
+    return [dataTableBlock(element, caption, table, note)]
+  }
+
+  function listCardBlock(
+    shell: ReactElement,
+    caption: AppendixRichText | undefined,
+    list: ReactElement,
+  ): AppendixBlock {
+    let item: keyof typeof LIST_ITEM_STYLES = 'none'
+    let marker: keyof typeof MARKER_STYLES | undefined
+    const body = { style: 'none' as keyof typeof LIST_CONTENT_STYLES, tag: 'none' as ItemTag }
+    const items: AppendixListItem[] = []
+
+    for (const li of elementChildren(propsOf(list).children as ReactNode)) {
+      if (li.type !== 'li') continue
+      const itemStyle = LIST_ITEMS.get(classKey(classOf(li)))
+      if (itemStyle === undefined) warn(`unmapped list-card item class "${classOf(li)}"`)
+      else item = itemStyle
+
+      const kids = childArray(propsOf(li).children as ReactNode)
+      const markerNode = kids.find(
+        (child) =>
+          isValidElement(child) && MARKERS.has(classKey(classOf(child as ReactElement))),
+      ) as ReactElement | undefined
+      if (markerNode) marker = MARKERS.get(classKey(classOf(markerNode)))
+
+      items.push(itemBody(kids.filter((child) => child !== markerNode), body))
+    }
+
+    return {
+      _type: 'appendixListCard',
+      _key: key(),
+      ...(caption ? { caption } : {}),
+      item,
+      ...(marker ? { marker } : {}),
+      content: body.style,
+      contentTag: body.tag,
+      items,
+      ...revealOf(shell),
+    }
+  }
+
+  function dataTableBlock(
+    shell: ReactElement,
+    caption: AppendixRichText | undefined,
+    table: ReactElement,
+    note:
+      | { style: keyof typeof TABLE_NOTE_STYLES; inside?: boolean; content: AppendixBlock[] }
+      | undefined,
+  ): AppendixBlock {
+    const tableStyle = TABLES.get(classKey(classOf(table)))
+    if (!tableStyle) warn(`unmapped table class "${classOf(table)}"`)
+
+    const columns: AppendixTableColumn[] = []
+    const rows: AppendixTableRow[] = []
+
+    const visit = (node: ReactNode) => {
+      for (const child of elementChildren(node)) {
+        if (child.type === 'thead' || child.type === 'tbody' || child.type === 'tfoot') {
+          visit(propsOf(child).children as ReactNode)
+          continue
+        }
+        if (child.type !== 'tr') continue
+        const cells = elementChildren(propsOf(child).children as ReactNode)
+
+        if (cells.length > 0 && cells.every((cell) => cell.type === 'th')) {
+          cells.forEach((cell, i) => {
+            const style = TABLE_HEADERS.get(classKey(classOf(cell)))
+            if (!style) warn(`unmapped table header class "${classOf(cell)}"`)
+            const column: AppendixTableColumn = {
+              header: inline(propsOf(cell).children as ReactNode),
+              headerStyle: style ?? 'left',
+              cellStyle: 'plain',
+            }
+            columns[i] = { ...columns[i], ...column }
+          })
+          continue
+        }
+
+        const rowStyle = TABLE_ROWS.get(classKey(classOf(child)))
+        if (!rowStyle) warn(`unmapped table row class "${classOf(child)}"`)
+        const cellStyles = cells.map((cell) => {
+          const style = TABLE_CELLS.get(classKey(classOf(cell)))
+          if (!style) warn(`unmapped table cell class "${classOf(cell)}"`)
+          return style ?? 'plain'
+        })
+        rows.push({
+          _key: key(),
+          style: rowStyle ?? 'data',
+          cells: cells.map((cell) => inline(propsOf(cell).children as ReactNode)),
+          cellStyles,
+        })
+      }
+    }
+    visit(propsOf(table).children as ReactNode)
+
+    // A cell recipe that every data row agrees on belongs to the column; only
+    // the rows that depart from it keep an override. That is how the source
+    // reads, and it keeps a totals row's emphasis visible as a difference.
+    const dataRows = rows.filter((row) => row.style === 'data')
+    const width = Math.max(columns.length, ...rows.map((row) => row.cells.length), 0)
+    for (let i = 0; i < width; i += 1) {
+      const seen = new Set(dataRows.map((row) => row.cellStyles?.[i]).filter(Boolean))
+      const common = seen.size === 1 ? [...seen][0] : undefined
+      const existing = columns[i]
+      columns[i] = {
+        ...(existing?.header ? { header: existing.header } : {}),
+        headerStyle: existing?.headerStyle ?? 'left',
+        cellStyle: common ?? 'plain',
+      }
+    }
+    for (const row of rows) {
+      if (row.cellStyles?.every((style, i) => style === columns[i]?.cellStyle)) {
+        delete row.cellStyles
+      }
+    }
+
+    return {
+      _type: 'appendixDataTable',
+      _key: key(),
+      ...(caption ? { caption } : {}),
+      table: tableStyle ?? 'plain',
+      columns,
+      rows,
+      ...(note ? { note } : {}),
+      ...revealOf(shell),
+    }
+  }
+
+  // ── code ───────────────────────────────────────────────────────────────────
+
+  function codeBlocks(
+    element: ReactElement,
+    style: keyof typeof CODE_STYLES,
+  ): AppendixBlock[] {
+    const code = elementChildren(propsOf(element).children as ReactNode).find(
+      (child) => child.type === 'code',
+    )
+    if (!code) {
+      warn(`a code strip held no <code> (class "${classOf(element)}")`)
+      return blocks(propsOf(element).children as ReactNode)
+    }
+    const textStyle = CODE_TEXTS.get(classKey(classOf(code)))
+    if (!textStyle) warn(`unmapped code class "${classOf(code)}"`)
+    return [
+      {
+        _type: 'appendixCode',
+        _key: key(),
+        style,
+        text: textStyle ?? 'sequence',
+        value: text(propsOf(code).children as ReactNode),
+      },
     ]
   }
 
   // ── grid tables ────────────────────────────────────────────────────────────
 
-  function gridTableBlock(children: ReactNode): AppendixBlock {
+  function gridTableBlock(element: ReactElement): AppendixBlock {
     const headers: AppendixRichText[] = []
     const rows: AppendixGridRow[] = []
     const notes: AppendixRichText[] = []
@@ -750,10 +1070,10 @@ export function convertTree(root: ReactNode): ConvertResult {
         }
         if (child.type !== 'tr') continue
         const cells = elementChildren(propsOf(child).children as ReactNode)
-        if (cells.every((cell) => cell.type === 'th')) {
+        if (cells.length > 0 && cells.every((cell) => cell.type === 'th')) {
           for (const cell of cells) {
             const cls = classOf(cell)
-            if (cls !== GRID_CELL_CLASS) warn(`unmapped grid header class "${cls}"`)
+            if (!is(cls, GRID_CELL)) warn(`unmapped grid header class "${cls}"`)
             headers.push(inline(propsOf(cell).children as ReactNode))
           }
           continue
@@ -762,7 +1082,7 @@ export function convertTree(root: ReactNode): ConvertResult {
         const variant: AppendixGridRow['variant'] =
           rowClass === 'font-semibold'
             ? 'total'
-            : cells.some((cell) => classOf(cell) === `${GRID_CELL_CLASS} font-semibold`)
+            : cells.some((cell) => is(classOf(cell), `${GRID_CELL} font-semibold`))
               ? 'group'
               : 'data'
         if (rowClass !== '' && rowClass !== 'font-semibold') {
@@ -771,8 +1091,8 @@ export function convertTree(root: ReactNode): ConvertResult {
         let alignTop = false
         const built = cells.map((cell) => {
           const cls = classOf(cell)
-          if (cls === `${GRID_CELL_CLASS} align-top`) alignTop = true
-          else if (cls !== GRID_CELL_CLASS && cls !== `${GRID_CELL_CLASS} font-semibold`) {
+          if (is(cls, `${GRID_CELL} align-top`)) alignTop = true
+          else if (!is(cls, GRID_CELL) && !is(cls, `${GRID_CELL} font-semibold`)) {
             warn(`unmapped grid cell class "${cls}"`)
           }
           const colSpan = propsOf(cell).colSpan
@@ -785,12 +1105,12 @@ export function convertTree(root: ReactNode): ConvertResult {
       }
     }
 
-    for (const child of elementChildren(children)) {
+    for (const child of elementChildren(propsOf(element).children as ReactNode)) {
       if (child.type === 'table') {
         visitRows(propsOf(child).children as ReactNode)
         continue
       }
-      if (child.type === 'p' && classOf(child) === GRID_NOTE_CLASS) {
+      if (child.type === 'p' && is(classOf(child), GRID_NOTE)) {
         notes.push(inline(propsOf(child).children as ReactNode))
         continue
       }
@@ -803,20 +1123,21 @@ export function convertTree(root: ReactNode): ConvertResult {
       headers,
       rows,
       ...(notes.length > 0 ? { notes } : {}),
+      ...revealOf(element),
     }
   }
 
   // ── components ─────────────────────────────────────────────────────────────
 
-  function mathCells(value: unknown): AppendixMathCell[][] {
-    if (!Array.isArray(value)) return []
-    return value.map((row) =>
-      (Array.isArray(row) ? row : [row]).map((cell) =>
-        typeof cell === 'number' ? cell : text(cell as ReactNode),
-      ),
-    )
-  }
-
+  /**
+   * A local presentational component is never recognised by its name, only by
+   * the markup it renders. Several appendices define a component called
+   * `MathTable` or `DataTable`, and those components do not agree: appendix 1's
+   * draws semibold headers and top-aligned cells where appendix 24's draws
+   * medium headers and nowrap monospace ones. Trusting the name once made 31 of
+   * appendix 1's tables render with appendix 24's recipe, and produced no
+   * warning while doing it.
+   */
   function componentBlocks(element: ReactElement): AppendixBlock[] {
     const name = nameOf(element.type)
     const props = propsOf(element)
@@ -830,54 +1151,10 @@ export function convertTree(root: ReactNode): ConvertResult {
       return []
     }
 
-    if (name === 'SectionDivider' || name === 'Divider') {
-      return [
-        {
-          _type: 'appendixDivider',
-          _key: key(),
-          title: inline((props.title ?? props.children) as ReactNode),
-        },
-      ]
-    }
-
-    if (name === 'EvidenceItem') {
-      return [
-        {
-          _type: 'appendixEvidence',
-          _key: key(),
-          n: typeof props.n === 'number' ? props.n : 0,
-          content: blocks(props.children as ReactNode),
-        },
-      ]
-    }
-
-    if (name === 'StatementBox') {
-      return [{ _type: 'appendixStatement', _key: key(), text: inline(props.children as ReactNode) }]
-    }
-
-    if (name === 'MathTable' || name === 'DataTable') {
-      const note = props.note === undefined ? undefined : inline(props.note as ReactNode)
-      return [
-        {
-          _type: 'appendixMathTable',
-          _key: key(),
-          caption: text(props.caption as ReactNode),
-          headers: (Array.isArray(props.headers) ? props.headers : []).map((h) =>
-            text(h as ReactNode),
-          ),
-          rows: mathCells(props.rows),
-          ...(Array.isArray(props.totals) && props.totals.length > 0
-            ? { totals: mathCells(props.totals) }
-            : {}),
-          ...(note && !isEmpty(note) ? { note } : {}),
-        },
-      ]
-    }
-
     if (name === 'AppendixLink' || name === 'QuranRef' || name === 'ScriptureRef') {
       // Inline constructs never reach block position in this corpus, but if one
       // does it belongs in a paragraph rather than being dropped.
-      return paragraph(element)
+      return paragraph(element, 'normal')
     }
 
     if (name === 'Image') {
@@ -885,6 +1162,8 @@ export function convertTree(root: ReactNode): ConvertResult {
       return []
     }
 
+    // Everything else is a local presentational wrapper: render it and keep
+    // walking, so the card it draws is recognised by its class like any other.
     return blocks(render(element))
   }
 

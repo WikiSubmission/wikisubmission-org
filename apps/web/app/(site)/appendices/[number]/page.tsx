@@ -11,6 +11,7 @@ import { buildPageMetadata } from '@/constants/metadata'
 import { ArticleAnimations } from '@/components/article-animations'
 import { getAppendixContent } from '@/content/library'
 import { AppendixMarkdown } from '@/components/library/appendix-markdown'
+import { AppendixPortableText } from '@/components/library/appendix-portable-text'
 import { AppendixVideo } from '@/components/library/appendix-video'
 import { fetchAppendix, hasEditorialBody } from '@/lib/appendices-backend'
 
@@ -116,8 +117,16 @@ export default async function AppendixPage({ params }: Props) {
           {/* ── Content ──────────────────────────────────────────────────────── */}
           {editorial && hasEditorialBody(editorial) ? (
             <>
-              <AppendixMarkdown content={editorial.body} />
-              {/* The video is payload metadata, not body markdown, so it is
+              {/* Portable Text first, then markdown. Markdown has one
+                  container, the blockquote, so it flattened five distinct card
+                  meanings into it; a converted appendix draws the typed blocks
+                  instead and keeps them apart. */}
+              {editorial.bodyPt ? (
+                <AppendixPortableText blocks={editorial.bodyPt} />
+              ) : (
+                <AppendixMarkdown content={editorial.body} />
+              )}
+              {/* The video is payload metadata, not body prose, so it is
                   rendered here: trailing, exactly where the TSX puts it. */}
               <AppendixVideo
                 videoId={editorial.videoId}

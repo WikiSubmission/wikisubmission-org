@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { APPENDICES, resolveAppendixMeta } from '@/constants/appendices'
 import { getAppendixContent } from '@/content/library'
 import { AppendixMarkdown } from '@/components/library/appendix-markdown'
+import { AppendixPortableText } from '@/components/library/appendix-portable-text'
 import { AppendixVideo } from '@/components/library/appendix-video'
 import { fetchAppendix, hasEditorialBody } from '@/lib/appendices-backend'
 import { AppendixEmptyState, AppendixPagination } from './appendix-chrome'
@@ -31,8 +32,8 @@ export default async function AppendixPage({
 
   const prev = resolveAppendixMeta(n - 1)
   const next = resolveAppendixMeta(n + 1)
-  const showMarkdown = hasEditorialBody(editorial)
-  const Content = showMarkdown ? null : await getAppendixContent(n)
+  const showEditorial = hasEditorialBody(editorial)
+  const Content = showEditorial ? null : await getAppendixContent(n)
 
   return (
     <article className="mx-auto w-full max-w-2xl space-y-8 px-4 py-8">
@@ -50,11 +51,19 @@ export default async function AppendixPage({
 
       <hr className="border-border/40" />
 
-      {showMarkdown && editorial ? (
+      {showEditorial && editorial ? (
         <>
-          <AppendixMarkdown content={editorial.body} />
-          {/* The video is payload metadata, not body markdown, so it is
-              rendered here: trailing, exactly where the TSX puts it. */}
+          {/* Portable Text first, then markdown. Markdown has one container,
+              the blockquote, so it flattened five distinct card meanings into
+              it; a converted appendix draws the typed blocks instead and keeps
+              them apart. */}
+          {editorial.bodyPt ? (
+            <AppendixPortableText blocks={editorial.bodyPt} />
+          ) : (
+            <AppendixMarkdown content={editorial.body} />
+          )}
+          {/* The video is payload metadata, not body prose, so it is rendered
+              here: trailing, exactly where the TSX puts it. */}
           <AppendixVideo videoId={editorial.videoId} videoTitle={editorial.videoTitle} />
         </>
       ) : Content ? (
