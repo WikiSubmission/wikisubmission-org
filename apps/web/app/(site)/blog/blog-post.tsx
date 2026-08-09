@@ -1,7 +1,7 @@
 import { buildPageMetadata } from '@/constants/metadata'
 import type { Metadata } from 'next'
 import { fetchArticleBySlug, fetchRelatedArticles } from '@/lib/blog-backend'
-import { type BlogPost, type RelatedBlogPost, type SanityLanguage } from '@/lib/blog-queries'
+import { type BlogLanguage, type BlogPost, type RelatedBlogPost } from '@/lib/blog-queries'
 
 // The article view and its data shapes are shared with mobile. Reads come from
 // ws-backend's public endpoints (blog-backend.ts); this module keeps the
@@ -10,8 +10,8 @@ import { type BlogPost, type RelatedBlogPost, type SanityLanguage } from '@/lib/
 // Drafts are previewed in /editor, which renders the working copy with the same
 // Portable Text schema. There is no public preview link.
 export { BlogPostArticle } from '@/components/blog/blog-post-article'
-export { SANITY_LANGUAGES, toSanityLanguage } from '@/lib/blog-queries'
-export type { BlogPost, RelatedBlogPost, SanityLanguage } from '@/lib/blog-queries'
+export { toBlogLanguage } from '@/lib/blog-queries'
+export type { BlogLanguage, BlogPost, RelatedBlogPost } from '@/lib/blog-queries'
 
 const BLOG_INDEX_METADATA = buildPageMetadata({
   title: 'Blog | WikiSubmission',
@@ -37,7 +37,7 @@ export function getBlogIndexMetadata() {
 
 export async function fetchPublishedBlogPostBySlug(
   slug: string,
-  language: SanityLanguage
+  language: BlogLanguage
 ): Promise<BlogPost | null> {
   return fetchArticleBySlug(slug, language)
 }

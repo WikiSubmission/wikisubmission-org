@@ -5,7 +5,7 @@ import { getLocale } from 'next-intl/server'
 import { BlogBrowser } from '@/components/blog/blog-browser'
 import { deriveCategories, fetchArticles } from '@/lib/blog-backend'
 import { type Post, type Category } from '@/lib/blog-queries'
-import { getBlogIndexMetadata, toSanityLanguage } from './blog-post'
+import { getBlogIndexMetadata, toBlogLanguage } from './blog-post'
 
 // This route used to double as a secret-link draft preview, reading unpublished
 // documents straight from Sanity. Drafts now live in ws-backend and are
@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BlogPage() {
   const locale = await getLocale()
-  const language = toSanityLanguage(locale)
+  const language = toBlogLanguage(locale)
 
   let allArticles: Post[] = []
   let categories: Category[] = []
