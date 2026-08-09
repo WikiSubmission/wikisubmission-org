@@ -29,6 +29,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { STATUS_META } from './status'
 import type { ContentModuleDef, FieldDef } from './module-defs'
 import { PTEditor } from './pt-editor'
+import { AppendixBodyEditor } from './appendix-body-editor'
 import { uploadEditorialImage } from './upload-image'
 
 type Fields = Record<string, unknown>
@@ -549,6 +550,16 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
             initialValue={value}
             disabled={disabled}
             onChange={(blocks) => set(def.key, blocks)}
+          />
+        </FieldShell>
+      )
+    case 'appendixPt':
+      return (
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <AppendixBodyEditor
+            value={value}
+            disabled={disabled}
+            onChange={(blocks) => set(def.key, blocks.length > 0 ? blocks : undefined)}
           />
         </FieldShell>
       )

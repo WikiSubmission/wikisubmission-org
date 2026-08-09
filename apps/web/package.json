@@ -15,6 +15,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:contract": "node scripts/check-openapi-sync.mjs",
+    "appendices:markdown": "tsx --tsconfig scripts/tsconfig.appendix-md.json scripts/appendix-to-markdown.tsx",
+    "appendices:pt": "tsx --tsconfig scripts/tsconfig.appendix-pt.json scripts/appendix-to-portable-text.tsx",
+    "appendices:backfill-pt": "tsx --tsconfig scripts/tsconfig.appendix-pt.json scripts/appendix-to-portable-text.tsx --sql scripts/appendix-backfill-pt.sql",
+    "appendices:backfill": "tsx --tsconfig scripts/tsconfig.appendix-md.json scripts/appendix-to-markdown.tsx --embeds=drop --sql scripts/appendix-backfill.sql",
     "e2e": "playwright test"
   },
   "dependencies": {
@@ -76,6 +80,7 @@
     "react-markdown": "^10.1.0",
     "react-simple-maps": "^3.0.0",
     "react-virtuoso": "^4.18.10",
+    "remark-gfm": "^4",
     "sonner": "^2.0.7",
     "stripe": "^22.3.0",
     "tailwind-merge": "^3.6.0",
