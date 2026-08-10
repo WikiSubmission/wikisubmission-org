@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { SearchIcon, StickyNote } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -16,6 +16,7 @@ import {
   expandAllChaptersVerseRef,
 } from '@/lib/scripture-parser'
 import { useMeSearch } from '@/hooks/use-me-search'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
 
 export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const t = useTranslations('search')
@@ -27,6 +28,17 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const [query, setQuery] = useState(urlQuery)
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // The input is the draft's only owner, so blur, Escape, and the reader's
+  // per-scroll `history.replaceState` verse sync can never discard what the
+  // user typed. Keying on the string value (not the searchParams object) means
+  // this only fires when `q` genuinely changes, i.e. on a real navigation.
+  const lastUrlQueryRef = useRef(urlQuery)
+  useEffect(() => {
+    if (lastUrlQueryRef.current === urlQuery) return
+    lastUrlQueryRef.current = urlQuery
+    setQuery(urlQuery)
+  }, [urlQuery])
 
   const chapters = useQuranNavStore((s) => s.chapters)
   const appendices = useQuranNavStore((s) => s.appendices)
@@ -52,17 +64,16 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           return
         }
       }
-      const normalized = normalizeQuranInput(q.trim())
-      const params = new URLSearchParams(searchParams.toString())
-      params.set('q', decodeURIComponent(normalized))
+      // A fresh param set, not a clone: carrying `verse` into a text search is
+      // meaningless, and a stale `tab=words` would silently force the words tab.
+      const params = new URLSearchParams()
+      params.set('q', decodeURIComponent(normalizeQuranInput(q.trim())))
       replace(`${pathname}?${params.toString()}`)
     },
-    [pathname, replace, router, searchParams, chapters]
+    [pathname, replace, router, chapters]
   )
 
-  const displayQuery = open ? query : urlQuery
-
-  const showDropdown = open && displayQuery.length >= 1 && !isQuranRefInput(displayQuery)
+  const showDropdown = open && query.length >= 1 && !isQuranRefInput(query)
 
   const matchedChapters = showDropdown
     ? chapters
@@ -71,11 +82,11 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           const n = c.chapter_number?.toString() ?? ''
           const transliteration =
             CHAPTER_TRANSLITERATIONS[(c.chapter_number ?? 1) - 1] ?? ''
-          const q = displayQuery.toLowerCase()
+          const q = query.toLowerCase()
           return (
             title.toLowerCase().includes(q) ||
             transliteration.toLowerCase().includes(q) ||
-            n.startsWith(displayQuery)
+            n.startsWith(query)
           )
         })
         .slice(0, 5)
@@ -87,14 +98,19 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           const title = a.title ?? ''
           const n = a.code?.toString() ?? ''
           return (
-            title.toLowerCase().includes(displayQuery.toLowerCase()) ||
-            n.startsWith(displayQuery)
+            title.toLowerCase().includes(query.toLowerCase()) ||
+            n.startsWith(query)
           )
         })
         .slice(0, 3)
     : []
 
-  const noteResults = useMeSearch(showDropdown ? displayQuery : '', 'quran').slice(0, 4)
+  // Notes search is the one network call reachable from the keystroke path, so
+  // it reads a debounced copy of the draft. Chapters and appendices above stay
+  // synchronous: they filter data the nav store already holds.
+  const debouncedQuery = useDebouncedValue(query, 300)
+  const noteQuery = showDropdown && debouncedQuery.trim().length >= 2 ? debouncedQuery : ''
+  const noteResults = useMeSearch(noteQuery, 'quran').slice(0, 4)
 
   const hasSuggestions =
     matchedChapters.length > 0 || matchedAppendices.length > 0 || noteResults.length > 0
@@ -111,12 +127,16 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           performSearch(query)
         }}
       >
-        <SearchIcon
+        <button
+          type="submit"
+          aria-label={t('placeholder')}
           className={cn(
-            'absolute top-1/2 -translate-y-1/2 text-muted-foreground/60 pointer-events-none',
+            'absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full text-muted-foreground/60 hover:text-foreground transition-colors',
             large ? 'left-3.5 size-4' : 'left-2.5 size-3.5'
           )}
-        />
+        >
+          <SearchIcon className="size-full" />
+        </button>
         <Input
           type="search"
           placeholder={t('placeholder')}
@@ -124,13 +144,14 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
             'bg-muted/50 border-border/40',
             large ? 'pl-11 h-12 text-base rounded-xl' : 'pl-8 h-8 text-sm'
           )}
-          value={displayQuery}
+          value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => {
-            setQuery(urlQuery)
-            setOpen(true)
-          }}
+          onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
+          onKeyDown={(e) => {
+            // Close the suggestions without discarding the draft.
+            if (e.key === 'Escape') setOpen(false)
+          }}
           autoComplete="off"
         />
       </form>
