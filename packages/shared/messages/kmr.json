@@ -984,5 +984,23 @@
     "goBack": "Vegere",
     "copyFailed": "Nekarî li clipboardê kopî bike",
     "copiedValue": "Hate kopî kirin: {value}"
+  },
+  "commandMenu": {
+    "title": "Menuya fermanan",
+    "openLabel": "Menuya fermanan veke",
+    "placeholder": "Li rûpel, sûre û mîhengan bigere…",
+    "empty": "Encam tune.",
+    "back": "Vegere",
+    "on": "Vekirî",
+    "off": "Girtî",
+    "mode": "Awa",
+    "palette": "Palet",
+    "groupActions": "Kirin",
+    "groupPages": "Rûpel",
+    "groupChapters": "Sûre",
+    "groupAppendices": "Pêvek",
+    "groupVerses": "Ayet",
+    "groupContent": "Di naverokê de",
+    "groupSettings": "Mîheng"
   }
 }

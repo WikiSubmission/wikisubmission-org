@@ -54,6 +54,15 @@ export type QuranPreferences = {
   wordLabSections: WordLabSections
   wordTapAction: WordTapAction
   setPreferences: (preferences: QuranPreferences) => void
+  /**
+   * Merges a partial update, keeping `text` pinned to true.
+   *
+   * `text` has no UI toggle and every write path has forced it true since the v8
+   * migration; enforcing that here means a caller cannot half-remember the rule.
+   * Prefer this over `setPreferences` for anything that changes one or two keys —
+   * the command menu, the settings panel, and the mode selector all do.
+   */
+  patchPreferences: (patch: Partial<QuranPreferences>) => void
 }
 
 /** Read the UI locale cookie — used only to seed the initial primaryLanguage default. */
@@ -85,6 +94,8 @@ export const useQuranPreferences = create(
       },
       wordTapAction: 'play' as WordTapAction,
       setPreferences: (preferences: QuranPreferences) => set(preferences),
+      patchPreferences: (patch: Partial<QuranPreferences>) =>
+        set((state) => ({ ...state, ...patch, text: true })),
     }),
     {
       name: 'quran-preferences-v4',

@@ -1696,5 +1696,23 @@
     "goBack": "Go back",
     "copyFailed": "Could not copy to clipboard",
     "copiedValue": "Copied: {value}"
+  },
+  "commandMenu": {
+    "title": "Command menu",
+    "openLabel": "Open command menu",
+    "placeholder": "Search pages, chapters, and settings…",
+    "empty": "No results.",
+    "back": "Back",
+    "on": "On",
+    "off": "Off",
+    "mode": "Mode",
+    "palette": "Palette",
+    "groupActions": "Actions",
+    "groupPages": "Pages",
+    "groupChapters": "Chapters",
+    "groupAppendices": "Appendices",
+    "groupVerses": "Verses",
+    "groupContent": "In content",
+    "groupSettings": "Settings"
   }
 }

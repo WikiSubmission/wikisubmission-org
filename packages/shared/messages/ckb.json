@@ -1633,5 +1633,23 @@
     "goBack": "بگەڕێوە",
     "copyFailed": "کۆپیکردن بۆ کلیپبۆرد سەرکەوتوو نەبوو",
     "copiedValue": "کۆپی کرا: {value}"
+  },
+  "commandMenu": {
+    "title": "پێڕستی فەرمان",
+    "openLabel": "کردنەوەی پێڕستی فەرمان",
+    "placeholder": "گەڕان بە پەرە، سوورە و ڕێکخستنەکان…",
+    "empty": "هیچ ئەنجامێک نییە.",
+    "back": "گەڕانەوە",
+    "on": "چالاک",
+    "off": "ناچالاک",
+    "mode": "دۆخ",
+    "palette": "تەختەڕەنگ",
+    "groupActions": "کردارەکان",
+    "groupPages": "پەرەکان",
+    "groupChapters": "سوورەتەکان",
+    "groupAppendices": "پاشکۆکان",
+    "groupVerses": "ئایەتەکان",
+    "groupContent": "لە ناوەڕۆک",
+    "groupSettings": "ڕێکخستنەکان"
   }
 }

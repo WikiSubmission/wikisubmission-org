@@ -1644,5 +1644,23 @@
     "goBack": "Geri dön",
     "copyFailed": "Panoya kopyalanamadı",
     "copiedValue": "Kopyalandı: {value}"
+  },
+  "commandMenu": {
+    "title": "Komut menüsü",
+    "openLabel": "Komut menüsünü aç",
+    "placeholder": "Sayfalarda, surelerde ve ayarlarda ara…",
+    "empty": "Sonuç yok.",
+    "back": "Geri",
+    "on": "Açık",
+    "off": "Kapalı",
+    "mode": "Mod",
+    "palette": "Palet",
+    "groupActions": "Eylemler",
+    "groupPages": "Sayfalar",
+    "groupChapters": "Sureler",
+    "groupAppendices": "Ekler",
+    "groupVerses": "Ayetler",
+    "groupContent": "İçerikte",
+    "groupSettings": "Ayarlar"
   }
 }

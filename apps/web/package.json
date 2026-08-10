@@ -63,6 +63,7 @@
     "@visx/tooltip": "^4.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "d3-array": "^3.2.4",
     "d3-geo": "^3.1.1",
     "gsap": "^3.15.0",

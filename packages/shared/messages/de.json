@@ -1644,5 +1644,23 @@
     "goBack": "Zurück",
     "copyFailed": "Konnte nicht in die Zwischenablage kopiert werden",
     "copiedValue": "Kopiert: {value}"
+  },
+  "commandMenu": {
+    "title": "Befehlsmenü",
+    "openLabel": "Befehlsmenü öffnen",
+    "placeholder": "Seiten, Kapitel und Einstellungen durchsuchen…",
+    "empty": "Keine Ergebnisse.",
+    "back": "Zurück",
+    "on": "Ein",
+    "off": "Aus",
+    "mode": "Modus",
+    "palette": "Palette",
+    "groupActions": "Aktionen",
+    "groupPages": "Seiten",
+    "groupChapters": "Kapitel",
+    "groupAppendices": "Anhänge",
+    "groupVerses": "Verse",
+    "groupContent": "In Inhalten",
+    "groupSettings": "Einstellungen"
   }
 }

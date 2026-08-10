@@ -1644,5 +1644,23 @@
     "goBack": "رجوع",
     "copyFailed": "تعذّر النسخ إلى الحافظة",
     "copiedValue": "تم النسخ: {value}"
+  },
+  "commandMenu": {
+    "title": "قائمة الأوامر",
+    "openLabel": "فتح قائمة الأوامر",
+    "placeholder": "ابحث في الصفحات والسور والإعدادات…",
+    "empty": "لا نتائج.",
+    "back": "رجوع",
+    "on": "مُفعّل",
+    "off": "مُعطّل",
+    "mode": "الوضع",
+    "palette": "اللوحة",
+    "groupActions": "إجراءات",
+    "groupPages": "الصفحات",
+    "groupChapters": "السور",
+    "groupAppendices": "الملاحق",
+    "groupVerses": "الآيات",
+    "groupContent": "في المحتوى",
+    "groupSettings": "الإعدادات"
   }
 }

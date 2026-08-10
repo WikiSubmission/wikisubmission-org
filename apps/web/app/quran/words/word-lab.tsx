@@ -708,7 +708,7 @@ function Detail({
   const prefs = useQuranPreferences()
   const sections = prefs.wordLabSections
   const setSection = (k: keyof typeof sections, v: boolean) =>
-    prefs.setPreferences({ ...prefs, wordLabSections: { ...sections, [k]: v } })
+    prefs.patchPreferences({ wordLabSections: { ...sections, [k]: v } })
 
   const onChipClick = (i: number) => {
     setActiveDeriv(i)

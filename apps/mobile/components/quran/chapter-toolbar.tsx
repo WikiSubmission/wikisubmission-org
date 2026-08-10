@@ -36,10 +36,10 @@ export function ChapterToolbar() {
   // honors; persisted with the rest of the Quran preferences.
   const zoomIndex = ZOOM_LEVELS.indexOf(zoomLevel)
   const stepZoom = useCallback((delta: -1 | 1) => {
-    const { zoomLevel: current } = useQuranPreferences.getState()
+    const { zoomLevel: current, patchPreferences } = useQuranPreferences.getState()
     const index = ZOOM_LEVELS.indexOf(current ?? 'comfortable')
     const next = ZOOM_LEVELS[Math.min(ZOOM_LEVELS.length - 1, Math.max(0, index + delta))]
-    if (next !== current) useQuranPreferences.setState({ zoomLevel: next })
+    if (next !== current) patchPreferences({ zoomLevel: next })
   }, [])
 
   const onModeChanged = useCallback((mode: QuranModeId) => {

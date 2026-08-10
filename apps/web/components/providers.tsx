@@ -9,6 +9,7 @@ import { ChatSidebar } from '@/components/chat-sidebar/chat-sidebar'
 import { ChatProvider } from '@/components/chat/chat-context'
 import { SignInPrompt } from '@/components/sign-in-prompt'
 import { ScriptureAuthBridge } from '@/components/scripture-auth-bridge'
+import { CommandMenuMount } from '@/components/command-menu-mount'
 import { QuranPlayerProvider } from '@/lib/quran-audio-context'
 import { NavigationReferrerTracker } from '@/components/navigation-referrer-tracker'
 import { PointerEventsRecovery } from '@/components/pointer-events-recovery'
@@ -56,6 +57,7 @@ export default function Providers({
                 <OfflineSyncStatus />
                 {children}
                 <ChatSidebar />
+                <CommandMenuMount />
                 <SignInPrompt />
               </ChatProvider>
             </ChatPanelProvider>

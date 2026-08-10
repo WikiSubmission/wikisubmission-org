@@ -1644,5 +1644,23 @@
     "goBack": "Retour",
     "copyFailed": "Impossible de copier dans le presse-papiers",
     "copiedValue": "Copié : {value}"
+  },
+  "commandMenu": {
+    "title": "Menu de commandes",
+    "openLabel": "Ouvrir le menu de commandes",
+    "placeholder": "Rechercher pages, chapitres et paramètres…",
+    "empty": "Aucun résultat.",
+    "back": "Retour",
+    "on": "Activé",
+    "off": "Désactivé",
+    "mode": "Mode",
+    "palette": "Palette",
+    "groupActions": "Actions",
+    "groupPages": "Pages",
+    "groupChapters": "Chapitres",
+    "groupAppendices": "Annexes",
+    "groupVerses": "Versets",
+    "groupContent": "Dans le contenu",
+    "groupSettings": "Paramètres"
   }
 }
