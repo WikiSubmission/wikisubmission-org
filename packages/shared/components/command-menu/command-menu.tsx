@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import gsap from 'gsap'
@@ -77,29 +77,32 @@ export function CommandMenu() {
   // unmounts the content. Radix's own `open` is driven by `present`, which keeps
   // its focus trap and Escape handling intact throughout.
   const [present, setPresent] = useState(false)
-  const panelRef = useRef<HTMLDivElement | null>(null)
-  const overlayRef = useRef<HTMLDivElement | null>(null)
+
+  // Held as state rather than refs. Radix's Portal mounts its children one
+  // commit after `present` flips, so a ref is still null when an effect keyed on
+  // `present` runs, and that effect would never re-run to catch up — the enter
+  // tween would silently never play. Callback refs make the node itself a
+  // dependency, so each tween starts the moment its element exists.
+  const [panelEl, setPanelEl] = useState<HTMLDivElement | null>(null)
+  const [overlayEl, setOverlayEl] = useState<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (open) setPresent(true)
   }, [open])
 
-  // Enter tween, once the panel is in the DOM.
+  // Enter tween.
   useEffect(() => {
-    if (!present || !open) return
-    const panel = panelRef.current
-    const overlay = overlayRef.current
-    if (!panel) return
+    if (!present || !open || !panelEl) return
 
     if (reducedMotion) {
-      gsap.set([panel, overlay].filter(Boolean), { opacity: 1, y: 0, scale: 1 })
+      gsap.set([panelEl, overlayEl].filter(Boolean), { opacity: 1, y: 0, scale: 1 })
       return
     }
 
     const tl = gsap.timeline()
-    if (overlay) tl.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: ENTER_DURATION }, 0)
+    if (overlayEl) tl.fromTo(overlayEl, { opacity: 0 }, { opacity: 1, duration: ENTER_DURATION }, 0)
     tl.fromTo(
-      panel,
+      panelEl,
       { opacity: 0, y: -8, scale: 0.98 },
       { opacity: 1, y: 0, scale: 1, duration: ENTER_DURATION, ease: 'power3.out' },
       0,
@@ -107,26 +110,31 @@ export function CommandMenu() {
     return () => {
       tl.kill()
     }
-  }, [present, open, reducedMotion])
+  }, [present, open, panelEl, overlayEl, reducedMotion])
 
   // Exit tween, then unmount.
   useEffect(() => {
     if (open || !present) return
-    const panel = panelRef.current
-    const overlay = overlayRef.current
 
-    if (reducedMotion || !panel) {
+    if (reducedMotion || !panelEl) {
       setPresent(false)
       return
     }
 
     const tl = gsap.timeline({ onComplete: () => setPresent(false) })
-    if (overlay) tl.to(overlay, { opacity: 0, duration: EXIT_DURATION }, 0)
-    tl.to(panel, { opacity: 0, y: -6, scale: 0.985, duration: EXIT_DURATION, ease: 'power2.in' }, 0)
+    if (overlayEl) tl.to(overlayEl, { opacity: 0, duration: EXIT_DURATION }, 0)
+    tl.to(panelEl, { opacity: 0, y: -6, scale: 0.985, duration: EXIT_DURATION, ease: 'power2.in' }, 0)
+
+    // GSAP advances on requestAnimationFrame, which browsers stall in a hidden
+    // or backgrounded tab. Dismissal must not depend on the tween completing, or
+    // the dialog would stay mounted for as long as the tab is away.
+    const fallback = setTimeout(() => setPresent(false), EXIT_DURATION * 1000 + 120)
+
     return () => {
+      clearTimeout(fallback)
       tl.kill()
     }
-  }, [open, present, reducedMotion])
+  }, [open, present, panelEl, overlayEl, reducedMotion])
 
   // ── Command sources ────────────────────────────────────────────────────────
   const localIndex = useLocalIndex()
@@ -185,7 +193,7 @@ export function CommandMenu() {
     >
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay asChild>
-          <div ref={overlayRef} className="fixed inset-0 z-100 bg-black/40 backdrop-blur-[2px]" />
+          <div ref={setOverlayEl} className="fixed inset-0 z-100 bg-black/40 backdrop-blur-[2px]" />
         </DialogPrimitive.Overlay>
         <DialogPrimitive.Content
           aria-label={t('title')}
@@ -194,12 +202,12 @@ export function CommandMenu() {
           onOpenAutoFocus={(event) => {
             // Radix would focus the panel; the input should have it instead.
             event.preventDefault()
-            panelRef.current?.querySelector<HTMLInputElement>('input')?.focus()
+            panelEl?.querySelector<HTMLInputElement>('input')?.focus()
           }}
         >
           <DialogPrimitive.Title className="sr-only">{t('title')}</DialogPrimitive.Title>
           <div
-            ref={panelRef}
+            ref={setPanelEl}
             className="bg-popover overflow-hidden rounded-xl border border-border/50 shadow-2xl"
           >
             <Command

@@ -1001,6 +1001,7 @@
     "groupAppendices": "Pêvek",
     "groupVerses": "Ayet",
     "groupContent": "Di naverokê de",
-    "groupSettings": "Mîheng"
+    "groupSettings": "Mîheng",
+    "verseCount": "{count, plural, other {# ayet}}"
   }
 }

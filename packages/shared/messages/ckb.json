@@ -1650,6 +1650,7 @@
     "groupAppendices": "پاشکۆکان",
     "groupVerses": "ئایەتەکان",
     "groupContent": "لە ناوەڕۆک",
-    "groupSettings": "ڕێکخستنەکان"
+    "groupSettings": "ڕێکخستنەکان",
+    "verseCount": "{count, plural, other {# ئایەت}}"
   }
 }

@@ -1713,6 +1713,7 @@
     "groupAppendices": "Appendices",
     "groupVerses": "Verses",
     "groupContent": "In content",
-    "groupSettings": "Settings"
+    "groupSettings": "Settings",
+    "verseCount": "{count, plural, =1 {# verse} other {# verses}}"
   }
 }

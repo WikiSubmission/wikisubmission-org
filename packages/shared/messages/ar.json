@@ -1661,6 +1661,7 @@
     "groupAppendices": "الملاحق",
     "groupVerses": "الآيات",
     "groupContent": "في المحتوى",
-    "groupSettings": "الإعدادات"
+    "groupSettings": "الإعدادات",
+    "verseCount": "{count, plural, one {آية واحدة} two {آيتان} few {# آيات} other {# آية}}"
   }
 }

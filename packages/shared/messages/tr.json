@@ -1661,6 +1661,7 @@
     "groupAppendices": "Ekler",
     "groupVerses": "Ayetler",
     "groupContent": "İçerikte",
-    "groupSettings": "Ayarlar"
+    "groupSettings": "Ayarlar",
+    "verseCount": "{count, plural, other {# ayet}}"
   }
 }

@@ -1661,6 +1661,7 @@
     "groupAppendices": "Annexes",
     "groupVerses": "Versets",
     "groupContent": "Dans le contenu",
-    "groupSettings": "Paramètres"
+    "groupSettings": "Paramètres",
+    "verseCount": "{count, plural, =1 {# verset} other {# versets}}"
   }
 }

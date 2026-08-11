@@ -1,51 +1,28 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import dynamic from 'next/dynamic'
 import { useHotkey } from '@/hooks/use-hotkey'
 import { useCommandMenu } from '@/components/command-menu/use-command-menu'
+import { CommandMenu } from '@/components/command-menu/command-menu'
 
 /**
- * The always-mounted half of the command menu.
+ * Binds the global command-menu shortcut and mounts the menu.
  *
- * Only the shortcut binding and the store live here; the menu itself (cmdk, the
- * route manifest, the command registries) is a separate chunk that loads on the
- * first Meta/Ctrl press or the first pointer over a trigger, both of which land
- * well before the dialog would animate in. Keeping the hotkey out of that chunk
- * is what makes the split real — a shortcut defined inside a lazily-loaded
- * component cannot be the thing that triggers its own load.
+ * `CommandMenu` renders nothing until it is opened, so mounting it eagerly costs
+ * a subscription and no DOM. It is a static import on purpose: behind
+ * `next/dynamic` with `ssr: false`, React reported a hook-order change inside
+ * `CommandMenu` on every open (accompanied by a null `getSnapshot` from one of
+ * the zustand stores), which left its effects unattached — the open and close
+ * tweens never ran and the dialog could not be dismissed. The chunk is small
+ * enough that correctness is the better trade; revisit with `React.lazy` behind
+ * a Suspense boundary if it ever grows.
  *
- * Once loaded, the chunk is precached by the service worker, so repeat visits
- * open the menu with no network at all.
+ * The shortcut lives out here rather than inside the menu so there is exactly one
+ * owner of Cmd/Ctrl+K, and it keeps working no matter what the menu is rendering.
  */
-const CommandMenu = dynamic(
-  () => import('@/components/command-menu/command-menu').then((m) => m.CommandMenu),
-  { ssr: false },
-)
-
 export function CommandMenuMount() {
-  const open = useCommandMenu((s) => s.open)
   const toggle = useCommandMenu((s) => s.toggle)
-  const [loaded, setLoaded] = useState(false)
 
   useHotkey('k', toggle, { mod: true })
 
-  // Warm the chunk as soon as the user reaches for a modifier key, so the first
-  // ⌘K opens instantly rather than waiting on a fetch.
-  useEffect(() => {
-    if (loaded) return
-    const warm = () => setLoaded(true)
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey) warm()
-    }
-    window.addEventListener('keydown', onKeyDown, { once: true })
-    window.addEventListener('pointerdown', warm, { once: true })
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-      window.removeEventListener('pointerdown', warm)
-    }
-  }, [loaded])
-
-  if (!loaded && !open) return null
   return <CommandMenu />
 }
