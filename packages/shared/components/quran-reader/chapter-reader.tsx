@@ -36,6 +36,7 @@ import {
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import { useScriptureState } from '@/hooks/use-scripture-state'
 import { useQuranPrefsSync } from '@/hooks/use-prefs-sync'
+import { useReaderContext } from '@/hooks/use-reader-context-store'
 import type { ScriptureState } from '@/types/bookmarks'
 
 type VirtualizedVerseListProps = {
@@ -508,6 +509,29 @@ export function ChapterReader({
   const scriptureState = useScriptureState('quran', chapterNumber)
   useQuranPrefsSync()
 
+  // Publish what is on screen for surfaces outside the reader's tree — the
+  // command menu and the header search bar — since neither can be reached by a
+  // prop from here.
+  const publishedVerseRef = useRef<string | null>(null)
+  const onVerseVisible = useCallback((verseKey: string) => {
+    // Fires on every scroll event, so only write when the verse actually
+    // changes; otherwise every tick would notify the store's subscribers.
+    if (publishedVerseRef.current === verseKey) return
+    publishedVerseRef.current = verseKey
+    useReaderContext.getState().setCurrentVerse(verseKey)
+  }, [])
+
+  useEffect(() => {
+    useReaderContext.getState().setChapter(chapterNumber)
+  }, [chapterNumber])
+
+  useEffect(() => {
+    useReaderContext.getState().setLoadedVerses(reader.verses)
+  }, [reader.verses])
+
+  // Context must not outlive the reader that produced it.
+  useEffect(() => () => useReaderContext.getState().clear(), [])
+
   // Read the initial verse from the prop (passed by the Server Component),
   // NOT from useSearchParams(). useSearchParams() subscribes to Next.js router
   // contexts and causes ChapterReader (+ all VerseCards) to re-render on every
@@ -838,6 +862,7 @@ export function ChapterReader({
           isBuffering={isBuffering}
           chapterLabel={tCommon('chapter')}
           scriptureState={scriptureState}
+          onVerseVisible={onVerseVisible}
         />
       )}
 

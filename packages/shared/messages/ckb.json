@@ -1651,6 +1651,21 @@
     "groupVerses": "ئایەتەکان",
     "groupContent": "لە ناوەڕۆک",
     "groupSettings": "ڕێکخستنەکان",
-    "verseCount": "{count, plural, other {# ئایەت}}"
+    "verseCount": "{count, plural, other {# ئایەت}}",
+    "copyAsTable": "لەبەرگرتنەوە وەک خشتە",
+    "copyAsTableHint": "ڕیزێک بۆ هەر ئایەتێک، لە خشتە و دۆکیومێنتدا دادەنرێت",
+    "copyWordTable": "لەبەرگرتنەوەی خشتەی وشەکان",
+    "copyWordTableHint": "ڕیزێک بۆ هەر وشەیەک، لەگەڵ ڕەگ و مانا",
+    "copyByReference": "لەبەرگرتنەوەی ئایەت بە ژمارە…",
+    "copyByReferenceHint": "هێنانی هەر ئایەتێک و لەبەرگرتنەوەی",
+    "openAsVerseList": "کردنەوە وەک لیستی ئایەت",
+    "referencePlaceholder": "ژمارەیەک بنووسە، وەک 2:255 یان 1:1-7، 3:18",
+    "referenceEmpty": "ژمارەی ئایەتێک بنووسە بۆ بەردەوامبوون.",
+    "noVersesFound": "هیچ ئایەتێک بۆ ئەو ژمارەیە نەدۆزرایەوە.",
+    "tooManyVerses": "ئەمە زیاترە لە {max} ئایەت. ژمارەکە کەمتر بکە.",
+    "playFromHere": "لێدان لەم ئایەتەوە",
+    "togglePlayback": "لێدان یان وەستان",
+    "nextVerse": "ئایەتی دواتر",
+    "previousVerse": "ئایەتی پێشوو"
   }
 }

@@ -1662,6 +1662,21 @@
     "groupVerses": "Versets",
     "groupContent": "Dans le contenu",
     "groupSettings": "Paramètres",
-    "verseCount": "{count, plural, =1 {# verset} other {# versets}}"
+    "verseCount": "{count, plural, =1 {# verset} other {# versets}}",
+    "copyAsTable": "Copier comme tableau",
+    "copyAsTableHint": "Une ligne par verset, pour tableurs et documents",
+    "copyWordTable": "Copier le tableau des mots",
+    "copyWordTableHint": "Une ligne par mot, avec racine et signification",
+    "copyByReference": "Copier des versets par référence…",
+    "copyByReferenceHint": "Récupérer n’importe quels versets et les copier",
+    "openAsVerseList": "Ouvrir comme liste de versets",
+    "referencePlaceholder": "Saisir une référence, par ex. 2:255 ou 1:1-7, 3:18",
+    "referenceEmpty": "Saisis une référence de verset pour continuer.",
+    "noVersesFound": "Aucun verset trouvé pour cette référence.",
+    "tooManyVerses": "Cela dépasse {max} versets. Précise la référence.",
+    "playFromHere": "Lire à partir de ce verset",
+    "togglePlayback": "Lire ou mettre en pause",
+    "nextVerse": "Verset suivant",
+    "previousVerse": "Verset précédent"
   }
 }

@@ -1662,6 +1662,21 @@
     "groupVerses": "Verse",
     "groupContent": "In Inhalten",
     "groupSettings": "Einstellungen",
-    "verseCount": "{count, plural, =1 {# Vers} other {# Verse}}"
+    "verseCount": "{count, plural, =1 {# Vers} other {# Verse}}",
+    "copyAsTable": "Als Tabelle kopieren",
+    "copyAsTableHint": "Eine Zeile pro Vers, für Tabellen und Dokumente",
+    "copyWordTable": "Worttabelle kopieren",
+    "copyWordTableHint": "Eine Zeile pro Wort, mit Wortwurzel und Bedeutung",
+    "copyByReference": "Verse nach Referenz kopieren…",
+    "copyByReferenceHint": "Beliebige Verse abrufen und kopieren",
+    "openAsVerseList": "Als Versliste öffnen",
+    "referencePlaceholder": "Referenz eingeben, z. B. 2:255 oder 1:1-7, 3:18",
+    "referenceEmpty": "Gib eine Versreferenz ein, um fortzufahren.",
+    "noVersesFound": "Keine Verse für diese Referenz gefunden.",
+    "tooManyVerses": "Das sind mehr als {max} Verse. Bitte die Referenz eingrenzen.",
+    "playFromHere": "Ab diesem Vers abspielen",
+    "togglePlayback": "Abspielen oder pausieren",
+    "nextVerse": "Nächster Vers",
+    "previousVerse": "Vorheriger Vers"
   }
 }

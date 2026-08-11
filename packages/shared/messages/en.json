@@ -1714,6 +1714,21 @@
     "groupVerses": "Verses",
     "groupContent": "In content",
     "groupSettings": "Settings",
-    "verseCount": "{count, plural, =1 {# verse} other {# verses}}"
+    "verseCount": "{count, plural, =1 {# verse} other {# verses}}",
+    "copyAsTable": "Copy as table",
+    "copyAsTableHint": "One row per verse, pastes into spreadsheets and docs",
+    "copyWordTable": "Copy word table",
+    "copyWordTableHint": "One row per word, with root and meaning",
+    "copyByReference": "Copy verses by reference…",
+    "copyByReferenceHint": "Fetch any verses and copy them",
+    "openAsVerseList": "Open as verse list",
+    "referencePlaceholder": "Type a reference, e.g. 2:255 or 1:1-7, 3:18",
+    "referenceEmpty": "Type a verse reference to continue.",
+    "noVersesFound": "No verses found for that reference.",
+    "tooManyVerses": "That is more than {max} verses. Narrow the reference.",
+    "playFromHere": "Play from this verse",
+    "togglePlayback": "Play or pause",
+    "nextVerse": "Next verse",
+    "previousVerse": "Previous verse"
   }
 }

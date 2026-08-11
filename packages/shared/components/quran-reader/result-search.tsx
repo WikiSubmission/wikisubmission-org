@@ -33,6 +33,7 @@ import {
 import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
+import { useReaderContext } from '@/hooks/use-reader-context-store'
 import { VerseCard } from '@/components/quran-reader/verse-card'
 import { MultiSelectBar } from '@/components/quran-reader/multi-select-bar'
 import { SearchHeader } from './search-header'
@@ -296,6 +297,13 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
   const noteMatches = useMeSearch(searchQuery, 'quran')
   const librarySearch = useLibrarySearch(searchQuery)
+  // Publish the loaded results so the command menu can act on what is on screen,
+  // and Phase 4's local filtering can search it without refetching.
+  useEffect(() => {
+    useReaderContext.getState().setResults({ query: searchQuery, verses: rawVerses })
+    useReaderContext.getState().setLoadedVerses(rawVerses)
+  }, [searchQuery, rawVerses])
+  useEffect(() => () => useReaderContext.getState().clear(), [])
   const allVerses =
     sortMode === 'verse-order'
       ? [...rawVerses].sort((a, b) => {

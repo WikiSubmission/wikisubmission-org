@@ -1662,6 +1662,21 @@
     "groupVerses": "الآيات",
     "groupContent": "في المحتوى",
     "groupSettings": "الإعدادات",
-    "verseCount": "{count, plural, one {آية واحدة} two {آيتان} few {# آيات} other {# آية}}"
+    "verseCount": "{count, plural, one {آية واحدة} two {آيتان} few {# آيات} other {# آية}}",
+    "copyAsTable": "نسخ كجدول",
+    "copyAsTableHint": "سطر لكل آية، يُلصق في الجداول والمستندات",
+    "copyWordTable": "نسخ جدول الكلمات",
+    "copyWordTableHint": "سطر لكل كلمة، مع الجذر والمعنى",
+    "copyByReference": "نسخ آيات بالمرجع…",
+    "copyByReferenceHint": "إحضار أي آيات ونسخها",
+    "openAsVerseList": "فتح كقائمة آيات",
+    "referencePlaceholder": "اكتب مرجعًا، مثل ٢:٢٥٥ أو 1:1-7، 3:18",
+    "referenceEmpty": "اكتب مرجع آية للمتابعة.",
+    "noVersesFound": "لم يتم العثور على آيات لهذا المرجع.",
+    "tooManyVerses": "هذا أكثر من {max} آية. حدِّد المرجع بدقة أكبر.",
+    "playFromHere": "التشغيل من هذه الآية",
+    "togglePlayback": "تشغيل أو إيقاف",
+    "nextVerse": "الآية التالية",
+    "previousVerse": "الآية السابقة"
   }
 }

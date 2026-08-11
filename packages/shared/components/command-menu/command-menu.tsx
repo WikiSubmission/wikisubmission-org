@@ -21,6 +21,8 @@ import { useCommandMenu } from './use-command-menu'
 import { useLocalIndex } from './use-local-index'
 import { usePreferenceCommands } from './registry/preferences'
 import { useLanguageCommands } from './registry/languages'
+import { useVerseCommands } from './registry/verses'
+import { useCopyByReferenceCommands } from './registry/copy-by-reference'
 import { COMMAND_GROUP_ORDER, type Command as MenuCommand, type CommandGroupId } from './types'
 
 /** Per-group caps so one large group cannot crowd out the others. */
@@ -140,24 +142,32 @@ export function CommandMenu() {
   const localIndex = useLocalIndex()
   const preferenceCommands = usePreferenceCommands()
   const languageCommands = useLanguageCommands()
+  const verseCommands = useVerseCommands()
+  const copyByReferenceCommands = useCopyByReferenceCommands(page === 'copy-verses' ? query : '')
 
   const commands = useMemo<MenuCommand[]>(() => {
     if (page === 'language') return languageCommands
+    if (page === 'copy-verses') return copyByReferenceCommands
     if (page) return []
-    return [...localIndex, ...preferenceCommands]
-  }, [page, localIndex, preferenceCommands, languageCommands])
+    return [...verseCommands, ...localIndex, ...preferenceCommands]
+  }, [page, localIndex, preferenceCommands, languageCommands, verseCommands, copyByReferenceCommands])
 
   /** Filtered and ranked per group, so group order stays editorial rather than score-driven. */
   const grouped = useMemo(() => {
+    // On the copy-by-reference page the query is the reference itself, not a
+    // search term — the rows are already derived from it, so ranking them
+    // against it would only filter them back out.
+    const rankQuery = page === 'copy-verses' ? '' : query
+
     const byGroup = new Map<CommandGroupId, MenuCommand[]>()
     for (const group of COMMAND_GROUP_ORDER) {
       const inGroup = commands.filter((c) => c.group === group)
       if (inGroup.length === 0) continue
-      const ranked = rankTargets(inGroup, query, GROUP_LIMIT[group])
+      const ranked = rankTargets(inGroup, rankQuery, GROUP_LIMIT[group])
       if (ranked.length > 0) byGroup.set(group, ranked)
     }
     return byGroup
-  }, [commands, query])
+  }, [commands, query, page])
 
   const hasResults = grouped.size > 0
 
@@ -239,14 +249,18 @@ export function CommandMenu() {
                   <CommandInput
                     value={query}
                     onValueChange={setQuery}
-                    placeholder={t('placeholder')}
+                    placeholder={page === 'copy-verses' ? t('referencePlaceholder') : t('placeholder')}
                     className="border-0"
                   />
                 </div>
               </div>
 
               <CommandList>
-                {!hasResults && <CommandEmpty>{t('empty')}</CommandEmpty>}
+                {!hasResults && (
+                  <CommandEmpty>
+                    {page === 'copy-verses' ? t('referenceEmpty') : t('empty')}
+                  </CommandEmpty>
+                )}
 
                 {[...grouped.entries()].map(([group, items]) => (
                   <CommandGroup key={group} heading={<GroupHeading group={group} />}>

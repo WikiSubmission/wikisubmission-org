@@ -20,9 +20,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
-import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { buildMultiVerseMarkdown } from '@/lib/quran-copy'
 import { canCopyImage, copyVersesImage } from '@/lib/quran-copy-image'
+import { useCopyPrefs } from '@/lib/quran-copy-prefs'
 
 type CopyKind = 'full-text' | 'wbw-text' | 'full-image' | 'wbw-image'
 
@@ -32,7 +32,7 @@ export function MultiSelectBar() {
   const count = useVerseSelection((s) => s.selected.size)
   const clear = useVerseSelection((s) => s.clear)
   const ordered = useVerseSelection((s) => s.ordered)
-  const prefs = useQuranPreferences()
+  const { markdown: copyPrefs, image: imagePrefs } = useCopyPrefs()
   const [imageSupported, setImageSupported] = useState(false)
   const [pendingKind, setPendingKind] = useState<CopyKind | null>(null)
   const isPending = pendingKind !== null
@@ -60,26 +60,6 @@ export function MultiSelectBar() {
       const verses = ordered()
       if (verses.length === 0) return
       setPendingKind(kind)
-      const primaryCode =
-        prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
-          ? prefs.primaryLanguage
-          : 'en'
-      const includeText = prefs.text && prefs.primaryLanguage !== 'none'
-      const secondaryCode =
-        prefs.secondaryLanguage &&
-        prefs.secondaryLanguage !== 'xl' &&
-        prefs.secondaryLanguage !== 'none'
-          ? prefs.secondaryLanguage
-          : undefined
-      const copyPrefs = {
-        primaryCode,
-        secondaryCode,
-        includeText,
-        includeArabic: prefs.arabic,
-        includeSubtitles: prefs.subtitles,
-        includeTransliteration: prefs.transliteration,
-        includeFootnotes: prefs.footnotes,
-      }
       let copied = false
       try {
         if (kind === 'full-text') {
@@ -95,11 +75,11 @@ export function MultiSelectBar() {
           toast.success(t('done_text'))
           copied = true
         } else if (kind === 'full-image') {
-          await copyVersesImage(verses, 'full', { prefs: copyPrefs })
+          await copyVersesImage(verses, 'full', imagePrefs)
           toast.success(t('done_image'))
           copied = true
         } else if (kind === 'wbw-image') {
-          await copyVersesImage(verses, 'wbw', { prefs: copyPrefs })
+          await copyVersesImage(verses, 'wbw', imagePrefs)
           toast.success(t('done_image'))
           copied = true
         }
@@ -112,7 +92,7 @@ export function MultiSelectBar() {
       }
       if (copied) clear()
     },
-    [ordered, prefs, clear, t, pendingKind]
+    [ordered, copyPrefs, imagePrefs, clear, t, pendingKind]
   )
 
   if (!active) return null

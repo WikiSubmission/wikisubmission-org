@@ -19,9 +19,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import { buildMultiVerseMarkdown, type CopyMarkdownOptions } from '@/lib/quran-copy'
+import { buildMultiVerseMarkdown } from '@/lib/quran-copy'
 import { canCopyImage, copyVersesImage } from '@/lib/quran-copy-image'
+import { useCopyPrefs } from '@/lib/quran-copy-prefs'
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']
@@ -35,37 +35,13 @@ interface CopyAllDropdownProps {
   className?: string
 }
 
-function useCopyPrefs(): CopyMarkdownOptions {
-  const prefs = useQuranPreferences()
-  const primaryCode =
-    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
-      ? prefs.primaryLanguage
-      : 'en'
-  const secondaryCode =
-    prefs.secondaryLanguage &&
-    prefs.secondaryLanguage !== 'xl' &&
-    prefs.secondaryLanguage !== 'none'
-      ? prefs.secondaryLanguage
-      : undefined
-  return {
-    primaryCode,
-    secondaryCode,
-    includeText: prefs.text && prefs.primaryLanguage !== 'none',
-    includeArabic: prefs.arabic,
-    includeSubtitles: prefs.subtitles,
-    includeTransliteration: prefs.transliteration,
-    includeFootnotes: prefs.footnotes,
-  }
-}
-
 export function CopyAllDropdown({
   verses,
   label,
   className = '',
 }: CopyAllDropdownProps) {
   const t = useTranslations('quran.copy')
-  const copyPrefs = useCopyPrefs()
-  const prefs = useQuranPreferences()
+  const { markdown: copyPrefs, image: imagePrefs } = useCopyPrefs()
 
   const [pendingKind, setPendingKind] = useState<CopyKind | null>(null)
   const [copiedText, setCopiedText] = useState(false)
@@ -91,20 +67,18 @@ export function CopyAllDropdown({
           setCopiedText(true)
           setTimeout(() => setCopiedText(false), 1500)
         } else if (kind === 'wbw-text') {
-          const text = buildMultiVerseMarkdown(
-            verses,
-            prefs.wordByWord ? 'wbw' : 'wbw',
-            copyPrefs
-          )
+          // Always word-by-word: this is the word-by-word menu item, regardless
+          // of whether the reader currently displays that mode.
+          const text = buildMultiVerseMarkdown(verses, 'wbw', copyPrefs)
           await navigator.clipboard.writeText(text)
           toast.success(t('done_text'))
           setCopiedText(true)
           setTimeout(() => setCopiedText(false), 1500)
         } else if (kind === 'full-image') {
-          await copyVersesImage(verses, 'full', { prefs: copyPrefs })
+          await copyVersesImage(verses, 'full', imagePrefs)
           toast.success(t('done_image'))
         } else if (kind === 'wbw-image') {
-          await copyVersesImage(verses, 'wbw', { prefs: copyPrefs })
+          await copyVersesImage(verses, 'wbw', imagePrefs)
           toast.success(t('done_image'))
         }
       } catch {
@@ -113,7 +87,7 @@ export function CopyAllDropdown({
         setPendingKind(null)
       }
     },
-    [isPending, verses, copyPrefs, prefs.wordByWord, t]
+    [isPending, verses, copyPrefs, imagePrefs, t]
   )
 
   const buttonBase =

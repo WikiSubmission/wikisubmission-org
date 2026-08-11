@@ -1002,6 +1002,21 @@
     "groupVerses": "Ayet",
     "groupContent": "Di naverokê de",
     "groupSettings": "Mîheng",
-    "verseCount": "{count, plural, other {# ayet}}"
+    "verseCount": "{count, plural, other {# ayet}}",
+    "copyAsTable": "Wek tabloyê kopî bike",
+    "copyAsTableHint": "Ji bo her ayetê rêzek, ji bo tablo û belgeyan",
+    "copyWordTable": "Tabloya peyvan kopî bike",
+    "copyWordTableHint": "Ji bo her peyvê rêzek, bi reh û wateyê",
+    "copyByReference": "Ayetan bi jimarê kopî bike…",
+    "copyByReferenceHint": "Her ayetê bîne û kopî bike",
+    "openAsVerseList": "Wek lîsteya ayetan veke",
+    "referencePlaceholder": "Jimarek binivîse, wek 2:255 an 1:1-7, 3:18",
+    "referenceEmpty": "Ji bo berdewamkirinê jimara ayetê binivîse.",
+    "noVersesFound": "Ji bo wê jimarê ayet nehat dîtin.",
+    "tooManyVerses": "Ev ji {max} ayetan zêdetir e. Jimarê tengtir bike.",
+    "playFromHere": "Ji vê ayetê lêde",
+    "togglePlayback": "Lêde an rawestîne",
+    "nextVerse": "Ayeta pêş",
+    "previousVerse": "Ayeta berê"
   }
 }
