@@ -1,11 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { createElement, useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import gsap from 'gsap'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, FileSearch } from 'lucide-react'
 import {
   Command,
   CommandEmpty,
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/command'
 import { rankTargets, splitHighlight } from '@/lib/command-match'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
+import { useSiteSearch, siteHitHref } from '@/hooks/use-site-search'
 import { useCommandMenu } from './use-command-menu'
 import { useLocalIndex } from './use-local-index'
 import { usePreferenceCommands } from './registry/preferences'
@@ -145,12 +146,51 @@ export function CommandMenu() {
   const verseCommands = useVerseCommands()
   const copyByReferenceCommands = useCopyByReferenceCommands(page === 'copy-verses' ? query : '')
 
+  // The site catalogue's backend tier. Only queried on the root page, and only
+  // once the query is worth a request; the instant tier above covers the wait.
+  const locale = useLocale()
+  const localRoutes = useMemo(
+    () =>
+      new Set(
+        localIndex
+          .filter((command) => command.navigate)
+          .map((command) => command.navigate as string),
+      ),
+    [localIndex],
+  )
+  const siteSearch = useSiteSearch(page ? '' : query, locale, localRoutes)
+
+  const contentCommands = useMemo<MenuCommand[]>(
+    () =>
+      siteSearch.results.map((hit) => ({
+        id: `site:${hit.id}`,
+        group: 'content' as const,
+        label: hit.heading ? `${hit.title} — ${hit.heading}` : hit.title,
+        description: hit.snippet ? undefined : hit.description,
+        snippet: hit.snippet,
+        icon: createElement(FileSearch),
+        navigate: siteHitHref(hit),
+        // Already ranked by the backend, so ordering must not be re-derived from
+        // the text here; a flat priority keeps the server's order intact.
+        priority: 50,
+      })),
+    [siteSearch.results],
+  )
+
   const commands = useMemo<MenuCommand[]>(() => {
     if (page === 'language') return languageCommands
     if (page === 'copy-verses') return copyByReferenceCommands
     if (page) return []
-    return [...verseCommands, ...localIndex, ...preferenceCommands]
-  }, [page, localIndex, preferenceCommands, languageCommands, verseCommands, copyByReferenceCommands])
+    return [...verseCommands, ...localIndex, ...preferenceCommands, ...contentCommands]
+  }, [
+    page,
+    localIndex,
+    preferenceCommands,
+    languageCommands,
+    verseCommands,
+    copyByReferenceCommands,
+    contentCommands,
+  ])
 
   /** Filtered and ranked per group, so group order stays editorial rather than score-driven. */
   const grouped = useMemo(() => {
@@ -163,7 +203,15 @@ export function CommandMenu() {
     for (const group of COMMAND_GROUP_ORDER) {
       const inGroup = commands.filter((c) => c.group === group)
       if (inGroup.length === 0) continue
-      const ranked = rankTargets(inGroup, rankQuery, GROUP_LIMIT[group])
+
+      // Backend results arrive already ranked, and their match is often in the
+      // body rather than the title — re-ranking them against the query here
+      // would reorder them and drop the body matches entirely.
+      const ranked =
+        group === 'content'
+          ? inGroup.slice(0, GROUP_LIMIT[group])
+          : rankTargets(inGroup, rankQuery, GROUP_LIMIT[group])
+
       if (ranked.length > 0) byGroup.set(group, ranked)
     }
     return byGroup
@@ -297,6 +345,11 @@ export function CommandMenu() {
                 <span>↑↓</span>
                 <span>⏎</span>
                 {page && <span>⌫</span>}
+                {/* Says so when the content tier is unreachable, rather than
+                    letting its absence read as "no matches". */}
+                {siteSearch.offline && (
+                  <span className="font-sans normal-case">{t('contentOffline')}</span>
+                )}
                 <span className="ml-auto">esc</span>
               </div>
             </Command>

@@ -851,6 +851,89 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+  # --- SITE API ---
+
+  /site/search:
+    get:
+      tags: [Site]
+      operationId: searchSite
+      summary: Full-text search across the site's pages
+      description: >
+        Full-text search over the site's own pages — landing, practices, legal,
+        blog, and the chapter and appendix landing pages — in the reader's UI
+        locale, plus the bodies of the library documents. Each result carries the
+        route and an optional anchor to navigate to, and a highlighted snippet.
+
+
+        The search language is detected from the query's script, independently of
+        the language the results are displayed in; `lang` restricts it explicitly.
+        Because the site has no locale path segment, one route has one URL across
+        every locale, so results are deduplicated by route and anchor.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: >
+            Search query (2–200 characters). Matched against page titles,
+            headings, descriptions and body text using PostgreSQL full-text
+            search, with a trigram fallback for typos. Supports quoted phrases.
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 200
+          example: "zakat"
+        - name: lang
+          in: query
+          required: false
+          description: >
+            UI locale code to search in (`en`, `ar`, `ckb`, `de`, `fr`, `kmr`,
+            `tr`). Omit to let the query's script decide, falling back to every
+            indexed locale.
+          schema:
+            type: string
+          example: "en"
+        - name: kind
+          in: query
+          required: false
+          explode: true
+          description: Restrict results to these kinds. Omit for all.
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [page, section, chapter, appendix, article, practice, legal]
+          example: ["page", "section"]
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results to return (1–50). Defaults to 10.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+          example: 10
+        - name: offset
+          in: query
+          required: false
+          description: Number of results to skip before returning the page.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          example: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteSearchResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
   # --- MUSIC API ---
 
   /music/artists:
@@ -984,10 +1067,10 @@ paths:
       operationId: getCommunities
       summary: List communities (online and physical)
       description: >
-        Returns active community entries authored in Sanity (online communities
-        on platforms like Discord/Telegram, plus physical meet-up locations).
-        Backed by the Sanity content lake; results are cached server-side and
-        invalidated by webhook on document changes.
+        Returns active community entries (online communities on platforms like
+        Discord/Telegram, plus physical meet-up locations). Backed by the
+        first-party editorial store that replaced the Sanity content lake: only
+        published snapshots are returned, and they are edited in /editor.
       parameters:
         - name: kind
           in: query
@@ -4226,6 +4309,84 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LibrarySearchResult'
+
+    SiteSearchResult:
+      type: object
+      description: >
+        One matching page or page section. Keys are readable rather than
+        minified: a page of ten menu rows does not justify the Quran payload's
+        legend.
+      required: [route, lang, kind, title, snippet]
+      properties:
+        route:
+          type: string
+          description: Site-relative path, with no origin and no locale segment.
+          example: "/practices/zakat"
+        anchor:
+          type: string
+          nullable: true
+          description: >
+            Fragment identifying the matching section, or null when the hit is
+            the page itself.
+          example: "#calculating-zakat"
+        lang:
+          type: string
+          description: UI locale this row was indexed for.
+          example: "en"
+        kind:
+          type: string
+          enum: [page, section, chapter, appendix, article, practice, legal]
+          example: "practice"
+        title:
+          type: string
+          description: Page title, repeated on every section row of that page.
+          example: "Zakat"
+        heading:
+          type: string
+          nullable: true
+          description: Section heading, or null on a page row.
+        description:
+          type: string
+          nullable: true
+          description: One-line page summary, when the page has one.
+        snippet:
+          type: string
+          description: >
+            Matching extract with matches wrapped in `<b>` tags, from
+            `ts_headline`. Empty when the row has no body text.
+          example: "the <b>zakat</b> due on gold and silver"
+        rank:
+          type: number
+          format: float
+          description: Relevance score. Higher is more relevant.
+
+    SiteSearchResponse:
+      type: object
+      description: >
+        Envelope for `/site/search` results. There is deliberately no `total`:
+        counting doubles the query cost for a number the command menu never
+        renders.
+      required: [q, limit, offset, results]
+      properties:
+        q:
+          type: string
+          description: The query as executed.
+        limit:
+          type: integer
+        offset:
+          type: integer
+        langs:
+          type: array
+          description: >
+            The locales actually searched, after script detection. Empty means
+            every indexed locale.
+          items:
+            type: string
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SiteSearchResult'
+
     BibleResponse:
       type: object
       description: >
@@ -4605,8 +4766,10 @@ components:
       properties:
         _id:
           type: string
-          description: Sanity document ID.
-          example: drafts.community-foo
+          description: >
+            Editorial content row id, as a string. Previously a Sanity document
+            id, so the type is kept for backwards compatibility.
+          example: '12'
         kind:
           type: string
           enum: [online, physical]
@@ -4625,10 +4788,8 @@ components:
           type: string
         imageUrl:
           type: string
-          description: >
-            Proxied image URL routed through `/sanity/image/...`. Preserves
-            Sanity's image transform query string when present.
-          example: /sanity/image/abc123-1024x768.jpg
+          description: Absolute image URL on the WikiSubmission CDN.
+          example: https://cdn.wikisubmission.org/editorial/images/abc123.jpg
         tags:
           type: array
           items:

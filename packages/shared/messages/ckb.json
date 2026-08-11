@@ -1672,6 +1672,7 @@
     "playFromHere": "لێدان لەم ئایەتەوە",
     "togglePlayback": "لێدان یان وەستان",
     "nextVerse": "ئایەتی دواتر",
-    "previousVerse": "ئایەتی پێشوو"
+    "previousVerse": "ئایەتی پێشوو",
+    "contentOffline": "گەڕانی ناوەڕۆک بەردەست نییە"
   }
 }

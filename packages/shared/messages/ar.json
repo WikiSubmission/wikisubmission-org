@@ -1683,6 +1683,7 @@
     "playFromHere": "التشغيل من هذه الآية",
     "togglePlayback": "تشغيل أو إيقاف",
     "nextVerse": "الآية التالية",
-    "previousVerse": "الآية السابقة"
+    "previousVerse": "الآية السابقة",
+    "contentOffline": "بحث المحتوى غير متوفر"
   }
 }

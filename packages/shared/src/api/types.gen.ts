@@ -253,6 +253,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/site/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Full-text search across the site's pages
+         * @description Full-text search over the site's own pages — landing, practices, legal, blog, and the chapter and appendix landing pages — in the reader's UI locale, plus the bodies of the library documents. Each result carries the route and an optional anchor to navigate to, and a highlighted snippet.
+         *
+         *     The search language is detected from the query's script, independently of the language the results are displayed in; `lang` restricts it explicitly. Because the site has no locale path segment, one route has one URL across every locale, so results are deduplicated by route and anchor.
+         */
+        get: operations["searchSite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/music/artists": {
         parameters: {
             query?: never;
@@ -342,7 +364,7 @@ export interface paths {
         };
         /**
          * List communities (online and physical)
-         * @description Returns active community entries authored in Sanity (online communities on platforms like Discord/Telegram, plus physical meet-up locations). Backed by the Sanity content lake; results are cached server-side and invalidated by webhook on document changes.
+         * @description Returns active community entries (online communities on platforms like Discord/Telegram, plus physical meet-up locations). Backed by the first-party editorial store that replaced the Sanity content lake: only published snapshots are returned, and they are edited in /editor.
          */
         get: operations["getCommunities"];
         put?: never;
@@ -2029,6 +2051,58 @@ export interface components {
             offset: number;
             results: components["schemas"]["LibrarySearchResult"][];
         };
+        /** @description One matching page or page section. Keys are readable rather than minified: a page of ten menu rows does not justify the Quran payload's legend. */
+        SiteSearchResult: {
+            /**
+             * @description Site-relative path, with no origin and no locale segment.
+             * @example /practices/zakat
+             */
+            route: string;
+            /**
+             * @description Fragment identifying the matching section, or null when the hit is the page itself.
+             * @example #calculating-zakat
+             */
+            anchor?: string | null;
+            /**
+             * @description UI locale this row was indexed for.
+             * @example en
+             */
+            lang: string;
+            /**
+             * @example practice
+             * @enum {string}
+             */
+            kind: "page" | "section" | "chapter" | "appendix" | "article" | "practice" | "legal";
+            /**
+             * @description Page title, repeated on every section row of that page.
+             * @example Zakat
+             */
+            title: string;
+            /** @description Section heading, or null on a page row. */
+            heading?: string | null;
+            /** @description One-line page summary, when the page has one. */
+            description?: string | null;
+            /**
+             * @description Matching extract with matches wrapped in `<b>` tags, from `ts_headline`. Empty when the row has no body text.
+             * @example the <b>zakat</b> due on gold and silver
+             */
+            snippet: string;
+            /**
+             * Format: float
+             * @description Relevance score. Higher is more relevant.
+             */
+            rank?: number;
+        };
+        /** @description Envelope for `/site/search` results. There is deliberately no `total`: counting doubles the query cost for a number the command menu never renders. */
+        SiteSearchResponse: {
+            /** @description The query as executed. */
+            q: string;
+            limit: number;
+            offset: number;
+            /** @description The locales actually searched, after script detection. Empty means every indexed locale. */
+            langs?: string[];
+            results: components["schemas"]["SiteSearchResult"][];
+        };
         /** @description Top-level envelope for both `/bible` (reader) and `/bible/search` (FTS) responses. The `info` object describes the resolved query; `books` contains the matching verses grouped by book and chapter. */
         BibleResponse: {
             info?: components["schemas"]["BibleResponseInfo"];
@@ -2355,8 +2429,8 @@ export interface components {
         /** @description A community entry sourced from Sanity. The `kind` discriminator determines which optional fields are populated: `online` communities carry `platform`/`url`/`inviteCode`/`memberCount`; `physical` communities carry `address`/`city`/`country`/`geo`/`contactEmail`/ `contactPhone`/`meetingSchedule`. The `imageUrl`, when present, points at the ws-backend image proxy and not directly at Sanity's CDN. */
         Community: {
             /**
-             * @description Sanity document ID.
-             * @example drafts.community-foo
+             * @description Editorial content row id, as a string. Previously a Sanity document id, so the type is kept for backwards compatibility.
+             * @example 12
              */
             _id: string;
             /**
@@ -2375,8 +2449,8 @@ export interface components {
             language?: string;
             description?: string;
             /**
-             * @description Proxied image URL routed through `/sanity/image/...`. Preserves Sanity's image transform query string when present.
-             * @example /sanity/image/abc123-1024x768.jpg
+             * @description Absolute image URL on the WikiSubmission CDN.
+             * @example https://cdn.wikisubmission.org/editorial/images/abc123.jpg
              */
             imageUrl?: string;
             tags?: string[];
@@ -4177,6 +4251,57 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LibrarySearchResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    searchSite: {
+        parameters: {
+            query: {
+                /**
+                 * @description Search query (2–200 characters). Matched against page titles, headings, descriptions and body text using PostgreSQL full-text search, with a trigram fallback for typos. Supports quoted phrases.
+                 * @example zakat
+                 */
+                q: string;
+                /**
+                 * @description UI locale code to search in (`en`, `ar`, `ckb`, `de`, `fr`, `kmr`, `tr`). Omit to let the query's script decide, falling back to every indexed locale.
+                 * @example en
+                 */
+                lang?: string;
+                /**
+                 * @description Restrict results to these kinds. Omit for all.
+                 * @example [
+                 *       "page",
+                 *       "section"
+                 *     ]
+                 */
+                kind?: ("page" | "section" | "chapter" | "appendix" | "article" | "practice" | "legal")[];
+                /**
+                 * @description Maximum number of results to return (1–50). Defaults to 10.
+                 * @example 10
+                 */
+                limit?: number;
+                /**
+                 * @description Number of results to skip before returning the page.
+                 * @example 0
+                 */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteSearchResponse"];
                 };
             };
             400: components["responses"]["BadRequest"];

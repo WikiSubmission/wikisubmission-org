@@ -1683,6 +1683,7 @@
     "playFromHere": "Lire à partir de ce verset",
     "togglePlayback": "Lire ou mettre en pause",
     "nextVerse": "Verset suivant",
-    "previousVerse": "Verset précédent"
+    "previousVerse": "Verset précédent",
+    "contentOffline": "recherche de contenu indisponible"
   }
 }

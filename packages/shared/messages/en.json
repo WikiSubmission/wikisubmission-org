@@ -1735,6 +1735,7 @@
     "playFromHere": "Play from this verse",
     "togglePlayback": "Play or pause",
     "nextVerse": "Next verse",
-    "previousVerse": "Previous verse"
+    "previousVerse": "Previous verse",
+    "contentOffline": "content search unavailable"
   }
 }
