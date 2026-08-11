@@ -117,7 +117,13 @@
       "quran": "قورئان",
       "media": "میدیا",
       "newsletters": "نامە"
-    }
+    },
+    "localResults": "لە بارکراوەکان",
+    "searchEverything": "گەڕان بەدوای «{query}» لە هەموو ئایەتەکان",
+    "sourceThisChapter": "ئەم سوورەتە",
+    "sourceOffline": "کۆپی ناوخۆیی",
+    "sourceResults": "ئەم ئەنجامەکان",
+    "filteredLocally": "بە ناوخۆیی پاڵاوترا: {shown} لە {loaded} بارکراو. Enter دابگرە بۆ گەڕان لە هەمووی."
   },
   "settings": {
     "title": "ڕێکخستنەکان",

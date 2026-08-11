@@ -17,6 +17,10 @@ import {
 } from '@/lib/scripture-parser'
 import { useMeSearch } from '@/hooks/use-me-search'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
+import { useLocalVerseSearch } from '@/hooks/use-local-verse-search'
+import { useReaderContext } from '@/hooks/use-reader-context-store'
+import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { splitHighlight } from '@/lib/command-match'
 
 export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const t = useTranslations('search')
@@ -45,6 +49,9 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
 
   const performSearch = useCallback(
     (q: string) => {
+      // The draft has been promoted to a real query, so the results view should
+      // stop filtering and show what the backend returns.
+      useReaderContext.getState().setDraftQuery('')
       if (!q) {
         replace(`${pathname}`)
         return
@@ -112,8 +119,31 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const noteQuery = showDropdown && debouncedQuery.trim().length >= 2 ? debouncedQuery : ''
   const noteResults = useMeSearch(noteQuery, 'quran').slice(0, 4)
 
+  // Verse hits from whatever is already local: installed offline bundles, the
+  // hydrated chapter, or the loaded search results. No network on this path — the
+  // backend is only reached on submit.
+  const primaryLanguage = useQuranPreferences((s) => s.primaryLanguage)
+  const primaryCode =
+    primaryLanguage === 'xl' || primaryLanguage === 'none' ? 'en' : primaryLanguage
+  const localSearch = useLocalVerseSearch(showDropdown ? query : '', {
+    primaryLang: primaryCode,
+    limit: 5,
+  })
+  const localVerses = localSearch.data?.chapters?.flatMap((chapter) => chapter.verses ?? []) ?? []
+  const localSourceLabel =
+    localSearch.source === 'bundle'
+      ? t('sourceOffline')
+      : localSearch.source === 'results'
+        ? t('sourceResults')
+        : t('sourceThisChapter')
+
+  const canSubmit = query.trim().length > 0
   const hasSuggestions =
-    matchedChapters.length > 0 || matchedAppendices.length > 0 || noteResults.length > 0
+    matchedChapters.length > 0 ||
+    matchedAppendices.length > 0 ||
+    noteResults.length > 0 ||
+    localVerses.length > 0 ||
+    canSubmit
 
   return (
     <div
@@ -145,7 +175,11 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
             large ? 'pl-11 h-12 text-base rounded-xl' : 'pl-8 h-8 text-sm'
           )}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value)
+            // Lets the results view narrow what is already on screen as you type.
+            useReaderContext.getState().setDraftQuery(e.target.value)
+          }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           onKeyDown={(e) => {
@@ -237,6 +271,75 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
               </button>
             )
           })}
+
+          {localVerses.length > 0 && (
+            <>
+              {(matchedChapters.length > 0 ||
+                matchedAppendices.length > 0 ||
+                noteResults.length > 0) && <div className="border-t border-border/20" />}
+              <div className="flex items-center justify-between px-3 pt-2 pb-1">
+                <span className="text-[11px] uppercase tracking-wide text-muted-foreground/60">
+                  {t('localResults')}
+                </span>
+                <span className="text-[11px] text-muted-foreground/50">{localSourceLabel}</span>
+              </div>
+            </>
+          )}
+
+          {localVerses.map((verse) => {
+            const [chapter, verseNumber] = (verse.vk ?? '').split(':')
+            const translation = (verse.tr ?? {})[primaryCode] ?? (verse.tr ?? {})['en']
+            const snippet = translation?.hl ?? translation?.tx ?? ''
+            return (
+              <button
+                type="button"
+                key={`local-${verse.vk}`}
+                onMouseDown={() => {
+                  setOpen(false)
+                  router.push(`/quran/${chapter}?verse=${verseNumber}`)
+                }}
+                className="flex items-start gap-2 w-full px-3 py-2 text-sm hover:bg-primary/5 text-left"
+              >
+                <span className="font-mono text-xs text-muted-foreground shrink-0 pt-0.5">
+                  {verse.vk}
+                </span>
+                <span className="flex-1 min-w-0 text-xs text-muted-foreground line-clamp-2">
+                  {/* Renders the <b> runs the search emits as marks, never as raw HTML. */}
+                  {splitHighlight(snippet).map((run, i) =>
+                    run.match ? (
+                      <mark key={i} className="bg-transparent font-medium text-primary">
+                        {run.text}
+                      </mark>
+                    ) : (
+                      <span key={i}>{run.text}</span>
+                    )
+                  )}
+                </span>
+              </button>
+            )
+          })}
+
+          {canSubmit && (
+            <>
+              <div className="border-t border-border/20" />
+              <button
+                type="button"
+                onMouseDown={() => {
+                  setOpen(false)
+                  performSearch(query)
+                }}
+                className="flex items-center gap-2 w-full px-3 py-2.5 text-sm hover:bg-muted/60 text-left"
+              >
+                <SearchIcon className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
+                <span className="truncate">
+                  {t('searchEverything', { query: query.trim() })}
+                </span>
+                <span className="ml-auto shrink-0 font-mono text-[11px] text-muted-foreground/50">
+                  ⏎
+                </span>
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

@@ -117,7 +117,13 @@
       "quran": "Kuran",
       "media": "Medya",
       "newsletters": "Bültenler"
-    }
+    },
+    "localResults": "Yüklenenler içinde",
+    "searchEverything": "Tüm ayetlerde “{query}” ara",
+    "sourceThisChapter": "bu sure",
+    "sourceOffline": "çevrimdışı kopya",
+    "sourceResults": "bu sonuçlar",
+    "filteredLocally": "Yerel olarak süzüldü: {loaded} yüklenenden {shown} tanesi. Tümünü aramak için Enter."
   },
   "settings": {
     "title": "Ayarlar",

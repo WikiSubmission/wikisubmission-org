@@ -37,6 +37,7 @@ import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import { useScriptureState } from '@/hooks/use-scripture-state'
 import { useQuranPrefsSync } from '@/hooks/use-prefs-sync'
 import { useReaderContext } from '@/hooks/use-reader-context-store'
+import { useChapterHydration } from '@/hooks/use-chapter-hydration'
 import type { ScriptureState } from '@/types/bookmarks'
 
 type VirtualizedVerseListProps = {
@@ -582,6 +583,12 @@ export function ChapterReader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [prefs.primaryLanguage, prefs.secondaryLanguage, prefs.arabic, prefs.wordByWord, displayMode]
   )
+
+  // Pull the rest of the chapter into memory once the first window is on screen,
+  // so typing in the search bar can filter the whole chapter, and load-more and
+  // minimap seeks resolve without the network. Skipped in range mode, where the
+  // SSR payload is already the complete set.
+  useChapterHydration(chapterNumber, opts, !isRangeMode && reader.verses.length > 0)
 
   // Keep the audio player queue in sync with loaded verses.
   const audioQueue = useMemo(

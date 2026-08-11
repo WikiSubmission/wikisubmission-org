@@ -117,7 +117,13 @@
       "quran": "Coran",
       "media": "Médias",
       "newsletters": "Bulletins"
-    }
+    },
+    "localResults": "Dans ce qui est chargé",
+    "searchEverything": "Rechercher « {query} » dans tous les versets",
+    "sourceThisChapter": "ce chapitre",
+    "sourceOffline": "copie hors ligne",
+    "sourceResults": "ces résultats",
+    "filteredLocally": "Filtré localement : {shown} sur {loaded} chargés. Appuie sur Entrée pour tout rechercher."
   },
   "settings": {
     "title": "Paramètres",

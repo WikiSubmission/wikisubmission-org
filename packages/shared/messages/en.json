@@ -117,7 +117,13 @@
       "quran": "Quran",
       "media": "Media",
       "newsletters": "Newsletters"
-    }
+    },
+    "localResults": "In what is loaded",
+    "searchEverything": "Search all verses for “{query}”",
+    "sourceThisChapter": "this chapter",
+    "sourceOffline": "offline copy",
+    "sourceResults": "these results",
+    "filteredLocally": "Filtered locally: {shown} of {loaded} loaded. Press Enter to search everything."
   },
   "settings": {
     "title": "Settings",

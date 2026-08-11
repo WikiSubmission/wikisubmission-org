@@ -117,7 +117,13 @@
       "quran": "القرآن",
       "media": "وسائط",
       "newsletters": "النشرات"
-    }
+    },
+    "localResults": "في المُحمَّل",
+    "searchEverything": "ابحث في كل الآيات عن ”{query}“",
+    "sourceThisChapter": "هذه السورة",
+    "sourceOffline": "النسخة المحلية",
+    "sourceResults": "هذه النتائج",
+    "filteredLocally": "تمت التصفية محليًا: {shown} من {loaded} مُحمَّلة. اضغط Enter للبحث في الكل."
   },
   "settings": {
     "title": "الإعدادات",
