@@ -100,7 +100,9 @@
     "sourceResults": "ev encam",
     "sourceAllVerses": "hemû ayet",
     "sourcePartialLibrary": "{count} ji 114 sûreyan",
-    "filteredLocally": "Herêmî hat parzûnkirin: {shown} ji {loaded} barkirî. Ji bo lêgerîna her tiştî Enter bike."
+    "draftMatches": "{count} ayet bi «{query}» re li hev tên",
+    "draftEmpty": "Tu ayet bi «{query}» re li hev nayên",
+    "draftHint": "Ji bo lêgerîna her tiştî Enter bitikîne"
   },
   "settings": {
     "title": "Sazkarî",

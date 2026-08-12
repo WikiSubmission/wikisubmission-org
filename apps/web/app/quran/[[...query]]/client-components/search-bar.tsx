@@ -17,10 +17,7 @@ import {
 } from '@/lib/scripture-parser'
 import { useMeSearch } from '@/hooks/use-me-search'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
-import { useLocalVerseSearch } from '@/hooks/use-local-verse-search'
 import { useReaderContext } from '@/hooks/use-reader-context-store'
-import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import { splitHighlight } from '@/lib/command-match'
 
 export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const t = useTranslations('search')
@@ -119,45 +116,30 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const noteQuery = showDropdown && debouncedQuery.trim().length >= 2 ? debouncedQuery : ''
   const noteResults = useMeSearch(noteQuery, 'quran').slice(0, 4)
 
-  // Verse hits from whatever is already local: installed offline bundles, the
-  // hydrated chapter, or the loaded search results. No network on this path — the
-  // backend is only reached on submit.
-  const primaryLanguage = useQuranPreferences((s) => s.primaryLanguage)
-  const primaryCode =
-    primaryLanguage === 'xl' || primaryLanguage === 'none' ? 'en' : primaryLanguage
-  const localSearch = useLocalVerseSearch(showDropdown ? query : '', {
-    primaryLang: primaryCode,
-    limit: 5,
-  })
-  const localVerses = localSearch.data?.chapters?.flatMap((chapter) => chapter.verses ?? []) ?? []
-  const localSourceLabel = (() => {
-    switch (localSearch.source) {
-      case 'bundle':
-        return t('sourceOffline')
-      case 'results':
-        return t('sourceResults')
-      case 'library':
-        // Mid-sweep the coverage is partial, and "all verses" would read as
-        // "these are all the matches" when they are not. Say how far it reaches.
-        return localSearch.libraryComplete
-          ? t('sourceAllVerses')
-          : t('sourcePartialLibrary', { count: localSearch.libraryChapters })
-      default:
-        return t('sourceThisChapter')
-    }
-  })()
-
+  // Matching verses are not previewed here. They render as reader cards through
+  // `QuranDraftSwitch`, which has the width to show the verse rather than a
+  // clipped line of it. What stays is navigation: jumps and the submit row.
   const canSubmit = query.trim().length > 0
   const hasSuggestions =
     matchedChapters.length > 0 ||
     matchedAppendices.length > 0 ||
     noteResults.length > 0 ||
-    localVerses.length > 0 ||
     canSubmit
+
+  /** Clears the draft as well as the field, so the reader comes back. */
+  const clearDraft = useCallback(() => {
+    setQuery('')
+    useReaderContext.getState().setDraftQuery('')
+    setOpen(false)
+  }, [])
 
   return (
     <div
       ref={containerRef}
+      // Marked so the draft overlay can start below it. On the index route this
+      // bar sits in the page body rather than the fixed header, and an overlay
+      // anchored only to the header would cover the field being typed into.
+      data-quran-search-bar
       className={cn('relative min-w-0', large ? 'w-full' : 'flex-1')}
     >
       <form
@@ -193,15 +175,26 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           onKeyDown={(e) => {
-            // Close the suggestions without discarding the draft.
-            if (e.key === 'Escape') setOpen(false)
+            // Escape is the one-key way back to reading: it drops the draft, so
+            // the reader returns to where it was rather than staying filtered
+            // behind a closed panel.
+            if (e.key === 'Escape') {
+              e.preventDefault()
+              clearDraft()
+              e.currentTarget.blur()
+            }
           }}
           autoComplete="off"
         />
       </form>
 
       {showDropdown && hasSuggestions && (
-        <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-background border border-border/40 rounded-xl shadow-lg overflow-hidden">
+        <div
+          // Marked so the draft overlay can start below it — the panel floats
+          // above the reader, and results tucked under it would be unreadable.
+          data-quran-search-dropdown
+          className="absolute top-full left-0 right-0 mt-1 z-50 bg-background border border-border/40 rounded-xl shadow-lg overflow-hidden"
+        >
           {matchedChapters.map((ch) => {
             const transliteration =
               CHAPTER_TRANSLITERATIONS[(ch.chapter_number ?? 1) - 1]
@@ -278,53 +271,6 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
                     {n.excerpt}
                   </span>
                 </div>
-              </button>
-            )
-          })}
-
-          {localVerses.length > 0 && (
-            <>
-              {(matchedChapters.length > 0 ||
-                matchedAppendices.length > 0 ||
-                noteResults.length > 0) && <div className="border-t border-border/20" />}
-              <div className="flex items-center justify-between px-3 pt-2 pb-1">
-                <span className="text-[11px] uppercase tracking-wide text-muted-foreground/60">
-                  {t('localResults')}
-                </span>
-                <span className="text-[11px] text-muted-foreground/50">{localSourceLabel}</span>
-              </div>
-            </>
-          )}
-
-          {localVerses.map((verse) => {
-            const [chapter, verseNumber] = (verse.vk ?? '').split(':')
-            const translation = (verse.tr ?? {})[primaryCode] ?? (verse.tr ?? {})['en']
-            const snippet = translation?.hl ?? translation?.tx ?? ''
-            return (
-              <button
-                type="button"
-                key={`local-${verse.vk}`}
-                onMouseDown={() => {
-                  setOpen(false)
-                  router.push(`/quran/${chapter}?verse=${verseNumber}`)
-                }}
-                className="flex items-start gap-2 w-full px-3 py-2 text-sm hover:bg-primary/5 text-left"
-              >
-                <span className="font-mono text-xs text-muted-foreground shrink-0 pt-0.5">
-                  {verse.vk}
-                </span>
-                <span className="flex-1 min-w-0 text-xs text-muted-foreground line-clamp-2">
-                  {/* Renders the <b> runs the search emits as marks, never as raw HTML. */}
-                  {splitHighlight(snippet).map((run, i) =>
-                    run.match ? (
-                      <mark key={i} className="bg-transparent font-medium text-primary">
-                        {run.text}
-                      </mark>
-                    ) : (
-                      <span key={i}>{run.text}</span>
-                    )
-                  )}
-                </span>
               </button>
             )
           })}

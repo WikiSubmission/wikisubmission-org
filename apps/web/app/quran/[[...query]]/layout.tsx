@@ -13,6 +13,7 @@ import { SiteFooter } from '@/components/site-footer'
 import { QuranNavSheet } from './client-components/nav-sheet'
 import { QuranModeSelector } from './client-components/mode-selector'
 import { QuranScrollContainer } from './client-components/scroll-container'
+import { QuranDraftSwitch } from './client-components/draft-switch'
 import { QuranPersonalActions } from './mini-components/personal-actions'
 import { getLocale } from 'next-intl/server'
 import { fetchQuranMetadata, QURAN_REVALIDATE_S } from '@/lib/quran-metadata'
@@ -68,7 +69,9 @@ export default async function QuranLayout({
         <LanguagesInit languages={languagesRes.data ?? []} />
         <QuranNavInit chapters={chapters} appendices={appendices} />
         <QuranLibraryInit />
-        <QuranScrollContainer>{children}</QuranScrollContainer>
+        <QuranScrollContainer>
+          <QuranDraftSwitch>{children}</QuranDraftSwitch>
+        </QuranScrollContainer>
         <SiteFooter />
         <MetricsCollector />
         <QuranPlayer />

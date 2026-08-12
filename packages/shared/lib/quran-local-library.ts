@@ -165,9 +165,16 @@ export interface LibraryHydrationInput {
   /** navigator.deviceMemory, in GB. Undefined when unreported. */
   deviceMemoryGb?: number
   online: boolean
+  /** navigator.connection.effectiveType — 'slow-2g' | '2g' | '3g' | '4g'. */
+  effectiveType?: string
+  /** navigator.hardwareConcurrency. Undefined when unreported. */
+  cpuCores?: number
   /** Offline bundles already cover every requested language. */
   bundlesInstalled: boolean
 }
+
+/** Connection classes on which a few hundred kilobytes is not a background cost. */
+const TOO_SLOW: ReadonlySet<string> = new Set(['slow-2g', '2g'])
 
 /**
  * Whether to pull the whole Quran into memory behind the reader.
@@ -175,8 +182,12 @@ export interface LibraryHydrationInput {
  * Translations only, so the sweep is a few hundred kilobytes gzipped across a
  * dozen idle-scheduled requests — the same order as the images already on the
  * page, and an order of magnitude below the word-by-word payload the chapter
- * corpus can carry. The gates below are the same ones `decideHydration` applies,
- * minus the verse-count caps, which only ever bit on the word payload.
+ * corpus can carry. Still, "background" is only true on a device and a link that
+ * can absorb it, so this declines on every signal that says otherwise.
+ *
+ * Declining is not a loss of function: local search falls through to the chapter
+ * corpus, which is a two-hundredth of the size and already there. Slow devices
+ * search the open chapter; everyone else searches the book.
  */
 export function decideLibraryHydration(input: LibraryHydrationInput): LibraryDecision {
   // Installed bundles already answer for the whole Quran through FTS5 in a
@@ -185,8 +196,11 @@ export function decideLibraryHydration(input: LibraryHydrationInput): LibraryDec
   if (!input.online) return 'skip'
   // An explicit request to conserve data outranks the feature.
   if (input.saveData) return 'skip'
-  // Holding ~6,300 verses in two languages is real memory; leave small devices
-  // on the chapter corpus, which is a two-hundredth of the size.
+  // On 2G the sweep would compete with the verses the reader still needs.
+  if (input.effectiveType && TOO_SLOW.has(input.effectiveType)) return 'skip'
+  // Holding ~6,300 verses in two languages is real memory.
   if (input.deviceMemoryGb !== undefined && input.deviceMemoryGb < 4) return 'skip'
+  // Tokenizing the book is main-thread work; on two cores it is felt.
+  if (input.cpuCores !== undefined && input.cpuCores <= 2) return 'skip'
   return 'sweep'
 }

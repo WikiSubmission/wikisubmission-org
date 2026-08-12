@@ -227,11 +227,22 @@ export function decideHydration(input: HydrationInput): HydrationDecision {
   return 'full'
 }
 
-/** Reads the browser's data and memory hints, which are not in the default DOM lib. */
-export function readDeviceHints(): { saveData: boolean; deviceMemoryGb?: number; online: boolean } {
+export interface DeviceHints {
+  saveData: boolean
+  /** navigator.deviceMemory, in GB. Undefined when unreported. */
+  deviceMemoryGb?: number
+  online: boolean
+  /** navigator.connection.effectiveType — 'slow-2g' | '2g' | '3g' | '4g'. */
+  effectiveType?: string
+  /** navigator.hardwareConcurrency. Undefined when unreported. */
+  cpuCores?: number
+}
+
+/** Reads the browser's data, memory and connection hints, which are not in the default DOM lib. */
+export function readDeviceHints(): DeviceHints {
   if (typeof navigator === 'undefined') return { saveData: false, online: true }
   const nav = navigator as Navigator & {
-    connection?: { saveData?: boolean }
+    connection?: { saveData?: boolean; effectiveType?: string }
     deviceMemory?: number
   }
   return {
@@ -239,5 +250,8 @@ export function readDeviceHints(): { saveData: boolean; deviceMemoryGb?: number;
     deviceMemoryGb: typeof nav.deviceMemory === 'number' ? nav.deviceMemory : undefined,
     // `onLine` false is reliable; true only means "has an interface".
     online: nav.onLine !== false,
+    effectiveType: nav.connection?.effectiveType,
+    cpuCores:
+      typeof nav.hardwareConcurrency === 'number' ? nav.hardwareConcurrency : undefined,
   }
 }

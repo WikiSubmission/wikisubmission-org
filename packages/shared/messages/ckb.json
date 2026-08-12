@@ -125,7 +125,9 @@
     "sourceResults": "ئەم ئەنجامەکان",
     "sourceAllVerses": "هەموو ئایەتەکان",
     "sourcePartialLibrary": "{count} لە 114 سوورەت",
-    "filteredLocally": "بە ناوخۆیی پاڵاوترا: {shown} لە {loaded} بارکراو. Enter دابگرە بۆ گەڕان لە هەمووی."
+    "draftMatches": "{count} ئایەت لەگەڵ «{query}» دەگونجێن",
+    "draftEmpty": "هیچ ئایەتێک لەگەڵ «{query}» ناگونجێت",
+    "draftHint": "Enter دابگرە بۆ گەڕان بە هەموویدا"
   },
   "settings": {
     "title": "ڕێکخستنەکان",

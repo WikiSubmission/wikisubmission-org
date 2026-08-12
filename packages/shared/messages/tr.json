@@ -125,7 +125,9 @@
     "sourceResults": "bu sonuçlar",
     "sourceAllVerses": "tüm ayetler",
     "sourcePartialLibrary": "114 surenin {count} tanesi",
-    "filteredLocally": "Yerel olarak süzüldü: {loaded} yüklenenden {shown} tanesi. Tümünü aramak için Enter."
+    "draftMatches": "“{query}” ile {count} ayet eşleşiyor",
+    "draftEmpty": "“{query}” ile eşleşen ayet yok",
+    "draftHint": "Her şeyi aramak için Enter’a basın"
   },
   "settings": {
     "title": "Ayarlar",

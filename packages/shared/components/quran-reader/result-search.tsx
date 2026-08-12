@@ -34,7 +34,6 @@ import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { useReaderContext } from '@/hooks/use-reader-context-store'
-import { buildLocalIndex } from '@/lib/quran-local-search'
 import { VerseCard } from '@/components/quran-reader/verse-card'
 import { MultiSelectBar } from '@/components/quran-reader/multi-select-bar'
 import { SearchHeader } from './search-header'
@@ -305,21 +304,13 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     useReaderContext.getState().setLoadedVerses(rawVerses)
   }, [searchQuery, rawVerses])
   useEffect(() => () => useReaderContext.getState().clear(), [])
-  // Typing in the search bar narrows the results already on screen, with no
-  // request. The submitted query lives in the URL and only Enter changes it, so
-  // drafting can never trigger a backend search.
-  const draftQuery = useReaderContext((s) => s.draftQuery)
-  const draft = draftQuery.trim()
-  const isFiltering = draft.length >= 2 && draft !== searchQuery.trim()
-  const resultIndex = useMemo(() => buildLocalIndex(rawVerses), [rawVerses])
-  const visibleVerses = useMemo(() => {
-    if (!isFiltering) return rawVerses
-    const filtered = resultIndex.search(draft, {
-      primaryLang: primaryCode,
-      limit: rawVerses.length,
-    })
-    return filtered.chapters?.flatMap((chapter) => chapter.verses ?? []) ?? []
-  }, [isFiltering, resultIndex, draft, primaryCode, rawVerses])
+  // Typing no longer narrows this view. `QuranDraftSwitch` overlays the matching
+  // verses as reader cards for every Quran route, searching the whole book
+  // rather than only what this view happened to load, so filtering here would be
+  // both narrower and invisible — it would rebuild an index per keystroke for
+  // content nobody can see. What this view still publishes is `results`, which
+  // the overlay uses as its last-resort tier.
+  const visibleVerses = rawVerses
 
   const allVerses =
     sortMode === 'verse-order'
@@ -357,12 +348,6 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       className={`space-y-3 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
     >
       <SearchHeader query={searchQuery} />
-
-      {isFiltering && (
-        <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
-          {t('filteredLocally', { shown: allVerses.length, loaded: rawVerses.length })}
-        </div>
-      )}
 
       <Tabs
         value={searchTab}

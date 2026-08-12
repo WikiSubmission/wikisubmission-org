@@ -125,7 +125,9 @@
     "sourceResults": "diese Ergebnisse",
     "sourceAllVerses": "alle Verse",
     "sourcePartialLibrary": "{count} von 114 Suren",
-    "filteredLocally": "Lokal gefiltert: {shown} von {loaded} geladen. Enter drücken, um alles zu durchsuchen."
+    "draftMatches": "{count} Verse passen zu „{query}“",
+    "draftEmpty": "Keine Verse passen zu „{query}“",
+    "draftHint": "Eingabetaste drücken, um alles zu durchsuchen"
   },
   "settings": {
     "title": "Einstellungen",

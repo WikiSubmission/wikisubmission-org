@@ -189,4 +189,29 @@ describe('decideLibraryHydration', () => {
   it('skips when offline', () => {
     expect(decideLibraryHydration({ ...base, online: false })).toBe('skip')
   })
+
+  /**
+   * On 2G the sweep would compete with the verses the reader still needs, so it
+   * stands down and local search falls back to the open chapter.
+   */
+  it('skips on 2G connections', () => {
+    expect(decideLibraryHydration({ ...base, effectiveType: 'slow-2g' })).toBe('skip')
+    expect(decideLibraryHydration({ ...base, effectiveType: '2g' })).toBe('skip')
+  })
+
+  it('sweeps on 3G and better', () => {
+    expect(decideLibraryHydration({ ...base, effectiveType: '3g' })).toBe('sweep')
+    expect(decideLibraryHydration({ ...base, effectiveType: '4g' })).toBe('sweep')
+  })
+
+  it('skips on two cores or fewer, where tokenizing the book is felt', () => {
+    expect(decideLibraryHydration({ ...base, cpuCores: 2 })).toBe('skip')
+    expect(decideLibraryHydration({ ...base, cpuCores: 4 })).toBe('sweep')
+  })
+
+  it('sweeps when the connection and core count are unreported', () => {
+    expect(
+      decideLibraryHydration({ ...base, effectiveType: undefined, cpuCores: undefined }),
+    ).toBe('sweep')
+  })
 })

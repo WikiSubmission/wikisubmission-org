@@ -125,7 +125,9 @@
     "sourceResults": "ces résultats",
     "sourceAllVerses": "tous les versets",
     "sourcePartialLibrary": "{count} sourates sur 114",
-    "filteredLocally": "Filtré localement : {shown} sur {loaded} chargés. Appuie sur Entrée pour tout rechercher."
+    "draftMatches": "{count} versets correspondent à « {query} »",
+    "draftEmpty": "Aucun verset ne correspond à « {query} »",
+    "draftHint": "Appuyez sur Entrée pour tout rechercher"
   },
   "settings": {
     "title": "Paramètres",
