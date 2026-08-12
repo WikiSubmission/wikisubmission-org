@@ -19,7 +19,7 @@ import React, { createElement, type ComponentType } from 'react'
 // `React.createElement` references — satisfy them globally.
 ;(globalThis as { React?: typeof React }).React = React
 import { renderToStaticMarkup } from 'react-dom/server'
-import { convert } from 'html-to-text'
+import { splitSections } from './lib/html-sections'
 import { APPENDICES } from '@/constants/appendices'
 import { IntroductionContent } from '@/content/library/introduction'
 import { ProclamationContent } from '@/content/library/proclamation'
@@ -40,45 +40,6 @@ interface SeedDoc {
 
 const OUT_PATH = path.resolve(__dirname, '../../../../ws-backend/db/seeds/library_docs_en.json')
 
-function toText(html: string): string {
-  return convert(html, {
-    wordwrap: false,
-    selectors: [
-      { selector: 'a', options: { ignoreHref: true } },
-      { selector: 'img', format: 'skip' },
-      { selector: 'svg', format: 'skip' },
-      { selector: 'h1', options: { uppercase: false } },
-      { selector: 'h2', options: { uppercase: false } },
-      { selector: 'h3', options: { uppercase: false } },
-      { selector: 'table', format: 'dataTable' },
-    ],
-  })
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
-}
-
-/** Split rendered HTML into sections on <h2> boundaries. */
-function splitSections(html: string): SeedSection[] {
-  const h2 = /<h2[^>]*>([\s\S]*?)<\/h2>/g
-  const sections: SeedSection[] = []
-  let lastIndex = 0
-  let lastHeading: string | null = null
-  let match: RegExpExecArray | null
-
-  const push = (heading: string | null, chunk: string) => {
-    const body = toText(chunk)
-    if (body) sections.push({ idx: sections.length, heading, body })
-  }
-
-  while ((match = h2.exec(html)) !== null) {
-    push(lastHeading, html.slice(lastIndex, match.index))
-    lastHeading = toText(match[1]) || null
-    lastIndex = h2.lastIndex
-  }
-  push(lastHeading, html.slice(lastIndex))
-  return sections
-}
-
 function extract(
   docType: SeedDoc['doc_type'],
   docNumber: number | null,
@@ -93,7 +54,13 @@ function extract(
       `${docType} ${docNumber ?? ''}: render failed: ${error instanceof Error ? error.message : error}`,
     )
   }
-  const sections = splitSections(html)
+  // The shared splitter also reports a heading anchor, which the library seed
+  // format has no column for; map it away rather than changing that format.
+  const sections: SeedSection[] = splitSections(html).map(({ idx, heading, body }) => ({
+    idx,
+    heading,
+    body,
+  }))
   if (sections.length === 0) {
     throw new Error(`${docType} ${docNumber ?? ''}: extraction produced no text`)
   }

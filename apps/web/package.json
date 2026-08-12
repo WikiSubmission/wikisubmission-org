@@ -20,7 +20,8 @@
     "appendices:backfill-pt": "tsx --tsconfig scripts/tsconfig.appendix-pt.json scripts/appendix-to-portable-text.tsx --sql scripts/appendix-backfill-pt.sql",
     "appendices:backfill": "tsx --tsconfig scripts/tsconfig.appendix-md.json scripts/appendix-to-markdown.tsx --embeds=drop --sql scripts/appendix-backfill.sql",
     "e2e": "playwright test",
-    "site:seed-pages": "tsx scripts/seed-site-pages.ts"
+    "site:seed-pages": "tsx scripts/seed-site-pages.ts",
+    "site:index": "tsx scripts/extract-site-text.ts"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.1083.0",
