@@ -83,3 +83,59 @@ export function resolveUiLocale(value: string | null | undefined): string | null
 export function directionForUiLocale(value: string | null | undefined): 'ltr' | 'rtl' {
   return value && RTL_LANGUAGE_CODES.has(value) ? 'rtl' : 'ltr'
 }
+
+/**
+ * The language content is requested in when no locale resolves to one.
+ *
+ * Separate from DEFAULT_UI_LOCALE despite sharing a value: one names the catalog
+ * the interface falls back to, the other the catalog the backend reads scripture
+ * from. They are free to diverge.
+ */
+export const DEFAULT_CONTENT_LANG = 'en'
+
+/**
+ * The content language each UI locale reads scripture and metadata in.
+ *
+ * UI locales and the backend's content languages are two registries that merely
+ * happen to share codes for five of the seven entries. The backend validates
+ * `lang` / `langs` against its own languages table and answers 400 for anything
+ * absent, so a UI locale has to be translated before it reaches the API —
+ * passing `ckb` through unmapped is what made /quran render "Something went
+ * wrong" for Kurdish readers instead of a reader.
+ *
+ * Both Kurdish locales map to English, not to the backend's `ku`. That row
+ * exists in the registry (ws-backend migration 026) but no Kurdish chapters,
+ * appendices, or verses were ever seeded behind it, so `lang=ku` answers 200
+ * with an empty array — which reads as an empty chapter picker rather than a
+ * failure. English titles are a fallback a reader can see past. When Kurdish
+ * content is seeded, point `ckb`/`kmr` at `ku` here and every call site follows.
+ *
+ * Codes are listed explicitly rather than defaulted through, so adding a UI
+ * locale forces a decision about what it reads instead of silently 400ing.
+ */
+const CONTENT_LANG_BY_UI_LOCALE: Readonly<Record<string, string>> = {
+  en: 'en',
+  ar: 'ar',
+  ckb: DEFAULT_CONTENT_LANG,
+  de: 'de',
+  fr: 'fr',
+  kmr: DEFAULT_CONTENT_LANG,
+  tr: 'tr',
+}
+
+/**
+ * The content language code to send to the backend for a UI locale.
+ *
+ * Use this for every `lang` / `langs` query param on content endpoints
+ * (`/chapters`, `/appendices`, `/quran`). It is deliberately NOT for
+ * `/site/search`, whose `lang` indexes the UI locale itself and does accept
+ * `ckb` and `kmr`.
+ *
+ * Follows legacy aliases, and answers English for unknown codes rather than
+ * throwing — a bad cookie should cost a reader their translation, not the page.
+ */
+export function contentLangForUiLocale(value: string | null | undefined): string {
+  if (!value) return DEFAULT_CONTENT_LANG
+  const resolved = resolveUiLocale(value) ?? value
+  return CONTENT_LANG_BY_UI_LOCALE[resolved] ?? DEFAULT_CONTENT_LANG
+}
