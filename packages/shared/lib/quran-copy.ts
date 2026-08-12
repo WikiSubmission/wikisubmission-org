@@ -227,3 +227,122 @@ export function buildMultiVerseMarkdown(
     )
     .join('\n\n')
 }
+
+// ─── Tables ──────────────────────────────────────────────────────────────────
+
+/**
+ * Table flavours. `tsv` is what spreadsheets paste as a real grid, `html` is what
+ * rich editors (Docs, Notion, Word) turn into a real table, and `markdown` is the
+ * readable plain-text fallback. Callers generally offer `tsv` and `html` on the
+ * same clipboard write so the destination picks whichever it understands.
+ */
+export type TableFlavor = 'markdown' | 'tsv' | 'html'
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+/** Markdown cells cannot contain a raw pipe or newline. */
+function escapeMarkdownCell(value: string): string {
+  return value.replace(/\|/g, '\\|').replace(/\s*\n\s*/g, ' ')
+}
+
+/** TSV cells cannot contain a tab or newline; both break the grid. */
+function escapeTsvCell(value: string): string {
+  return value.replace(/\t/g, ' ').replace(/\s*\n\s*/g, ' ')
+}
+
+function renderTable(headers: string[], rows: string[][], flavor: TableFlavor): string {
+  if (flavor === 'tsv') {
+    return [headers, ...rows]
+      .map((row) => row.map(escapeTsvCell).join('\t'))
+      .join('\n')
+  }
+
+  if (flavor === 'html') {
+    const head = `<tr>${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`
+    const body = rows
+      .map((row) => `<tr>${row.map((c) => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`)
+      .join('')
+    return `<table><thead>${head}</thead><tbody>${body}</tbody></table>`
+  }
+
+  const divider = headers.map(() => '---')
+  return [headers, divider, ...rows]
+    .map((row) => `| ${row.map(escapeMarkdownCell).join(' | ')} |`)
+    .join('\n')
+}
+
+/**
+ * One row per verse, one column per enabled field. Column set follows the same
+ * preference gating as the text builders, so a reader who has turned Arabic off
+ * does not get an empty Arabic column.
+ */
+export function buildVerseTable(
+  verses: VerseData[],
+  flavor: TableFlavor,
+  opts: CopyMarkdownOptions
+): string {
+  const wantPrimary = opts.includeText
+  const wantArabic = opts.includeArabic
+  const wantSecondary = Boolean(opts.secondaryCode)
+
+  const headers = ['Verse']
+  if (wantPrimary) headers.push(opts.primaryCode.toUpperCase())
+  if (wantArabic) headers.push('AR')
+  if (wantSecondary) headers.push(opts.secondaryCode!.toUpperCase())
+  if (opts.includeSubtitles) headers.push('Subtitle')
+  if (opts.includeFootnotes) headers.push('Footnote')
+
+  const rows = verses.map((verse) => {
+    const tr = verse.tr?.[opts.primaryCode] ?? verse.tr?.['en']
+    const arabic = verse.tr?.['ar']
+    const secondary = opts.secondaryCode ? verse.tr?.[opts.secondaryCode] : undefined
+
+    const row = [verse.vk ?? '']
+    if (wantPrimary) row.push(tr?.tx ?? '')
+    if (wantArabic) row.push(arabic?.tx ?? '')
+    if (wantSecondary) row.push(secondary?.tx ?? '')
+    if (opts.includeSubtitles) row.push(tr?.s ?? '')
+    if (opts.includeFootnotes) row.push(tr?.f ?? '')
+    return row
+  })
+
+  return renderTable(headers, rows, flavor)
+}
+
+/**
+ * One row per word across the given verses, for morphology work. Verses with no
+ * word data contribute nothing rather than an empty row.
+ */
+export function buildWordTable(
+  verses: VerseData[],
+  flavor: TableFlavor,
+  opts: CopyMarkdownOptions
+): string {
+  const headers = ['Verse', '#']
+  if (opts.includeArabic) headers.push('Arabic')
+  if (opts.includeTransliteration) headers.push('Transliteration')
+  if (opts.includeText) headers.push('Meaning')
+  headers.push('Root')
+
+  const rows: string[][] = []
+  for (const verse of verses) {
+    const words = [...(verse.w ?? [])].sort((a, b) => (a.wi ?? 0) - (b.wi ?? 0))
+    for (const word of words) {
+      const tx = word.tx as Record<string, string> | undefined
+      const row = [verse.vk ?? '', String(word.wi ?? '')]
+      if (opts.includeArabic) row.push(tx?.['ar'] ?? '')
+      if (opts.includeTransliteration) row.push(tx?.['tl'] ?? '')
+      if (opts.includeText) row.push(word.m ?? tx?.['en'] ?? '')
+      row.push(word.r ?? '')
+      rows.push(row)
+    }
+  }
+
+  return renderTable(headers, rows, flavor)
+}

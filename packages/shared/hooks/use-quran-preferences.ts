@@ -1,27 +1,54 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { contentLangForUiLocale } from '@/constants/ui-locales'
 import type { ZoomLevel } from '@/lib/quran-zoom'
 
 /**
  * ISO 639-1 lang codes used by the ws-backend API.
  * `xl` is a non-standard code for transliterated Arabic (Latin script) — has no API equivalent yet.
+ *
+ * A runtime list rather than a bare union because persisted preferences and the
+ * locale cookie are both untrusted input that has to be checked against it — see
+ * `isLangCode`. The type is derived so the two cannot drift.
  */
-export type LangCode =
-  | 'none' // No translation language selected
-  | 'en' // English
-  | 'ar' // Arabic
-  | 'fr' // French
-  | 'de' // German
-  | 'tr' // Turkish
-  | 'id' // Bahasa Indonesia
-  | 'fa' // Persian
-  | 'ta' // Tamil
-  | 'sv' // Swedish
-  | 'ru' // Russian
-  | 'bn' // Bengali
-  | 'es' // Spanish
-  | 'ur' // Urdu
-  | 'xl' // Transliterated (custom, not sent to API)
+const LANG_CODES = [
+  'none', // No translation language selected
+  'en', // English
+  'ar', // Arabic
+  'fr', // French
+  'de', // German
+  'tr', // Turkish
+  'id', // Bahasa Indonesia
+  'fa', // Persian
+  'ta', // Tamil
+  'sv', // Swedish
+  'ru', // Russian
+  'bn', // Bengali
+  'es', // Spanish
+  'ur', // Urdu
+  'xl', // Transliterated (custom, not sent to API)
+] as const
+
+export type LangCode = (typeof LANG_CODES)[number]
+
+const LANG_CODE_SET: ReadonlySet<string> = new Set(LANG_CODES)
+
+function isLangCode(value: unknown): value is LangCode {
+  return typeof value === 'string' && LANG_CODE_SET.has(value)
+}
+
+/**
+ * Coerce an untrusted stored/cookie value into a usable translation language.
+ *
+ * Anything already valid passes through. A UI locale is mapped to the language it
+ * reads (`ckb` → `en`), and anything unrecognisable lands on English, so no code
+ * the backend would 400 on can reach a request.
+ */
+function repairLangCode(value: unknown): LangCode {
+  if (isLangCode(value)) return value
+  const mapped = contentLangForUiLocale(typeof value === 'string' ? value : null)
+  return isLangCode(mapped) ? mapped : 'en'
+}
 
 export type DisplayMode = 'verse' | 'reading'
 export type ReadingModeLang = 'translation' | 'arabic'
@@ -54,13 +81,31 @@ export type QuranPreferences = {
   wordLabSections: WordLabSections
   wordTapAction: WordTapAction
   setPreferences: (preferences: QuranPreferences) => void
+  /**
+   * Merges a partial update, keeping `text` pinned to true.
+   *
+   * `text` has no UI toggle and every write path has forced it true since the v8
+   * migration; enforcing that here means a caller cannot half-remember the rule.
+   * Prefer this over `setPreferences` for anything that changes one or two keys —
+   * the command menu, the settings panel, and the mode selector all do.
+   */
+  patchPreferences: (patch: Partial<QuranPreferences>) => void
 }
 
-/** Read the UI locale cookie — used only to seed the initial primaryLanguage default. */
+/**
+ * Read the UI locale cookie — used only to seed the initial primaryLanguage default.
+ *
+ * The cookie holds a UI locale, which is not interchangeable with a translation
+ * language: `ckb` and `kmr` are shipped interface locales that the backend has no
+ * content for, and it rejects the whole verse request with a 400 if one appears
+ * in `langs`. Seeding the raw cookie value therefore left Kurdish readers with a
+ * reader that could not load a single verse. repairLangCode maps the locale to a
+ * code the backend serves.
+ */
 function getLocaleCookie(): LangCode {
   if (typeof document === 'undefined') return 'en'
   const match = document.cookie.match(/(?:^|; )locale=([^;]*)/)
-  return (match?.[1] as LangCode) ?? 'en'
+  return repairLangCode(match?.[1])
 }
 
 export const useQuranPreferences = create(
@@ -85,11 +130,13 @@ export const useQuranPreferences = create(
       },
       wordTapAction: 'play' as WordTapAction,
       setPreferences: (preferences: QuranPreferences) => set(preferences),
+      patchPreferences: (patch: Partial<QuranPreferences>) =>
+        set((state) => ({ ...state, ...patch, text: true })),
     }),
     {
       name: 'quran-preferences-v4',
       storage: createJSONStorage(() => localStorage),
-      version: 8,
+      version: 9,
       migrate: (state, version) => {
         let next = state as Omit<QuranPreferences, 'displayMode' | 'wordLabSections'> & {
           displayMode?: string
@@ -115,6 +162,20 @@ export const useQuranPreferences = create(
         }
         if (version < 8) {
           next = { ...next, text: true }
+        }
+        if (version < 9) {
+          // primaryLanguage was seeded straight from the UI locale cookie, so a
+          // reader who ever browsed in Kurdish has `ckb`/`kmr` stored — codes the
+          // backend 400s on, which failed every verse fetch the reader made.
+          // An unusable secondary is dropped rather than repaired: it is optional,
+          // and English is already covered by the primary it would collide with.
+          next = {
+            ...next,
+            primaryLanguage: repairLangCode(next.primaryLanguage),
+            secondaryLanguage: isLangCode(next.secondaryLanguage)
+              ? next.secondaryLanguage
+              : undefined,
+          }
         }
         return next as QuranPreferences
       },

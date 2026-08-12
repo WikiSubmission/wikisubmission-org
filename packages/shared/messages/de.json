@@ -117,7 +117,13 @@
       "quran": "Koran",
       "media": "Medien",
       "newsletters": "Newsletter"
-    }
+    },
+    "localResults": "Im Geladenen",
+    "searchEverything": "Alle Verse nach „{query}“ durchsuchen",
+    "sourceThisChapter": "dieses Kapitel",
+    "sourceOffline": "lokale Kopie",
+    "sourceResults": "diese Ergebnisse",
+    "filteredLocally": "Lokal gefiltert: {shown} von {loaded} geladen. Enter drücken, um alles zu durchsuchen."
   },
   "settings": {
     "title": "Einstellungen",
@@ -1644,5 +1650,40 @@
     "goBack": "Zurück",
     "copyFailed": "Konnte nicht in die Zwischenablage kopiert werden",
     "copiedValue": "Kopiert: {value}"
+  },
+  "commandMenu": {
+    "title": "Befehlsmenü",
+    "openLabel": "Befehlsmenü öffnen",
+    "placeholder": "Seiten, Kapitel und Einstellungen durchsuchen…",
+    "empty": "Keine Ergebnisse.",
+    "back": "Zurück",
+    "on": "Ein",
+    "off": "Aus",
+    "mode": "Modus",
+    "palette": "Palette",
+    "groupActions": "Aktionen",
+    "groupPages": "Seiten",
+    "groupChapters": "Kapitel",
+    "groupAppendices": "Anhänge",
+    "groupVerses": "Verse",
+    "groupContent": "In Inhalten",
+    "groupSettings": "Einstellungen",
+    "verseCount": "{count, plural, =1 {# Vers} other {# Verse}}",
+    "copyAsTable": "Als Tabelle kopieren",
+    "copyAsTableHint": "Eine Zeile pro Vers, für Tabellen und Dokumente",
+    "copyWordTable": "Worttabelle kopieren",
+    "copyWordTableHint": "Eine Zeile pro Wort, mit Wortwurzel und Bedeutung",
+    "copyByReference": "Verse nach Referenz kopieren…",
+    "copyByReferenceHint": "Beliebige Verse abrufen und kopieren",
+    "openAsVerseList": "Als Versliste öffnen",
+    "referencePlaceholder": "Referenz eingeben, z. B. 2:255 oder 1:1-7, 3:18",
+    "referenceEmpty": "Gib eine Versreferenz ein, um fortzufahren.",
+    "noVersesFound": "Keine Verse für diese Referenz gefunden.",
+    "tooManyVerses": "Das sind mehr als {max} Verse. Bitte die Referenz eingrenzen.",
+    "playFromHere": "Ab diesem Vers abspielen",
+    "togglePlayback": "Abspielen oder pausieren",
+    "nextVerse": "Nächster Vers",
+    "previousVerse": "Vorheriger Vers",
+    "contentOffline": "Inhaltssuche nicht verfügbar"
   }
 }

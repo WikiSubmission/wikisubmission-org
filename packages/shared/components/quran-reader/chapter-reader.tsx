@@ -36,6 +36,8 @@ import {
 import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
 import { useScriptureState } from '@/hooks/use-scripture-state'
 import { useQuranPrefsSync } from '@/hooks/use-prefs-sync'
+import { useReaderContext } from '@/hooks/use-reader-context-store'
+import { useChapterHydration } from '@/hooks/use-chapter-hydration'
 import type { ScriptureState } from '@/types/bookmarks'
 
 type VirtualizedVerseListProps = {
@@ -508,6 +510,29 @@ export function ChapterReader({
   const scriptureState = useScriptureState('quran', chapterNumber)
   useQuranPrefsSync()
 
+  // Publish what is on screen for surfaces outside the reader's tree — the
+  // command menu and the header search bar — since neither can be reached by a
+  // prop from here.
+  const publishedVerseRef = useRef<string | null>(null)
+  const onVerseVisible = useCallback((verseKey: string) => {
+    // Fires on every scroll event, so only write when the verse actually
+    // changes; otherwise every tick would notify the store's subscribers.
+    if (publishedVerseRef.current === verseKey) return
+    publishedVerseRef.current = verseKey
+    useReaderContext.getState().setCurrentVerse(verseKey)
+  }, [])
+
+  useEffect(() => {
+    useReaderContext.getState().setChapter(chapterNumber)
+  }, [chapterNumber])
+
+  useEffect(() => {
+    useReaderContext.getState().setLoadedVerses(reader.verses)
+  }, [reader.verses])
+
+  // Context must not outlive the reader that produced it.
+  useEffect(() => () => useReaderContext.getState().clear(), [])
+
   // Read the initial verse from the prop (passed by the Server Component),
   // NOT from useSearchParams(). useSearchParams() subscribes to Next.js router
   // contexts and causes ChapterReader (+ all VerseCards) to re-render on every
@@ -558,6 +583,12 @@ export function ChapterReader({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [prefs.primaryLanguage, prefs.secondaryLanguage, prefs.arabic, prefs.wordByWord, displayMode]
   )
+
+  // Pull the rest of the chapter into memory once the first window is on screen,
+  // so typing in the search bar can filter the whole chapter, and load-more and
+  // minimap seeks resolve without the network. Skipped in range mode, where the
+  // SSR payload is already the complete set.
+  useChapterHydration(chapterNumber, opts, !isRangeMode && reader.verses.length > 0)
 
   // Keep the audio player queue in sync with loaded verses.
   const audioQueue = useMemo(
@@ -838,6 +869,7 @@ export function ChapterReader({
           isBuffering={isBuffering}
           chapterLabel={tCommon('chapter')}
           scriptureState={scriptureState}
+          onVerseVisible={onVerseVisible}
         />
       )}
 

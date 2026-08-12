@@ -6,10 +6,11 @@ import { meApi } from '@/src/api/me-client'
 import { useQuranPreferences, type QuranPreferences } from '@/hooks/use-quran-preferences'
 
 // Keys excluded from backend sync.
-// `displayMode` is intentionally local-only because pushing a transient view
-// state through the account preference store created bad UX on chapter loads:
-// stale server state could override the user's current local choice.
-const EXCLUDED_KEYS = new Set(['setPreferences', 'displayMode'])
+// The two setters are store actions, not data. `displayMode` is intentionally
+// local-only because pushing a transient view state through the account
+// preference store created bad UX on chapter loads: stale server state could
+// override the user's current local choice.
+const EXCLUDED_KEYS = new Set(['setPreferences', 'patchPreferences', 'displayMode'])
 
 function stripRemoteOnlyOverrides(
   prefs: QuranPreferences,

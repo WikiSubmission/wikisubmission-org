@@ -117,7 +117,13 @@
       "quran": "Kuran",
       "media": "Medya",
       "newsletters": "Bültenler"
-    }
+    },
+    "localResults": "Yüklenenler içinde",
+    "searchEverything": "Tüm ayetlerde “{query}” ara",
+    "sourceThisChapter": "bu sure",
+    "sourceOffline": "çevrimdışı kopya",
+    "sourceResults": "bu sonuçlar",
+    "filteredLocally": "Yerel olarak süzüldü: {loaded} yüklenenden {shown} tanesi. Tümünü aramak için Enter."
   },
   "settings": {
     "title": "Ayarlar",
@@ -1644,5 +1650,40 @@
     "goBack": "Geri dön",
     "copyFailed": "Panoya kopyalanamadı",
     "copiedValue": "Kopyalandı: {value}"
+  },
+  "commandMenu": {
+    "title": "Komut menüsü",
+    "openLabel": "Komut menüsünü aç",
+    "placeholder": "Sayfalarda, surelerde ve ayarlarda ara…",
+    "empty": "Sonuç yok.",
+    "back": "Geri",
+    "on": "Açık",
+    "off": "Kapalı",
+    "mode": "Mod",
+    "palette": "Palet",
+    "groupActions": "Eylemler",
+    "groupPages": "Sayfalar",
+    "groupChapters": "Sureler",
+    "groupAppendices": "Ekler",
+    "groupVerses": "Ayetler",
+    "groupContent": "İçerikte",
+    "groupSettings": "Ayarlar",
+    "verseCount": "{count, plural, other {# ayet}}",
+    "copyAsTable": "Tablo olarak kopyala",
+    "copyAsTableHint": "Her ayet için bir satır, tablolara ve belgelere yapışır",
+    "copyWordTable": "Kelime tablosunu kopyala",
+    "copyWordTableHint": "Her kelime için bir satır, kök ve anlamıyla",
+    "copyByReference": "Ayetleri referansla kopyala…",
+    "copyByReferenceHint": "İstediğin ayetleri getir ve kopyala",
+    "openAsVerseList": "Ayet listesi olarak aç",
+    "referencePlaceholder": "Bir referans yaz, örn. 2:255 veya 1:1-7, 3:18",
+    "referenceEmpty": "Devam etmek için bir ayet referansı yaz.",
+    "noVersesFound": "Bu referans için ayet bulunamadı.",
+    "tooManyVerses": "Bu {max} ayetten fazla. Referansı daralt.",
+    "playFromHere": "Bu ayetten itibaren çal",
+    "togglePlayback": "Çal veya duraklat",
+    "nextVerse": "Sonraki ayet",
+    "previousVerse": "Önceki ayet",
+    "contentOffline": "içerik arama kullanılamıyor"
   }
 }

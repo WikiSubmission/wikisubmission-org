@@ -117,7 +117,13 @@
       "quran": "Quran",
       "media": "Media",
       "newsletters": "Newsletters"
-    }
+    },
+    "localResults": "In what is loaded",
+    "searchEverything": "Search all verses for “{query}”",
+    "sourceThisChapter": "this chapter",
+    "sourceOffline": "offline copy",
+    "sourceResults": "these results",
+    "filteredLocally": "Filtered locally: {shown} of {loaded} loaded. Press Enter to search everything."
   },
   "settings": {
     "title": "Settings",
@@ -1696,5 +1702,40 @@
     "goBack": "Go back",
     "copyFailed": "Could not copy to clipboard",
     "copiedValue": "Copied: {value}"
+  },
+  "commandMenu": {
+    "title": "Command menu",
+    "openLabel": "Open command menu",
+    "placeholder": "Search pages, chapters, and settings…",
+    "empty": "No results.",
+    "back": "Back",
+    "on": "On",
+    "off": "Off",
+    "mode": "Mode",
+    "palette": "Palette",
+    "groupActions": "Actions",
+    "groupPages": "Pages",
+    "groupChapters": "Chapters",
+    "groupAppendices": "Appendices",
+    "groupVerses": "Verses",
+    "groupContent": "In content",
+    "groupSettings": "Settings",
+    "verseCount": "{count, plural, =1 {# verse} other {# verses}}",
+    "copyAsTable": "Copy as table",
+    "copyAsTableHint": "One row per verse, pastes into spreadsheets and docs",
+    "copyWordTable": "Copy word table",
+    "copyWordTableHint": "One row per word, with root and meaning",
+    "copyByReference": "Copy verses by reference…",
+    "copyByReferenceHint": "Fetch any verses and copy them",
+    "openAsVerseList": "Open as verse list",
+    "referencePlaceholder": "Type a reference, e.g. 2:255 or 1:1-7, 3:18",
+    "referenceEmpty": "Type a verse reference to continue.",
+    "noVersesFound": "No verses found for that reference.",
+    "tooManyVerses": "That is more than {max} verses. Narrow the reference.",
+    "playFromHere": "Play from this verse",
+    "togglePlayback": "Play or pause",
+    "nextVerse": "Next verse",
+    "previousVerse": "Previous verse",
+    "contentOffline": "content search unavailable"
   }
 }

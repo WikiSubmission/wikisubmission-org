@@ -6,6 +6,13 @@ import type { components } from '@/src/api/types.gen'
 import type { LangCode } from '@/hooks/use-quran-preferences'
 import { getRegisteredOfflineContentStore } from '@/lib/offline/registry'
 import { offlineQuranVerses } from '@/lib/offline/quran-adapter'
+import {
+  corpusCovers,
+  corpusServes,
+  corpusWindow,
+  type Corpus,
+} from '@/lib/quran-local-corpus'
+import { useReaderContext } from '@/hooks/use-reader-context-store'
 
 export type QuranResponse = components['schemas']['QuranResponse']
 export type ChapterData = components['schemas']['ChapterData']
@@ -71,6 +78,17 @@ type FetchResult = {
   error: string | null
 }
 
+/**
+ * The hydrated corpus, but only when it can answer for these options.
+ * `corpusServes` owns the language and word-data rules. Reading through
+ * `getState()` keeps this off the render path entirely.
+ */
+function usableCorpus(chapterNumber: number, opts: ChapterReaderOptions): Corpus | null {
+  const corpus = useReaderContext.getState().corpus
+  const shape = { langs: buildLangs(opts), includeWords: opts.includeWords }
+  return corpusServes(corpus, chapterNumber, shape) ? corpus : null
+}
+
 export function useChapterReader(
   chapterNumber: number,
   initialData: QuranResponse | null,
@@ -124,6 +142,19 @@ export function useChapterReader(
       const verseEndParam = rangeEnd !== undefined
         ? rangeEnd
         : verseStart + PAGE_SIZE - 1
+
+      // Layer 0: the hydrated corpus. Above the offline check because it is
+      // already in memory — no worker round trip, no network.
+      const corpus = usableCorpus(chapterNumber, opts)
+      if (corpus && corpusCovers(corpus, chapterNumber, verseStart, verseEndParam)) {
+        const window = corpusWindow(corpus, verseStart, verseEndParam)
+        return {
+          verses: window,
+          titles: corpus.titles,
+          reachedEnd: rangeEnd !== undefined ? true : verseEndParam >= corpus.lastVerse,
+          error: null,
+        }
+      }
 
       const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false
       const offlineStore = getRegisteredOfflineContentStore()
@@ -279,6 +310,31 @@ export function useChapterReader(
     // page start passes naturally once the state commit advances lastVerseEnd.
     if (loadMoreRequestedStartRef.current === nextStart) return
     loadMoreRequestedStartRef.current = nextStart
+
+    // Synchronous corpus path, deliberately before the loading flag: appending
+    // verses already in memory should not pulse the glow or the title spinner.
+    // The requested-start ref is still set above, so a duplicate call in the
+    // pre-commit window is rejected exactly as it is on the network path, and
+    // fetchGenerationRef is untouched since nothing is in flight to supersede.
+    const corpus = usableCorpus(chapterNumber, lastOpts)
+    const nextEnd = rangeEnd ?? nextStart + PAGE_SIZE - 1
+    if (corpus && corpusCovers(corpus, chapterNumber, nextStart, nextEnd)) {
+      const fresh = corpusWindow(corpus, nextStart, nextEnd)
+      setState((prev) => {
+        const seen = new Set(prev.verses.map((v) => v.vk))
+        const deduped = fresh.filter((v) => !seen.has(v.vk))
+        return {
+          ...prev,
+          verses: [...prev.verses, ...deduped],
+          verseCount: prev.verseCount + deduped.length,
+          lastVerseEnd: nextEnd,
+          reachedEnd: rangeEnd !== undefined ? true : nextEnd >= corpus.lastVerse,
+          lastOpts,
+        }
+      })
+      return
+    }
+
     setState((prev) => ({ ...prev, loading: true, error: null }))
 
     const result = await fetchVerses(nextStart, lastOpts)
@@ -311,7 +367,7 @@ export function useChapterReader(
         lastOpts,
       }
     })
-  }, [fetchVerses]) // stable — reads state from stateRef
+  }, [fetchVerses, chapterNumber, rangeEnd]) // stable — reads state from stateRef
 
   /**
    * Fire-and-forget prefetch for the verse window around `targetVerse`.
@@ -362,6 +418,27 @@ export function useChapterReader(
       const windowStart = Math.floor(rawStart / PREFETCH_GRID) * PREFETCH_GRID
       const cacheKey = `${chapterNumber}:${windowStart}`
 
+      // Synchronous corpus path, before the loading flag: a seek into hydrated
+      // verses is an instant window replacement with no glow. `handleSeek` in the
+      // reader already scrolls locally when the target is rendered, so this is
+      // the case where the target is held but not yet in the rendered array.
+      const windowEnd = rangeEnd ?? windowStart + PAGE_SIZE - 1
+      const corpus = usableCorpus(chapterNumber, opts)
+      if (corpus && corpusCovers(corpus, chapterNumber, windowStart, windowEnd)) {
+        const verses = corpusWindow(corpus, windowStart, windowEnd)
+        setState({
+          verses,
+          chapterTitles: corpus.titles,
+          verseCount: verses.length,
+          loading: false,
+          error: null,
+          lastVerseEnd: windowEnd,
+          reachedEnd: rangeEnd !== undefined ? true : windowEnd >= corpus.lastVerse,
+          lastOpts: opts,
+        })
+        return
+      }
+
       setState((prev) => ({ ...prev, loading: true, error: null }))
 
       const cached = prefetchCacheRef.current.get(cacheKey)
@@ -392,7 +469,7 @@ export function useChapterReader(
         lastOpts: opts,
       })
     },
-    [chapterNumber, fetchVerses] // stable — reads state from stateRef
+    [chapterNumber, fetchVerses, rangeEnd] // stable — reads state from stateRef
   )
 
   const hasMore = state.verses.length > 0 && !state.reachedEnd

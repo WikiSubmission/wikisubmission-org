@@ -1,9 +1,16 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 import { fetchArticles } from '@/lib/blog-backend'
 import { type Post } from '@/lib/blog-queries'
 import { APPENDICES } from '@/constants/appendices'
+import {
+  SITE_ROUTES,
+  routeDescription,
+  routeHref,
+  routeTitle,
+} from '@/lib/site-routes'
 
 const BASE = 'https://wikisubmission.org'
 
@@ -15,6 +22,23 @@ export async function GET() {
     // non-critical — llms.txt still renders without blog posts
   }
 
+  // Always English: this file is a machine-readable summary, and the site has no
+  // locale path segment to describe alternates with.
+  const t = await getTranslations({ locale: 'en' })
+
+  // Projected from the route manifest, so a new page appears here automatically.
+  // The chapter and appendix sections below were already data-driven and stay
+  // that way — they carry detail (verse refs) the manifest does not model.
+  const corePages = SITE_ROUTES.filter((r) => r.indexable && !r.expand)
+    .map((route) => {
+      const href = routeHref(route)
+      if (href === null) return null
+      const url = href === '/' ? BASE : `${BASE}${href}`
+      const description = routeDescription(route, t)
+      return `- [${routeTitle(route, t)}](${url})${description ? `: ${description}` : ''}`
+    })
+    .filter((line): line is string => line !== null)
+
   const lines: string[] = [
     '# WikiSubmission',
     '',
@@ -24,17 +48,7 @@ export async function GET() {
     '',
     '## Core Pages',
     '',
-    `- [Home](${BASE}): Main landing page`,
-    `- [Quran Reader](${BASE}/quran): Full Quran with 114 chapters, multilingual translations, word-by-word breakdown, and audio recitation`,
-    `- [Introduction](${BASE}/introduction): Introduction to Submission (Islam) and the Final Testament`,
-    `- [Miracle of the Quran](${BASE}/miracle): Mathematical miracle of the Quran based on the number 19`,
-    `- [Practices](${BASE}/practices): Religious practices and guidance`,
-    `- [Blog](${BASE}/blog): Articles, reflections, and research from the WikiSubmission community`,
-    `- [Music / Zikr](${BASE}/music): Devotional audio and recitations`,
-    `- [Archive](${BASE}/archive): Media archive`,
-    `- [Downloads](${BASE}/downloads): Free downloadable resources`,
-    `- [Donate](${BASE}/donate): Support the mission`,
-    `- [Contact](${BASE}/contact): Get in touch`,
+    ...corePages,
     '',
     '## Quran Chapters',
     '',

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { wsApi } from '@/src/api/client'
 import { Spinner } from '@/components/ui/spinner'
@@ -33,6 +33,8 @@ import {
 import Link from 'next/link'
 import { QuranRef } from '@/components/quran-ref'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
+import { useReaderContext } from '@/hooks/use-reader-context-store'
+import { buildLocalIndex } from '@/lib/quran-local-search'
 import { VerseCard } from '@/components/quran-reader/verse-card'
 import { MultiSelectBar } from '@/components/quran-reader/multi-select-bar'
 import { SearchHeader } from './search-header'
@@ -296,14 +298,37 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
   const noteMatches = useMeSearch(searchQuery, 'quran')
   const librarySearch = useLibrarySearch(searchQuery)
+  // Publish the loaded results so the command menu can act on what is on screen,
+  // and Phase 4's local filtering can search it without refetching.
+  useEffect(() => {
+    useReaderContext.getState().setResults({ query: searchQuery, verses: rawVerses })
+    useReaderContext.getState().setLoadedVerses(rawVerses)
+  }, [searchQuery, rawVerses])
+  useEffect(() => () => useReaderContext.getState().clear(), [])
+  // Typing in the search bar narrows the results already on screen, with no
+  // request. The submitted query lives in the URL and only Enter changes it, so
+  // drafting can never trigger a backend search.
+  const draftQuery = useReaderContext((s) => s.draftQuery)
+  const draft = draftQuery.trim()
+  const isFiltering = draft.length >= 2 && draft !== searchQuery.trim()
+  const resultIndex = useMemo(() => buildLocalIndex(rawVerses), [rawVerses])
+  const visibleVerses = useMemo(() => {
+    if (!isFiltering) return rawVerses
+    const filtered = resultIndex.search(draft, {
+      primaryLang: primaryCode,
+      limit: rawVerses.length,
+    })
+    return filtered.chapters?.flatMap((chapter) => chapter.verses ?? []) ?? []
+  }, [isFiltering, resultIndex, draft, primaryCode, rawVerses])
+
   const allVerses =
     sortMode === 'verse-order'
-      ? [...rawVerses].sort((a, b) => {
+      ? [...visibleVerses].sort((a, b) => {
           const [ac, av] = (a.vk ?? '0:0').split(':').map(Number)
           const [bc, bv] = (b.vk ?? '0:0').split(':').map(Number)
           return ac === bc ? av - bv : ac - bc
         })
-      : [...rawVerses].sort((a, b) => {
+      : [...visibleVerses].sort((a, b) => {
           const sa = a.sc ?? 0
           const sb = b.sc ?? 0
           if (sa !== sb) return sb - sa
@@ -332,6 +357,12 @@ export default function SearchResult({ props }: { props: { query: string } }) {
       className={`space-y-3 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
     >
       <SearchHeader query={searchQuery} />
+
+      {isFiltering && (
+        <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+          {t('filteredLocally', { shown: allVerses.length, loaded: rawVerses.length })}
+        </div>
+      )}
 
       <Tabs
         value={searchTab}

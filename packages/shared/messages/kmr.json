@@ -92,7 +92,13 @@
       "quran": "Qur'an",
       "media": "Medya",
       "newsletters": "Nûçename"
-    }
+    },
+    "localResults": "Di ya barkirî de",
+    "searchEverything": "Li hemû ayetan “{query}” bigere",
+    "sourceThisChapter": "ev sûre",
+    "sourceOffline": "kopiya herêmî",
+    "sourceResults": "ev encam",
+    "filteredLocally": "Herêmî hat parzûnkirin: {shown} ji {loaded} barkirî. Ji bo lêgerîna her tiştî Enter bike."
   },
   "settings": {
     "title": "Sazkarî",
@@ -984,5 +990,40 @@
     "goBack": "Vegere",
     "copyFailed": "Nekarî li clipboardê kopî bike",
     "copiedValue": "Hate kopî kirin: {value}"
+  },
+  "commandMenu": {
+    "title": "Menuya fermanan",
+    "openLabel": "Menuya fermanan veke",
+    "placeholder": "Li rûpel, sûre û mîhengan bigere…",
+    "empty": "Encam tune.",
+    "back": "Vegere",
+    "on": "Vekirî",
+    "off": "Girtî",
+    "mode": "Awa",
+    "palette": "Palet",
+    "groupActions": "Kirin",
+    "groupPages": "Rûpel",
+    "groupChapters": "Sûre",
+    "groupAppendices": "Pêvek",
+    "groupVerses": "Ayet",
+    "groupContent": "Di naverokê de",
+    "groupSettings": "Mîheng",
+    "verseCount": "{count, plural, other {# ayet}}",
+    "copyAsTable": "Wek tabloyê kopî bike",
+    "copyAsTableHint": "Ji bo her ayetê rêzek, ji bo tablo û belgeyan",
+    "copyWordTable": "Tabloya peyvan kopî bike",
+    "copyWordTableHint": "Ji bo her peyvê rêzek, bi reh û wateyê",
+    "copyByReference": "Ayetan bi jimarê kopî bike…",
+    "copyByReferenceHint": "Her ayetê bîne û kopî bike",
+    "openAsVerseList": "Wek lîsteya ayetan veke",
+    "referencePlaceholder": "Jimarek binivîse, wek 2:255 an 1:1-7, 3:18",
+    "referenceEmpty": "Ji bo berdewamkirinê jimara ayetê binivîse.",
+    "noVersesFound": "Ji bo wê jimarê ayet nehat dîtin.",
+    "tooManyVerses": "Ev ji {max} ayetan zêdetir e. Jimarê tengtir bike.",
+    "playFromHere": "Ji vê ayetê lêde",
+    "togglePlayback": "Lêde an rawestîne",
+    "nextVerse": "Ayeta pêş",
+    "previousVerse": "Ayeta berê",
+    "contentOffline": "lêgerîna naverokê tune ye"
   }
 }

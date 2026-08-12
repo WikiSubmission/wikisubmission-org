@@ -20,17 +20,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import {
-  buildVerseMarkdown,
-  buildWordByWordMarkdown,
-  type CopyMarkdownOptions,
-} from '@/lib/quran-copy'
-import {
-  canCopyImage,
-  copyVerseImage,
-  type CopyImageOptions,
-} from '@/lib/quran-copy-image'
+import { buildVerseMarkdown, buildWordByWordMarkdown } from '@/lib/quran-copy'
+import { canCopyImage, copyVerseImage } from '@/lib/quran-copy-image'
+import { useCopyPrefs } from '@/lib/quran-copy-prefs'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { DENSITY } from './verse-density'
 import type { components } from '@/src/api/types.gen'
@@ -47,42 +39,6 @@ interface CopyButtonProps {
   compact?: boolean
 }
 
-function usePrefsSnapshot() {
-  const prefs = useQuranPreferences()
-  const primaryCode =
-    prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
-      ? prefs.primaryLanguage
-      : 'en'
-  const includeText = prefs.text && prefs.primaryLanguage !== 'none'
-  const secondaryCode =
-    prefs.secondaryLanguage &&
-    prefs.secondaryLanguage !== 'xl' &&
-    prefs.secondaryLanguage !== 'none'
-      ? prefs.secondaryLanguage
-      : undefined
-  return {
-    markdown: {
-      primaryCode,
-      secondaryCode,
-      includeText,
-      includeArabic: prefs.arabic,
-      includeSubtitles: prefs.subtitles,
-      includeTransliteration: prefs.transliteration,
-      includeFootnotes: prefs.footnotes,
-    } satisfies CopyMarkdownOptions,
-    image: {
-      prefs: {
-        primaryCode,
-        secondaryCode,
-        includeText,
-        includeArabic: prefs.arabic,
-        includeTransliteration: prefs.transliteration,
-        includeFootnotes: prefs.footnotes,
-      },
-    } satisfies CopyImageOptions,
-  }
-}
-
 export function CopyButton({
   verse,
   searchHighlight,
@@ -93,7 +49,7 @@ export function CopyButton({
   const [pendingKind, setPendingKind] = useState<CopyKind | null>(null)
   const [imageSupported, setImageSupported] = useState(false)
   const activateSelection = useVerseSelection((s) => s.activate)
-  const { markdown, image } = usePrefsSnapshot()
+  const { markdown, image } = useCopyPrefs()
   const isPending = pendingKind !== null
   const imagePending = pendingKind?.endsWith('image') ?? false
 

@@ -197,8 +197,8 @@ export default function QuranSettings() {
   const [openSection, setOpenSection] = useState<Section>('reading')
   const [langTab, setLangTab] = useState<'primary' | 'secondary'>('primary')
 
-  const set = (patch: Partial<typeof prefs>) =>
-    prefs.setPreferences({ ...prefs, ...patch, text: true })
+  // `patchPreferences` owns the `text: true` invariant, so this is now a passthrough.
+  const set = prefs.patchPreferences
 
   const toggle = (section: Exclude<Section, null>) =>
     setOpenSection((cur) => (cur === section ? null : section))

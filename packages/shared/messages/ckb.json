@@ -117,7 +117,13 @@
       "quran": "قورئان",
       "media": "میدیا",
       "newsletters": "نامە"
-    }
+    },
+    "localResults": "لە بارکراوەکان",
+    "searchEverything": "گەڕان بەدوای «{query}» لە هەموو ئایەتەکان",
+    "sourceThisChapter": "ئەم سوورەتە",
+    "sourceOffline": "کۆپی ناوخۆیی",
+    "sourceResults": "ئەم ئەنجامەکان",
+    "filteredLocally": "بە ناوخۆیی پاڵاوترا: {shown} لە {loaded} بارکراو. Enter دابگرە بۆ گەڕان لە هەمووی."
   },
   "settings": {
     "title": "ڕێکخستنەکان",
@@ -1633,5 +1639,40 @@
     "goBack": "بگەڕێوە",
     "copyFailed": "کۆپیکردن بۆ کلیپبۆرد سەرکەوتوو نەبوو",
     "copiedValue": "کۆپی کرا: {value}"
+  },
+  "commandMenu": {
+    "title": "پێڕستی فەرمان",
+    "openLabel": "کردنەوەی پێڕستی فەرمان",
+    "placeholder": "گەڕان بە پەرە، سوورە و ڕێکخستنەکان…",
+    "empty": "هیچ ئەنجامێک نییە.",
+    "back": "گەڕانەوە",
+    "on": "چالاک",
+    "off": "ناچالاک",
+    "mode": "دۆخ",
+    "palette": "تەختەڕەنگ",
+    "groupActions": "کردارەکان",
+    "groupPages": "پەرەکان",
+    "groupChapters": "سوورەتەکان",
+    "groupAppendices": "پاشکۆکان",
+    "groupVerses": "ئایەتەکان",
+    "groupContent": "لە ناوەڕۆک",
+    "groupSettings": "ڕێکخستنەکان",
+    "verseCount": "{count, plural, other {# ئایەت}}",
+    "copyAsTable": "لەبەرگرتنەوە وەک خشتە",
+    "copyAsTableHint": "ڕیزێک بۆ هەر ئایەتێک، لە خشتە و دۆکیومێنتدا دادەنرێت",
+    "copyWordTable": "لەبەرگرتنەوەی خشتەی وشەکان",
+    "copyWordTableHint": "ڕیزێک بۆ هەر وشەیەک، لەگەڵ ڕەگ و مانا",
+    "copyByReference": "لەبەرگرتنەوەی ئایەت بە ژمارە…",
+    "copyByReferenceHint": "هێنانی هەر ئایەتێک و لەبەرگرتنەوەی",
+    "openAsVerseList": "کردنەوە وەک لیستی ئایەت",
+    "referencePlaceholder": "ژمارەیەک بنووسە، وەک 2:255 یان 1:1-7، 3:18",
+    "referenceEmpty": "ژمارەی ئایەتێک بنووسە بۆ بەردەوامبوون.",
+    "noVersesFound": "هیچ ئایەتێک بۆ ئەو ژمارەیە نەدۆزرایەوە.",
+    "tooManyVerses": "ئەمە زیاترە لە {max} ئایەت. ژمارەکە کەمتر بکە.",
+    "playFromHere": "لێدان لەم ئایەتەوە",
+    "togglePlayback": "لێدان یان وەستان",
+    "nextVerse": "ئایەتی دواتر",
+    "previousVerse": "ئایەتی پێشوو",
+    "contentOffline": "گەڕانی ناوەڕۆک بەردەست نییە"
   }
 }

@@ -17,10 +17,7 @@ import { QuranAccordions } from './mini-components/quran-accordions'
 import { ContinueCoverToCoverSection } from './mini-components/continue-cover-to-cover-section'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { ActivityRecorder } from '@/components/activity-recorder'
-
-// SSR fetch cache TTL for /quran content. Kept short so backend data
-// updates / corrections show up within an hour without a manual purge.
-const QURAN_REVALIDATE_S = 3600
+import { fetchChapters, fetchQuranMetadata } from '@/lib/quran-metadata'
 
 // Detect query intent: chapter, verse-list, or text search.
 // Single verse refs AND ranges both go to verse-list (VerseListResult).
@@ -64,26 +61,17 @@ export default async function QuranPage({
 
   if (!queryText) {
     const locale = await getLocale()
-    const [chaptersRes, appendicesRes] = await Promise.all([
-      wsApiServer.GET('/chapters', {
-        params: { query: { lang: locale } },
-        next: { revalidate: QURAN_REVALIDATE_S },
-      }),
-      wsApiServer.GET('/appendices', {
-        params: { query: { lang: locale } },
-        next: { revalidate: QURAN_REVALIDATE_S },
-      }),
-    ])
-    const [tQuran, tNav, tCommon] = await Promise.all([
+    const [metadata, tQuran, tNav, tCommon] = await Promise.all([
+      fetchQuranMetadata(locale),
       getTranslations('quran'),
       getTranslations('nav'),
       getTranslations('common'),
     ])
 
-    const chapters = (chaptersRes.data ?? [])
+    const chapters = metadata.chapters
       .filter(Boolean)
       .sort((a, b) => (a.chapter_number ?? 0) - (b.chapter_number ?? 0))
-    const appendices = (appendicesRes.data ?? [])
+    const appendices = metadata.appendices
       .filter(Boolean)
       .sort((a, b) => (a.code ?? 0) - (b.code ?? 0))
 
@@ -273,11 +261,8 @@ export async function generateMetadata({
       let chapterTitle = ''
       try {
         const locale = await getLocale()
-        const [chaptersRes, verseRes] = await Promise.all([
-          wsApiServer.GET('/chapters', {
-            params: { query: { lang: locale } },
-            next: { revalidate: QURAN_REVALIDATE_S },
-          }),
+        const [chapters, verseRes] = await Promise.all([
+          fetchChapters(locale),
           wsApiServer.GET('/quran', {
             params: {
               query: {
@@ -289,7 +274,7 @@ export async function generateMetadata({
             },
           }),
         ])
-        const ch = chaptersRes.data?.find((c) => c.chapter_number === parsed.chapterNumber)
+        const ch = chapters.find((c) => c.chapter_number === parsed.chapterNumber)
         if (ch?.title) chapterTitle = ch.title
         const tx = verseRes.data?.chapters?.[0]?.verses?.[0]?.tr?.['en']?.tx ?? ''
         verseText = tx.length > 220 ? tx.slice(0, 217) + '...' : tx
@@ -315,11 +300,8 @@ export async function generateMetadata({
     let versePreview = ''
     try {
       const locale = await getLocale()
-      const [chaptersRes, versesRes] = await Promise.all([
-        wsApiServer.GET('/chapters', {
-          params: { query: { lang: locale } },
-          next: { revalidate: QURAN_REVALIDATE_S },
-        }),
+      const [chapters, versesRes] = await Promise.all([
+        fetchChapters(locale),
         wsApiServer.GET('/quran', {
           params: {
             query: {
@@ -331,7 +313,7 @@ export async function generateMetadata({
           },
         }),
       ])
-      const ch = chaptersRes.data?.find((c) => c.chapter_number === parsed.chapterNumber)
+      const ch = chapters.find((c) => c.chapter_number === parsed.chapterNumber)
       if (ch?.title) chapterTitle = ch.title
       if (ch?.verse_count) verseCount = ch.verse_count
       const verses = versesRes.data?.chapters?.[0]?.verses ?? []

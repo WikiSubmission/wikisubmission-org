@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { SearchIcon, StickyNote } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -16,6 +16,11 @@ import {
   expandAllChaptersVerseRef,
 } from '@/lib/scripture-parser'
 import { useMeSearch } from '@/hooks/use-me-search'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
+import { useLocalVerseSearch } from '@/hooks/use-local-verse-search'
+import { useReaderContext } from '@/hooks/use-reader-context-store'
+import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { splitHighlight } from '@/lib/command-match'
 
 export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const t = useTranslations('search')
@@ -28,11 +33,25 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // The input is the draft's only owner, so blur, Escape, and the reader's
+  // per-scroll `history.replaceState` verse sync can never discard what the
+  // user typed. Keying on the string value (not the searchParams object) means
+  // this only fires when `q` genuinely changes, i.e. on a real navigation.
+  const lastUrlQueryRef = useRef(urlQuery)
+  useEffect(() => {
+    if (lastUrlQueryRef.current === urlQuery) return
+    lastUrlQueryRef.current = urlQuery
+    setQuery(urlQuery)
+  }, [urlQuery])
+
   const chapters = useQuranNavStore((s) => s.chapters)
   const appendices = useQuranNavStore((s) => s.appendices)
 
   const performSearch = useCallback(
     (q: string) => {
+      // The draft has been promoted to a real query, so the results view should
+      // stop filtering and show what the backend returns.
+      useReaderContext.getState().setDraftQuery('')
       if (!q) {
         replace(`${pathname}`)
         return
@@ -52,17 +71,16 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           return
         }
       }
-      const normalized = normalizeQuranInput(q.trim())
-      const params = new URLSearchParams(searchParams.toString())
-      params.set('q', decodeURIComponent(normalized))
+      // A fresh param set, not a clone: carrying `verse` into a text search is
+      // meaningless, and a stale `tab=words` would silently force the words tab.
+      const params = new URLSearchParams()
+      params.set('q', decodeURIComponent(normalizeQuranInput(q.trim())))
       replace(`${pathname}?${params.toString()}`)
     },
-    [pathname, replace, router, searchParams, chapters]
+    [pathname, replace, router, chapters]
   )
 
-  const displayQuery = open ? query : urlQuery
-
-  const showDropdown = open && displayQuery.length >= 1 && !isQuranRefInput(displayQuery)
+  const showDropdown = open && query.length >= 1 && !isQuranRefInput(query)
 
   const matchedChapters = showDropdown
     ? chapters
@@ -71,11 +89,11 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           const n = c.chapter_number?.toString() ?? ''
           const transliteration =
             CHAPTER_TRANSLITERATIONS[(c.chapter_number ?? 1) - 1] ?? ''
-          const q = displayQuery.toLowerCase()
+          const q = query.toLowerCase()
           return (
             title.toLowerCase().includes(q) ||
             transliteration.toLowerCase().includes(q) ||
-            n.startsWith(displayQuery)
+            n.startsWith(query)
           )
         })
         .slice(0, 5)
@@ -87,17 +105,45 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           const title = a.title ?? ''
           const n = a.code?.toString() ?? ''
           return (
-            title.toLowerCase().includes(displayQuery.toLowerCase()) ||
-            n.startsWith(displayQuery)
+            title.toLowerCase().includes(query.toLowerCase()) ||
+            n.startsWith(query)
           )
         })
         .slice(0, 3)
     : []
 
-  const noteResults = useMeSearch(showDropdown ? displayQuery : '', 'quran').slice(0, 4)
+  // Notes search is the one network call reachable from the keystroke path, so
+  // it reads a debounced copy of the draft. Chapters and appendices above stay
+  // synchronous: they filter data the nav store already holds.
+  const debouncedQuery = useDebouncedValue(query, 300)
+  const noteQuery = showDropdown && debouncedQuery.trim().length >= 2 ? debouncedQuery : ''
+  const noteResults = useMeSearch(noteQuery, 'quran').slice(0, 4)
 
+  // Verse hits from whatever is already local: installed offline bundles, the
+  // hydrated chapter, or the loaded search results. No network on this path — the
+  // backend is only reached on submit.
+  const primaryLanguage = useQuranPreferences((s) => s.primaryLanguage)
+  const primaryCode =
+    primaryLanguage === 'xl' || primaryLanguage === 'none' ? 'en' : primaryLanguage
+  const localSearch = useLocalVerseSearch(showDropdown ? query : '', {
+    primaryLang: primaryCode,
+    limit: 5,
+  })
+  const localVerses = localSearch.data?.chapters?.flatMap((chapter) => chapter.verses ?? []) ?? []
+  const localSourceLabel =
+    localSearch.source === 'bundle'
+      ? t('sourceOffline')
+      : localSearch.source === 'results'
+        ? t('sourceResults')
+        : t('sourceThisChapter')
+
+  const canSubmit = query.trim().length > 0
   const hasSuggestions =
-    matchedChapters.length > 0 || matchedAppendices.length > 0 || noteResults.length > 0
+    matchedChapters.length > 0 ||
+    matchedAppendices.length > 0 ||
+    noteResults.length > 0 ||
+    localVerses.length > 0 ||
+    canSubmit
 
   return (
     <div
@@ -111,12 +157,16 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           performSearch(query)
         }}
       >
-        <SearchIcon
+        <button
+          type="submit"
+          aria-label={t('placeholder')}
           className={cn(
-            'absolute top-1/2 -translate-y-1/2 text-muted-foreground/60 pointer-events-none',
+            'absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full text-muted-foreground/60 hover:text-foreground transition-colors',
             large ? 'left-3.5 size-4' : 'left-2.5 size-3.5'
           )}
-        />
+        >
+          <SearchIcon className="size-full" />
+        </button>
         <Input
           type="search"
           placeholder={t('placeholder')}
@@ -124,13 +174,18 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
             'bg-muted/50 border-border/40',
             large ? 'pl-11 h-12 text-base rounded-xl' : 'pl-8 h-8 text-sm'
           )}
-          value={displayQuery}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => {
-            setQuery(urlQuery)
-            setOpen(true)
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value)
+            // Lets the results view narrow what is already on screen as you type.
+            useReaderContext.getState().setDraftQuery(e.target.value)
           }}
+          onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
+          onKeyDown={(e) => {
+            // Close the suggestions without discarding the draft.
+            if (e.key === 'Escape') setOpen(false)
+          }}
           autoComplete="off"
         />
       </form>
@@ -216,6 +271,75 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
               </button>
             )
           })}
+
+          {localVerses.length > 0 && (
+            <>
+              {(matchedChapters.length > 0 ||
+                matchedAppendices.length > 0 ||
+                noteResults.length > 0) && <div className="border-t border-border/20" />}
+              <div className="flex items-center justify-between px-3 pt-2 pb-1">
+                <span className="text-[11px] uppercase tracking-wide text-muted-foreground/60">
+                  {t('localResults')}
+                </span>
+                <span className="text-[11px] text-muted-foreground/50">{localSourceLabel}</span>
+              </div>
+            </>
+          )}
+
+          {localVerses.map((verse) => {
+            const [chapter, verseNumber] = (verse.vk ?? '').split(':')
+            const translation = (verse.tr ?? {})[primaryCode] ?? (verse.tr ?? {})['en']
+            const snippet = translation?.hl ?? translation?.tx ?? ''
+            return (
+              <button
+                type="button"
+                key={`local-${verse.vk}`}
+                onMouseDown={() => {
+                  setOpen(false)
+                  router.push(`/quran/${chapter}?verse=${verseNumber}`)
+                }}
+                className="flex items-start gap-2 w-full px-3 py-2 text-sm hover:bg-primary/5 text-left"
+              >
+                <span className="font-mono text-xs text-muted-foreground shrink-0 pt-0.5">
+                  {verse.vk}
+                </span>
+                <span className="flex-1 min-w-0 text-xs text-muted-foreground line-clamp-2">
+                  {/* Renders the <b> runs the search emits as marks, never as raw HTML. */}
+                  {splitHighlight(snippet).map((run, i) =>
+                    run.match ? (
+                      <mark key={i} className="bg-transparent font-medium text-primary">
+                        {run.text}
+                      </mark>
+                    ) : (
+                      <span key={i}>{run.text}</span>
+                    )
+                  )}
+                </span>
+              </button>
+            )
+          })}
+
+          {canSubmit && (
+            <>
+              <div className="border-t border-border/20" />
+              <button
+                type="button"
+                onMouseDown={() => {
+                  setOpen(false)
+                  performSearch(query)
+                }}
+                className="flex items-center gap-2 w-full px-3 py-2.5 text-sm hover:bg-muted/60 text-left"
+              >
+                <SearchIcon className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
+                <span className="truncate">
+                  {t('searchEverything', { query: query.trim() })}
+                </span>
+                <span className="ml-auto shrink-0 font-mono text-[11px] text-muted-foreground/50">
+                  ⏎
+                </span>
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

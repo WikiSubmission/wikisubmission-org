@@ -57,7 +57,7 @@ export function QuranModeSelector({
   useEffect(() => {
     if (!readingBlocked) return
     if (prefs.displayMode !== 'reading') return
-    prefs.setPreferences({ ...prefs, displayMode: 'verse' })
+    prefs.patchPreferences({ displayMode: 'verse' })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [readingBlocked, prefs.displayMode])
 
@@ -65,21 +65,13 @@ export function QuranModeSelector({
     if (mode === activeMode) return
     if (mode === 'reading' && readingBlocked) return
     if (mode === 'reading') {
-      prefs.setPreferences({ ...prefs, displayMode: 'reading' })
+      prefs.patchPreferences({ displayMode: 'reading' })
     } else if (mode === 'word') {
       if (onWordModeIntercept && (await onWordModeIntercept()) === false) return
-      prefs.setPreferences({
-        ...prefs,
-        displayMode: 'verse',
-        wordByWord: true,
-        arabic: true,
-      })
+      // Word-by-word is meaningless without the Arabic it annotates.
+      prefs.patchPreferences({ displayMode: 'verse', wordByWord: true, arabic: true })
     } else {
-      prefs.setPreferences({
-        ...prefs,
-        displayMode: 'verse',
-        wordByWord: false,
-      })
+      prefs.patchPreferences({ displayMode: 'verse', wordByWord: false })
     }
     onModeChanged?.(mode)
   }
