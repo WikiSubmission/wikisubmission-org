@@ -1,4 +1,4 @@
+import type { FC } from 'react'
+
 /** Extraction stub: video embeds contribute no searchable text. */
-export function YouTubeEmbed(_props: { videoId: string; title?: string }) {
-  return null
-}
+export const YouTubeEmbed: FC<{ videoId: string; title?: string }> = () => null

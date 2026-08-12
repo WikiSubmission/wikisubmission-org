@@ -7,11 +7,20 @@
  * contract) so no content migration is needed and the public
  * @portabletext/react renderer is unchanged.
  *
- * Custom block objects: `callout` (tone + text) and `image` (url/alt/caption,
- * with upload). Documents containing block types the schema cannot represent
- * are opened read-only so nothing is ever dropped on save.
+ * Custom block objects: `callout` (tone + text), `image` (url/alt/caption, with
+ * upload) and `richTableBlock` (tables migrated from the Studio, edited by
+ * rich-table-card.tsx). Documents containing block types the schema cannot
+ * represent are opened read-only so nothing is ever dropped on save.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 
 import { defineSchema, EditorProvider, PortableTextEditable, useEditor } from '@portabletext/editor'
 import type {
@@ -29,6 +38,8 @@ import {
   toInitialValue,
 } from './pt-schema'
 import { sanitizeUrl } from '@/lib/safe-url'
+import { RichTableCard } from './rich-table-card'
+import type { RichTableValue } from './pt-table'
 import { uploadEditorialImage } from './upload-image'
 
 const schemaDefinition = defineSchema(
@@ -36,6 +47,10 @@ const schemaDefinition = defineSchema(
 )
 
 type BlockPath = BlockRenderProps['path']
+
+// renderBlock is called outside the component tree's props, so the read-only
+// state of the document reaches the block cards through context.
+const ReadOnlyContext = createContext(false)
 
 interface BlockObjectValue {
   _key: string
@@ -55,8 +70,11 @@ interface PTEditorProps {
 
 export function PTEditor({ initialValue, onChange, disabled }: PTEditorProps) {
   // Slate needs the DOM; render only after mount to avoid SSR/hydration issues.
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  )
 
   const initial = useMemo(() => toInitialValue(initialValue), [initialValue])
   const unsupported = useMemo(() => hasUnsupportedBlocks(initialValue), [initialValue])
@@ -82,34 +100,39 @@ export function PTEditor({ initialValue, onChange, disabled }: PTEditorProps) {
     return (
       <div className="pt-editor pt-unsupported">
         This document contains content types the visual editor cannot represent
-        (for example legacy tables or embeds). Editing the body here is disabled
-        so nothing is lost. The content is preserved exactly as stored.
+        (for example an embed or a legacy block type). Editing the body here is
+        disabled so nothing is lost. The content is preserved exactly as stored.
       </div>
     )
   }
 
   return (
-    <div className={`pt-editor${disabled ? ' is-disabled' : ''}`}>
-      <EditorProvider
-        initialConfig={{ schemaDefinition, initialValue: initial as PortableTextBlock[] | undefined }}
-      >
-        <EventListenerPlugin
-          on={(event) => {
-            if (event.type === 'mutation') handleMutation(event.value)
+    <ReadOnlyContext.Provider value={disabled === true}>
+      <div className={`pt-editor${disabled ? ' is-disabled' : ''}`}>
+        <EditorProvider
+          initialConfig={{
+            schemaDefinition,
+            initialValue: initial as PortableTextBlock[] | undefined,
           }}
-        />
-        {!disabled && <Toolbar />}
-        <PortableTextEditable
-          className="pt-content"
-          readOnly={disabled}
-          renderStyle={(props) => renderStyle(props)}
-          renderDecorator={(props) => renderDecorator(props)}
-          renderAnnotation={(props) => renderAnnotation(props)}
-          renderListItem={(props) => <>{props.children}</>}
-          renderBlock={(props) => renderBlock(props)}
-        />
-      </EditorProvider>
-    </div>
+        >
+          <EventListenerPlugin
+            on={(event) => {
+              if (event.type === 'mutation') handleMutation(event.value)
+            }}
+          />
+          {!disabled && <Toolbar />}
+          <PortableTextEditable
+            className="pt-content"
+            readOnly={disabled}
+            renderStyle={(props) => renderStyle(props)}
+            renderDecorator={(props) => renderDecorator(props)}
+            renderAnnotation={(props) => renderAnnotation(props)}
+            renderListItem={(props) => <>{props.children}</>}
+            renderBlock={(props) => renderBlock(props)}
+          />
+        </EditorProvider>
+      </div>
+    </ReadOnlyContext.Provider>
   )
 }
 
@@ -166,6 +189,9 @@ function renderBlock(props: BlockRenderProps) {
   }
   if (props.schemaType.name === 'image') {
     return <ImageCard value={value} path={props.path} />
+  }
+  if (props.schemaType.name === 'richTableBlock') {
+    return <TableBlock value={props.value as RichTableValue} path={props.path} />
   }
   const meta = props.value as { listItem?: string; level?: number }
   return (
@@ -378,4 +404,14 @@ function ImageCard({ value, path }: { value: BlockObjectValue; path: BlockPath }
       </div>
     </div>
   )
+}
+
+// ── Rich table ───────────────────────────────────────────────────────────────
+// Tables were authored in the retired Studio by sanity-plugin-rich-table. The
+// card in rich-table-card.tsx edits rows, columns and cells in place and writes
+// back only the fields it touched, so Studio-only fields survive a save.
+
+function TableBlock({ value, path }: { value: RichTableValue; path: BlockPath }) {
+  const readOnly = useContext(ReadOnlyContext)
+  return <RichTableCard value={value} path={path} readOnly={readOnly} />
 }

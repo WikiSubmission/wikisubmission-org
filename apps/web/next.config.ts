@@ -60,7 +60,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://cdn.wikisubmission.org https://cdn.sanity.io https://img.youtube.com https://www.masjidtucson.org https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
+      "img-src 'self' data: blob: https://cdn.wikisubmission.org https://img.youtube.com https://www.masjidtucson.org https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
       "font-src 'self'",
       // The service worker (Serwist defaultCache) re-fetches cross-origin
       // assets via fetch() to populate its runtime cache, and fetch() is
@@ -73,7 +73,7 @@ const securityHeaders = [
       // (fetch(), so img-src/media-src listings do not cover it).
       // db.wikisubmission.org: Supabase endpoint the archive page queries via
       // the wikisubmission-sdk (ws_media / ws_newsletters full-text search).
-      "connect-src 'self' https://ws-backend.wikisubmission.org https://db.wikisubmission.org https://cdn.wikisubmission.org https://cdn.sanity.io https://audio.qurancdn.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
+      "connect-src 'self' https://ws-backend.wikisubmission.org https://db.wikisubmission.org https://cdn.wikisubmission.org https://audio.qurancdn.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatars.discordapp.com",
       "media-src 'self' blob: https://cdn.wikisubmission.org https://audio.qurancdn.com",
       "worker-src 'self' blob:",
       'frame-src https://www.youtube-nocookie.com https://www.youtube.com',
@@ -116,10 +116,6 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'img.youtube.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn.sanity.io',
       },
       {
         // First-party editorial images (article thumbnails + body images)

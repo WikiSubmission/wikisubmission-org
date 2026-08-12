@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { BookMarked, ListOrdered, Megaphone, Search } from 'lucide-react'
+import { BookMarked, BookOpen, BookText, ListOrdered, Megaphone, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { ContinueCoverToCover } from '@/components/quran-reader/continue-cover-to-cover'
+import { ScriptureRef } from '@/components/quran-ref'
+import { resolveScriptureRef } from '@/lib/scripture-search'
 import { CHAPTER_TRANSLITERATIONS, VERSE_COUNTS } from '@/constants/quran-chapters'
 import { setChapterFlightState } from '@/lib/chapter-flight'
 import { Flip } from '@/lib/gsap'
@@ -82,6 +84,10 @@ export function ChapterIndex() {
     [query, titles]
   )
 
+  // "2:255", "1 1-7", "1:4,2:45", ":50", "Mark 12:3" — a typed reference goes
+  // straight to the passage instead of running a full-text search.
+  const scriptureRef = useMemo(() => resolveScriptureRef(query), [query])
+
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pt-3 pb-6">
       <div className="relative mb-4">
@@ -97,7 +103,47 @@ export function ChapterIndex() {
         />
       </div>
 
-      {query.trim() && (
+      {scriptureRef?.kind === 'quran' && (
+        <Link
+          href={scriptureRef.href}
+          prefetch={false}
+          onClick={() => haptic('light')}
+          className="mb-3 flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3 transition-colors active:bg-primary/10"
+        >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+            <BookOpen className="size-4" />
+          </span>
+          <span className="flex min-w-0 flex-col text-start">
+            <span className="truncate font-mono text-base font-semibold leading-tight text-primary">
+              {scriptureRef.label}
+            </span>
+            <span className="truncate text-sm text-muted-foreground">
+              {t('mobile.reader.goToReference')}
+            </span>
+          </span>
+        </Link>
+      )}
+
+      {scriptureRef?.kind === 'bible' && (
+        <ScriptureRef
+          reference={scriptureRef.reference}
+          triggerClassName="mb-3 flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3 transition-colors active:bg-primary/10"
+        >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+            <BookText className="size-4" />
+          </span>
+          <span className="flex min-w-0 flex-col text-start">
+            <span className="truncate text-base font-semibold leading-tight text-primary">
+              {scriptureRef.label}
+            </span>
+            <span className="truncate text-sm text-muted-foreground">
+              {t('mobile.reader.previewBibleVerse')}
+            </span>
+          </span>
+        </ScriptureRef>
+      )}
+
+      {query.trim() && !scriptureRef && (
         <Link
           href={`/quran/search?q=${encodeURIComponent(query.trim())}`}
           prefetch={false}

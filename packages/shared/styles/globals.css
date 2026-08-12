@@ -2291,3 +2291,18 @@ html[data-palette='mono'].dark {
   letter-spacing: 0.04em;
   background: color-mix(in oklab, var(--ed-surface) 50%, transparent);
 }
+
+/* ── Closed overlay layers must never swallow taps ──────────────────────────
+   A Radix layer stays mounted until its exit animation fires `animationend`.
+   The Android WebView pauses CSS animations when the app is backgrounded, so a
+   layer closed at that moment can be stranded in the DOM — invisible, fullscreen,
+   and eating every tap. A closed layer is never interactive, so make that
+   explicit rather than relying on the animation completing.
+   See packages/shared/lib/pointer-events-recovery.ts for the body-level half. */
+[role='dialog'][data-state='closed'],
+[role='alertdialog'][data-state='closed'],
+[role='menu'][data-state='closed'],
+[role='listbox'][data-state='closed'],
+[data-slot$='-overlay'][data-state='closed'] {
+  pointer-events: none;
+}

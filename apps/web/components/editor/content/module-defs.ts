@@ -15,10 +15,12 @@ export type FieldDef =
   | { kind: 'select'; key: string; label: string; required?: boolean; options?: Array<{ value: string; label: string }>; optionsKey?: string; desc?: string }
   | { kind: 'multiselect'; key: string; label: string; optionsKey: string; desc?: string }
   | { kind: 'number'; key: string; label: string; desc?: string }
-  | { kind: 'toggle'; key: string; label: string; desc?: string }
+  | { kind: 'toggle'; key: string; label: string; desc?: string; defaultOn?: boolean }
   | { kind: 'tags'; key: string; label: string; desc?: string }
   | { kind: 'image'; key: string; label: string; required?: boolean; desc?: string; aspect?: string }
   | { kind: 'pt'; key: string; label: string; desc?: string }
+  | { kind: 'appendixPt'; key: string; label: string; desc?: string }
+  | { kind: 'geo'; key: string; label: string; desc?: string }
   | { kind: 'row'; fields: FieldDef[] }
   | { kind: 'section'; label: string; desc?: string; when?: { key: string; equals: string } }
 
@@ -62,6 +64,13 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
       { kind: 'image', key: 'thumbnail_url', label: 'Thumbnail', aspect: '16 / 9', desc: 'Upload an image (stored on our CDN) or paste a hosted URL. 16:9 recommended.' },
       { kind: 'pt', key: 'thumbnail_text', label: 'Thumbnail text', desc: 'Short rich-text teaser shown on the thumbnail.' },
       { kind: 'pt', key: 'body', label: 'Body' },
+      {
+        kind: 'toggle',
+        key: 'enable_scripture_refs',
+        label: 'Link scripture references',
+        defaultOn: true,
+        desc: 'Turn verse references in the body into links. On unless you turn it off.',
+      },
     ],
   },
 
@@ -168,6 +177,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
           { kind: 'text', key: 'country', label: 'Country' },
         ],
       },
+      { kind: 'geo', key: 'geo', label: 'Coordinates', desc: 'Decimal degrees, e.g. 43.6548 / -79.3886. Leave both blank for none.' },
       { kind: 'text', key: 'meeting_schedule', label: 'Meeting schedule' },
       {
         kind: 'row',
@@ -196,7 +206,25 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
         ],
       },
       { kind: 'textarea', key: 'snippet', label: 'Snippet', rows: 2, desc: 'One-line teaser shown in appendix lists.' },
-      { kind: 'textarea', key: 'body', label: 'Body (markdown)', rows: 24 },
+      // Two body carriers while the Portable Text migration is in flight. The
+      // reader prefers body_pt and falls back to the markdown, so an appendix
+      // that has not been converted keeps rendering from the carrier it has.
+      {
+        kind: 'appendixPt',
+        key: 'body_pt',
+        label: 'Body (Portable Text)',
+        desc: 'Typed blocks. Preferred over the markdown body when present; clear every block to fall back to it.',
+      },
+      { kind: 'textarea', key: 'body', label: 'Body (markdown)', rows: 24, desc: 'Fallback, used only when there is no Portable Text body.' },
+      // An appendix carries at most one video, always trailing. It is metadata
+      // rather than body markdown, so the reader appends it below the body.
+      {
+        kind: 'row',
+        fields: [
+          { kind: 'text', key: 'video_id', label: 'Video ID', mono: true, desc: 'Bare 11-character YouTube id, not a URL. Leave blank for no video.' },
+          { kind: 'text', key: 'video_title', label: 'Video title', desc: 'Accessible label for the embed.' },
+        ],
+      },
     ],
   },
 }

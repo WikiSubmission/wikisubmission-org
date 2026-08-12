@@ -1,23 +1,16 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { sanityServer } from '@/lib/sanity'
+import { fetchArticles } from '@/lib/blog-backend'
+import { type Post } from '@/lib/blog-queries'
 import { APPENDICES } from '@/constants/appendices'
 
 const BASE = 'https://wikisubmission.org'
 
-const POSTS_QUERY = `*[_type == "article" && language == "en"] | order(publishedAt desc) {
-  title,
-  "slug": slug.current,
-  excerpt
-}`
-
-type Post = { title: string; slug: string; excerpt?: string }
-
 export async function GET() {
   let posts: Post[] = []
   try {
-    posts = await sanityServer.fetch<Post[]>(POSTS_QUERY)
+    posts = await fetchArticles('en')
   } catch {
     // non-critical — llms.txt still renders without blog posts
   }
@@ -60,7 +53,7 @@ export async function GET() {
     lines.push('', '## Blog Articles', '')
     for (const post of posts) {
       const desc = post.excerpt ? `: ${post.excerpt}` : ''
-      lines.push(`- [${post.title}](${BASE}/blog/${post.slug})${desc}`)
+      lines.push(`- [${post.title}](${BASE}/blog/${post.slug.current})${desc}`)
     }
   }
 

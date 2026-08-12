@@ -53,13 +53,21 @@ function BibleVersePreview({
  *    Bible:  <ScriptureRef reference="Mark 4:12" />
  *            <ScriptureRef reference="40:5:3" />     ← numeric (book 40 = Matthew)
  *            <ScriptureRef reference="1 Sam 3:1-5" />
+ *
+ *  `children` + `triggerClassName` replace the inline badge with a caller-owned
+ *  trigger — used by the mobile search field, where the reference is a full
+ *  result row rather than a word inside a sentence.
  */
 export function ScriptureRef({
   reference,
   from,
+  children,
+  triggerClassName,
 }: {
   reference: string
   from?: string
+  children?: React.ReactNode
+  triggerClassName?: string
 }) {
   const prefs = useQuranPreferences()
   const { verses: quranVerses, loading: quranLoading, error: quranError, fetch: fetchQuran } = useVerseFetch()
@@ -92,7 +100,9 @@ export function ScriptureRef({
 
   // If unparseable, render plain text so we don't swallow content
   if (!isBible && !quranRef) {
-    return <span className="font-glacial text-[0.85em] font-bold">{reference}</span>
+    return children ?? (
+      <span className="font-glacial text-[0.85em] font-bold">{reference}</span>
+    )
   }
 
   // Badge label
@@ -139,10 +149,13 @@ export function ScriptureRef({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <button
         onClick={() => handleOpenChange(true)}
-        className="inline-flex items-center font-glacial text-[0.85em] font-bold text-primary hover:underline px-0.5 transition-colors cursor-pointer align-baseline select-text mx-0.5"
+        className={
+          triggerClassName ??
+          'inline-flex items-center font-glacial text-[0.85em] font-bold text-primary hover:underline px-0.5 transition-colors cursor-pointer align-baseline select-text mx-0.5'
+        }
         aria-label={`View ${isBible ? 'Bible' : 'Quran'} verse ${reference}`}
       >
-        {label}
+        {children ?? label}
       </button>
 
       <DialogContent

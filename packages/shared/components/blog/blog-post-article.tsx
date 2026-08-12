@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { ArrowLeftIcon } from 'lucide-react'
 import { Children, type ReactNode } from 'react'
 import { ScriptureText } from '@/components/scripture-text'
-import { urlFor } from '@/lib/sanity'
 import { sanitizeUrl } from '@/lib/safe-url'
 import type { BlogPost, RelatedBlogPost } from '@/lib/blog-queries'
 import { BlogReadingProgressBar } from './blog-reading-progress-bar'
@@ -40,13 +39,11 @@ function readingTime(body?: PortableTextBlock[]): string {
 export function BlogPostArticle({
   post,
   related = [],
-  preview = false,
   backHref = '/blog',
   hrefForRelated = (slug: string) => `/blog/${slug}`,
 }: {
   post: BlogPost
   related?: RelatedBlogPost[]
-  preview?: boolean
   backHref?: string
   hrefForRelated?: (slug: string) => string
 }) {
@@ -76,12 +73,6 @@ export function BlogPostArticle({
 
       {/* ── Title block (centered, magazine style) ──────────────────────── */}
       <section className="px-6 md:px-12 pt-8 pb-10 max-w-[760px] mx-auto text-center">
-        {preview && (
-          <div className="mb-8 rounded-xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-950 text-left">
-            Draft preview. This article is being loaded from unpublished Sanity content through a secret link.
-          </div>
-        )}
-
         {post.category && (
           <span className="inline-block mb-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
             {post.category}
@@ -257,6 +248,19 @@ function wrapStringChildren(children: ReactNode): ReactNode {
   )
 }
 
+const CALLOUT_TONES: Record<string, string> = {
+  info: 'border-primary/30 bg-primary/5 text-foreground',
+  tip: 'border-emerald-500/30 bg-emerald-500/5 text-foreground',
+  warning: 'border-amber-500/40 bg-amber-500/5 text-foreground',
+  danger: 'border-destructive/40 bg-destructive/5 text-foreground',
+}
+
+interface RichTableValue {
+  rows?: Array<{ cells?: Array<{ content?: unknown[] }> }>
+  columnHeaders?: Array<{ title?: string }>
+  hasRowTitles?: boolean
+}
+
 function buildPortableTextComponents(scriptureRefsEnabled: boolean) {
   const renderText = (children: ReactNode) =>
     scriptureRefsEnabled ? wrapStringChildren(children) : children
@@ -345,14 +349,67 @@ function buildPortableTextComponents(scriptureRefsEnabled: boolean) {
     },
   },
   types: {
+    // Editable in /editor but previously unrendered here, so a callout silently
+    // vanished from the published article.
+    callout: ({ value }: { value: { tone?: string; text?: string } }) => {
+      if (!value.text) return null
+      const tone = CALLOUT_TONES[value.tone ?? 'info'] ?? CALLOUT_TONES.info
+      return (
+        <aside className={`my-8 rounded-xl border px-5 py-4 text-[15px] leading-relaxed ${tone}`}>
+          {value.text}
+        </aside>
+      )
+    },
+    richTableBlock: ({ value }: { value: RichTableValue }) => {
+      const rows = value.rows ?? []
+      const headers = value.columnHeaders ?? []
+      if (rows.length === 0 && headers.length === 0) return null
+      return (
+        <figure className="my-10 -mx-2 overflow-x-auto">
+          <table className="w-full min-w-[520px] border-collapse text-[15px]">
+            {headers.length > 0 && (
+              <thead>
+                <tr>
+                  {headers.map((h, i) => (
+                    <th
+                      key={i}
+                      scope="col"
+                      className="border-b border-border px-3 py-2 text-left font-semibold"
+                    >
+                      {h.title ?? ''}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+            )}
+            <tbody>
+              {rows.map((row, r) => (
+                <tr key={r} className="align-top">
+                  {(row.cells ?? []).map((cell, c) => {
+                    const Cell = value.hasRowTitles && c === 0 ? 'th' : 'td'
+                    return (
+                      <Cell
+                        key={c}
+                        {...(Cell === 'th' ? { scope: 'row' as const } : {})}
+                        className="border-b border-border/60 px-3 py-2 text-left font-normal"
+                      >
+                        <PortableText value={(cell.content ?? []) as PortableTextBlock[]} />
+                      </Cell>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </figure>
+      )
+    },
     image: ({
       value,
     }: {
-      value: { url?: string; asset?: { url?: string }; alt?: string; caption?: string }
+      value: { url?: string; alt?: string; caption?: string }
     }) => {
-      // First-party images carry a plain `url`; legacy Sanity draft images
-      // (preview) still resolve through urlFor's asset ref.
-      const url = sanitizeUrl(value.url || urlFor(value))
+      const url = sanitizeUrl(value.url)
       if (!url) return null
       return (
         <figure className="my-10">

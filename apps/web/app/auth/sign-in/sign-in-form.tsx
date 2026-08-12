@@ -66,11 +66,10 @@ export function SignInForm() {
           </Link>
           <span className="auth-eyebrow">Sign in</span>
           <h1>
-            Return to the <em>commentary</em>
+            Welcome <em>back</em>
           </h1>
           <p>
-            Bookmark verses, write notes in the margin, and keep a streak across
-            the scripture.
+            Sign in to your WikiSubmission account to continue.
           </p>
         </div>
 

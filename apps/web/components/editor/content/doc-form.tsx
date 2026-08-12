@@ -29,6 +29,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { STATUS_META } from './status'
 import type { ContentModuleDef, FieldDef } from './module-defs'
 import { PTEditor } from './pt-editor'
+import { AppendixBodyEditor } from './appendix-body-editor'
 import { uploadEditorialImage } from './upload-image'
 
 type Fields = Record<string, unknown>
@@ -456,23 +457,62 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
           />
         </FieldShell>
       )
-    case 'toggle':
+    case 'toggle': {
+      // An absent value follows the field's default, so a flag the backend
+      // treats as on-unless-set does not read as "No" before it is touched.
+      const on = typeof value === 'boolean' ? value : (def.defaultOn ?? false)
       return (
         <FieldShell label={def.label} optional={optional} desc={desc}>
           <div className="flex flex-wrap gap-1.5">
-            <Chip active={value === true} disabled={disabled} onClick={() => set(def.key, true)}>
+            <Chip active={on} disabled={disabled} onClick={() => set(def.key, true)}>
               Yes
             </Chip>
-            <Chip
-              active={value === false || value === undefined || value === null}
-              disabled={disabled}
-              onClick={() => set(def.key, false)}
-            >
+            <Chip active={!on} disabled={disabled} onClick={() => set(def.key, false)}>
               No
             </Chip>
           </div>
         </FieldShell>
       )
+    }
+    case 'geo': {
+      const point = (value ?? null) as { lat?: number; lng?: number } | null
+      // Both halves must be present to form a point; clearing either drops it.
+      const commit = (part: 'lat' | 'lng', raw: string) => {
+        const trimmed = raw.trim()
+        const next = { lat: point?.lat, lng: point?.lng, [part]: trimmed === '' ? undefined : Number(trimmed) }
+        if (trimmed !== '' && !Number.isFinite(next[part])) return
+        set(
+          def.key,
+          Number.isFinite(next.lat) && Number.isFinite(next.lng)
+            ? { lat: next.lat as number, lng: next.lng as number }
+            : null,
+        )
+      }
+      return (
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              className={MONO_FONT}
+              inputMode="decimal"
+              placeholder="Latitude"
+              aria-label={`${def.label} latitude`}
+              defaultValue={point?.lat ?? ''}
+              disabled={disabled}
+              onChange={(e) => commit('lat', e.target.value)}
+            />
+            <Input
+              className={MONO_FONT}
+              inputMode="decimal"
+              placeholder="Longitude"
+              aria-label={`${def.label} longitude`}
+              defaultValue={point?.lng ?? ''}
+              disabled={disabled}
+              onChange={(e) => commit('lng', e.target.value)}
+            />
+          </div>
+        </FieldShell>
+      )
+    }
     case 'tags': {
       const text = Array.isArray(value) ? (value as unknown[]).join(', ') : ''
       return (
@@ -510,6 +550,16 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
             initialValue={value}
             disabled={disabled}
             onChange={(blocks) => set(def.key, blocks)}
+          />
+        </FieldShell>
+      )
+    case 'appendixPt':
+      return (
+        <FieldShell label={def.label} optional={optional} desc={desc}>
+          <AppendixBodyEditor
+            value={value}
+            disabled={disabled}
+            onChange={(blocks) => set(def.key, blocks.length > 0 ? blocks : undefined)}
           />
         </FieldShell>
       )

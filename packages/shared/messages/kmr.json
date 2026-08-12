@@ -338,7 +338,9 @@
     },
     "tools": {
       "dividerNum": "VI",
-      "aiTitle": "SubmissionAI"
+      "aiTitle": "Submission AI",
+      "githubTitle": "Koda Çavkaniyê",
+      "githubDesc": "Her sepan, koma daneyan û amûrek li vê malperê çavkaniya wê vekirî ye. Bixwînin, fork bikin û li ser ava bikin."
     }
   },
   "meNotes": {
@@ -771,6 +773,8 @@
       "searchPlaceholder": "Li sûre an ayetan bigere",
       "searchAllVerses": "Li hemû ayetan bigere",
       "searchAcross": "\"{query}\" di tevahiya Qur'anê de bibîne",
+      "goToReference": "Biçe vê beşê",
+      "previewBibleVerse": "Vê ayeta Kitêba Pîroz bibîne",
       "appendicesDesc": "Hemû 38 pêvekên Peymana Dawî",
       "decreaseTextSize": "Nivîsê biçûk bike",
       "increaseTextSize": "Nivîsê mezin bike",

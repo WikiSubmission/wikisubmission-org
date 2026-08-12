@@ -8,6 +8,40 @@ export function appendixPdfUrl(number: number): string {
   return `https://library.wikisubmission.org/file/quran-the-final-testament-appendix-${number}`
 }
 
+// The editorial store keeps the scripture reference inside the title
+// ("One of the Great Miracles [74:35]"), while the reader renders it on its own
+// line beneath the heading.
+const TRAILING_REF = /\s*\[(\d{1,3}:\d{1,3}(?:-\d{1,3})?)\]\s*$/
+
+/**
+ * Splits an editorial appendix title into the heading and its trailing
+ * scripture reference, so a title edited in /editor renders in the same shape
+ * as the static metadata.
+ */
+export function splitAppendixTitle(title: string): { title: string; quranRef?: string } {
+  const match = TRAILING_REF.exec(title)
+  if (!match) return { title: title.trim() }
+  return { title: title.replace(TRAILING_REF, '').trim(), quranRef: match[1] }
+}
+
+/**
+ * Reader-facing metadata for an appendix: the editorial row when it has one,
+ * otherwise the static list. Returns undefined for an unknown number.
+ */
+export function resolveAppendixMeta(
+  number: number,
+  editorialTitle?: string
+): AppendixMeta | undefined {
+  const fallback = APPENDICES.find((a) => a.number === number)
+  if (!editorialTitle?.trim()) return fallback
+  const split = splitAppendixTitle(editorialTitle)
+  return {
+    number,
+    title: split.title || fallback?.title || editorialTitle,
+    quranRef: split.quranRef ?? fallback?.quranRef,
+  }
+}
+
 export const APPENDICES: AppendixMeta[] = [
   { number: 1, title: 'One of the Great Miracles', quranRef: '74:35' },
   { number: 2, title: "God's Messenger of the Covenant", quranRef: '3:81' },

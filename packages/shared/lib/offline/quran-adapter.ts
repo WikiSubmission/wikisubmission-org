@@ -1,4 +1,5 @@
 import type { components } from '@/src/api/types.gen'
+import { parseQuranSegments } from '@/lib/verse-ref-parser'
 import type { OfflineContentStore } from './content-store'
 import type { WordRow } from './types'
 
@@ -108,6 +109,66 @@ export async function offlineQuranVerses(
   }
 
   return { verses, titles, hasWords }
+}
+
+/**
+ * Build a network-shaped QuranResponse for a reference list ("2:255",
+ * "1:1-7,2:45") entirely from installed bundles, so a typed reference resolves
+ * without a connection. Each segment is read as its own range and merged per
+ * chapter; overlapping segments collapse on the verse key.
+ *
+ * Returns null when the input holds no parsable segment or when any one of them
+ * misses locally — a partial answer would silently drop verses the user asked
+ * for, so the caller falls back to the network instead.
+ */
+export async function offlineQuranVerseList(
+  store: OfflineContentStore,
+  langs: string[],
+  refs: string,
+  words?: OfflineWordsOpts,
+): Promise<QuranResponse | null> {
+  const segments = parseQuranSegments(refs)
+  if (segments.length === 0) return null
+
+  const byChapter = new Map<
+    number,
+    { verses: Map<string, VerseData>; titles: Record<string, string> }
+  >()
+
+  for (const seg of segments) {
+    const range: OfflineRange =
+      seg.type === 'verse'
+        ? { chapter: seg.cn, verseStart: seg.v, verseEnd: seg.v }
+        : { chapter: seg.cn, verseStart: seg.vs, verseEnd: seg.ve }
+
+    const result = await offlineQuranVerses(store, langs, range, words)
+    if (!result || result.verses.length === 0) return null
+
+    const entry = byChapter.get(seg.cn) ?? { verses: new Map(), titles: result.titles }
+    for (const verse of result.verses) {
+      if (verse.vk) entry.verses.set(verse.vk, verse)
+    }
+    byChapter.set(seg.cn, entry)
+  }
+
+  const chapters: ChapterData[] = [...byChapter.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([cn, entry]) => ({
+      cn,
+      titles: entry.titles,
+      verses: [...entry.verses.values()].sort(
+        (a, b) => verseNumber(a.vk) - verseNumber(b.vk),
+      ),
+    }))
+
+  return {
+    info: { result_count: chapters.reduce((n, ch) => n + (ch.verses?.length ?? 0), 0) },
+    chapters,
+  }
+}
+
+function verseNumber(vk: string | undefined): number {
+  return parseInt((vk ?? '').split(':')[1] ?? '0', 10)
 }
 
 /**

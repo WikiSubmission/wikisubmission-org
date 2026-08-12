@@ -1,18 +1,39 @@
 import type { PortableTextBlock } from '@portabletext/types'
 
-// Shared blog data shapes and GROQ queries. The web app fetches these through
-// its server-only Sanity client (apps/web/lib/sanity.ts); the mobile static
-// export fetches the same queries client-side via the shared CDN client
-// (packages/shared/lib/blog-client.ts). Keeping the strings in one place stops
-// the two platforms from drifting.
+// Shared blog data shapes. Both platforms read published articles from
+// ws-backend's public editorial endpoints via blog-backend.ts; these types are
+// the view model those responses are mapped onto.
 
-export const SANITY_LANGUAGES = ['en', 'fr', 'ar', 'tr'] as const
-export type SanityLanguage = (typeof SANITY_LANGUAGES)[number]
+/**
+ * The language reads fall back to when the reader's locale has nothing
+ * published, and the value a locale normalizes to when it is missing or
+ * malformed. The backend reads an empty `language` as "every language", which
+ * would put several scripts on one page, so a read must never send one.
+ */
+export const DEFAULT_BLOG_LANGUAGE = 'en'
 
-export function toSanityLanguage(locale: string): SanityLanguage {
-  return (SANITY_LANGUAGES as readonly string[]).includes(locale)
-    ? (locale as SanityLanguage)
-    : 'en'
+/**
+ * A content language code. Every language the editorial registry can publish to
+ * is valid, so this is deliberately a plain string and not a fixed union.
+ */
+export type BlogLanguage = string
+
+/** Shape of a BCP-47 code: two or three letters, optional subtags. */
+const LANGUAGE_CODE = /^[a-z]{2,3}(?:-[a-z0-9]+)*$/
+
+/**
+ * Normalize a UI locale into a content language code.
+ *
+ * This does not restrict which languages are readable. The blog used to accept
+ * only en/fr/ar/tr and clamp everything else to English, so an article
+ * published in German was invisible to a German reader even though /editor
+ * offers the full language registry. Unknown codes now pass through, and
+ * blog-backend falls back to English only when the language turns up empty, so
+ * a newly published language reaches readers with no frontend change.
+ */
+export function toBlogLanguage(locale: string | null | undefined): BlogLanguage {
+  const code = locale?.trim().toLowerCase() ?? ''
+  return LANGUAGE_CODE.test(code) ? code : DEFAULT_BLOG_LANGUAGE
 }
 
 // Index-card shape (list/grid). Slug is an object here to match the GROQ result.
@@ -64,59 +85,3 @@ export type RelatedBlogPost = {
   category?: string
   thumbnailUrl?: string
 }
-
-export const ALL_ARTICLES_QUERY = `*[_type == "article" && language == $language] | order(publishedAt desc) {
-  _id, title, slug, excerpt, publishedAt,
-  "category": categories[0]->name,
-  "categorySlug": categories[0]->slug.current,
-  "thumbnailUrl": thumbnail.asset->url,
-  "authorName": author->firstName + " " + author->lastName
-}`
-
-export const CATEGORIES_QUERY = `*[_type == "category"] | order(name asc) {
-  name,
-  "slug": slug.current,
-  "count": count(*[_type == "article" && language == $language && references(^._id)])
-}`
-
-const POST_FIELDS = `
-  _id,
-  title,
-  slug,
-  excerpt,
-  publishedAt,
-  updatedAt,
-  language,
-  enableScriptureRefs,
-  "category": categories[0]->name,
-  "categoryRef": categories[0]._ref,
-  body,
-  "thumbnailUrl": thumbnail.asset->url,
-  "authorName": author->firstName + " " + author->lastName,
-  "authorPhotoUrl": author->photo.asset->url
-`
-
-export const POST_BY_SLUG_QUERY = `*[_type == "article" && slug.current == $slug && language == $language][0] {
-  ${POST_FIELDS}
-}`
-
-export const PREVIEW_POST_BY_ID_QUERY = `*[
-  _type == "article" &&
-  _id in [$documentId, "drafts." + $documentId]
-][0] {
-  ${POST_FIELDS}
-}`
-
-export const RELATED_QUERY = `*[
-  _type == "article" &&
-  language == $language &&
-  $categoryRef in categories[]._ref &&
-  _id != $excludeId
-] | order(publishedAt desc) [0...3] {
-  _id,
-  title,
-  slug,
-  publishedAt,
-  "category": categories[0]->name,
-  "thumbnailUrl": thumbnail.asset->url
-}`

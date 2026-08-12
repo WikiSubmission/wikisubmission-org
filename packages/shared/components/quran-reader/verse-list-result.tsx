@@ -108,7 +108,10 @@ export function VerseListResult({
 
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${zoom}-${prefs.arabic}-${prefs.wordByWord}`
 
-  // Build lookup: cn → (verseNumber → VerseData) and cn → titles
+  // Build lookup: cn → (verseNumber → VerseData) and cn → titles. Offline
+  // bundles key titles by the languages they were read in, so the reader's own
+  // language is tried before English.
+  const primaryLanguage = prefs.primaryLanguage
   const { byChapter, chapterTitles } = useMemo(() => {
     const byChapter = new Map<number, Map<number, VerseData>>()
     const chapterTitles = new Map<number, string>()
@@ -119,10 +122,13 @@ export function VerseListResult({
         if (!isNaN(vNum)) m.set(vNum, v)
       }
       byChapter.set(ch.cn ?? 0, m)
-      chapterTitles.set(ch.cn ?? 0, ch.titles?.['en'] ?? `Chapter ${ch.cn}`)
+      chapterTitles.set(
+        ch.cn ?? 0,
+        ch.titles?.[primaryLanguage] ?? ch.titles?.['en'] ?? `Chapter ${ch.cn}`,
+      )
     }
     return { byChapter, chapterTitles }
-  }, [data])
+  }, [data, primaryLanguage])
 
   const segments = useMemo(() => parseQuranSegments(queryText), [queryText])
 

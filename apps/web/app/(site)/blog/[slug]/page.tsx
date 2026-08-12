@@ -7,7 +7,7 @@ import {
   buildBlogPostMetadata,
   fetchPublishedBlogPostBySlug,
   fetchRelatedBlogPosts,
-  toSanityLanguage,
+  toBlogLanguage,
 } from '../blog-post'
 
 export async function generateMetadata({
@@ -17,7 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
   const locale = await getLocale()
-  const language = toSanityLanguage(locale)
+  const language = toBlogLanguage(locale)
   try {
     const post = await fetchPublishedBlogPostBySlug(slug, language)
     if (!post) return {}
@@ -36,13 +36,13 @@ export default async function BlogPostPage({
 }) {
   const { slug } = await params
   const locale = await getLocale()
-  const language = toSanityLanguage(locale)
+  const language = toBlogLanguage(locale)
 
   let post = null
   try {
     post = await fetchPublishedBlogPostBySlug(slug, language)
   } catch (err) {
-    console.error('[blog/slug] Sanity fetch failed:', err)
+    console.error('[blog/slug] article fetch failed:', err)
     notFound()
   }
 

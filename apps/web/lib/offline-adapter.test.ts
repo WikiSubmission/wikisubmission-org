@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { offlineQuranVerses, offlineQuranSearch } from '@/lib/offline/quran-adapter'
+import {
+  offlineQuranVerses,
+  offlineQuranSearch,
+  offlineQuranVerseList,
+} from '@/lib/offline/quran-adapter'
 import type { OfflineContentStore } from '@/lib/offline/content-store'
 import type { BundleInfo, SearchRow, VerseRow, WordRow } from '@/lib/offline/types'
 
@@ -289,5 +293,94 @@ describe('offlineQuranSearch', () => {
     const store = fakeStore({ installedIds: ['quran-en'], searchRows: ordered })
     const res = await offlineQuranSearch(store, ['en'], 'mercy')
     expect(res?.chapters?.map((c) => c.cn)).toEqual([76, 1])
+  })
+})
+
+// ── Verse-reference lists ────────────────────────────────────────────────────
+
+/** Range-aware store: unlike fakeStore above, it honours chapter + verse bounds
+ *  so multi-segment references can be exercised. */
+function rangeStore(rows: Record<string, VerseRow[]>, installedIds: string[]): OfflineContentStore {
+  return {
+    async installedBundles() {
+      return installedIds.map(
+        (id): BundleInfo => ({
+          id,
+          scripture: 'quran',
+          lang: id.split('-').pop() ?? '',
+          kind: 'text',
+          bytes: 1,
+          sha256: 'a'.repeat(64),
+          dataVersion: 1,
+          schemaVersion: 1,
+          normalizationVersion: 1,
+          ftsTokenizer: 'trigram',
+          installedAt: 0,
+        }),
+      )
+    },
+    async getVerses(_scripture, lang, range) {
+      return (rows[lang] ?? []).filter(
+        (r) =>
+          r.cn === range.chapter &&
+          (range.verseStart === undefined || r.vn >= range.verseStart) &&
+          (range.verseEnd === undefined || r.vn <= range.verseEnd),
+      )
+    },
+    async getWords() {
+      return []
+    },
+    async getChapterTitle(_scripture, lang, chapter) {
+      return lang === 'en' ? `Chapter ${chapter}` : null
+    },
+    async search() {
+      return []
+    },
+    async searchDocs() {
+      return []
+    },
+    async install() {},
+    async remove() {},
+  }
+}
+
+const listRows: Record<string, VerseRow[]> = {
+  en: [
+    { vk: '1:1', cn: 1, vn: 1, text: 'one one' },
+    { vk: '1:2', cn: 1, vn: 2, text: 'one two' },
+    { vk: '1:3', cn: 1, vn: 3, text: 'one three' },
+    { vk: '2:45', cn: 2, vn: 45, text: 'two forty-five' },
+  ],
+}
+
+describe('offlineQuranVerseList', () => {
+  it('assembles a multi-chapter reference list in chapter and verse order', async () => {
+    const store = rangeStore(listRows, ['quran-en'])
+    const res = await offlineQuranVerseList(store, ['en'], '2:45,1:1-2')
+    expect(res?.chapters?.map((c) => c.cn)).toEqual([1, 2])
+    expect(res?.chapters?.[0].verses?.map((v) => v.vk)).toEqual(['1:1', '1:2'])
+    expect(res?.chapters?.[0].titles).toEqual({ en: 'Chapter 1' })
+    expect(res?.info?.result_count).toBe(3)
+  })
+
+  it('collapses overlapping segments on the verse key', async () => {
+    const store = rangeStore(listRows, ['quran-en'])
+    const res = await offlineQuranVerseList(store, ['en'], '1:1-3,1:2')
+    expect(res?.chapters?.[0].verses?.map((v) => v.vk)).toEqual(['1:1', '1:2', '1:3'])
+  })
+
+  it('returns null when any segment misses locally, so the caller can use the network', async () => {
+    const store = rangeStore(listRows, ['quran-en'])
+    expect(await offlineQuranVerseList(store, ['en'], '1:1,9:9')).toBeNull()
+  })
+
+  it('returns null when the bundle for a requested language is not installed', async () => {
+    const store = rangeStore(listRows, ['quran-en'])
+    expect(await offlineQuranVerseList(store, ['en', 'ar'], '1:1')).toBeNull()
+  })
+
+  it('returns null for input with no parsable segment', async () => {
+    const store = rangeStore(listRows, ['quran-en'])
+    expect(await offlineQuranVerseList(store, ['en'], 'mercy')).toBeNull()
   })
 })

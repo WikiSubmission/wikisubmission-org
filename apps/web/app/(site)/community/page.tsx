@@ -22,8 +22,8 @@ export const metadata = buildPageMetadata({
   url: '/community',
 })
 
-// Sanity-backed; the backend invalidates its own cache via webhook. Refresh
-// the SSR copy hourly so changes propagate without a redeploy.
+// Served from ws-backend's editorial store. Refresh the SSR copy hourly so
+// edits made in /editor propagate without a redeploy.
 export const revalidate = 3600
 
 function toLocation(c: ApiCommunity): Location | null {

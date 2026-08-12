@@ -19,7 +19,7 @@ const GEO_URL = '/maps/world-110m.json'
 
 // ─── Data ─────────────────────────────────────────────────────
 // Physical locations and social communities are sourced from the ws-backend
-// `/communities` endpoint (Sanity-backed, see `page.tsx`). Section III
+// `/communities` endpoint (editorial store, see `page.tsx`). Section III
 // ("Content channels") still uses static placeholders since the backend has
 // no equivalent endpoint yet.
 
@@ -35,7 +35,7 @@ export type Location = {
   lng: number
   contact: string
   desc: string
-  /** Optional fields populated when present on the Sanity entry. */
+  /** Optional fields populated when present on the community record. */
   schedule?: string
   address?: string
 }

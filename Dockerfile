@@ -23,8 +23,6 @@ FROM base AS builder
 
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_APP_URL
-ARG NEXT_PUBLIC_SANITY_PROJECT_ID
-ARG NEXT_PUBLIC_SANITY_DATASET
 # Commit being built, injected by Coolify. next.config.ts uses it as the
 # service worker's precache revision for the offline fallback documents; .git is
 # excluded from the build context and this base has no git, so the config cannot
@@ -33,8 +31,6 @@ ARG SOURCE_COMMIT
 
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
-ENV NEXT_PUBLIC_SANITY_PROJECT_ID=$NEXT_PUBLIC_SANITY_PROJECT_ID
-ENV NEXT_PUBLIC_SANITY_DATASET=$NEXT_PUBLIC_SANITY_DATASET
 ENV SOURCE_COMMIT=$SOURCE_COMMIT
 
 # Bring in the installed workspace (root + apps/web node_modules symlinks),

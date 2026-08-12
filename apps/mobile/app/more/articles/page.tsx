@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { BlogBrowser } from '@/components/blog/blog-browser'
 import { Spinner } from '@/components/ui/spinner'
 import { deriveCategories, fetchArticles } from '@/lib/blog-backend'
-import { toSanityLanguage, type Category, type Post } from '@/lib/blog-queries'
+import { toBlogLanguage, type Category, type Post } from '@/lib/blog-queries'
 
 // Articles index. The shared BlogBrowser runs without the web search route
 // (list + category filter only) and points article links at the mobile detail
@@ -18,7 +18,7 @@ export default function ArticlesScreen() {
 
   useEffect(() => {
     let cancelled = false
-    const language = toSanityLanguage(locale)
+    const language = toBlogLanguage(locale)
     fetchArticles(language)
       .then((articles) => {
         if (!cancelled) setData({ articles, categories: deriveCategories(articles) })

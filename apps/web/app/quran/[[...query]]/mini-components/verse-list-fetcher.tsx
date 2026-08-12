@@ -1,5 +1,5 @@
 import { wsApiServer } from '@/src/api/server-client'
-import { VerseListResult } from './verse-list-result'
+import { VerseListResult } from '@/components/quran-reader/verse-list-result'
 
 export async function VerseListFetcher({ queryText }: { queryText: string }) {
   let data = undefined
