@@ -123,6 +123,8 @@
     "sourceThisChapter": "ce chapitre",
     "sourceOffline": "copie hors ligne",
     "sourceResults": "ces résultats",
+    "sourceAllVerses": "tous les versets",
+    "sourcePartialLibrary": "{count} sourates sur 114",
     "filteredLocally": "Filtré localement : {shown} sur {loaded} chargés. Appuie sur Entrée pour tout rechercher."
   },
   "settings": {

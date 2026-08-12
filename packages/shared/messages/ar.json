@@ -123,6 +123,8 @@
     "sourceThisChapter": "هذه السورة",
     "sourceOffline": "النسخة المحلية",
     "sourceResults": "هذه النتائج",
+    "sourceAllVerses": "كل الآيات",
+    "sourcePartialLibrary": "{count} من 114 سورة",
     "filteredLocally": "تمت التصفية محليًا: {shown} من {loaded} مُحمَّلة. اضغط Enter للبحث في الكل."
   },
   "settings": {

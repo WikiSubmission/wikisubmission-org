@@ -7,6 +7,7 @@ import { QuranPlayer } from '@/components/quran-player/now-playing-bar'
 import { wsApiServer } from '@/src/api/server-client'
 import { LanguagesInit } from '@/components/languages-init'
 import { QuranNavInit } from '@/components/quran-nav-init'
+import { QuranLibraryInit } from '@/components/quran-library-init'
 import { SiteNav } from '@/components/site-nav'
 import { SiteFooter } from '@/components/site-footer'
 import { QuranNavSheet } from './client-components/nav-sheet'
@@ -66,6 +67,7 @@ export default async function QuranLayout({
       <div className={query ? 'pt-30' : 'pt-16'}>
         <LanguagesInit languages={languagesRes.data ?? []} />
         <QuranNavInit chapters={chapters} appendices={appendices} />
+        <QuranLibraryInit />
         <QuranScrollContainer>{children}</QuranScrollContainer>
         <SiteFooter />
         <MetricsCollector />

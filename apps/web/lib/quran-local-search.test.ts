@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildLocalIndex,
+  createLocalIndex,
   parseLocalQuery,
   searchVersesLocally,
 } from '@/lib/quran-local-search'
@@ -238,5 +239,44 @@ describe('buildLocalIndex', () => {
     const empty = buildLocalIndex([])
     expect(empty.size).toBe(0)
     expect(empty.search('god').chapters).toEqual([])
+  })
+})
+
+describe('createLocalIndex', () => {
+  it('searches verses added after construction', () => {
+    const index = createLocalIndex()
+    expect(index.search('merciful').chapters).toEqual([])
+    index.add(VERSES)
+    expect(index.size).toBe(4)
+    expect(keys(index.search('merciful'))).toEqual(['1:1'])
+  })
+
+  it('accumulates across batches rather than replacing', () => {
+    const index = createLocalIndex()
+    index.add([VERSES[0]!])
+    index.add([VERSES[1]!])
+    expect(index.size).toBe(2)
+    expect(keys(index.search('merciful'))).toEqual(['1:1'])
+    expect(keys(index.search('eternal'))).toEqual(['2:255'])
+  })
+
+  /**
+   * The library shares one index across its versions, so a retried batch must
+   * overwrite by verse key — otherwise the same verse would be scored twice and
+   * appear twice in the results.
+   */
+  it('replaces a verse re-added under the same key', () => {
+    const index = createLocalIndex()
+    index.add(VERSES)
+    index.add(VERSES)
+    expect(index.size).toBe(4)
+    expect(keys(index.search('merciful'))).toEqual(['1:1'])
+  })
+
+  it('matches buildLocalIndex for the same verses', () => {
+    const incremental = createLocalIndex()
+    incremental.add(VERSES.slice(0, 2))
+    incremental.add(VERSES.slice(2))
+    expect(keys(incremental.search('god'))).toEqual(keys(buildLocalIndex(VERSES).search('god')))
   })
 })

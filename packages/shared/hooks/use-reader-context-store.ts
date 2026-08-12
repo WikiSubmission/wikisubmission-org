@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import type { Corpus } from '@/lib/quran-local-corpus'
+import type { Library } from '@/lib/quran-local-library'
 import type { components } from '@/src/api/types.gen'
 
 type VerseData = components['schemas']['VerseData']
@@ -42,6 +43,20 @@ interface ReaderContextStore {
   /** Scalar mirror of `corpus.version`, safe to subscribe to. */
   corpusVersion: number
   /**
+   * The whole Quran as text, swept in behind the reader so search covers the
+   * book rather than only the open chapter.
+   *
+   * Same access rule as `corpus`: never select it in a render body, subscribe to
+   * `libraryVersion` instead. Unlike the corpus it is *not* cleared when a reader
+   * unmounts — it belongs to the Quran section, not to any one chapter, and
+   * re-sweeping it on every navigation would defeat the point.
+   */
+  library: Library | null
+  /** Scalar mirror of `library.version`, safe to subscribe to. */
+  libraryVersion: number
+  /** Chapters swept so far, out of 114. Lets the UI say how far coverage reaches. */
+  libraryChapterCount: number
+  /**
    * What the user has typed in the search bar but not yet submitted.
    *
    * The results view filters its loaded results by this, so typing narrows what
@@ -55,6 +70,7 @@ interface ReaderContextStore {
   setLoadedVerses(verses: VerseData[]): void
   setResults(results: { query: string; verses: VerseData[] } | null): void
   setCorpus(corpus: Corpus | null): void
+  setLibrary(library: Library | null): void
   setDraftQuery(query: string): void
   /** Called when a reader unmounts, so stale context cannot outlive it. */
   clear(): void
@@ -67,6 +83,9 @@ export const useReaderContext = create<ReaderContextStore>((set) => ({
   results: null,
   corpus: null,
   corpusVersion: 0,
+  library: null,
+  libraryVersion: 0,
+  libraryChapterCount: 0,
   draftQuery: '',
 
   setChapter: (chapterNumber) => set({ chapterNumber }),
@@ -74,9 +93,17 @@ export const useReaderContext = create<ReaderContextStore>((set) => ({
   setLoadedVerses: (loadedVerses) => set({ loadedVerses }),
   setResults: (results) => set({ results }),
   setCorpus: (corpus) => set({ corpus, corpusVersion: corpus?.version ?? 0 }),
+  setLibrary: (library) =>
+    set({
+      library,
+      libraryVersion: library?.version ?? 0,
+      libraryChapterCount: library?.chapters.size ?? 0,
+    }),
   setDraftQuery: (draftQuery) => set({ draftQuery }),
   // `draftQuery` deliberately survives: it belongs to the search bar, which
   // outlives any single reader, and Phase 0 made draft retention the contract.
+  // `library` survives for the same reason — it is section-wide, and dropping it
+  // on a chapter change would re-sweep the whole book on every navigation.
   clear: () =>
     set({
       chapterNumber: null,

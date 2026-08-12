@@ -98,57 +98,96 @@ export interface LocalSearchOptions {
 }
 
 export interface LocalIndex {
-  size: number
+  readonly size: number
   search(query: string, options?: LocalSearchOptions): QuranResponse
 }
 
 /**
- * Pre-tokenizes a verse array once.
+ * A `LocalIndex` that can be grown after construction.
  *
- * This is the load-bearing performance decision. Re-normalizing a few hundred
- * verses across two languages on every keystroke is hundreds of kilobytes of
- * string churn; scanning pre-computed tokens is a few milliseconds.
+ * The whole-Quran library arrives in batches, and re-tokenizing everything held
+ * so far on each arrival is quadratic — twelve rebuilds of a corpus that ends at
+ * ~6,300 verses across two languages. Appending keeps the cost proportional to
+ * what actually arrived.
  */
-export function buildLocalIndex(verses: VerseData[]): LocalIndex {
-  const indexed: IndexedVerse[] = []
+export interface IncrementalLocalIndex extends LocalIndex {
+  /** Verses already held are replaced by verse key, so a re-merge is idempotent. */
+  add(verses: VerseData[]): void
+}
 
-  for (const verse of verses) {
-    if (!verse.vk) continue
-    const [chapterRaw, verseRaw] = verse.vk.split(':')
-    const chapter = Number(chapterRaw)
-    const verseNumber = Number(verseRaw)
-    if (!Number.isFinite(chapter) || !Number.isFinite(verseNumber)) continue
+/** Tokenizes one verse into the entry the scorer walks. Null when unparsable. */
+function indexVerse(verse: VerseData): IndexedVerse | null {
+  if (!verse.vk) return null
+  const [chapterRaw, verseRaw] = verse.vk.split(':')
+  const chapter = Number(chapterRaw)
+  const verseNumber = Number(verseRaw)
+  if (!Number.isFinite(chapter) || !Number.isFinite(verseNumber)) return null
 
-    const fields: FieldIndex[] = []
-    for (const [lang, translation] of Object.entries(verse.tr ?? {})) {
-      if (translation?.tx) {
-        fields.push({ lang, weight: 1, text: translation.tx, tokens: tokenize(translation.tx) })
-      }
-      if (translation?.s) {
-        fields.push({
-          lang,
-          weight: SUBTITLE_WEIGHT,
-          text: translation.s,
-          tokens: tokenize(translation.s),
-        })
-      }
-      if (translation?.f) {
-        fields.push({
-          lang,
-          weight: SUBTITLE_WEIGHT,
-          text: translation.f,
-          tokens: tokenize(translation.f),
-        })
-      }
+  const fields: FieldIndex[] = []
+  for (const [lang, translation] of Object.entries(verse.tr ?? {})) {
+    if (translation?.tx) {
+      fields.push({ lang, weight: 1, text: translation.tx, tokens: tokenize(translation.tx) })
     }
-
-    indexed.push({ verse, chapter, verseNumber, fields })
+    if (translation?.s) {
+      fields.push({
+        lang,
+        weight: SUBTITLE_WEIGHT,
+        text: translation.s,
+        tokens: tokenize(translation.s),
+      })
+    }
+    if (translation?.f) {
+      fields.push({
+        lang,
+        weight: SUBTITLE_WEIGHT,
+        text: translation.f,
+        tokens: tokenize(translation.f),
+      })
+    }
   }
+
+  return { verse, chapter, verseNumber, fields }
+}
+
+/**
+ * An empty index that verses are appended to.
+ *
+ * Pre-tokenizing is the load-bearing performance decision. Re-normalizing a few
+ * hundred verses across two languages on every keystroke is hundreds of
+ * kilobytes of string churn; scanning pre-computed tokens is a few milliseconds.
+ */
+export function createLocalIndex(): IncrementalLocalIndex {
+  const indexed: IndexedVerse[] = []
+  // Verse key → position in `indexed`, so a repeated batch overwrites in place
+  // rather than scoring the same verse twice.
+  const positions = new Map<string, number>()
 
   return {
-    size: indexed.length,
+    get size() {
+      return indexed.length
+    },
+    add(verses) {
+      for (const verse of verses) {
+        const entry = indexVerse(verse)
+        if (!entry) continue
+        const existing = positions.get(entry.verse.vk!)
+        if (existing !== undefined) {
+          indexed[existing] = entry
+          continue
+        }
+        positions.set(entry.verse.vk!, indexed.length)
+        indexed.push(entry)
+      }
+    },
     search: (query, options = {}) => runSearch(indexed, query, options),
   }
+}
+
+/** Pre-tokenizes a fixed verse array once. */
+export function buildLocalIndex(verses: VerseData[]): LocalIndex {
+  const index = createLocalIndex()
+  index.add(verses)
+  return index
 }
 
 /** One-shot convenience for callers that do not keep an index around. */

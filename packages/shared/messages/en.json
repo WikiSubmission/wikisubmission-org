@@ -123,6 +123,8 @@
     "sourceThisChapter": "this chapter",
     "sourceOffline": "offline copy",
     "sourceResults": "these results",
+    "sourceAllVerses": "all verses",
+    "sourcePartialLibrary": "{count} of 114 suras",
     "filteredLocally": "Filtered locally: {shown} of {loaded} loaded. Press Enter to search everything."
   },
   "settings": {

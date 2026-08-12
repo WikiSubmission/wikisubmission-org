@@ -130,12 +130,22 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
     limit: 5,
   })
   const localVerses = localSearch.data?.chapters?.flatMap((chapter) => chapter.verses ?? []) ?? []
-  const localSourceLabel =
-    localSearch.source === 'bundle'
-      ? t('sourceOffline')
-      : localSearch.source === 'results'
-        ? t('sourceResults')
-        : t('sourceThisChapter')
+  const localSourceLabel = (() => {
+    switch (localSearch.source) {
+      case 'bundle':
+        return t('sourceOffline')
+      case 'results':
+        return t('sourceResults')
+      case 'library':
+        // Mid-sweep the coverage is partial, and "all verses" would read as
+        // "these are all the matches" when they are not. Say how far it reaches.
+        return localSearch.libraryComplete
+          ? t('sourceAllVerses')
+          : t('sourcePartialLibrary', { count: localSearch.libraryChapters })
+      default:
+        return t('sourceThisChapter')
+    }
+  })()
 
   const canSubmit = query.trim().length > 0
   const hasSuggestions =

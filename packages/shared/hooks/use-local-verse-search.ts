@@ -5,6 +5,7 @@ import { getRegisteredOfflineContentStore } from '@/lib/offline/registry'
 import { offlineQuranSearch } from '@/lib/offline/quran-adapter'
 import { buildLocalIndex } from '@/lib/quran-local-search'
 import { corpusVerses } from '@/lib/quran-local-corpus'
+import { libraryServes, libraryTitles, QURAN_CHAPTER_COUNT } from '@/lib/quran-local-library'
 import { useReaderContext } from '@/hooks/use-reader-context-store'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import type { components } from '@/src/api/types.gen'
@@ -12,13 +13,17 @@ import type { components } from '@/src/api/types.gen'
 type QuranResponse = components['schemas']['QuranResponse']
 
 /** Where a set of local results came from, so the UI can label them honestly. */
-export type LocalSearchSource = 'bundle' | 'chapter' | 'results' | 'none'
+export type LocalSearchSource = 'bundle' | 'library' | 'chapter' | 'results' | 'none'
 
 export interface UseLocalVerseSearchResult {
   data: QuranResponse | null
   source: LocalSearchSource
   /** True while the bundle query is in flight. The in-memory paths are synchronous. */
   scanning: boolean
+  /** Chapters the background sweep has pulled in, out of 114. */
+  libraryChapters: number
+  /** True once the sweep has the whole book, so the UI can stop hedging. */
+  libraryComplete: boolean
 }
 
 /** Short: this only gates a local FTS5 query in a worker, not a network call. */
@@ -42,12 +47,15 @@ function installedBundleIds(): Promise<Set<string>> {
  * Searches what is already available locally, in descending order of coverage.
  *
  * 1. Installed offline bundles, which cover the whole Quran via FTS5 in a worker.
- * 2. The hydrated chapter corpus, which covers the open chapter.
- * 3. The loaded search results, when the search view is the active one.
+ * 2. The background-swept library, which covers every chapter pulled in so far.
+ * 3. The hydrated chapter corpus, which covers the open chapter.
+ * 4. The loaded search results, when the search view is the active one.
  *
- * On the web the bundles are an opt-in download, so the corpus is the common path
- * and bundles are the power-user upgrade. Nothing here touches the network — that
- * is what makes it safe to run on every keystroke.
+ * On the web the bundles are an opt-in download, so the library is the common
+ * path; the corpus below it still matters because it lands seconds before the
+ * sweep reaches the open chapter, and because it survives the gates the sweep
+ * declines (save-data, low memory). Nothing here touches the network — that is
+ * what makes it safe to run on every keystroke.
  */
 export function useLocalVerseSearch(
   query: string,
@@ -56,8 +64,10 @@ export function useLocalVerseSearch(
   const { primaryLang, limit = 8 } = options
   const trimmed = query.trim()
 
-  // Subscribed to scalars only; the corpus itself is read through getState().
+  // Subscribed to scalars only; the corpus and library are read through getState().
   const corpusVersion = useReaderContext((s) => s.corpusVersion)
+  const libraryVersion = useReaderContext((s) => s.libraryVersion)
+  const libraryChapters = useReaderContext((s) => s.libraryChapterCount)
   const resultsQuery = useReaderContext((s) => s.results?.query ?? null)
 
   const [bundleData, setBundleData] = useState<QuranResponse | null>(null)
@@ -117,25 +127,66 @@ export function useLocalVerseSearch(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resultsQuery, corpusVersion])
 
+  // The library owns its index and grows it in place as batches land, so this
+  // only re-reads the handle — it never re-tokenizes what is already held.
+  const libraryIndex = useMemo(() => {
+    const library = useReaderContext.getState().library
+    if (!library || !libraryServes(library, [primaryCodeOf(primaryLang)])) return null
+    return { index: library.index, titles: libraryTitles(library) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [libraryVersion, primaryLang])
+
   return useMemo(() => {
-    if (trimmed.length < 2) return { data: null, source: 'none', scanning: false }
+    const progress = { libraryChapters, libraryComplete: libraryChapters >= QURAN_CHAPTER_COUNT }
+    if (trimmed.length < 2) {
+      return { data: null, source: 'none' as const, scanning: false, ...progress }
+    }
 
     // The bundle tier answers for the whole Quran, so it wins when present.
     const bundleHits = bundleData?.chapters?.some((chapter) => (chapter.verses?.length ?? 0) > 0)
-    if (bundleHits) return { data: bundleData, source: 'bundle', scanning }
+    if (bundleHits) return { data: bundleData, source: 'bundle' as const, scanning, ...progress }
 
     const searchOptions = { primaryLang, limit }
 
+    if (libraryIndex) {
+      const data = libraryIndex.index.search(trimmed, {
+        ...searchOptions,
+        titles: libraryIndex.titles,
+      })
+      if ((data.info?.result_count ?? 0) > 0) {
+        return { data, source: 'library' as const, scanning, ...progress }
+      }
+    }
+
     if (chapterIndex) {
       const data = chapterIndex.search(trimmed, searchOptions)
-      if ((data.info?.result_count ?? 0) > 0) return { data, source: 'chapter', scanning }
+      if ((data.info?.result_count ?? 0) > 0) {
+        return { data, source: 'chapter' as const, scanning, ...progress }
+      }
     }
 
     if (resultsIndex) {
       const data = resultsIndex.search(trimmed, searchOptions)
-      if ((data.info?.result_count ?? 0) > 0) return { data, source: 'results', scanning }
+      if ((data.info?.result_count ?? 0) > 0) {
+        return { data, source: 'results' as const, scanning, ...progress }
+      }
     }
 
-    return { data: null, source: 'none', scanning }
-  }, [trimmed, bundleData, chapterIndex, resultsIndex, primaryLang, limit, scanning])
+    return { data: null, source: 'none' as const, scanning, ...progress }
+  }, [
+    trimmed,
+    bundleData,
+    libraryIndex,
+    chapterIndex,
+    resultsIndex,
+    primaryLang,
+    limit,
+    scanning,
+    libraryChapters,
+  ])
+}
+
+/** The reader's display languages include codes the API has no equivalent for. */
+function primaryCodeOf(primaryLang: string | undefined): string {
+  return !primaryLang || primaryLang === 'xl' || primaryLang === 'none' ? 'en' : primaryLang
 }
