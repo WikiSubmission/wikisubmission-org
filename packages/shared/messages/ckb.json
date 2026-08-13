@@ -118,14 +118,10 @@
       "media": "میدیا",
       "newsletters": "نامە"
     },
-    "localResults": "لە بارکراوەکان",
     "searchEverything": "گەڕان بەدوای «{query}» لە هەموو ئایەتەکان",
     "sourceThisChapter": "ئەم سوورەتە",
-    "sourceOffline": "کۆپی ناوخۆیی",
     "sourceResults": "ئەم ئەنجامەکان",
-    "sourceAllVerses": "هەموو ئایەتەکان",
-    "sourcePartialLibrary": "{count} لە 114 سوورەت",
-    "draftMatches": "{count} ئایەت لەگەڵ «{query}» دەگونجێن",
+    "draftMatches": "{count, plural, =1 {1 ئایەت لەگەڵ «{query}» دەگونجێت} other {# ئایەت لەگەڵ «{query}» دەگونجێن}}",
     "draftEmpty": "هیچ ئایەتێک لەگەڵ «{query}» ناگونجێت",
     "draftHint": "Enter دابگرە بۆ گەڕان بە هەموویدا"
   },

@@ -118,14 +118,10 @@
       "media": "Médias",
       "newsletters": "Bulletins"
     },
-    "localResults": "Dans ce qui est chargé",
     "searchEverything": "Rechercher « {query} » dans tous les versets",
     "sourceThisChapter": "ce chapitre",
-    "sourceOffline": "copie hors ligne",
     "sourceResults": "ces résultats",
-    "sourceAllVerses": "tous les versets",
-    "sourcePartialLibrary": "{count} sourates sur 114",
-    "draftMatches": "{count} versets correspondent à « {query} »",
+    "draftMatches": "{count, plural, =1 {1 verset correspond} other {# versets correspondent}} à « {query} »",
     "draftEmpty": "Aucun verset ne correspond à « {query} »",
     "draftHint": "Appuyez sur Entrée pour tout rechercher"
   },

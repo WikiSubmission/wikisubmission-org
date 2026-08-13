@@ -45,24 +45,10 @@ export function QuranDraftResults({ query }: { query: string }) {
 
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${prefs.zoomLevel ?? 'comfortable'}-${prefs.arabic}-${prefs.wordByWord}`
 
-  const scope = (() => {
-    switch (local.source) {
-      case 'bundle':
-        return t('sourceOffline')
-      case 'results':
-        return t('sourceResults')
-      case 'library':
-        // Mid-sweep the coverage is partial, and "all verses" would read as
-        // "these are all the matches" when they are not. Say how far it reaches.
-        return local.libraryComplete
-          ? t('sourceAllVerses')
-          : t('sourcePartialLibrary', { count: local.libraryChapters })
-      default:
-        // With no library the haystack is whatever the reader itself holds, so
-        // the label has to say so rather than imply the whole book was searched.
-        return t('sourceThisChapter')
-    }
-  })()
+  // Always shown, including on an empty result, because the scope is what makes
+  // the emptiness readable: "not in this sura" is a different statement from
+  // "not in the Quran", and only Enter can make the second one.
+  const scope = local.source === 'results' ? t('sourceResults') : t('sourceThisChapter')
 
   return (
     <div

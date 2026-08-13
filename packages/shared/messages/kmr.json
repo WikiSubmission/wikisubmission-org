@@ -93,14 +93,10 @@
       "media": "Medya",
       "newsletters": "Nûçename"
     },
-    "localResults": "Di ya barkirî de",
     "searchEverything": "Li hemû ayetan “{query}” bigere",
     "sourceThisChapter": "ev sûre",
-    "sourceOffline": "kopiya herêmî",
     "sourceResults": "ev encam",
-    "sourceAllVerses": "hemû ayet",
-    "sourcePartialLibrary": "{count} ji 114 sûreyan",
-    "draftMatches": "{count} ayet bi «{query}» re li hev tên",
+    "draftMatches": "{count, plural, =1 {1 ayet bi «{query}» re li hev tê} other {# ayet bi «{query}» re li hev tên}}",
     "draftEmpty": "Tu ayet bi «{query}» re li hev nayên",
     "draftHint": "Ji bo lêgerîna her tiştî Enter bitikîne"
   },

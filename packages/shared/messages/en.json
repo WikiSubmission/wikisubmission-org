@@ -118,14 +118,10 @@
       "media": "Media",
       "newsletters": "Newsletters"
     },
-    "localResults": "In what is loaded",
     "searchEverything": "Search all verses for “{query}”",
     "sourceThisChapter": "this chapter",
-    "sourceOffline": "offline copy",
     "sourceResults": "these results",
-    "sourceAllVerses": "all verses",
-    "sourcePartialLibrary": "{count} of 114 suras",
-    "draftMatches": "{count} verses match “{query}”",
+    "draftMatches": "{count, plural, =1 {1 verse matches} other {# verses match}} “{query}”",
     "draftEmpty": "No verses match “{query}”",
     "draftHint": "Press Enter to search everything"
   },

@@ -118,13 +118,9 @@
       "media": "Medya",
       "newsletters": "Bültenler"
     },
-    "localResults": "Yüklenenler içinde",
     "searchEverything": "Tüm ayetlerde “{query}” ara",
     "sourceThisChapter": "bu sure",
-    "sourceOffline": "çevrimdışı kopya",
     "sourceResults": "bu sonuçlar",
-    "sourceAllVerses": "tüm ayetler",
-    "sourcePartialLibrary": "114 surenin {count} tanesi",
     "draftMatches": "“{query}” ile {count} ayet eşleşiyor",
     "draftEmpty": "“{query}” ile eşleşen ayet yok",
     "draftHint": "Her şeyi aramak için Enter’a basın"

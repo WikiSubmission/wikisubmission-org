@@ -293,12 +293,18 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   const primaryCode =
     prefs.primaryLanguage !== 'xl' ? prefs.primaryLanguage : 'en'
   const titleMatches = verseSearch.data?.chapters?.filter((ch) => ch.tm) ?? []
-  const rawVerses =
-    verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? []
+  // Memoized because this array is published to the reader context below, and
+  // the draft overlay indexes whatever it finds there. A fresh array per render
+  // would re-run the effect every render and re-tokenize the whole result set
+  // behind it on every keystroke.
+  const rawVerses = useMemo(
+    () => verseSearch.data?.chapters?.flatMap((ch) => ch.verses ?? []) ?? [],
+    [verseSearch.data],
+  )
   const noteMatches = useMeSearch(searchQuery, 'quran')
   const librarySearch = useLibrarySearch(searchQuery)
   // Publish the loaded results so the command menu can act on what is on screen,
-  // and Phase 4's local filtering can search it without refetching.
+  // and so typing narrows these results rather than starting a new search.
   useEffect(() => {
     useReaderContext.getState().setResults({ query: searchQuery, verses: rawVerses })
     useReaderContext.getState().setLoadedVerses(rawVerses)

@@ -118,14 +118,10 @@
       "media": "وسائط",
       "newsletters": "النشرات"
     },
-    "localResults": "في المُحمَّل",
     "searchEverything": "ابحث في كل الآيات عن ”{query}“",
     "sourceThisChapter": "هذه السورة",
-    "sourceOffline": "النسخة المحلية",
     "sourceResults": "هذه النتائج",
-    "sourceAllVerses": "كل الآيات",
-    "sourcePartialLibrary": "{count} من 114 سورة",
-    "draftMatches": "{count} آية تطابق «{query}»",
+    "draftMatches": "{count, plural, one {آية واحدة تطابق} two {آيتان تطابقان} few {# آيات تطابق} other {# آية تطابق}} «{query}»",
     "draftEmpty": "لا توجد آيات تطابق «{query}»",
     "draftHint": "اضغط Enter للبحث في كل شيء"
   },

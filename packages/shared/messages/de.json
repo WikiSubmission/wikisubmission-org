@@ -118,14 +118,10 @@
       "media": "Medien",
       "newsletters": "Newsletter"
     },
-    "localResults": "Im Geladenen",
     "searchEverything": "Alle Verse nach „{query}“ durchsuchen",
     "sourceThisChapter": "dieses Kapitel",
-    "sourceOffline": "lokale Kopie",
     "sourceResults": "diese Ergebnisse",
-    "sourceAllVerses": "alle Verse",
-    "sourcePartialLibrary": "{count} von 114 Suren",
-    "draftMatches": "{count} Verse passen zu „{query}“",
+    "draftMatches": "{count, plural, =1 {1 Vers passt} other {# Verse passen}} zu „{query}“",
     "draftEmpty": "Keine Verse passen zu „{query}“",
     "draftHint": "Eingabetaste drücken, um alles zu durchsuchen"
   },
