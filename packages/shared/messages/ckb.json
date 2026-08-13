@@ -247,6 +247,7 @@
     "categoryAudios": "دەنگەکان",
     "categoryVideo": "ڤیدیۆ",
     "matchingSegments": "{count, plural, one {# بەشی هاوتا} other {# بەشی هاوتا}}",
+    "viewAllSegments": "{count, plural, one {نیشاندانی هەموو # بەشەکان} other {نیشاندانی هەموو # بەشەکان}}",
     "newsletterMasthead": "Submitters Perspective",
     "newsletterLabel": "نامەهەواڵ",
     "readingPages": "{count, plural, one {# پەڕەی خوێندنەوە} other {# پەڕەی خوێندنەوە}}",

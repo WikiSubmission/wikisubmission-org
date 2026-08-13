@@ -247,6 +247,7 @@
     "categoryAudios": "صوتيات",
     "categoryVideo": "فيديو",
     "matchingSegments": "{count, plural, one {# مقطع مطابق} other {# مقاطع مطابقة}}",
+    "viewAllSegments": "{count, plural, one {إظهار المقطع} other {إظهار كل المقاطع (#)}}",
     "newsletterMasthead": "Submitters Perspective",
     "newsletterLabel": "نشرة",
     "readingPages": "{count, plural, one {# صفحة قراءة} other {# صفحات قراءة}}",

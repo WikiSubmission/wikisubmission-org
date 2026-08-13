@@ -247,6 +247,7 @@
     "categoryAudios": "Audios",
     "categoryVideo": "Vidéo",
     "matchingSegments": "{count, plural, one {# segment correspondant} other {# segments correspondants}}",
+    "viewAllSegments": "{count, plural, one {Afficher # segment} other {Afficher les # segments}}",
     "newsletterMasthead": "Submitters Perspective",
     "newsletterLabel": "Newsletter",
     "readingPages": "{count, plural, one {# page à lire} other {# pages à lire}}",

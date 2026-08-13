@@ -835,8 +835,10 @@ function MatchingSegments({ items }: { items: MediaRow[] }) {
   const t = useTranslations('archive')
   const [expanded, setExpanded] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const label = t('matchingSegments', { count: items.length })
-  const triggerStyle: React.CSSProperties = {
+  const count = items.length
+  const inlineLabel = t('matchingSegments', { count })
+  const dialogLabel = t('viewAllSegments', { count })
+  const inlineTriggerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     gap: 6,
@@ -849,6 +851,22 @@ function MatchingSegments({ items }: { items: MediaRow[] }) {
     padding: 0,
     cursor: 'pointer',
   }
+  const dialogTriggerStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    fontFamily: F.mono,
+    fontSize: 10.5,
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    color: 'var(--ed-fg)',
+    background: 'color-mix(in oklab, var(--ed-fg), transparent 94%)',
+    border: '1px solid var(--ed-rule)',
+    borderRadius: 2,
+    padding: '6px 10px',
+    marginTop: 2,
+    cursor: 'pointer',
+  }
 
   return (
     <>
@@ -858,10 +876,10 @@ function MatchingSegments({ items }: { items: MediaRow[] }) {
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          style={triggerStyle}
+          style={inlineTriggerStyle}
           className="hover:text-[var(--ed-accent)]"
         >
-          {label}
+          {inlineLabel}
           <ChevronDownIcon
             className={cn(
               'size-3 transition-transform',
@@ -892,11 +910,10 @@ function MatchingSegments({ items }: { items: MediaRow[] }) {
         <button
           type="button"
           onClick={() => setDialogOpen(true)}
-          style={triggerStyle}
-          className="hover:text-[var(--ed-accent)]"
+          style={dialogTriggerStyle}
+          className="hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] transition-colors"
         >
-          {label}
-          <ArrowUpRight className="size-3" />
+          {dialogLabel}
         </button>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent
@@ -928,7 +945,7 @@ function MatchingSegments({ items }: { items: MediaRow[] }) {
                   marginTop: 4,
                 }}
               >
-                {label}
+                {inlineLabel}
               </p>
             </DialogHeader>
             <div

@@ -247,6 +247,7 @@
     "categoryAudios": "Sesler",
     "categoryVideo": "Video",
     "matchingSegments": "{count, plural, one {# eşleşen bölüm} other {# eşleşen bölüm}}",
+    "viewAllSegments": "{count, plural, one {# bölümü göster} other {Tüm # bölümü göster}}",
     "newsletterMasthead": "Submitters Perspective",
     "newsletterLabel": "Bülten",
     "readingPages": "{count, plural, one {# sayfa okuma} other {# sayfa okuma}}",
