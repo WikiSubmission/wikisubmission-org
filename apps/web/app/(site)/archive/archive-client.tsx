@@ -9,10 +9,17 @@ import {
   NewspaperIcon,
   ArrowUpRight,
   InfoIcon,
+  ChevronDownIcon,
 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { ws } from '@/lib/wikisubmission-sdk'
 import { highlightMarkdown } from '@/lib/highlight-markdown'
 import Image from 'next/image'
@@ -640,100 +647,24 @@ function MediaCardGrid({ items }: { items: MediaRow[] }) {
   const kind = categoryLabel.toUpperCase()
   const timestamp = first.start_timestamp
   return (
-    <Link
-      href={`https://www.youtube.com/watch?v=${first.youtube_id}&t=${first.youtube_timestamp}`}
-      target="_blank"
-      rel="noopener noreferrer"
+    <div
       className="ed-card group"
       style={{
         display: 'flex',
         flexDirection: 'column',
         background: 'var(--ed-surface)',
         overflow: 'hidden',
-        textDecoration: 'none',
       }}
     >
       {/* Thumbnail */}
-      <div
-        style={{
-          position: 'relative',
-          aspectRatio: '16 / 9',
-          overflow: 'hidden',
-          background: 'var(--ed-bg-alt)',
-        }}
+      <Link
+        href={`https://www.youtube.com/watch?v=${first.youtube_id}&t=${first.youtube_timestamp}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ textDecoration: 'none' }}
       >
-        <Image
-          src={`https://img.youtube.com/vi/${first.youtube_id}/mqdefault.jpg`}
-          alt={first.title}
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        <span
-          style={{
-            position: 'absolute',
-            top: 10,
-            left: 10,
-            padding: '3px 8px',
-            borderRadius: 2,
-            fontFamily: F.mono,
-            fontSize: 9.5,
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            background: 'rgba(0,0,0,0.65)',
-            color: '#fff',
-          }}
-        >
-          {kind}
-        </span>
-        {timestamp && (
-          <span
-            style={{
-              position: 'absolute',
-              bottom: 10,
-              right: 10,
-              padding: '3px 8px',
-              borderRadius: 2,
-              fontFamily: F.mono,
-              fontSize: 10,
-              letterSpacing: '0.1em',
-              background: 'rgba(0,0,0,0.65)',
-              color: '#fff',
-            }}
-          >
-            {timestamp}
-          </span>
-        )}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: 0,
-            transition: 'opacity 200ms',
-            background:
-              'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.35))',
-          }}
-          className="group-hover:opacity-100"
-        >
-          <span
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: '50%',
-              background: 'var(--ed-accent)',
-              color: 'var(--ed-bg)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <PlayIcon className="size-5" />
-          </span>
-        </div>
-      </div>
+        <MediaThumbnail item={first} kind={kind} timestamp={timestamp} />
+      </Link>
 
       {/* Body */}
       <div
@@ -745,63 +676,335 @@ function MediaCardGrid({ items }: { items: MediaRow[] }) {
           flex: 1,
         }}
       >
-        <div
+        <Link
+          href={`https://www.youtube.com/watch?v=${first.youtube_id}&t=${first.youtube_timestamp}`}
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
-            fontFamily: F.mono,
-            fontSize: 10,
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            color: 'var(--ed-accent)',
+            textDecoration: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
           }}
         >
-          {categoryLabel}
-        </div>
-        <h3
-          style={{
-            fontFamily: F.display,
-            fontSize: 17,
-            fontWeight: 500,
-            letterSpacing: '-0.01em',
-            lineHeight: 1.25,
-            color: 'var(--ed-fg)',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
-        >
-          {first.title}
-        </h3>
-        {items.length > 1 && (
           <div
             style={{
               fontFamily: F.mono,
-              fontSize: 10.5,
-              letterSpacing: '0.1em',
-              color: 'var(--ed-fg-muted)',
+              fontSize: 10,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'var(--ed-accent)',
             }}
           >
-            {t('matchingSegments', { count: items.length })}
+            {categoryLabel}
           </div>
-        )}
-        {items[0].transcript && (
-          <p
+          <h3
             style={{
-              fontFamily: F.serif,
-              fontSize: 13,
-              lineHeight: 1.55,
-              color: 'var(--ed-fg-muted)',
-              margin: 0,
+              fontFamily: F.display,
+              fontSize: 17,
+              fontWeight: 500,
+              letterSpacing: '-0.01em',
+              lineHeight: 1.25,
+              color: 'var(--ed-fg)',
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
             }}
           >
-            {highlightMarkdown(items[0].transcript)}
-          </p>
+            {first.title}
+          </h3>
+          {first.transcript && (
+            <p
+              style={{
+                fontFamily: F.serif,
+                fontSize: 13,
+                lineHeight: 1.55,
+                color: 'var(--ed-fg-muted)',
+                margin: 0,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {highlightMarkdown(first.transcript)}
+            </p>
+          )}
+        </Link>
+        {items.length > 1 && <MatchingSegments items={items} />}
+      </div>
+    </div>
+  )
+}
+
+function MediaThumbnail({
+  item,
+  kind,
+  timestamp,
+}: {
+  item: MediaRow
+  kind: string
+  timestamp: string | null
+}) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        aspectRatio: '16 / 9',
+        overflow: 'hidden',
+        background: 'var(--ed-bg-alt)',
+      }}
+    >
+      <Image
+        src={`https://img.youtube.com/vi/${item.youtube_id}/mqdefault.jpg`}
+        alt={item.title}
+        fill
+        sizes="(max-width: 768px) 100vw, 33vw"
+        className="object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <span
+        style={{
+          position: 'absolute',
+          top: 10,
+          left: 10,
+          padding: '3px 8px',
+          borderRadius: 2,
+          fontFamily: F.mono,
+          fontSize: 9.5,
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          background: 'rgba(0,0,0,0.65)',
+          color: '#fff',
+        }}
+      >
+        {kind}
+      </span>
+      {timestamp && (
+        <span
+          style={{
+            position: 'absolute',
+            bottom: 10,
+            right: 10,
+            padding: '3px 8px',
+            borderRadius: 2,
+            fontFamily: F.mono,
+            fontSize: 10,
+            letterSpacing: '0.1em',
+            background: 'rgba(0,0,0,0.65)',
+            color: '#fff',
+          }}
+        >
+          {timestamp}
+        </span>
+      )}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: 0,
+          transition: 'opacity 200ms',
+          background:
+            'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.35))',
+        }}
+        className="group-hover:opacity-100"
+      >
+        <span
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: '50%',
+            background: 'var(--ed-accent)',
+            color: 'var(--ed-bg)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <PlayIcon className="size-5" />
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function MatchingSegments({ items }: { items: MediaRow[] }) {
+  const t = useTranslations('archive')
+  const [expanded, setExpanded] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const label = t('matchingSegments', { count: items.length })
+  const triggerStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    fontFamily: F.mono,
+    fontSize: 10.5,
+    letterSpacing: '0.1em',
+    color: 'var(--ed-fg-muted)',
+    background: 'transparent',
+    border: 'none',
+    padding: 0,
+    cursor: 'pointer',
+  }
+
+  return (
+    <>
+      {/* Single-column layout: expand inline, no dialog needed */}
+      <div className="sm:hidden">
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          style={triggerStyle}
+          className="hover:text-[var(--ed-accent)]"
+        >
+          {label}
+          <ChevronDownIcon
+            className={cn(
+              'size-3 transition-transform',
+              expanded && 'rotate-180'
+            )}
+          />
+        </button>
+        {expanded && (
+          <div
+            style={{
+              marginTop: 10,
+              paddingTop: 10,
+              borderTop: '1px solid var(--ed-rule)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}
+          >
+            {items.map((item, i) => (
+              <SegmentRow key={i} item={item} />
+            ))}
+          </div>
         )}
       </div>
+
+      {/* Grid layout: keep the card height stable, expand into a dialog */}
+      <div className="hidden sm:block">
+        <button
+          type="button"
+          onClick={() => setDialogOpen(true)}
+          style={triggerStyle}
+          className="hover:text-[var(--ed-accent)]"
+        >
+          {label}
+          <ArrowUpRight className="size-3" />
+        </button>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent
+            className="max-w-lg w-full p-0 gap-0 bg-[var(--ed-surface)] border-[var(--ed-rule)] rounded-[3px]"
+            aria-describedby={undefined}
+          >
+            <DialogHeader className="px-6 pt-5 pb-4 border-b border-[var(--ed-rule)]">
+              <DialogTitle asChild>
+                <h2
+                  style={{
+                    fontFamily: F.display,
+                    fontSize: 20,
+                    fontWeight: 500,
+                    letterSpacing: '-0.01em',
+                    color: 'var(--ed-fg)',
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {items[0].title}
+                </h2>
+              </DialogTitle>
+              <p
+                style={{
+                  fontFamily: F.mono,
+                  fontSize: 10.5,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'var(--ed-accent)',
+                  marginTop: 4,
+                }}
+              >
+                {label}
+              </p>
+            </DialogHeader>
+            <div
+              className="max-h-[65vh] overflow-y-auto px-6 py-4"
+              style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
+            >
+              {items.map((item, i) => (
+                <SegmentRow key={i} item={item} />
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </>
+  )
+}
+
+function SegmentRow({ item }: { item: MediaRow }) {
+  return (
+    <Link
+      href={`https://www.youtube.com/watch?v=${item.youtube_id}&t=${item.youtube_timestamp}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group/segment"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+        textDecoration: 'none',
+        padding: '10px 12px',
+        borderRadius: 2,
+        background: 'color-mix(in oklab, var(--ed-fg), transparent 96%)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 8,
+        }}
+      >
+        {item.start_timestamp && (
+          <span
+            style={{
+              fontFamily: F.mono,
+              fontSize: 10.5,
+              letterSpacing: '0.08em',
+              color: 'var(--ed-accent)',
+            }}
+          >
+            {item.start_timestamp}
+          </span>
+        )}
+        <PlayIcon
+          className="size-3 opacity-0 transition-opacity group-hover/segment:opacity-100"
+          style={{ color: 'var(--ed-fg-muted)' }}
+        />
+      </div>
+      {item.transcript && (
+        <p
+          style={{
+            fontFamily: F.serif,
+            fontSize: 12.5,
+            lineHeight: 1.5,
+            color: 'var(--ed-fg-muted)',
+            margin: 0,
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {highlightMarkdown(item.transcript)}
+        </p>
+      )}
     </Link>
   )
 }
