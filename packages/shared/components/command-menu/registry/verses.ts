@@ -60,7 +60,20 @@ export function useVerseCommands(): Command[] {
   )
 
   return useMemo(() => {
-    if (!hasReaderContext) return []
+    // Copy-by-reference does not need a reader at all, so it must survive the
+    // early return below and stay reachable from any page.
+    const copyByRefCommand: Command = {
+      id: 'verse:copy-by-ref',
+      group: 'actions',
+      label: tMenu('copyByReference'),
+      description: tMenu('copyByReferenceHint'),
+      icon: createElement(Copy),
+      page: 'copy-verses',
+      priority: 72,
+      keywords: ['2:255', 'range', 'reference'],
+    }
+
+    if (!hasReaderContext) return [copyByRefCommand]
 
     /** The verses a command should act on: the selection, else the centre verse. */
     const targetVerses = (): VerseData[] => {
@@ -251,18 +264,7 @@ export function useVerseCommands(): Command[] {
       },
     )
 
-    // Copy-by-reference does not need a reader at all, but it belongs with the
-    // other copy actions.
-    commands.push({
-      id: 'verse:copy-by-ref',
-      group: 'actions',
-      label: tMenu('copyByReference'),
-      description: tMenu('copyByReferenceHint'),
-      icon: createElement(Copy),
-      page: 'copy-verses',
-      priority: 72,
-      keywords: ['2:255', 'range', 'reference'],
-    })
+    commands.push(copyByRefCommand)
 
     return commands
   }, [
