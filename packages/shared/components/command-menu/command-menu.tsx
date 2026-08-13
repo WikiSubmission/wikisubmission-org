@@ -23,7 +23,8 @@ import { useLocalIndex } from './use-local-index'
 import { usePreferenceCommands } from './registry/preferences'
 import { useLanguageCommands } from './registry/languages'
 import { useVerseCommands } from './registry/verses'
-import { useCopyByReferenceCommands } from './registry/copy-by-reference'
+import { useCopyByReferenceCommands, useCopyDraftSummary } from './registry/copy-by-reference'
+import { selectCopyStep, useCopyDraft } from './use-copy-draft'
 import { COMMAND_GROUP_ORDER, type Command as MenuCommand, type CommandGroupId } from './types'
 
 /** Per-group caps so one large group cannot crowd out the others. */
@@ -36,6 +37,13 @@ const GROUP_LIMIT: Record<CommandGroupId, number> = {
   content: 8,
   settings: 6,
 }
+
+/**
+ * A sub-page is a single list with nothing to crowd out, so its cap only has to
+ * keep the list scrollable. The root caps would cut a translation picker down to
+ * the first six languages.
+ */
+const SUBPAGE_LIMIT = 40
 
 const ENTER_DURATION = 0.22
 const EXIT_DURATION = 0.14
@@ -144,7 +152,9 @@ export function CommandMenu() {
   const preferenceCommands = usePreferenceCommands()
   const languageCommands = useLanguageCommands()
   const verseCommands = useVerseCommands()
-  const copyByReferenceCommands = useCopyByReferenceCommands(page === 'copy-verses' ? query : '')
+  const copyByReferenceCommands = useCopyByReferenceCommands(page === 'copy-verses', query)
+  const copyStep = useCopyDraft(selectCopyStep)
+  const copySummary = useCopyDraftSummary()
 
   // The site catalogue's backend tier. Only queried on the root page, and only
   // once the query is worth a request; the instant tier above covers the wait.
@@ -194,30 +204,47 @@ export function CommandMenu() {
 
   /** Filtered and ranked per group, so group order stays editorial rather than score-driven. */
   const grouped = useMemo(() => {
-    // On the copy-by-reference page the query is the reference itself, not a
-    // search term — the rows are already derived from it, so ranking them
-    // against it would only filter them back out.
-    const rankQuery = page === 'copy-verses' ? '' : query
+    // On the first step of copy-by-reference the query is the reference itself,
+    // not a search term — the row is already derived from it, so ranking it
+    // against the query would only filter it back out. Every later step is a
+    // list of choices the query is a real filter for.
+    const rankQuery = page === 'copy-verses' && copyStep === 'ref' ? '' : query
 
     const byGroup = new Map<CommandGroupId, MenuCommand[]>()
     for (const group of COMMAND_GROUP_ORDER) {
       const inGroup = commands.filter((c) => c.group === group)
       if (inGroup.length === 0) continue
 
+      const limit = page ? SUBPAGE_LIMIT : GROUP_LIMIT[group]
+
       // Backend results arrive already ranked, and their match is often in the
       // body rather than the title — re-ranking them against the query here
       // would reorder them and drop the body matches entirely.
       const ranked =
-        group === 'content'
-          ? inGroup.slice(0, GROUP_LIMIT[group])
-          : rankTargets(inGroup, rankQuery, GROUP_LIMIT[group])
+        group === 'content' ? inGroup.slice(0, limit) : rankTargets(inGroup, rankQuery, limit)
 
       if (ranked.length > 0) byGroup.set(group, ranked)
     }
     return byGroup
-  }, [commands, query, page])
+  }, [commands, query, page, copyStep])
 
   const hasResults = grouped.size > 0
+
+  /**
+   * Back steps through the copy tree one answer at a time, and only leaves the
+   * page once there is nothing left to undo. Returning to the reference step
+   * puts the reference back in the input so it can be edited rather than retyped.
+   */
+  const goBack = useCallback(() => {
+    if (page === 'copy-verses') {
+      const { refs, stepBack } = useCopyDraft.getState()
+      if (stepBack()) {
+        setQuery(useCopyDraft.getState().refs === null && refs ? refs : '')
+        return
+      }
+    }
+    back()
+  }, [page, back, setQuery])
 
   const runCommand = useCallback(
     async (command: MenuCommand) => {
@@ -278,7 +305,7 @@ export function CommandMenu() {
                 // command-menu idiom.
                 if (event.key === 'Backspace' && query === '' && page) {
                   event.preventDefault()
-                  back()
+                  goBack()
                 }
               }}
             >
@@ -286,7 +313,7 @@ export function CommandMenu() {
                 {page && (
                   <button
                     type="button"
-                    onClick={back}
+                    onClick={goBack}
                     aria-label={t('back')}
                     className="ml-2 flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary"
                   >
@@ -297,16 +324,39 @@ export function CommandMenu() {
                   <CommandInput
                     value={query}
                     onValueChange={setQuery}
-                    placeholder={page === 'copy-verses' ? t('referencePlaceholder') : t('placeholder')}
+                    placeholder={
+                      page === 'copy-verses'
+                        ? copyStep === 'ref'
+                          ? t('referencePlaceholder')
+                          : t('copyStepPlaceholder')
+                        : t('placeholder')
+                    }
                     className="border-0"
                   />
                 </div>
               </div>
 
+              {/* The answers so far, so a choice made three questions ago is
+                  still visible when the copy finally happens. */}
+              {page === 'copy-verses' && copySummary.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1 border-b border-border/40 px-3 py-1.5">
+                  {copySummary.map((chip) => (
+                    <span
+                      key={chip}
+                      className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary/80"
+                    >
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <CommandList>
                 {!hasResults && (
                   <CommandEmpty>
-                    {page === 'copy-verses' ? t('referenceEmpty') : t('empty')}
+                    {page === 'copy-verses' && copyStep === 'ref'
+                      ? t('referenceEmpty')
+                      : t('empty')}
                   </CommandEmpty>
                 )}
 
