@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import type { CopyOutput, CopyRecipe } from '@/lib/copy-command'
 
 /**
  * The answers collected by the copy-by-reference tree, one question at a time.
@@ -9,10 +10,10 @@ import { createJSONStorage, persist } from 'zustand/middleware'
  * `null` means "not answered yet" and is what drives the current step; the
  * string `'none'` is a real answer that leaves that part out. Keeping the two
  * apart is what lets a step be walked back into rather than re-asked from the
- * start.
+ * start, and lets a typed one-liner pre-answer some steps and leave the rest.
  */
 export interface CopyDraft {
-  /** Normalized reference string, e.g. `2:255` or `1:1-7,3:18`. */
+  /** Normalized reference string, e.g. `2:255` or `1:1-7, 3:18`. */
   refs: string | null
   granularity: 'full' | 'wbw' | null
   arabic: 'yes' | 'no' | null
@@ -22,28 +23,16 @@ export interface CopyDraft {
   secondary: string | null
 }
 
-/** What the finished tree copies. */
-export type CopyOutput = 'text' | 'table' | 'image'
-
-/** A completed set of answers, kept so the next reference can reuse it. */
-export interface CopyRecipe {
-  granularity: 'full' | 'wbw'
-  arabic: 'yes' | 'no'
-  primary: string
-  secondary: string
-  output: CopyOutput
-}
-
 /** The question the tree is currently on. Derived from the draft, never stored. */
 export type CopyStep = 'ref' | 'granularity' | 'arabic' | 'translation' | 'extra' | 'output'
 
 interface CopyDraftStore extends CopyDraft {
   /**
-   * The last set of answers that produced a copy, surviving reloads.
+   * The last command that produced a copy, surviving reloads.
    *
-   * Someone pulling ten references for a study note answers the same five
-   * questions ten times otherwise, so the reference step offers this as a
-   * one-keystroke repeat.
+   * Someone pulling ten references for a study note answers the same questions
+   * ten times otherwise, so the reference step pre-fills this as a line with the
+   * reference selected: type the next one over it and the options carry.
    */
   recent: CopyRecipe | null
   choose(answer: Partial<CopyDraft>): void
@@ -73,10 +62,13 @@ export function selectCopyStep(draft: CopyDraft): CopyStep {
   return 'output'
 }
 
-/** The answers as a recipe, or null while any of them is still open. */
+/** The answers as a command, or null while any of them is still open. */
 export function draftRecipe(draft: CopyDraft, output: CopyOutput): CopyRecipe | null {
-  if (!draft.granularity || !draft.arabic || !draft.primary || !draft.secondary) return null
+  if (!draft.refs || !draft.granularity || !draft.arabic || !draft.primary || !draft.secondary) {
+    return null
+  }
   return {
+    refs: draft.refs,
     granularity: draft.granularity,
     arabic: draft.arabic,
     primary: draft.primary,
@@ -108,8 +100,14 @@ export const useCopyDraft = create<CopyDraftStore>()(
     {
       name: 'ws-copy-recipe-v1',
       storage: createJSONStorage(() => localStorage),
-      // The draft is per-visit and always starts empty; only the recipe is worth
-      // carrying across sessions.
+      version: 1,
+      // v0 stored the options without the reference they were used with, which
+      // the pre-filled command line needs. There is nothing to salvage in half a
+      // command, so the next copy starts it over.
+      migrate: (state, version) =>
+        version < 1 ? { ...(state as CopyDraftStore), recent: null } : (state as CopyDraftStore),
+      // The draft is per-visit and always starts empty; only the last command is
+      // worth carrying across sessions.
       partialize: (state) => ({ recent: state.recent }) as CopyDraftStore,
     },
   ),

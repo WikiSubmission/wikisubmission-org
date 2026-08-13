@@ -4,19 +4,28 @@ import { createElement, useCallback, useEffect, useMemo } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import {
-  ArrowRight,
   Ban,
+  Copy,
   ExternalLink,
   FileText,
   History,
   Image as ImageIcon,
   Languages,
   ListTree,
+  Plus,
   Table,
 } from 'lucide-react'
 import { wsApi } from '@/src/api/client'
 import { parseQuranRefs } from '@/lib/verse-ref-parser'
-import { normalizeQuranInput } from '@/lib/scripture-parser'
+import {
+  COPY_MODIFIERS,
+  copyCommandTokens,
+  parseCopyCommand,
+  withCopyToken,
+  type CopyOutput,
+  type CopyRecipe,
+} from '@/lib/copy-command'
+import { normalizeForSearch } from '@/lib/text-normalization/normalize'
 import {
   buildMultiVerseMarkdown,
   buildVerseTable,
@@ -31,14 +40,7 @@ import { offlineQuranVerseList } from '@/lib/offline/quran-adapter'
 import { contentLangForUiLocale } from '@/constants/ui-locales'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
 import { useCommandMenu } from '../use-command-menu'
-import {
-  draftRecipe,
-  selectCopyStep,
-  useCopyDraft,
-  type CopyDraft,
-  type CopyOutput,
-  type CopyRecipe,
-} from '../use-copy-draft'
+import { draftRecipe, selectCopyStep, useCopyDraft, type CopyDraft } from '../use-copy-draft'
 import type { components } from '@/src/api/types.gen'
 import type { Command } from '../types'
 
@@ -56,7 +58,7 @@ const OUTPUT_KEY: Record<CopyOutput, string> = {
   image: 'copyAsImage',
 }
 
-/** The three fields the tree does not ask about, which stay on reader preferences. */
+/** The three fields neither form asks about, which stay on reader preferences. */
 type DisplayPrefs = Pick<
   CopyMarkdownOptions,
   'includeSubtitles' | 'includeTransliteration' | 'includeFootnotes'
@@ -84,7 +86,11 @@ function langsFor(options: CopyMarkdownOptions): string[] {
   return langs.length > 0 ? langs : ['en']
 }
 
-/** Renders a set of answers as short chips, for the strip and the repeat row. */
+/**
+ * Renders a set of answers as short chips, for the tree's strip and the
+ * one-liner's description. The reference is passed separately because the run
+ * row already carries it in its label.
+ */
 function useChips() {
   const tMenu = useTranslations('commandMenu')
   return useCallback(
@@ -108,21 +114,20 @@ function useChips() {
 }
 
 /**
- * The `copy-verses` sub-page: a decision tree that ends in a copy.
+ * The `copy-verses` sub-page, in two forms over one state machine.
  *
- * One question per screen — reference, granularity, Arabic, translation, second
- * translation — and only then the output formats. The flat list this replaced
- * offered five copy variants that all silently followed the reader's display
- * preferences, so what landed on the clipboard depended on settings the user was
- * not looking at; each choice is now asked for explicitly and shown back as a
- * chip strip above the list.
+ * The reference step reads a whole command — `2:255 ar en fr wbw` — and offers
+ * the next token as completions, so a reader who knows what they want types it
+ * in one line and presses Enter. Anyone who does not takes `Choose step by step`
+ * and answers one question per screen (granularity, Arabic, translation, second
+ * translation, output). Both write the same answers: tokens already typed
+ * pre-answer their steps, and the tree only asks for what is left.
  *
  * Answers live in `useCopyDraft` rather than local state so Backspace can walk
  * back through them (see `stepBack`) instead of dropping out of the page, and so
- * the last completed set survives as a recipe the reference step can repeat in
- * one keystroke. Subtitles, transliteration, and footnotes stay on reader
- * preferences — the tree would be twice as deep for three fields that rarely
- * change per copy.
+ * the last completed command survives as the line the page pre-fills next time.
+ * Subtitles, transliteration, and footnotes stay on reader preferences: they
+ * would double the depth of both forms for three fields that rarely change.
  *
  * Fetching prefers installed offline bundles and falls back to the compact
  * `verses=` form of `/quran`, which is the same order the reader itself uses.
@@ -157,8 +162,8 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
   const translations = useMemo(() => {
     const entries = storeLanguages.length ? storeLanguages : FALLBACK_LANGUAGES
     const usable = entries
-      // Arabic is the scripture text itself and has its own step, so listing it
-      // as a translation here would put the same block on the clipboard twice.
+      // Arabic is the scripture text itself and has its own answer, so listing it
+      // as a translation would put the same block on the clipboard twice.
       .filter((language) => language.code && language.code !== 'ar')
       .map((language) => ({
         code: language.code as string,
@@ -170,6 +175,11 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
       ...usable.filter((language) => language.code !== uiLang),
     ]
   }, [storeLanguages, uiLang])
+
+  const languageCodes = useMemo(
+    () => translations.map((language) => language.code),
+    [translations],
+  )
 
   const display = useMemo<DisplayPrefs>(
     () => ({
@@ -217,18 +227,22 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
   )
 
   /**
-   * Fetches and copies in one go, from a complete recipe.
+   * Fetches and copies in one go, from a complete command.
    *
-   * Both the finished tree and the repeat row on the reference step come through
-   * here, so a repeat cannot drift from the answers it is repeating. A recipe is
-   * only remembered once its copy has actually landed.
+   * The typed line and the finished tree both come through here, so the two
+   * forms cannot drift. A command is only remembered once its copy has landed.
    */
   const runCopy = useCallback(
-    async (recipe: CopyRecipe, references: string) => {
+    async (recipe: CopyRecipe) => {
+      if (parseQuranRefs(recipe.refs).length > MAX_REFS) {
+        toast.error(tMenu('tooManyVerses', { max: MAX_REFS }))
+        return
+      }
+
       const options = optionsFor(recipe, display)
       const wbw = recipe.granularity === 'wbw'
       try {
-        const verses = await fetchVerses(references, langsFor(options), wbw)
+        const verses = await fetchVerses(recipe.refs, langsFor(options), wbw)
         if (verses.length === 0) {
           toast.error(tMenu('noVersesFound'))
           return
@@ -261,66 +275,158 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
   return useMemo(() => {
     if (!active) return []
 
+    const setQuery = (value: string) => useCommandMenu.getState().setQuery(value)
     const advance = (answer: Partial<CopyDraft>) => {
       choose(answer)
-      // The input holds the reference on the first step and a filter on the
-      // rest, so it is cleared on every hop instead of carried forward.
-      useCommandMenu.getState().setQuery('')
+      // The input holds the command on the first step and a filter on the rest,
+      // so it is cleared on every hop instead of carried forward.
+      setQuery('')
     }
 
     const step = selectCopyStep({ refs, granularity, arabic, primary, secondary })
 
-    // ── 1. The reference ─────────────────────────────────────────────────────
+    // ── The command line, with the next token as completions ─────────────────
     if (step === 'ref') {
-      const parsed = normalizeQuranInput(query.trim())
-      if (!parsed) return []
-      // Expanding also gives the exact verse count, which the ref cap is
-      // measured against and which the rows show as their hint.
-      const count = parseQuranRefs(parsed).length
-      if (count === 0) return []
-      const tooMany = count > MAX_REFS
+      const command = parseCopyCommand(query, languageCodes, uiLang)
+      if (!command.recipe) return []
+      const recipe = command.recipe
+      const tooMany = command.count > MAX_REFS
+
+      // While a token is half-typed the completions lead, so Enter finishes the
+      // word. With nothing pending, Enter is the copy.
+      const completing = command.partial.length > 0
+      const used = new Set(command.tokens)
+      const usedKinds = new Set(
+        COPY_MODIFIERS.filter((modifier) => used.has(modifier.token)).map((m) => m.kind),
+      )
+      const languageCount = command.tokens.filter((token) =>
+        languageCodes.includes(token),
+      ).length
 
       const commands: Command[] = [
         {
-          id: 'ref:continue',
+          id: 'ref:run',
           group: 'actions',
-          label: tMenu('copyContinue', { refs: parsed }),
-          description: tooMany ? tMenu('tooManyVerses', { max: MAX_REFS }) : undefined,
-          hint: String(count),
-          icon: createElement(ArrowRight),
-          priority: 90,
-          keepOpen: true,
-          run: () => {
-            if (tooMany) {
-              toast.error(tMenu('tooManyVerses', { max: MAX_REFS }))
-              return
-            }
-            advance({ refs: parsed })
-          },
+          label: tMenu('copyCommandRun', { refs: recipe.refs }),
+          description: tooMany
+            ? tMenu('tooManyVerses', { max: MAX_REFS })
+            : chips(recipe).join(' · '),
+          hint: String(command.count),
+          icon: createElement(Copy),
+          priority: completing ? 40 : 100,
+          keepOpen: tooMany,
+          run: () => runCopy(recipe),
         },
       ]
 
-      // Repeating the last answers is the likelier intent when there are any, so
-      // it leads. Skipped where the browser cannot write images, which is the one
-      // recipe that would fail on arrival.
-      if (recent && !tooMany && (recent.output !== 'image' || canCopyImage())) {
-        commands.unshift({
-          id: 'ref:repeat',
+      /** Completion rows append their token to the line and stay put. */
+      const completion = (
+        id: string,
+        token: string,
+        label: string,
+        icon: Command['icon'],
+        priority: number,
+      ): Command | null => {
+        if (
+          command.partial &&
+          !token.startsWith(command.partial) &&
+          !normalizeForSearch(label).startsWith(command.partial)
+        ) {
+          return null
+        }
+        return {
+          id,
           group: 'actions',
-          label: tMenu('copyLastSettings', { refs: parsed }),
-          description: chips(recent).join(' · '),
-          hint: String(count),
-          icon: createElement(History),
-          keywords: ['again', 'repeat', 'last'],
-          priority: 95,
-          run: () => runCopy(recent, parsed),
-        })
+          label,
+          hint: token,
+          icon,
+          keywords: [token],
+          priority,
+          keepOpen: true,
+          run: () => setQuery(withCopyToken(query, token, command.partial)),
+        }
       }
+
+      const push = (row: Command | null) => {
+        if (row) commands.push(row)
+      }
+
+      // Whatever the last copy used, as one row rather than token by token. Only
+      // when nothing is half-typed, since it completes no word.
+      if (recent && !completing) {
+        const missing = copyCommandTokens(recent).filter((token) => !used.has(token))
+        if (missing.length > 0) {
+          commands.push({
+            id: 'ref:last',
+            group: 'actions',
+            label: tMenu('copyLastSettings'),
+            description: missing.join(' '),
+            icon: createElement(History),
+            priority: 90,
+            keepOpen: true,
+            run: () => setQuery(missing.reduce((line, token) => withCopyToken(line, token, ''), query)),
+          })
+        }
+      }
+
+      for (const modifier of COPY_MODIFIERS) {
+        // One answer per question, and `none` contradicts a language already given.
+        if (used.has(modifier.token) || usedKinds.has(modifier.kind)) continue
+        if (modifier.kind === 'translation' && languageCount > 0) continue
+        if (modifier.token === 'image' && !canCopyImage()) continue
+        // Text is what a line without an output token already does.
+        if (modifier.token === 'text') continue
+        push(
+          completion(
+            `ref:token:${modifier.token}`,
+            modifier.token,
+            tMenu(modifier.labelKey),
+            createElement(Plus),
+            completing ? 90 : 85,
+          ),
+        )
+      }
+
+      if (!used.has('none') && languageCount < 2) {
+        for (const language of translations) {
+          if (used.has(language.code)) continue
+          push(
+            completion(
+              `ref:token:${language.code}`,
+              language.code,
+              language.name,
+              createElement(Languages),
+              language.code === uiLang ? 70 : 65,
+            ),
+          )
+        }
+      }
+
+      commands.push({
+        id: 'ref:steps',
+        group: 'actions',
+        label: tMenu('copyStepByStep'),
+        description: tMenu('copyStepByStepHint'),
+        icon: createElement(ListTree),
+        keywords: ['guide', 'steps', 'wizard'],
+        priority: 30,
+        keepOpen: true,
+        run: () =>
+          // Tokens already typed are answers, so the tree opens on the first
+          // question they left open.
+          advance({
+            refs: recipe.refs,
+            granularity: command.answers.granularity ?? null,
+            arabic: command.answers.arabic ?? null,
+            primary: command.answers.primary ?? null,
+            secondary: command.answers.secondary ?? null,
+          }),
+      })
 
       return commands
     }
 
-    // ── 2. Whole verses or one line per word ─────────────────────────────────
+    // ── Whole verses or one line per word ────────────────────────────────────
     if (step === 'granularity') {
       return [
         {
@@ -339,6 +445,7 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
           label: tMenu('copyWordByWord'),
           description: tMenu('copyWordByWordHint'),
           icon: createElement(ListTree),
+          hint: 'wbw',
           keywords: ['wbw', 'morphology', 'root'],
           priority: 80,
           keepOpen: true,
@@ -347,7 +454,7 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
       ]
     }
 
-    // ── 3. Arabic ────────────────────────────────────────────────────────────
+    // ── Arabic ───────────────────────────────────────────────────────────────
     if (step === 'arabic') {
       return [
         {
@@ -355,6 +462,7 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
           group: 'actions',
           label: tMenu('copyWithArabic'),
           icon: createElement(Languages),
+          hint: 'ar',
           priority: 90,
           keepOpen: true,
           run: () => advance({ arabic: 'yes' }),
@@ -371,7 +479,7 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
       ]
     }
 
-    // ── 4. Translation, defaulting to the interface language ─────────────────
+    // ── Translation, defaulting to the interface language ────────────────────
     if (step === 'translation') {
       const commands: Command[] = translations.map((language) => ({
         id: `ref:translation:${language.code}`,
@@ -395,6 +503,7 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
           group: 'actions',
           label: tMenu('copyNoTranslation'),
           icon: createElement(Ban),
+          hint: 'none',
           priority: 60,
           keepOpen: true,
           run: () => advance({ primary: 'none' }),
@@ -404,7 +513,7 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
       return commands
     }
 
-    // ── 5. An optional second translation ────────────────────────────────────
+    // ── An optional second translation ───────────────────────────────────────
     if (step === 'extra') {
       const commands: Command[] = [
         {
@@ -436,7 +545,7 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
       return commands
     }
 
-    // ── 6. The copy itself ───────────────────────────────────────────────────
+    // ── The copy itself ──────────────────────────────────────────────────────
     const references = refs as string
     const draft = { refs, granularity, arabic, primary, secondary }
     const count = parseQuranRefs(references).length
@@ -458,7 +567,7 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
         icon,
         keywords: output === 'table' ? ['tsv', 'csv', 'spreadsheet', 'excel'] : undefined,
         priority,
-        run: () => (recipe ? runCopy(recipe, references) : Promise.resolve()),
+        run: () => (recipe ? runCopy(recipe) : Promise.resolve()),
       }
     }
 
@@ -494,6 +603,7 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
     choose,
     chips,
     translations,
+    languageCodes,
     uiLang,
     runCopy,
     tMenu,

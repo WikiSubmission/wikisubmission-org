@@ -1,6 +1,6 @@
 'use client'
 
-import { createElement, useCallback, useEffect, useMemo, useState } from 'react'
+import { createElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import gsap from 'gsap'
@@ -16,6 +16,7 @@ import {
   CommandShortcut,
 } from '@/components/ui/command'
 import { rankTargets, splitHighlight } from '@/lib/command-match'
+import { formatCopyCommand } from '@/lib/copy-command'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 import { useSiteSearch, siteHitHref } from '@/hooks/use-site-search'
 import { useCommandMenu } from './use-command-menu'
@@ -245,6 +246,30 @@ export function CommandMenu() {
     }
     back()
   }, [page, back, setQuery])
+
+  /**
+   * Entering the copy page pre-fills the last command with its reference
+   * selected, so the next copy is one edit — type the new reference over the old
+   * one and the options carry — rather than the same answers again.
+   */
+  const prefilled = useRef(false)
+  useEffect(() => {
+    if (page !== 'copy-verses') {
+      prefilled.current = false
+      return
+    }
+    if (prefilled.current || !panelEl) return
+    const { recent } = useCopyDraft.getState()
+    if (!recent) return
+
+    prefilled.current = true
+    setQuery(formatCopyCommand(recent))
+    const input = panelEl.querySelector('input')
+    if (!input) return
+    // A frame late, so the controlled value is on the element before it is selected.
+    const frame = requestAnimationFrame(() => input.setSelectionRange(0, recent.refs.length))
+    return () => cancelAnimationFrame(frame)
+  }, [page, panelEl, setQuery])
 
   const runCommand = useCallback(
     async (command: MenuCommand) => {
