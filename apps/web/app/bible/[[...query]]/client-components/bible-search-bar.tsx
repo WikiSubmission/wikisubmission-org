@@ -128,7 +128,7 @@ export default function BibleSearchBar({ className, large }: BibleSearchBarProps
           placeholder="Search books, chapters, or text…"
           className={cn(
             'bg-muted/50 border-border/40',
-            large ? 'pl-11 h-12 text-base rounded-xl' : 'h-8 text-sm pl-8'
+            large ? 'pl-11 h-12 text-base rounded-xl' : 'h-8 text-base md:text-sm pl-8'
           )}
           value={query}
           onChange={(e) => setQuery(e.target.value)}

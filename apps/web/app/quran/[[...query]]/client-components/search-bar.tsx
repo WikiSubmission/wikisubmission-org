@@ -164,7 +164,7 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           placeholder={t('placeholder')}
           className={cn(
             'bg-muted/50 border-border/40',
-            large ? 'pl-11 h-12 text-base rounded-xl' : 'pl-8 h-8 text-sm'
+            large ? 'pl-11 h-12 text-base rounded-xl' : 'pl-8 h-8 text-base md:text-sm'
           )}
           value={query}
           onChange={(e) => {
