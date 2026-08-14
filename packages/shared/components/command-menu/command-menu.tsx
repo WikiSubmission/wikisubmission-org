@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import gsap from 'gsap'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { ChevronLeft, FileSearch } from 'lucide-react'
+import { ChevronLeft, FileSearch, SparklesIcon } from 'lucide-react'
 import {
   Command,
   CommandEmpty,
@@ -18,6 +18,7 @@ import {
 import { rankTargets, splitHighlight } from '@/lib/command-match'
 import { formatCopyCommand } from '@/lib/copy-command'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
+import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { useSiteSearch, siteHitHref } from '@/hooks/use-site-search'
 import { useCommandMenu } from './use-command-menu'
 import { useLocalIndex } from './use-local-index'
@@ -84,6 +85,7 @@ export function CommandMenu() {
   const router = useRouter()
   const t = useTranslations('commandMenu')
   const reducedMotion = usePrefersReducedMotion()
+  const { open: openAsk } = useChatPanel()
 
   // `present` lags `open` on close so the exit tween can finish before Radix
   // unmounts the content. Radix's own `open` is driven by `present`, which keeps
@@ -153,7 +155,10 @@ export function CommandMenu() {
   const preferenceCommands = usePreferenceCommands()
   const languageCommands = useLanguageCommands()
   const verseCommands = useVerseCommands()
-  const copyByReferenceCommands = useCopyByReferenceCommands(page === 'copy-verses', query)
+  const copyByReferenceCommands = useCopyByReferenceCommands(
+    page === 'copy-verses' ? 'page' : page ? 'inactive' : 'root',
+    query,
+  )
   const copyStep = useCopyDraft(selectCopyStep)
   const copySummary = useCopyDraftSummary()
 
@@ -192,7 +197,30 @@ export function CommandMenu() {
     if (page === 'language') return languageCommands
     if (page === 'copy-verses') return copyByReferenceCommands
     if (page) return []
-    return [...verseCommands, ...localIndex, ...preferenceCommands, ...contentCommands]
+    const askCommand: MenuCommand = {
+      id: 'action:ask-ai',
+      group: 'actions',
+      label: t('askAI'),
+      description: t('askAIHint'),
+      icon: createElement(SparklesIcon),
+      keywords: ['ask', 'ai', 'chat'],
+      priority: 88,
+      run: openAsk,
+    }
+    // A recognized reference has exactly the two intent rows above. Hiding the
+    // generic entry avoids a third, redundant "Copy by reference…" result.
+    const visibleVerseCommands =
+      copyByReferenceCommands.length > 0
+        ? verseCommands.filter((command) => command.id !== 'verse:copy-by-ref')
+        : verseCommands
+    return [
+      ...copyByReferenceCommands,
+      askCommand,
+      ...visibleVerseCommands,
+      ...localIndex,
+      ...preferenceCommands,
+      ...contentCommands,
+    ]
   }, [
     page,
     localIndex,
@@ -201,6 +229,8 @@ export function CommandMenu() {
     verseCommands,
     copyByReferenceCommands,
     contentCommands,
+    openAsk,
+    t,
   ])
 
   /** Filtered and ranked per group, so group order stays editorial rather than score-driven. */

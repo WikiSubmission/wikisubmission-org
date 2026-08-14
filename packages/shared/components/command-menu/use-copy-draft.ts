@@ -74,6 +74,7 @@ export function draftRecipe(draft: CopyDraft, output: CopyOutput): CopyRecipe | 
     primary: draft.primary,
     secondary: draft.secondary,
     output,
+    footnotes: 'default',
   }
 }
 

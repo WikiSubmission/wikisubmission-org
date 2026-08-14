@@ -39,7 +39,14 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
     if (lastUrlQueryRef.current === urlQuery) return
     lastUrlQueryRef.current = urlQuery
     setQuery(urlQuery)
+    // A navigation can remount or reset this controlled input without firing
+    // onChange. Never let an old client-side filter outlive an empty field.
+    if (!urlQuery.trim()) useReaderContext.getState().setDraftQuery('')
   }, [urlQuery])
+
+  useEffect(() => {
+    if (!query.trim()) useReaderContext.getState().setDraftQuery('')
+  }, [query])
 
   const chapters = useQuranNavStore((s) => s.chapters)
   const appendices = useQuranNavStore((s) => s.appendices)

@@ -41,7 +41,13 @@ export function QuranDraftResults({ query }: { query: string }) {
       : prefs.primaryLanguage
 
   const local = useLocalVerseSearch(query, { primaryLang: primaryCode, limit: DRAFT_LIMIT })
-  const verses = local.data?.chapters?.flatMap((chapter) => chapter.verses ?? []) ?? []
+  const verses = (local.data?.chapters?.flatMap((chapter) => chapter.verses ?? []) ?? [])
+    .slice()
+    .sort((a, b) => {
+      const [ac, av] = (a.vk ?? '0:0').split(':').map(Number)
+      const [bc, bv] = (b.vk ?? '0:0').split(':').map(Number)
+      return ac === bc ? av - bv : ac - bc
+    })
 
   const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${prefs.zoomLevel ?? 'comfortable'}-${prefs.arabic}-${prefs.wordByWord}`
 

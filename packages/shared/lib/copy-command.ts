@@ -8,11 +8,11 @@ import { expandQuranSegments, parseQuranSegments } from '@/lib/verse-ref-parser'
  *   2:255 ar en fr          with Arabic, English, and French
  *   1:1-7, 3:18 wbw table   word by word, as a table
  *   18:1 ar none            Arabic only
+ *   2:255 no-footnotes       omit footnotes even when the reader shows them
  *
- * Two rules keep the split unambiguous: a reference is made only of digits,
- * colons, commas, and dashes, and every option token is alphabetic. So the
- * reference is the leading run of numeric words and everything after it is
- * options, in any order.
+ * The split stays unambiguous because a reference is the leading run made only
+ * of digits, colons, commas, and dashes. Everything after that run is treated as
+ * option tokens, in any order.
  *
  * Tokens are fixed keywords rather than translated words. The syntax is typed,
  * and a command a reader saves has to keep meaning the same thing after they
@@ -34,10 +34,17 @@ export interface CopyRecipe {
   /** Second translation language code, or `'none'`. */
   secondary: string
   output: CopyOutput
+  /** Use the reader preference unless the command explicitly suppresses footnotes. */
+  footnotes: 'default' | 'exclude'
 }
 
 /** The answers a token supplies, for the rows that offer it as a completion. */
-export type CopyTokenKind = 'arabic' | 'granularity' | 'translation' | 'output'
+export type CopyTokenKind =
+  | 'arabic'
+  | 'granularity'
+  | 'translation'
+  | 'output'
+  | 'footnotes'
 
 export interface CopyModifier {
   token: string
@@ -54,6 +61,7 @@ export const COPY_MODIFIERS: readonly CopyModifier[] = [
   { token: 'table', labelKey: 'copyAsTable', kind: 'output' },
   { token: 'image', labelKey: 'copyAsImage', kind: 'output' },
   { token: 'text', labelKey: 'copyAsText', kind: 'output' },
+  { token: 'no-footnotes', labelKey: 'copyWithoutFootnotes', kind: 'footnotes' },
 ]
 
 const OUTPUT_TOKENS = new Set<string>(['text', 'table', 'image'])
@@ -134,6 +142,7 @@ export function parseCopyCommand(
   // overrides it rather than being quietly ignored.
   const output = tokens.filter((token) => OUTPUT_TOKENS.has(token)).pop()
   if (output) answers.output = output as CopyOutput
+  if (has('no-footnotes')) answers.footnotes = 'exclude'
 
   return {
     refText,
@@ -150,6 +159,7 @@ export function parseCopyCommand(
           primary: answers.primary ?? defaultLanguage,
           secondary: answers.secondary ?? 'none',
           output: answers.output ?? 'text',
+          footnotes: answers.footnotes ?? 'default',
         }
       : null,
   }
@@ -170,6 +180,7 @@ export function copyCommandTokens(recipe: CopyRecipe): string[] {
   }
   // Text is the default, so spelling it out would only be noise to edit around.
   if (recipe.output !== 'text') tokens.push(recipe.output)
+  if (recipe.footnotes === 'exclude') tokens.push('no-footnotes')
   return tokens
 }
 

@@ -71,6 +71,7 @@ function optionsFor(recipe: CopyRecipe, display: DisplayPrefs): CopyMarkdownOpti
     includeText: recipe.primary !== 'none',
     includeArabic: recipe.arabic === 'yes',
     ...display,
+    includeFootnotes: recipe.footnotes === 'exclude' ? false : display.includeFootnotes,
   }
 }
 
@@ -107,6 +108,7 @@ function useChips() {
         chips.push(answers.secondary.toUpperCase())
       }
       if (answers.output) chips.push(tMenu(OUTPUT_KEY[answers.output]))
+      if (answers.footnotes === 'exclude') chips.push(tMenu('copyWithoutFootnotes'))
       return chips
     },
     [tMenu],
@@ -114,14 +116,12 @@ function useChips() {
 }
 
 /**
- * The `copy-verses` sub-page, in two forms over one state machine.
+ * The `copy-verses` sub-page and root reference detector share one copy runner.
  *
  * The reference step reads a whole command — `2:255 ar en fr wbw` — and offers
  * the next token as completions, so a reader who knows what they want types it
- * in one line and presses Enter. Anyone who does not takes `Choose step by step`
- * and answers one question per screen (granularity, Arabic, translation, second
- * translation, output). Both write the same answers: tokens already typed
- * pre-answer their steps, and the tree only asks for what is left.
+ * in one line and presses Enter. On the root menu, the same parser recognizes a
+ * reference-shaped query and offers direct Navigate and Copy actions.
  *
  * Answers live in `useCopyDraft` rather than local state so Backspace can walk
  * back through them (see `stepBack`) instead of dropping out of the page, and so
@@ -132,7 +132,10 @@ function useChips() {
  * Fetching prefers installed offline bundles and falls back to the compact
  * `verses=` form of `/quran`, which is the same order the reader itself uses.
  */
-export function useCopyByReferenceCommands(active: boolean, query: string): Command[] {
+export function useCopyByReferenceCommands(
+  mode: 'inactive' | 'root' | 'page',
+  query: string,
+): Command[] {
   const t = useTranslations('quran.copy')
   const tMenu = useTranslations('commandMenu')
   const { markdown: readerPrefs } = useCopyPrefs()
@@ -153,8 +156,8 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
   // Leaving the page abandons the draft, so entering it always starts over at
   // the reference rather than resuming a half-answered tree from earlier.
   useEffect(() => {
-    if (!active) reset()
-  }, [active, reset])
+    if (mode !== 'page') reset()
+  }, [mode, reset])
 
   /** The language the interface is in, which is the likeliest translation to want. */
   const uiLang = contentLangForUiLocale(locale)
@@ -273,7 +276,40 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
   )
 
   return useMemo(() => {
-    if (!active) return []
+    if (mode === 'inactive') return []
+
+    const detected = parseCopyCommand(query, languageCodes, uiLang)
+    if (mode === 'root') {
+      if (!detected.recipe) return []
+      const recipe = detected.recipe
+      const tooMany = detected.count > MAX_REFS
+      return [
+        {
+          id: 'ref:detected:navigate',
+          group: 'actions',
+          label: tMenu('navigateToReference', { refs: recipe.refs }),
+          hint: String(detected.count),
+          icon: createElement(ExternalLink),
+          keywords: [recipe.refs, query],
+          priority: 100,
+          navigate: `/quran/${recipe.refs}`,
+        },
+        {
+          id: 'ref:detected:copy',
+          group: 'actions',
+          label: tMenu('copyCommandRun', { refs: recipe.refs }),
+          description: tooMany
+            ? tMenu('tooManyVerses', { max: MAX_REFS })
+            : chips(recipe).join(' · '),
+          hint: String(detected.count),
+          icon: createElement(Copy),
+          keywords: [recipe.refs, query],
+          priority: 95,
+          keepOpen: tooMany,
+          run: () => runCopy(recipe),
+        },
+      ]
+    }
 
     const setQuery = (value: string) => useCommandMenu.getState().setQuery(value)
     const advance = (answer: Partial<CopyDraft>) => {
@@ -401,27 +437,6 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
           )
         }
       }
-
-      commands.push({
-        id: 'ref:steps',
-        group: 'actions',
-        label: tMenu('copyStepByStep'),
-        description: tMenu('copyStepByStepHint'),
-        icon: createElement(ListTree),
-        keywords: ['guide', 'steps', 'wizard'],
-        priority: 30,
-        keepOpen: true,
-        run: () =>
-          // Tokens already typed are answers, so the tree opens on the first
-          // question they left open.
-          advance({
-            refs: recipe.refs,
-            granularity: command.answers.granularity ?? null,
-            arabic: command.answers.arabic ?? null,
-            primary: command.answers.primary ?? null,
-            secondary: command.answers.secondary ?? null,
-          }),
-      })
 
       return commands
     }
@@ -592,7 +607,7 @@ export function useCopyByReferenceCommands(active: boolean, query: string): Comm
 
     return commands
   }, [
-    active,
+    mode,
     query,
     refs,
     granularity,

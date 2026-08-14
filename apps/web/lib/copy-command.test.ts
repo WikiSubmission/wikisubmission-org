@@ -24,6 +24,7 @@ describe('reference and option split', () => {
       primary: 'en',
       secondary: 'none',
       output: 'text',
+      footnotes: 'default',
     })
   })
 
@@ -107,6 +108,7 @@ describe('formatting back to a line', () => {
     primary: 'en',
     secondary: 'fr',
     output: 'table',
+    footnotes: 'default',
   }
 
   it('renders the options in canonical order', () => {
@@ -133,6 +135,12 @@ describe('formatting back to a line', () => {
 
   it('drops a second translation that repeats the first', () => {
     expect(copyCommandTokens({ ...recipe, secondary: 'en' })).toEqual(['ar', 'wbw', 'en', 'table'])
+  })
+
+  it('round-trips the no-footnotes option', () => {
+    const withoutFootnotes = { ...recipe, footnotes: 'exclude' as const }
+    expect(formatCopyCommand(withoutFootnotes)).toContain('no-footnotes')
+    expect(parse(formatCopyCommand(withoutFootnotes)).recipe).toEqual(withoutFootnotes)
   })
 })
 
