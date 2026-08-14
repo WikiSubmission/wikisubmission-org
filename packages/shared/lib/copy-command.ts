@@ -8,7 +8,8 @@ import { expandQuranSegments, parseQuranSegments } from '@/lib/verse-ref-parser'
  *   2:255 ar en fr          with Arabic, English, and French
  *   1:1-7, 3:18 wbw table   word by word, as a table
  *   18:1 ar none            Arabic only
- *   2:255 no-footnotes       omit footnotes even when the reader shows them
+ *   2:255 vbv no-footnotes no-subtitles
+ *                            verse by verse without reader annotations
  *
  * The split stays unambiguous because a reference is the leading run made only
  * of digits, colons, commas, and dashes. Everything after that run is treated as
@@ -36,6 +37,8 @@ export interface CopyRecipe {
   output: CopyOutput
   /** Use the reader preference unless the command explicitly suppresses footnotes. */
   footnotes: 'default' | 'exclude'
+  /** Use the reader preference unless the command explicitly suppresses subtitles. */
+  subtitles: 'default' | 'exclude'
 }
 
 /** The answers a token supplies, for the rows that offer it as a completion. */
@@ -45,6 +48,7 @@ export type CopyTokenKind =
   | 'translation'
   | 'output'
   | 'footnotes'
+  | 'subtitles'
 
 export interface CopyModifier {
   token: string
@@ -57,11 +61,13 @@ export interface CopyModifier {
 export const COPY_MODIFIERS: readonly CopyModifier[] = [
   { token: 'ar', labelKey: 'copyWithArabic', kind: 'arabic' },
   { token: 'wbw', labelKey: 'copyWordByWord', kind: 'granularity' },
+  { token: 'vbv', labelKey: 'copyVerseByVerse', kind: 'granularity' },
   { token: 'none', labelKey: 'copyNoTranslation', kind: 'translation' },
   { token: 'table', labelKey: 'copyAsTable', kind: 'output' },
   { token: 'image', labelKey: 'copyAsImage', kind: 'output' },
   { token: 'text', labelKey: 'copyAsText', kind: 'output' },
   { token: 'no-footnotes', labelKey: 'copyWithoutFootnotes', kind: 'footnotes' },
+  { token: 'no-subtitles', labelKey: 'copyWithoutSubtitles', kind: 'subtitles' },
 ]
 
 const OUTPUT_TOKENS = new Set<string>(['text', 'table', 'image'])
@@ -78,6 +84,10 @@ export interface CopyCommand {
   count: number
   /** Recognized option tokens, deduped, in the order typed. */
   tokens: string[]
+  /** Every typed option word, classified for live UI feedback. */
+  tokenFeedback: Array<{ token: string; status: 'valid' | 'partial' | 'invalid' }>
+  /** Unknown completed tokens. Copy actions should not silently ignore these. */
+  invalidTokens: string[]
   /** The token still being typed, or '' when the query ends in a space. */
   partial: string
   /** What was spelled out, with nothing inferred. */
@@ -114,6 +124,18 @@ export function parseCopyCommand(
   const known = new Set<string>([...COPY_MODIFIERS.map((m) => m.token), ...languageCodes])
 
   const rest = words.slice(cursor).map((word) => word.toLowerCase())
+  const hasTrailingSpace = /\s$/.test(query)
+  const tokenFeedback = rest.map((token, index) => {
+    if (known.has(token)) return { token, status: 'valid' as const }
+    const isActiveWord = index === rest.length - 1 && !hasTrailingSpace
+    if (isActiveWord && [...known].some((candidate) => candidate.startsWith(token))) {
+      return { token, status: 'partial' as const }
+    }
+    return { token, status: 'invalid' as const }
+  })
+  const invalidTokens = tokenFeedback
+    .filter((item) => item.status === 'invalid')
+    .map((item) => item.token)
   const tokens: string[] = []
   for (const word of rest) {
     if (known.has(word) && !tokens.includes(word)) tokens.push(word)
@@ -122,13 +144,14 @@ export function parseCopyCommand(
   // The last word is still being typed unless the query ends in whitespace. It
   // can be a finished token at the same time — `en` is both a complete answer and
   // a prefix of nothing else, so it counts above and filters completions here.
-  const partial = rest.length > 0 && !/\s$/.test(query) ? rest[rest.length - 1]! : ''
+  const partial = rest.length > 0 && !hasTrailingSpace ? rest[rest.length - 1]! : ''
 
   const has = (token: string) => tokens.includes(token)
   const languageTokens = tokens.filter((token) => languages.has(token))
 
   const answers: CopyAnswers = {}
-  if (has('wbw')) answers.granularity = 'wbw'
+  const granularity = tokens.filter((token) => token === 'wbw' || token === 'vbv').pop()
+  if (granularity) answers.granularity = granularity === 'wbw' ? 'wbw' : 'full'
   if (has('ar')) answers.arabic = 'yes'
   if (has('none')) {
     // The explicit suppressor, so it wins over any language that came with it.
@@ -143,12 +166,15 @@ export function parseCopyCommand(
   const output = tokens.filter((token) => OUTPUT_TOKENS.has(token)).pop()
   if (output) answers.output = output as CopyOutput
   if (has('no-footnotes')) answers.footnotes = 'exclude'
+  if (has('no-subtitles')) answers.subtitles = 'exclude'
 
   return {
     refText,
     refs,
     count,
     tokens,
+    tokenFeedback,
+    invalidTokens,
     partial,
     answers,
     recipe: refs
@@ -160,6 +186,7 @@ export function parseCopyCommand(
           secondary: answers.secondary ?? 'none',
           output: answers.output ?? 'text',
           footnotes: answers.footnotes ?? 'default',
+          subtitles: answers.subtitles ?? 'default',
         }
       : null,
   }
@@ -181,6 +208,7 @@ export function copyCommandTokens(recipe: CopyRecipe): string[] {
   // Text is the default, so spelling it out would only be noise to edit around.
   if (recipe.output !== 'text') tokens.push(recipe.output)
   if (recipe.footnotes === 'exclude') tokens.push('no-footnotes')
+  if (recipe.subtitles === 'exclude') tokens.push('no-subtitles')
   return tokens
 }
 

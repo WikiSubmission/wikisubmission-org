@@ -75,6 +75,7 @@ export function draftRecipe(draft: CopyDraft, output: CopyOutput): CopyRecipe | 
     secondary: draft.secondary,
     output,
     footnotes: 'default',
+    subtitles: 'default',
   }
 }
 

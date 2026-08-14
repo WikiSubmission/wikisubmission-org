@@ -20,6 +20,7 @@ import { parseQuranRefs } from '@/lib/verse-ref-parser'
 import {
   COPY_MODIFIERS,
   copyCommandTokens,
+  formatCopyCommand,
   parseCopyCommand,
   withCopyToken,
   type CopyOutput,
@@ -52,6 +53,28 @@ const MAX_REFS = 300
 /** The menu is mounted app-wide, but only the Quran layout seeds the language store. */
 const FALLBACK_LANGUAGES = [{ code: 'en', name: 'English' }]
 
+export type CopyParameterFeedback = {
+  token: string
+  status: 'valid' | 'partial' | 'invalid'
+}
+
+/** Parameter words from a reference-shaped command, for the live badge strip. */
+export function useCopyParameterFeedback(query: string): CopyParameterFeedback[] {
+  const locale = useLocale()
+  const languages = useLanguagesStore((state) => state.languages)
+  const languageCodes = useMemo(
+    () =>
+      (languages.length ? languages : FALLBACK_LANGUAGES)
+        .map((language) => language.code)
+        .filter((code): code is string => Boolean(code)),
+    [languages],
+  )
+  return useMemo(() => {
+    const command = parseCopyCommand(query, languageCodes, contentLangForUiLocale(locale))
+    return command.refs ? command.tokenFeedback : []
+  }, [query, languageCodes, locale])
+}
+
 const OUTPUT_KEY: Record<CopyOutput, string> = {
   text: 'copyAsText',
   table: 'copyAsTable',
@@ -72,6 +95,7 @@ function optionsFor(recipe: CopyRecipe, display: DisplayPrefs): CopyMarkdownOpti
     includeArabic: recipe.arabic === 'yes',
     ...display,
     includeFootnotes: recipe.footnotes === 'exclude' ? false : display.includeFootnotes,
+    includeSubtitles: recipe.subtitles === 'exclude' ? false : display.includeSubtitles,
   }
 }
 
@@ -109,6 +133,7 @@ function useChips() {
       }
       if (answers.output) chips.push(tMenu(OUTPUT_KEY[answers.output]))
       if (answers.footnotes === 'exclude') chips.push(tMenu('copyWithoutFootnotes'))
+      if (answers.subtitles === 'exclude') chips.push(tMenu('copyWithoutSubtitles'))
       return chips
     },
     [tMenu],
@@ -278,12 +303,28 @@ export function useCopyByReferenceCommands(
   return useMemo(() => {
     if (mode === 'inactive') return []
 
+    const setQuery = (value: string) => useCommandMenu.getState().setQuery(value)
     const detected = parseCopyCommand(query, languageCodes, uiLang)
     if (mode === 'root') {
       if (!detected.recipe) return []
       const recipe = detected.recipe
       const tooMany = detected.count > MAX_REFS
-      return [
+      const hasInvalidTokens = detected.invalidTokens.length > 0
+      const completing = detected.partial.length > 0
+      const activeFeedback = detected.tokenFeedback.at(-1)
+      // An unknown active word should reveal every hint; selecting one replaces
+      // the red token in place instead of making the user erase it first.
+      const completionFilter =
+        activeFeedback?.status === 'invalid' ? '' : detected.partial
+      const used = new Set(detected.tokens)
+      const usedKinds = new Set(
+        COPY_MODIFIERS.filter((modifier) => used.has(modifier.token)).map((m) => m.kind),
+      )
+      const languageCount = detected.tokens.filter((token) =>
+        languageCodes.includes(token),
+      ).length
+
+      const commands: Command[] = [
         {
           id: 'ref:detected:navigate',
           group: 'actions',
@@ -300,18 +341,113 @@ export function useCopyByReferenceCommands(
           label: tMenu('copyCommandRun', { refs: recipe.refs }),
           description: tooMany
             ? tMenu('tooManyVerses', { max: MAX_REFS })
+            : hasInvalidTokens
+              ? tMenu('invalidCopyParameters', {
+                  parameters: detected.invalidTokens.join(', '),
+                })
             : chips(recipe).join(' · '),
           hint: String(detected.count),
           icon: createElement(Copy),
           keywords: [recipe.refs, query],
           priority: 95,
-          keepOpen: tooMany,
-          run: () => runCopy(recipe),
+          keepOpen: tooMany || hasInvalidTokens,
+          run: () => {
+            if (hasInvalidTokens) {
+              toast.error(
+                tMenu('invalidCopyParameters', {
+                  parameters: detected.invalidTokens.join(', '),
+                }),
+              )
+              return
+            }
+            return runCopy(recipe)
+          },
         },
       ]
+
+      if (recent && !completing) {
+        const recentTokens = copyCommandTokens(recent)
+        if (recentTokens.length > 0) {
+          commands.push({
+            id: 'ref:detected:last',
+            group: 'actions',
+            label: tMenu('copyLastSettings'),
+            description: recentTokens.join(' '),
+            icon: createElement(History),
+            priority: 90,
+            keepOpen: true,
+            run: () =>
+              setQuery(
+                `${formatCopyCommand({ ...recent, refs: recipe.refs })} `,
+              ),
+          })
+        }
+      }
+
+      const completion = (
+        id: string,
+        token: string,
+        label: string,
+        icon: Command['icon'],
+        priority: number,
+      ): Command | null => {
+        if (
+          completionFilter &&
+          !token.startsWith(completionFilter) &&
+          !normalizeForSearch(label).startsWith(completionFilter)
+        ) {
+          return null
+        }
+        return {
+          id,
+          group: 'actions',
+          label,
+          hint: token,
+          icon,
+          keywords: [token],
+          priority,
+          keepOpen: true,
+          run: () => setQuery(withCopyToken(query, token, detected.partial)),
+        }
+      }
+      const push = (row: Command | null) => {
+        if (row) commands.push(row)
+      }
+
+      for (const modifier of COPY_MODIFIERS) {
+        if (used.has(modifier.token) || usedKinds.has(modifier.kind)) continue
+        if (modifier.kind === 'translation' && languageCount > 0) continue
+        if (modifier.token === 'image' && !canCopyImage()) continue
+        if (modifier.token === 'text') continue
+        push(
+          completion(
+            `ref:detected:token:${modifier.token}`,
+            modifier.token,
+            tMenu(modifier.labelKey),
+            createElement(Plus),
+            completing ? 92 : 85,
+          ),
+        )
+      }
+
+      if (!used.has('none') && languageCount < 2) {
+        for (const language of translations) {
+          if (used.has(language.code)) continue
+          push(
+            completion(
+              `ref:detected:token:${language.code}`,
+              language.code,
+              language.name,
+              createElement(Languages),
+              language.code === uiLang ? 78 : 70,
+            ),
+          )
+        }
+      }
+
+      return commands
     }
 
-    const setQuery = (value: string) => useCommandMenu.getState().setQuery(value)
     const advance = (answer: Partial<CopyDraft>) => {
       choose(answer)
       // The input holds the command on the first step and a filter on the rest,
@@ -327,10 +463,13 @@ export function useCopyByReferenceCommands(
       if (!command.recipe) return []
       const recipe = command.recipe
       const tooMany = command.count > MAX_REFS
+      const hasInvalidTokens = command.invalidTokens.length > 0
 
       // While a token is half-typed the completions lead, so Enter finishes the
       // word. With nothing pending, Enter is the copy.
       const completing = command.partial.length > 0
+      const activeFeedback = command.tokenFeedback.at(-1)
+      const completionFilter = activeFeedback?.status === 'invalid' ? '' : command.partial
       const used = new Set(command.tokens)
       const usedKinds = new Set(
         COPY_MODIFIERS.filter((modifier) => used.has(modifier.token)).map((m) => m.kind),
@@ -346,12 +485,26 @@ export function useCopyByReferenceCommands(
           label: tMenu('copyCommandRun', { refs: recipe.refs }),
           description: tooMany
             ? tMenu('tooManyVerses', { max: MAX_REFS })
+            : hasInvalidTokens
+              ? tMenu('invalidCopyParameters', {
+                  parameters: command.invalidTokens.join(', '),
+                })
             : chips(recipe).join(' · '),
           hint: String(command.count),
           icon: createElement(Copy),
           priority: completing ? 40 : 100,
-          keepOpen: tooMany,
-          run: () => runCopy(recipe),
+          keepOpen: tooMany || hasInvalidTokens,
+          run: () => {
+            if (hasInvalidTokens) {
+              toast.error(
+                tMenu('invalidCopyParameters', {
+                  parameters: command.invalidTokens.join(', '),
+                }),
+              )
+              return
+            }
+            return runCopy(recipe)
+          },
         },
       ]
 
@@ -364,9 +517,9 @@ export function useCopyByReferenceCommands(
         priority: number,
       ): Command | null => {
         if (
-          command.partial &&
-          !token.startsWith(command.partial) &&
-          !normalizeForSearch(label).startsWith(command.partial)
+          completionFilter &&
+          !token.startsWith(completionFilter) &&
+          !normalizeForSearch(label).startsWith(completionFilter)
         ) {
           return null
         }
@@ -390,17 +543,18 @@ export function useCopyByReferenceCommands(
       // Whatever the last copy used, as one row rather than token by token. Only
       // when nothing is half-typed, since it completes no word.
       if (recent && !completing) {
-        const missing = copyCommandTokens(recent).filter((token) => !used.has(token))
-        if (missing.length > 0) {
+        const recentTokens = copyCommandTokens(recent)
+        if (recentTokens.length > 0) {
           commands.push({
             id: 'ref:last',
             group: 'actions',
             label: tMenu('copyLastSettings'),
-            description: missing.join(' '),
+            description: recentTokens.join(' '),
             icon: createElement(History),
             priority: 90,
             keepOpen: true,
-            run: () => setQuery(missing.reduce((line, token) => withCopyToken(line, token, ''), query)),
+            run: () =>
+              setQuery(`${formatCopyCommand({ ...recent, refs: recipe.refs })} `),
           })
         }
       }

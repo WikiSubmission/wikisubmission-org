@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import gsap from 'gsap'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { ChevronLeft, FileSearch, SparklesIcon } from 'lucide-react'
+import { Check, ChevronLeft, FileSearch, SparklesIcon, X } from 'lucide-react'
 import {
   Command,
   CommandEmpty,
@@ -25,7 +25,11 @@ import { useLocalIndex } from './use-local-index'
 import { usePreferenceCommands } from './registry/preferences'
 import { useLanguageCommands } from './registry/languages'
 import { useVerseCommands } from './registry/verses'
-import { useCopyByReferenceCommands, useCopyDraftSummary } from './registry/copy-by-reference'
+import {
+  useCopyByReferenceCommands,
+  useCopyDraftSummary,
+  useCopyParameterFeedback,
+} from './registry/copy-by-reference'
 import { selectCopyStep, useCopyDraft } from './use-copy-draft'
 import { COMMAND_GROUP_ORDER, type Command as MenuCommand, type CommandGroupId } from './types'
 
@@ -161,6 +165,7 @@ export function CommandMenu() {
   )
   const copyStep = useCopyDraft(selectCopyStep)
   const copySummary = useCopyDraftSummary()
+  const copyParameterFeedback = useCopyParameterFeedback(query)
 
   // The site catalogue's backend tier. Only queried on the root page, and only
   // once the query is worth a request; the instant tier above covers the wait.
@@ -207,8 +212,8 @@ export function CommandMenu() {
       priority: 88,
       run: openAsk,
     }
-    // A recognized reference has exactly the two intent rows above. Hiding the
-    // generic entry avoids a third, redundant "Copy by reference…" result.
+    // A recognized reference owns the copy suggestions. Hiding the generic
+    // entry avoids a redundant "Copy by reference…" result.
     const visibleVerseCommands =
       copyByReferenceCommands.length > 0
         ? verseCommands.filter((command) => command.id !== 'verse:copy-by-ref')
@@ -239,14 +244,16 @@ export function CommandMenu() {
     // not a search term — the row is already derived from it, so ranking it
     // against the query would only filter it back out. Every later step is a
     // list of choices the query is a real filter for.
-    const rankQuery = page === 'copy-verses' && copyStep === 'ref' ? '' : query
+    const referenceAutocomplete =
+      copyByReferenceCommands.length > 0 && (!page || page === 'copy-verses')
+    const rankQuery = referenceAutocomplete ? '' : query
 
     const byGroup = new Map<CommandGroupId, MenuCommand[]>()
     for (const group of COMMAND_GROUP_ORDER) {
       const inGroup = commands.filter((c) => c.group === group)
       if (inGroup.length === 0) continue
 
-      const limit = page ? SUBPAGE_LIMIT : GROUP_LIMIT[group]
+      const limit = page || referenceAutocomplete ? SUBPAGE_LIMIT : GROUP_LIMIT[group]
 
       // Backend results arrive already ranked, and their match is often in the
       // body rather than the title — re-ranking them against the query here
@@ -257,7 +264,7 @@ export function CommandMenu() {
       if (ranked.length > 0) byGroup.set(group, ranked)
     }
     return byGroup
-  }, [commands, query, page, copyStep])
+  }, [commands, query, page, copyByReferenceCommands])
 
   const hasResults = grouped.size > 0
 
@@ -390,6 +397,43 @@ export function CommandMenu() {
                   />
                 </div>
               </div>
+
+              {copyParameterFeedback.length > 0 &&
+                (!page || (page === 'copy-verses' && copyStep === 'ref')) && (
+                  <div
+                    className="flex flex-wrap items-center gap-1.5 border-b border-border/40 px-3 py-2"
+                    aria-label={t('copyParameterFeedback')}
+                  >
+                    {copyParameterFeedback.map((item, index) => (
+                      <span
+                        key={`${item.token}:${index}`}
+                        title={t(
+                          item.status === 'valid'
+                            ? 'validParameter'
+                            : item.status === 'partial'
+                              ? 'partialParameter'
+                              : 'invalidParameter',
+                        )}
+                        className={
+                          item.status === 'valid'
+                            ? 'inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] text-emerald-700 dark:text-emerald-300'
+                            : item.status === 'partial'
+                              ? 'inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 font-mono text-[11px] text-amber-700 dark:text-amber-300'
+                              : 'inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 font-mono text-[11px] text-destructive'
+                        }
+                      >
+                        {item.status === 'valid' ? (
+                          <Check className="size-3" />
+                        ) : item.status === 'invalid' ? (
+                          <X className="size-3" />
+                        ) : (
+                          <span aria-hidden>…</span>
+                        )}
+                        {item.token}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
               {/* The answers so far, so a choice made three questions ago is
                   still visible when the copy finally happens. */}

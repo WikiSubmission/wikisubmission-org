@@ -25,6 +25,7 @@ describe('reference and option split', () => {
       secondary: 'none',
       output: 'text',
       footnotes: 'default',
+      subtitles: 'default',
     })
   })
 
@@ -109,6 +110,7 @@ describe('formatting back to a line', () => {
     secondary: 'fr',
     output: 'table',
     footnotes: 'default',
+    subtitles: 'default',
   }
 
   it('renders the options in canonical order', () => {
@@ -141,6 +143,20 @@ describe('formatting back to a line', () => {
     const withoutFootnotes = { ...recipe, footnotes: 'exclude' as const }
     expect(formatCopyCommand(withoutFootnotes)).toContain('no-footnotes')
     expect(parse(formatCopyCommand(withoutFootnotes)).recipe).toEqual(withoutFootnotes)
+  })
+
+  it('recognizes vbv and no-subtitles', () => {
+    const command = parse('2:255 wbw vbv no-subtitles')
+    expect(command.recipe?.granularity).toBe('full')
+    expect(command.recipe?.subtitles).toBe('exclude')
+  })
+
+  it('classifies valid, partial, and invalid parameter tokens', () => {
+    expect(parse('2:255 ar wb').tokenFeedback).toEqual([
+      { token: 'ar', status: 'valid' },
+      { token: 'wb', status: 'partial' },
+    ])
+    expect(parse('2:255 ar wat ').invalidTokens).toEqual(['wat'])
   })
 })
 
