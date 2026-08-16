@@ -151,7 +151,7 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
         'relative min-w-0',
         large
           ? 'w-full'
-          : 'flex-1 max-md:focus-within:absolute max-md:focus-within:inset-x-3 max-md:focus-within:z-[60] max-md:focus-within:w-auto'
+          : 'flex-1 max-md:focus-within:absolute max-md:focus-within:inset-x-3 max-md:focus-within:top-1/2 max-md:focus-within:z-[60] max-md:focus-within:w-auto max-md:focus-within:-translate-y-1/2'
       )}
     >
       <form
