@@ -237,6 +237,7 @@ type Props = {
   /** vk of the verse currently playing in the audio player, if any. */
   currentVerseId?: string
   isPlaying?: boolean
+  onChapterChange?: (target: number) => void
 }
 
 export function ReadingView({
@@ -249,6 +250,7 @@ export function ReadingView({
   chapterLabel,
   currentVerseId,
   isPlaying = false,
+  onChapterChange,
 }: Props) {
   const prefs = useQuranPreferences()
   const primaryCode =
@@ -387,41 +389,69 @@ export function ReadingView({
       {/* Previous / next chapter navigation — route-derived, rendered on first paint (SSR) */}
       <div className="flex justify-between items-center gap-4 pt-6 border-t border-border/40">
         {chapterNumber > 1 ? (
-          <Link href={`/quran/${chapterNumber - 1}`} prefetch>
-            <Button
-              variant="secondary"
-              size="lg"
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="size-4 shrink-0" />
-              <span>
-                <span className="hidden sm:inline">{chapterLabel} </span>
-                {chapterNumber - 1}
-              </span>
-            </Button>
-          </Link>
+          (() => {
+            const prevButton = (
+              <Button
+                variant="secondary"
+                size="lg"
+                className="flex items-center gap-2"
+                onClick={
+                  onChapterChange
+                    ? () => onChapterChange(chapterNumber - 1)
+                    : undefined
+                }
+              >
+                <ArrowLeft className="size-4 shrink-0" />
+                <span>
+                  <span className="hidden sm:inline">{chapterLabel} </span>
+                  {chapterNumber - 1}
+                </span>
+              </Button>
+            )
+            return onChapterChange ? (
+              prevButton
+            ) : (
+              <Link href={`/quran/${chapterNumber - 1}`} prefetch>
+                {prevButton}
+              </Link>
+            )
+          })()
         ) : (
           <span />
         )}
 
         {chapterNumber < 114 ? (
-          <Link
-            href={`/quran/${chapterNumber + 1}`}
-            prefetch
-            className="ml-auto"
-          >
-            <Button
-              variant="secondary"
-              size="lg"
-              className="flex items-center gap-2"
-            >
-              <span>
-                <span className="hidden sm:inline">{chapterLabel} </span>
-                {chapterNumber + 1}
-              </span>
-              <ArrowRight className="size-4 shrink-0" />
-            </Button>
-          </Link>
+          (() => {
+            const nextButton = (
+              <Button
+                variant="secondary"
+                size="lg"
+                className={`flex items-center gap-2 ${onChapterChange ? 'ml-auto' : ''}`}
+                onClick={
+                  onChapterChange
+                    ? () => onChapterChange(chapterNumber + 1)
+                    : undefined
+                }
+              >
+                <span>
+                  <span className="hidden sm:inline">{chapterLabel} </span>
+                  {chapterNumber + 1}
+                </span>
+                <ArrowRight className="size-4 shrink-0" />
+              </Button>
+            )
+            return onChapterChange ? (
+              nextButton
+            ) : (
+              <Link
+                href={`/quran/${chapterNumber + 1}`}
+                prefetch
+                className="ml-auto"
+              >
+                {nextButton}
+              </Link>
+            )
+          })()
         ) : (
           <span />
         )}

@@ -63,6 +63,7 @@ type VirtualizedVerseListProps = {
   chapterLabel: string
   scriptureState?: ScriptureState
   onVerseVisible?: (verseKey: string) => void
+  onChapterChange?: (target: number) => void
 }
 
 function VirtualizedVerseList({
@@ -85,6 +86,7 @@ function VirtualizedVerseList({
   chapterLabel,
   scriptureState,
   onVerseVisible,
+  onChapterChange,
 }: VirtualizedVerseListProps) {
   const virtuosoRef = useRef<VirtuosoHandle>(null)
   const seekDoneRef = useRef(false)
@@ -420,41 +422,69 @@ function VirtualizedVerseList({
         >
           <div className="flex justify-between items-center gap-4 p-6">
             {chapterNumber > 1 ? (
-              <Link href={`/quran/${chapterNumber - 1}`} prefetch>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="size-4 shrink-0" />
-                  <span>
-                    <span className="hidden sm:inline">{chapterLabel} </span>
-                    {chapterNumber - 1}
-                  </span>
-                </Button>
-              </Link>
+              (() => {
+                const prevButton = (
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    className="flex items-center gap-2"
+                    onClick={
+                      onChapterChange
+                        ? () => onChapterChange(chapterNumber - 1)
+                        : undefined
+                    }
+                  >
+                    <ArrowLeft className="size-4 shrink-0" />
+                    <span>
+                      <span className="hidden sm:inline">{chapterLabel} </span>
+                      {chapterNumber - 1}
+                    </span>
+                  </Button>
+                )
+                return onChapterChange ? (
+                  prevButton
+                ) : (
+                  <Link href={`/quran/${chapterNumber - 1}`} prefetch>
+                    {prevButton}
+                  </Link>
+                )
+              })()
             ) : (
               <span />
             )}
 
             {chapterNumber < 114 ? (
-              <Link
-                href={`/quran/${chapterNumber + 1}`}
-                prefetch
-                className="ml-auto"
-              >
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  className="flex items-center gap-2"
-                >
-                  <span>
-                    <span className="hidden sm:inline">{chapterLabel} </span>
-                    {chapterNumber + 1}
-                  </span>
-                  <ArrowRight className="size-4 shrink-0" />
-                </Button>
-              </Link>
+              (() => {
+                const nextButton = (
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    className={`flex items-center gap-2 ${onChapterChange ? 'ml-auto' : ''}`}
+                    onClick={
+                      onChapterChange
+                        ? () => onChapterChange(chapterNumber + 1)
+                        : undefined
+                    }
+                  >
+                    <span>
+                      <span className="hidden sm:inline">{chapterLabel} </span>
+                      {chapterNumber + 1}
+                    </span>
+                    <ArrowRight className="size-4 shrink-0" />
+                  </Button>
+                )
+                return onChapterChange ? (
+                  nextButton
+                ) : (
+                  <Link
+                    href={`/quran/${chapterNumber + 1}`}
+                    prefetch
+                    className="ml-auto"
+                  >
+                    {nextButton}
+                  </Link>
+                )
+              })()
             ) : (
               <span />
             )}
@@ -481,12 +511,14 @@ export function ChapterReader({
   initialVerse,
   rangeStart,
   rangeEnd,
+  onChapterChange,
 }: {
   chapterNumber: number
   initialData: QuranResponse | null
   initialVerse?: string
   rangeStart?: number
   rangeEnd?: number
+  onChapterChange?: (target: number) => void
 }) {
   const isRangeMode = rangeStart !== undefined && rangeEnd !== undefined
   const prefs = useQuranPreferences()
@@ -845,6 +877,7 @@ export function ChapterReader({
             chapterLabel={tCommon('chapter')}
             currentVerseId={currentVerse?.verse_id}
             isPlaying={isPlaying}
+            onChapterChange={onChapterChange}
           />
         </div>
       )}
@@ -870,6 +903,7 @@ export function ChapterReader({
           chapterLabel={tCommon('chapter')}
           scriptureState={scriptureState}
           onVerseVisible={onVerseVisible}
+          onChapterChange={onChapterChange}
         />
       )}
 

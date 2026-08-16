@@ -1,6 +1,6 @@
 'use client'
 
-import { useLayoutEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { ChapterReader } from '@/components/quran-reader/chapter-reader'
 import { takeChapterFlightState } from '@/lib/chapter-flight'
 import { Flip } from '@/lib/gsap'
@@ -18,6 +18,18 @@ import { Flip } from '@/lib/gsap'
  * and would re-render the reader (+ every VerseCard) on each history sync — the
  * exact re-render storm ChapterReader avoids by reading `initialVerse` from a
  * prop. Reading once at mount keeps that stable.
+ *
+ * Chapter-to-chapter navigation (prev/next buttons) is handled entirely as
+ * client state here, never through Next's router. Next's client-side
+ * transition between two generateStaticParams pages needs the server to
+ * content-negotiate an RSC payload vs. the full HTML document via request
+ * headers on the same URL — a static file host (what Capacitor serves `out/`
+ * from) can't do that, so the soft navigation silently no-ops. A hard `<a>`
+ * reload "works" but replays the entire app boot sequence (startup splash,
+ * prayer-reminder flow) outside its normal entry point, which is worse. So
+ * `chapterNumber` is owned as local state, seeded from the route param and
+ * swapped in place on nav-button taps; `history.pushState`/`popstate` keep
+ * the URL and Android back button honest without asking Next to do anything.
  */
 
 function readVerseParam(): string | undefined {
@@ -25,7 +37,17 @@ function readVerseParam(): string | undefined {
   return new URLSearchParams(window.location.search).get('verse') ?? undefined
 }
 
-export function ChapterReaderClient({ chapterNumber }: { chapterNumber: number }) {
+function readChapterFromPath(): number | null {
+  const match = window.location.pathname.match(/\/quran\/(\d+)/)
+  return match ? Number(match[1]) : null
+}
+
+export function ChapterReaderClient({
+  chapterNumber: routeChapterNumber,
+}: {
+  chapterNumber: number
+}) {
+  const [chapterNumber, setChapterNumber] = useState(routeChapterNumber)
   const [initialVerse, setInitialVerse] = useState<string | undefined>(readVerseParam)
 
   // On client-side navigations the useState initializer above runs while
@@ -40,6 +62,25 @@ export function ChapterReaderClient({ chapterNumber }: { chapterNumber: number }
   useLayoutEffect(() => {
     const verse = readVerseParam()
     setInitialVerse((prev) => (prev === verse ? prev : verse))
+  }, [])
+
+  const navigateToChapter = useCallback((target: number) => {
+    if (!Number.isInteger(target) || target < 1 || target > 114) return
+    window.history.pushState(null, '', `/quran/${target}/`)
+    setChapterNumber(target)
+    setInitialVerse(undefined)
+  }, [])
+
+  // Android hardware/gesture back after one or more in-place chapter swaps —
+  // sync local state back from whatever URL browser history lands on.
+  useEffect(() => {
+    const onPopState = () => {
+      const chapter = readChapterFromPath()
+      if (chapter !== null) setChapterNumber(chapter)
+      setInitialVerse(readVerseParam())
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
   }, [])
 
   // Index-card → reader title continuity: if the navigation captured a Flip
@@ -58,10 +99,11 @@ export function ChapterReaderClient({ chapterNumber }: { chapterNumber: number }
 
   return (
     <ChapterReader
-      key={initialVerse ?? 'top'}
+      key={`${chapterNumber}-${initialVerse ?? 'top'}`}
       chapterNumber={chapterNumber}
       initialData={null}
       initialVerse={initialVerse}
+      onChapterChange={navigateToChapter}
     />
   )
 }
