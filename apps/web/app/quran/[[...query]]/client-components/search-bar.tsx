@@ -147,7 +147,12 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
       // bar sits in the page body rather than the fixed header, and an overlay
       // anchored only to the header would cover the field being typed into.
       data-quran-search-bar
-      className={cn('relative min-w-0', large ? 'w-full' : 'flex-1')}
+      className={cn(
+        'relative min-w-0',
+        large
+          ? 'w-full'
+          : 'flex-1 max-md:focus-within:absolute max-md:focus-within:inset-x-3 max-md:focus-within:z-[60] max-md:focus-within:w-auto'
+      )}
     >
       <form
         onSubmit={(e) => {
