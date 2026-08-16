@@ -33,6 +33,12 @@ export function NativeInit() {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return
 
+    // Keep the WebView edge-to-edge so the top bar itself paints the status
+    // bar/notch area. Its safe-area padding protects the interactive content.
+    // Applying this at runtime also covers installs upgraded from an older
+    // native config before the next full Capacitor sync.
+    StatusBar.setOverlaysWebView({ overlay: true }).catch(() => {})
+
     // Resize mode is declared once in capacitor.config.ts (KeyboardResize.Native);
     // only the accessory bar has no config-file equivalent.
     Keyboard.setAccessoryBarVisible({ isVisible: false }).catch(() => {})
@@ -67,8 +73,8 @@ export function NativeInit() {
     StatusBar.setStyle({ style: isDark ? Style.Light : Style.Dark }).catch(() => {})
 
     // setBackgroundColor is Android-only; it throws on iOS, which the catch
-    // swallows. The status bar does not overlay the webview, so this color
-    // fills the area above the header.
+    // swallows. It remains a fallback for Android versions/configurations that
+    // do not draw edge-to-edge, and matches the header background either way.
     StatusBar.setBackgroundColor({
       color: isDark ? STATUS_BAR_BACKGROUND.dark : STATUS_BAR_BACKGROUND.light,
     }).catch(() => {})

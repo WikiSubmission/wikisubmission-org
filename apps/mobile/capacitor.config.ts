@@ -18,10 +18,10 @@ const config: CapacitorConfig = {
       showSpinner: false,
     },
     StatusBar: {
-      // The status bar sits above the webview (does not overlay), so the
-      // safe-area-inset-top padding in the chrome stays 0 and this color fills
-      // the bar. NativeInit re-syncs style + color to the active theme.
-      overlaysWebView: false,
+      // Let the WebView (and therefore the top bar background) paint behind
+      // the status bar/cutout. The top bar pads its contents with the actual
+      // safe-area inset, so icons and text remain clear of every notch shape.
+      overlaysWebView: true,
       style: 'DARK',
       backgroundColor: '#F6F2EA',
     },
