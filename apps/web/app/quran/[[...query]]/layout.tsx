@@ -47,16 +47,18 @@ export default async function QuranLayout({
         <SiteNav />
         {query && (
           <header className="relative h-14 glass-nav bg-background/80 border-b border-border/40">
-            <div className="px-3 h-full flex flex-row items-center gap-2 w-full justify-between">
-              <QuranNavSheet chapters={chapters} appendices={appendices} />
+            <div className="quran-reader-toolbar px-3 h-full flex flex-row items-center gap-2 w-full justify-between">
+              <div data-search-leading>
+                <QuranNavSheet chapters={chapters} appendices={appendices} />
+              </div>
               <div className="flex-1 min-w-0">
                 <QuranSearchBar />
               </div>
-              <div className="flex gap-2 shrink-0">
+              <div data-search-trailing className="flex items-center gap-2 shrink-0">
                 <QuranModeSelector />
                 <QuranPersonalActions />
+                <QuranSettings />
               </div>
-              <QuranSettings />
             </div>
           </header>
         )}

@@ -664,6 +664,37 @@ html[data-palette='mono'].dark {
   }
 }
 
+/* On narrow Quran reader headers, let the search field borrow the full row.
+   The adjacent controls visibly leave the viewport instead of disappearing
+   underneath it, then return when focus leaves the search field. */
+@media (max-width: 767px) {
+  .quran-reader-toolbar [data-search-leading],
+  .quran-reader-toolbar [data-search-trailing] {
+    transition: transform 220ms ease, opacity 160ms ease;
+  }
+
+  .quran-reader-toolbar:has([data-quran-search-bar]:focus-within)
+    [data-search-leading] {
+    transform: translateX(calc(-100% - 1rem));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .quran-reader-toolbar:has([data-quran-search-bar]:focus-within)
+    [data-search-trailing] {
+    transform: translateX(calc(100% + 1rem));
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quran-reader-toolbar [data-search-leading],
+  .quran-reader-toolbar [data-search-trailing] {
+    transition: none;
+  }
+}
+
 /* ── BlockNote editor theming — match editorial palette ──────────────────── */
 .bn-themed .bn-container,
 .bn-themed .bn-editor {
