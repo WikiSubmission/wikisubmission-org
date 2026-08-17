@@ -504,6 +504,57 @@ html[data-palette='mono'].dark {
     -webkit-backdrop-filter: blur(12px);
   }
 
+  /* Header motion language: one-pixel lift, a centre-out hover rule, and a
+     quiet press response. The active route is handled by the shared GSAP
+     indicator in SiteNav so it can travel between destinations. */
+  .site-nav-tab {
+    isolation: isolate;
+  }
+
+  .site-nav-tab::after {
+    content: '';
+    position: absolute;
+    inset-inline: 25%;
+    bottom: 2px;
+    height: 1px;
+    border-radius: 999px;
+    background: var(--ed-accent);
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 180ms ease, opacity 160ms ease;
+  }
+
+  .site-nav-tab[data-nav-active='false']:hover {
+    color: var(--ed-fg) !important;
+    background: color-mix(in oklab, var(--ed-fg), transparent 94%) !important;
+    transform: translateY(-1px);
+  }
+
+  .site-nav-tab[data-nav-active='false']:hover::after {
+    opacity: 0.8;
+    transform: scaleX(1);
+  }
+
+  .site-nav-tab:active,
+  .site-header-action:active,
+  .site-brand:active {
+    transform: scale(0.97);
+  }
+
+  .site-header-action {
+    transition: color 160ms ease, background-color 160ms ease, transform 120ms ease;
+  }
+
+  .site-header-action:hover {
+    color: var(--ed-fg);
+    background: color-mix(in oklab, var(--ed-fg), transparent 94%) !important;
+  }
+
+  .site-brand {
+    transition: transform 140ms ease;
+  }
+
   /* Safe-area insets for installed PWA / TWA (viewport-fit=cover). These
      resolve to 0 in a normal browser, so the utilities are inert off-device.
      Apply .safe-bottom to bottom-fixed UI (e.g. the now-playing bar) and
@@ -546,7 +597,31 @@ html[data-palette='mono'].dark {
      safe-area edge, maximizing the reading window. A small upward scroll
      brings both back. */
   .mobile-top-bar {
-    transition: transform 250ms ease;
+    transition: transform 250ms ease, background-color 220ms ease, box-shadow 220ms ease;
+  }
+
+  .mobile-header-action {
+    transition: color 160ms ease, background-color 160ms ease, transform 120ms ease;
+  }
+
+  .mobile-header-action:active {
+    transform: scale(0.94);
+  }
+
+  .mobile-tab-link {
+    transition: color 180ms ease, transform 120ms ease;
+  }
+
+  .mobile-tab-icon {
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .mobile-tab-link[data-active='true'] .mobile-tab-icon {
+    transform: translateY(-1px) scale(1.06);
+  }
+
+  .mobile-tab-link:active {
+    transform: scale(0.96);
   }
 
   html[data-reader-chrome-hidden] .mobile-top-bar {
@@ -560,6 +635,30 @@ html[data-palette='mono'].dark {
 
   html[data-reader-chrome-hidden] .mobile-chapter-toolbar {
     top: env(safe-area-inset-top);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-nav-tab,
+    .site-nav-tab::after,
+    .site-header-action,
+    .site-brand,
+    .mobile-header-action,
+    .mobile-tab-link,
+    .mobile-tab-icon,
+    .mobile-top-bar,
+    .mobile-chapter-toolbar {
+      transition: none !important;
+    }
+
+    .site-nav-tab:hover,
+    .site-nav-tab:active,
+    .site-header-action:active,
+    .site-brand:active,
+    .mobile-header-action:active,
+    .mobile-tab-link:active,
+    .mobile-tab-link[data-active='true'] .mobile-tab-icon {
+      transform: none !important;
+    }
   }
 
   @keyframes highlight-glow {

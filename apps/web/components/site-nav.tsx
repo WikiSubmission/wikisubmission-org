@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, MessageSquare } from 'lucide-react'
@@ -13,6 +13,7 @@ import { SiteBrand } from '@/components/site-brand'
 import { UserMenu } from '@/components/user-menu'
 import { useSession } from 'next-auth/react'
 import { isRtlLocale } from '@/lib/is-rtl-language'
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
 
 type FlatLink = { kind: 'link'; label: string; href: string; requiresAuth?: boolean }
 type GroupGrandchild = { label: string; sub: string; href: string; requiresAuth?: boolean }
@@ -132,6 +133,7 @@ function MobileMenu({
   isRtl,
   isAuthed,
   locale,
+  reducedMotion,
 }: {
   open: boolean
   pathname: string | null
@@ -141,8 +143,11 @@ function MobileMenu({
   isRtl: boolean
   isAuthed: boolean
   locale: string
+  reducedMotion: boolean
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
+  const panelRef = useRef<HTMLDivElement | null>(null)
+  const scrimRef = useRef<HTMLButtonElement | null>(null)
   const [render, setRender] = useState(open)
 
   useEffect(() => {
@@ -152,39 +157,99 @@ function MobileMenu({
 
   useEffect(() => {
     const el = ref.current
-    if (!el) return
-    if (open) {
-      gsap.fromTo(
-        el,
-        { opacity: 0, y: -8 },
-        { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' },
-      )
-    } else if (render) {
-      gsap.to(el, {
-        opacity: 0,
-        y: -8,
-        duration: 0.2,
-        ease: 'power2.out',
-        onComplete: () => setRender(false),
-      })
+    const panel = panelRef.current
+    const scrim = scrimRef.current
+    if (!el || !panel || !scrim) return
+    if (reducedMotion) {
+      gsap.set(el, { autoAlpha: open ? 1 : 0 })
+      gsap.set(panel, { clearProps: 'clipPath,transform,opacity' })
+      gsap.set(scrim, { opacity: open ? 1 : 0 })
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (!open) setRender(false)
+      return
     }
-  }, [open, render])
+
+    const items = panel.querySelectorAll('[data-mobile-menu-item]')
+    const rails = panel.querySelectorAll('[data-mobile-menu-rail]')
+    let animation: ReturnType<typeof gsap.timeline> | null = null
+    if (open) {
+      animation = gsap.timeline()
+      animation.set(el, { autoAlpha: 1 })
+        .fromTo(scrim, { opacity: 0 }, { opacity: 1, duration: 0.22, ease: 'power2.out' })
+        .fromTo(
+          panel,
+          { clipPath: 'inset(0 0 100% 0)', y: -8 },
+          { clipPath: 'inset(0 0 0% 0)', y: 0, duration: 0.34, ease: 'power3.out' },
+          0,
+        )
+        .fromTo(
+          items,
+          { opacity: 0, y: -6 },
+          { opacity: 1, y: 0, duration: 0.24, stagger: 0.035, ease: 'power2.out' },
+          0.08,
+        )
+        .fromTo(
+          rails,
+          { scaleY: 0, transformOrigin: 'top' },
+          { scaleY: 1, duration: 0.28, stagger: 0.045, ease: 'power2.out' },
+          0.12,
+        )
+    } else if (render) {
+      animation = gsap.timeline({ onComplete: () => setRender(false) })
+        .to(items, { opacity: 0, y: -4, duration: 0.12, stagger: 0.012 })
+        .to(panel, { clipPath: 'inset(0 0 100% 0)', y: -6, duration: 0.22, ease: 'power2.in' }, 0)
+        .to(scrim, { opacity: 0, duration: 0.18 }, 0.04)
+        .set(el, { autoAlpha: 0 })
+    }
+    return () => animation?.kill()
+  }, [open, reducedMotion, render])
+
+  useEffect(() => {
+    if (!render) return
+    const previousOverflow = document.body.style.overflow
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close()
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [close, render])
 
   if (!render) return null
 
   return (
     <div
       ref={ref}
-      style={{
-        borderTop: '1px solid var(--ed-rule)',
-        backgroundColor: 'var(--ed-bg)',
-      }}
-      className="lg:hidden px-4 py-4 flex flex-col gap-0.5 sm:px-6"
+      id="mobile-site-menu"
+      className="lg:hidden absolute inset-x-0 top-16 h-[calc(100dvh-4rem)]"
+      style={{ visibility: 'hidden', zIndex: 49 }}
     >
+      <button
+        ref={scrimRef}
+        type="button"
+        aria-label="Close menu"
+        onClick={close}
+        className="absolute inset-0 cursor-default"
+        style={{ border: 0, background: 'rgba(12, 14, 14, 0.34)' }}
+      />
+      <div
+        ref={panelRef}
+        className="relative px-4 py-4 flex max-h-full flex-col gap-0.5 overflow-y-auto sm:px-6"
+        style={{
+          borderTop: '1px solid var(--ed-rule)',
+          borderBottom: '1px solid var(--ed-rule)',
+          backgroundColor: 'var(--ed-bg)',
+          boxShadow: '0 22px 50px -28px rgba(0,0,0,0.55)',
+        }}
+      >
       {items.map((item) =>
         item.kind === 'link' ? (
           <Link
             key={item.label}
+            data-mobile-menu-item
             href={item.href}
             onClick={close}
             style={{
@@ -221,7 +286,7 @@ function MobileMenu({
             {t(item.label)}
           </Link>
         ) : (
-          <div key={item.label} className="flex flex-col">
+          <div key={item.label} data-mobile-menu-item className="flex flex-col">
             <div
               style={{
                 fontFamily: F.glacial,
@@ -239,6 +304,7 @@ function MobileMenu({
               {/* Outer vertical rail spanning all children + grandchildren */}
               <span
                 aria-hidden
+                data-mobile-menu-rail
                 style={{
                   position: 'absolute',
                   [isRtl ? 'right' : 'left']: 14,
@@ -309,6 +375,7 @@ function MobileMenu({
                         {c.children!.length > 1 && (
                           <span
                             aria-hidden
+                            data-mobile-menu-rail
                             style={{
                               position: 'absolute',
                               [isRtl ? 'right' : 'left']: 38,
@@ -387,6 +454,7 @@ function MobileMenu({
 
       {!isAuthed && (
         <div
+          data-mobile-menu-item
           className="sm:hidden flex items-center gap-2 mt-2 pt-3"
           style={{ borderTop: '1px solid var(--ed-rule)' }}
         >
@@ -394,46 +462,116 @@ function MobileMenu({
           <PaletteThemeSwitcher />
         </div>
       )}
+      </div>
     </div>
   )
 }
 
 export function SiteNav() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [inFixedHeaderStack, setInFixedHeaderStack] = useState(false)
+  const navRef = useRef<HTMLElement | null>(null)
+  const desktopTabsRef = useRef<HTMLDivElement | null>(null)
+  const indicatorRef = useRef<HTMLSpanElement | null>(null)
   const pathname = usePathname()
   const t = useTranslations('navbar')
   const locale = useLocale()
   const { toggle: toggleAsk, state: askState } = useChatPanel()
   const { status } = useSession()
   const isAuthed = status === 'authenticated'
+  const reducedMotion = usePrefersReducedMotion()
   const navItems = filterNavItems(getNavItems(t), isAuthed)
-  const close = () => setMobileOpen(false)
+  const close = useCallback(() => setMobileOpen(false), [])
+  const compact = scrolled && !inFixedHeaderStack && !mobileOpen
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setInFixedHeaderStack(!!navRef.current?.closest('.quran-fixed-headers'))
+  }, [])
+
+  useEffect(() => {
+    let frame = 0
+    const sync = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => setScrolled(window.scrollY > 24))
+    }
+    sync()
+    window.addEventListener('scroll', sync, { passive: true })
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', sync)
+    }
+  }, [])
+
+  useLayoutEffect(() => {
+    const tabs = desktopTabsRef.current
+    const indicator = indicatorRef.current
+    if (!tabs || !indicator) return
+
+    const positionIndicator = (animate: boolean) => {
+      const active = tabs.querySelector<HTMLElement>('[data-nav-active="true"]')
+      if (!active) {
+        gsap.set(indicator, { autoAlpha: 0 })
+        return
+      }
+      const tabsRect = tabs.getBoundingClientRect()
+      const activeRect = active.getBoundingClientRect()
+      const vars = {
+        x: activeRect.left - tabsRect.left,
+        width: activeRect.width,
+        autoAlpha: 1,
+      }
+      if (!animate || reducedMotion) gsap.set(indicator, vars)
+      else gsap.to(indicator, { ...vars, duration: 0.34, ease: 'power3.out', overwrite: 'auto' })
+    }
+
+    positionIndicator(true)
+    if (typeof ResizeObserver === 'undefined') {
+      const onResize = () => positionIndicator(false)
+      window.addEventListener('resize', onResize)
+      return () => window.removeEventListener('resize', onResize)
+    }
+    const resizeObserver = new ResizeObserver(() => positionIndicator(false))
+    resizeObserver.observe(tabs)
+    return () => resizeObserver.disconnect()
+  }, [pathname, reducedMotion, status, locale])
 
   return (
     <nav
+      ref={navRef}
       data-site-nav=""
+      data-scrolled={scrolled ? 'true' : 'false'}
       style={{
         position: 'sticky',
         top: 0,
         zIndex: 50,
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        backgroundColor: 'color-mix(in oklab, var(--ed-bg), transparent 18%)',
+        backgroundColor: scrolled
+          ? 'color-mix(in oklab, var(--ed-bg), transparent 8%)'
+          : 'color-mix(in oklab, var(--ed-bg), transparent 18%)',
         borderBottom:
           '1px solid color-mix(in oklab, var(--ed-rule), transparent 40%)',
+        boxShadow: scrolled ? '0 10px 28px -24px rgba(0,0,0,0.5)' : 'none',
+        transition: reducedMotion
+          ? 'none'
+          : 'background-color 240ms ease, box-shadow 240ms ease',
       }}
     >
       <div
+        data-site-nav-inner
         style={{
           maxWidth: 1240,
           margin: '0 auto',
           padding: '0 clamp(12px, 3vw, 40px)',
-          height: 64,
+          height: compact ? 54 : 64,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 10,
           direction: 'ltr',
+          transition: reducedMotion ? 'none' : 'height 280ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}
       >
         <div className="flex-none min-w-0">
@@ -442,8 +580,10 @@ export function SiteNav() {
 
         <div className="hidden lg:flex flex-1 justify-center">
           <div
+            ref={desktopTabsRef}
             className="flex"
             style={{
+              position: 'relative',
               background: 'color-mix(in oklab, var(--ed-fg), transparent 96%)',
               padding: '2px',
               borderRadius: '0px',
@@ -452,6 +592,22 @@ export function SiteNav() {
               gap: '1px',
             }}
           >
+            <span
+              ref={indicatorRef}
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                left: 0,
+                bottom: -1,
+                width: 0,
+                height: 2,
+                borderRadius: 999,
+                background: 'var(--ed-accent)',
+                boxShadow: '0 0 8px color-mix(in oklab, var(--ed-accent), transparent 45%)',
+                visibility: 'hidden',
+                pointerEvents: 'none',
+              }}
+            />
             {navItems.map((item) =>
               item.kind === 'link' ? (
                 <NavTabLink
@@ -479,7 +635,7 @@ export function SiteNav() {
               type="button"
               onClick={toggleAsk}
               aria-label={t('submissionAI')}
-              className="hidden sm:inline-flex items-center gap-1.5 h-[34px] px-2.5 rounded-[2px] transition-colors"
+              className="site-header-action hidden sm:inline-flex items-center gap-1.5 h-[34px] px-2.5 rounded-[2px] transition-colors"
               style={{
                 fontFamily: F.glacial,
                 fontSize: 10.5,
@@ -524,7 +680,7 @@ export function SiteNav() {
               type="button"
               onClick={toggleAsk}
               aria-label={t('submissionAI')}
-              className="sm:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md"
+              className="site-header-action sm:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md"
               style={{
                 border: 'none',
                 background: 'none',
@@ -541,10 +697,12 @@ export function SiteNav() {
 
           <button
             type="button"
-            className="lg:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md text-muted-foreground transition-colors"
+            className="site-header-action lg:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md text-muted-foreground transition-colors"
             style={{ border: 'none', background: 'none', cursor: 'pointer' }}
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
+            aria-controls="mobile-site-menu"
+            aria-expanded={mobileOpen}
           >
             <HamburgerIcon open={mobileOpen} />
           </button>
@@ -560,26 +718,9 @@ export function SiteNav() {
         isRtl={isRtlLocale(locale)}
         isAuthed={isAuthed}
         locale={locale}
+        reducedMotion={reducedMotion}
       />
     </nav>
-  )
-}
-
-function NavActiveDot() {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: '-4px',
-        left: '50%',
-        width: '3px',
-        height: '3px',
-        borderRadius: '50%',
-        background: 'var(--ed-accent)',
-        boxShadow: '0 0 6px var(--ed-accent)',
-        transform: 'translateX(-50%)',
-      }}
-    />
   )
 }
 
@@ -595,18 +736,9 @@ function NavTabLink({
   return (
     <Link
       href={item.href}
-      onMouseEnter={(e) => {
-        if (active) return
-        const el = e.currentTarget as HTMLAnchorElement
-        el.style.color = 'var(--ed-fg)'
-        el.style.background = 'color-mix(in oklab, var(--ed-fg), transparent 94%)'
-      }}
-      onMouseLeave={(e) => {
-        if (active) return
-        const el = e.currentTarget as HTMLAnchorElement
-        el.style.color = 'var(--ed-fg-muted)'
-        el.style.background = 'transparent'
-      }}
+      data-nav-tab
+      data-nav-active={active ? 'true' : 'false'}
+      className="site-nav-tab"
       style={{
         position: 'relative',
         fontFamily: F.glacial,
@@ -618,17 +750,17 @@ function NavTabLink({
         color: active ? 'var(--ed-fg)' : 'var(--ed-fg-muted)',
         textDecoration: 'none',
         borderRadius: '0px',
-        background: active ? 'var(--ed-bg)' : 'transparent',
-        border: active ? '1px solid var(--ed-rule)' : '1px solid transparent',
-        boxShadow: active ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-        transition: 'color 150ms ease, background-color 150ms ease',
+        background: active
+          ? 'color-mix(in oklab, var(--ed-bg), transparent 20%)'
+          : 'transparent',
+        border: '1px solid transparent',
+        transition: 'color 180ms ease, background-color 180ms ease, transform 180ms ease',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
       {label}
-      {active && <NavActiveDot />}
     </Link>
   )
 }
@@ -837,23 +969,14 @@ function NavTabGroup({
     >
       <Link
         href={item.href}
+        data-nav-tab
+        data-nav-active={active ? 'true' : 'false'}
+        className="site-nav-tab"
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') {
             e.preventDefault()
             openNow()
           }
-        }}
-        onMouseEnter={(e) => {
-          if (active) return
-          const el = e.currentTarget as HTMLAnchorElement
-          el.style.color = 'var(--ed-fg)'
-          el.style.background = 'color-mix(in oklab, var(--ed-fg), transparent 94%)'
-        }}
-        onMouseLeave={(e) => {
-          if (active) return
-          const el = e.currentTarget as HTMLAnchorElement
-          el.style.color = 'var(--ed-fg-muted)'
-          el.style.background = 'transparent'
         }}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -868,10 +991,11 @@ function NavTabGroup({
           color: active ? 'var(--ed-fg)' : 'var(--ed-fg-muted)',
           textDecoration: 'none',
           borderRadius: '0px',
-          background: active ? 'var(--ed-bg)' : 'transparent',
-          border: active ? '1px solid var(--ed-rule)' : '1px solid transparent',
-          boxShadow: active ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-          transition: 'color 150ms ease, background-color 150ms ease',
+          background: active
+            ? 'color-mix(in oklab, var(--ed-bg), transparent 20%)'
+            : 'transparent',
+          border: '1px solid transparent',
+          transition: 'color 180ms ease, background-color 180ms ease, transform 180ms ease',
           display: 'flex',
           alignItems: 'center',
           gap: 4,
@@ -893,7 +1017,6 @@ function NavTabGroup({
         >
           <path d="m6 9 6 6 6-6" />
         </svg>
-        {active && <NavActiveDot />}
       </Link>
 
       <NavGroupMenu open={open} item={item} setOpen={setOpen} tChild={tChild} />

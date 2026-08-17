@@ -50,12 +50,35 @@ export function SiteBrand({ onClick }: SiteBrandProps) {
     return () => ctx.revert()
   }, [])
 
+  const animateHover = (hovered: boolean) => {
+    const root = rootRef.current
+    if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const mark = root.querySelector('[data-brand-mark]')
+    const wordmark = root.querySelector('[data-brand-wordmark]')
+    gsap.to(mark, {
+      rotate: hovered ? 2.5 : 0,
+      scale: hovered ? 1.04 : 1,
+      duration: hovered ? 0.28 : 0.34,
+      ease: 'power3.out',
+      overwrite: 'auto',
+    })
+    gsap.to(wordmark, {
+      letterSpacing: hovered ? '0.01em' : '-0.015em',
+      duration: 0.28,
+      ease: 'power2.out',
+      overwrite: 'auto',
+    })
+  }
+
   return (
     <Link
       ref={rootRef}
       href="/"
       onClick={onClick}
+      onMouseEnter={() => animateHover(true)}
+      onMouseLeave={() => animateHover(false)}
       aria-label="WikiSubmission"
+      className="site-brand"
       dir="ltr"
       style={{
         display: 'inline-flex',

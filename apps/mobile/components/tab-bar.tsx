@@ -83,13 +83,14 @@ export function TabBar() {
                 <Link
                   href={tab.href}
                   aria-current={isActive ? 'page' : undefined}
+                  data-active={isActive ? 'true' : 'false'}
                   onClick={() => haptic('light')}
                   className={cn(
-                    'flex h-full flex-col items-center justify-center gap-1 text-[0.625rem] font-medium transition-colors',
+                    'mobile-tab-link flex h-full flex-col items-center justify-center gap-1 text-[0.625rem] font-medium transition-colors',
                     isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
-                  <Icon className="size-5" aria-hidden="true" />
+                  <Icon className="mobile-tab-icon size-5" aria-hidden="true" />
                   {t(tab.labelKey)}
                 </Link>
               </li>
