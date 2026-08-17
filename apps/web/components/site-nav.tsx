@@ -201,7 +201,9 @@ function MobileMenu({
         .to(scrim, { opacity: 0, duration: 0.18 }, 0.04)
         .set(el, { autoAlpha: 0 })
     }
-    return () => animation?.kill()
+    return () => {
+      animation?.kill()
+    }
   }, [open, reducedMotion, render])
 
   useEffect(() => {
