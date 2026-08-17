@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { BookMarked, BookOpen, BookText, ListOrdered, Megaphone, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { ContinueCoverToCover } from '@/components/quran-reader/continue-cover-to-cover'
@@ -76,6 +77,7 @@ function matches(chapter: ChapterRow, localizedTitle: string, query: string): bo
  */
 export function ChapterIndex() {
   const t = useTranslations()
+  const router = useRouter()
   const titles = useChapterTitles()
   const [query, setQuery] = useState('')
 
@@ -90,18 +92,33 @@ export function ChapterIndex() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pt-3 pb-6">
-      <div className="relative mb-4">
+      <form
+        className="relative mb-4"
+        onSubmit={(event) => {
+          event.preventDefault()
+          const trimmed = query.trim()
+          if (!trimmed) return
+          if (scriptureRef?.kind === 'quran') {
+            router.push(scriptureRef.href)
+            return
+          }
+          if (!scriptureRef) {
+            router.push(`/quran/search?q=${encodeURIComponent(trimmed)}`)
+          }
+        }}
+      >
         <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
-          type="text"
+          type="search"
           inputMode="search"
+          enterKeyHint="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('mobile.reader.searchPlaceholder')}
           aria-label={t('mobile.reader.searchPlaceholder')}
           className="h-11 w-full rounded-xl border border-border/50 bg-muted/40 ps-10 pe-3 text-base outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary/60 focus:bg-muted/60"
         />
-      </div>
+      </form>
 
       {scriptureRef?.kind === 'quran' && (
         <Link
@@ -144,24 +161,33 @@ export function ChapterIndex() {
       )}
 
       {query.trim() && !scriptureRef && (
-        <Link
-          href={`/quran/search?q=${encodeURIComponent(query.trim())}`}
-          prefetch={false}
-          onClick={() => haptic('light')}
-          className="mb-3 flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3 transition-colors active:bg-primary/10"
-        >
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-            <Search className="size-4" />
-          </span>
-          <span className="flex min-w-0 flex-col">
-            <span className="truncate text-base font-semibold leading-tight text-primary">
-              {t('mobile.reader.searchAllVerses')}
+        <div className="mb-3">
+          <p
+            role="status"
+            className="mb-2 flex items-center gap-1.5 px-1 text-xs text-muted-foreground"
+          >
+            <ListOrdered className="size-3.5 shrink-0 text-primary" />
+            <span>{t('mobile.reader.searchingChapters')}</span>
+          </p>
+          <Link
+            href={`/quran/search?q=${encodeURIComponent(query.trim())}`}
+            prefetch={false}
+            onClick={() => haptic('light')}
+            className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3 transition-colors active:bg-primary/10"
+          >
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+              <Search className="size-4" />
             </span>
-            <span className="truncate text-sm text-muted-foreground">
-              {t('mobile.reader.searchAcross', { query: query.trim() })}
+            <span className="flex min-w-0 flex-col text-start">
+              <span className="truncate text-base font-semibold leading-tight text-primary">
+                {t('mobile.reader.searchAllVerses')}
+              </span>
+              <span className="truncate text-sm text-muted-foreground">
+                {t('mobile.reader.searchAcross', { query: query.trim() })}
+              </span>
             </span>
-          </span>
-        </Link>
+          </Link>
+        </div>
       )}
 
       {!query.trim() && (

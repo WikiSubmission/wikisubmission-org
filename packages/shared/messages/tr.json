@@ -119,6 +119,7 @@
       "newsletters": "Bültenler"
     },
     "searchEverything": "Tüm ayetlerde “{query}” ara",
+    "searchingWithin": "{scope} içinde aranıyor",
     "sourceThisChapter": "bu sure",
     "sourceResults": "bu sonuçlar",
     "draftMatches": "“{query}” ile {count} ayet eşleşiyor",
@@ -1438,6 +1439,7 @@
     "reader": {
       "searchPlaceholder": "Sure veya ayet ara",
       "searchAllVerses": "Tüm ayetlerde ara",
+      "searchingChapters": "Şu anda bu ekrandaki surelerde aranıyor",
       "searchAcross": "Kuran'ın tamamında \"{query}\" ara",
       "goToReference": "Bu bölüme git",
       "previewBibleVerse": "Bu İncil ayetini önizle",

@@ -119,6 +119,7 @@
       "newsletters": "Bulletins"
     },
     "searchEverything": "Rechercher « {query} » dans tous les versets",
+    "searchingWithin": "Recherche dans {scope}",
     "sourceThisChapter": "ce chapitre",
     "sourceResults": "ces résultats",
     "draftMatches": "{count, plural, =1 {1 verset correspond} other {# versets correspondent}} à « {query} »",
@@ -1438,6 +1439,7 @@
     "reader": {
       "searchPlaceholder": "Rechercher des sourates ou des versets",
       "searchAllVerses": "Rechercher dans tous les versets",
+      "searchingChapters": "Recherche en cours dans les sourates affichées",
       "searchAcross": "Trouver « {query} » dans tout le Coran",
       "goToReference": "Aller à ce passage",
       "previewBibleVerse": "Aperçu de ce verset biblique",

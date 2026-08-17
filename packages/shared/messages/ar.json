@@ -119,6 +119,7 @@
       "newsletters": "النشرات"
     },
     "searchEverything": "ابحث في كل الآيات عن ”{query}“",
+    "searchingWithin": "البحث ضمن {scope}",
     "sourceThisChapter": "هذه السورة",
     "sourceResults": "هذه النتائج",
     "draftMatches": "{count, plural, one {آية واحدة تطابق} two {آيتان تطابقان} few {# آيات تطابق} other {# آية تطابق}} «{query}»",
@@ -1438,6 +1439,7 @@
     "reader": {
       "searchPlaceholder": "ابحث في السور أو الآيات",
       "searchAllVerses": "ابحث في كل الآيات",
+      "searchingChapters": "يتم البحث حاليًا في السور الظاهرة على هذه الشاشة",
       "searchAcross": "ابحث عن «{query}» في القرآن",
       "goToReference": "الانتقال إلى هذا المقطع",
       "previewBibleVerse": "معاينة هذه الآية من الكتاب المقدس",

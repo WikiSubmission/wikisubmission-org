@@ -119,6 +119,7 @@
       "newsletters": "Newsletter"
     },
     "searchEverything": "Alle Verse nach „{query}“ durchsuchen",
+    "searchingWithin": "Suche in: {scope}",
     "sourceThisChapter": "dieses Kapitel",
     "sourceResults": "diese Ergebnisse",
     "draftMatches": "{count, plural, =1 {1 Vers passt} other {# Verse passen}} zu „{query}“",
@@ -1438,6 +1439,7 @@
     "reader": {
       "searchPlaceholder": "Suren oder Verse suchen",
       "searchAllVerses": "Alle Verse durchsuchen",
+      "searchingChapters": "Aktuell werden die Kapitel auf diesem Bildschirm durchsucht",
       "searchAcross": "„{query}“ im gesamten Koran finden",
       "goToReference": "Zu dieser Stelle springen",
       "previewBibleVerse": "Diesen Bibelvers ansehen",

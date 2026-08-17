@@ -60,15 +60,16 @@ export function QuranDraftResults({ query }: { query: string }) {
     <div
       className={`${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full space-y-3 px-4 pt-4`}
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <p className="text-sm text-muted-foreground">
+      <div className="rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
+        <div className="flex items-center gap-2 text-sm font-medium text-primary">
+          <SearchIcon className="size-4 shrink-0" />
+          <span>{t('searchingWithin', { scope })}</span>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
           {verses.length > 0
             ? t('draftMatches', { count: verses.length, query })
             : t('draftEmpty', { query })}
         </p>
-        <span className="text-[11px] uppercase tracking-wide text-muted-foreground/60">
-          {scope}
-        </span>
       </div>
 
       {verses.length > 0 && (

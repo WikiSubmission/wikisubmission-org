@@ -94,6 +94,7 @@
       "newsletters": "Nûçename"
     },
     "searchEverything": "Li hemû ayetan “{query}” bigere",
+    "searchingWithin": "Di {scope} de tê lêgerîn",
     "sourceThisChapter": "ev sûre",
     "sourceResults": "ev encam",
     "draftMatches": "{count, plural, =1 {1 ayet bi «{query}» re li hev tê} other {# ayet bi «{query}» re li hev tên}}",
@@ -778,6 +779,7 @@
     "reader": {
       "searchPlaceholder": "Li sûre an ayetan bigere",
       "searchAllVerses": "Li hemû ayetan bigere",
+      "searchingChapters": "Niha di sûreên li ser vê ekranê de tê lêgerîn",
       "searchAcross": "\"{query}\" di tevahiya Qur'anê de bibîne",
       "goToReference": "Biçe vê beşê",
       "previewBibleVerse": "Vê ayeta Kitêba Pîroz bibîne",

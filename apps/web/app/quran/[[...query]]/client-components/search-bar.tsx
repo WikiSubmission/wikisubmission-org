@@ -29,6 +29,8 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const [query, setQuery] = useState(urlQuery)
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const chapterNumber = useReaderContext((state) => state.chapterNumber)
+  const activeResults = useReaderContext((state) => state.results)
 
   // The input is the draft's only owner, so blur, Escape, and the reader's
   // per-scroll `history.replaceState` verse sync can never discard what the
@@ -127,6 +129,11 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   // `QuranDraftSwitch`, which has the width to show the verse rather than a
   // clipped line of it. What stays is navigation: jumps and the submit row.
   const canSubmit = query.trim().length > 0
+  const localScope = activeResults
+    ? t('sourceResults')
+    : chapterNumber !== null
+      ? t('sourceThisChapter')
+      : null
   const hasSuggestions =
     matchedChapters.length > 0 ||
     matchedAppendices.length > 0 ||
@@ -196,6 +203,7 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
               e.currentTarget.blur()
             }
           }}
+          enterKeyHint="search"
           autoComplete="off"
         />
       </form>
@@ -207,6 +215,44 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           data-quran-search-dropdown
           className="absolute top-full left-0 right-0 mt-1 z-50 bg-background border border-border/40 rounded-xl shadow-lg overflow-hidden"
         >
+          {localScope && (
+            <>
+              <div
+                role="status"
+                className="flex items-center gap-2 bg-primary/5 px-3 py-2 text-xs text-muted-foreground"
+              >
+                <SearchIcon className="size-3.5 shrink-0 text-primary" />
+                <span className="truncate">
+                  {t('searchingWithin', { scope: localScope })}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  setOpen(false)
+                  performSearch(query)
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium hover:bg-muted/60"
+              >
+                <SearchIcon className="size-3.5 shrink-0 text-muted-foreground/60" />
+                <span className="truncate">
+                  {t('searchEverything', { query: query.trim() })}
+                </span>
+                <span className="ms-auto shrink-0 font-mono text-[11px] text-muted-foreground/50 max-md:hidden">
+                  ⏎
+                </span>
+              </button>
+
+              {(matchedChapters.length > 0 ||
+                matchedAppendices.length > 0 ||
+                noteResults.length > 0) && (
+                <div className="border-t border-border/20" />
+              )}
+            </>
+          )}
+
           {matchedChapters.map((ch) => {
             const transliteration =
               CHAPTER_TRANSLITERATIONS[(ch.chapter_number ?? 1) - 1]
@@ -287,7 +333,7 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
             )
           })}
 
-          {canSubmit && (
+          {canSubmit && !localScope && (
             <>
               <div className="border-t border-border/20" />
               <button

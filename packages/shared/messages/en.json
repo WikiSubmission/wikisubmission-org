@@ -118,12 +118,13 @@
       "media": "Media",
       "newsletters": "Newsletters"
     },
-    "searchEverything": "Search all verses for “{query}”",
+    "searchEverything": "Search the entire Quran for “{query}”",
+    "searchingWithin": "Searching within {scope}",
     "sourceThisChapter": "this chapter",
     "sourceResults": "these results",
     "draftMatches": "{count, plural, =1 {1 verse matches} other {# verses match}} “{query}”",
     "draftEmpty": "No verses match “{query}”",
-    "draftHint": "Press Enter to search everything"
+    "draftHint": "Press Enter to search the entire Quran"
   },
   "settings": {
     "title": "Settings",
@@ -1490,6 +1491,7 @@
     "reader": {
       "searchPlaceholder": "Search chapters or verses",
       "searchAllVerses": "Search all verses",
+      "searchingChapters": "Currently searching chapters on this screen",
       "searchAcross": "Find “{query}” across the Quran",
       "goToReference": "Go to this passage",
       "previewBibleVerse": "Preview this Bible verse",

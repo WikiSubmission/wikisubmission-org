@@ -119,6 +119,7 @@
       "newsletters": "نامە"
     },
     "searchEverything": "گەڕان بەدوای «{query}» لە هەموو ئایەتەکان",
+    "searchingWithin": "گەڕان لە ناو {scope}",
     "sourceThisChapter": "ئەم سوورەتە",
     "sourceResults": "ئەم ئەنجامەکان",
     "draftMatches": "{count, plural, =1 {1 ئایەت لەگەڵ «{query}» دەگونجێت} other {# ئایەت لەگەڵ «{query}» دەگونجێن}}",
@@ -1428,6 +1429,7 @@
     "reader": {
       "searchPlaceholder": "بەدوای سورەت یان ئایەت بگەڕێ",
       "searchAllVerses": "لە هەموو ئایەتەکان بگەڕێ",
+      "searchingChapters": "ئێستا لە سوورەتەکانی ئەم شاشەیەدا دەگەڕێت",
       "searchAcross": "«{query}» لە هەموو قورئاندا بدۆزەوە",
       "goToReference": "بڕۆ بۆ ئەم بەشە",
       "previewBibleVerse": "پێشبینینی ئەم ئایەتەی کتێبی پیرۆز",
