@@ -48,6 +48,18 @@ describe('proxy route handling', () => {
     expect(authHandlerCalls.count).toBe(0)
   })
 
+  it('leaves ?q= alone on the Quran sibling routes', async () => {
+    // These are separate pages with their own meaning for ?q=; rewriting them
+    // sent the topical index's search and cross-reference links into the reader.
+    for (const path of [
+      '/quran/index?q=alimony',
+      '/quran/words?q=rahma',
+      '/quran/games?q=x',
+    ]) {
+      expect(getPublicProxyResponse(request(path)), path).toBeNull()
+    }
+  })
+
   it('does not invoke auth for a normal public page', async () => {
     const response = (await proxy(request('/legal/privacy-policy'), event)) as Response
 

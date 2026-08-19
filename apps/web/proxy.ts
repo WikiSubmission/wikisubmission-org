@@ -27,7 +27,14 @@ export function getPublicProxyResponse(request: NextRequest) {
   }
 
   // Quran URL rewriting: /quran?q=foo → /quran/foo
-  if (pathname.startsWith('/quran') && searchParams.has('q')) {
+  //
+  // Scoped to the reader's own landing path, not the whole /quran prefix. The
+  // sibling routes (/quran/index, /quran/words, /quran/games) have their own
+  // meaning for ?q= and were being redirected into the reader by it: the topical
+  // index's own search and every one of its cross-reference links landed on
+  // /quran/<topic> as a verse search instead. Every caller of this rewrite
+  // (chat-ui.tsx, the /quran metadata) links to bare /quran?q= anyway.
+  if (pathname === '/quran' && searchParams.has('q')) {
     const query = searchParams.get('q')
     const tab = searchParams.get('tab')
     if (query) {
