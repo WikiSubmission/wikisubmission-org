@@ -1111,6 +1111,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/editorial/quran-reference-version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Choose the current editor's word-by-word Quran reference version */
+        put: operations["updateEditorialQuranReferenceVersion"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/editorial/bible-versions": {
         parameters: {
             query?: never;
@@ -2899,6 +2916,8 @@ export interface components {
         OkResponse: {
             ok: boolean;
         };
+        /** @enum {string} */
+        AccessRole: "member" | "editor" | "game_editor" | "admin";
         User: {
             /** Format: int64 */
             id: number;
@@ -2906,8 +2925,13 @@ export interface components {
             /** Format: email */
             email: string;
             display_name?: string | null;
-            /** @enum {string} */
+            /**
+             * @deprecated
+             * @description Compatibility projection. New clients must use roles.
+             * @enum {string}
+             */
             role: "admin" | "editor" | "member";
+            roles: components["schemas"]["AccessRole"][];
             permissions: {
                 [key: string]: unknown;
             } | null;
@@ -2918,8 +2942,12 @@ export interface components {
             updated_at: string;
         };
         UpdateUserRequest: {
-            /** @enum {string} */
+            /**
+             * @deprecated
+             * @enum {string}
+             */
             role?: "admin" | "editor" | "member";
+            roles?: components["schemas"]["AccessRole"][];
             permissions?: {
                 [key: string]: unknown;
             };
@@ -2958,6 +2986,13 @@ export interface components {
         };
         EditorialSessionEnvelope: {
             data: components["schemas"]["EditorialSession"];
+        };
+        QuranReferencePreferenceInput: {
+            /**
+             * Format: int64
+             * @description A Quran version the current editor can read, or null to clear.
+             */
+            reference_version_id: number | null;
         };
         /**
          * @description Content module keys of the first-party editorial store (subset of editor_module).
@@ -3034,15 +3069,18 @@ export interface components {
             bible_versions: components["schemas"]["EditorVersionGrant"][];
             /** @description Per-game grants. Omit (or send an empty array) to revoke them all; unknown game keys are rejected with 400. */
             games?: components["schemas"]["EditorGameGrant"][];
-            /** Format: int64 */
-            quran_reference_version_id?: number | null;
         };
         EditorialEditor: {
             /** Format: int64 */
             user_id: number;
             email: string;
             display_name?: string | null;
+            /**
+             * @deprecated
+             * @description Compatibility projection. New clients must use roles.
+             */
             role: string;
+            roles: components["schemas"]["AccessRole"][];
             is_active: boolean;
             /** @description Module key mapped to can_write. Presence of a key implies read access. */
             modules: {
@@ -3052,8 +3090,6 @@ export interface components {
             bible_versions: components["schemas"]["EditorVersionGrant"][];
             /** @description Per-game grants. The global tier appears as the `game` key in modules. */
             games: components["schemas"]["EditorGameGrant"][];
-            /** Format: int64 */
-            quran_reference_version_id?: number | null;
         };
         EditorialEditorEnvelope: {
             data: components["schemas"]["EditorialEditor"];
@@ -5916,6 +5952,33 @@ export interface operations {
             500: components["responses"]["InternalServerErrror"];
         };
     };
+    updateEditorialQuranReferenceVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuranReferencePreferenceInput"];
+            };
+        };
+        responses: {
+            /** @description Updated permission and preference snapshot */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorialSessionEnvelope"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
     listEditorialBibleVersions: {
         parameters: {
             query?: never;
@@ -6646,6 +6709,7 @@ export interface operations {
             };
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
             500: components["responses"]["InternalServerErrror"];
         };
     };

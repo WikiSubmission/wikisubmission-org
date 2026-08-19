@@ -26,7 +26,6 @@ export const CONTENT_MODULE_KEYS = [
   'article',
   'community',
   'author',
-  'category',
   'appendix',
 ] as const
 
@@ -53,6 +52,26 @@ export function canWriteModule(
   module: string
 ): boolean {
   return session.is_admin || session.modules[module] === true
+}
+
+/** Route-level rules for generic content documents. Categories live under
+ * Articles, while the Authors management surface is admin-only. */
+export function canReadContentModule(
+  session: EditorialSession,
+  module: string
+): boolean {
+  if (module === 'category') return canReadModule(session, 'article')
+  if (module === 'author') return session.is_admin
+  return canReadModule(session, module)
+}
+
+export function canWriteContentModule(
+  session: EditorialSession,
+  module: string
+): boolean {
+  if (module === 'category') return canWriteModule(session, 'article')
+  if (module === 'author') return session.is_admin
+  return canWriteModule(session, module)
 }
 
 // ── Quran versions ───────────────────────────────────────────────────────────

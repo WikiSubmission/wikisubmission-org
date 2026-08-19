@@ -12,7 +12,9 @@ import {
   upsertQuranRootMeaning,
   upsertQuranVerseDraft,
   upsertQuranWordDraft,
+  updateQuranReferenceVersion,
   type MutationResult,
+  type EditorialSession,
   type QuranPublishRequest,
   type QuranRectifySeedInput,
   type QuranRectifySeedResult,
@@ -34,29 +36,53 @@ async function requireToken(): Promise<string | null> {
   return session?.accessToken ?? null
 }
 
-const NOT_AUTHED: MutationResult<never> = { ok: false, error: 'Your session has expired. Sign in again.' }
+const NOT_AUTHED: MutationResult<never> = {
+  ok: false,
+  error: 'Your session has expired. Sign in again.',
+}
 
 export async function saveVerseDraftAction(
   versionId: number,
   chapterNumber: number,
   verseNumber: number,
-  body: QuranVerseDraftInput,
+  body: QuranVerseDraftInput
 ): Promise<MutationResult<QuranVerseDraft>> {
   const token = await requireToken()
   if (!token) return NOT_AUTHED
-  const result = await upsertQuranVerseDraft(token, versionId, chapterNumber, verseNumber, body)
+  const result = await upsertQuranVerseDraft(
+    token,
+    versionId,
+    chapterNumber,
+    verseNumber,
+    body
+  )
   if (result.ok) revalidatePath(`/editor/quran/${versionId}/${chapterNumber}`)
+  return result
+}
+
+export async function setQuranReferenceVersionAction(
+  versionId: number | null
+): Promise<MutationResult<EditorialSession>> {
+  const token = await requireToken()
+  if (!token) return NOT_AUTHED
+  const result = await updateQuranReferenceVersion(token, versionId)
+  if (result.ok) revalidatePath('/editor/quran')
   return result
 }
 
 export async function saveChapterTitleAction(
   versionId: number,
   chapterNumber: number,
-  title: string | null,
+  title: string | null
 ): Promise<MutationResult<{ chapter_number: number; title?: string | null }>> {
   const token = await requireToken()
   if (!token) return NOT_AUTHED
-  const result = await upsertQuranChapterDraft(token, versionId, chapterNumber, title)
+  const result = await upsertQuranChapterDraft(
+    token,
+    versionId,
+    chapterNumber,
+    title
+  )
   if (result.ok) revalidatePath(`/editor/quran/${versionId}/${chapterNumber}`)
   return result
 }
@@ -64,11 +90,16 @@ export async function saveChapterTitleAction(
 export async function submitPublishAction(
   versionId: number,
   chapterNumber: number,
-  note: string | null,
+  note: string | null
 ): Promise<MutationResult<QuranPublishRequest>> {
   const token = await requireToken()
   if (!token) return NOT_AUTHED
-  const result = await createQuranPublishRequest(token, versionId, chapterNumber, note)
+  const result = await createQuranPublishRequest(
+    token,
+    versionId,
+    chapterNumber,
+    note
+  )
   if (result.ok) {
     revalidatePath(`/editor/quran/${versionId}/${chapterNumber}`)
     revalidatePath(`/editor/quran/${versionId}`)
@@ -81,19 +112,20 @@ export async function saveWordDraftAction(
   versionId: number,
   chapterNumber: number,
   wordId: number,
-  body: QuranWordDraftInput,
+  body: QuranWordDraftInput
 ): Promise<MutationResult<QuranWord>> {
   const token = await requireToken()
   if (!token) return NOT_AUTHED
   const result = await upsertQuranWordDraft(token, versionId, wordId, body)
-  if (result.ok) revalidatePath(`/editor/quran/${versionId}/${chapterNumber}/words`)
+  if (result.ok)
+    revalidatePath(`/editor/quran/${versionId}/${chapterNumber}/words`)
   return result
 }
 
 export async function saveRootMeaningAction(
   versionId: number,
   rootId: number,
-  meaning: string | null,
+  meaning: string | null
 ): Promise<MutationResult<QuranRootSummary>> {
   const token = await requireToken()
   if (!token) return NOT_AUTHED
@@ -104,7 +136,7 @@ export async function saveRootMeaningAction(
 
 export async function publishRootMeaningsAction(
   versionId: number,
-  note: string | null,
+  note: string | null
 ): Promise<MutationResult<QuranRootPublishResult>> {
   const token = await requireToken()
   if (!token) return NOT_AUTHED
@@ -113,7 +145,9 @@ export async function publishRootMeaningsAction(
   return result
 }
 
-export async function syncRootsAction(): Promise<MutationResult<QuranRootsSyncResult>> {
+export async function syncRootsAction(): Promise<
+  MutationResult<QuranRootsSyncResult>
+> {
   const token = await requireToken()
   if (!token) return NOT_AUTHED
   return syncQuranRoots(token)
@@ -121,7 +155,7 @@ export async function syncRootsAction(): Promise<MutationResult<QuranRootsSyncRe
 
 export async function seedDraftShellsAction(
   versionId: number,
-  body: QuranRectifySeedInput,
+  body: QuranRectifySeedInput
 ): Promise<MutationResult<QuranRectifySeedResult>> {
   const token = await requireToken()
   if (!token) return NOT_AUTHED
@@ -133,14 +167,21 @@ export async function seedDraftShellsAction(
 export async function decidePublishAction(
   requestId: number,
   decision: 'approve' | 'reject' | 'cancel',
-  note: string | null,
+  note: string | null
 ): Promise<MutationResult<QuranPublishRequest>> {
   const token = await requireToken()
   if (!token) return NOT_AUTHED
-  const result = await decideQuranPublishRequest(token, requestId, decision, note)
+  const result = await decideQuranPublishRequest(
+    token,
+    requestId,
+    decision,
+    note
+  )
   if (result.ok) {
     revalidatePath('/editor/quran/approvals')
-    revalidatePath(`/editor/quran/${result.data.version_id}/${result.data.chapter_number}`)
+    revalidatePath(
+      `/editor/quran/${result.data.version_id}/${result.data.chapter_number}`
+    )
     revalidatePath(`/editor/quran/${result.data.version_id}`)
   }
   return result

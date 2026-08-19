@@ -1,36 +1,54 @@
 'use client'
 
-/**
- * The unified access console. One expandable panel per user covering all three
- * areas of access:
- *
- *   Role      — member / editor / admin (admins bypass every grant below)
- *   Games     — a global "all games" tier plus a per-game row for each game
- *   Editorial — per-module, and for Quran/Bible a per-version row with the
- *               separate approver capability and the word-by-word reference
- *
- * Saving issues at most two calls: PATCH /users/{id} when the role changed, and
- * PUT /editorial/admin/editors/{id} for everything else (which the backend
- * applies atomically, revoking anything absent from the request).
- *
- * Admin-only surface; the backend re-checks on every call. Replaces the old
- * role-plus-one-checkbox table and the separate /editor/admin grant editor.
- */
-import { useMemo, useState, useTransition } from 'react'
+import {
+  useMemo,
+  useState,
+  useTransition,
+  type ChangeEvent,
+  type ReactNode,
+} from 'react'
+import {
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+  type ColumnDef,
+  type SortingState,
+} from '@tanstack/react-table'
+import { ArrowUpDown, KeyRound, Search } from 'lucide-react'
 
 import type {
   EditorGame,
   EditorialEditor,
 } from '@/lib/editorial-content-client'
+import { callAdminAction } from '@/lib/call-admin-action'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { STATUS_META } from '@/components/editor/content/status'
 import {
   Chip,
   GrantRow,
   GrantSectionHeading,
-  NativeSelect,
   TriState,
   type GrantLevel,
 } from '@/components/admin/grants/grant-controls'
@@ -41,15 +59,35 @@ import {
   initialGrantState,
   type GrantState,
 } from '@/components/admin/grants/grant-state'
-import { callAdminAction } from '@/lib/call-admin-action'
 import { saveAccessAction } from './actions'
 
-export type UserRole = 'admin' | 'editor' | 'member'
+export type AccessRole = 'member' | 'editor' | 'game_editor' | 'admin'
 
-const ROLE_OPTIONS: Array<{ v: UserRole; label: string }> = [
-  { v: 'member', label: 'Member' },
-  { v: 'editor', label: 'Editor' },
-  { v: 'admin', label: 'Admin' },
+const ROLE_OPTIONS: Array<{
+  value: AccessRole
+  label: string
+  description: string
+}> = [
+  {
+    value: 'member',
+    label: 'Member',
+    description: 'Default access for every account.',
+  },
+  {
+    value: 'editor',
+    label: 'Editor',
+    description: 'Access to granted site CMS sections.',
+  },
+  {
+    value: 'game_editor',
+    label: 'Game editor',
+    description: 'Access to granted game tools.',
+  },
+  {
+    value: 'admin',
+    label: 'Admin',
+    description: 'Full access to every administrative and editorial surface.',
+  },
 ]
 
 interface VersionOption {
@@ -72,21 +110,124 @@ export function AccessClient({
   games,
   loadError,
 }: AccessClientProps) {
-  const [openUserId, setOpenUserId] = useState<number | null>(null)
+  const [rows, setRows] = useState(editors)
   const [query, setQuery] = useState('')
+  const [roleFilter, setRoleFilter] = useState<AccessRole | 'all'>('all')
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'active' | 'inactive'
+  >('all')
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [selected, setSelected] = useState<EditorialEditor | null>(null)
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return editors
-    return editors.filter(
-      (e) =>
-        e.email.toLowerCase().includes(q) ||
-        (e.display_name ?? '').toLowerCase().includes(q)
+    const needle = query.trim().toLowerCase()
+    return rows.filter((user) => {
+      if (
+        needle &&
+        !user.email.toLowerCase().includes(needle) &&
+        !(user.display_name ?? '').toLowerCase().includes(needle)
+      )
+        return false
+      if (roleFilter !== 'all' && !user.roles.includes(roleFilter)) return false
+      if (statusFilter === 'active' && !user.is_active) return false
+      if (statusFilter === 'inactive' && user.is_active) return false
+      return true
+    })
+  }, [query, roleFilter, rows, statusFilter])
+
+  const columns = useMemo<ColumnDef<EditorialEditor>[]>(
+    () => [
+      {
+        id: 'user',
+        accessorFn: (user) => (user.display_name || user.email).toLowerCase(),
+        header: ({ column }) => (
+          <SortButton
+            label="User"
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          />
+        ),
+        cell: ({ row }) => (
+          <div className="min-w-[220px]">
+            <div className="font-[family-name:var(--font-source-serif)] text-[16px] font-medium text-foreground">
+              {row.original.display_name || row.original.email}
+            </div>
+            <div className="font-[family-name:var(--font-jetbrains)] text-[12px] text-muted-foreground">
+              {row.original.email}
+            </div>
+          </div>
+        ),
+      },
+      {
+        id: 'roles',
+        accessorFn: (user) => user.roles.join(' '),
+        header: 'Roles',
+        cell: ({ row }) => (
+          <RoleBadges roles={row.original.roles as AccessRole[]} />
+        ),
+      },
+      {
+        id: 'permissions',
+        accessorFn: (user) => grantSummary(user),
+        header: 'Permissions',
+        cell: ({ row }) => (
+          <span className="block max-w-[360px] truncate text-[13px] text-muted-foreground">
+            {grantSummary(row.original)}
+          </span>
+        ),
+      },
+      {
+        id: 'status',
+        accessorFn: (user) => (user.is_active ? 'active' : 'inactive'),
+        header: 'Status',
+        cell: ({ row }) => (
+          <Badge
+            variant={row.original.is_active ? 'secondary' : 'outline'}
+            className="font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.1em]"
+          >
+            {row.original.is_active ? 'Active' : 'Deactivated'}
+          </Badge>
+        ),
+      },
+      {
+        id: 'actions',
+        enableSorting: false,
+        header: () => <span className="sr-only">Actions</span>,
+        cell: ({ row }) => (
+          <div className="text-right">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setSelected(row.original)}
+            >
+              <KeyRound className="size-3.5" /> Manage access
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    []
+  )
+
+  const table = useReactTable({
+    data: filtered,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 15 } },
+  })
+
+  const updateRow = (next: EditorialEditor) => {
+    setRows((current) =>
+      current.map((user) => (user.user_id === next.user_id ? next : user))
     )
-  }, [editors, query])
+    setSelected(next)
+  }
 
   return (
-    <section className="mx-auto max-w-[960px] px-4 py-8 sm:px-6 sm:py-12">
+    <section className="mx-auto max-w-[1180px] px-4 py-8 sm:px-6 sm:py-12">
       <header className="mb-6">
         <p className="m-0 font-[family-name:var(--font-jetbrains)] text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
           Administration
@@ -94,11 +235,10 @@ export function AccessClient({
         <h1 className="mt-1.5 mb-3 font-[family-name:var(--font-cormorant)] text-[clamp(32px,5vw,48px)]">
           Access
         </h1>
-        <p className="max-w-[640px] text-[15px] leading-relaxed text-muted-foreground">
-          Grant access per area. Admins get everything and bypass the grants
-          below. Everyone else sees only what is granted here — a games grant
-          can cover every game or just one, and Quran access can be scoped to
-          individual versions.
+        <p className="max-w-[720px] text-[15px] leading-relaxed text-muted-foreground">
+          Assign one or more roles, then grant read or write access to the
+          sections each role unlocks. Member is the default role; admins have
+          full access.
         </p>
       </header>
 
@@ -106,365 +246,473 @@ export function AccessClient({
         <p className="mb-3 text-[14px] text-destructive">{loadError}</p>
       )}
 
-      <input
-        type="search"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Filter by email or name…"
-        aria-label="Filter users"
-        className="mb-4 h-9 w-full max-w-[320px] rounded-[2px] border border-input bg-transparent px-3 font-[family-name:var(--font-source-serif)] text-[15px] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-      />
+      <div className="mb-4 flex flex-wrap gap-2.5">
+        <label className="relative min-w-[260px] flex-1 sm:max-w-sm">
+          <Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+              setQuery(event.target.value)
+            }
+            placeholder="Filter by name or email…"
+            className="pl-9"
+          />
+        </label>
+        <FilterSelect
+          value={roleFilter}
+          onChange={(value) => setRoleFilter(value as AccessRole | 'all')}
+          ariaLabel="Filter by role"
+        >
+          <option value="all">All roles</option>
+          {ROLE_OPTIONS.map((role) => (
+            <option key={role.value} value={role.value}>
+              {role.label}
+            </option>
+          ))}
+        </FilterSelect>
+        <FilterSelect
+          value={statusFilter}
+          onChange={(value) => setStatusFilter(value as typeof statusFilter)}
+          ariaLabel="Filter by account status"
+        >
+          <option value="all">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Deactivated</option>
+        </FilterSelect>
+      </div>
 
       <div className="overflow-hidden rounded-[3px] border border-border bg-card">
-        {filtered.map((editor) => (
-          <EditorRow
-            key={editor.user_id}
-            editor={editor}
-            quranVersions={quranVersions}
-            bibleVersions={bibleVersions}
-            games={games}
-            open={openUserId === editor.user_id}
-            onToggle={() =>
-              setOpenUserId(
-                openUserId === editor.user_id ? null : editor.user_id
-              )
-            }
-          />
-        ))}
-        {filtered.length === 0 && (
-          <p className="m-0 p-4 text-[16px] text-muted-foreground">
-            {editors.length === 0
-              ? 'No users found.'
-              : 'No users match that filter.'}
-          </p>
-        )}
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((group) => (
+              <TableRow key={group.id}>
+                {group.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-28 text-center text-muted-foreground"
+                >
+                  No users match these filters.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
+
+      <div className="mt-3 flex items-center justify-between gap-3 text-[13px] text-muted-foreground">
+        <span>
+          {filtered.length} user{filtered.length === 1 ? '' : 's'}
+        </span>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <span>
+            Page {table.getState().pagination.pageIndex + 1} of{' '}
+            {Math.max(table.getPageCount(), 1)}
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+
+      {selected && (
+        <AccessDialog
+          key={selected.user_id}
+          editor={selected}
+          quranVersions={quranVersions}
+          bibleVersions={bibleVersions}
+          games={games}
+          open
+          onOpenChange={(open) => {
+            if (!open) setSelected(null)
+          }}
+          onSaved={updateRow}
+        />
+      )}
     </section>
   )
 }
 
-function EditorRow({
+function AccessDialog({
   editor,
   quranVersions,
   bibleVersions,
   games,
   open,
-  onToggle,
+  onOpenChange,
+  onSaved,
 }: {
   editor: EditorialEditor
   quranVersions: VersionOption[]
   bibleVersions: VersionOption[]
   games: EditorGame[]
   open: boolean
-  onToggle: () => void
+  onOpenChange: (open: boolean) => void
+  onSaved: (editor: EditorialEditor) => void
 }) {
-  return (
-    <div className="border-b border-border last:border-b-0">
-      <button
-        type="button"
-        aria-expanded={open}
-        className="flex w-full flex-col gap-1 px-4 py-3 text-left transition-colors hover:bg-accent"
-        onClick={onToggle}
-      >
-        <div className="flex items-center gap-2.5">
-          <span className="min-w-0 flex-1 truncate font-[family-name:var(--font-source-serif)] text-[17px] font-medium text-foreground">
-            {editor.display_name || editor.email}
-          </span>
-          {editor.role === 'admin' && (
-            <Badge className="font-[family-name:var(--font-glacial)] text-[11px] uppercase tracking-[0.1em]">
-              admin
-            </Badge>
-          )}
-          {editor.role === 'editor' && (
-            <Badge
-              variant="outline"
-              className="font-[family-name:var(--font-glacial)] text-[11px] uppercase tracking-[0.1em]"
-            >
-              editor
-            </Badge>
-          )}
-          {!editor.is_active && (
-            <Badge
-              variant="outline"
-              className="font-[family-name:var(--font-glacial)] text-[11px] uppercase tracking-[0.1em] text-muted-foreground"
-            >
-              deactivated
-            </Badge>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[12.5px] text-muted-foreground">
-          <span>{editor.email}</span>
-          <span className="opacity-45">·</span>
-          <span>{grantSummary(editor)}</span>
-        </div>
-      </button>
-      {open && (
-        <AccessPanel
-          editor={editor}
-          quranVersions={quranVersions}
-          bibleVersions={bibleVersions}
-          games={games}
-        />
-      )}
-    </div>
+  const [roles, setRoles] = useState<AccessRole[]>(() =>
+    normalizeRoles(editor.roles)
   )
-}
-
-function AccessPanel({
-  editor,
-  quranVersions,
-  bibleVersions,
-  games,
-}: {
-  editor: EditorialEditor
-  quranVersions: VersionOption[]
-  bibleVersions: VersionOption[]
-  games: EditorGame[]
-}) {
-  const [role, setRole] = useState<UserRole>(normalizeRole(editor.role))
   const [state, setState] = useState<GrantState>(() =>
     initialGrantState(editor)
   )
-  const [dirty, setDirty] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  const patch = (updater: (prev: GrantState) => GrantState) => {
+  const patch = (updater: (previous: GrantState) => GrantState) => {
     setState(updater)
-    setDirty(true)
     setMessage(null)
     setError(null)
   }
-
-  const changeRole = (next: UserRole) => {
-    setRole(next)
-    setDirty(true)
+  const toggleRole = (role: AccessRole) => {
+    if (role === 'member') return
+    setRoles((current) =>
+      current.includes(role)
+        ? current.filter((item) => item !== role)
+        : [...current, role]
+    )
     setMessage(null)
     setError(null)
   }
+  const isAdmin = roles.includes('admin')
+  const isEditor = roles.includes('editor')
+  const isGameEditor = roles.includes('game_editor')
 
-  const save = () => {
+  const save = () =>
     startTransition(async () => {
+      const grants = grantStateToInput(state)
       const result = await callAdminAction(() =>
-        saveAccessAction({
-          userId: editor.user_id,
-          // Omitted when unchanged so a grants-only edit does not touch the role.
-          role: role === normalizeRole(editor.role) ? undefined : role,
-          grants: grantStateToInput(state),
-        })
+        saveAccessAction({ userId: editor.user_id, roles, grants })
       )
       if (!result.ok) {
         setError(result.error)
         return
       }
-      setDirty(false)
+      onSaved({
+        ...editor,
+        role: roles.includes('admin')
+          ? 'admin'
+          : roles.includes('editor')
+            ? 'editor'
+            : 'member',
+        roles,
+        modules: grants.modules,
+        quran_versions: grants.quran_versions,
+        bible_versions: grants.bible_versions,
+        games: grants.games ?? [],
+      })
       setMessage('Access saved.')
     })
-  }
-
-  const isAdmin = role === 'admin'
 
   return (
-    <div className="border-t border-border px-4 pt-1 pb-[18px]">
-      <GrantSectionHeading>Role</GrantSectionHeading>
-      <GrantRow label="Site role">
-        <span className="inline-flex gap-1.5">
-          {ROLE_OPTIONS.map(({ v, label }) => (
-            <Chip
-              key={v}
-              active={role === v}
-              disabled={pending}
-              onClick={() => changeRole(v)}
-            >
-              {label}
-            </Chip>
-          ))}
-        </span>
-      </GrantRow>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-[780px]">
+        <DialogHeader>
+          <DialogTitle className="font-[family-name:var(--font-cormorant)] text-[30px]">
+            Manage access
+          </DialogTitle>
+          <DialogDescription>
+            {editor.display_name || editor.email} · {editor.email}
+          </DialogDescription>
+        </DialogHeader>
 
-      {isAdmin && (
-        <p className="mt-3 text-[15px] leading-snug text-muted-foreground">
-          Admins bypass every grant below; anything set here only takes effect
-          if the admin role is removed.
-        </p>
-      )}
+        <GrantSectionHeading>Roles</GrantSectionHeading>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {ROLE_OPTIONS.map((role) => {
+            const checked = roles.includes(role.value)
+            return (
+              <label
+                key={role.value}
+                className={cn(
+                  'flex cursor-pointer gap-3 rounded-[3px] border p-3',
+                  checked && 'border-primary bg-primary/5',
+                  role.value === 'member' && 'cursor-default'
+                )}
+              >
+                <Checkbox
+                  checked={checked}
+                  disabled={pending || role.value === 'member'}
+                  onCheckedChange={() => toggleRole(role.value)}
+                />
+                <span>
+                  <span className="block text-[15px] font-medium">
+                    {role.label}
+                  </span>
+                  <span className="block text-[12.5px] leading-snug text-muted-foreground">
+                    {role.description}
+                  </span>
+                </span>
+              </label>
+            )
+          })}
+        </div>
+        {isAdmin && (
+          <p className="mt-3 rounded-[3px] bg-muted px-3 py-2 text-[14px] text-muted-foreground">
+            Admin provides full access. Editor and Game editor may remain
+            selected independently for future demotion.
+          </p>
+        )}
 
-      <GrantSectionHeading hint="a per-game grant works on its own — the global tier is not required">
-        Games
-      </GrantSectionHeading>
-      <GrantRow label="All games" labelWidth="w-[220px]">
-        <TriState
-          value={state.allGames}
-          disabled={pending}
-          onChange={(allGames) => patch((p) => ({ ...p, allGames }))}
-        />
-      </GrantRow>
-      {games.map((game) => (
-        <GrantRow
-          key={game.key}
-          label={game.name}
-          labelWidth="w-[220px]"
-          indent
-        >
-          <TriState
-            value={state.games[game.key] ?? 'none'}
-            disabled={pending}
-            onChange={(access) =>
-              patch((p) => ({
-                ...p,
-                games: { ...p.games, [game.key]: access },
-              }))
-            }
-          />
-        </GrantRow>
-      ))}
-      {games.length === 0 && (
-        <p className="m-0 py-1.5 text-[14px] text-muted-foreground">
-          No games are registered yet.
-        </p>
-      )}
-
-      <GrantSectionHeading>Editorial</GrantSectionHeading>
-      {CONTENT_MODULES.map(({ key, label }) => (
-        <div key={key}>
-          <GrantRow label={label} labelWidth="w-[220px]">
-            <TriState
-              value={state.modules[key]}
-              disabled={pending}
-              onChange={(v) =>
-                patch((p) => ({ ...p, modules: { ...p.modules, [key]: v } }))
-              }
-            />
-          </GrantRow>
-
-          {/* Version rows refine their module grant, so they only make sense
-              once the module itself is granted. */}
-          {key === 'quran' && state.modules.quran !== 'none' && (
-            <>
-              {quranVersions.map((v) => {
-                const grant = state.quran[v.id] ?? {
-                  access: 'none' as GrantLevel,
-                  approve: false,
-                }
-                return (
-                  <GrantRow
-                    key={v.id}
-                    label={v.name}
-                    labelWidth="w-[220px]"
-                    indent
-                  >
-                    <TriState
-                      value={grant.access}
-                      disabled={pending}
-                      onChange={(access) =>
-                        patch((p) => ({
-                          ...p,
-                          quran: { ...p.quran, [v.id]: { ...grant, access } },
-                        }))
-                      }
-                    />
-                    <Chip
-                      active={grant.approve}
-                      disabled={pending}
-                      onClick={() =>
-                        patch((p) => ({
-                          ...p,
-                          quran: {
-                            ...p.quran,
-                            [v.id]: { ...grant, approve: !grant.approve },
-                          },
-                        }))
-                      }
+        {isEditor && (
+          <>
+            <GrantSectionHeading>Site CMS</GrantSectionHeading>
+            {CONTENT_MODULES.map(({ key, label }) => (
+              <div key={key}>
+                <GrantRow label={label} labelWidth="w-[190px]">
+                  <TriState
+                    value={state.modules[key]}
+                    disabled={pending}
+                    onChange={(value) =>
+                      patch((previous) => ({
+                        ...previous,
+                        modules: { ...previous.modules, [key]: value },
+                      }))
+                    }
+                  />
+                </GrantRow>
+                {key === 'quran' &&
+                  state.modules.quran !== 'none' &&
+                  quranVersions.map((version) => {
+                    const grant = state.quran[version.id] ?? {
+                      access: 'none' as GrantLevel,
+                      approve: false,
+                    }
+                    return (
+                      <GrantRow
+                        key={version.id}
+                        label={version.name}
+                        labelWidth="w-[190px]"
+                        indent
+                      >
+                        <TriState
+                          value={grant.access}
+                          disabled={pending}
+                          onChange={(access) =>
+                            patch((previous) => ({
+                              ...previous,
+                              quran: {
+                                ...previous.quran,
+                                [version.id]: { ...grant, access },
+                              },
+                            }))
+                          }
+                        />
+                        <Chip
+                          active={grant.approve}
+                          disabled={pending}
+                          onClick={() =>
+                            patch((previous) => ({
+                              ...previous,
+                              quran: {
+                                ...previous.quran,
+                                [version.id]: {
+                                  ...grant,
+                                  approve: !grant.approve,
+                                },
+                              },
+                            }))
+                          }
+                        >
+                          approver
+                        </Chip>
+                      </GrantRow>
+                    )
+                  })}
+                {key === 'bible' &&
+                  state.modules.bible !== 'none' &&
+                  bibleVersions.map((version) => (
+                    <GrantRow
+                      key={version.id}
+                      label={version.name}
+                      labelWidth="w-[190px]"
+                      indent
                     >
-                      approver
-                    </Chip>
-                  </GrantRow>
-                )
-              })}
+                      <TriState
+                        value={state.bible[version.id] ?? 'none'}
+                        disabled={pending}
+                        onChange={(access) =>
+                          patch((previous) => ({
+                            ...previous,
+                            bible: { ...previous.bible, [version.id]: access },
+                          }))
+                        }
+                      />
+                    </GrantRow>
+                  ))}
+              </div>
+            ))}
+            <p className="mt-3 text-[13px] text-muted-foreground">
+              Categories are managed inside Articles and inherit its access.
+              Author management is admin-only.
+            </p>
+          </>
+        )}
+
+        {isGameEditor && (
+          <>
+            <GrantSectionHeading hint="per-game access works without the global grant">
+              Games
+            </GrantSectionHeading>
+            <GrantRow label="All games" labelWidth="w-[190px]">
+              <TriState
+                value={state.allGames}
+                disabled={pending}
+                onChange={(allGames) =>
+                  patch((previous) => ({ ...previous, allGames }))
+                }
+              />
+            </GrantRow>
+            {games.map((game) => (
               <GrantRow
-                label="Word-by-word reference"
-                labelWidth="w-[220px]"
+                key={game.key}
+                label={game.name}
+                labelWidth="w-[190px]"
                 indent
               >
-                <NativeSelect
-                  className="max-w-[280px]"
-                  value={
-                    state.reference === null ? '' : String(state.reference)
-                  }
-                  disabled={pending}
-                  onChange={(raw) =>
-                    patch((p) => ({
-                      ...p,
-                      reference: raw === '' ? null : Number(raw),
-                    }))
-                  }
-                >
-                  <option value="">Default</option>
-                  {quranVersions.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.name}
-                    </option>
-                  ))}
-                </NativeSelect>
-              </GrantRow>
-            </>
-          )}
-
-          {key === 'bible' &&
-            state.modules.bible !== 'none' &&
-            bibleVersions.map((v) => (
-              <GrantRow key={v.id} label={v.name} labelWidth="w-[220px]" indent>
                 <TriState
-                  value={state.bible[v.id] ?? 'none'}
+                  value={state.games[game.key] ?? 'none'}
                   disabled={pending}
                   onChange={(access) =>
-                    patch((p) => ({
-                      ...p,
-                      bible: { ...p.bible, [v.id]: access },
+                    patch((previous) => ({
+                      ...previous,
+                      games: { ...previous.games, [game.key]: access },
                     }))
                   }
                 />
               </GrantRow>
             ))}
-        </div>
-      ))}
+            {games.length === 0 && (
+              <p className="text-[14px] text-muted-foreground">
+                No games are registered yet.
+              </p>
+            )}
+          </>
+        )}
 
-      <div className="mt-[18px] flex items-center gap-3">
-        <Button
-          type="button"
-          size="sm"
-          disabled={pending || !dirty}
-          onClick={save}
-        >
-          {pending ? 'Saving…' : 'Save changes'}
-        </Button>
-        {message && (
-          <span
-            className={cn(
-              'font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.12em]',
-              STATUS_META.published.text
+        <DialogFooter className="items-center gap-3 sm:justify-between">
+          <div className="min-h-5 text-[12px] uppercase tracking-[0.1em]">
+            {message && (
+              <span className={STATUS_META.published.text}>{message}</span>
             )}
-          >
-            {message}
-          </span>
-        )}
-        {error && (
-          <span
-            className={cn(
-              'font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.12em]',
-              STATUS_META.changed.text
-            )}
-          >
-            {error}
-          </span>
-        )}
-      </div>
-    </div>
+            {error && <span className={STATUS_META.changed.text}>{error}</span>}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={pending}
+            >
+              Cancel
+            </Button>
+            <Button onClick={save} disabled={pending}>
+              {pending ? 'Saving…' : 'Save access'}
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
-/** The backend's role column is a plain string; fall back to the least privilege. */
-function normalizeRole(role: string): UserRole {
-  return role === 'admin' || role === 'editor' ? role : 'member'
+function SortButton({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <Button variant="ghost" size="sm" className="-ml-3 h-8" onClick={onClick}>
+      {label}
+      <ArrowUpDown className="size-3.5" />
+    </Button>
+  )
+}
+function RoleBadges({ roles }: { roles: AccessRole[] }) {
+  return (
+    <div className="flex min-w-[190px] flex-wrap gap-1">
+      {roles.map((role) => (
+        <Badge
+          key={role}
+          variant={role === 'admin' ? 'default' : 'outline'}
+          className="font-[family-name:var(--font-glacial)] text-[10px] uppercase tracking-[0.08em]"
+        >
+          {role.replace('_', ' ')}
+        </Badge>
+      ))}
+    </div>
+  )
+}
+function FilterSelect({
+  value,
+  onChange,
+  ariaLabel,
+  children,
+}: {
+  value: string
+  onChange: (value: string) => void
+  ariaLabel: string
+  children: ReactNode
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      aria-label={ariaLabel}
+      className="h-9 rounded-[2px] border border-input bg-background px-3 text-[14px] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+    >
+      {children}
+    </select>
+  )
+}
+function normalizeRoles(roles: readonly string[]): AccessRole[] {
+  const valid = roles.filter(
+    (role): role is AccessRole =>
+      role === 'member' ||
+      role === 'editor' ||
+      role === 'game_editor' ||
+      role === 'admin'
+  )
+  return ['member', ...valid.filter((role) => role !== 'member')]
 }

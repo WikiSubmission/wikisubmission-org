@@ -8,17 +8,29 @@ import {
   type EditorialContentModule,
   type EditorialContentStatus,
 } from '@/lib/editorial-content-client'
-import { CONTENT_MODULE_DEFS, docTitle } from '@/components/editor/content/module-defs'
-import { EditorCrumb, EditorPageHeader } from '@/components/editor/content/page-chrome'
+import {
+  CONTENT_MODULE_DEFS,
+  docTitle,
+} from '@/components/editor/content/module-defs'
+import {
+  EditorCrumb,
+  EditorPageHeader,
+} from '@/components/editor/content/page-chrome'
 import { STATUS_META } from '@/components/editor/content/status'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { canReadModule, canWriteModule } from '@/lib/editorial-access'
+import {
+  canReadContentModule,
+  canWriteContentModule,
+} from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
-const STATUS_FILTERS: Array<{ value: EditorialContentStatus | ''; label: string }> = [
+const STATUS_FILTERS: Array<{
+  value: EditorialContentStatus | ''
+  label: string
+}> = [
   { value: '', label: 'All' },
   { value: 'draft', label: 'Drafts' },
   { value: 'changed', label: 'Unpublished changes' },
@@ -30,7 +42,10 @@ interface PageProps {
   searchParams: Promise<{ q?: string; status?: string }>
 }
 
-export default async function ContentModuleListPage({ params, searchParams }: PageProps) {
+export default async function ContentModuleListPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { module } = await params
   const def = CONTENT_MODULE_DEFS[module]
   if (!def) notFound()
@@ -38,10 +53,10 @@ export default async function ContentModuleListPage({ params, searchParams }: Pa
   const session = await auth()
   if (!session?.accessToken) redirect(`/auth/sign-in?next=/editor/${module}`)
   const editorial = await getEditorialSession(session.accessToken)
-  if (!editorial || !canReadModule(editorial, module)) {
+  if (!editorial || !canReadContentModule(editorial, module)) {
     redirect('/editor')
   }
-  const canWrite = canWriteModule(editorial, module)
+  const canWrite = canWriteContentModule(editorial, module)
 
   const { q = '', status = '' } = await searchParams
   const statusFilter = STATUS_FILTERS.some((f) => f.value === status)
@@ -50,7 +65,7 @@ export default async function ContentModuleListPage({ params, searchParams }: Pa
   const { docs, total } = await listContentDocs(
     session.accessToken,
     module as EditorialContentModule,
-    { q: q || undefined, status: statusFilter || undefined, limit: 200 },
+    { q: q || undefined, status: statusFilter || undefined, limit: 200 }
   )
 
   const isArticle = module === 'article'
@@ -65,14 +80,27 @@ export default async function ContentModuleListPage({ params, searchParams }: Pa
         meta={`${total} total`}
         description={def.blurb}
         actions={
-          canWrite && (
-            <Button
-              asChild
-              className="font-[family-name:var(--font-source-serif)] text-[15.5px]"
-            >
-              <Link href={`/editor/${module}/new`}>New {def.labelSingular.toLowerCase()}</Link>
-            </Button>
-          )
+          <div className="flex gap-2">
+            {module === 'article' && (
+              <Button
+                asChild
+                variant="outline"
+                className="font-[family-name:var(--font-source-serif)] text-[15.5px]"
+              >
+                <Link href="/editor/category">Categories</Link>
+              </Button>
+            )}
+            {canWrite && (
+              <Button
+                asChild
+                className="font-[family-name:var(--font-source-serif)] text-[15.5px]"
+              >
+                <Link href={`/editor/${module}/new`}>
+                  New {def.labelSingular.toLowerCase()}
+                </Link>
+              </Button>
+            )}
+          </div>
         }
       />
 
@@ -106,7 +134,13 @@ export default async function ContentModuleListPage({ params, searchParams }: Pa
       ) : (
         <div className="overflow-hidden rounded-[3px] border border-border bg-card">
           {groups.map((group) => (
-            <DocGroup key={group[0].id} module={module} group={group} isArticle={isArticle} canWrite={canWrite} />
+            <DocGroup
+              key={group[0].id}
+              module={module}
+              group={group}
+              isArticle={isArticle}
+              canWrite={canWrite}
+            />
           ))}
         </div>
       )}
@@ -173,7 +207,8 @@ function DocGroup({
     <div className="border-b border-border last:border-b-0">
       {group.map((doc) => {
         const fields = doc.fields as Record<string, unknown>
-        const language = typeof fields.language === 'string' ? fields.language : null
+        const language =
+          typeof fields.language === 'string' ? fields.language : null
         const meta = STATUS_META[doc.status]
         return (
           <Link
@@ -182,7 +217,10 @@ function DocGroup({
             className="relative flex flex-col gap-1 border-b border-border px-4 py-3 transition-colors last:border-b-0 hover:bg-accent"
           >
             <div className="flex items-center gap-2.5">
-              <span className={`size-[7px] shrink-0 rounded-full ${meta.dot}`} aria-hidden />
+              <span
+                className={`size-[7px] shrink-0 rounded-full ${meta.dot}`}
+                aria-hidden
+              />
               <span className="min-w-0 flex-1 truncate font-[family-name:var(--font-source-serif)] text-[17px] font-medium text-foreground">
                 {docTitle(def, fields)}
               </span>
@@ -196,13 +234,17 @@ function DocGroup({
               )}
             </div>
             <div className="flex flex-wrap items-center gap-2 font-[family-name:var(--font-jetbrains)] text-[12.5px] text-muted-foreground">
-              <span className={`font-[family-name:var(--font-glacial)] uppercase tracking-[0.1em] ${meta.text}`}>
+              <span
+                className={`font-[family-name:var(--font-glacial)] uppercase tracking-[0.1em] ${meta.text}`}
+              >
                 {doc.status}
               </span>
               <span className="opacity-45">·</span>
               <span>{subtitleOf(def.subtitleKey, fields)}</span>
               <span className="opacity-45">·</span>
-              <span>updated {new Date(doc.updated_at).toLocaleDateString()}</span>
+              <span>
+                updated {new Date(doc.updated_at).toLocaleDateString()}
+              </span>
               {doc.updated_by_email && (
                 <>
                   <span className="opacity-45">·</span>
@@ -225,7 +267,10 @@ function DocGroup({
   )
 }
 
-function subtitleOf(key: string | undefined, fields: Record<string, unknown>): string {
+function subtitleOf(
+  key: string | undefined,
+  fields: Record<string, unknown>
+): string {
   if (!key) return ''
   const v = fields[key]
   return typeof v === 'string' ? v : ''

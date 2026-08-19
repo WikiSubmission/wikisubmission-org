@@ -48,7 +48,7 @@ function makeAuthedFetch(token: string) {
       new Request(request, {
         headers,
         cache: 'no-store',
-      }),
+      })
     )
   }
 }
@@ -60,26 +60,40 @@ export function adminUsersClient(token: string) {
   })
 
   return {
-    list: async (opts?: { limit?: number; offset?: number }): Promise<AdminUser[]> => {
+    list: async (opts?: {
+      limit?: number
+      offset?: number
+    }): Promise<AdminUser[]> => {
       const { data, error, response } = await client.GET('/users', {
         params: { query: { limit: opts?.limit, offset: opts?.offset } },
       })
       if (error || !response.ok || !data?.data) {
-        throw new AdminUsersError(response.status, extractMessage(error, response.statusText))
+        throw new AdminUsersError(
+          response.status,
+          extractMessage(error, response.statusText)
+        )
       }
       return data.data.map(toAdminUser)
     },
 
     update: async (
       id: number,
-      patch: { role?: 'admin' | 'editor' | 'member'; permissions?: Record<string, unknown>; is_active?: boolean },
+      patch: {
+        role?: 'admin' | 'editor' | 'member'
+        roles?: Array<'member' | 'editor' | 'game_editor' | 'admin'>
+        permissions?: Record<string, unknown>
+        is_active?: boolean
+      }
     ): Promise<AdminUser> => {
       const { data, error, response } = await client.PATCH('/users/{id}', {
         params: { path: { id } },
         body: patch,
       })
       if (error || !response.ok || !data?.data) {
-        throw new AdminUsersError(response.status, extractMessage(error, response.statusText))
+        throw new AdminUsersError(
+          response.status,
+          extractMessage(error, response.statusText)
+        )
       }
       return toAdminUser(data.data)
     },

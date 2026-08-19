@@ -29,9 +29,7 @@ import {
   IBibleBook,
   IUsers,
   IIdCard,
-  ITag,
   ILibrary,
-  IShield,
   type IconProps,
 } from './icons'
 import { EditorUserMenu } from './user-menu'
@@ -50,10 +48,9 @@ const MODULE_META: Record<string, ModuleMeta> = {
   community: { label: 'Communities', icon: IUsers, group: 'Content' },
   appendix: { label: 'Appendices', icon: ILibrary, group: 'Content' },
   author: { label: 'Authors', icon: IIdCard, group: 'People' },
-  category: { label: 'Categories', icon: ITag, group: 'People' },
 }
 
-const GROUP_ORDER = ['Content', 'People', 'System'] as const
+const GROUP_ORDER = ['Content', 'People'] as const
 
 interface NavItem {
   key: string
@@ -62,7 +59,10 @@ interface NavItem {
   icon: ComponentType<IconProps>
 }
 
-function buildNav(modules: Record<string, boolean>, isAdmin: boolean): Map<string, NavItem[]> {
+function buildNav(
+  modules: Record<string, boolean>,
+  isAdmin: boolean
+): Map<string, NavItem[]> {
   const groups = new Map<string, NavItem[]>()
   const push = (group: string, item: NavItem) => {
     const list = groups.get(group) ?? []
@@ -73,12 +73,12 @@ function buildNav(modules: Record<string, boolean>, isAdmin: boolean): Map<strin
   for (const key of Object.keys(MODULE_META)) {
     if (!isAdmin && modules[key] === undefined) continue
     const meta = MODULE_META[key]
-    push(meta.group, { key, label: meta.label, href: `/editor/${key}`, icon: meta.icon })
-  }
-
-  if (isAdmin) {
-    // Grants live in the unified access console, outside the editor route tree.
-    push('System', { key: 'admin', label: 'Access', href: '/admin/access', icon: IShield })
+    push(meta.group, {
+      key,
+      label: meta.label,
+      href: `/editor/${key}`,
+      icon: meta.icon,
+    })
   }
 
   return groups
@@ -96,7 +96,11 @@ interface EditorSidebarProps {
   signOutAction: () => void
 }
 
-export function EditorSidebar({ viewer, modules, signOutAction }: EditorSidebarProps) {
+export function EditorSidebar({
+  viewer,
+  modules,
+  signOutAction,
+}: EditorSidebarProps) {
   const pathname = usePathname()
   const nav = buildNav(modules, viewer.isAdmin)
   // /editor/quran/... -> "quran"; /editor -> "" (landing, nothing active)
@@ -107,7 +111,11 @@ export function EditorSidebar({ viewer, modules, signOutAction }: EditorSidebarP
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild size="lg" tooltip="WikiSubmission Editor">
+            <SidebarMenuButton
+              asChild
+              size="lg"
+              tooltip="WikiSubmission Editor"
+            >
               <Link href="/editor">
                 <span className="flex aspect-square size-8 items-center justify-center rounded-[3px] bg-sidebar-primary font-[family-name:var(--font-cormorant)] text-base font-semibold text-sidebar-primary-foreground">
                   W

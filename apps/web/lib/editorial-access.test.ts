@@ -5,9 +5,11 @@ import {
   canApproveAnyQuranVersion,
   canApproveQuranVersion,
   canReadBibleVersion,
+  canReadContentModule,
   canReadGame,
   canReadModule,
   canWriteBibleVersion,
+  canWriteContentModule,
   canWriteGame,
   canWriteModule,
   canWriteQuranVersion,
@@ -57,6 +59,27 @@ describe('modules', () => {
     const admin = session({ is_admin: true })
     expect(canReadModule(admin, 'article')).toBe(true)
     expect(canWriteModule(admin, 'anything-at-all')).toBe(true)
+  })
+})
+
+describe('content subresources', () => {
+  it('makes categories inherit Articles access', () => {
+    const readOnly = session({ modules: { article: false } })
+    expect(canReadContentModule(readOnly, 'category')).toBe(true)
+    expect(canWriteContentModule(readOnly, 'category')).toBe(false)
+
+    const writable = session({ modules: { article: true } })
+    expect(canWriteContentModule(writable, 'category')).toBe(true)
+  })
+
+  it('keeps author management admin-only', () => {
+    const editor = session({ modules: { article: true, author: true } })
+    expect(canReadContentModule(editor, 'author')).toBe(false)
+    expect(canWriteContentModule(editor, 'author')).toBe(false)
+
+    const admin = session({ is_admin: true })
+    expect(canReadContentModule(admin, 'author')).toBe(true)
+    expect(canWriteContentModule(admin, 'author')).toBe(true)
   })
 })
 

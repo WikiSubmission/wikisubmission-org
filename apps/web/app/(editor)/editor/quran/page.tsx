@@ -2,10 +2,7 @@ import type { CSSProperties } from 'react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
-import {
-  getEditorialSession,
-  listQuranVersions,
-} from '@/lib/editorial-client'
+import { getEditorialSession, listQuranVersions } from '@/lib/editorial-client'
 import * as s from './styles'
 import {
   canApproveAnyQuranVersion,
@@ -26,7 +23,9 @@ export default async function QuranVersionsPage() {
   }
 
   const versions = await listQuranVersions(session.accessToken)
-  const accessible = versions.filter((v) => canReadQuranVersion(editorial, v.id))
+  const accessible = versions.filter((v) =>
+    canReadQuranVersion(editorial, v.id)
+  )
   const canApproveAny = canApproveAnyQuranVersion(editorial)
 
   return (
@@ -34,7 +33,15 @@ export default async function QuranVersionsPage() {
       <Link href="/editor" style={s.crumb}>
         ← Workspace
       </Link>
-      <header style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16 }}>
+      <header
+        style={{
+          marginBottom: 24,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          gap: 16,
+        }}
+      >
         <div>
           <p style={s.kicker}>Quran</p>
           <h1 style={s.heading}>Versions</h1>
@@ -51,7 +58,9 @@ export default async function QuranVersionsPage() {
       </header>
 
       {accessible.length === 0 ? (
-        <p style={s.lede}>No Quran versions have been assigned to your account yet.</p>
+        <p style={s.lede}>
+          No Quran versions have been assigned to your account yet.
+        </p>
       ) : (
         <ul style={grid}>
           {accessible.map((v) => {
@@ -59,18 +68,22 @@ export default async function QuranVersionsPage() {
             const canApprove = canApproveQuranVersion(editorial, v.id)
             return (
               <li key={v.id}>
-                <Link href={`/editor/quran/${v.id}`} style={tile}>
-                  <div style={tileTitle}>{v.name}</div>
-                  <p style={tileMeta}>
-                    {v.slug}
-                    {v.is_canonical_english ? ' · canonical EN' : ''}
-                    {v.direction === 'rtl' ? ' · rtl' : ''}
-                  </p>
+                <div style={tile}>
+                  <Link href={`/editor/quran/${v.id}`}>
+                    <div style={tileTitle}>{v.name}</div>
+                    <p style={tileMeta}>
+                      {v.slug}
+                      {v.is_canonical_english ? ' · canonical EN' : ''}
+                      {v.direction === 'rtl' ? ' · rtl' : ''}
+                    </p>
+                  </Link>
                   <div style={{ marginTop: 'auto', display: 'flex', gap: 10 }}>
-                    <span style={s.tag}>{canWrite ? 'Read & write' : 'Read only'}</span>
+                    <span style={s.tag}>
+                      {canWrite ? 'Read & write' : 'Read only'}
+                    </span>
                     {canApprove && <span style={s.mutedTag}>Approver</span>}
                   </div>
-                </Link>
+                </div>
               </li>
             )
           })}

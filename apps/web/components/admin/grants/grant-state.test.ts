@@ -13,6 +13,7 @@ function editor(overrides: Partial<EditorialEditor> = {}): EditorialEditor {
     user_id: 1,
     email: 'someone@example.com',
     role: 'member',
+    roles: ['member'],
     is_active: true,
     modules: {},
     quran_versions: [],
@@ -29,15 +30,12 @@ function state(overrides: Partial<GrantState> = {}): GrantState {
       bible: 'none',
       article: 'none',
       community: 'none',
-      author: 'none',
-      category: 'none',
       appendix: 'none',
     },
     quran: {},
     bible: {},
     allGames: 'none',
     games: {},
-    reference: null,
     ...overrides,
   }
 }
@@ -125,7 +123,6 @@ describe('grantStateToInput', () => {
           3: { access: 'write', approve: true },
           4: { access: 'read', approve: false },
         },
-        reference: 3,
       })
     )
     expect(input.quran_versions).toEqual([])
@@ -161,7 +158,6 @@ describe('grantStateToInput', () => {
       modules: { quran: true, game: false },
       quran_versions: [{ version_id: 3, can_write: true, can_approve: true }],
       games: [{ game_key: 'fill-blank', can_write: false }],
-      quran_reference_version_id: 3,
     })
     const input = grantStateToInput(initialGrantState(source))
     expect(input.modules).toEqual({ quran: true, game: false })
@@ -169,28 +165,35 @@ describe('grantStateToInput', () => {
       { version_id: 3, can_write: true, can_approve: true },
     ])
     expect(input.games).toEqual([{ game_key: 'fill-blank', can_write: false }])
-    expect(input.quran_reference_version_id).toBe(3)
   })
 })
 
 describe('grantSummary', () => {
   it('reports admins as having full access', () => {
-    expect(grantSummary(editor({ role: 'admin' }))).toBe('admin — full access')
+    expect(
+      grantSummary(editor({ role: 'admin', roles: ['member', 'admin'] }))
+    ).toBe('full access')
   })
 
   it('reports no grants', () => {
-    expect(grantSummary(editor())).toBe('no grants')
+    expect(grantSummary(editor())).toBe('no permissions')
   })
 
   it('names the global games tier rather than the raw module key', () => {
-    expect(grantSummary(editor({ modules: { game: true } }))).toBe(
-      'all games (write)'
-    )
+    expect(
+      grantSummary(
+        editor({
+          roles: ['member', 'game_editor'],
+          modules: { game: true },
+        })
+      )
+    ).toBe('all games (write)')
   })
 
   it('lists per-game grants alongside modules', () => {
     const summary = grantSummary(
       editor({
+        roles: ['member', 'editor', 'game_editor'],
         modules: { quran: false },
         games: [{ game_key: 'fill-blank', can_write: true }],
       })

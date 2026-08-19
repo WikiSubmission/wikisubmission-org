@@ -11,12 +11,11 @@ import {
 
 export type AccessResult = { ok: true } | { ok: false; error: string }
 
-export type UserRole = 'admin' | 'editor' | 'member'
+export type AccessRole = 'member' | 'editor' | 'game_editor' | 'admin'
 
 export interface SaveAccessInput {
   userId: number
-  /** Omitted when unchanged, so a grants-only edit leaves the role alone. */
-  role?: UserRole
+  roles: AccessRole[]
   grants: EditorGrantsInput
 }
 
@@ -42,13 +41,13 @@ function describe(err: unknown): string {
 /**
  * Saves one user's access across all three areas.
  *
- * Two backend calls, because role and grants live in different places: the role
- * is a column on users, while grants are their own tables behind
+ * Two backend calls, because roles and grants live in different places: roles
+ * are normalized per user, while grants are their own tables behind
  * PUT /editorial/admin/editors/{id} (which replaces them atomically — anything
  * absent from `grants` is revoked).
  *
- * The role is written first: it is the coarser control, and if the grants write
- * then fails the user is left with the role the admin chose rather than a
+ * Roles are written first: they are the coarser control, and if the grants write
+ * then fails the user is left with the roles the admin chose rather than a
  * half-applied grant set. Both calls are admin-gated server-side.
  *
  * Note this never writes users.permissions. Games access moved to the grant
@@ -63,14 +62,12 @@ export async function saveAccessAction(
     return { ok: false, error: describe('not_authenticated') }
   if (!session.isAdmin) return { ok: false, error: describe('not_authorized') }
 
-  if (input.role) {
-    try {
-      await adminUsersClient(session.accessToken).update(input.userId, {
-        role: input.role,
-      })
-    } catch (err) {
-      return { ok: false, error: describe(err) }
-    }
+  try {
+    await adminUsersClient(session.accessToken).update(input.userId, {
+      roles: input.roles,
+    })
+  } catch (err) {
+    return { ok: false, error: describe(err) }
   }
 
   const result = await replaceEditorGrants(

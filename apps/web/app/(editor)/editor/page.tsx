@@ -2,7 +2,12 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { getEditorialSession } from '@/lib/editorial-client'
-import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
   canReadModule,
@@ -15,16 +20,34 @@ export const dynamic = 'force-dynamic'
 // Display labels + a one-line purpose for each backend module key. Quran leads
 // because it is the first module being brought onto the new editor.
 const MODULE_INFO: Record<string, { label: string; blurb: string }> = {
-  quran: { label: 'Quran', blurb: 'Versions, chapters, verse text and references.' },
-  article: { label: 'Articles', blurb: 'Multilingual articles, drafts and publishing.' },
+  quran: {
+    label: 'Quran',
+    blurb: 'Versions, chapters, verse text and references.',
+  },
+  article: {
+    label: 'Articles',
+    blurb: 'Multilingual articles, drafts and publishing.',
+  },
   bible: { label: 'Bible', blurb: 'Books, chapters and verse translations.' },
-  community: { label: 'Communities', blurb: 'Online and physical community listings.' },
-  author: { label: 'Authors', blurb: 'Author profiles and article relationships.' },
-  category: { label: 'Categories', blurb: 'Article categories.' },
+  community: {
+    label: 'Communities',
+    blurb: 'Online and physical community listings.',
+  },
+  author: {
+    label: 'Authors',
+    blurb: 'Author profiles and article relationships.',
+  },
   appendix: { label: 'Appendices', blurb: 'Quran-scoped appendices.' },
 }
 
-const MODULE_ORDER = ['quran', 'article', 'bible', 'community', 'author', 'category', 'appendix']
+const MODULE_ORDER = [
+  'quran',
+  'article',
+  'bible',
+  'community',
+  'author',
+  'appendix',
+]
 
 export default async function EditorLandingPage() {
   const session = await auth()

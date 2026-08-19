@@ -11,7 +11,7 @@ import { AccessClient } from './access-client'
 export const dynamic = 'force-dynamic'
 
 /**
- * The single access console: role, games and editorial grants for every user.
+ * The single access console: roles, games and editorial grants for every user.
  *
  * The user list comes from /editorial/admin/editors rather than /users, because
  * that endpoint already returns email, display name, role and active state

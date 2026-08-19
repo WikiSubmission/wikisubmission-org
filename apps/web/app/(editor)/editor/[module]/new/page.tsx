@@ -6,7 +6,7 @@ import { DocForm } from '@/components/editor/content/doc-form'
 import { CONTENT_MODULE_DEFS } from '@/components/editor/content/module-defs'
 import { loadModuleOptions } from '@/components/editor/content/options'
 import { EditorCrumb } from '@/components/editor/content/page-chrome'
-import { canWriteModule } from '@/lib/editorial-access'
+import { canWriteContentModule } from '@/lib/editorial-access'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,15 +15,19 @@ interface PageProps {
   searchParams: Promise<{ group?: string }>
 }
 
-export default async function NewContentDocPage({ params, searchParams }: PageProps) {
+export default async function NewContentDocPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { module } = await params
   const def = CONTENT_MODULE_DEFS[module]
   if (!def) notFound()
 
   const session = await auth()
-  if (!session?.accessToken) redirect(`/auth/sign-in?next=/editor/${module}/new`)
+  if (!session?.accessToken)
+    redirect(`/auth/sign-in?next=/editor/${module}/new`)
   const editorial = await getEditorialSession(session.accessToken)
-  const canWrite = !!editorial && canWriteModule(editorial, module)
+  const canWrite = !!editorial && canWriteContentModule(editorial, module)
   if (!canWrite) redirect(`/editor/${module}`)
 
   const { group } = await searchParams

@@ -31,14 +31,18 @@ export type QuranWord = components['schemas']['QuranWord']
 export type QuranWordFields = components['schemas']['QuranWordFields']
 export type QuranWordDraftInput = components['schemas']['QuranWordDraftInput']
 export type QuranRootSummary = components['schemas']['QuranRootSummary']
-export type QuranRootPublishResult = components['schemas']['QuranRootPublishResult']
+export type QuranRootPublishResult =
+  components['schemas']['QuranRootPublishResult']
 export type QuranRectifyReport = components['schemas']['QuranRectifyReport']
 export type QuranRootsSyncResult = components['schemas']['QuranRootsSyncResult']
-export type QuranRectifySeedResult = components['schemas']['QuranRectifySeedResult']
-export type QuranRectifySeedInput = components['schemas']['QuranRectifySeedInput']
+export type QuranRectifySeedResult =
+  components['schemas']['QuranRectifySeedResult']
+export type QuranRectifySeedInput =
+  components['schemas']['QuranRectifySeedInput']
 
 /** Uniform result for editorial mutations invoked from server actions. */
-export type MutationResult<T> = { ok: true; data: T } | { ok: false; error: string }
+export type MutationResult<T> =
+  { ok: true; data: T } | { ok: false; error: string }
 
 const API_BASE = resolveServerApiBaseUrl()
 
@@ -48,7 +52,9 @@ function authedClient(token: string) {
     fetch: (request: Request): Promise<Response> => {
       const headers = new Headers(request.headers)
       headers.set('Authorization', `Bearer ${token}`)
-      return globalThis.fetch(new Request(request, { headers, cache: 'no-store' }))
+      return globalThis.fetch(
+        new Request(request, { headers, cache: 'no-store' })
+      )
     },
   })
 }
@@ -59,13 +65,12 @@ function authedClient(token: string) {
  * caller treats null as "no editorial access" and denies by default.
  */
 export async function getEditorialSession(
-  token: string | undefined,
+  token: string | undefined
 ): Promise<EditorialSession | null> {
   if (!API_BASE || !token) return null
   try {
-    const { data, error, response } = await authedClient(token).GET(
-      '/editorial/session',
-    )
+    const { data, error, response } =
+      await authedClient(token).GET('/editorial/session')
     if (error || !response.ok || !data?.data) return null
     return data.data
   } catch {
@@ -75,12 +80,12 @@ export async function getEditorialSession(
 
 /** Lists the Quran version registry. Returns [] on denial or failure. */
 export async function listQuranVersions(
-  token: string | undefined,
+  token: string | undefined
 ): Promise<QuranVersion[]> {
   if (!API_BASE || !token) return []
   try {
     const { data, error, response } = await authedClient(token).GET(
-      '/editorial/quran-versions',
+      '/editorial/quran-versions'
     )
     if (error || !response.ok || !data?.data) return []
     return data.data
@@ -89,14 +94,33 @@ export async function listQuranVersions(
   }
 }
 
+/** Updates the current editor's own word-by-word reference preference. */
+export async function updateQuranReferenceVersion(
+  token: string,
+  referenceVersionId: number | null
+): Promise<MutationResult<EditorialSession>> {
+  try {
+    const { data, error, response } = await authedClient(token).PUT(
+      '/editorial/quran-reference-version',
+      { body: { reference_version_id: referenceVersionId } }
+    )
+    if (error || !response.ok || !data?.data) {
+      return { ok: false, error: messageFrom(error, response.status) }
+    }
+    return { ok: true, data: data.data }
+  } catch {
+    return { ok: false, error: 'Network error saving reference preference.' }
+  }
+}
+
 /** Lists the Bible version registry. Returns [] on denial or failure. */
 export async function listBibleVersions(
-  token: string | undefined,
+  token: string | undefined
 ): Promise<BibleVersion[]> {
   if (!API_BASE || !token) return []
   try {
     const { data, error, response } = await authedClient(token).GET(
-      '/editorial/bible-versions',
+      '/editorial/bible-versions'
     )
     if (error || !response.ok || !data?.data) return []
     return data.data
@@ -110,13 +134,13 @@ export async function listBibleVersions(
 /** Lists chapter navigation + progress for a version. [] on denial/failure. */
 export async function listQuranChapters(
   token: string | undefined,
-  versionId: number,
+  versionId: number
 ): Promise<QuranChapterSummary[]> {
   if (!API_BASE || !token) return []
   try {
     const { data, error, response } = await authedClient(token).GET(
       '/editorial/quran/versions/{versionId}/chapters',
-      { params: { path: { versionId } } },
+      { params: { path: { versionId } } }
     )
     if (error || !response.ok || !data?.data) return []
     return data.data
@@ -129,13 +153,13 @@ export async function listQuranChapters(
 export async function getQuranChapter(
   token: string | undefined,
   versionId: number,
-  chapterNumber: number,
+  chapterNumber: number
 ): Promise<QuranChapterEditor | null> {
   if (!API_BASE || !token) return null
   try {
     const { data, error, response } = await authedClient(token).GET(
       '/editorial/quran/versions/{versionId}/chapters/{chapterNumber}',
-      { params: { path: { versionId, chapterNumber } } },
+      { params: { path: { versionId, chapterNumber } } }
     )
     if (error || !response.ok || !data?.data) return null
     return data.data
@@ -147,13 +171,17 @@ export async function getQuranChapter(
 /** Lists publish requests visible to the caller. [] on denial/failure. */
 export async function listQuranPublishRequests(
   token: string | undefined,
-  filter?: { status?: QuranPublishStatus; versionId?: number },
+  filter?: { status?: QuranPublishStatus; versionId?: number }
 ): Promise<QuranPublishRequest[]> {
   if (!API_BASE || !token) return []
   try {
     const { data, error, response } = await authedClient(token).GET(
       '/editorial/quran/publish-requests',
-      { params: { query: { status: filter?.status, version_id: filter?.versionId } } },
+      {
+        params: {
+          query: { status: filter?.status, version_id: filter?.versionId },
+        },
+      }
     )
     if (error || !response.ok || !data?.data) return []
     return data.data
@@ -167,13 +195,13 @@ export async function listQuranChapterChangelog(
   token: string | undefined,
   versionId: number,
   chapterNumber: number,
-  limit?: number,
+  limit?: number
 ): Promise<QuranChangelogEntry[]> {
   if (!API_BASE || !token) return []
   try {
     const { data, error, response } = await authedClient(token).GET(
       '/editorial/quran/versions/{versionId}/chapters/{chapterNumber}/changelog',
-      { params: { path: { versionId, chapterNumber }, query: { limit } } },
+      { params: { path: { versionId, chapterNumber }, query: { limit } } }
     )
     if (error || !response.ok || !data?.data) return []
     return data.data
@@ -188,12 +216,12 @@ export async function upsertQuranVerseDraft(
   versionId: number,
   chapterNumber: number,
   verseNumber: number,
-  body: QuranVerseDraftInput,
+  body: QuranVerseDraftInput
 ): Promise<MutationResult<QuranVerseDraft>> {
   try {
     const { data, error, response } = await authedClient(token).PUT(
       '/editorial/quran/versions/{versionId}/chapters/{chapterNumber}/verses/{verseNumber}',
-      { params: { path: { versionId, chapterNumber, verseNumber } }, body },
+      { params: { path: { versionId, chapterNumber, verseNumber } }, body }
     )
     if (error || !response.ok || !data?.data) {
       return { ok: false, error: messageFrom(error, response.status) }
@@ -209,12 +237,12 @@ export async function upsertQuranChapterDraft(
   token: string,
   versionId: number,
   chapterNumber: number,
-  title: string | null,
+  title: string | null
 ): Promise<MutationResult<{ chapter_number: number; title?: string | null }>> {
   try {
     const { data, error, response } = await authedClient(token).PUT(
       '/editorial/quran/versions/{versionId}/chapters/{chapterNumber}',
-      { params: { path: { versionId, chapterNumber } }, body: { title } },
+      { params: { path: { versionId, chapterNumber } }, body: { title } }
     )
     if (error || !response.ok || !data?.data) {
       return { ok: false, error: messageFrom(error, response.status) }
@@ -230,12 +258,12 @@ export async function createQuranPublishRequest(
   token: string,
   versionId: number,
   chapterNumber: number,
-  note?: string | null,
+  note?: string | null
 ): Promise<MutationResult<QuranPublishRequest>> {
   try {
     const { data, error, response } = await authedClient(token).POST(
       '/editorial/quran/versions/{versionId}/chapters/{chapterNumber}/publish-request',
-      { params: { path: { versionId, chapterNumber } }, body: { note } },
+      { params: { path: { versionId, chapterNumber } }, body: { note } }
     )
     if (error || !response.ok || !data?.data) {
       return { ok: false, error: messageFrom(error, response.status) }
@@ -251,7 +279,7 @@ export async function decideQuranPublishRequest(
   token: string,
   requestId: number,
   decision: 'approve' | 'reject' | 'cancel',
-  note?: string | null,
+  note?: string | null
 ): Promise<MutationResult<QuranPublishRequest>> {
   const path = {
     approve: '/editorial/quran/publish-requests/{requestId}/approve',
@@ -281,13 +309,13 @@ export async function decideQuranPublishRequest(
 export async function getQuranChapterWords(
   token: string | undefined,
   versionId: number,
-  chapterNumber: number,
+  chapterNumber: number
 ): Promise<QuranChapterWords | null> {
   if (!API_BASE || !token) return null
   try {
     const { data, error, response } = await authedClient(token).GET(
       '/editorial/quran/versions/{versionId}/chapters/{chapterNumber}/words',
-      { params: { path: { versionId, chapterNumber } } },
+      { params: { path: { versionId, chapterNumber } } }
     )
     if (error || !response.ok || !data?.data) return null
     return data.data
@@ -301,12 +329,12 @@ export async function upsertQuranWordDraft(
   token: string,
   versionId: number,
   wordId: number,
-  body: QuranWordDraftInput,
+  body: QuranWordDraftInput
 ): Promise<MutationResult<QuranWord>> {
   try {
     const { data, error, response } = await authedClient(token).PUT(
       '/editorial/quran/versions/{versionId}/words/{wordId}',
-      { params: { path: { versionId, wordId } }, body },
+      { params: { path: { versionId, wordId } }, body }
     )
     if (error || !response.ok || !data?.data) {
       return { ok: false, error: messageFrom(error, response.status) }
@@ -321,13 +349,18 @@ export async function upsertQuranWordDraft(
 export async function listQuranRoots(
   token: string | undefined,
   versionId: number,
-  opts?: { q?: string; limit?: number; offset?: number },
+  opts?: { q?: string; limit?: number; offset?: number }
 ): Promise<{ roots: QuranRootSummary[]; total: number }> {
   if (!API_BASE || !token) return { roots: [], total: 0 }
   try {
     const { data, error, response } = await authedClient(token).GET(
       '/editorial/quran/versions/{versionId}/roots',
-      { params: { path: { versionId }, query: { q: opts?.q, limit: opts?.limit, offset: opts?.offset } } },
+      {
+        params: {
+          path: { versionId },
+          query: { q: opts?.q, limit: opts?.limit, offset: opts?.offset },
+        },
+      }
     )
     if (error || !response.ok || !data?.data) return { roots: [], total: 0 }
     return { roots: data.data, total: data.total }
@@ -341,12 +374,12 @@ export async function upsertQuranRootMeaning(
   token: string,
   versionId: number,
   rootId: number,
-  meaning: string | null,
+  meaning: string | null
 ): Promise<MutationResult<QuranRootSummary>> {
   try {
     const { data, error, response } = await authedClient(token).PUT(
       '/editorial/quran/versions/{versionId}/roots/{rootId}',
-      { params: { path: { versionId, rootId } }, body: { meaning } },
+      { params: { path: { versionId, rootId } }, body: { meaning } }
     )
     if (error || !response.ok || !data?.data) {
       return { ok: false, error: messageFrom(error, response.status) }
@@ -361,12 +394,12 @@ export async function upsertQuranRootMeaning(
 export async function publishQuranRootMeanings(
   token: string,
   versionId: number,
-  note?: string | null,
+  note?: string | null
 ): Promise<MutationResult<QuranRootPublishResult>> {
   try {
     const { data, error, response } = await authedClient(token).POST(
       '/editorial/quran/versions/{versionId}/roots/publish',
-      { params: { path: { versionId } }, body: { note } },
+      { params: { path: { versionId } }, body: { note } }
     )
     if (error || !response.ok || !data?.data) {
       return { ok: false, error: messageFrom(error, response.status) }
@@ -382,13 +415,13 @@ export async function publishQuranRootMeanings(
 /** Fetches the integrity + coverage report for a version (admin). null on failure. */
 export async function getQuranRectifyReport(
   token: string | undefined,
-  versionId: number,
+  versionId: number
 ): Promise<QuranRectifyReport | null> {
   if (!API_BASE || !token) return null
   try {
     const { data, error, response } = await authedClient(token).GET(
       '/editorial/quran/versions/{versionId}/rectify',
-      { params: { path: { versionId } } },
+      { params: { path: { versionId } } }
     )
     if (error || !response.ok || !data?.data) return null
     return data.data
@@ -399,11 +432,11 @@ export async function getQuranRectifyReport(
 
 /** Syncs the roots master from the canonical corpus (admin). */
 export async function syncQuranRoots(
-  token: string,
+  token: string
 ): Promise<MutationResult<QuranRootsSyncResult>> {
   try {
     const { data, error, response } = await authedClient(token).POST(
-      '/editorial/quran/rectify/roots',
+      '/editorial/quran/rectify/roots'
     )
     if (error || !response.ok || !data?.data) {
       return { ok: false, error: messageFrom(error, response.status) }
@@ -418,12 +451,12 @@ export async function syncQuranRoots(
 export async function seedQuranDraftShells(
   token: string,
   versionId: number,
-  body: QuranRectifySeedInput,
+  body: QuranRectifySeedInput
 ): Promise<MutationResult<QuranRectifySeedResult>> {
   try {
     const { data, error, response } = await authedClient(token).POST(
       '/editorial/quran/versions/{versionId}/rectify/seed',
-      { params: { path: { versionId } }, body },
+      { params: { path: { versionId } }, body }
     )
     if (error || !response.ok || !data?.data) {
       return { ok: false, error: messageFrom(error, response.status) }

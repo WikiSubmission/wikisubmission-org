@@ -14,7 +14,7 @@ const TILES: Tile[] = [
   {
     href: '/admin/access',
     title: 'Access',
-    body: 'Grant or revoke access for any account: site role, games (all of them or one at a time), and editorial modules down to individual Quran versions.',
+    body: 'Assign account roles and grant CMS or game access down to individual Quran, Bible, and game entries.',
   },
   {
     href: '/admin/games',
@@ -44,7 +44,8 @@ export default async function AdminLandingPage() {
         <p style={kicker}>Administration</p>
         <h1 style={heading}>Admin</h1>
         <p style={lede}>
-          Manage access and per-feature settings. Anything destructive is logged and rate-limited.
+          Manage access and per-feature settings. Anything destructive is logged
+          and rate-limited.
         </p>
       </header>
 

@@ -21,8 +21,6 @@ export const CONTENT_MODULES: Array<{ key: string; label: string }> = [
   { key: 'bible', label: 'Bible' },
   { key: 'article', label: 'Articles' },
   { key: 'community', label: 'Communities' },
-  { key: 'author', label: 'Authors' },
-  { key: 'category', label: 'Categories' },
   { key: 'appendix', label: 'Appendices' },
 ]
 
@@ -35,7 +33,6 @@ export interface GrantState {
   allGames: GrantLevel
   /** Per-game grants, keyed by game key. Independent of `allGames`. */
   games: Record<string, GrantLevel>
-  reference: number | null
 }
 
 function levelFrom(grant: boolean | undefined): GrantLevel {
@@ -73,7 +70,6 @@ export function initialGrantState(editor: EditorialEditor): GrantState {
     bible,
     allGames: levelFrom(editor.modules[GAME_MODULE_KEY]),
     games,
-    reference: editor.quran_reference_version_id ?? null,
   }
 }
 
@@ -124,25 +120,30 @@ export function grantStateToInput(state: GrantState): EditorGrantsInput {
     quran_versions,
     bible_versions,
     games,
-    quran_reference_version_id: state.reference,
   }
 }
 
 /** One-line summary for the collapsed row. */
 export function grantSummary(editor: EditorialEditor): string {
-  if (editor.role === 'admin') return 'admin — full access'
+  if (editor.roles.includes('admin')) return 'full access'
 
   const parts: string[] = []
+  const hasEditorRole = editor.roles.includes('editor')
+  const hasGameEditorRole = editor.roles.includes('game_editor')
   for (const [key, canWrite] of Object.entries(editor.modules)) {
     if (key === GAME_MODULE_KEY) {
+      if (!hasGameEditorRole) continue
       parts.push(`all games${canWrite ? ' (write)' : ' (read)'}`)
       continue
     }
+    if (!hasEditorRole) continue
     parts.push(`${key}${canWrite ? ' (write)' : ' (read)'}`)
   }
-  for (const g of editor.games ?? []) {
-    parts.push(`${g.game_key}${g.can_write ? ' (write)' : ' (read)'}`)
+  if (hasGameEditorRole) {
+    for (const g of editor.games ?? []) {
+      parts.push(`${g.game_key}${g.can_write ? ' (write)' : ' (read)'}`)
+    }
   }
 
-  return parts.length === 0 ? 'no grants' : parts.join(', ')
+  return parts.length === 0 ? 'no permissions' : parts.join(', ')
 }

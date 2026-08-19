@@ -2568,6 +2568,33 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
+  /editorial/quran-reference-version:
+    put:
+      tags: [Editorial]
+      operationId: updateEditorialQuranReferenceVersion
+      summary: Choose the current editor's word-by-word Quran reference version
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuranReferencePreferenceInput'
+      responses:
+        '200':
+          description: Updated permission and preference snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditorialSessionEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerErrror'
+
   /editorial/bible-versions:
     get:
       tags: [Editorial]
@@ -3414,6 +3441,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalServerErrror'
 
@@ -5714,9 +5743,13 @@ components:
         ok:
           type: boolean
 
+    AccessRole:
+      type: string
+      enum: [member, editor, game_editor, admin]
+
     User:
       type: object
-      required: [id, auth_id, email, role, permissions, is_active, created_at, updated_at]
+      required: [id, auth_id, email, role, roles, permissions, is_active, created_at, updated_at]
       properties:
         id:
           type: integer
@@ -5732,6 +5765,12 @@ components:
         role:
           type: string
           enum: [admin, editor, member]
+          deprecated: true
+          description: Compatibility projection. New clients must use roles.
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessRole'
         permissions:
           type: object
           additionalProperties: true
@@ -5751,6 +5790,13 @@ components:
         role:
           type: string
           enum: [admin, editor, member]
+          deprecated: true
+        roles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/AccessRole'
         permissions:
           type: object
           additionalProperties: true
@@ -5826,6 +5872,16 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/EditorialSession'
+
+    QuranReferencePreferenceInput:
+      type: object
+      required: [reference_version_id]
+      properties:
+        reference_version_id:
+          type: integer
+          format: int64
+          nullable: true
+          description: A Quran version the current editor can read, or null to clear.
 
     EditorialContentModule:
       type: string
@@ -5978,14 +6034,9 @@ components:
             unknown game keys are rejected with 400.
           items:
             $ref: '#/components/schemas/EditorGameGrant'
-        quran_reference_version_id:
-          type: integer
-          format: int64
-          nullable: true
-
     EditorialEditor:
       type: object
-      required: [user_id, email, role, is_active, modules, quran_versions, bible_versions, games]
+      required: [user_id, email, role, roles, is_active, modules, quran_versions, bible_versions, games]
       properties:
         user_id:
           type: integer
@@ -5997,6 +6048,12 @@ components:
           nullable: true
         role:
           type: string
+          deprecated: true
+          description: Compatibility projection. New clients must use roles.
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessRole'
         is_active:
           type: boolean
         modules:
@@ -6017,11 +6074,6 @@ components:
           description: Per-game grants. The global tier appears as the `game` key in modules.
           items:
             $ref: '#/components/schemas/EditorGameGrant'
-        quran_reference_version_id:
-          type: integer
-          format: int64
-          nullable: true
-
     EditorialEditorEnvelope:
       type: object
       required: [data]

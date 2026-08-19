@@ -5,8 +5,10 @@ import { auth } from '@/auth'
 import {
   getEditorialSession,
   listQuranChapters,
+  listQuranVersions,
 } from '@/lib/editorial-client'
 import * as s from '../styles'
+import { ReferenceVersionPicker } from '../reference-version-button'
 import {
   canReadQuranVersion,
   canWriteQuranVersion,
@@ -24,18 +26,30 @@ export default async function QuranChaptersPage({ params }: PageProps) {
   if (!Number.isInteger(versionId) || versionId < 1) notFound()
 
   const session = await auth()
-  if (!session?.accessToken) redirect(`/auth/sign-in?next=/editor/quran/${versionId}`)
+  if (!session?.accessToken)
+    redirect(`/auth/sign-in?next=/editor/quran/${versionId}`)
   const editorial = await getEditorialSession(session.accessToken)
-  if (!editorial || !canReadQuranVersion(editorial, versionId)) redirect('/editor/quran')
+  if (!editorial || !canReadQuranVersion(editorial, versionId))
+    redirect('/editor/quran')
 
-  const chapters = await listQuranChapters(session.accessToken, versionId)
+  const [chapters, versions] = await Promise.all([
+    listQuranChapters(session.accessToken, versionId),
+    listQuranVersions(session.accessToken),
+  ])
   if (chapters.length === 0) notFound()
 
   const canWrite = canWriteQuranVersion(editorial, versionId)
 
   return (
     <section style={s.page}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
         <Link href="/editor/quran" style={s.crumb}>
           ← Versions
         </Link>
@@ -60,20 +74,34 @@ export default async function QuranChaptersPage({ params }: PageProps) {
         </p>
       </header>
 
+      <ReferenceVersionPicker
+        versions={versions
+          .filter((version) => canReadQuranVersion(editorial, version.id))
+          .map((version) => ({ id: version.id, name: version.name }))}
+        initialVersionId={editorial.quran_reference_version_id ?? null}
+      />
+
       <ul style={list}>
         {chapters.map((c) => (
           <li key={c.chapter_number}>
-            <Link href={`/editor/quran/${versionId}/${c.chapter_number}`} style={row}>
+            <Link
+              href={`/editor/quran/${versionId}/${c.chapter_number}`}
+              style={row}
+            >
               <span style={num}>{c.chapter_number}</span>
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={title}>{c.title || `Chapter ${c.chapter_number}`}</span>
+                <span style={title}>
+                  {c.title || `Chapter ${c.chapter_number}`}
+                </span>
                 <span style={meta}>
                   {c.draft_verse_count}/{c.verse_count} verses drafted
                   {c.has_title_draft ? ' · title draft' : ''}
                 </span>
               </span>
               {c.pending_request && (
-                <span style={{ ...s.pillBase(), ...s.statusPill.pending }}>pending</span>
+                <span style={{ ...s.pillBase(), ...s.statusPill.pending }}>
+                  pending
+                </span>
               )}
             </Link>
           </li>
