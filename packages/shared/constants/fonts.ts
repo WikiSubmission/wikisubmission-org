@@ -7,7 +7,7 @@ const glacial = localFont({
     variable: '--font-glacial',
 });
 
-// Only weights actually rendered (single call site: web home-utilities).
+// Only the weights actually rendered anywhere.
 // Loading 8 weights shipped 6 unused woff2 files with every page.
 const geistMono = Geist_Mono({
   subsets: ['latin'],

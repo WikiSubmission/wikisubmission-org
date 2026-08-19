@@ -92,7 +92,39 @@
       "done_image": "Resim kopyalandı",
       "error_text": "Kopyalanamadı",
       "error_image": "Resim kopyalanamadı"
-    }
+    },
+    "bandRead": "Okuma",
+    "bandStudy": "Çalışmanız",
+    "indexTitle": "Dizin",
+    "indexDesc": "Herhangi bir konuyu alfabetik olarak bulun ve doğrudan ayetlerine gidin",
+    "seeAll": "Tümünü gör",
+    "studySignInTitle": "Kaldığınız yeri, notlarınızı ve yer imlerinizi koruyun",
+    "studySignInBody": "Kaldığınız yerden devam etmek, ayet kaydetmek, not yazmak ve okumanızı zaman içinde izlemek için giriş yapın.",
+    "studySignInCta": "Giriş yap",
+    "studyBookmarks": "Yer imleri",
+    "studyBookmarksDesc": "Dönmek için kaydettiğiniz ayetler",
+    "studyNotes": "Notlar",
+    "studyNotesDesc": "Metnin yanına yazdıklarınız",
+    "studyStats": "Okuma istatistikleri",
+    "studyStatsDesc": "Seriniz, hızınız ve ilerlemeniz",
+    "studyEmptyBookmarks": "Henüz yer imi yok. Herhangi bir sureden bir ayet kaydedin.",
+    "studyEmptyNotes": "Henüz not yok. Herhangi bir ayetten bir not yazın.",
+    "studyEmptyStats": "Henüz okuma kaydı yok. Başlamak için bir sure açın."
+  },
+  "quranIndex": {
+    "title": "Konu dizini",
+    "description": "Son Ahit’in sonundaki alfabetik konu dizini. Her konu, kendisinden söz eden ayetleri listeler.",
+    "entryCount": "{count, plural, =1 {# madde} other {# madde}}",
+    "resultCount": "{count, plural, =1 {# konu} other {# konu}}",
+    "resultsFor": "“{query}” için sonuçlar",
+    "backToIndex": "Dizine dön",
+    "filterPlaceholder": "{letter} harfini filtrele",
+    "searchWholeIndex": "dizinin tamamında ara",
+    "noneInLetter": "Bu harf altında filtrenize uyan bir şey yok.",
+    "noResults": "Bu aramaya uyan konu yok.",
+    "clear": "Filtreyi temizle",
+    "unavailable": "Dizin şu anda kullanılamıyor. Kısa süre sonra tekrar deneyin.",
+    "attribution": "Quran, The Final Testament dizini, Dr. Rashad Khalifa."
   },
   "search": {
     "placeholder": "Kuran'da ara…",
@@ -124,7 +156,9 @@
     "sourceResults": "bu sonuçlar",
     "draftMatches": "“{query}” ile {count} ayet eşleşiyor",
     "draftEmpty": "“{query}” ile eşleşen ayet yok",
-    "draftHint": "Her şeyi aramak için Enter’a basın"
+    "draftHint": "Her şeyi aramak için Enter’a basın",
+    "topics": "Konular",
+    "topicsHint": "Kuran’ın kendi dizininden"
   },
   "settings": {
     "title": "Ayarlar",

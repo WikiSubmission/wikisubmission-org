@@ -92,7 +92,39 @@
       "done_image": "Image copied",
       "error_text": "Could not copy",
       "error_image": "Could not copy image"
-    }
+    },
+    "bandRead": "Read",
+    "bandStudy": "Your study",
+    "indexTitle": "Index",
+    "indexDesc": "Look up any topic alphabetically and jump straight to the verses on it",
+    "seeAll": "See all",
+    "studySignInTitle": "Keep your place, notes and bookmarks",
+    "studySignInBody": "Sign in to pick up where you left off, save verses, write notes and follow your reading over time.",
+    "studySignInCta": "Sign in",
+    "studyBookmarks": "Bookmarks",
+    "studyBookmarksDesc": "Verses you saved to come back to",
+    "studyNotes": "Notes",
+    "studyNotesDesc": "What you wrote alongside the text",
+    "studyStats": "Reading stats",
+    "studyStatsDesc": "Your streak, pace and coverage",
+    "studyEmptyBookmarks": "No bookmarks yet. Save a verse from any chapter.",
+    "studyEmptyNotes": "No notes yet. Write one from any verse.",
+    "studyEmptyStats": "No readings logged yet. Open a chapter to start."
+  },
+  "quranIndex": {
+    "title": "Topical index",
+    "description": "The alphabetical subject index from the back of the Final Testament. Every topic lists the verses that speak to it.",
+    "entryCount": "{count, plural, =1 {# entry} other {# entries}}",
+    "resultCount": "{count, plural, =1 {# topic} other {# topics}}",
+    "resultsFor": "Results for “{query}”",
+    "backToIndex": "Back to the index",
+    "filterPlaceholder": "Filter {letter}",
+    "searchWholeIndex": "search the whole index",
+    "noneInLetter": "Nothing under this letter matches your filter.",
+    "noResults": "No topics match that search.",
+    "clear": "Clear filter",
+    "unavailable": "The index is unavailable right now. Try again shortly.",
+    "attribution": "Index to Quran, The Final Testament, by Dr. Rashad Khalifa."
   },
   "search": {
     "placeholder": "Search the Quran…",
@@ -124,7 +156,9 @@
     "sourceResults": "these results",
     "draftMatches": "{count, plural, =1 {1 verse matches} other {# verses match}} “{query}”",
     "draftEmpty": "No verses match “{query}”",
-    "draftHint": "Press Enter to search the entire Quran"
+    "draftHint": "Press Enter to search the entire Quran",
+    "topics": "Topics",
+    "topicsHint": "From the Quran's own index"
   },
   "settings": {
     "title": "Settings",

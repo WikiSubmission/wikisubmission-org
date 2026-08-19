@@ -67,7 +67,39 @@
       "done_image": "Wêne hate kopî kirin",
       "error_text": "Nekarî kopî bike",
       "error_image": "Nekarî wêneyê kopî bike"
-    }
+    },
+    "bandRead": "Xwendin",
+    "bandStudy": "Xebata te",
+    "indexTitle": "Pêrist",
+    "indexDesc": "Her babetî bi rêza alfabeyê bibîne û rasterast biçe ser ayetên wê",
+    "seeAll": "Hemûyan bibîne",
+    "studySignInTitle": "Cih, tîbînî û bijareyên xwe biparêze",
+    "studySignInBody": "Têkeve hundir ku ji cihê ku hiştîbûyî berdewam bikî, ayetan tomar bikî, tîbînî binivîsî û xwendina xwe bi demê re bişopînî.",
+    "studySignInCta": "Têkeve hundir",
+    "studyBookmarks": "Bijare",
+    "studyBookmarksDesc": "Ayetên ku te tomar kirine ku vegerî wan",
+    "studyNotes": "Tîbînî",
+    "studyNotesDesc": "Ya ku te li kêleka nivîsê nivîsandiye",
+    "studyStats": "Amarên xwendinê",
+    "studyStatsDesc": "Rêsa te, leza te û pêşketina te",
+    "studyEmptyBookmarks": "Hîn bijare tune. Ji her sûretekê ayetekê tomar bike.",
+    "studyEmptyNotes": "Hîn tîbînî tune. Ji her ayetekê yekê binivîse.",
+    "studyEmptyStats": "Hîn xwendin nehatiye tomarkirin. Sûretekê veke ku dest pê bikî."
+  },
+  "quranIndex": {
+    "title": "Pêrista babetan",
+    "description": "Pêrista alfabetîk a babetan a li dawiya Peymana Dawî. Ji bo her babetî ew ayetên ku qala wê dikin hatine rêzkirin.",
+    "entryCount": "{count, plural, =1 {# babet} other {# babet}}",
+    "resultCount": "{count, plural, =1 {# babet} other {# babet}}",
+    "resultsFor": "Encamên ji bo „a{query}“",
+    "backToIndex": "Vegere pêristê",
+    "filterPlaceholder": "{letter} parzûn bike",
+    "searchWholeIndex": "li tevahiya pêristê bigere",
+    "noneInLetter": "Di bin vê tîpê de tiştek li parzûna te nayê.",
+    "noResults": "Tu babet li vê lêgerînê nayê.",
+    "clear": "Parzûnê pak bike",
+    "unavailable": "Pêrist niha ne berdest e. Piştî demeke kurt dîsa biceribîne.",
+    "attribution": "Pêrista Quran, The Final Testament, ji Dr. Rashad Khalifa."
   },
   "search": {
     "placeholder": "Di Qur'anê de bigere…",
@@ -99,7 +131,9 @@
     "sourceResults": "ev encam",
     "draftMatches": "{count, plural, =1 {1 ayet bi «{query}» re li hev tê} other {# ayet bi «{query}» re li hev tên}}",
     "draftEmpty": "Tu ayet bi «{query}» re li hev nayên",
-    "draftHint": "Ji bo lêgerîna her tiştî Enter bitikîne"
+    "draftHint": "Ji bo lêgerîna her tiştî Enter bitikîne",
+    "topics": "Babet",
+    "topicsHint": "Ji pêrista Quranê bi xwe"
   },
   "settings": {
     "title": "Sazkarî",

@@ -10,14 +10,18 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { buildPageMetadata } from '@/constants/metadata'
-import { ArrowRight, BookOpen } from 'lucide-react'
+import { ArrowRight, BookOpen, ListTree } from 'lucide-react'
 import { VerseListFetcher } from './mini-components/verse-list-fetcher'
 import { VerseListSkeleton } from '@/components/quran-reader/verse-list-skeleton'
 import { QuranAccordions } from './mini-components/quran-accordions'
 import { ContinueCoverToCoverSection } from './mini-components/continue-cover-to-cover-section'
+import { QuranStudyBand } from './mini-components/quran-study-band'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { ActivityRecorder } from '@/components/activity-recorder'
 import { fetchChapters, fetchQuranMetadata } from '@/lib/quran-metadata'
+import { auth } from '@/auth'
+import { QueryClient, dehydrate, HydrationBoundary } from '@tanstack/react-query'
+import { meApiServer } from '@/src/api/me-server-client'
 
 // Detect query intent: chapter, verse-list, or text search.
 // Single verse refs AND ranges both go to verse-list (VerseListResult).
@@ -81,6 +85,64 @@ export default async function QuranPage({
       chapters.map((c) => [c.chapter_number, c.title ?? '']),
     )
 
+    // Study-band data, prefetched into react-query so a signed-in reader sees
+    // their bookmarks, notes and streak in the first paint. Copies the pattern in
+    // app/me/page.tsx, but never redirects: /quran is public, and the band
+    // renders a sign-in prompt when there is no session.
+    //
+    // Reading stats are deliberately NOT prefetched. useReadingStats keys on the
+    // browser's resolved timezone, which the server cannot know, so a prefetch
+    // here would land under a different key and be thrown away. It loads client
+    // side instead.
+    const session = await auth()
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: 60_000 } },
+    })
+
+    if (session?.accessToken) {
+      const meApi = meApiServer(session.accessToken)
+      await Promise.allSettled([
+        queryClient.prefetchQuery({
+          queryKey: ['bookmark-categories'],
+          queryFn: () => meApi.listBookmarkCategories(),
+        }),
+        queryClient.prefetchQuery({
+          queryKey: ['notes', 'quran'],
+          queryFn: () => meApi.getNotes('quran'),
+        }),
+        queryClient.prefetchQuery({
+          queryKey: ['streak', 'quran'],
+          queryFn: () => meApi.getStreak('quran'),
+        }),
+        queryClient.prefetchQuery({
+          queryKey: ['cover-to-cover', 'quran'],
+          queryFn: () => meApi.getCoverToCover('quran'),
+        }),
+      ])
+    }
+
+    // Three entry points into the book itself, ahead of the 114-chapter grid.
+    const readCards = [
+      {
+        href: '/introduction',
+        title: tNav('introduction'),
+        description: tQuran('introductionDesc'),
+        icon: BookOpen,
+      },
+      {
+        href: '/proclamation',
+        title: tNav('proclamation'),
+        description: tQuran('proclamationDesc'),
+        icon: BookOpen,
+      },
+      {
+        href: '/quran/index',
+        title: tQuran('indexTitle'),
+        description: tQuran('indexDesc'),
+        icon: ListTree,
+      },
+    ]
+
     return (
       <main className="py-12 px-4">
         <div className="max-w-4xl mx-auto space-y-12">
@@ -100,47 +162,45 @@ export default async function QuranPage({
           {/* ── Continue cover to cover (signed in, once marked) ──────── */}
           <ContinueCoverToCoverSection chapterTitles={chapterTitles} />
 
-          {/* ── Preview cards ─────────────────────────────────────────── */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link
-              href="/proclamation"
-              className="group flex flex-col gap-2 p-5 rounded-2xl border border-border/50 bg-muted/30 hover:bg-muted/60 hover:border-border transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                  <BookOpen className="size-4 text-primary/70" />
-                  {tNav('proclamation')}
-                </div>
-                <ArrowRight className="size-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {tQuran('proclamationDesc')}
-              </p>
-            </Link>
+          {/* ── Read: the book ────────────────────────────────────────── */}
+          <section className="space-y-4">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">
+              {tQuran('bandRead')}
+            </h2>
 
-            <Link
-              href="/introduction"
-              className="group flex flex-col gap-2 p-5 rounded-2xl border border-border/50 bg-muted/30 hover:bg-muted/60 hover:border-border transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                  <BookOpen className="size-4 text-primary/70" />
-                  {tNav('introduction')}
-                </div>
-                <ArrowRight className="size-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {tQuran('introductionDesc')}
-              </p>
-            </Link>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {readCards.map((card) => (
+                <Link
+                  key={card.href}
+                  href={card.href}
+                  className="group flex flex-col gap-2 p-5 rounded-2xl border border-border/50 bg-muted/30 hover:bg-muted/60 hover:border-border transition-all"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-sm font-semibold min-w-0">
+                      <card.icon className="size-4 text-primary/70 shrink-0" />
+                      <span className="truncate">{card.title}</span>
+                    </div>
+                    <ArrowRight className="size-4 shrink-0 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {card.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+
+            <QuranAccordions
+              chapters={chapters}
+              appendices={appendices}
+              chaptersOpen={ch !== '0'}
+              appendicesOpen={ap !== '0'}
+            />
           </section>
 
-          <QuranAccordions
-            chapters={chapters}
-            appendices={appendices}
-            chaptersOpen={ch !== '0'}
-            appendicesOpen={ap !== '0'}
-          />
+          {/* ── Your study: bookmarks, notes, reading stats ───────────── */}
+          <HydrationBoundary state={dehydrate(queryClient)}>
+            <QuranStudyBand />
+          </HydrationBoundary>
         </div>
       </main>
     )

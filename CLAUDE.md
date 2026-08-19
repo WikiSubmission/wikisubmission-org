@@ -42,6 +42,8 @@ npx tsc --noEmit    # typecheck — MUST be run from the app dir, not the repo r
 - Each app has its own `app/` tree with Next.js 16 App Router conventions
 - Server Components fetch data directly (web only); Client Components use hooks/state
 - Web route: `app/quran/[[...query]]/` — catch-all for all Quran reader pages; text queries are detected by `parseQueryType` in `page.tsx` and dispatch to the search results view (there is no separate `app/search/` route)
+- Web route: `app/quran/index/` — the topical index. A static sibling of the catch-all, so it declares its own layout: `app/quran/[[...query]]/layout.tsx` lives *inside* the catch-all segment and does not apply to it (same for `app/quran/words` and `app/quran/games`). `?letter=` browses one printed A-Z section, `?q=` searches every letter
+- `proxy.ts` rewrites `/quran?q=foo` → `/quran/foo` for **`/quran` exactly**, not the whole prefix — the sibling routes have their own meaning for `?q=`
 - Web route: `app/bible/[[...query]]/` — Bible reader (web only; hidden on mobile for now)
 - Web marketing/content pages live in the `app/(site)/` route group
 - Mobile routes mirror a subset (`app/quran/[chapter]/` is SSG via `generateStaticParams` — all 114 chapters prerendered; search lives at `app/quran/search/`)
@@ -62,7 +64,7 @@ Quran data is fetched directly from **ws-backend** via the type-safe `openapi-fe
 
 Base URL: `process.env.NEXT_PUBLIC_API_URL`
 
-Endpoints: **GET `/quran`** (verse ranges), **GET `/search`** (full-text), **GET `/chapters`** / **`/appendices`** / **`/languages`** (metadata, used in SSR layout). Full params live in the synced spec at `packages/shared/src/api/openapi.yaml` (regenerated types in `types.gen.ts`) — read those rather than duplicating the tables here.
+Endpoints: **GET `/quran`** (verse ranges), **GET `/search`** (full-text), **GET `/chapters`** / **`/appendices`** / **`/languages`** (metadata, used in SSR layout), **GET `/topic-index`** / **`/topic-index/letters`** / **`/topic-index/search`** / **`/topic-index/verse/{verseKey}`** (the Quran's printed topical index; readable keys, not minified, and its verse numbers are 1-based unlike `vi`). Full params live in the synced spec at `packages/shared/src/api/openapi.yaml` (regenerated types in `types.gen.ts`) — read those rather than duplicating the tables here.
 
 ### Response shape (Quran)
 
@@ -283,6 +285,10 @@ const loadMore = useCallback((opts) => {
 | `packages/shared/lib/media-session-adapter.ts` | OS media-session seam: web uses `navigator.mediaSession`, mobile registers a native Capacitor adapter |
 | `packages/shared/components/quran-reader/chapter-reader.tsx` | Main chapter reader: virtual list, audio sync, URL sync, minimap |
 | `packages/shared/components/quran-reader/result-search.tsx` | Quran text search results |
+| `packages/shared/components/quran-index/*` | Topical index UI: entry list, A-Z rail, in-letter filter, verse-ref chips |
+| `packages/shared/lib/topic-index.ts` | Topical index types + URL helpers. NOT a `'use client'` module: the server-rendered index page calls them |
+| `packages/shared/hooks/use-topic-index-search.ts` | Debounced `/topic-index/search`; feeds the Topics block above verse results and the search-bar typeahead |
+| `apps/web/app/quran/[[...query]]/mini-components/quran-study-band.tsx` | Hub "Your study" band: Quran-scoped bookmark, note and stats previews linking to `/me/*` |
 | `packages/shared/components/quran-reader/verse-card.tsx` | Individual verse card (memoized) |
 | `packages/shared/components/quran-reader/verse-minimap.tsx` | Right-edge seek minimap |
 | `packages/shared/hooks/use-chapter-reader.ts` | Verse window management (load, load-more, seek, prefetch) |

@@ -11,6 +11,7 @@ import {
   BookMarked,
   CheckIcon,
   ChevronRight,
+  ListTree,
   SearchIcon,
   StickyNote,
 } from 'lucide-react'
@@ -42,6 +43,9 @@ import { SearchResultsSkeleton } from './search-results-skeleton'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import { useMeSearch } from '@/hooks/use-me-search'
 import { useLibrarySearch, libraryHitHref, type LibraryHit } from '@/hooks/use-library-search'
+import { useTopicIndexSearch } from '@/hooks/use-topic-index-search'
+import { topicEntryHref, flattenTopicRefs, type TopicEntry } from '@/lib/topic-index'
+import { TopicRefChips } from '@/components/quran-index/topic-ref-chips'
 import { useTranslations } from 'next-intl'
 import { useScriptureAuth } from '@/lib/scripture-auth-context'
 
@@ -108,6 +112,62 @@ function libraryHitLabel(hit: LibraryHit): string {
     return `Appendix ${hit.docNumber} — ${hit.title}`
   }
   return hit.title
+}
+
+/**
+ * Hits from the Quran's own topical index (/quran/index).
+ *
+ * Sits above the verse results rather than mixed into them: an index entry is a
+ * curated topic, not a verse, so it answers a different question and competing
+ * for the same ranking would only distort both. Each row links to the entry on
+ * the index page, with its printed citations inline as a shortcut.
+ */
+function TopicResults({
+  entries,
+  heading,
+  hint,
+}: {
+  entries: TopicEntry[]
+  heading: string
+  hint: string
+}) {
+  if (entries.length === 0) return null
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-baseline gap-2 px-1">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-primary/70">
+          {heading}
+        </h3>
+        <span className="text-xs text-muted-foreground">{hint}</span>
+      </div>
+      <div className="bg-primary/5 rounded-2xl border border-primary/20 overflow-hidden divide-y divide-primary/10">
+        {entries.map((entry) => {
+          const refs = flattenTopicRefs(entry)
+          return (
+            <div key={`topic:${entry.letter}:${entry.slug}`} className="px-4 py-3">
+              <div className="flex items-start gap-2">
+                <ListTree className="size-4 text-primary/80 mt-0.5 shrink-0" />
+                <div className="min-w-0 space-y-1">
+                  <Link
+                    href={topicEntryHref(entry)}
+                    className="text-sm font-medium hover:underline underline-offset-2"
+                  >
+                    {entry.title}
+                  </Link>
+                  {entry.subentries.length > 0 && (
+                    <p className="text-xs text-muted-foreground line-clamp-1">
+                      {entry.subentries.map((sub) => sub.label).join(' · ')}
+                    </p>
+                  )}
+                  <TopicRefChips refs={refs} max={12} />
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 function LibraryResults({ hits }: { hits: LibraryHit[] }) {
@@ -303,6 +363,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   )
   const noteMatches = useMeSearch(searchQuery, 'quran')
   const librarySearch = useLibrarySearch(searchQuery)
+  const topicSearch = useTopicIndexSearch(searchQuery)
   // Publish the loaded results so the command menu can act on what is on screen,
   // and so typing narrows these results rather than starting a new search.
   useEffect(() => {
@@ -472,6 +533,12 @@ export default function SearchResult({ props }: { props: { query: string } }) {
               })}
             </div>
           )}
+
+          <TopicResults
+            entries={topicSearch.entries}
+            heading={t('topics')}
+            hint={t('topicsHint')}
+          />
 
           <LibraryResults hits={librarySearch.hits} />
 

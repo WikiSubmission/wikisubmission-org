@@ -92,7 +92,39 @@
       "done_image": "Bild kopiert",
       "error_text": "Kopieren nicht möglich",
       "error_image": "Bild konnte nicht kopiert werden"
-    }
+    },
+    "bandRead": "Lesen",
+    "bandStudy": "Dein Studium",
+    "indexTitle": "Register",
+    "indexDesc": "Jedes Thema alphabetisch nachschlagen und direkt zu seinen Versen springen",
+    "seeAll": "Alle ansehen",
+    "studySignInTitle": "Behalte Lesestelle, Notizen und Lesezeichen",
+    "studySignInBody": "Melde dich an, um dort weiterzulesen, wo du aufgehört hast, Verse zu speichern, Notizen zu schreiben und dein Lesen über die Zeit zu verfolgen.",
+    "studySignInCta": "Anmelden",
+    "studyBookmarks": "Lesezeichen",
+    "studyBookmarksDesc": "Verse, die du zum Wiederkommen gespeichert hast",
+    "studyNotes": "Notizen",
+    "studyNotesDesc": "Was du neben dem Text geschrieben hast",
+    "studyStats": "Lesestatistik",
+    "studyStatsDesc": "Deine Strähne, dein Tempo und dein Fortschritt",
+    "studyEmptyBookmarks": "Noch keine Lesezeichen. Speichere einen Vers aus einer beliebigen Sure.",
+    "studyEmptyNotes": "Noch keine Notizen. Schreibe eine an einem beliebigen Vers.",
+    "studyEmptyStats": "Noch keine Lesungen erfasst. Öffne eine Sure, um zu beginnen."
+  },
+  "quranIndex": {
+    "title": "Sachregister",
+    "description": "Das alphabetische Sachregister aus dem hinteren Teil des Letzten Testaments. Zu jedem Thema stehen die Verse, die davon sprechen.",
+    "entryCount": "{count, plural, =1 {# Eintrag} other {# Einträge}}",
+    "resultCount": "{count, plural, =1 {# Thema} other {# Themen}}",
+    "resultsFor": "Ergebnisse für „{query}“",
+    "backToIndex": "Zurück zum Register",
+    "filterPlaceholder": "{letter} filtern",
+    "searchWholeIndex": "das ganze Register durchsuchen",
+    "noneInLetter": "Unter diesem Buchstaben passt nichts zu deinem Filter.",
+    "noResults": "Keine Themen passen zu dieser Suche.",
+    "clear": "Filter löschen",
+    "unavailable": "Das Register ist gerade nicht verfügbar. Versuche es in Kürze erneut.",
+    "attribution": "Register zu Quran, The Final Testament, von Dr. Rashad Khalifa."
   },
   "search": {
     "placeholder": "Im Koran suchen…",
@@ -124,7 +156,9 @@
     "sourceResults": "diese Ergebnisse",
     "draftMatches": "{count, plural, =1 {1 Vers passt} other {# Verse passen}} zu „{query}“",
     "draftEmpty": "Keine Verse passen zu „{query}“",
-    "draftHint": "Eingabetaste drücken, um alles zu durchsuchen"
+    "draftHint": "Eingabetaste drücken, um alles zu durchsuchen",
+    "topics": "Themen",
+    "topicsHint": "Aus dem Register des Qurans selbst"
   },
   "settings": {
     "title": "Einstellungen",

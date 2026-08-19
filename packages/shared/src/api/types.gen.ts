@@ -275,6 +275,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/topic-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fetch one letter of the Quran's topical index
+         * @description Returns one alphabetical section of the subject index bound into the back of Quran, The Final Testament. Each entry carries its sub-entries and the verse references printed against them.
+         *
+         *     Verse numbers here are **1-based, as printed** — unlike `vi` elsewhere in this API, which is 0-based. A reference is stored as a range (`verse_start`, `verse_end`) rather than expanded, so `7:65-72` is one reference, not eight; `display` is the string to render.
+         *
+         *     Keys are readable rather than minified. The Quran payload's legend exists for verse text repeated across seven languages; a page of thirty index entries does not earn it.
+         */
+        get: operations["getTopicIndex"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/topic-index/letters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the populated letters of the topical index
+         * @description Returns each letter that has entries, with its entry count — enough to render the A–Z rail without fetching the index itself. The printed index has no X, so a client must not assume all 26 letters exist.
+         */
+        get: operations["getTopicIndexLetters"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/topic-index/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search the Quran's topical index
+         * @description Full-text search over index entry titles, sub-entry labels and cross-references, with a trigram fallback for typos ("abrogaton", "alimoney"). Ranked by `ts_rank_cd` with the entry title weighted above its sub-entry labels, which sit above its cross-references.
+         *
+         *     This is a separate corpus from `/search`, which searches verse text, subtitles and footnotes. A client wanting both runs the two in parallel: the topical index answers "what does the book say about X", verse search answers "where does this wording appear".
+         */
+        get: operations["searchTopicIndex"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/topic-index/verse/{verseKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the topics that cite a verse
+         * @description The reverse lookup: given a verse, return the index entries whose printed references cover it. Ranges are matched inclusively, so 7:70 is returned for an entry citing 7:65-72.
+         */
+        get: operations["getTopicIndexForVerse"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/music/artists": {
         parameters: {
             query?: never;
@@ -2109,6 +2195,96 @@ export interface components {
              * @description Relevance score. Higher is more relevant.
              */
             rank?: number;
+        };
+        /** @description Envelope for `/topic-index` and `/topic-index/verse/{verseKey}`. Matches the `{items, total}` shape `RootsIndexResponse` uses. `total` is the count for the whole letter (or the whole verse lookup), not the returned page. */
+        TopicIndexResponse: {
+            items: components["schemas"]["TopicIndexEntry"][];
+            /** @example 35 */
+            total: number;
+        };
+        /** @description Envelope for `/topic-index/search`. `total` counts full-text matches only. When the full-text leg finds nothing the trigram fallback fires instead and `total` is 0 while `results` is not — the fallback returns every hit it has on one page, so there is nothing to paginate. */
+        TopicIndexSearchResponse: {
+            /** @description The query as executed. */
+            q: string;
+            total: number;
+            limit: number;
+            offset: number;
+            results: components["schemas"]["TopicIndexEntry"][];
+        };
+        /** @description One entry of the printed topical index, with its sub-entries and verse references. `score` and `headline` are populated only by `/topic-index/search`. */
+        TopicIndexEntry: {
+            /**
+             * @description The entry as printed, punctuation included.
+             * @example Abraham
+             */
+            title: string;
+            /**
+             * @description The printed A–Z section this entry sits in.
+             * @example A
+             */
+            letter: string;
+            /**
+             * @description Stable URL fragment for deep links — `/quran/index?letter=A#abraham`.
+             * @example abraham
+             */
+            slug: string;
+            /**
+             * @description Index edition this entry belongs to.
+             * @example en
+             */
+            lang?: string;
+            /**
+             * @description Other entry titles this one points at, lifted out of the printed "(see also Hood)" / "see Covenant, Promises" text. These are titles, not ids: the printed text does not always spell a target exactly as that entry's own title, so a client resolves them by search.
+             * @example [
+             *       "Covenant",
+             *       "Promises"
+             *     ]
+             */
+            cross_refs: string[];
+            /** @description References printed against the entry itself, before any sub-entry. Empty when every reference hangs off a sub-entry instead. */
+            refs: components["schemas"]["TopicIndexRef"][];
+            subentries: components["schemas"]["TopicIndexSubentry"][];
+            /**
+             * Format: float
+             * @description Relevance score; search results only.
+             */
+            score?: number;
+            /** @description Matched text with `<b>` markers around the hit; search results only. Contains no other markup — render the markers, never the string as HTML. */
+            headline?: string;
+        };
+        /** @description A sub-heading under an entry ("monotheist" under "Abraham"), with its own references. */
+        TopicIndexSubentry: {
+            /** @example builds Kaaba */
+            label: string;
+            refs: components["schemas"]["TopicIndexRef"][];
+        };
+        /**
+         * @description One printed verse citation, stored as a range rather than expanded. `verse_start` and `verse_end` are **1-based**, unlike `vi` elsewhere in this API; 0 addresses the Basmalah.
+         *
+         *     References are not validated against the verse table. The printed index contains a handful of typographic errors, which the seed generator quarantines and reports rather than failing on; anything that survives into this table pointed at a real verse when it was generated.
+         */
+        TopicIndexRef: {
+            /** @example 7 */
+            chapter_number: number;
+            /** @example 65 */
+            verse_start: number;
+            /**
+             * @description Equal to `verse_start` for a single verse.
+             * @example 72
+             */
+            verse_end: number;
+            /**
+             * @description The citation as printed — render this verbatim.
+             * @example 7:65-72
+             */
+            display: string;
+        };
+        /** @description One bucket of the A–Z rail. */
+        TopicIndexLetter: {
+            /** @example A */
+            letter: string;
+            /** @example 35 */
+            count: number;
         };
         /** @description Envelope for `/site/search` results. There is deliberately no `total`: counting doubles the query cost for a number the command menu never renders. */
         SiteSearchResponse: {
@@ -4341,6 +4517,155 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getTopicIndex: {
+        parameters: {
+            query: {
+                /**
+                 * @description The printed A–Z section to return. The index has no X, so `/topic-index/letters` is the authority on which letters exist.
+                 * @example A
+                 */
+                letter: string;
+                /**
+                 * @description Index edition to read. Only `en` exists today; omit for the default.
+                 * @example en
+                 */
+                lang?: string;
+                /**
+                 * @description Maximum number of entries to return (1–500). Defaults to 500, which covers the largest letter (S, 186 entries) in one request.
+                 * @example 500
+                 */
+                limit?: number;
+                /**
+                 * @description Number of entries to skip before returning the page.
+                 * @example 0
+                 */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicIndexResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getTopicIndexLetters: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Index edition to read. Only `en` exists today.
+                 * @example en
+                 */
+                lang?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicIndexLetter"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    searchTopicIndex: {
+        parameters: {
+            query: {
+                /**
+                 * @description Search query (2–200 characters). A single Latin word is matched as a prefix; anything else goes through `websearch_to_tsquery`, so quoted phrases and `-exclusions` work.
+                 * @example alimony
+                 */
+                q: string;
+                /**
+                 * @description Index edition to search. Omit to search every edition.
+                 * @example en
+                 */
+                lang?: string;
+                /**
+                 * @description Maximum number of results to return (1–100). Defaults to 10.
+                 * @example 10
+                 */
+                limit?: number;
+                /**
+                 * @description Number of results to skip before returning the page.
+                 * @example 0
+                 */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicIndexSearchResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            500: components["responses"]["InternalServerErrror"];
+        };
+    };
+    getTopicIndexForVerse: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Index edition to read. Omit for every edition.
+                 * @example en
+                 */
+                lang?: string;
+            };
+            header?: never;
+            path: {
+                /**
+                 * @description Verse key in `chapter:verse` form, verse **1-based** (`2:255`). Verse 0 addresses the Basmalah, which every chapter except 1 and 9 has.
+                 * @example 2:255
+                 */
+                verseKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicIndexResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalServerErrror"];
         };
     };

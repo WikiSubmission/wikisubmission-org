@@ -92,7 +92,39 @@
       "done_image": "تم نسخ الصورة",
       "error_text": "تعذّر النسخ",
       "error_image": "تعذّر نسخ الصورة"
-    }
+    },
+    "bandRead": "القراءة",
+    "bandStudy": "دراستك",
+    "indexTitle": "الفهرس",
+    "indexDesc": "ابحذ عن أي موضوع أبجديًا وانتقل مباشرة إلى آياته",
+    "seeAll": "عرض الكل",
+    "studySignInTitle": "احفظ موضعك وملاحقاتك وعلاماتك",
+    "studySignInBody": "سجّل الدخول لتكمل من حيث توقفت، وتحفظ الآيات، وتكتب الملاحقات، وتتابع قراءتك مع الوقت.",
+    "studySignInCta": "تسجيل الدخول",
+    "studyBookmarks": "العلامات المرجعية",
+    "studyBookmarksDesc": "آيات حفظتها للرجوع إليها",
+    "studyNotes": "الملاحقات",
+    "studyNotesDesc": "ما كتبته إلى جانب النص",
+    "studyStats": "إحصاءات القراءة",
+    "studyStatsDesc": "سلسلتك ووتيرتك وما أنجزته",
+    "studyEmptyBookmarks": "لا علامات بعد. احفظ آية من أي سورة.",
+    "studyEmptyNotes": "لا ملاحقات بعد. اكتب واحدة من أي آية.",
+    "studyEmptyStats": "لم تُسجَل قراءات بعد. افتح سورة لتبدأ."
+  },
+  "quranIndex": {
+    "title": "الفهرس الموضوعي",
+    "description": "الفهرس الأبجدي للمواضيع الموجود في آخر العهد الأخير. كل موضوع يسرد الآيات التي تتناوله.",
+    "entryCount": "{count} مدخل",
+    "resultCount": "{count} موضوع",
+    "resultsFor": "نتائج البحث عن «{query}»",
+    "backToIndex": "العودة إلى الفهرس",
+    "filterPlaceholder": "تصفية حرف {letter}",
+    "searchWholeIndex": "ابحذ في الفهرس كله",
+    "noneInLetter": "لا يوجد مدخل تحت هذا الحرف يطابق التصفية.",
+    "noResults": "لا يوجد موضوع يطابق هذا البحث.",
+    "clear": "إلغاء التصفية",
+    "unavailable": "الفهرس غير متاح الآن. حاول بعد قليل.",
+    "attribution": "فهرس القرآن، العهد الأخير، بقلم د. رشاد خليفة."
   },
   "search": {
     "placeholder": "ابحث في القرآن…",
@@ -124,7 +156,9 @@
     "sourceResults": "هذه النتائج",
     "draftMatches": "{count, plural, one {آية واحدة تطابق} two {آيتان تطابقان} few {# آيات تطابق} other {# آية تطابق}} «{query}»",
     "draftEmpty": "لا توجد آيات تطابق «{query}»",
-    "draftHint": "اضغط Enter للبحث في كل شيء"
+    "draftHint": "اضغط Enter للبحث في كل شيء",
+    "topics": "المواضيع",
+    "topicsHint": "من فهرس القرآن نفسه"
   },
   "settings": {
     "title": "الإعدادات",

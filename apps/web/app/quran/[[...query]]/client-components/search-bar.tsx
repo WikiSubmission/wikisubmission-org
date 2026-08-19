@@ -2,9 +2,11 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { SearchIcon, StickyNote } from 'lucide-react'
+import { ListTree, SearchIcon, StickyNote } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useTranslations } from 'next-intl'
+import { useTopicIndexSearch } from '@/hooks/use-topic-index-search'
+import { topicEntryHref } from '@/lib/topic-index'
 import { cn } from '@/lib/utils'
 import { useQuranNavStore } from '@/hooks/use-quran-nav-store'
 import { CHAPTER_TRANSLITERATIONS } from '@/constants/quran-chapters'
@@ -125,6 +127,11 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const noteQuery = showDropdown && debouncedQuery.trim().length >= 2 ? debouncedQuery : ''
   const noteResults = useMeSearch(noteQuery, 'quran').slice(0, 4)
 
+  // Topical index entries ride the same debounce. They are jumps, like chapters
+  // and appendices, so they belong in this dropdown rather than only in the
+  // results page: "alimony" is one keystroke away from the verse that answers it.
+  const topicResults = useTopicIndexSearch(noteQuery).entries.slice(0, 3)
+
   // Matching verses are not previewed here. They render as reader cards through
   // `QuranDraftSwitch`, which has the width to show the verse rather than a
   // clipped line of it. What stays is navigation: jumps and the submit row.
@@ -137,6 +144,7 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const hasSuggestions =
     matchedChapters.length > 0 ||
     matchedAppendices.length > 0 ||
+    topicResults.length > 0 ||
     noteResults.length > 0 ||
     canSubmit
 
@@ -247,6 +255,7 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
 
               {(matchedChapters.length > 0 ||
                 matchedAppendices.length > 0 ||
+                topicResults.length > 0 ||
                 noteResults.length > 0) && (
                 <div className="border-t border-border/20" />
               )}
@@ -300,9 +309,37 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
             </button>
           ))}
 
-          {noteResults.length > 0 && (matchedChapters.length > 0 || matchedAppendices.length > 0) && (
-            <div className="border-t border-border/20" />
-          )}
+          {topicResults.length > 0 &&
+            (matchedChapters.length > 0 || matchedAppendices.length > 0) && (
+              <div className="border-t border-border/20" />
+            )}
+
+          {topicResults.map((entry) => (
+            <button
+              type="button"
+              key={`topic-${entry.letter}-${entry.slug}`}
+              onMouseDown={() => {
+                setOpen(false)
+                router.push(topicEntryHref(entry))
+              }}
+              className="flex items-start gap-2 w-full px-3 py-2 text-sm hover:bg-primary/5 text-left"
+            >
+              <ListTree className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary/70" />
+              <div className="flex-1 min-w-0">
+                <span className="truncate block">{entry.title}</span>
+                <span className="text-xs text-muted-foreground truncate block">
+                  {t('topicsHint')}
+                </span>
+              </div>
+            </button>
+          ))}
+
+          {noteResults.length > 0 &&
+            (matchedChapters.length > 0 ||
+              matchedAppendices.length > 0 ||
+              topicResults.length > 0) && (
+              <div className="border-t border-border/20" />
+            )}
 
           {noteResults.map((n) => {
             const [chapter, verse] = n.verse_key.split(':')

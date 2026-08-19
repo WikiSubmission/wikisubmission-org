@@ -92,7 +92,39 @@
       "done_image": "Image copiée",
       "error_text": "Impossible de copier",
       "error_image": "Impossible de copier l'image"
-    }
+    },
+    "bandRead": "Lecture",
+    "bandStudy": "Votre étude",
+    "indexTitle": "Index",
+    "indexDesc": "Cherchez n’importe quel sujet par ordre alphabétique et accédez directement à ses versets",
+    "seeAll": "Tout voir",
+    "studySignInTitle": "Gardez votre place, vos notes et vos favoris",
+    "studySignInBody": "Connectez-vous pour reprendre où vous en étiez, enregistrer des versets, écrire des notes et suivre votre lecture dans le temps.",
+    "studySignInCta": "Se connecter",
+    "studyBookmarks": "Favoris",
+    "studyBookmarksDesc": "Les versets que vous avez enregistrés pour y revenir",
+    "studyNotes": "Notes",
+    "studyNotesDesc": "Ce que vous avez écrit en marge du texte",
+    "studyStats": "Statistiques de lecture",
+    "studyStatsDesc": "Votre série, votre rythme et votre progression",
+    "studyEmptyBookmarks": "Aucun favori pour l’instant. Enregistrez un verset depuis n’importe quelle sourate.",
+    "studyEmptyNotes": "Aucune note pour l’instant. Écrivez-en une depuis n’importe quel verset.",
+    "studyEmptyStats": "Aucune lecture enregistrée pour l’instant. Ouvrez une sourate pour commencer."
+  },
+  "quranIndex": {
+    "title": "Index thématique",
+    "description": "L’index alphabétique des sujets qui figure à la fin du Testament Final. Chaque sujet renvoie aux versets qui en parlent.",
+    "entryCount": "{count, plural, =1 {# entrée} other {# entrées}}",
+    "resultCount": "{count, plural, =1 {# sujet} other {# sujets}}",
+    "resultsFor": "Résultats pour « {query} »",
+    "backToIndex": "Retour à l’index",
+    "filterPlaceholder": "Filtrer {letter}",
+    "searchWholeIndex": "chercher dans tout l’index",
+    "noneInLetter": "Rien sous cette lettre ne correspond à votre filtre.",
+    "noResults": "Aucun sujet ne correspond à cette recherche.",
+    "clear": "Effacer le filtre",
+    "unavailable": "L’index est indisponible pour le moment. Réessayez sous peu.",
+    "attribution": "Index de Quran, The Final Testament, par le Dr Rashad Khalifa."
   },
   "search": {
     "placeholder": "Rechercher dans le Coran…",
@@ -124,7 +156,9 @@
     "sourceResults": "ces résultats",
     "draftMatches": "{count, plural, =1 {1 verset correspond} other {# versets correspondent}} à « {query} »",
     "draftEmpty": "Aucun verset ne correspond à « {query} »",
-    "draftHint": "Appuyez sur Entrée pour tout rechercher"
+    "draftHint": "Appuyez sur Entrée pour tout rechercher",
+    "topics": "Sujets",
+    "topicsHint": "Depuis l’index du Coran lui-même"
   },
   "settings": {
     "title": "Paramètres",
