@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { ChapterReader } from '@/components/quran-reader/chapter-reader'
 import { takeChapterFlightState } from '@/lib/chapter-flight'
+import { replaceChapterHistoryEntry } from '@/lib/chapter-navigation'
 import { Flip } from '@/lib/gsap'
 
 /**
@@ -28,8 +29,9 @@ import { Flip } from '@/lib/gsap'
  * reload "works" but replays the entire app boot sequence (startup splash,
  * prayer-reminder flow) outside its normal entry point, which is worse. So
  * `chapterNumber` is owned as local state, seeded from the route param and
- * swapped in place on nav-button taps; `history.pushState`/`popstate` keep
- * the URL and Android back button honest without asking Next to do anything.
+ * swapped in place on nav-button taps. `history.replaceState` keeps the URL in
+ * sync without turning each Prev/Next tap into another Android Back stop; the
+ * reader remains one history entry and Back returns to the page that opened it.
  */
 
 function readVerseParam(): string | undefined {
@@ -65,14 +67,13 @@ export function ChapterReaderClient({
   }, [])
 
   const navigateToChapter = useCallback((target: number) => {
-    if (!Number.isInteger(target) || target < 1 || target > 114) return
-    window.history.pushState(null, '', `/quran/${target}/`)
+    if (!replaceChapterHistoryEntry(window.history, target)) return
     setChapterNumber(target)
     setInitialVerse(undefined)
   }, [])
 
-  // Android hardware/gesture back after one or more in-place chapter swaps —
-  // sync local state back from whatever URL browser history lands on.
+  // Keep local state aligned when browser history lands on another chapter
+  // entry (for example, a chapter URL opened from elsewhere in the app).
   useEffect(() => {
     const onPopState = () => {
       const chapter = readChapterFromPath()
