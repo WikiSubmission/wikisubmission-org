@@ -15,7 +15,16 @@ import { resolveServerApiBaseUrl } from './base-url'
 const baseUrl = resolveServerApiBaseUrl()
 const internalAuthToken = process.env.INTERNAL_API_TOKEN
 
-const dynamicPrefixes = ['/music/', '/communities']
+// Paths whose SSR fetches must not sit in Next's data cache.
+//
+// /topic-index is here because its rows change only on an admin reseed, and the
+// 86400s default gave that no purge path: seeding a previously empty database
+// left /quran/index rendering "0 entries" for a day, from a cached empty
+// response, with no way to invalidate short of redeploying. The page is already
+// force-dynamic, so the data cache was contradicting its own intent. Load is
+// still absorbed at the HTTP layer — the backend sends
+// `Cache-Control: public, max-age=86400` on these routes.
+const dynamicPrefixes = ['/music/', '/communities', '/topic-index']
 
 function isDynamicApiPath(url: RequestInfo | URL) {
   const raw =

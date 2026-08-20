@@ -2202,7 +2202,11 @@ export interface components {
             /** @example 35 */
             total: number;
         };
-        /** @description Envelope for `/topic-index/search`. `total` counts full-text matches only. When the full-text leg finds nothing the trigram fallback fires instead and `total` is 0 while `results` is not — the fallback returns every hit it has on one page, so there is nothing to paginate. */
+        /**
+         * @description Envelope for `/topic-index/search`. `total` counts full-text matches, and is then clamped up to at least `offset + len(results)` the way `/search` does, so it never contradicts the page it accompanies.
+         *
+         *     That clamp is what a trigram-only match reports: the fuzzy fallback fires only when the full-text leg found nothing, so the count is 0 while results are not, and `total` ends up equal to the number returned. Such a response is complete — the fallback returns every hit it has on one page and there is nothing further to page through.
+         */
         TopicIndexSearchResponse: {
             /** @description The query as executed. */
             q: string;
@@ -4647,6 +4651,8 @@ export interface operations {
             path: {
                 /**
                  * @description Verse key in `chapter:verse` form, verse **1-based** (`2:255`). Verse 0 addresses the Basmalah, which every chapter except 1 and 9 has.
+                 *
+                 *     Deliberately declared without a `pattern`. The colon is percent-encoded by any client that escapes path segments — the site's own `/api/ws` proxy does — and the request validator matches a `pattern` against the raw, still-encoded segment, so `2%3A255` was rejected with a 400 before the handler saw it. Gin routes on the decoded path, so the handler receives `2:255` either way and validates the shape itself, returning 400 for anything malformed and 404 past the end of a chapter.
                  * @example 2:255
                  */
                 verseKey: string;
