@@ -96,3 +96,22 @@ export function getCurrentVerse(): VerseData | null {
   if (!currentVerseKey) return null
   return loadedVerses.find((verse) => verse.vk === currentVerseKey) ?? null
 }
+
+/**
+ * Whether anything on screen can be narrowed client-side.
+ *
+ * Local search filters what the reader already holds: an open chapter, or the
+ * verses a submitted search returned. The Quran index — the chapter list, the
+ * introduction, the proclamation, the topical index — holds no verses in
+ * memory, so typing there is the start of a real search rather than a filter
+ * over the page, and the draft overlay must stay out of the way.
+ */
+export function hasLocalScope(): boolean {
+  const { chapterNumber, results } = useReaderContext.getState()
+  return chapterNumber !== null || results !== null
+}
+
+/** Subscribing form of {@link hasLocalScope}. Selects a boolean, so it is safe in render. */
+export function useHasLocalScope(): boolean {
+  return useReaderContext((state) => state.chapterNumber !== null || state.results !== null)
+}

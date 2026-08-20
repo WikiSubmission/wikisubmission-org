@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { QuranDraftResults } from '@/components/quran-reader/draft-results'
-import { useReaderContext } from '@/hooks/use-reader-context-store'
+import { useHasLocalScope, useReaderContext } from '@/hooks/use-reader-context-store'
 
 /** Matches the minimum the local index enforces, so one character shows nothing. */
 const MIN_DRAFT_LENGTH = 2
@@ -30,7 +30,11 @@ const HEADER_FALLBACK_PX = 120
  */
 export function QuranDraftSwitch({ children }: { children: React.ReactNode }) {
   const draft = useReaderContext((s) => s.draftQuery).trim()
-  const active = draft.length >= MIN_DRAFT_LENGTH
+  // The overlay only makes sense over verses. On the Quran index there is no
+  // chapter and no result set behind it, so there is nothing to narrow and
+  // covering the page would hide the very thing the user is browsing.
+  const scoped = useHasLocalScope()
+  const active = scoped && draft.length >= MIN_DRAFT_LENGTH
 
   // Two measurements, not one.
   //

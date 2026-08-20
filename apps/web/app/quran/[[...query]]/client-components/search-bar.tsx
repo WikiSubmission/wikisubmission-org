@@ -141,6 +141,10 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
     : chapterNumber !== null
       ? t('sourceThisChapter')
       : null
+  // On the index route there is no chapter and no result set in memory, so the
+  // draft never gets set and the page stays as it is until Enter runs a real
+  // search. Read from the same pair the scope label above is built from.
+  const canFilterLocally = localScope !== null
   const hasSuggestions =
     matchedChapters.length > 0 ||
     matchedAppendices.length > 0 ||
@@ -196,8 +200,12 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
           value={query}
           onChange={(e) => {
             setQuery(e.target.value)
-            // Lets the results view narrow what is already on screen as you type.
-            useReaderContext.getState().setDraftQuery(e.target.value)
+            // Lets the reader or the results view narrow what is already on
+            // screen as you type. Nowhere else: with no verses in memory there
+            // is nothing to narrow.
+            useReaderContext
+              .getState()
+              .setDraftQuery(canFilterLocally ? e.target.value : '')
           }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
