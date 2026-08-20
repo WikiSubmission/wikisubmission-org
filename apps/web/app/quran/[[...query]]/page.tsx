@@ -16,6 +16,7 @@ import { VerseListSkeleton } from '@/components/quran-reader/verse-list-skeleton
 import { QuranAccordions } from './mini-components/quran-accordions'
 import { ContinueCoverToCoverSection } from './mini-components/continue-cover-to-cover-section'
 import { QuranStudyBand } from './mini-components/quran-study-band'
+import { QuranSectionRail } from './client-components/section-rail'
 import { parseQuranRef, normalizeQuranInput } from '@/lib/scripture-parser'
 import { ActivityRecorder } from '@/components/activity-recorder'
 import { fetchChapters, fetchQuranMetadata } from '@/lib/quran-metadata'
@@ -65,11 +66,12 @@ export default async function QuranPage({
 
   if (!queryText) {
     const locale = await getLocale()
-    const [metadata, tQuran, tNav, tCommon] = await Promise.all([
+    const [metadata, tQuran, tNav, tCommon, tSidebar] = await Promise.all([
       fetchQuranMetadata(locale),
       getTranslations('quran'),
       getTranslations('nav'),
       getTranslations('common'),
+      getTranslations('sidebar'),
     ])
 
     const chapters = metadata.chapters
@@ -121,6 +123,18 @@ export default async function QuranPage({
       ])
     }
 
+    // Bars for the right-edge section rail. Ids match the sections rendered
+    // below; #chapters and #appendices belong to QuranAccordions. The continue
+    // card resolves client side and renders nothing without reading progress,
+    // so the rail drops that bar on its own when the section comes back empty.
+    const railSections = [
+      { id: 'quran-continue', label: tQuran('sectionContinue') },
+      { id: 'quran-read', label: tQuran('bandRead') },
+      { id: 'chapters', label: tSidebar('chapters') },
+      { id: 'appendices', label: tSidebar('appendices') },
+      { id: 'quran-study', label: tQuran('bandStudy') },
+    ]
+
     // Three entry points into the book itself, ahead of the 114-chapter grid.
     const readCards = [
       {
@@ -160,10 +174,12 @@ export default async function QuranPage({
           </section>
 
           {/* ── Continue cover to cover (signed in, once marked) ──────── */}
-          <ContinueCoverToCoverSection chapterTitles={chapterTitles} />
+          <div id="quran-continue" className="empty:hidden">
+            <ContinueCoverToCoverSection chapterTitles={chapterTitles} />
+          </div>
 
           {/* ── Read: the book ────────────────────────────────────────── */}
-          <section className="space-y-4">
+          <section id="quran-read" className="space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">
               {tQuran('bandRead')}
             </h2>
@@ -198,10 +214,14 @@ export default async function QuranPage({
           </section>
 
           {/* ── Your study: bookmarks, notes, reading stats ───────────── */}
-          <HydrationBoundary state={dehydrate(queryClient)}>
-            <QuranStudyBand />
-          </HydrationBoundary>
+          <div id="quran-study">
+            <HydrationBoundary state={dehydrate(queryClient)}>
+              <QuranStudyBand />
+            </HydrationBoundary>
+          </div>
         </div>
+
+        <QuranSectionRail sections={railSections} />
       </main>
     )
   }
