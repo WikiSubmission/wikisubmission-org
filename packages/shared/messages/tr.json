@@ -387,6 +387,7 @@
   "navbar": {
     "scripture": "Kutsal Kitap",
     "quran": "Kuran",
+    "quranIndex": "Konu dizini",
     "bible": "İncil",
     "wordLab": "Word Lab",
     "games": "Games",
@@ -407,6 +408,7 @@
     "signIn": "Giriş yap",
     "submissionAI": "Submission AI",
     "quranSub": "Son Ahit",
+    "quranIndexSub": "Her konu, A'dan Z'ye",
     "wordLabSub": "Kökler ve dizin",
     "gamesSub": "Ezberleme oyunları",
     "bibleSub": "Eski ve Yeni Ahit"

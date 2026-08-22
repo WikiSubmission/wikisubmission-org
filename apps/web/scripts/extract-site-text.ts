@@ -34,9 +34,10 @@ import {
 } from '../../../packages/shared/lib/site-routes'
 import { UI_LOCALES } from '../../../packages/shared/constants/ui-locales'
 import { extractMain, splitSections, stripSkipped } from './lib/html-sections'
+import { backendSeedsDir } from './lib/backend-repo'
 
 const MESSAGES_DIR = path.resolve(__dirname, '../../../packages/shared/messages')
-const OUT_DIR = path.resolve(__dirname, '../../../../ws-backend/db/seeds')
+const OUT_DIR = backendSeedsDir(__dirname)
 
 /** A route declaring `ssr` must yield at least this much text, or it is broken. */
 const MIN_SSR_CHARS = 200

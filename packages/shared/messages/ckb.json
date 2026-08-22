@@ -387,6 +387,7 @@
   "navbar": {
     "scripture": "نووسراوە",
     "quran": "قورئان",
+    "quranIndex": "پێرستی بابەتەکان",
     "bible": "ئینجیل",
     "wordLab": "Word Lab",
     "games": "Games",
@@ -407,6 +408,7 @@
     "signIn": "چوونەژوورەوە",
     "submissionAI": "Submission AI",
     "quranSub": "کۆتا پەیمان",
+    "quranIndexSub": "هەموو بابەتێک، بە رێزی ئەلفوبێ",
     "wordLabSub": "ڕەگ و پێڕست",
     "gamesSub": "یاریی لەبەرکردن",
     "bibleSub": "پەیمانی کۆن و نوێ"

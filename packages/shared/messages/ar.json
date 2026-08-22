@@ -387,6 +387,7 @@
   "navbar": {
     "scripture": "الكتاب المقدس",
     "quran": "القرآن",
+    "quranIndex": "الفهرس الموضوعي",
     "bible": "الإنجيل",
     "wordLab": "مختبر الكلمات",
     "games": "الألعاب",
@@ -407,6 +408,7 @@
     "signIn": "تسجيل الدخول",
     "submissionAI": "Submission AI",
     "quranSub": "العهد الأخير",
+    "quranIndexSub": "كل موضوع، من الألف إلى الياء",
     "wordLabSub": "الجذور والتوافق",
     "gamesSub": "ألعاب الحفظ",
     "bibleSub": "العهد القديم والجديد"

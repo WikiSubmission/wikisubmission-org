@@ -23,9 +23,10 @@ import {
   type SiteRoute,
 } from '../../../packages/shared/lib/site-routes'
 import { UI_LOCALES } from '../../../packages/shared/constants/ui-locales'
+import { backendSeedsDir } from './lib/backend-repo'
 
 const MESSAGES_DIR = path.resolve(__dirname, '../../../packages/shared/messages')
-const OUT_DIR = path.resolve(__dirname, '../../../../ws-backend/db/seeds')
+const OUT_DIR = backendSeedsDir(__dirname)
 
 /** Row shape consumed by db.SeedSiteDocuments. */
 interface SeedRow {
@@ -100,6 +101,63 @@ function rowFor(route: SiteRoute, catalog: Catalog, english: Catalog): SeedRow |
   }
 }
 
+/**
+ * Folds newly generated page rows into whatever the file already holds, keeping
+ * the section rows this script does not produce.
+ *
+ * Without this, running the script after `site:index` silently regresses a
+ * locale: it rewrote site_docs_en.json as 23 page rows and dropped the 109
+ * extracted body sections, leaving `/site/search` with titles and no text until
+ * someone remembered to re-crawl. Preserving them makes the script safe to run at
+ * any point, which matters because check-site-routes.ts tells people to run it
+ * the moment they add a route.
+ *
+ * A section whose route no longer has a page row is dropped: the route left the
+ * manifest or stopped being indexable, so its body has nowhere to point.
+ */
+function merge(pageRows: SeedRow[], file: string): SeedRow[] {
+  let existing: SeedRow[]
+  try {
+    existing = JSON.parse(readFileSync(file, 'utf8')) as SeedRow[]
+  } catch {
+    return pageRows // first run for this locale
+  }
+
+  const sectionsByRoute = new Map<string, SeedRow[]>()
+  const pageBodyByRoute = new Map<string, string>()
+  for (const row of existing) {
+    if (row.section_index === 0) {
+      // Title, description and priority are regenerated from the manifest, but
+      // the body is the crawler's to own — rowFor() always writes '' for a page
+      // row. Blanking it here would strip the page-level text off 22 routes.
+      if (row.body) pageBodyByRoute.set(row.route, row.body)
+      continue
+    }
+    const list = sectionsByRoute.get(row.route)
+    if (list) list.push(row)
+    else sectionsByRoute.set(row.route, [row])
+  }
+
+  const merged: SeedRow[] = []
+  for (const page of pageRows) {
+    const body = page.body || pageBodyByRoute.get(page.route) || ''
+    merged.push({ ...page, body })
+    const sections = sectionsByRoute.get(page.route)
+    if (!sections) continue
+    sections.sort((a, b) => a.section_index - b.section_index)
+    merged.push(...sections)
+    sectionsByRoute.delete(page.route)
+  }
+
+  for (const [route, sections] of sectionsByRoute) {
+    console.warn(
+      `  dropped ${sections.length} section row(s) for ${route}: no longer an indexable page`,
+    )
+  }
+
+  return merged
+}
+
 function main() {
   const english = loadCatalog('en')
   const indexable = SITE_ROUTES.filter((route) => route.indexable && !route.expand)
@@ -116,7 +174,7 @@ function main() {
     if (rows.length === 0) throw new Error(`no rows generated for ${locale.code}`)
 
     const file = path.join(OUT_DIR, `site_docs_${locale.code}.json`)
-    writeFileSync(file, `${JSON.stringify(rows, null, 2)}\n`, 'utf8')
+    writeFileSync(file, `${JSON.stringify(merge(rows, file), null, 2)}\n`, 'utf8')
 
     // Reports how much of each locale is genuinely translated, so a locale that
     // is really just English is visible rather than silently indexed as itself.

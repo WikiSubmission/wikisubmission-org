@@ -42,10 +42,34 @@ function hrefsIn(relativePath: string): string[] {
   return [...found].sort()
 }
 
-/** True when the manifest accounts for `route`, either as a page or as an exclusion. */
+/**
+ * True when the manifest accounts for `route`, either as a page or as an exclusion.
+ *
+ * Pattern-based, because this also judges hrefs found in the chrome: the nav
+ * links `/quran`, which no row spells exactly and the reader's catch-all serves.
+ */
 function isCovered(route: string): boolean {
   if (isExcluded(route)) return true
   return SITE_ROUTES.some((r) => matchesPattern(r.route, route) || r.route === route)
+}
+
+/**
+ * Stricter rule for a route that has a `page.tsx` behind it. Shared with
+ * scripts/check-site-routes.ts, which runs as `prebuild`.
+ *
+ * A STATIC disk route needs an exact row or an explicit exclusion. Pattern
+ * matching hides a missing one: under `app/quran/` both the reader's catch-all
+ * (`/quran/:query*`) and the synthetic chapter expansion (`/quran/:chapter`)
+ * match the literal path `/quran/index`, so this test reported the manifest as
+ * complete while the page was absent from the sitemap, llms.txt, the command
+ * menu and the search catalogue. A dynamic disk route still resolves by pattern,
+ * since its concrete URLs come from data.
+ */
+function isDiskRouteCovered(route: string): boolean {
+  if (isExcluded(route)) return true
+  if (SITE_ROUTES.some((r) => r.route === route)) return true
+  if (!route.includes(':')) return false
+  return SITE_ROUTES.some((r) => matchesPattern(r.route, route))
 }
 
 describe('routePatternFromDir', () => {
@@ -83,7 +107,7 @@ describe('route manifest covers the filesystem', () => {
   // The guard that matters: this is how sitemap.ts drifted into omitting eight
   // live routes. A new page must be added to SITE_ROUTES or to NOT_INDEXED.
   it.each(diskRoutes())('%s is in the manifest or explicitly excluded', (route) => {
-    expect(isCovered(route)).toBe(true)
+    expect(isDiskRouteCovered(route)).toBe(true)
   })
 
   it('indexes the routes the hardcoded sitemap used to omit', () => {
@@ -105,6 +129,18 @@ describe('route manifest covers the filesystem', () => {
       expect(row, `${route} missing from the manifest`).toBeDefined()
       expect(row!.indexable, `${route} must be indexable`).toBe(true)
     }
+  })
+
+  it('does not let a catch-all or a dynamic sibling cover a static page', () => {
+    // The exact hole /quran/index fell through: `/quran/:query*` absorbs it and
+    // `/quran/:chapter` matches `index` as a chapter, so pattern matching alone
+    // reported the manifest as complete.
+    expect(matchesPattern('/quran/:query*', '/quran/index')).toBe(true)
+    expect(matchesPattern('/quran/:chapter', '/quran/index')).toBe(true)
+    expect(
+      SITE_ROUTES.some((r) => r.route === '/quran/index'),
+      '/quran/index needs its own row, not coverage by a pattern',
+    ).toBe(true)
   })
 
   it('finds every route group in the app directory', () => {

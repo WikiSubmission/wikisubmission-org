@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
+    "prebuild": "pnpm check:routes",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "check:routes": "tsx scripts/check-site-routes.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "sync-api": "cp ../../../ws-backend/openapi.yaml ../../packages/shared/src/api/openapi.yaml",

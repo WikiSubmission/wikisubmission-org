@@ -387,6 +387,7 @@
   "navbar": {
     "scripture": "Schrift",
     "quran": "Koran",
+    "quranIndex": "Sachregister",
     "bible": "Bibel",
     "wordLab": "Word Lab",
     "games": "Games",
@@ -407,6 +408,7 @@
     "signIn": "Anmelden",
     "submissionAI": "Submission AI",
     "quranSub": "Letztes Testament",
+    "quranIndexSub": "Jedes Thema, von A bis Z",
     "wordLabSub": "Wurzeln & Konkordanz",
     "gamesSub": "Gedächtnisspiele",
     "bibleSub": "Altes & Neues Testament"

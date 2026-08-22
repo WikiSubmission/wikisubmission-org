@@ -243,6 +243,7 @@
   "navbar": {
     "scripture": "Nivîsara Pîroz",
     "quran": "Qur'an",
+    "quranIndex": "Pêrista babetan",
     "bible": "Încîl",
     "wordLab": "Word Lab",
     "games": "Games",
@@ -263,6 +264,7 @@
     "signIn": "Têketin",
     "submissionAI": "Submission AI",
     "quranSub": "Peymana Dawî",
+    "quranIndexSub": "Her babetek, ji A hetanî Z",
     "wordLabSub": "Reh û pêrist",
     "gamesSub": "Lîstikên jibîrkirinê",
     "bibleSub": "Peymana Kevin û Nû"

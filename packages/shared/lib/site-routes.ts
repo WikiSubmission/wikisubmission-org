@@ -126,6 +126,27 @@ export const SITE_ROUTES: readonly SiteRoute[] = [
     hasDiskRoute: false,
   },
   {
+    // The Quran's printed subject index. A static sibling of the reader's
+    // catch-all on disk (app/quran/index/), so it needs its own row: the
+    // catch-all and the synthetic '/quran/:chapter' expansion both *match* it,
+    // which is exactly how it went unregistered until the coverage test learned
+    // to require an exact row for a static route.
+    route: '/quran/index',
+    title: { key: 'navbar.quranIndex' },
+    description: { key: 'navbar.quranIndexSub' },
+    //
+    // No navGroup on purpose: the site nav, footer and PWA manifest are
+    // hand-authored, and a grouped row they do not link trips the chrome
+    // agreement test. Discovery does not depend on it — the command menu,
+    // sitemap, llms.txt and the /site/search catalogue all key off `indexable`
+    // — and the page is already linked from the /quran hub and its section rail.
+    kind: 'reader',
+    indexable: true,
+    bodySource: 'ssr',
+    priority: 60,
+    changeFrequency: 'yearly',
+  },
+  {
     route: '/quran/words',
     title: { key: 'navbar.wordLab' },
     description: { key: 'navbar.wordLabSub' },
