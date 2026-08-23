@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ArrowRight, BarChart3, Bookmark, Flame, StickyNote } from 'lucide-react'
@@ -10,16 +11,18 @@ import { useStreak } from '@/hooks/use-reading-streak'
 import { useReadingStats } from '@/hooks/use-reading-stats'
 import { useCoverToCoverProgress } from '@/hooks/use-reading-progress'
 import { parseCoverToCover } from '@/lib/cover-to-cover'
+import { BookmarksDialog } from './bookmarks-dialog'
+import { NotesDialog } from './notes-dialog'
+import { StatsDialog } from './stats-dialog'
 
 /**
  * The "Your study" band of the /quran hub: bookmarks, notes and reading stats,
  * scoped to the Quran.
  *
- * These are previews, not the full screens. The all-scripture views stay at
- * /me/bookmarks, /me/notes and /me/stats, which each section links to: Bible
- * bookmarks, notes and stats live there too, and folding them into /quran would
- * leave them unreachable. The shared components in components/me/ are therefore
- * untouched, so /me and apps/mobile behave exactly as before.
+ * Each section is a preview that opens the full view in a dialog, so the reader
+ * never leaves /quran. The all-scripture screens still live under /me for deep
+ * links and for apps/mobile; the dialogs reuse the same shared components, so
+ * there is one implementation of each view.
  *
  * Every hook here is gated on isSignedIn inside itself, so a signed-out visitor
  * triggers no requests and sees a single prompt instead of three empty panels.
@@ -29,15 +32,15 @@ function SectionShell({
   icon,
   title,
   description,
-  href,
-  seeAllLabel,
+  onOpen,
+  openLabel,
   children,
 }: {
   icon: React.ReactNode
   title: string
   description: string
-  href: string
-  seeAllLabel: string
+  onOpen: () => void
+  openLabel: string
   children: React.ReactNode
 }) {
   return (
@@ -52,13 +55,14 @@ function SectionShell({
             {description}
           </p>
         </div>
-        <Link
-          href={href}
+        <button
+          type="button"
+          onClick={onOpen}
           className="group inline-flex items-center gap-1 shrink-0 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
-          {seeAllLabel}
+          {openLabel}
           <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
-        </Link>
+        </button>
       </div>
       {children}
     </div>
@@ -69,7 +73,11 @@ function EmptyLine({ children }: { children: React.ReactNode }) {
   return <p className="text-xs text-muted-foreground/70">{children}</p>
 }
 
-function BookmarksPreview() {
+function BookmarksPreview({
+  onOpen,
+}: {
+  onOpen: (categoryId?: number) => void
+}) {
   const t = useTranslations('quran')
   const categories = useBookmarkCategories()
 
@@ -80,8 +88,8 @@ function BookmarksPreview() {
       icon={<Bookmark className="size-4 text-primary/70" />}
       title={t('studyBookmarks')}
       description={t('studyBookmarksDesc')}
-      href="/me/bookmarks"
-      seeAllLabel={t('seeAll')}
+      onOpen={() => onOpen()}
+      openLabel={t('seeAll')}
     >
       {withEntries.length === 0 ? (
         <EmptyLine>{t('studyEmptyBookmarks')}</EmptyLine>
@@ -89,15 +97,16 @@ function BookmarksPreview() {
         <ul className="flex flex-wrap gap-1.5">
           {withEntries.map((category) => (
             <li key={category.id}>
-              <Link
-                href="/me/bookmarks"
+              <button
+                type="button"
+                onClick={() => onOpen(category.id)}
                 className="inline-flex items-baseline gap-1.5 px-2.5 py-1 rounded-lg bg-background/60 border border-border/40 text-xs hover:border-border transition-colors"
               >
                 <span className="truncate max-w-32">{category.name}</span>
                 <span className="text-muted-foreground tabular-nums">
                   {category.entry_count}
                 </span>
-              </Link>
+              </button>
             </li>
           ))}
         </ul>
@@ -106,7 +115,7 @@ function BookmarksPreview() {
   )
 }
 
-function NotesPreview() {
+function NotesPreview({ onOpen }: { onOpen: () => void }) {
   const t = useTranslations('quran')
   const notes = useNotesByScripture('quran')
 
@@ -119,8 +128,8 @@ function NotesPreview() {
       icon={<StickyNote className="size-4 text-primary/70" />}
       title={t('studyNotes')}
       description={t('studyNotesDesc')}
-      href="/me/notes"
-      seeAllLabel={t('seeAll')}
+      onOpen={onOpen}
+      openLabel={t('seeAll')}
     >
       {recent.length === 0 ? (
         <EmptyLine>{t('studyEmptyNotes')}</EmptyLine>
@@ -150,7 +159,7 @@ function NotesPreview() {
   )
 }
 
-function StatsPreview() {
+function StatsPreview({ onOpen }: { onOpen: () => void }) {
   const t = useTranslations('quran')
   const tStats = useTranslations('meStats')
   const streak = useStreak('quran')
@@ -166,8 +175,8 @@ function StatsPreview() {
       icon={<BarChart3 className="size-4 text-primary/70" />}
       title={t('studyStats')}
       description={t('studyStatsDesc')}
-      href="/me/stats"
-      seeAllLabel={t('seeAll')}
+      onOpen={onOpen}
+      openLabel={t('seeAll')}
     >
       {!hasAnything ? (
         <EmptyLine>{t('studyEmptyStats')}</EmptyLine>
@@ -209,6 +218,12 @@ function StatsPreview() {
 export function QuranStudyBand() {
   const t = useTranslations('quran')
   const { isSignedIn } = useScriptureAuth()
+  const [bookmarksOpen, setBookmarksOpen] = useState(false)
+  // Which category the bookmarks dialog should land on. It also keys the dialog
+  // so a second chip re-mounts it onto the newly picked category.
+  const [bookmarksCategoryId, setBookmarksCategoryId] = useState<number | undefined>()
+  const [notesOpen, setNotesOpen] = useState(false)
+  const [statsOpen, setStatsOpen] = useState(false)
 
   return (
     <section className="space-y-4">
@@ -233,13 +248,29 @@ export function QuranStudyBand() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <BookmarksPreview />
-          <NotesPreview />
-          <div className="md:col-span-2">
-            <StatsPreview />
+        <>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <BookmarksPreview
+              onOpen={(categoryId) => {
+                setBookmarksCategoryId(categoryId)
+                setBookmarksOpen(true)
+              }}
+            />
+            <NotesPreview onOpen={() => setNotesOpen(true)} />
+            <div className="md:col-span-2">
+              <StatsPreview onOpen={() => setStatsOpen(true)} />
+            </div>
           </div>
-        </div>
+
+          <BookmarksDialog
+            key={bookmarksCategoryId ?? 'all'}
+            open={bookmarksOpen}
+            onOpenChange={setBookmarksOpen}
+            initialCategoryId={bookmarksCategoryId}
+          />
+          <NotesDialog open={notesOpen} onOpenChange={setNotesOpen} />
+          <StatsDialog open={statsOpen} onOpenChange={setStatsOpen} />
+        </>
       )}
     </section>
   )

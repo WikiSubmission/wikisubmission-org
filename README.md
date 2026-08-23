@@ -75,6 +75,11 @@ Required environment variables:
 Additional environment variables used by optional integrations:
 
 - `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_SITE_ENV` - `production` | `staging` | `development`. Staging and
+  production are both production builds, so `NODE_ENV` cannot tell them apart;
+  this does. Optional - when unset the hostname decides, and only
+  `wikisubmission.org` / `www.wikisubmission.org` count as production. Anything
+  it gates (browser debug logging, for one) stays quiet on production.
 - `STRIPE_SECRET_KEY`
 - `SUBMITTERAI_API_KEY`
 - `SUBMITTERAI_API_URL`

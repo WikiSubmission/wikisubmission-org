@@ -108,12 +108,18 @@ function CoverToCoverCard({ scripture }: { scripture: 'quran' | 'bible' }) {
   )
 }
 
-function CoverToCoverSection({ hideBible = false }: { hideBible?: boolean }) {
+function CoverToCoverSection({
+  hideBible = false,
+  numeral,
+}: {
+  hideBible?: boolean
+  numeral: string
+}) {
   const t = useTranslations('meDashboard')
   return (
     <section className="section" id="cover-to-cover">
       <div className="section-head">
-        <span className="section-roman">I</span>
+        <span className="section-roman">{numeral}</span>
         <span className="section-eyebrow">{t('coverEyebrow')}</span>
         <h2 className="section-title">{t.rich('coverTitle', { em: (c) => <em>{c}</em> })}</h2>
         <span className="section-spacer" />
@@ -168,13 +174,19 @@ function RhythmTeaser({ scripture, label }: { scripture: 'quran' | 'bible'; labe
   )
 }
 
-function RhythmSection({ hideBible = false }: { hideBible?: boolean }) {
+function RhythmSection({
+  hideBible = false,
+  numeral,
+}: {
+  hideBible?: boolean
+  numeral: string
+}) {
   const t = useTranslations('meDashboard')
   const tNav = useTranslations('navbar')
   return (
     <section className="section" id="rhythm">
       <div className="section-head">
-        <span className="section-roman">II</span>
+        <span className="section-roman">{numeral}</span>
         <span className="section-eyebrow">{t('rhythmEyebrow')}</span>
         <h2 className="section-title">{t.rich('rhythmTitle', { em: (c) => <em>{c}</em> })}</h2>
         <span className="section-spacer" />
@@ -191,7 +203,7 @@ function RhythmSection({ hideBible = false }: { hideBible?: boolean }) {
   )
 }
 
-function CategoriesSection() {
+function CategoriesSection({ numeral }: { numeral: string }) {
   const t = useTranslations('meDashboard')
   const categories = useBookmarkCategories()
   const [createOpen, setCreateOpen] = useState(false)
@@ -206,7 +218,7 @@ function CategoriesSection() {
   return (
     <section className="section" id="bookmarks">
       <div className="section-head">
-        <span className="section-roman">III</span>
+        <span className="section-roman">{numeral}</span>
         <span className="section-eyebrow">{t('bookmarksEyebrow')}</span>
         <h2 className="section-title">
           <Link href="/me/bookmarks" className="hover:text-[var(--ed-accent)] transition-colors">
@@ -258,7 +270,7 @@ function CategoriesSection() {
   )
 }
 
-function NotesPreviewSection() {
+function NotesPreviewSection({ numeral }: { numeral: string }) {
   const t = useTranslations('meDashboard')
   const notes = useAllNotes()
   if (notes.length === 0) return null
@@ -268,7 +280,7 @@ function NotesPreviewSection() {
   return (
     <section className="section" id="notes">
       <div className="section-head">
-        <span className="section-roman">IV</span>
+        <span className="section-roman">{numeral}</span>
         <span className="section-eyebrow">{t('notesEyebrow', { count: notes.length })}</span>
         <h2 className="section-title">{t.rich('notesTitle', { em: (c) => <em>{c}</em> })}</h2>
         <span className="section-spacer" />
@@ -315,7 +327,7 @@ function NotePreviewCard({ note }: { note: NoteData }) {
   )
 }
 
-function CollectionsSection() {
+function CollectionsSection({ numeral }: { numeral: string }) {
   const t = useTranslations('meDashboard')
   const collections = useCollections()
   if (collections.length === 0) return null
@@ -323,7 +335,7 @@ function CollectionsSection() {
   return (
     <section className="section" id="collections">
       <div className="section-head">
-        <span className="section-roman">V</span>
+        <span className="section-roman">{numeral}</span>
         <span className="section-eyebrow">{t('collectionsEyebrow')}</span>
         <h2 className="section-title">
           <Link href="/me/collections" className="hover:text-[var(--ed-accent)] transition-colors">
@@ -404,12 +416,14 @@ function StatsGrid({
   noteCount,
   totalBookmarks,
   hideBible = false,
+  hideStudy = false,
 }: {
   quranStreak: number
   bibleStreak: number
   noteCount: number
   totalBookmarks: number
   hideBible?: boolean
+  hideStudy?: boolean
 }) {
   const t = useTranslations('meDashboard')
   const tHeader = useTranslations('meHeader')
@@ -443,16 +457,22 @@ function StatsGrid({
           <p className="stat-sub">{t('oldNewTestament')}</p>
         </div>
       )}
-      <Link href="/me/notes">
-        <p className="stat-eyebrow">{tHeader('notes')}</p>
-        <div className="stat-num">{noteCount}</div>
-        <p className="stat-sub">{t('acrossBothScriptures')}</p>
-      </Link>
-      <Link href="/me#bookmarks">
-        <p className="stat-eyebrow">{tHeader('bookmarks')}</p>
-        <div className="stat-num">{totalBookmarks}</div>
-        <p className="stat-sub">{t('savedVerses')}</p>
-      </Link>
+      {/* Notes and bookmarks are owned by the /quran hub's dialogs on web, so
+          the tiles that link into them are hidden there. */}
+      {!hideStudy && (
+        <>
+          <Link href="/me/notes">
+            <p className="stat-eyebrow">{tHeader('notes')}</p>
+            <div className="stat-num">{noteCount}</div>
+            <p className="stat-sub">{t('acrossBothScriptures')}</p>
+          </Link>
+          <Link href="/me#bookmarks">
+            <p className="stat-eyebrow">{tHeader('bookmarks')}</p>
+            <div className="stat-num">{totalBookmarks}</div>
+            <p className="stat-sub">{t('savedVerses')}</p>
+          </Link>
+        </>
+      )}
     </>
   )
   return (
@@ -553,6 +573,11 @@ interface MeDashboardProps {
   // Hide all Bible-specific content. The mobile app has no /bible route yet, so
   // it opts in; web leaves this false and shows Bible as before.
   hideBible?: boolean
+  /** Hide the bookmarks, notes and reading-stats sections. Web opts in: those
+   *  three now open as dialogs from the /quran hub's "Your study" band, and
+   *  keeping a second copy here left two places to maintain. Mobile has no such
+   *  band, so it leaves this false and shows them as before. */
+  hideStudy?: boolean
 }
 
 export default function MeDashboard({
@@ -561,6 +586,7 @@ export default function MeDashboard({
   onSignOut,
   providerLabel,
   hideBible = false,
+  hideStudy = false,
 }: MeDashboardProps) {
   const t = useTranslations('meDashboard')
   const quranStreak = useStreak('quran')
@@ -585,6 +611,7 @@ export default function MeDashboard({
           noteCount={noteCount}
           totalBookmarks={totalBookmarks}
           hideBible={hideBible}
+          hideStudy={hideStudy}
         />
       )}
 
@@ -592,11 +619,15 @@ export default function MeDashboard({
         <NewUserStarter />
       ) : (
         <>
-          <CoverToCoverSection hideBible={hideBible} />
-          <RhythmSection hideBible={hideBible} />
-          <CategoriesSection />
-          <NotesPreviewSection />
-          <CollectionsSection />
+          <CoverToCoverSection hideBible={hideBible} numeral="I" />
+          {!hideStudy && (
+            <>
+              <RhythmSection hideBible={hideBible} numeral="II" />
+              <CategoriesSection numeral="III" />
+              <NotesPreviewSection numeral="IV" />
+            </>
+          )}
+          <CollectionsSection numeral={hideStudy ? 'II' : 'V'} />
         </>
       )}
 

@@ -17,13 +17,20 @@ type View = { kind: 'list' } | { kind: 'detail'; categoryId: number }
 export function BookmarksDialog({
   open,
   onOpenChange,
+  initialCategoryId,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Open straight onto a category's verses. Callers that pick a category up
+   *  front (the /quran study band's chips) pass it; the back button still
+   *  returns to the full category list. */
+  initialCategoryId?: number
 }) {
   const categories = useBookmarkCategories()
   const [createOpen, setCreateOpen] = useState(false)
-  const [view, setView] = useState<View>({ kind: 'list' })
+  const [view, setView] = useState<View>(
+    initialCategoryId ? { kind: 'detail', categoryId: initialCategoryId } : { kind: 'list' }
+  )
   const [search, setSearch] = useState('')
 
   const handleOpenChange = (nextOpen: boolean) => {
