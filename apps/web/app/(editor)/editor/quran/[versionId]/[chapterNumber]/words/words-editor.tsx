@@ -21,11 +21,11 @@ export function WordsEditor({ versionId, chapterNumber, initial }: WordsEditorPr
     <div>
       <header style={{ marginBottom: 18 }}>
         <p style={s.kicker}>Chapter {initial.chapter_number} · version {versionId}</p>
-        <h1 style={s.heading}>Word by word</h1>
+        <h1 className="ed-h1">Word by word</h1>
         <p style={s.lede}>
           {readOnly
-            ? 'You have read-only access to this version. Changes cannot be saved.'
-            : 'Per-word text saves automatically when you leave a field. Root meanings are edited in the Root Book.'}
+            ? 'You can read this translation, but not change it.'
+            : 'Each word saves on its own as soon as you move to the next field. Root meanings live on the Root meanings page, since they apply across the whole translation.'}
         </p>
       </header>
 

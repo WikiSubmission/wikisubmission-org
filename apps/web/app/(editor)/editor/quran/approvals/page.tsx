@@ -24,21 +24,21 @@ export default async function QuranApprovalsPage() {
   const requests = await listQuranPublishRequests(session.accessToken, { status: 'pending' })
 
   return (
-    <section style={s.page}>
+    <section className="ed-page">
       <Link href="/editor/quran" style={s.crumb}>
         ← Versions
       </Link>
       <header style={{ marginBottom: 20 }}>
         <p style={s.kicker}>Quran</p>
-        <h1 style={s.heading}>Pending approvals</h1>
+        <h1 className="ed-h1">Waiting for review</h1>
         <p style={s.lede}>
-          Chapters submitted for publishing. Approving syncs that chapter&apos;s
-          drafts into the published record.
+          Chapters that editors have finished and sent on for a second look.
+          Approving one publishes its drafts to the live site.
         </p>
       </header>
 
       {requests.length === 0 ? (
-        <p style={s.lede}>Nothing is waiting for approval.</p>
+        <p style={s.lede}>Nothing is waiting on you right now.</p>
       ) : (
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
           {requests.map((r) => {
@@ -54,7 +54,7 @@ export default async function QuranApprovalsPage() {
                       Version {r.version_id} · Chapter {r.chapter_number}
                     </Link>
                     <p style={meta}>
-                      Requested by user #{r.requested_by} ·{' '}
+                      Sent by editor #{r.requested_by} on{' '}
                       {new Date(r.requested_at).toLocaleString()}
                     </p>
                   </div>
@@ -73,6 +73,7 @@ export default async function QuranApprovalsPage() {
 
 const rowHead: CSSProperties = {
   display: 'flex',
+  flexWrap: 'wrap',
   justifyContent: 'space-between',
   alignItems: 'flex-start',
   gap: 12,

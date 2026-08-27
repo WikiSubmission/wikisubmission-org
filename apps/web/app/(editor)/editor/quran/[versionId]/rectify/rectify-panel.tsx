@@ -76,12 +76,13 @@ export function RectifyPanel({ versionId, report }: RectifyPanelProps) {
   return (
     <div>
       <header style={{ marginBottom: 18 }}>
-        <p style={s.kicker}>Rectify · version {versionId}</p>
-        <h1 style={s.heading}>Integrity and coverage</h1>
+        <p style={s.kicker}>Quran · version {versionId}</p>
+        <h1 className="ed-h1">Integrity and coverage</h1>
         <p style={s.lede}>
-          The canonical corpus is complete and shared by every version, so the only repair
-          is keeping the roots master in step. Pre-seeding draft shells is optional and never
-          overwrites existing edits.
+          Admin tools. The Arabic corpus is shared by every translation and is
+          already complete, so the only repair on offer is keeping the roots
+          list in step with it. Pre-seeding is optional and never touches work
+          that is already there.
         </p>
       </header>
 
@@ -123,8 +124,9 @@ export function RectifyPanel({ versionId, report }: RectifyPanelProps) {
       <section style={{ ...s.surface, padding: '16px 18px' }}>
         <h2 style={sectionTitle}>Pre-seed draft shells</h2>
         <p style={{ ...s.lede, marginTop: 0 }}>
-          Creates empty draft rows so the editor shows every word and root. Existing drafts are
-          left untouched. Leave the chapter blank to seed the whole version.
+          Creates blank rows so every word and root shows up in the editor
+          ready to fill in. Anything already written is left alone. Leave the
+          chapter blank to do the whole translation.
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
           <label style={s.label}>

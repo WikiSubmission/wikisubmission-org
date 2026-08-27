@@ -28,10 +28,10 @@ export function ApprovalActions({ requestId }: ApprovalActionsProps) {
         style={{ ...s.input, marginBottom: 8 }}
         value={note}
         disabled={isPending}
-        placeholder="Optional review note"
+        placeholder="Add a note for the editor (optional)"
         onChange={(e) => setNote(e.target.value)}
       />
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         <button type="button" style={s.button} disabled={isPending} onClick={() => decide('approve')}>
           Approve &amp; publish
         </button>

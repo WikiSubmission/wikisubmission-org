@@ -41,7 +41,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
     key: 'article',
     label: 'Articles',
     labelSingular: 'Article',
-    blurb: 'Multilingual articles, drafts and publishing.',
+    blurb: 'Write, translate and publish articles for the site.',
     titleKeys: ['title'],
     subtitleKey: 'slug',
     fields: [
@@ -60,16 +60,16 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
           { kind: 'multiselect', key: 'categories', label: 'Categories', optionsKey: 'categories' },
         ],
       },
-      { kind: 'textarea', key: 'excerpt', label: 'Excerpt', rows: 3, desc: 'Short description used for SEO and previews.' },
-      { kind: 'image', key: 'thumbnail_url', label: 'Thumbnail', aspect: '16 / 9', desc: 'Upload an image (stored on our CDN) or paste a hosted URL. 16:9 recommended.' },
-      { kind: 'pt', key: 'thumbnail_text', label: 'Thumbnail text', desc: 'Short rich-text teaser shown on the thumbnail.' },
+      { kind: 'textarea', key: 'excerpt', label: 'Excerpt', rows: 3, desc: 'A sentence or two. Shows up in search results and article previews.' },
+      { kind: 'image', key: 'thumbnail_url', label: 'Thumbnail', aspect: '16 / 9', desc: 'Upload an image, or paste a link to one already online. Wide (16:9) images look best.' },
+      { kind: 'pt', key: 'thumbnail_text', label: 'Thumbnail text', desc: 'A short line shown over the thumbnail.' },
       { kind: 'pt', key: 'body', label: 'Body' },
       {
         kind: 'toggle',
         key: 'enable_scripture_refs',
         label: 'Link scripture references',
         defaultOn: true,
-        desc: 'Turn verse references in the body into links. On unless you turn it off.',
+        desc: 'Turns verse references in the body into links readers can follow. On unless you turn it off.',
       },
     ],
   },
@@ -78,7 +78,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
     key: 'author',
     label: 'Authors',
     labelSingular: 'Author',
-    blurb: 'Author profiles and article relationships.',
+    blurb: 'Bylines and profiles for the people who write here.',
     titleKeys: ['first_name', 'last_name'],
     subtitleKey: 'slug',
     fields: [
@@ -92,7 +92,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
       { kind: 'slug', key: 'slug', label: 'Slug', from: 'first_name last_name' },
       { kind: 'text', key: 'photo_url', label: 'Photo URL', mono: true },
       { kind: 'textarea', key: 'bio', label: 'Bio', rows: 4 },
-      { kind: 'number', key: 'user_id', label: 'WS user id', desc: 'Optional link to a WikiSubmission account.' },
+      { kind: 'number', key: 'user_id', label: 'WS user id', desc: 'Optional. Links this author to a WikiSubmission account.' },
     ],
   },
 
@@ -100,7 +100,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
     key: 'category',
     label: 'Categories',
     labelSingular: 'Category',
-    blurb: 'Article categories.',
+    blurb: 'The topics readers use to browse articles.',
     titleKeys: ['name'],
     subtitleKey: 'slug',
     fields: [
@@ -114,7 +114,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
     key: 'community',
     label: 'Communities',
     labelSingular: 'Community',
-    blurb: 'Online and physical community listings.',
+    blurb: 'The local groups and online communities listed on the site.',
     titleKeys: ['name'],
     subtitleKey: 'slug',
     fields: [
@@ -138,7 +138,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
         kind: 'row',
         fields: [
           { kind: 'slug', key: 'slug', label: 'Slug', from: 'name' },
-          { kind: 'text', key: 'language', label: 'Language', desc: 'Primary language code, e.g. en.' },
+          { kind: 'text', key: 'language', label: 'Language', desc: 'Two-letter code for the main language, such as en.' },
         ],
       },
       { kind: 'textarea', key: 'description', label: 'Description', rows: 3 },
@@ -149,14 +149,14 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
           { kind: 'text', key: 'image_alt', label: 'Image alt text' },
         ],
       },
-      { kind: 'tags', key: 'tags', label: 'Tags', desc: 'Comma-separated.' },
-      { kind: 'toggle', key: 'is_active', label: 'Active', desc: 'Inactive communities are hidden from listings.' },
+      { kind: 'tags', key: 'tags', label: 'Tags', desc: 'Separate each tag with a comma.' },
+      { kind: 'toggle', key: 'is_active', label: 'Active', desc: 'Turn this off to hide the community from the site without deleting it.' },
 
       { kind: 'section', label: 'Online details', when: { key: 'kind', equals: 'online' } },
       {
         kind: 'row',
         fields: [
-          { kind: 'text', key: 'platform', label: 'Platform', desc: 'discord, telegram, whatsapp…' },
+          { kind: 'text', key: 'platform', label: 'Platform', desc: 'Where it meets: discord, telegram, whatsapp…' },
           { kind: 'text', key: 'url', label: 'URL', mono: true },
         ],
       },
@@ -177,7 +177,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
           { kind: 'text', key: 'country', label: 'Country' },
         ],
       },
-      { kind: 'geo', key: 'geo', label: 'Coordinates', desc: 'Decimal degrees, e.g. 43.6548 / -79.3886. Leave both blank for none.' },
+      { kind: 'geo', key: 'geo', label: 'Coordinates', desc: 'Decimal degrees, e.g. 43.6548 / -79.3886. Leave both blank to skip the map pin.' },
       { kind: 'text', key: 'meeting_schedule', label: 'Meeting schedule' },
       {
         kind: 'row',
@@ -193,7 +193,7 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
     key: 'appendix',
     label: 'Appendices',
     labelSingular: 'Appendix',
-    blurb: 'Quran-scoped appendices.',
+    blurb: 'The appendices that accompany a Quran translation.',
     titleKeys: ['title'],
     subtitleKey: 'code',
     fields: [
@@ -201,11 +201,11 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
       {
         kind: 'row',
         fields: [
-          { kind: 'text', key: 'code', label: 'Code', mono: true, required: true, desc: 'Kebab-case or numeric, e.g. 19 or intro.' },
+          { kind: 'text', key: 'code', label: 'Code', mono: true, required: true, desc: 'How this appendix is addressed in links, e.g. 19 or intro.' },
           { kind: 'select', key: 'version_id', label: 'Quran version', required: true, optionsKey: 'quranVersions' },
         ],
       },
-      { kind: 'textarea', key: 'snippet', label: 'Snippet', rows: 2, desc: 'One-line teaser shown in appendix lists.' },
+      { kind: 'textarea', key: 'snippet', label: 'Snippet', rows: 2, desc: 'One line, shown wherever appendices are listed.' },
       // Two body carriers while the Portable Text migration is in flight. The
       // reader prefers body_pt and falls back to the markdown, so an appendix
       // that has not been converted keeps rendering from the carrier it has.
@@ -213,16 +213,16 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
         kind: 'appendixPt',
         key: 'body_pt',
         label: 'Body (Portable Text)',
-        desc: 'Typed blocks. Preferred over the markdown body when present; clear every block to fall back to it.',
+        desc: 'The formatted body. Used in place of the markdown below whenever it has anything in it — clear every block to fall back to the markdown.',
       },
-      { kind: 'textarea', key: 'body', label: 'Body (markdown)', rows: 24, desc: 'Fallback, used only when there is no Portable Text body.' },
+      { kind: 'textarea', key: 'body', label: 'Body (markdown)', rows: 24, desc: 'Older format. Only used when the formatted body above is empty.' },
       // An appendix carries at most one video, always trailing. It is metadata
       // rather than body markdown, so the reader appends it below the body.
       {
         kind: 'row',
         fields: [
-          { kind: 'text', key: 'video_id', label: 'Video ID', mono: true, desc: 'Bare 11-character YouTube id, not a URL. Leave blank for no video.' },
-          { kind: 'text', key: 'video_title', label: 'Video title', desc: 'Accessible label for the embed.' },
+          { kind: 'text', key: 'video_id', label: 'Video ID', mono: true, desc: 'The 11-character YouTube id only, not the whole link. Leave blank for no video.' },
+          { kind: 'text', key: 'video_title', label: 'Video title', desc: 'Describes the video for screen readers.' },
         ],
       },
     ],

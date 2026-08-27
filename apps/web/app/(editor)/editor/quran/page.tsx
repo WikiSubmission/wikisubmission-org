@@ -29,7 +29,7 @@ export default async function QuranVersionsPage() {
   const canApproveAny = canApproveAnyQuranVersion(editorial)
 
   return (
-    <section style={s.page}>
+    <section className="ed-page">
       <Link href="/editor" style={s.crumb}>
         ← Workspace
       </Link>
@@ -37,6 +37,7 @@ export default async function QuranVersionsPage() {
         style={{
           marginBottom: 24,
           display: 'flex',
+          flexWrap: 'wrap',
           justifyContent: 'space-between',
           alignItems: 'flex-end',
           gap: 16,
@@ -44,22 +45,23 @@ export default async function QuranVersionsPage() {
       >
         <div>
           <p style={s.kicker}>Quran</p>
-          <h1 style={s.heading}>Versions</h1>
+          <h1 className="ed-h1">Versions</h1>
           <p style={s.lede}>
-            Pick a version to edit its chapters. You see only versions you have
-            been granted; the backend re-checks access on every change.
+            Each version is a separate translation. Open one to work through its
+            chapters verse by verse.
           </p>
         </div>
         {canApproveAny && (
           <Link href="/editor/quran/approvals" style={s.buttonGhost}>
-            Pending approvals
+            Waiting for review
           </Link>
         )}
       </header>
 
       {accessible.length === 0 ? (
         <p style={s.lede}>
-          No Quran versions have been assigned to your account yet.
+          No translations have been shared with you yet. An administrator can
+          give you access to the ones you work on.
         </p>
       ) : (
         <ul style={grid}>
@@ -79,9 +81,11 @@ export default async function QuranVersionsPage() {
                   </Link>
                   <div style={{ marginTop: 'auto', display: 'flex', gap: 10 }}>
                     <span style={s.tag}>
-                      {canWrite ? 'Read & write' : 'Read only'}
+                      {canWrite ? 'You can edit' : 'View only'}
                     </span>
-                    {canApprove && <span style={s.mutedTag}>Approver</span>}
+                    {canApprove && (
+                      <span style={s.mutedTag}>You can publish</span>
+                    )}
                   </div>
                 </div>
               </li>

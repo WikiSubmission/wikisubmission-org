@@ -56,7 +56,7 @@ export function ChapterEditor({ versionId, chapterNumber, initial, canApprove }:
       const res = await submitPublishAction(versionId, chapterNumber, null)
       if (res.ok) {
         setPending(res.data)
-        flash('ok', 'Submitted for publishing. Awaiting approval.')
+        flash('ok', 'Sent for review. An approver will take it from here.')
       } else {
         flash('err', res.error)
       }
@@ -69,7 +69,12 @@ export function ChapterEditor({ versionId, chapterNumber, initial, canApprove }:
       const res = await decidePublishAction(pending.id, decision, null)
       if (res.ok) {
         setPending(res.data.status === 'pending' ? res.data : null)
-        flash('ok', `Request ${decision === 'approve' ? 'approved and published' : decision + 'ed'}.`)
+        flash(
+          'ok',
+          decision === 'approve'
+            ? 'Approved. This chapter is now live.'
+            : 'Sent back to the editor.'
+        )
       } else {
         flash('err', res.error)
       }
@@ -78,11 +83,14 @@ export function ChapterEditor({ versionId, chapterNumber, initial, canApprove }:
 
   return (
     <div>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, marginBottom: 18 }}>
+      <header style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, marginBottom: 18 }}>
         <div>
           <p style={s.kicker}>Chapter {initial.chapter_number} · version {versionId}</p>
-          <h1 style={s.heading}>{title || `Chapter ${initial.chapter_number}`}</h1>
-          <p style={s.lede}>{initial.verse_count} verses{readOnly ? ' · read only' : ''}</p>
+          <h1 className="ed-h1">{title || `Chapter ${initial.chapter_number}`}</h1>
+          <p style={s.lede}>
+            {initial.verse_count} verses
+            {readOnly ? ' · you can read this chapter but not change it' : ''}
+          </p>
         </div>
         {!readOnly && (
           <button
@@ -91,21 +99,21 @@ export function ChapterEditor({ versionId, chapterNumber, initial, canApprove }:
             disabled={isPending || pending !== null}
             onClick={submitForPublish}
           >
-            {pending ? 'Pending approval' : 'Submit for publishing'}
+            {pending ? 'Waiting for review' : 'Send for review'}
           </button>
         )}
       </header>
 
       {pending && (
-        <div style={{ ...s.surface, padding: '12px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <div style={{ ...s.surface, padding: '12px 16px', marginBottom: 16, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 15, color: 'var(--ed-fg-muted)' }}>
-            <span style={{ ...s.pillBase(), ...s.statusPill.pending, marginRight: 8 }}>pending</span>
-            Submitted for publishing (request #{pending.id}).
+            <span style={{ ...s.pillBase(), ...s.statusPill.pending, marginRight: 8 }}>in review</span>
+            This chapter is with an approver (request #{pending.id}).
           </span>
           {canApprove && (
             <span style={{ display: 'flex', gap: 8 }}>
               <button type="button" style={s.button} disabled={isPending} onClick={() => decide('approve')}>
-                Approve & publish
+                Approve and publish
               </button>
               <button type="button" style={s.buttonGhost} disabled={isPending} onClick={() => decide('reject')}>
                 Reject
@@ -130,14 +138,16 @@ export function ChapterEditor({ versionId, chapterNumber, initial, canApprove }:
 
       <div style={{ ...s.surface, padding: '14px 16px', marginBottom: 18 }}>
         <label style={s.label} htmlFor="chapter-title">Chapter title</label>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
           <input
             id="chapter-title"
-            style={s.input}
+            // Grows to fill the row, but keeps enough width that the Save
+            // button wraps under it instead of squeezing the field to nothing.
+            style={{ ...s.input, width: 'auto', flex: '1 1 220px' }}
             value={title}
             disabled={readOnly || isPending}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Optional chapter title"
+            placeholder="Leave blank if this chapter has no title"
           />
           {!readOnly && (
             <button type="button" style={s.buttonGhost} disabled={isPending} onClick={saveTitle}>
@@ -147,7 +157,7 @@ export function ChapterEditor({ versionId, chapterNumber, initial, canApprove }:
         </div>
         {initial.title_published != null && initial.title_published !== title && (
           <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--ed-fg-muted)' }}>
-            Published: {initial.title_published}
+            Currently live: {initial.title_published}
           </p>
         )}
       </div>
@@ -208,7 +218,7 @@ function VerseRow({ versionId, chapterNumber, verse, readOnly, disabled }: Verse
 
       {ref && (ref.content || ref.subtitle || ref.footer) && (
         <div style={referenceBox}>
-          <span style={s.mutedTag}>Reference</span>
+          <span style={s.mutedTag}>Your reference version</span>
           {ref.subtitle && <p style={refLine}>{ref.subtitle}</p>}
           {ref.content && <p style={{ ...refLine, color: 'var(--ed-fg)' }}>{ref.content}</p>}
           {ref.footer && <p style={refLine}>{ref.footer}</p>}
@@ -258,6 +268,7 @@ function VerseRow({ versionId, chapterNumber, verse, readOnly, disabled }: Verse
 
 const verseHead: CSSProperties = {
   display: 'flex',
+  flexWrap: 'wrap',
   justifyContent: 'space-between',
   alignItems: 'center',
   marginBottom: 10,

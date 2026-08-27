@@ -1135,3 +1135,190 @@
    effectively invisible as text */
 .ed-scope .wbw-input::placeholder,
 .ed-scope .reflang .rl-empty { color: var(--ed-fg-muted); }
+
+/* =========================================================
+   NATIVE CONTROLS
+   Chromium hands the <select> drop-down list the control's own background
+   once the author has set one. Several editor selects are `bg-transparent`,
+   which resolves to nothing and paints the list white — so in dark mode the
+   options were light ink on white and unreadable. (next-themes already sets
+   `color-scheme` on <html>, which is what would otherwise have covered this;
+   an author background overrides it.) Pinning the surface on both the control
+   and its options keeps the list legible in every mode and palette.
+   ========================================================= */
+.ed-scope select {
+  background-color: var(--ed-surface);
+}
+.ed-scope select option,
+.ed-scope select optgroup {
+  background-color: var(--ed-bg);
+  color: var(--ed-fg);
+}
+
+/* =========================================================
+   RESPONSIVE — phones and small tablets
+   The shell was drawn for a desktop control room: fixed-width rails, a
+   three-slot top bar, two-column field rows and wide tables. Below the
+   breakpoints the rails stack, the top bar sheds its optional slots, and
+   anything that cannot reflow scrolls inside its own box instead of pushing
+   the page sideways.
+   ========================================================= */
+
+/* Page gutters shrink before anything else does. `.ed-page` is the inline-style
+   pages' hook (the Quran screens set their padding here rather than in JS). */
+.ed-scope .ed-page {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: 32px 36px 96px;
+}
+
+/* Display heading for the inline-styled Quran screens, so the size can step
+   down with the viewport. */
+.ed-scope .ed-h1 {
+  margin: 6px 0 10px;
+  font-family: var(--font-cormorant);
+  font-size: 36px;
+  line-height: 1.05;
+  color: var(--ed-fg);
+}
+
+@media (max-width: 1023px) {
+  /* Reference rail sits below the detail column rather than beside it. */
+  .refrail,
+  .refrail.wide {
+    flex: 1 1 auto;
+    border-left: 0;
+    border-top: 1px solid var(--ed-rule);
+  }
+  .detail-inner { padding: 26px 24px 80px; }
+}
+
+@media (max-width: 767px) {
+  .ed-scope .ed-page { padding: 22px 18px 88px; }
+
+  /* Top bar: the crumb takes the free space and truncates; the right-hand
+     slots keep only what identifies the session. */
+  .topbar {
+    height: 52px; flex: 0 0 52px;
+    gap: 10px; padding: 0 12px;
+  }
+  .tb-crumb {
+    min-width: 0; flex: 1;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  /* Only the deepest crumb is legible at this width; the ancestors repeat what
+     the back link above the heading already says. */
+  .tb-crumb > span:not(:last-child) { display: none; }
+  .tb-crumb .cur { font-size: 17px; }
+  .tb-spacer { display: none; }
+  .tb-right { gap: 8px; flex: 0 0 auto; }
+  .tb-right .badge { display: none; }
+  /* Keep the dot, drop the wording — "All changes saved" doubles the bar. */
+  /* .ed-scope-scoped so it outranks the legibility pass above. */
+  .ed-scope .save-pill { padding: 5px; gap: 0; font-size: 0; border-radius: 999px; }
+  .ed-scope .save-pill .d { width: 8px; height: 8px; }
+
+  /* Headings step down one size; 40px display type wraps to four lines on a
+     narrow screen. */
+  .dh { flex-direction: column; gap: 14px; margin-bottom: 20px; }
+  .dh h1,
+  .ed-scope .ed-h1 { font-size: 29px; }
+  .dh-sub { font-size: 16px; }
+  .dh-actions { flex-wrap: wrap; }
+
+  .block { margin-top: 24px; }
+  .block-head { flex-wrap: wrap; gap: 8px; }
+  .block-head h3 { font-size: 23px; }
+
+  /* Forms go single-column; side-by-side fields are unusable at this width. */
+  .field-row,
+  .field-row.three { grid-template-columns: 1fr; gap: 14px; }
+  /* iOS Safari zooms the page whenever a focused control is under 16px, which
+     leaves the editor panned half off-screen. Several controls sit at 14–15px
+     by design, so the floor is applied to every one of them here rather than
+     chased through each component. */
+  .ed-scope input,
+  .ed-scope textarea,
+  .ed-scope select { font-size: 16px; }
+  .ed-scope .input.title-input { font-size: 23px; }
+
+  /* Buttons reach a comfortable tap target and may wrap onto their own line. */
+  .btn { padding: 10px 15px; }
+  .iconbtn { width: 36px; height: 36px; }
+
+  /* Master/detail collapses to a single stacked column. */
+  .master {
+    flex: 1 1 auto;
+    border-right: 0; border-bottom: 1px solid var(--ed-rule);
+  }
+  .master.narrow { --master-w: auto; }
+  .detail-inner { padding: 20px 18px 80px; }
+
+  /* Tables cannot reflow — give them their own horizontal scroll so the page
+     body never scrolls sideways. */
+  .wtable-wrap,
+  .pt-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .wtable { min-width: 560px; }
+  .permtable { min-width: 460px; }
+  .rte-table { min-width: 480px; }
+
+  /* Grids that hardcode a column count. */
+  .progress-grid { grid-template-columns: 1fr; }
+  .progress-grid > div { border-right: 0; border-bottom: 1px solid var(--ed-rule); }
+  .progress-grid > div:last-child { border-bottom: 0; }
+  .cardgrid.cols-2,
+  .cardgrid.cols-3 { grid-template-columns: 1fr; }
+  .wstack-row { grid-template-columns: 1fr; gap: 8px; }
+  .wstack-ar { min-width: 0; text-align: right; }
+  .wstack-fields { grid-template-columns: 1fr; }
+
+  /* Word-by-word: tighter gaps so more than two words fit per line. */
+  .wbw { gap: 18px 20px; padding: 20px 14px; }
+  .wbw-ar { font-size: 26px; }
+  .wbw-input { width: 84px; }
+  /* The root popover is anchored to a word and would overflow the viewport. */
+  .rootpop { left: auto; right: 0; min-width: min(252px, calc(100vw - 48px)); }
+
+  /* Writing surfaces: keep the measure, lose the desk-sized padding. */
+  .pt-content { font-size: 18.5px; padding: 18px 16px 32px; }
+  .pt-content .pt-h2 { font-size: 27px; }
+  .pt-content .pt-h3 { font-size: 23px; }
+  .pt-quote { font-size: 19px; }
+  .pt-toolbar { gap: 2px; padding: 6px; }
+  .rte-canvas { padding: 20px 16px; }
+  .rte-canvas p { font-size: 17.5px; }
+
+  .verse-card { margin-bottom: 16px; }
+  .vc-head { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
+  .vc-arabic { font-size: 22px; flex-basis: 100%; }
+  .vc-body { padding: 12px; }
+  .vfield-label { flex-wrap: wrap; }
+  .vfield-label .refmini { max-width: 100%; margin-left: 0; flex-basis: 100%; }
+
+  .chrow { grid-template-columns: 26px 1fr; padding: 11px 12px; }
+  .chrow .car { display: none; }
+
+  .refverse { grid-template-columns: 30px 1fr; gap: 9px; }
+  .admin-warn { flex-direction: column; gap: 10px; }
+  .rect-step-head { flex-wrap: wrap; }
+  .empty-pane { padding: 36px 20px; }
+}
+
+@media (max-width: 420px) {
+  .ed-scope .ed-page { padding: 18px 14px 80px; }
+  .dh h1,
+  .ed-scope .ed-h1 { font-size: 26px; }
+  .tb-crumb .cur { font-size: 15.5px; }
+  .wbw-input { width: 74px; }
+}
+
+/* Coarse pointers get real tap targets on the controls that are otherwise
+   sized for a mouse, whatever the viewport width. */
+@media (pointer: coarse) {
+  .ed-scope .fchip,
+  .ed-scope .colchip,
+  .ed-scope .seg button { padding-block: 8px; }
+  .ed-scope .rte-btn,
+  .ed-scope .pt-tb { min-height: 36px; }
+}

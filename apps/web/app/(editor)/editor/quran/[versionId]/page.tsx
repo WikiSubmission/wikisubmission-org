@@ -39,12 +39,17 @@ export default async function QuranChaptersPage({ params }: PageProps) {
   if (chapters.length === 0) notFound()
 
   const canWrite = canWriteQuranVersion(editorial, versionId)
+  // Name the translation rather than its row id — "version 3" means nothing to
+  // someone editing Rashad Khalifa's translation.
+  const versionName =
+    versions.find((v) => v.id === versionId)?.name ?? `Version ${versionId}`
 
   return (
-    <section style={s.page}>
+    <section className="ed-page">
       <div
         style={{
           display: 'flex',
+          flexWrap: 'wrap',
           justifyContent: 'space-between',
           alignItems: 'center',
           gap: 12,
@@ -56,21 +61,21 @@ export default async function QuranChaptersPage({ params }: PageProps) {
         <span style={{ display: 'flex', gap: 16 }}>
           {editorial.is_admin && (
             <Link href={`/editor/quran/${versionId}/rectify`} style={s.crumb}>
-              Rectify →
+              Integrity check →
             </Link>
           )}
           <Link href={`/editor/quran/${versionId}/roots`} style={s.crumb}>
-            Root Book →
+            Root meanings →
           </Link>
         </span>
       </div>
       <header style={{ marginBottom: 20 }}>
-        <p style={s.kicker}>Quran · version {versionId}</p>
-        <h1 style={s.heading}>Chapters</h1>
+        <p style={s.kicker}>Quran · {versionName}</p>
+        <h1 className="ed-h1">Chapters</h1>
         <p style={s.lede}>
           {canWrite
-            ? 'Open a chapter to edit verse text and submit it for publishing.'
-            : 'You have read-only access to this version.'}
+            ? 'Open a chapter to work on its verses. When a chapter is ready, send it on for review and it will be published once approved.'
+            : 'You can read this translation, but not change it.'}
         </p>
       </header>
 
@@ -94,13 +99,15 @@ export default async function QuranChaptersPage({ params }: PageProps) {
                   {c.title || `Chapter ${c.chapter_number}`}
                 </span>
                 <span style={meta}>
-                  {c.draft_verse_count}/{c.verse_count} verses drafted
-                  {c.has_title_draft ? ' · title draft' : ''}
+                  {c.draft_verse_count > 0
+                    ? `${c.draft_verse_count} of ${c.verse_count} verses edited`
+                    : `${c.verse_count} verses`}
+                  {c.has_title_draft ? ' · title edited' : ''}
                 </span>
               </span>
               {c.pending_request && (
                 <span style={{ ...s.pillBase(), ...s.statusPill.pending }}>
-                  pending
+                  in review
                 </span>
               )}
             </Link>

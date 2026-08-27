@@ -51,7 +51,7 @@ export default async function QuranRootsPage({ params, searchParams }: PageProps
   const hasNext = offset + PAGE_SIZE < total
 
   return (
-    <section style={s.page}>
+    <section className="ed-page">
       <Link href={`/editor/quran/${versionId}`} style={s.crumb}>
         ← Chapters
       </Link>
@@ -96,11 +96,13 @@ export default async function QuranRootsPage({ params, searchParams }: PageProps
 
 const searchForm: CSSProperties = {
   display: 'flex',
+  flexWrap: 'wrap',
   gap: 8,
   marginBottom: 18,
 }
 const pager: CSSProperties = {
   display: 'flex',
+  flexWrap: 'wrap',
   justifyContent: 'space-between',
   alignItems: 'center',
   gap: 12,

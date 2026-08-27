@@ -128,7 +128,11 @@ export function DocForm({
 
   const destroy = () => {
     if (docId === null) return
-    if (!window.confirm(`Delete this ${def.labelSingular.toLowerCase()}? This also removes the published version.`)) {
+    if (
+      !window.confirm(
+        `Delete this ${def.labelSingular.toLowerCase()}? It will also come off the live site, and this cannot be undone.`
+      )
+    ) {
       return
     }
     startTransition(async () => {
@@ -150,14 +154,14 @@ export function DocForm({
           <p className="font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
             {def.labelSingular}
           </p>
-          <h1 className="mt-2 font-[family-name:var(--font-cormorant)] text-[36px] leading-[1.05] text-foreground">
+          <h1 className="mt-2 font-[family-name:var(--font-cormorant)] text-[28px] leading-[1.08] text-foreground sm:text-[36px] sm:leading-[1.05]">
             {docId === null ? `New ${def.labelSingular.toLowerCase()}` : titleOf(def, fields)}
           </h1>
           {statusMeta && (
             <p className="mt-2 flex items-center gap-2 font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.12em]">
               <span className={statusMeta.text}>{statusMeta.label}</span>
               {dirty && (
-                <span className={STATUS_META.changed.text}>· unsaved edits</span>
+                <span className={STATUS_META.changed.text}>· not saved yet</span>
               )}
             </p>
           )}
@@ -172,7 +176,7 @@ export function DocForm({
                 type="button"
                 variant="secondary"
                 disabled={pending || dirty}
-                title={dirty ? 'Save first' : undefined}
+                title={dirty ? 'Save your draft first' : undefined}
                 onClick={() => publish('publish')}
               >
                 Publish
@@ -205,7 +209,8 @@ export function DocForm({
       )}
       {!canWrite && (
         <p className="mb-4 text-[16px] text-muted-foreground">
-          Read only — you have not been granted write access to this module.
+          You can read this, but not change it. Ask an administrator if you
+          need editing access.
         </p>
       )}
 
@@ -647,7 +652,7 @@ function ImageField({
 
       <Input
         className={MONO_FONT}
-        placeholder="or paste a hosted image URL"
+        placeholder="or paste a link to an image already online"
         value={value}
         disabled={disabled || uploading}
         onChange={(e) => {

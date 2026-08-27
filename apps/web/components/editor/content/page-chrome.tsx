@@ -43,12 +43,12 @@ export function EditorPageHeader({
   actions,
 }: EditorPageHeaderProps) {
   return (
-    <header className="mb-6 flex items-start gap-5">
+    <header className="mb-6 flex flex-wrap items-start gap-x-5 gap-y-3">
       <div className="min-w-0 flex-1">
         <p className="font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
           {eyebrow}
         </p>
-        <h1 className="mt-2 flex items-baseline gap-3 font-[family-name:var(--font-cormorant)] text-[36px] leading-[1.05] text-foreground">
+        <h1 className="mt-2 flex flex-wrap items-baseline gap-x-3 font-[family-name:var(--font-cormorant)] text-[28px] leading-[1.08] text-foreground sm:text-[36px] sm:leading-[1.05]">
           <span className="min-w-0">{title}</span>
           {meta && (
             <span className="font-[family-name:var(--font-jetbrains)] text-[12.5px] font-normal tracking-normal text-muted-foreground">
@@ -62,7 +62,7 @@ export function EditorPageHeader({
           </p>
         )}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-2.5">{actions}</div>}
+      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2.5">{actions}</div>}
     </header>
   )
 }

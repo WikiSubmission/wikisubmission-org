@@ -34,7 +34,7 @@ export default async function QuranChapterWordsPage({ params }: PageProps) {
   if (!words) notFound()
 
   return (
-    <section style={s.page}>
+    <section className="ed-page">
       <Link href={`/editor/quran/${versionId}/${chapterNumber}`} style={s.crumb}>
         ← Verse text
       </Link>

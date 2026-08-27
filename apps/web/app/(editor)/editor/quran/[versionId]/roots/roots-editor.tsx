@@ -33,17 +33,18 @@ export function RootsEditor({ versionId, canWrite, canApprove, roots }: RootsEdi
 
   return (
     <div>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, marginBottom: 18 }}>
+      <header style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, marginBottom: 18 }}>
         <div>
-          <p style={s.kicker}>Root Book · version {versionId}</p>
-          <h1 style={s.heading}>Root meanings</h1>
+          <p style={s.kicker}>Quran · version {versionId}</p>
+          <h1 className="ed-h1">Root meanings</h1>
           <p style={s.lede}>
-            A meaning applies to every word sharing the root, across all chapters in this version. Edits save automatically.
+            A meaning you write here applies to every word built on that root,
+            in every chapter of this translation. Your edits save on their own.
           </p>
         </div>
         {canApprove && (
           <button type="button" style={{ ...s.button, opacity: isPublishing ? 0.5 : 1 }} disabled={isPublishing} onClick={publish}>
-            {isPublishing ? 'Publishing…' : 'Publish all drafts'}
+            {isPublishing ? 'Publishing…' : 'Publish all edits'}
           </button>
         )}
       </header>
@@ -55,7 +56,7 @@ export function RootsEditor({ versionId, canWrite, canApprove, roots }: RootsEdi
       )}
 
       {roots.length === 0 ? (
-        <p style={s.lede}>No roots match.</p>
+        <p style={s.lede}>No roots match what you searched for.</p>
       ) : (
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {roots.map((r) => (

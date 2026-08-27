@@ -1,5 +1,30 @@
 apply plugin: 'com.android.application'
 
+// Release signing is supplied entirely by the environment so no key material or
+// password lives in this file. Export KEYSTORE_PATH and KEYSTORE_PASSWORD (plus
+// KEY_ALIAS / KEY_PASSWORD if they differ from the defaults below) before any
+// assembleRelease/bundleRelease task. See apps/mobile/ANDROID.md. Debug builds
+// need none of this and use the local ~/.android/debug.keystore as usual.
+def keystorePath = System.getenv("KEYSTORE_PATH")
+def keystorePassword = System.getenv("KEYSTORE_PASSWORD")
+def keystoreAlias = System.getenv("KEY_ALIAS") ?: "upload"
+def keystoreKeyPassword = System.getenv("KEY_PASSWORD") ?: keystorePassword
+def releaseSigningReady = keystorePath && keystorePassword
+
+// Without this a missing environment yields an unsigned artifact that only fails
+// once Play rejects the upload. Fail at configuration time instead.
+if (gradle.startParameter.taskNames.any { it ==~ /(?i).*(assemble|bundle)Release.*/ }) {
+    if (!releaseSigningReady) {
+        throw new GradleException(
+            "Release signing is not configured. Export KEYSTORE_PATH and KEYSTORE_PASSWORD " +
+            "(and KEY_ALIAS/KEY_PASSWORD if they are not \"upload\"/the store password) " +
+            "before running a release task. See apps/mobile/ANDROID.md.")
+    }
+    if (!file(keystorePath).exists()) {
+        throw new GradleException("KEYSTORE_PATH does not point at an existing file: ${keystorePath}")
+    }
+}
+
 android {
     namespace = "org.wikisubmission.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -19,16 +44,18 @@ android {
 
     signingConfigs {
         release {
-            storeFile file(System.getenv("KEYSTORE_PATH") ?: System.properties["user.home"] + "/ws-upload.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "wikisubmission"
-            keyAlias System.getenv("KEY_ALIAS") ?: "upload"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "wikisubmission"
+            if (releaseSigningReady) {
+                storeFile file(keystorePath)
+                storePassword keystorePassword
+                keyAlias keystoreAlias
+                keyPassword keystoreKeyPassword
+            }
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            signingConfig releaseSigningReady ? signingConfigs.release : null
             // R8 shrink+obfuscate. Deliberately the non-"optimize" default
             // config: the aggressive one is a separate step to evaluate once
             // this has proven itself on-device.

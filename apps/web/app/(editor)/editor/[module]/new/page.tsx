@@ -34,7 +34,7 @@ export default async function NewContentDocPage({
   const options = await loadModuleOptions(module, session.accessToken)
 
   return (
-    <section className="ed-page-narrow px-9 pt-8 pb-24">
+    <section className="ed-page-narrow px-4 pt-6 pb-24 sm:px-9 sm:pt-8">
       <EditorCrumb href={`/editor/${module}`}>{def.label}</EditorCrumb>
       <DocForm
         module={module as EditorialContentModule}

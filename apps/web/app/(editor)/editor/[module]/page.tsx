@@ -33,7 +33,7 @@ const STATUS_FILTERS: Array<{
 }> = [
   { value: '', label: 'All' },
   { value: 'draft', label: 'Drafts' },
-  { value: 'changed', label: 'Unpublished changes' },
+  { value: 'changed', label: 'Edited since publishing' },
   { value: 'published', label: 'Published' },
 ]
 
@@ -72,12 +72,12 @@ export default async function ContentModuleListPage({
   const groups = isArticle ? groupArticles(docs) : docs.map((doc) => [doc])
 
   return (
-    <section className="ed-page-wide px-9 pt-8 pb-24">
+    <section className="ed-page-wide px-4 pt-6 pb-24 sm:px-9 sm:pt-8">
       <EditorCrumb href="/editor">Workspace</EditorCrumb>
       <EditorPageHeader
         eyebrow={def.label}
         title={def.label}
-        meta={`${total} total`}
+        meta={total === 1 ? '1 item' : `${total} items`}
         description={def.blurb}
         actions={
           <div className="flex gap-2">
@@ -128,8 +128,8 @@ export default async function ContentModuleListPage({
       {docs.length === 0 ? (
         <p className="max-w-[60ch] text-[16px] leading-relaxed text-muted-foreground">
           {q || statusFilter
-            ? 'Nothing matches these filters.'
-            : `No ${def.label.toLowerCase()} yet.${canWrite ? ' Create the first one.' : ''}`}
+            ? 'Nothing here matches what you searched for.'
+            : `There are no ${def.label.toLowerCase()} yet.${canWrite ? ' Go ahead and create the first one.' : ''}`}
         </p>
       ) : (
         <div className="overflow-hidden rounded-[3px] border border-border bg-card">
@@ -260,7 +260,7 @@ function DocGroup({
           href={`/editor/${module}/new?group=${primary.translation_group}`}
           className="block px-4 py-2.5 font-[family-name:var(--font-source-serif)] text-[15px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
-          + Add a language variant
+          + Add another language
         </Link>
       )}
     </div>

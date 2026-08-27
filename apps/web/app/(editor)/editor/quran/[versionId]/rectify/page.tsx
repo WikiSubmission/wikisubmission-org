@@ -28,7 +28,7 @@ export default async function QuranRectifyPage({ params }: PageProps) {
   if (!report) notFound()
 
   return (
-    <section style={s.page}>
+    <section className="ed-page">
       <Link href={`/editor/quran/${versionId}`} style={s.crumb}>
         ← Chapters
       </Link>

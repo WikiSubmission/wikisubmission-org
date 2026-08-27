@@ -18,7 +18,7 @@ interface StatusMeta {
 export const STATUS_META: Record<EditorialContentStatus, StatusMeta> = {
   draft: { label: 'Draft', dot: 'bg-[var(--st-draft)]', text: 'text-[var(--st-draft)]' },
   changed: {
-    label: 'Unpublished changes',
+    label: 'Edited since publishing',
     dot: 'bg-[var(--st-changes)]',
     text: 'text-[var(--st-changes)]',
   },

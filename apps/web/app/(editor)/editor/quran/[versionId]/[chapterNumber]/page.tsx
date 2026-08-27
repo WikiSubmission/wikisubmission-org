@@ -34,17 +34,17 @@ export default async function QuranChapterEditorPage({ params }: PageProps) {
   const canApprove = canApproveQuranVersion(editorial, versionId)
 
   return (
-    <section style={s.page}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+    <section className="ed-page">
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
         <Link href={`/editor/quran/${versionId}`} style={s.crumb}>
           ← Chapters
         </Link>
-        <span style={{ display: 'inline-flex', gap: 14 }}>
+        <span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 14 }}>
           <Link href={`/editor/quran/${versionId}/${chapterNumber}/words`} style={s.crumb}>
             Word by word →
           </Link>
           <Link href={`/editor/quran/${versionId}/roots`} style={s.crumb}>
-            Root Book →
+            Root meanings →
           </Link>
         </span>
       </div>

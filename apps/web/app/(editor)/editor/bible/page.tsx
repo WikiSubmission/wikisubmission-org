@@ -30,7 +30,7 @@ export default async function BibleVersionsPage() {
   const accessible = versions.filter((v) => canReadBibleVersion(editorial, v.id))
 
   return (
-    <section style={s.page}>
+    <section className="ed-page">
       <Link href="/editor" style={s.crumb}>
         ← Workspace
       </Link>
@@ -39,14 +39,17 @@ export default async function BibleVersionsPage() {
           <p className="dh-eyebrow">Bible</p>
           <h1>Versions</h1>
           <p className="dh-sub">
-            Books, chapters and verse translations. Editing arrives with the
-            Bible write path (Phase 3); until then the registry is read-only.
+            The Bible translations that appear on the site. Editing is not open
+            yet, so for now this is a reference list.
           </p>
         </div>
       </div>
 
       {accessible.length === 0 ? (
-        <p style={s.lede}>No Bible versions have been assigned to your account yet.</p>
+        <p style={s.lede}>
+          No translations have been shared with you yet. An administrator can
+          give you access to the ones you work on.
+        </p>
       ) : (
         <ul style={grid}>
           {accessible.map((v) => {
@@ -60,8 +63,8 @@ export default async function BibleVersionsPage() {
                     {v.direction === 'rtl' ? ' · rtl' : ''}
                   </p>
                   <div style={{ marginTop: 'auto', display: 'flex', gap: 10 }}>
-                    <span style={s.tag}>{canWrite ? 'Read & write' : 'Read only'}</span>
-                    <span style={s.mutedTag}>Editing not yet available</span>
+                    <span style={s.tag}>{canWrite ? 'You can edit' : 'View only'}</span>
+                    <span style={s.mutedTag}>Editing coming soon</span>
                   </div>
                 </div>
               </li>
