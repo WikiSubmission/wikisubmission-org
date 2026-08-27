@@ -1496,7 +1496,10 @@
       "wordBundleWifiOnline": "Le téléchargement démarrera automatiquement la prochaine fois que vous serez en Wi-Fi. D’ici là, le mode mot nécessite une connexion.",
       "wordBundleWifiOffline": "Vous êtes hors ligne. Le téléchargement démarrera automatiquement la prochaine fois que vous serez en ligne en Wi-Fi.",
       "wordBundleDownloadNow": "Télécharger maintenant ({size})",
-      "wordBundleUnavailable": "Aucune donnée mot par mot hors ligne n’est encore publiée pour votre langue — le mode mot utilise le réseau."
+      "wordBundleUnavailable": "Aucune donnée mot par mot hors ligne n’est encore publiée pour votre langue — le mode mot utilise le réseau.",
+      "sortChapterOrder": "Ordre des chapitres",
+      "sortRevelationOrder": "Ordre de révélation",
+      "revealedOrder": "Révélée n°{order, number}"
     }
   },
   "meDashboard": {

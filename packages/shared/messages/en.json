@@ -1548,7 +1548,10 @@
       "wordBundleWifiOnline": "It will download automatically next time you're on Wi-Fi. Until then, word mode needs a connection.",
       "wordBundleWifiOffline": "You're offline. It will download automatically next time you're online over Wi-Fi.",
       "wordBundleDownloadNow": "Download now ({size})",
-      "wordBundleUnavailable": "No offline word-by-word data is published for your language yet — word mode uses the network."
+      "wordBundleUnavailable": "No offline word-by-word data is published for your language yet — word mode uses the network.",
+      "sortChapterOrder": "Chapter order",
+      "sortRevelationOrder": "Revelation order",
+      "revealedOrder": "Revealed #{order, number}"
     }
   },
   "meDashboard": {

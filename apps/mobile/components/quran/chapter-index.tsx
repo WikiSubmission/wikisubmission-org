@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import { ContinueCoverToCover } from '@/components/quran-reader/continue-cover-to-cover'
 import { ScriptureRef } from '@/components/quran-ref'
 import { resolveScriptureRef } from '@/lib/scripture-search'
-import { CHAPTER_TRANSLITERATIONS, VERSE_COUNTS } from '@/constants/quran-chapters'
+import { CHAPTER_TRANSLITERATIONS, REVELATION_ORDER, VERSE_COUNTS } from '@/constants/quran-chapters'
 import { setChapterFlightState } from '@/lib/chapter-flight'
 import { Flip } from '@/lib/gsap'
 import { CHAPTER_TITLES_EN } from '@/lib/quran-titles-en'
@@ -22,6 +22,7 @@ interface ChapterRow {
   english: string
   transliteration: string
   verses: number
+  revelationOrder: number
 }
 
 const CHAPTERS: ChapterRow[] = CHAPTER_TRANSLITERATIONS.map((transliteration, i) => ({
@@ -29,7 +30,10 @@ const CHAPTERS: ChapterRow[] = CHAPTER_TRANSLITERATIONS.map((transliteration, i)
   english: CHAPTER_TITLES_EN[i + 1] ?? '',
   transliteration,
   verses: VERSE_COUNTS[i] ?? 0,
+  revelationOrder: REVELATION_ORDER[i] ?? 0,
 }))
+
+type ChapterSort = 'chapter' | 'revelation'
 
 // Companion texts reachable from the Quran tab. Routes mirror the web URLs;
 // activeTab() in constants/navigation.ts keeps the Quran tab highlighted.
@@ -80,11 +84,15 @@ export function ChapterIndex() {
   const router = useRouter()
   const titles = useChapterTitles()
   const [query, setQuery] = useState('')
+  const [sortBy, setSortBy] = useState<ChapterSort>('chapter')
 
-  const filtered = useMemo(
-    () => CHAPTERS.filter((c) => matches(c, titles[c.number] ?? '', query.trim())),
-    [query, titles]
-  )
+  const filtered = useMemo(() => {
+    const matched = CHAPTERS.filter((c) => matches(c, titles[c.number] ?? '', query.trim()))
+    if (sortBy === 'revelation') {
+      return [...matched].sort((a, b) => a.revelationOrder - b.revelationOrder)
+    }
+    return matched
+  }, [query, titles, sortBy])
 
   // "2:255", "1 1-7", "1:4,2:45", ":50", "Mark 12:3" — a typed reference goes
   // straight to the passage instead of running a full-text search.
@@ -232,6 +240,33 @@ export function ChapterIndex() {
         </>
       )}
 
+      {!query.trim() && (
+        <div className="mb-2 flex items-center gap-1.5 px-1">
+          {(['chapter', 'revelation'] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => {
+                haptic('light')
+                setSortBy(option)
+              }}
+              className={cn(
+                'rounded-full px-3 py-1 text-xs font-medium transition-colors',
+                sortBy === option
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground active:bg-muted/60'
+              )}
+            >
+              {t(
+                option === 'chapter'
+                  ? 'mobile.reader.sortChapterOrder'
+                  : 'mobile.reader.sortRevelationOrder'
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
       <ul className="flex flex-col gap-1.5">
         {filtered.map((chapter) => (
           <li key={chapter.number}>
@@ -248,10 +283,13 @@ export function ChapterIndex() {
                 if (title) setChapterFlightState(Flip.getState(title))
               }}
               className={cn(
-                'flex items-center gap-3 rounded-2xl border border-border/40 bg-muted/30 p-3',
+                'relative flex items-center gap-3 rounded-2xl border border-border/40 bg-muted/30 p-3',
                 'transition-colors active:bg-muted/60'
               )}
             >
+              <span className="pointer-events-none absolute end-2.5 top-2.5 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                {t('mobile.reader.revealedOrder', { order: chapter.revelationOrder })}
+              </span>
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 font-mono text-sm font-medium text-primary">
                 {chapter.number}
               </span>
@@ -264,7 +302,7 @@ export function ChapterIndex() {
                   {titles[chapter.number] ?? chapter.english}
                 </span>
                 <span className="truncate text-sm text-muted-foreground">
-                  {chapter.transliteration} · {chapter.verses} verses
+                  {chapter.verses} verses
                 </span>
               </span>
             </Link>

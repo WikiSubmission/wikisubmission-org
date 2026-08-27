@@ -1496,7 +1496,10 @@
       "wordBundleWifiOnline": "سيُنزَّل تلقائيًا في المرة القادمة التي تتصل فيها بشبكة Wi-Fi. حتى ذلك الحين يحتاج وضع الكلمات إلى اتصال.",
       "wordBundleWifiOffline": "أنت غير متصل. سيُنزَّل تلقائيًا في المرة القادمة التي تتصل فيها بشبكة Wi-Fi.",
       "wordBundleDownloadNow": "التنزيل الآن ({size})",
-      "wordBundleUnavailable": "لم تُنشر بعد بيانات كلمة بكلمة دون اتصال لِلغتك — يستخدم وضع الكلمات الشبكة."
+      "wordBundleUnavailable": "لم تُنشر بعد بيانات كلمة بكلمة دون اتصال لِلغتك — يستخدم وضع الكلمات الشبكة.",
+      "sortChapterOrder": "ترتيب السور",
+      "sortRevelationOrder": "ترتيب النزول",
+      "revealedOrder": "نزول رقم {order, number}"
     }
   },
   "meDashboard": {

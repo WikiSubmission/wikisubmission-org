@@ -1496,7 +1496,10 @@
       "wordBundleWifiOnline": "Der Download startet automatisch, sobald Sie das nächste Mal im WLAN sind. Bis dahin benötigt der Wortmodus eine Verbindung.",
       "wordBundleWifiOffline": "Sie sind offline. Der Download startet automatisch, sobald Sie das nächste Mal über WLAN online sind.",
       "wordBundleDownloadNow": "Jetzt herunterladen ({size})",
-      "wordBundleUnavailable": "Für Ihre Sprache sind noch keine Offline-Wort-für-Wort-Daten veröffentlicht — der Wortmodus nutzt das Netzwerk."
+      "wordBundleUnavailable": "Für Ihre Sprache sind noch keine Offline-Wort-für-Wort-Daten veröffentlicht — der Wortmodus nutzt das Netzwerk.",
+      "sortChapterOrder": "Kapitelreihenfolge",
+      "sortRevelationOrder": "Offenbarungsreihenfolge",
+      "revealedOrder": "Offenbart Nr. {order, number}"
     }
   },
   "meDashboard": {

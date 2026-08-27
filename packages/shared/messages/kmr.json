@@ -836,7 +836,10 @@
       "wordBundleWifiOnline": "Cara bê ku tu li Wi-Fi bî bixweber dê were daxistin. Heta wê demê moda peyvê hewceyî girêdanê ye.",
       "wordBundleWifiOffline": "Tu derveyî xetê yî. Cara bê ku tu bi Wi-Fi li xetê bî bixweber dê were daxistin.",
       "wordBundleDownloadNow": "Niha daxîne ({size})",
-      "wordBundleUnavailable": "Ji bo zimanê te hîn daneya peyv bi peyv a derveyî xetê nehatiye weşandin — moda peyvê torê bikar tîne."
+      "wordBundleUnavailable": "Ji bo zimanê te hîn daneya peyv bi peyv a derveyî xetê nehatiye weşandin — moda peyvê torê bikar tîne.",
+      "sortChapterOrder": "Rêza sûreyan",
+      "sortRevelationOrder": "Rêza nazilbûnê",
+      "revealedOrder": "Nazilbûna hejmar {order, number}"
     }
   },
   "meDashboard": {

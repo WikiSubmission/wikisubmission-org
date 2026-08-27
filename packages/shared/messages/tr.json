@@ -1496,7 +1496,10 @@
       "wordBundleWifiOnline": "Bir sonraki Wi-Fi bağlantınızda otomatik olarak indirilecek. O zamana kadar kelime modu bağlantı gerektirir.",
       "wordBundleWifiOffline": "Çevrimdışısınız. Bir sonraki Wi-Fi bağlantınızda otomatik olarak indirilecek.",
       "wordBundleDownloadNow": "Şimdi indir ({size})",
-      "wordBundleUnavailable": "Diliniz için henüz çevrimdışı kelime kelime verisi yayınlanmadı — kelime modu ağı kullanır."
+      "wordBundleUnavailable": "Diliniz için henüz çevrimdışı kelime kelime verisi yayınlanmadı — kelime modu ağı kullanır.",
+      "sortChapterOrder": "Sure sırası",
+      "sortRevelationOrder": "İniş sırası",
+      "revealedOrder": "İniş sırası #{order, number}"
     }
   },
   "meDashboard": {
