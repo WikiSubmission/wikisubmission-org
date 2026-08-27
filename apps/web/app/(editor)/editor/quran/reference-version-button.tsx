@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Combobox } from '@/components/editor/content/combobox'
 import { setQuranReferenceVersionAction } from './actions'
 
 export function ReferenceVersionPicker({
@@ -29,19 +30,18 @@ export function ReferenceVersionPicker({
         just for you — nobody else’s workspace changes.
       </p>
       <div className="flex flex-wrap items-center gap-2">
-        <select
+        <Combobox
           value={value}
+          options={versions.map((version) => ({
+            value: String(version.id),
+            label: version.name,
+          }))}
+          placeholder="Don’t show one"
+          ariaLabel="Reference translation"
           disabled={pending}
-          onChange={(event) => setValue(event.target.value)}
-          className="h-9 w-full min-w-0 rounded-[2px] border border-input bg-background px-3 text-[14px] sm:w-auto sm:min-w-[240px]"
-        >
-          <option value="">Don’t show one</option>
-          {versions.map((version) => (
-            <option key={version.id} value={version.id}>
-              {version.name}
-            </option>
-          ))}
-        </select>
+          onChange={setValue}
+          className="w-full sm:w-[260px]"
+        />
         <Button
           type="button"
           size="sm"

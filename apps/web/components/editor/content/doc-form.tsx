@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Combobox } from './combobox'
 import { STATUS_META } from './status'
 import type { ContentModuleDef, FieldDef } from './module-defs'
 import { PTEditor } from './pt-editor'
@@ -43,6 +44,8 @@ interface DocFormProps {
   translationGroup?: string | null
   canWrite: boolean
   options: Record<string, Array<{ value: string; label: string }>>
+  /** Admins see every field; `adminOnly` fields are hidden from everyone else. */
+  isAdmin?: boolean
 }
 
 function slugify(source: string): string {
@@ -64,6 +67,7 @@ export function DocForm({
   translationGroup,
   canWrite,
   options,
+  isAdmin = false,
 }: DocFormProps) {
   const router = useRouter()
   const [fields, setFields] = useState<Fields>(initialFields)
@@ -149,8 +153,12 @@ export function DocForm({
 
   return (
     <div>
-      <header className="mb-6 flex flex-wrap items-start gap-x-5 gap-y-3">
-        <div className="min-w-0 flex-1">
+      {/* Stacked below sm. As a single flex line the title column is
+          `flex-1` (basis 0) against shrink-0 actions, so on a phone the
+          actions claimed the full width and the title rendered on top of
+          them. */}
+      <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-5 sm:gap-y-3">
+        <div className="min-w-0 sm:flex-1">
           <p className="font-[family-name:var(--font-glacial)] text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
             {def.labelSingular}
           </p>
@@ -167,7 +175,7 @@ export function DocForm({
           )}
         </div>
         {canWrite && (
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
             <Button type="button" disabled={pending || !dirty} onClick={save}>
               {pending ? 'Working…' : docId === null ? 'Create draft' : 'Save draft'}
             </Button>
@@ -217,6 +225,7 @@ export function DocForm({
       <FieldList
         defs={def.fields}
         fields={fields}
+        isAdmin={isAdmin}
         set={set}
         disabled={disabled}
         options={options}
@@ -245,10 +254,16 @@ interface FieldListProps {
   set: (key: string, value: unknown) => void
   disabled: boolean
   options: Record<string, Array<{ value: string; label: string }>>
+  isAdmin: boolean
   onSlugTouched: () => void
 }
 
-function FieldList({ defs, fields, set, disabled, options, onSlugTouched }: FieldListProps) {
+/** Fields an editor should not see at all, rather than see disabled. */
+function isHidden(def: FieldDef, isAdmin: boolean): boolean {
+  return def.kind === 'select' && def.adminOnly === true && !isAdmin
+}
+
+function FieldList({ defs, fields, set, disabled, options, isAdmin, onSlugTouched }: FieldListProps) {
   // Sections gate the fields that follow them until the next section.
   let visible = true
   const rendered: ReactNode[] = []
@@ -276,15 +291,23 @@ function FieldList({ defs, fields, set, disabled, options, onSlugTouched }: Fiel
     }
     if (!visible) return
     if (fieldDef.kind === 'row') {
+      // A row whose fields are all hidden collapses entirely; one survivor
+      // stretches rather than leaving a gap where its sibling was.
+      const subs = fieldDef.fields.filter((sub) => !isHidden(sub, isAdmin))
+      if (subs.length === 0) return
       rendered.push(
-        <div key={`r${i}`} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {fieldDef.fields.map((sub) => (
+        <div
+          key={`r${i}`}
+          className={cn('grid grid-cols-1 gap-4', subs.length > 1 && 'sm:grid-cols-2')}
+        >
+          {subs.map((sub) => (
             <Field key={keyOf(sub)} def={sub} fields={fields} set={set} disabled={disabled} options={options} onSlugTouched={onSlugTouched} />
           ))}
         </div>,
       )
       return
     }
+    if (isHidden(fieldDef, isAdmin)) return
     rendered.push(
       <Field key={keyOf(fieldDef)} def={fieldDef} fields={fields} set={set} disabled={disabled} options={options} onSlugTouched={onSlugTouched} />,
     )
@@ -395,18 +418,13 @@ function Field({ def, fields, set, disabled, options, onSlugTouched }: FieldProp
       const numeric = def.key.endsWith('_id')
       return (
         <FieldShell label={def.label} optional={optional} desc={desc}>
-          <NativeSelect
+          <Combobox
             value={value === null || value === undefined ? '' : String(value)}
+            options={opts}
+            ariaLabel={def.label}
             disabled={disabled}
             onChange={(raw) => set(def.key, raw === '' ? null : numeric ? Number(raw) : raw)}
-          >
-            <option value="">—</option>
-            {opts.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </NativeSelect>
+          />
         </FieldShell>
       )
     }
@@ -697,29 +715,3 @@ function Chip({
   )
 }
 
-/** Native select styled to match the shadcn Input surface + brand type. */
-function NativeSelect({
-  value,
-  disabled,
-  onChange,
-  children,
-}: {
-  value: string
-  disabled: boolean
-  onChange: (value: string) => void
-  children: ReactNode
-}) {
-  return (
-    <select
-      className={cn(
-        'h-9 w-full rounded-[2px] border border-input bg-transparent px-3 py-1 shadow-xs outline-none transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50',
-        CONTROL_FONT,
-      )}
-      value={value}
-      disabled={disabled}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      {children}
-    </select>
-  )
-}

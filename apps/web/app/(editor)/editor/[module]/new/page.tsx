@@ -4,7 +4,10 @@ import { getEditorialSession } from '@/lib/editorial-client'
 import type { EditorialContentModule } from '@/lib/editorial-content-client'
 import { DocForm } from '@/components/editor/content/doc-form'
 import { CONTENT_MODULE_DEFS } from '@/components/editor/content/module-defs'
-import { loadModuleOptions } from '@/components/editor/content/options'
+import {
+  loadModuleOptions,
+  loadViewerAuthorId,
+} from '@/components/editor/content/options'
 import { EditorCrumb } from '@/components/editor/content/page-chrome'
 import { canWriteContentModule } from '@/lib/editorial-access'
 
@@ -33,6 +36,15 @@ export default async function NewContentDocPage({
   const { group } = await searchParams
   const options = await loadModuleOptions(module, session.accessToken)
 
+  // A non-admin does not get the author picker, so their own byline is filled
+  // in here instead. Admins pick from the full list.
+  const viewerAuthorId =
+    module === 'article' && !editorial.is_admin
+      ? await loadViewerAuthorId(session.accessToken)
+      : null
+  const initialFields =
+    viewerAuthorId === null ? {} : { author_id: viewerAuthorId }
+
   return (
     <section className="ed-page-narrow px-4 pt-6 pb-24 sm:px-9 sm:pt-8">
       <EditorCrumb href={`/editor/${module}`}>{def.label}</EditorCrumb>
@@ -40,11 +52,12 @@ export default async function NewContentDocPage({
         module={module as EditorialContentModule}
         def={def}
         docId={null}
-        initialFields={{}}
+        initialFields={initialFields}
         initialStatus={null}
         translationGroup={group ?? null}
         canWrite
         options={options}
+        isAdmin={editorial.is_admin}
       />
     </section>
   )

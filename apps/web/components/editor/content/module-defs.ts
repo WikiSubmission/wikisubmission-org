@@ -12,7 +12,7 @@ export type FieldDef =
   | { kind: 'text'; key: string; label: string; required?: boolean; mono?: boolean; desc?: string; title?: boolean }
   | { kind: 'slug'; key: string; label: string; from: string; desc?: string }
   | { kind: 'textarea'; key: string; label: string; rows?: number; desc?: string }
-  | { kind: 'select'; key: string; label: string; required?: boolean; options?: Array<{ value: string; label: string }>; optionsKey?: string; desc?: string }
+  | { kind: 'select'; key: string; label: string; required?: boolean; options?: Array<{ value: string; label: string }>; optionsKey?: string; desc?: string; adminOnly?: boolean }
   | { kind: 'multiselect'; key: string; label: string; optionsKey: string; desc?: string }
   | { kind: 'number'; key: string; label: string; desc?: string }
   | { kind: 'toggle'; key: string; label: string; desc?: string; defaultOn?: boolean }
@@ -56,7 +56,10 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
       {
         kind: 'row',
         fields: [
-          { kind: 'select', key: 'author_id', label: 'Author', optionsKey: 'authors' },
+          // Admin-only: a regular editor writes under their own byline, which
+          // the form fills in from their account, so the picker would only
+          // offer them a way to publish under someone else's name.
+          { kind: 'select', key: 'author_id', label: 'Author', optionsKey: 'authors', adminOnly: true },
           { kind: 'multiselect', key: 'categories', label: 'Categories', optionsKey: 'categories' },
         ],
       },

@@ -60,6 +60,25 @@ function authedClient(token: string) {
 }
 
 /**
+ * Resolves the caller's own WikiSubmission user id. Used to match an editor to
+ * their author record so the byline can be filled in for them. Returns null on
+ * any failure — callers fall back to leaving the field unset.
+ */
+export async function getViewerUserId(
+  token: string | undefined
+): Promise<number | null> {
+  if (!API_BASE || !token) return null
+  try {
+    const { data, error, response } =
+      await authedClient(token).GET('/users/me')
+    if (error || !response.ok || !data?.data) return null
+    return data.data.id ?? null
+  } catch {
+    return null
+  }
+}
+
+/**
  * Resolves the caller's editorial permission snapshot. Returns null when the
  * backend denies access (403), the token is missing, or the request fails — the
  * caller treats null as "no editorial access" and denies by default.

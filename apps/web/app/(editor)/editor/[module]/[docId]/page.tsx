@@ -54,6 +54,7 @@ export default async function EditContentDocPage({ params }: PageProps) {
         translationGroup={doc.translation_group ?? null}
         canWrite={canWrite}
         options={options}
+        isAdmin={editorial.is_admin}
       />
     </section>
   )

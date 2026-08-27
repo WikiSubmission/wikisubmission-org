@@ -1138,13 +1138,17 @@
 
 /* =========================================================
    NATIVE CONTROLS
-   Chromium hands the <select> drop-down list the control's own background
-   once the author has set one. Several editor selects are `bg-transparent`,
-   which resolves to nothing and paints the list white — so in dark mode the
-   options were light ink on white and unreadable. (next-themes already sets
-   `color-scheme` on <html>, which is what would otherwise have covered this;
-   an author background overrides it.) Pinning the surface on both the control
-   and its options keeps the list legible in every mode and palette.
+   Keeps the closed <select> box on an editor surface instead of the
+   `bg-transparent` some of them inherit from the shadcn Input styling.
+
+   This does NOT fix the drop-down list itself. Chromium on Windows paints
+   that list from the platform, and neither `color-scheme` (next-themes
+   already sets it on <html>) nor an author `background-color` on `option`
+   reaches it — the list still came up white behind light ink in dark mode.
+   The form's select fields were therefore moved to `content/combobox.tsx`,
+   which draws its own list. What remains native here is the deep-editor
+   plumbing (callout tone, appendix body slots); the rules below at least keep
+   their closed state readable, and they are next in line for the combobox.
    ========================================================= */
 .ed-scope select {
   background-color: var(--ed-surface);

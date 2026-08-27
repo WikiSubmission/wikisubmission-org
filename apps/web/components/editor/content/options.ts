@@ -1,10 +1,31 @@
 // Server-only helpers — imported from server components, never the browser.
 import { wsApiServer } from '@/src/api/server-client'
-import { listQuranVersions } from '@/lib/editorial-client'
+import { getViewerUserId, listQuranVersions } from '@/lib/editorial-client'
 import { listContentDocs } from '@/lib/editorial-content-client'
 import { docTitle, CONTENT_MODULE_DEFS } from './module-defs'
 
 export type OptionMap = Record<string, Array<{ value: string; label: string }>>
+
+/**
+ * The author doc that belongs to the caller, found by the `user_id` an admin
+ * set on it. Null when the caller has no author record, or none is linked to
+ * their account — the byline then stays empty for them to be granted one.
+ */
+export async function loadViewerAuthorId(
+  token: string | undefined
+): Promise<number | null> {
+  try {
+    const userId = await getViewerUserId(token)
+    if (userId === null) return null
+    const { docs } = await listContentDocs(token, 'author', { limit: 500 })
+    const mine = docs.find(
+      (doc) => Number((doc.fields as Record<string, unknown>).user_id) === userId
+    )
+    return mine ? mine.id : null
+  } catch {
+    return null
+  }
+}
 
 /**
  * Loads the reference-data options a module's editing form needs (languages,
