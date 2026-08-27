@@ -17,12 +17,13 @@ import { CommandMenu } from '@/components/command-menu/command-menu'
  * a Suspense boundary if it ever grows.
  *
  * The shortcut lives out here rather than inside the menu so there is exactly one
- * owner of Cmd/Ctrl+K, and it keeps working no matter what the menu is rendering.
+ * owner of `/`, and it keeps working no matter what the menu is rendering. `/` is
+ * a bare key, so `useHotkey` ignores it while the user is typing in a field.
  */
 export function CommandMenuMount() {
   const toggle = useCommandMenu((s) => s.toggle)
 
-  useHotkey('k', toggle, { mod: true })
+  useHotkey('/', toggle, { mod: false })
 
   return <CommandMenu />
 }

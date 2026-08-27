@@ -74,9 +74,6 @@ export default function NotesScreen() {
               placeholder={t('searchPlaceholder')}
               className="flex-1 bg-transparent outline-none py-2 font-[var(--font-source-serif)] text-[14px] text-[var(--ed-fg)] placeholder:text-[var(--ed-fg-muted)]"
             />
-            <span className="font-[var(--font-jetbrains)] text-[10px] tracking-[0.04em] text-[var(--ed-fg-muted)] border border-[var(--ed-rule)] px-1.5 py-0.5">
-              ⌘K
-            </span>
           </label>
         </div>
       </div>

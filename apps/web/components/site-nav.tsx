@@ -11,6 +11,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { useChatPanel } from '@/components/chat-sidebar/panel-context'
 import { SiteBrand } from '@/components/site-brand'
 import { UserMenu } from '@/components/user-menu'
+import { CommandMenuTrigger } from '@/components/command-menu-trigger'
 import { useSession } from 'next-auth/react'
 import { isRtlLocale } from '@/lib/is-rtl-language'
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion'
@@ -632,6 +633,8 @@ export function SiteNav() {
         </div>
 
         <div className="flex-none flex items-center justify-end gap-1.5 sm:gap-1">
+          <CommandMenuTrigger />
+
           {isAuthed && (
             <button
               type="button"

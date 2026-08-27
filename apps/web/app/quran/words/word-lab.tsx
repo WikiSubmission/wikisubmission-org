@@ -373,24 +373,6 @@ export function WordLab({ initialLetters }: { initialLetters?: string }) {
     }
   }, [activeRoot])
 
-  // Cmd/Ctrl+K belongs to the global command menu. This page-local focus key is
-  // plain `/`, which only fires when the user is not already typing somewhere.
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return
-      const target = e.target as HTMLElement | null
-      const tag = target?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) return
-      const el = inputRef.current
-      if (!el) return
-      e.preventDefault()
-      el.focus()
-      el.select()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [])
-
   const onSearchChange = (value: string) => {
     setQuery(value)
   }
