@@ -10,8 +10,8 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
-  canReadModule,
-  canWriteModule,
+  canReadContentModule,
+  canWriteContentModule,
   hasEditorWorkspaceAccess,
 } from '@/lib/editorial-access'
 
@@ -62,7 +62,12 @@ export default async function EditorLandingPage() {
   // workspace here, so they would see an empty grid.
   if (!editorial || !hasEditorWorkspaceAccess(editorial)) redirect('/')
 
-  const accessible = MODULE_ORDER.filter((key) => canReadModule(editorial, key))
+  // canReadContentModule, not canReadModule: it is the one that knows Authors
+  // is admin-only and Categories ride on Articles, so a legacy grant does not
+  // put a card here that the module's own page would redirect away from.
+  const accessible = MODULE_ORDER.filter((key) =>
+    canReadContentModule(editorial, key)
+  )
 
   // First name where we have one, so the page opens like a greeting rather
   // than a control panel. Falls back to a plain title for accounts with no
@@ -86,16 +91,19 @@ export default async function EditorLandingPage() {
         </p>
       </header>
 
-      {accessible.length === 0 ? (
-        <p className="max-w-xl text-[16.5px] leading-relaxed text-muted-foreground">
-          Nothing has been shared with you yet. Ask an administrator which parts
-          of the site you should be working on and they will show up here.
+      {accessible.length === 0 && (
+        <p className="mb-7 max-w-xl text-[16.5px] leading-relaxed text-muted-foreground">
+          No sections have been shared with you yet. Ask an administrator which
+          parts of the site you should be working on and they will show up here.
+          You can still set up your byline below.
         </p>
-      ) : (
+      )}
+
+      {accessible.length > 0 && (
         <ul className="grid list-none grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3.5 p-0">
           {accessible.map((key) => {
             const info = MODULE_INFO[key] ?? { label: key, blurb: '' }
-            const canWrite = canWriteModule(editorial, key)
+            const canWrite = canWriteContentModule(editorial, key)
             return (
               <li key={key}>
                 <Link href={`/editor/${key}`} className="group block h-full">
@@ -121,6 +129,20 @@ export default async function EditorLandingPage() {
           })}
         </ul>
       )}
+
+      {/* Everyone has a byline, whatever sections they have been granted. The
+          Authors module beside it is the admin-only full list. */}
+      <Link
+        href="/editor/profile"
+        className="group mt-3.5 block max-w-md rounded-[3px] border border-border bg-card px-5 py-4 transition-colors hover:border-primary/40"
+      >
+        <span className="block font-[family-name:var(--font-cormorant)] text-[21px] text-foreground">
+          Your profile
+        </span>
+        <span className="mt-0.5 block text-[15px] leading-normal text-muted-foreground">
+          The byline readers see on the articles you write.
+        </span>
+      </Link>
     </section>
   )
 }

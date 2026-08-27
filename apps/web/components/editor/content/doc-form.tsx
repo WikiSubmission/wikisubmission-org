@@ -46,6 +46,12 @@ interface DocFormProps {
   options: Record<string, Array<{ value: string; label: string }>>
   /** Admins see every field; `adminOnly` fields are hidden from everyone else. */
   isAdmin?: boolean
+  /**
+   * Whether to offer Delete. Defaults to `canWrite`. The self-service profile
+   * passes false for non-admins: the backend keeps author deletes admin-only so
+   * an editor cannot remove a byline that published articles point at.
+   */
+  canDelete?: boolean
 }
 
 function slugify(source: string): string {
@@ -68,6 +74,7 @@ export function DocForm({
   canWrite,
   options,
   isAdmin = false,
+  canDelete,
 }: DocFormProps) {
   const router = useRouter()
   const [fields, setFields] = useState<Fields>(initialFields)
@@ -195,7 +202,7 @@ export function DocForm({
                 Unpublish
               </Button>
             )}
-            {docId !== null && (
+            {docId !== null && (canDelete ?? canWrite) && (
               <Button
                 type="button"
                 variant="ghost"
@@ -260,7 +267,7 @@ interface FieldListProps {
 
 /** Fields an editor should not see at all, rather than see disabled. */
 function isHidden(def: FieldDef, isAdmin: boolean): boolean {
-  return def.kind === 'select' && def.adminOnly === true && !isAdmin
+  return 'adminOnly' in def && def.adminOnly === true && !isAdmin
 }
 
 function FieldList({ defs, fields, set, disabled, options, isAdmin, onSlugTouched }: FieldListProps) {

@@ -14,7 +14,7 @@ export type FieldDef =
   | { kind: 'textarea'; key: string; label: string; rows?: number; desc?: string }
   | { kind: 'select'; key: string; label: string; required?: boolean; options?: Array<{ value: string; label: string }>; optionsKey?: string; desc?: string; adminOnly?: boolean }
   | { kind: 'multiselect'; key: string; label: string; optionsKey: string; desc?: string }
-  | { kind: 'number'; key: string; label: string; desc?: string }
+  | { kind: 'number'; key: string; label: string; desc?: string; adminOnly?: boolean }
   | { kind: 'toggle'; key: string; label: string; desc?: string; defaultOn?: boolean }
   | { kind: 'tags'; key: string; label: string; desc?: string }
   | { kind: 'image'; key: string; label: string; required?: boolean; desc?: string; aspect?: string }
@@ -95,7 +95,10 @@ export const CONTENT_MODULE_DEFS: Record<string, ContentModuleDef> = {
       { kind: 'slug', key: 'slug', label: 'Slug', from: 'first_name last_name' },
       { kind: 'text', key: 'photo_url', label: 'Photo URL', mono: true },
       { kind: 'textarea', key: 'bio', label: 'Bio', rows: 4 },
-      { kind: 'number', key: 'user_id', label: 'WS user id', desc: 'Optional. Links this author to a WikiSubmission account.' },
+      // Admin-only: this link is what /editor/profile authorizes a self-write
+      // against, so an editor must not be able to point it somewhere else. The
+      // backend rejects it too (enforceAuthorSelfLink).
+      { kind: 'number', key: 'user_id', label: 'WS user id', adminOnly: true, desc: 'Optional. Links this author to a WikiSubmission account, letting them maintain their own profile.' },
     ],
   },
 
