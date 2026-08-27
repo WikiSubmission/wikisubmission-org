@@ -5,7 +5,11 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { auth, signOut } from '@/auth'
 import { getEditorialSession } from '@/lib/editorial-client'
-import { hasAnyGameAccess, hasEditorWorkspaceAccess } from '@/lib/editorial-access'
+import {
+  hasAnyGameAccess,
+  hasEditorWorkspaceAccess,
+  resolveEditorRole,
+} from '@/lib/editorial-access'
 import { AppShell, type EditorViewer } from '@/components/editor/shell'
 
 // Session-dependent: never statically render the editor.
@@ -46,7 +50,12 @@ export default async function EditorLayout({ children }: { children: ReactNode }
   const viewer: EditorViewer = {
     name: session.user?.name || localPart || 'Editor',
     handle: localPart || (session.user?.name ?? 'editor').toLowerCase(),
+    email,
+    // Same provider photo the site nav shows, so the account looks identical
+    // on both surfaces.
+    image: session.user?.image ?? null,
     isAdmin: editorial.is_admin,
+    role: resolveEditorRole(editorial),
   }
 
   async function doSignOut() {

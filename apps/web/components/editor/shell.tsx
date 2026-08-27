@@ -6,6 +6,7 @@
  * Server component; the interactive pieces (sidebar, trigger) are client.
  */
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import { cookies } from 'next/headers'
 import {
   SidebarInset,
@@ -13,7 +14,8 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { EditorSidebar, type EditorViewer } from './sidebar'
-import { IChevR } from './icons'
+import { EditorAvatar } from './avatar'
+import { IChevR, IArrowL } from './icons'
 
 export type { EditorViewer }
 
@@ -27,8 +29,7 @@ export interface TopBarProps {
 }
 
 interface TopBarInternalProps extends TopBarProps {
-  isAdmin: boolean
-  initial: string
+  viewer: EditorViewer
 }
 
 const SAVE_TEXT: Record<SaveState, string> = {
@@ -37,7 +38,7 @@ const SAVE_TEXT: Record<SaveState, string> = {
   unsaved: 'Unsaved changes',
 }
 
-function TopBar({ crumb = [], cur, save, actions, isAdmin, initial }: TopBarInternalProps) {
+function TopBar({ crumb = [], cur, save, actions, viewer }: TopBarInternalProps) {
   return (
     <header className="topbar">
       <SidebarTrigger className="-ml-1 text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)]" />
@@ -70,8 +71,17 @@ function TopBar({ crumb = [], cur, save, actions, isAdmin, initial }: TopBarInte
             {SAVE_TEXT[save]}
           </span>
         )}
-        <span className="badge admin">{isAdmin ? 'Admin' : 'Editor'}</span>
-        <span className="tb-avatar">{initial}</span>
+        {/* The workspace is otherwise a dead end — this is the way back out. */}
+        <Link href="/" className="tb-exit" title="Back to wikisubmission.org">
+          <IArrowL size={13} />
+          <span>Site</span>
+        </Link>
+        <span className="badge admin">{viewer.role.label}</span>
+        <EditorAvatar
+          name={viewer.name}
+          email={viewer.email}
+          image={viewer.image}
+        />
       </div>
     </header>
   )
@@ -93,11 +103,7 @@ export async function AppShell({ viewer, modules, signOutAction, topBar, childre
     <SidebarProvider defaultOpen={defaultOpen} className="h-full min-h-0 overflow-hidden">
       <EditorSidebar viewer={viewer} modules={modules} signOutAction={signOutAction} />
       <SidebarInset className="min-h-0 min-w-0 overflow-hidden">
-        <TopBar
-          {...topBar}
-          isAdmin={viewer.isAdmin}
-          initial={viewer.name.charAt(0).toUpperCase()}
-        />
+        <TopBar {...topBar} viewer={viewer} />
         <div className="workspace">{children}</div>
       </SidebarInset>
     </SidebarProvider>

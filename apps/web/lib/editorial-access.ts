@@ -188,3 +188,34 @@ export function hasEditorWorkspaceAccess(session: EditorialSession): boolean {
   if (session.is_admin) return true
   return CONTENT_MODULE_KEYS.some((key) => session.modules[key] !== undefined)
 }
+
+// ── role label ───────────────────────────────────────────────────────────────
+
+/**
+ * The single highest role to show the caller in the editor chrome.
+ *
+ * The backend's AccessRole enum (member/editor/game_editor/admin) is not on the
+ * EditorialSession snapshot, so the label is derived from the grants that are.
+ * Ordered most to least authority; only the first match is shown.
+ */
+export type EditorRoleKey = 'admin' | 'approver' | 'editor' | 'contributor'
+
+export interface EditorRole {
+  key: EditorRoleKey
+  label: string
+}
+
+export function resolveEditorRole(session: EditorialSession): EditorRole {
+  if (session.is_admin) return { key: 'admin', label: 'Admin' }
+  // An approver can release someone else's work on at least one version — more
+  // authority than write access to it, so it ranks above plain editor.
+  if (Object.keys(session.quran_approver_versions ?? {}).length > 0) {
+    return { key: 'approver', label: 'Approver' }
+  }
+  const canWriteAnything = CONTENT_MODULE_KEYS.some(
+    (key) => session.modules[key] === true
+  )
+  if (canWriteAnything) return { key: 'editor', label: 'Editor' }
+  // A key with no write flag is read-only access.
+  return { key: 'contributor', label: 'Contributor' }
+}

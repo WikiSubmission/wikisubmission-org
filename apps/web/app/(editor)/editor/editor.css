@@ -115,12 +115,17 @@
 .save-pill.unsaved { color: var(--st-changes); border-color: color-mix(in oklab, var(--st-changes) 40%, var(--ed-rule)); }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-.tb-avatar {
-  width: 30px; height: 30px; border-radius: var(--ed-radius-sm);
-  background: var(--ed-surface); border: 1px solid var(--ed-rule);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-cormorant); font-size: 17px; color: var(--ed-fg);
+/* The way out of the workspace, back to the reader-facing site. */
+.tb-exit {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-glacial);
+  font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ed-fg-muted);
+  border: 1px solid var(--ed-rule); border-radius: var(--ed-radius-sm);
+  padding: 4px 9px 4px 7px;
+  transition: color 120ms ease, border-color 120ms ease;
 }
+.tb-exit:hover { color: var(--ed-fg); border-color: var(--ed-fg); }
 
 /* =========================================================
    WORKSPACE — master / detail / reference rail
@@ -1218,6 +1223,8 @@
   .tb-spacer { display: none; }
   .tb-right { gap: 8px; flex: 0 0 auto; }
   .tb-right .badge { display: none; }
+  .tb-exit span { display: none; }
+  .tb-exit { padding: 5px 6px; }
   /* Keep the dot, drop the wording — "All changes saved" doubles the bar. */
   /* .ed-scope-scoped so it outranks the legibility pass above. */
   .ed-scope .save-pill { padding: 5px; gap: 0; font-size: 0; border-radius: 999px; }

@@ -33,6 +33,7 @@ import {
   type IconProps,
 } from './icons'
 import { EditorUserMenu } from './user-menu'
+import type { EditorRole } from '@/lib/editorial-access'
 
 interface ModuleMeta {
   label: string
@@ -51,6 +52,15 @@ const MODULE_META: Record<string, ModuleMeta> = {
 }
 
 const GROUP_ORDER = ['Content', 'People'] as const
+
+// Everyone with a workspace gets their own byline; the Authors module beside it
+// is the admin-only full list.
+const PROFILE_ITEM = {
+  key: 'profile',
+  label: 'Your profile',
+  href: '/editor/profile',
+  icon: IIdCard,
+} as const
 
 interface NavItem {
   key: string
@@ -71,6 +81,9 @@ function buildNav(
   }
 
   for (const key of Object.keys(MODULE_META)) {
+    // Authors is the whole-list surface and stays admin-only, whatever legacy
+    // grants an account still carries.
+    if (key === 'author' && !isAdmin) continue
     if (!isAdmin && modules[key] === undefined) continue
     const meta = MODULE_META[key]
     push(meta.group, {
@@ -81,13 +94,20 @@ function buildNav(
     })
   }
 
+  push('People', { ...PROFILE_ITEM })
+
   return groups
 }
 
 export interface EditorViewer {
   name: string
   handle: string
+  email?: string | null
+  /** Provider photo from the auth session, same source as the site nav. */
+  image?: string | null
   isAdmin: boolean
+  /** Highest role the grants add up to, already resolved for display. */
+  role: EditorRole
 }
 
 interface EditorSidebarProps {

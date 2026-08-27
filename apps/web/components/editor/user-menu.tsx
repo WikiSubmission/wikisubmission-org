@@ -7,6 +7,7 @@
  * themes as the rest of the site rather than a private light/dark switch.
  */
 import { useTransition, useSyncExternalStore } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useLocale } from 'next-intl'
 import { useTheme } from 'next-themes'
@@ -24,7 +25,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
-import { IGlobe, IPalette, ILogout, IChevD } from './icons'
+import { IGlobe, IPalette, ILogout, IChevD, IArrowL } from './icons'
+import { EditorAvatar } from './avatar'
 import type { EditorViewer } from './sidebar'
 import { UI_LOCALES } from '@/constants/ui-locales'
 
@@ -80,13 +82,16 @@ export function EditorUserMenu({ viewer, signOutAction }: EditorUserMenuProps) {
           aria-label="Account, language and theme"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <span className="flex aspect-square size-8 items-center justify-center rounded-[2px] border bg-card font-[family-name:var(--font-cormorant)] text-[17px]">
-            {viewer.name.charAt(0).toUpperCase()}
-          </span>
+          <EditorAvatar
+            name={viewer.name}
+            email={viewer.email}
+            image={viewer.image}
+            size={32}
+          />
           <span className="flex min-w-0 flex-col leading-tight">
             <span className="truncate text-[15.5px] font-semibold">{viewer.name}</span>
-            <span className="truncate font-mono text-[11.5px] text-muted-foreground">
-              @{viewer.handle}
+            <span className="truncate font-[family-name:var(--font-glacial)] text-[10.5px] uppercase tracking-[0.16em] text-primary">
+              {viewer.role.label}
             </span>
           </span>
           <span className="ml-auto text-muted-foreground" aria-hidden>
@@ -95,7 +100,34 @@ export function EditorUserMenu({ viewer, signOutAction }: EditorUserMenuProps) {
         </SidebarMenuButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent side="top" align="start" className="w-56">
+      <DropdownMenuContent side="top" align="start" className="w-60">
+        <div className="flex items-center gap-2.5 px-2 py-2">
+          <EditorAvatar
+            name={viewer.name}
+            email={viewer.email}
+            image={viewer.image}
+            size={34}
+          />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-foreground">{viewer.name}</p>
+            <p className="truncate font-mono text-[11px] text-muted-foreground">
+              @{viewer.handle}
+            </p>
+          </div>
+        </div>
+        <div className="px-2 pb-2">
+          <span className="badge admin">{viewer.role.label}</span>
+        </div>
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem asChild>
+          <Link href="/" className="flex items-center gap-2">
+            <IArrowL size={15} />
+            Back to WikiSubmission
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="flex items-center gap-2">
             <IGlobe size={15} />

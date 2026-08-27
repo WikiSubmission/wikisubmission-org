@@ -153,3 +153,9 @@ export const IPalette = (p: IconProps) => (
     <circle cx="15.5" cy="8" r="1" fill="currentColor" stroke="none" />
   </Glyph>
 )
+
+export const IArrowL = (p: IconProps) => (
+  <Glyph {...p}>
+    <path d="M19 12H5M11 18l-6-6 6-6" />
+  </Glyph>
+)
