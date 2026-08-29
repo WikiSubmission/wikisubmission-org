@@ -323,6 +323,10 @@ export function useCopyByReferenceCommands(
       const languageCount = detected.tokens.filter((token) =>
         languageCodes.includes(token),
       ).length
+      // Once the reader has started typing anything past the reference itself
+      // (a recognized token, a partial word, or junk), that is copy intent, not
+      // navigation — Copy should lead instead of Navigate.
+      const hasParams = detected.tokenFeedback.length > 0
 
       const commands: Command[] = [
         {
@@ -332,7 +336,7 @@ export function useCopyByReferenceCommands(
           hint: String(detected.count),
           icon: createElement(ExternalLink),
           keywords: [recipe.refs, query],
-          priority: 100,
+          priority: hasParams ? 95 : 100,
           navigate: `/quran/${recipe.refs}`,
         },
         {
@@ -349,7 +353,7 @@ export function useCopyByReferenceCommands(
           hint: String(detected.count),
           icon: createElement(Copy),
           keywords: [recipe.refs, query],
-          priority: 95,
+          priority: hasParams ? 100 : 95,
           keepOpen: tooMany || hasInvalidTokens,
           run: () => {
             if (hasInvalidTokens) {
