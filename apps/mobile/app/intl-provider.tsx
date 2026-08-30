@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { Preferences } from '@capacitor/preferences'
 import {
   DEFAULT_LOCALE,
+  detectSystemLocale,
   directionFor,
   LOCALE_CHANGED_EVENT,
   LOCALE_PREF_KEY,
@@ -74,12 +75,19 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
         // resolveLocale, not isLocale: a build before the Kurdish split stored
         // `ku`, which must land on Sorani rather than fall back to English.
         const stored = resolveLocale(value)
-        if (!stored) return
-        applyLocale(stored)
-        if (stored !== value) {
-          // Rewrite the preference so the alias is followed only once.
-          void Preferences.set({ key: LOCALE_PREF_KEY, value: stored }).catch(() => {})
+        if (stored) {
+          applyLocale(stored)
+          if (stored !== value) {
+            // Rewrite the preference so the alias is followed only once.
+            void Preferences.set({ key: LOCALE_PREF_KEY, value: stored }).catch(() => {})
+          }
+          return
         }
+        // No preference has ever been set: follow the device's language list.
+        // Deliberately not persisted, so a later system-language change keeps
+        // being picked up until the user overrides it from the picker.
+        const detected = detectSystemLocale(navigator.languages ?? [navigator.language])
+        if (detected) applyLocale(detected)
       })
       .catch(() => {
         // No stored preference / bridge unavailable: keep the default locale.

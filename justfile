@@ -1,10 +1,21 @@
-android_home := env_var_or_default("ANDROID_HOME", env_var("HOME") + "/Android/Sdk")
-java_home := "/usr/lib/jvm/java-21-openjdk-amd64"
+set windows-shell := ['C:\PROGRA~1\Git\bin\bash.exe', '-cu']
+
+os_family := os_family()
+
+android_home := env_var_or_default("ANDROID_HOME", if os_family == "windows" { env_var("LOCALAPPDATA") + "/Android/Sdk" } else { env_var("HOME") + "/Android/Sdk" })
+java_home := env_var_or_default("JAVA_HOME", if os_family == "windows" { env_var_or_default("ProgramFiles", "C:/Program Files") + "/Android/Android Studio/jbr" } else { "/usr/lib/jvm/java-21-openjdk-amd64" })
+path_sep := if os_family == "windows" { ";" } else { ":" }
+
+# just's shebang handling on Windows shells out to `cygpath` to translate any
+# interpreter path containing a forward slash, and naively whitespace-splits
+# backslash paths — both break on a normal "C:\Program Files\..." install.
+# The 8.3 short name has no spaces and no slashes, so it hits neither problem.
+bash_exe := if os_family == "windows" { 'C:\PROGRA~1\Git\bin\bash.exe' } else { "/usr/bin/env bash" }
 
 export ANDROID_HOME := android_home
 export ANDROID_SDK_ROOT := android_home
 export JAVA_HOME := java_home
-export PATH := java_home + "/bin:" + android_home + "/platform-tools:" + android_home + "/emulator:" + env_var("PATH")
+export PATH := java_home + "/bin" + path_sep + android_home + "/platform-tools" + path_sep + android_home + "/emulator" + path_sep + env_var("PATH")
 
 gradle_file := "apps/mobile/android/app/build.gradle"
 
@@ -20,7 +31,7 @@ default:
 
 # Increment versionCode by 1 and versionName's minor by 0.1 (e.g. 2/"1.1" -> 3/"1.2")
 _bump-version:
-    #!/usr/bin/env bash
+    #!{{bash_exe}}
     set -euo pipefail
     code=$(grep -oP 'versionCode \K\d+' {{gradle_file}})
     name=$(grep -oP 'versionName "\K[^"]+' {{gradle_file}})
@@ -34,27 +45,37 @@ _bump-version:
 
 # Build the Play Store release bundle (Next export -> cap sync -> gradlew bundleRelease). Pass --bump to increment versionCode/versionName first.
 android-release bump="":
-    #!/usr/bin/env bash
+    #!{{bash_exe}}
     set -euo pipefail
     if [ -n "{{bump}}" ]; then just _bump-version; fi
     pnpm --filter mobile build
     (cd apps/mobile && npx cap sync android)
     (cd apps/mobile/android && ./gradlew bundleRelease --no-daemon)
-    echo "AAB: apps/mobile/android/app/build/outputs/bundle/release/app-release.aab"
+    version_name=$(grep -oP 'versionName "\K[^"]+' {{gradle_file}})
+    version_code=$(grep -oP 'versionCode \K\d+' {{gradle_file}})
+    mkdir -p releases
+    dest="releases/app-release-$version_name-$version_code.aab"
+    cp apps/mobile/android/app/build/outputs/bundle/release/app-release.aab "$dest"
+    echo "AAB: $dest"
 
 # Build a signed release APK for sideloading/testing outside the Play Store. Pass --bump to increment versionCode/versionName first.
 android-release-apk bump="":
-    #!/usr/bin/env bash
+    #!{{bash_exe}}
     set -euo pipefail
     if [ -n "{{bump}}" ]; then just _bump-version; fi
     pnpm --filter mobile build
     (cd apps/mobile && npx cap sync android)
     (cd apps/mobile/android && ./gradlew assembleRelease --no-daemon)
-    echo "APK: apps/mobile/android/app/build/outputs/apk/release/app-release.apk"
+    version_name=$(grep -oP 'versionName "\K[^"]+' {{gradle_file}})
+    version_code=$(grep -oP 'versionCode \K\d+' {{gradle_file}})
+    mkdir -p releases
+    dest="releases/app-release-$version_name-$version_code.apk"
+    cp apps/mobile/android/app/build/outputs/apk/release/app-release.apk "$dest"
+    echo "APK: $dest"
 
 # Compile the web export, sync it into the native project, build a debug APK, then install + launch it on the phone connected over adb. Inspect the WebView live at chrome://inspect.
 android-debug:
-    #!/usr/bin/env bash
+    #!{{bash_exe}}
     set -euo pipefail
     # Pick the first authorized device; pin every adb call to it so a phone
     # reachable over both USB/TCP and wireless-debugging doesn't trip
@@ -93,7 +114,7 @@ android-connect addr:
 
 # Switch a USB-connected phone to wireless adb automatically: reads the phone's Wi-Fi IP, restarts adb on port 5555, and connects — no need to read the IP/port off the phone. Plug in over USB first; afterwards you can unplug.
 android-wifi:
-    #!/usr/bin/env bash
+    #!{{bash_exe}}
     set -euo pipefail
     if [ "$(adb devices | awk 'NR>1 && $2=="device"' | wc -l)" -eq 0 ]; then
       echo "Plug the phone in over USB first (and accept the USB-debugging prompt)." >&2
@@ -106,12 +127,17 @@ android-wifi:
     fi
     adb tcpip 5555
     sleep 1
-    adb connect "$ip:5555"
+    result="$(adb connect "$ip:5555" 2>&1)"
+    echo "$result"
+    if ! echo "$result" | grep -qE "^(connected to|already connected to)"; then
+      echo "Failed to connect over Wi-Fi — keep the USB cable plugged in. Make sure the phone is on the same Wi-Fi network as this machine and that nothing blocks port 5555 (router client isolation, Windows Firewall), then try again." >&2
+      exit 1
+    fi
     echo "Connected to $ip:5555 — you can unplug USB now. Deploy with: just android-debug"
 
 # Stream the running app's logs (JS console + native) from the phone.
 android-logcat:
-    #!/usr/bin/env bash
+    #!{{bash_exe}}
     set -euo pipefail
     pid="$(adb shell pidof -s {{app_id}} || true)"
     if [ -z "$pid" ]; then

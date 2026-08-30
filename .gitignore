@@ -79,3 +79,6 @@ scripts/*
 
 # Generated Play Store listing assets (scripts/store-assets)
 store-listing/
+
+# built release artifacts (copied here by `just android-release`/`android-release-apk`)
+/releases/

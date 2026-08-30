@@ -64,3 +64,19 @@ export function resolveLocale(value: string | null | undefined): Locale | null {
 export function directionFor(locale: string): 'rtl' | 'ltr' {
   return RTL_LOCALES.has(locale) ? 'rtl' : 'ltr'
 }
+
+/**
+ * Match the device's language list (`navigator.languages`, most-preferred
+ * first) against the locales this build ships. Compares base language
+ * subtags, so a region-qualified tag like `ar-SA` or `de-DE` still matches.
+ * Returns null when none of the device's languages are supported, so callers
+ * can fall back to `DEFAULT_LOCALE`.
+ */
+export function detectSystemLocale(languages: readonly string[]): Locale | null {
+  for (const tag of languages) {
+    const base = tag.split('-')[0].toLowerCase()
+    const resolved = resolveLocale(base)
+    if (resolved) return resolved
+  }
+  return null
+}
