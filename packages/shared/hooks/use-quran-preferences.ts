@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { contentLangForUiLocale } from '@/constants/ui-locales'
-import type { ZoomLevel } from '@/lib/quran-zoom'
+import { ZOOM_LEVELS, type ZoomLevel } from '@/lib/quran-zoom'
 
 /**
  * ISO 639-1 lang codes used by the ws-backend API.
@@ -90,6 +90,63 @@ export type QuranPreferences = {
    * the command menu, the settings panel, and the mode selector all do.
    */
   patchPreferences: (patch: Partial<QuranPreferences>) => void
+}
+
+/**
+ * Whitelist + repair an untrusted preferences blob from `GET /me/preferences`.
+ *
+ * The backend stores the payload opaquely (`Record<string, unknown>`), so a
+ * record written by an older client survives every migration below and would
+ * otherwise be spread straight into the store — reintroducing exactly the
+ * `ckb`/`kmr` primaryLanguage bug the v9 migration exists to fix. Anything not
+ * recognised here is dropped rather than trusted.
+ *
+ * Two keys are deliberately never accepted from the server:
+ * - `displayMode`, which is local-only view state (see `use-prefs-sync`)
+ * - `text`, whose `true` invariant belongs to `patchPreferences`
+ */
+export function sanitiseRemotePreferences(remote: unknown): Partial<QuranPreferences> {
+  if (!remote || typeof remote !== 'object') return {}
+  const src = remote as Record<string, unknown>
+  const out: Record<string, unknown> = {}
+
+  const BOOLEAN_KEYS = [
+    'arabic',
+    'subtitles',
+    'footnotes',
+    'transliteration',
+    'wordByWord',
+    'showVerseNumbers',
+  ] as const
+  for (const key of BOOLEAN_KEYS) {
+    if (typeof src[key] === 'boolean') out[key] = src[key]
+  }
+
+  if (src.primaryLanguage !== undefined) out.primaryLanguage = repairLangCode(src.primaryLanguage)
+  // An unusable secondary is dropped, not repaired — it is optional, and
+  // collapsing it onto English would collide with the primary.
+  if ('secondaryLanguage' in src) {
+    out.secondaryLanguage = isLangCode(src.secondaryLanguage) ? src.secondaryLanguage : undefined
+  }
+
+  if (src.readingModeLang === 'translation' || src.readingModeLang === 'arabic') {
+    out.readingModeLang = src.readingModeLang
+  }
+  if (src.wordTapAction === 'play' || src.wordTapAction === 'details') {
+    out.wordTapAction = src.wordTapAction
+  }
+  if (ZOOM_LEVELS.includes(src.zoomLevel as ZoomLevel)) out.zoomLevel = src.zoomLevel
+
+  if (src.wordLabSections && typeof src.wordLabSections === 'object') {
+    const s = src.wordLabSections as Record<string, unknown>
+    out.wordLabSections = {
+      derivs: typeof s.derivs === 'boolean' ? s.derivs : true,
+      occurrences: typeof s.occurrences === 'boolean' ? s.occurrences : true,
+      morphology: typeof s.morphology === 'boolean' ? s.morphology : false,
+    }
+  }
+
+  return out as Partial<QuranPreferences>
 }
 
 /**
