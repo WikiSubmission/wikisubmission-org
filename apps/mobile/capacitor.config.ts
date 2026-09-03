@@ -17,13 +17,20 @@ const config: CapacitorConfig = {
       backgroundColor: '#14110E',
       showSpinner: false,
     },
-    StatusBar: {
-      // Let the WebView (and therefore the top bar background) paint behind
-      // the status bar/cutout. The top bar pads its contents with the actual
-      // safe-area inset, so icons and text remain clear of every notch shape.
-      overlaysWebView: true,
-      style: 'DARK',
-      backgroundColor: '#F6F2EA',
+    SystemBars: {
+      // Capacitor 8's built-in replacement for @capacitor/status-bar. Android
+      // 15+ enforces edge-to-edge, so `overlaysWebView`/`backgroundColor` no
+      // longer exist: the WebView always paints behind the status bar and
+      // gesture bar, and the top bar's own background fills that area.
+      //
+      // 'css' keeps the plugin feeding the real window insets into
+      // env(safe-area-inset-*) (via --safe-area-inset-* on <html>), which is
+      // what the top bar and bottom nav pad themselves with. It needs
+      // viewport-fit=cover, set in app/layout.tsx.
+      insetsHandling: 'css',
+      // Follow the system light/dark appearance until NativeInit applies the
+      // resolved app theme, so the first painted frame is never wrong.
+      style: 'DEFAULT',
     },
     Keyboard: {
       resize: KeyboardResize.Native,

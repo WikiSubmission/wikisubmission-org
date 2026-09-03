@@ -2,8 +2,7 @@
 
 import { useEffect } from 'react'
 import { useTheme } from 'next-themes'
-import { Capacitor } from '@capacitor/core'
-import { StatusBar, Style } from '@capacitor/status-bar'
+import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
 import { Keyboard } from '@capacitor/keyboard'
 import { installCrashReporter } from '@/lib/crash-reporter'
 import { hideNativeSplash } from '@/lib/splash-handoff'
@@ -11,13 +10,6 @@ import { hideNativeSplash } from '@/lib/splash-handoff'
 // Global error/rejection listeners: installed at module scope so they cover
 // everything from the first evaluated frame onwards, not just post-mount.
 installCrashReporter()
-
-// App chrome background per color scheme. Mirrors the themeColor values in the
-// root layout viewport so the native status bar matches the web header.
-const STATUS_BAR_BACKGROUND = {
-  light: '#F6F2EA',
-  dark: '#14110E',
-} as const
 
 /**
  * One-time native shell configuration. Everything here is guarded by
@@ -32,12 +24,6 @@ export function NativeInit() {
   // Keyboard + splash run once on mount; they do not depend on the theme.
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return
-
-    // Keep the WebView edge-to-edge so the top bar itself paints the status
-    // bar/notch area. Its safe-area padding protects the interactive content.
-    // Applying this at runtime also covers installs upgraded from an older
-    // native config before the next full Capacitor sync.
-    StatusBar.setOverlaysWebView({ overlay: true }).catch(() => {})
 
     // Resize mode is declared once in capacitor.config.ts (KeyboardResize.Native);
     // only the accessory bar has no config-file equivalent.
@@ -64,19 +50,16 @@ export function NativeInit() {
     return () => window.clearTimeout(splashSafetyTimer)
   }, [])
 
-  // Keep the status bar legible against the current theme. Style.Dark means
-  // dark content (for light backgrounds); Style.Light means light content.
+  // Keep the status bar and gesture bar legible against the current theme.
+  // The style names the *background* the bar content has to sit on, not the
+  // content: Dark gives light icons (for our dark surface), Light gives dark
+  // icons. Both bars are transparent under edge-to-edge, so this follows the
+  // app theme rather than the system one, which they may disagree on.
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return
 
-    const isDark = resolvedTheme === 'dark'
-    StatusBar.setStyle({ style: isDark ? Style.Light : Style.Dark }).catch(() => {})
-
-    // setBackgroundColor is Android-only; it throws on iOS, which the catch
-    // swallows. It remains a fallback for Android versions/configurations that
-    // do not draw edge-to-edge, and matches the header background either way.
-    StatusBar.setBackgroundColor({
-      color: isDark ? STATUS_BAR_BACKGROUND.dark : STATUS_BAR_BACKGROUND.light,
+    SystemBars.setStyle({
+      style: resolvedTheme === 'dark' ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
     }).catch(() => {})
   }, [resolvedTheme])
 

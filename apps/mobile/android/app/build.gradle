@@ -55,13 +55,21 @@ android {
 
     buildTypes {
         release {
-            signingConfig releaseSigningReady ? signingConfigs.release : null
-            // R8 shrink+obfuscate. Deliberately the non-"optimize" default
-            // config: the aggressive one is a separate step to evaluate once
-            // this has proven itself on-device.
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig = releaseSigningReady ? signingConfigs.release : null
+            // R8 shrink + obfuscate + optimize. The "-optimize" default config
+            // differs from the plain one by exactly two lines: it drops
+            // `-dontoptimize` and adds `-allowaccessmodification` (verified
+            // against the AGP 8.13 copies under build/intermediates), so this
+            // is what Play Console's "Optimization isn't enabled" check wants.
+            // Everything Capacitor reaches reflectively (plugin dispatch,
+            // @JavascriptInterface members, Gson models) is pinned by
+            // proguard-rules.pro plus the plugins' own consumer rules, so
+            // whole-program optimization has no un-kept entry point to remove.
+            // Still smoke-test a release build on-device: the shrinker, not the
+            // compiler, is what breaks reflective code.
+            minifyEnabled = true
+            shrinkResources = true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             // No `ndk { debugSymbolLevel }` here on purpose: the only native code
             // in the bundle is prebuilt, already-stripped .so files from AARs
             // (libsqlcipher via @capacitor-community/sqlite, libdatastore_shared_counter).

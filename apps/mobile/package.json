@@ -28,7 +28,6 @@
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/push-notifications": "^8.1.1",
     "@capacitor/splash-screen": "^8.0.1",
-    "@capacitor/status-bar": "^8.0.2",
     "@capgo/capacitor-media-session": "^8.0.28",
     "@capgo/capacitor-social-login": "^8.3.35",
     "@tanstack/react-query": "^5.101.2",
