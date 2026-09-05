@@ -9,6 +9,7 @@ import { VerseOfTheDaySection } from './_sections/verse-of-day'
 import { PracticesSection } from './_sections/practices'
 import { JournalSection } from './_sections/journal'
 import { ToolsSection } from './_sections/tools'
+import { SupportSection } from './_sections/support'
 import { ClosingSection } from './_sections/closing'
 import { ContinueReadingSection } from './_sections/continue-reading'
 
@@ -29,7 +30,7 @@ type LatestArticle = {
   thumbnailUrl?: string
 }
 
-const LATEST_ARTICLE_COUNT = 3
+const LATEST_ARTICLE_COUNT = 6
 
 export default async function Home() {
   const locale = await getLocale()
@@ -53,7 +54,9 @@ export default async function Home() {
       <PracticesSection />
       <JournalSection articles={latestArticles} />
       <ToolsSection />
+      <SupportSection />
       <ClosingSection />
     </div>
   )
 }
+

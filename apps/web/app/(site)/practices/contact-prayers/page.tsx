@@ -75,54 +75,63 @@ function PrayerTimeRow({
   index: number
 }) {
   return (
-    <div className="grid gap-5 border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-5 transition-colors hover:border-[var(--ed-accent)] hover:bg-[var(--ed-surface)] sm:p-7 md:grid-cols-[74px_1fr_auto] md:items-center">
+    <div
+      className="grid gap-5 rounded-2xl border p-6 sm:p-7 transition-all duration-300 hover:border-[var(--ed-accent)] md:grid-cols-[72px_1fr_auto] md:items-center shadow-sm"
+      style={{
+        borderColor: 'var(--ed-rule)',
+        backgroundColor: 'var(--ed-surface)',
+      }}
+    >
       <div
-        className="text-4xl font-medium tabular-nums text-[var(--ed-accent)]"
-        style={{ fontFamily: F.display }}
+        className="text-3xl sm:text-4xl font-mono font-bold text-[var(--ed-accent)]"
+        style={{ fontFamily: F.mono }}
       >
         {String(index + 1).padStart(2, '0')}
       </div>
-      <div className="space-y-2">
-        <h3
-          className="text-2xl font-medium text-[var(--ed-fg)] md:text-3xl"
-          style={{ fontFamily: F.display }}
-        >
-          {prayer.name}
-        </h3>
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-3">
+          <h3
+            className="text-2xl font-medium text-[var(--ed-fg)]"
+            style={{ fontFamily: F.display }}
+          >
+            {prayer.name}
+          </h3>
           <span
-            className="text-xl text-[var(--ed-accent)]"
-            style={{ fontFamily: F.arabic }}
+            dir="rtl"
+            className="text-xl text-[var(--ed-accent)] opacity-80"
+            style={{ fontFamily: 'var(--font-amiri), "Amiri", serif' }}
           >
             {prayer.arabic}
           </span>
-          <span className="h-1 w-1 bg-[var(--ed-rule)]" />
-          <span
-            className="text-[15px] italic text-[var(--ed-fg-muted)]"
-            style={{ fontFamily: F.serif }}
-          >
-            {prayer.time}
-          </span>
         </div>
+        <p
+          className="text-sm italic text-[var(--ed-fg-muted)]"
+          style={{ fontFamily: F.serif }}
+        >
+          {prayer.time}
+        </p>
       </div>
-      <div className="flex flex-wrap gap-4 border-t border-[var(--ed-rule)] pt-5 md:border-t-0 md:pt-0">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap gap-5 border-t md:border-t-0 pt-4 md:pt-0" style={{ borderColor: 'var(--ed-rule)' }}>
+        <div className="flex items-center gap-2">
           <span
-            className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ed-fg-muted)]"
+            className="text-[10px] font-bold uppercase tracking-wider text-[var(--ed-fg-muted)]"
             style={{ fontFamily: F.glacial }}
           >
-            Units
+            Units:
           </span>
-          <span className="font-[family-name:var(--font-jetbrains)] text-xl leading-none text-[var(--ed-fg)]">
-            {prayer.units}
+          <span
+            className="px-2.5 py-0.5 rounded-lg border font-mono text-xs font-bold text-[var(--ed-fg)] bg-[var(--ed-bg)]"
+            style={{ borderColor: 'var(--ed-rule)', fontFamily: F.mono }}
+          >
+            {prayer.units} Rakat
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <span
-            className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ed-fg-muted)]"
+            className="text-[10px] font-bold uppercase tracking-wider text-[var(--ed-fg-muted)]"
             style={{ fontFamily: F.glacial }}
           >
-            Quran
+            Quran:
           </span>
           <RefList refs={prayer.refs} />
         </div>
@@ -144,7 +153,7 @@ export default function ContactPrayersPage() {
         <MiniPrayerTimes />
       </PracticeHero>
 
-      <section className="mx-auto max-w-6xl space-y-16 px-5 py-14 sm:px-6 md:space-y-20 md:py-20 lg:py-24">
+      <section className="mx-auto max-w-6xl space-y-16 px-4 sm:px-6 md:px-10 py-16 sm:py-24">
         <ReadingSection
           label="Origin"
           title="The original source of the Contact Prayers"
@@ -180,10 +189,17 @@ export default function ContactPrayersPage() {
             appointment cannot be recreated.
           </p>
 
-          <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-6 md:p-8">
-            <div className="absolute inset-x-0 top-0 h-[2px] bg-[var(--ed-accent)]/40" />
-            <div className="mb-5 flex items-center gap-3 border-b border-[var(--ed-rule)] pb-4">
-              <AlertTriangle className="shrink-0 text-[var(--ed-accent)]" size={22} strokeWidth={1.6} />
+          <div
+            className="rounded-2xl border p-6 sm:p-8 space-y-4 shadow-sm"
+            style={{
+              borderColor: 'var(--ed-rule)',
+              borderLeftWidth: 4,
+              borderLeftColor: 'var(--ed-accent)',
+              backgroundColor: 'var(--ed-surface)',
+            }}
+          >
+            <div className="flex items-center gap-3 border-b pb-4" style={{ borderColor: 'var(--ed-rule)' }}>
+              <AlertTriangle className="shrink-0 text-[var(--ed-accent)]" size={20} strokeWidth={1.7} />
               <h3
                 className="text-xl font-medium text-[var(--ed-fg)]"
                 style={{ fontFamily: F.display }}
@@ -191,7 +207,7 @@ export default function ContactPrayersPage() {
                 Keep the prayer for God alone
               </h3>
             </div>
-            <div className="space-y-5 text-base leading-relaxed text-[var(--ed-fg-muted)]">
+            <div className="space-y-4 text-base leading-relaxed text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>
               <p>
                 The proof that Salat was already established through Abraham is
                 found in <RefList refs={['8:35', '9:54', '16:123', '21:73']} />.
@@ -208,11 +224,11 @@ export default function ContactPrayersPage() {
           </div>
         </ReadingSection>
 
-        <section className="mx-auto max-w-6xl space-y-8">
-          <div className="space-y-4">
+        <section className="space-y-8">
+          <div className="space-y-3">
             <SectionLabel>Specified times</SectionLabel>
             <h2
-              className="text-balance text-3xl font-medium tracking-tight md:text-4xl"
+              className="text-balance text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
               style={{ fontFamily: F.display }}
             >
               The five times are specified in the Quran
@@ -225,75 +241,73 @@ export default function ContactPrayersPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl space-y-8">
-          <div className="space-y-4">
+        <section className="space-y-8">
+          <div className="space-y-3">
             <SectionLabel>Preparation</SectionLabel>
             <h2
-              className="text-balance text-3xl font-medium tracking-tight md:text-4xl"
+              className="text-balance text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
               style={{ fontFamily: F.display }}
             >
               The Pre-Prayer Rituals
             </h2>
           </div>
-          <div className="space-y-8">
-            <div className="border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-4 md:p-8">
+          <div className="space-y-6">
+            <div className="rounded-2xl border overflow-hidden p-6 sm:p-8 shadow-sm" style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)' }}>
               <AblutionSlideshow />
             </div>
-            <div className="border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-4 md:p-8">
+            <div className="rounded-2xl border overflow-hidden p-6 sm:p-8 shadow-sm" style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)' }}>
               <AzaanCard />
             </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl space-y-8">
-          <div className="space-y-4">
+        <section className="space-y-8">
+          <div className="space-y-3">
             <SectionLabel>Performance</SectionLabel>
             <h2
-              className="text-balance text-3xl font-medium tracking-tight md:text-4xl"
+              className="text-balance text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
               style={{ fontFamily: F.display }}
             >
               The Contact Prayer (Salat)
             </h2>
           </div>
-          <div className="space-y-8">
-            <div className="border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-4 md:p-8">
+          <div className="space-y-6">
+            <div className="rounded-2xl border overflow-hidden p-6 sm:p-8 shadow-sm" style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)' }}>
               <PrayerDemos />
             </div>
-            <div className="py-2 md:py-6">
+            <div className="rounded-2xl border overflow-hidden p-6 sm:p-8 shadow-sm" style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)' }}>
               <FatihaAudio />
             </div>
           </div>
         </section>
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-5 pt-12 border-t border-[var(--ed-rule)]">
-          <div className="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
-            <Link
-              href="/practices"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
-            >
-              &larr; {t("practicesHub")}
-            </Link>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-12 border-t" style={{ borderColor: 'var(--ed-rule)' }}>
+          <Link
+            href="/practices"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] w-full sm:w-auto justify-center"
+            style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
+          >
+            &larr; {t("practicesHub")}
+          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-2.5 w-full sm:w-auto">
             <Link
               href="/practices/zakat"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
               {t("zakatNav")}
             </Link>
             <Link
               href="/practices/ramadan"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
               {t("ramadanNav")}
             </Link>
             <Link
               href="/practices/hajj"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
               {t("hajjNav")} &rarr;
             </Link>

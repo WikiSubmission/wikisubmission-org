@@ -8,7 +8,7 @@ import {
   ImageIcon, ArrowRightLeft, User, Mail, Lock,
   Search, Plus, Globe, Send, MoreVertical, LayoutGrid, FileText
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '../../lib/utils'
 
 // ── Mockup Components ──────────────────────────────────────────────────────
 
@@ -642,13 +642,29 @@ export function BlogTutorial({
     }
   }, [previewOpen, previewRender])
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
+
   return (
     <div
-      ref={rootRef}
-      className="relative z-10 w-full sm:max-w-3xl bg-card border-y sm:border border-border sm:rounded-2xl shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[88vh] overflow-hidden"
-      onClick={(e) => e.stopPropagation()}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
     >
-      {/* Header */}
+      <div
+        ref={rootRef}
+        className="relative z-10 w-full sm:max-w-3xl bg-card border border-border/80 rounded-2xl shadow-2xl flex flex-col h-full sm:h-auto sm:max-h-[88vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-border/60 bg-background/40 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <BookOpen size={16} className="text-primary shrink-0" />
@@ -824,6 +840,7 @@ export function BlogTutorial({
         )}
       </div>
     </div>
+  </div>
   )
 }
 

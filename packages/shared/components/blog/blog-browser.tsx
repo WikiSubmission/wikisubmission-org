@@ -5,16 +5,16 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { SearchIcon, XIcon } from 'lucide-react'
-import { Spinner } from '@/components/ui/spinner'
-import { cn } from '@/lib/utils'
+import { Spinner } from '../ui/spinner'
+import { cn } from '../../lib/utils'
 import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
 import gsap from 'gsap'
 import { BlogTutorial } from './blog-tutorial'
 import { BookOpenIcon } from 'lucide-react'
-import type { Category, Post, SearchPost } from '@/lib/blog-queries'
+import type { Category, Post, SearchPost } from '../../lib/blog-queries'
 
-export type { Category, Post, SearchPost } from '@/lib/blog-queries'
+export type { Category, Post, SearchPost } from '../../lib/blog-queries'
 
 // Default full-text search (web): hits the server search route. Mobile passes
 // `disableSearch` instead, so this never runs there.
@@ -157,7 +157,7 @@ function SearchResultRow({
 
         {hasBodySnippets && (
           <div className="space-y-1 mt-0.5">
-            {post.snippets!.map((snippet, i) => (
+            {post.snippets!.map((snippet: string, i: number) => (
               <p key={i} className="text-xs text-muted-foreground leading-relaxed border-l-2 border-border/60 pl-2">
                 <Highlight text={snippet} query={query} />
               </p>
@@ -273,21 +273,71 @@ function BlogBrowserInner({
 
   const uncategorised = articles.filter((a) => !a.categorySlug)
 
+  const headingText = t('heading') || 'Articles & Essays'
+  const words = headingText.split(' ')
+  const firstPart = words.slice(0, -1).join(' ')
+  const lastWord = words[words.length - 1]
+
   return (
-    <div className="min-h-screen">
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="px-6 md:px-12 pt-16 pb-8 max-w-[1200px] mx-auto">
-        <h1 className="font-headline tracking-[-0.02em] leading-none text-[clamp(40px,5vw,72px)] mb-4">
-          {t('heading')}
-        </h1>
-        <p className="text-muted-foreground text-lg max-w-[60ch]">
-          {t('description')}
-        </p>
+    <div className="min-h-screen pb-20">
+      {/* ── Editorial Hero Header ────────────────────────────────────────── */}
+      <section className="border-b border-border/40 bg-gradient-to-b from-muted/40 via-muted/20 to-background">
+        <div className="max-w-6xl mx-auto px-6 pt-14 pb-12 sm:pt-20 sm:pb-16">
+          <div className="flex items-center gap-2 text-[11px] font-mono tracking-widest text-primary uppercase mb-4">
+            <span>ARTICLES &amp; REFLECTIONS</span>
+            <span>·</span>
+            <span>WIKISUBMISSION</span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-8 lg:gap-14 items-end">
+            <div>
+              <h1
+                style={{
+                  fontFamily: 'var(--font-cormorant), Georgia, serif',
+                  fontSize: 'clamp(48px, 9vw, 88px)',
+                  fontWeight: 400,
+                  lineHeight: 0.95,
+                  letterSpacing: '-0.035em',
+                }}
+                className="text-foreground"
+              >
+                {firstPart ? `${firstPart} ` : ''}
+                <span className="italic text-muted-foreground font-light">{lastWord}</span>
+              </h1>
+              <p
+                style={{
+                  fontFamily: 'var(--font-source-serif), Georgia, serif',
+                  fontSize: 'clamp(15px, 3.6vw, 17px)',
+                  lineHeight: 1.65,
+                }}
+                className="text-muted-foreground max-w-[64ch] mt-6 leading-relaxed"
+              >
+                {t('description')}
+              </p>
+            </div>
+
+            {/* Quick Metadata Summary Card */}
+            <div className="border-t lg:border-t-0 lg:border-l border-border/60 pt-5 lg:pt-0 lg:pl-8 flex flex-col gap-3 font-mono text-xs text-muted-foreground">
+              <div className="flex items-center justify-between">
+                <span className="uppercase tracking-wider text-[10px]">Published</span>
+                <span className="font-semibold text-foreground">{articles.length} Articles</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="uppercase tracking-wider text-[10px]">Topics</span>
+                <span className="font-semibold text-foreground">{visibleCategories.length} Categories</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="uppercase tracking-wider text-[10px]">Edition</span>
+                <span className="text-primary font-semibold uppercase">{locale}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ── Search + tutorial ─────────────────────────────────────────────── */}
       {(!disableSearch || showTutorial) && (
-        <section className="px-6 md:px-12 max-w-[1200px] mx-auto">
+        <section className="px-6 md:px-12 max-w-[1200px] mx-auto pt-10">
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
             {!disableSearch && (
               <div className="relative flex-1">
@@ -422,7 +472,7 @@ function BlogBrowserInner({
                     )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {preview.map((post) => (
+                    {preview.map((post: Post) => (
                       <PostCard key={post._id} post={post} locale={locale} hrefForSlug={hrefForSlug} />
                     ))}
                   </div>

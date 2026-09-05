@@ -39,24 +39,23 @@ export function ArticleAnimations({
         })
       }
 
-      // 2. Section / blockquote / card stagger reveals
+      // 2. Section / blockquote / card reveals on viewport entry
       const revealTargets = el.querySelectorAll(
         'section, blockquote, [data-card]',
       )
-      if (revealTargets.length > 0) {
-        gsap.from(revealTargets, {
+      revealTargets.forEach((target) => {
+        gsap.from(target, {
           opacity: 0,
-          y: 22,
-          duration: 0.65,
-          stagger: 0.09,
-          ease: 'sine.out',
+          y: 16,
+          duration: 0.5,
+          ease: 'power2.out',
           scrollTrigger: {
-            trigger: el,
-            start: 'top 82%',
+            trigger: target,
+            start: 'top 92%',
             once: true,
           },
         })
-      }
+      })
 
       // 3. Parallax decorative elements
       el.querySelectorAll<HTMLElement>('[data-parallax]').forEach((node) => {

@@ -18,10 +18,34 @@ export function RandomVerseTile() {
   return (
     <button
       onClick={go}
-      className="flex flex-col gap-1 p-3 rounded-xl border border-dashed border-border/60 bg-muted/10 hover:bg-muted/40 hover:border-primary/30 transition-all group text-left"
+      type="button"
+      className="flex flex-col justify-between p-3.5 rounded-lg border border-dashed transition-all duration-200 group text-left cursor-pointer hover:-translate-y-0.5"
+      style={{
+        backgroundColor: 'var(--ed-surface)',
+        borderColor: 'var(--ed-rule)',
+      }}
     >
-      <Shuffle className="size-3 text-muted-foreground/60 group-hover:text-primary transition-colors" />
-      <span className="text-sm font-medium leading-snug text-muted-foreground group-hover:text-foreground transition-colors">
+      <div className="flex items-center gap-1.5 text-[var(--ed-accent)] mb-1">
+        <Shuffle className="size-3 shrink-0" />
+        <span
+          style={{
+            fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+            fontSize: 9.5,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            fontWeight: 600,
+          }}
+        >
+          Random
+        </span>
+      </div>
+      <span
+        className="text-sm font-medium leading-snug group-hover:text-[var(--ed-accent)] transition-colors"
+        style={{
+          fontFamily: 'var(--font-source-serif), Georgia, serif',
+          color: 'var(--ed-fg-muted)',
+        }}
+      >
         {t('randomVerse')}
       </span>
     </button>

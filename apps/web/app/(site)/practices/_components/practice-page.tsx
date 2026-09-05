@@ -2,31 +2,52 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { ArrowLeft, BookOpen } from 'lucide-react'
+import { ArrowLeft, BookOpen, Compass, Landmark, Moon, Wallet } from 'lucide-react'
 import { QuranRef } from '@/components/quran-ref'
 import { F } from '../../_sections/shared/server'
 import { FadeUp } from '@/lib/motion'
 
 type PracticeSlug = 'contact-prayers' | 'zakat' | 'ramadan' | 'hajj'
 
-const PRACTICE_LINKS_DATA: { href: string; slug?: PracticeSlug; translationKey: string }[] = [
-  { href: '/practices', translationKey: 'practicesHub' },
+const PRACTICE_LINKS_DATA: {
+  href: string
+  slug?: PracticeSlug
+  translationKey: string
+  icon?: LucideIcon
+}[] = [
+  { href: '/practices', translationKey: 'practicesHub', icon: ArrowLeft },
   {
     href: '/practices/contact-prayers',
     slug: 'contact-prayers',
     translationKey: 'contactPrayersNav',
+    icon: Compass,
   },
-  { href: '/practices/zakat', slug: 'zakat', translationKey: 'zakatNav' },
-  { href: '/practices/ramadan', slug: 'ramadan', translationKey: 'ramadanNav' },
-  { href: '/practices/hajj', slug: 'hajj', translationKey: 'hajjNav' },
+  {
+    href: '/practices/zakat',
+    slug: 'zakat',
+    translationKey: 'zakatNav',
+    icon: Wallet,
+  },
+  {
+    href: '/practices/ramadan',
+    slug: 'ramadan',
+    translationKey: 'ramadanNav',
+    icon: Moon,
+  },
+  {
+    href: '/practices/hajj',
+    slug: 'hajj',
+    translationKey: 'hajjNav',
+    icon: Landmark,
+  },
 ]
 
 export function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <div className="mb-8 flex items-center gap-4">
-      <span className="h-px w-10 bg-[var(--ed-accent)]" />
+    <div className="flex items-center gap-3 mb-6">
+      <span className="w-2 h-2 rounded-full bg-[var(--ed-accent)]" />
       <span
-        className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--ed-accent)]"
+        className="text-[11px] font-bold uppercase tracking-[0.24em] text-[var(--ed-accent)]"
         style={{ fontFamily: F.glacial }}
       >
         {children}
@@ -39,28 +60,30 @@ export function PracticeNav({ active }: { active: PracticeSlug }) {
   const t = useTranslations('practiceComponents')
   return (
     <nav
-      className="flex flex-wrap items-center gap-2 sm:gap-3 border-t border-[var(--ed-rule)] pt-6 sm:pt-8"
+      className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-6 border-t"
+      style={{ borderColor: 'var(--ed-rule)' }}
       aria-label="Practice pages"
     >
       {PRACTICE_LINKS_DATA.map((link) => {
         const isActive = link.slug === active
+        const Icon = link.icon
+
         return (
           <Link
             key={link.href}
             href={link.href}
             aria-current={isActive ? 'page' : undefined}
-            className={[
-              'inline-flex min-h-11 items-center gap-2 border px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] transition-all duration-300 ease-out active:translate-y-px',
-              isActive
-                ? 'border-[var(--ed-accent)] bg-[var(--ed-accent)] text-[var(--ed-bg)]'
-                : 'border-[var(--ed-rule)] bg-[var(--ed-bg)] text-[var(--ed-fg-muted)] hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]',
-            ].join(' ')}
-            style={{ fontFamily: F.glacial }}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono border transition-all duration-300 active:translate-y-px"
+            style={{
+              borderColor: isActive ? 'var(--ed-accent)' : 'var(--ed-rule)',
+              backgroundColor: isActive ? 'var(--ed-accent)' : 'var(--ed-surface)',
+              color: isActive ? 'var(--ed-bg)' : 'var(--ed-fg-muted)',
+              fontFamily: F.mono,
+              fontWeight: isActive ? 600 : 400,
+            }}
           >
-            {link.href === '/practices' && (
-              <ArrowLeft size={13} strokeWidth={1.8} />
-            )}
-            {t(link.translationKey)}
+            {Icon && <Icon size={13} className={isActive ? 'text-[var(--ed-bg)]' : 'text-[var(--ed-accent)]'} />}
+            <span>{t(link.translationKey)}</span>
           </Link>
         )
       })}
@@ -83,7 +106,7 @@ export function RefList({ refs }: { refs?: string[] }) {
 export function HeroGradient() {
   return (
     <>
-      <div className="absolute inset-0 -z-10 opacity-50 [background:radial-gradient(circle_at_15%_20%,var(--ed-accent-soft),transparent_40%),radial-gradient(circle_at_85%_80%,color-mix(in_oklab,var(--ed-surface),transparent_60%),transparent_50%)]" />
+      <div className="absolute inset-0 -z-10 opacity-40 [background:radial-gradient(circle_at_15%_20%,var(--ed-accent-soft),transparent_40%),radial-gradient(circle_at_85%_80%,color-mix(in_oklab,var(--ed-surface),transparent_60%),transparent_50%)]" />
       <div className="absolute inset-x-0 bottom-0 h-px bg-[var(--ed-rule)]" />
     </>
   )
@@ -103,21 +126,37 @@ export function PracticeHero({
   children: ReactNode
 }) {
   return (
-    <section className="relative isolate overflow-hidden border-b border-[var(--ed-rule)]">
+    <section
+      className="px-4 sm:px-6 md:px-10 border-b relative isolate overflow-hidden"
+      style={{
+        borderColor: 'var(--ed-rule)',
+      }}
+    >
       <HeroGradient />
 
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-16 pt-20 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(300px,420px)] md:pb-24 md:pt-28 lg:gap-16">
-        <FadeUp distance={16} duration={0.65} className="max-w-3xl space-y-8">
+      <div
+        className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start"
+        style={{
+          maxWidth: 1240,
+          margin: '0 auto',
+          paddingTop: 'clamp(56px, 10vw, 96px)',
+          paddingBottom: 'clamp(32px, 6vw, 56px)',
+        }}
+      >
+        <FadeUp distance={16} duration={0.65} className="lg:col-span-7 space-y-6">
           <SectionLabel>{eyebrow}</SectionLabel>
-          <div className="space-y-6">
+          <div className="space-y-4">
             <h1
-              className="max-w-4xl text-balance text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
-              style={{ fontFamily: F.display }}
+              className="text-balance text-4xl sm:text-5xl md:text-6xl font-normal leading-[1.02] tracking-tight text-[var(--ed-fg)]"
+              style={{
+                fontFamily: F.display,
+                letterSpacing: '-0.035em',
+              }}
             >
               {title}
             </h1>
             <p
-              className="max-w-2xl text-pretty text-base leading-[1.7] text-[var(--ed-fg-muted)] sm:text-lg md:text-xl"
+              className="text-pretty text-base sm:text-lg leading-relaxed text-[var(--ed-fg-muted)] max-w-2xl"
               style={{ fontFamily: F.serif }}
             >
               {description}
@@ -125,7 +164,8 @@ export function PracticeHero({
           </div>
           <PracticeNav active={active} />
         </FadeUp>
-        <FadeUp distance={16} duration={0.65} delay={0.12} className="md:mt-4">
+
+        <FadeUp distance={16} duration={0.65} delay={0.12} className="lg:col-span-5">
           {children}
         </FadeUp>
       </div>
@@ -147,54 +187,62 @@ export function PracticeHeroPanel({
   items: ReactNode[]
 }) {
   return (
-    <aside className="border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-2 md:p-2.5">
-      <div className="flex h-full flex-col border border-[var(--ed-rule)] bg-[var(--ed-bg)]">
-        <div className="flex items-start justify-between gap-6 border-b border-[var(--ed-rule)] bg-[var(--ed-accent-soft)] p-6 sm:p-7 md:p-8">
-          <div className="min-w-0">
-            <div className="mb-4 flex items-center gap-2">
-              <span className="h-1.5 w-1.5 bg-[var(--ed-accent)]" />
-              <p
-                className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ed-fg-muted)]"
-                style={{ fontFamily: F.glacial }}
-              >
-                {kicker}
-              </p>
-            </div>
+    <aside
+      className="rounded-2xl border overflow-hidden shadow-sm"
+      style={{
+        borderColor: 'var(--ed-rule)',
+        backgroundColor: 'var(--ed-surface)',
+      }}
+    >
+      <div className="p-6 sm:p-7 border-b flex items-start justify-between gap-5 relative overflow-hidden" style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-bg)' }}>
+        <div className="absolute inset-x-0 top-0 h-0.5 bg-[var(--ed-accent)]" />
+        <div className="min-w-0 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)]" />
             <p
-              className="text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
-              style={{ fontFamily: F.display }}
+              className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ed-fg-muted)]"
+              style={{ fontFamily: F.glacial }}
             >
-              {value}
+              {kicker}
             </p>
-            {meta && (
-              <p className="mt-2 text-sm leading-relaxed text-[var(--ed-fg-muted)]">
-                {meta}
-              </p>
-            )}
           </div>
-          <div className="flex size-11 shrink-0 items-center justify-center border border-[var(--ed-rule)] bg-[var(--ed-bg)] text-[var(--ed-accent)]">
-            <Icon size={20} strokeWidth={1.6} />
-          </div>
+          <p
+            className="text-2xl sm:text-3xl font-medium tracking-tight text-[var(--ed-fg)]"
+            style={{ fontFamily: F.display }}
+          >
+            {value}
+          </p>
+          {meta && (
+            <p className="text-xs text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>
+              {meta}
+            </p>
+          )}
         </div>
+        <div
+          className="w-10 h-10 rounded-xl flex shrink-0 items-center justify-center border text-[var(--ed-accent)]"
+          style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)' }}
+        >
+          <Icon size={18} strokeWidth={1.7} />
+        </div>
+      </div>
 
-        <div className="flex flex-1 flex-col divide-y divide-[var(--ed-rule)]">
-          {items.map((item, index) => (
+      <div className="divide-y" style={{ borderColor: 'var(--ed-rule)' }}>
+        {items.map((item, index) => (
+          <div
+            key={index}
+            className="grid grid-cols-[44px_1fr] sm:grid-cols-[48px_1fr] transition-colors hover:bg-[var(--ed-bg-alt)]"
+          >
             <div
-              key={index}
-              className="grid grid-cols-[44px_1fr] sm:grid-cols-[48px_1fr] transition-colors hover:bg-[var(--ed-surface)]"
+              className="flex items-center justify-center border-r text-[10px] font-mono text-[var(--ed-accent)] font-semibold"
+              style={{ borderColor: 'var(--ed-rule)', fontFamily: F.mono }}
             >
-              <div
-                className="flex items-center justify-center border-r border-[var(--ed-rule)] text-[10px] text-[var(--ed-fg-muted)]"
-                style={{ fontFamily: F.mono }}
-              >
-                {String(index + 1).padStart(2, '0')}
-              </div>
-              <div className="p-4 sm:p-5 text-[15px] leading-relaxed text-[var(--ed-fg-muted)]">
-                {item}
-              </div>
+              {String(index + 1).padStart(2, '0')}
             </div>
-          ))}
-        </div>
+            <div className="p-4 sm:p-4.5 text-xs sm:text-sm leading-relaxed text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>
+              {item}
+            </div>
+          </div>
+        ))}
       </div>
     </aside>
   )
@@ -213,18 +261,18 @@ export function ReadingSection({
 }) {
   return (
     <FadeUp distance={16}>
-      <article className={`mx-auto max-w-4xl space-y-8 md:space-y-10 ${className}`}>
-        <div className="space-y-5">
+      <article className={`space-y-6 sm:space-y-8 ${className}`}>
+        <div className="space-y-3">
           <SectionLabel>{label}</SectionLabel>
           <h2
-            className="text-balance text-2xl sm:text-3xl font-medium tracking-tight md:text-4xl"
+            className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
             style={{ fontFamily: F.display }}
           >
             {title}
           </h2>
         </div>
         <div
-          className="space-y-6 text-base sm:text-lg leading-[1.7] text-[var(--ed-fg-muted)]"
+          className="space-y-5 text-base sm:text-lg leading-relaxed text-[var(--ed-fg-muted)]"
           style={{ fontFamily: F.serif }}
         >
           {children}
@@ -243,15 +291,25 @@ export function QuoteCallout({
 }) {
   const t = useTranslations('practiceComponents')
   return (
-    <figure className="relative border-l-[3px] border-[var(--ed-accent)] bg-[var(--ed-surface)]/30 p-6 sm:p-8 md:p-10">
+    <figure
+      className="rounded-2xl border p-6 sm:p-8 space-y-4 relative overflow-hidden shadow-sm"
+      style={{
+        borderColor: 'var(--ed-rule)',
+        borderLeftWidth: 4,
+        borderLeftColor: 'var(--ed-accent)',
+        backgroundColor: 'var(--ed-surface)',
+      }}
+    >
       <blockquote
-        className="text-pretty text-lg sm:text-xl md:text-2xl font-medium italic leading-[1.5] text-[var(--ed-fg)]"
+        className="text-base sm:text-lg md:text-xl font-medium italic leading-relaxed text-[var(--ed-fg)]"
         style={{ fontFamily: F.serif }}
       >
-        &ldquo;{children}&rdquo;
+        <span className="text-[var(--ed-accent)] font-semibold mr-1">&ldquo;</span>
+        {children}
+        <span className="text-[var(--ed-accent)] font-semibold ml-0.5">&rdquo;</span>
       </blockquote>
-      <figcaption className="mt-6 flex flex-wrap items-center gap-3">
-        <span className="h-px w-8 bg-[var(--ed-accent)]" />
+      <figcaption className="flex flex-wrap items-center gap-3 pt-3 border-t" style={{ borderColor: 'var(--ed-rule)' }}>
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)]" />
         <span
           className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-accent)]"
           style={{ fontFamily: F.glacial }}
@@ -277,32 +335,38 @@ export function VerseQuote({
 }) {
   return (
     <article
-      className={`group h-full border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-5 sm:p-6 transition-all duration-300 ease-out hover:border-[var(--ed-accent)]/50 hover:bg-[var(--ed-surface)]/40 ${className}`}
+      className={`rounded-2xl border p-6 flex flex-col justify-between transition-all duration-300 hover:border-[var(--ed-accent)] group shadow-sm ${className}`}
+      style={{
+        borderColor: 'var(--ed-rule)',
+        backgroundColor: 'var(--ed-surface)',
+      }}
     >
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <span
-          className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-accent)]"
-          style={{ fontFamily: F.glacial }}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-4 pb-3 border-b" style={{ borderColor: 'var(--ed-rule)' }}>
+          <span
+            className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-accent)]"
+            style={{ fontFamily: F.glacial }}
+          >
+            <BookOpen size={13} strokeWidth={1.8} />
+            {verseKey}
+          </span>
+          <QuranRef reference={verseKey} />
+        </div>
+        {label && (
+          <h3
+            className="text-lg sm:text-xl font-medium text-[var(--ed-fg)]"
+            style={{ fontFamily: F.display }}
+          >
+            {label}
+          </h3>
+        )}
+        <p
+          className="text-sm sm:text-base leading-relaxed text-[var(--ed-fg-muted)]"
+          style={{ fontFamily: F.serif }}
         >
-          <BookOpen size={14} strokeWidth={1.8} />
-          {verseKey}
-        </span>
-        <QuranRef reference={verseKey} />
+          &ldquo;{text}&rdquo;
+        </p>
       </div>
-      {label && (
-        <h3
-          className="mb-3 text-lg sm:text-xl font-medium text-[var(--ed-fg)]"
-          style={{ fontFamily: F.display }}
-        >
-          {label}
-        </h3>
-      )}
-      <p
-        className="text-pretty text-base leading-[1.7] text-[var(--ed-fg-muted)] sm:text-lg"
-        style={{ fontFamily: F.serif }}
-      >
-        &quot;{text}&quot;
-      </p>
     </article>
   )
 }
@@ -319,24 +383,24 @@ export function VerseGrid({
   verses: { vk: string; label?: string; tx: string }[]
 }) {
   return (
-    <section className="mx-auto max-w-6xl px-5 py-16 sm:px-6 md:py-24 lg:py-28">
-      <FadeUp distance={16} className="mb-10 sm:mb-12 max-w-3xl space-y-5 sm:space-y-6">
+    <section className="space-y-8">
+      <FadeUp distance={16} className="space-y-3 max-w-3xl">
         <SectionLabel>{label}</SectionLabel>
         <h2
-          className="text-balance text-3xl sm:text-4xl font-medium tracking-tight md:text-5xl"
+          className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
           style={{ fontFamily: F.display }}
         >
           {title}
         </h2>
         <p
-          className="text-pretty text-base sm:text-lg leading-[1.7] text-[var(--ed-fg-muted)]"
+          className="text-base sm:text-lg leading-relaxed text-[var(--ed-fg-muted)]"
           style={{ fontFamily: F.serif }}
         >
           {description}
         </p>
       </FadeUp>
 
-      <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2">
         {verses.map((verse, index) => (
           <FadeUp
             key={verse.vk}
@@ -367,25 +431,37 @@ export function FactGrid({
   }[]
 }) {
   return (
-    <div className="grid gap-px border border-[var(--ed-rule)] bg-[var(--ed-rule)] md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
       {items.map((item, index) => (
         <FadeUp key={item.title} distance={14} delay={index * 0.04}>
-          <article className="group h-full bg-[var(--ed-bg)] p-6 transition-all duration-300 hover:bg-[var(--ed-surface)] sm:p-7">
-            <item.icon
-              size={22}
-              className="mb-6 text-[var(--ed-accent)] transition-transform duration-300 group-hover:scale-110"
-              strokeWidth={1.7}
-            />
-            <h3
-              className="text-xl sm:text-2xl font-medium"
-              style={{ fontFamily: F.display }}
-            >
-              {item.title}
-            </h3>
-            <div className="mt-4 text-sm sm:text-base leading-[1.7] text-[var(--ed-fg-muted)]">
-              {item.body}
+          <article
+            className="rounded-2xl border p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:border-[var(--ed-accent)] group shadow-sm h-full"
+            style={{
+              borderColor: 'var(--ed-rule)',
+              backgroundColor: 'var(--ed-surface)',
+            }}
+          >
+            <div className="space-y-4">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center border text-[var(--ed-accent)] group-hover:bg-[var(--ed-accent)] group-hover:text-[var(--ed-bg)] transition-colors"
+                style={{
+                  borderColor: 'var(--ed-rule)',
+                  backgroundColor: 'var(--ed-bg)',
+                }}
+              >
+                <item.icon size={18} strokeWidth={1.7} />
+              </div>
+              <h3
+                className="text-xl sm:text-2xl font-medium text-[var(--ed-fg)]"
+                style={{ fontFamily: F.display }}
+              >
+                {item.title}
+              </h3>
+              <div className="text-sm sm:text-base leading-relaxed text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>
+                {item.body}
+              </div>
             </div>
-            <div className="mt-5">
+            <div className="mt-5 pt-4 border-t" style={{ borderColor: 'var(--ed-rule)' }}>
               <RefList refs={item.refs} />
             </div>
           </article>
@@ -397,19 +473,25 @@ export function FactGrid({
 
 export function NumberedPanel({ items }: { items: ReactNode[] }) {
   return (
-    <ol className="divide-y divide-[var(--ed-rule)] border border-[var(--ed-rule)] bg-[var(--ed-bg)]">
+    <ol
+      className="rounded-2xl border overflow-hidden shadow-sm divide-y"
+      style={{
+        borderColor: 'var(--ed-rule)',
+        backgroundColor: 'var(--ed-surface)',
+      }}
+    >
       {items.map((item, index) => (
         <li
           key={index}
-          className="grid grid-cols-[56px_1fr] sm:grid-cols-[72px_1fr] transition-colors hover:bg-[var(--ed-surface)]"
+          className="grid grid-cols-[52px_1fr] sm:grid-cols-[64px_1fr] transition-colors hover:bg-[var(--ed-bg-alt)]"
         >
           <span
-            className="flex min-h-14 sm:min-h-16 items-center justify-center border-r border-[var(--ed-rule)] text-sm font-bold tabular-nums text-[var(--ed-accent)]"
-            style={{ fontFamily: F.glacial }}
+            className="flex items-center justify-center border-r text-xs font-mono font-bold text-[var(--ed-accent)]"
+            style={{ borderColor: 'var(--ed-rule)', fontFamily: F.mono }}
           >
             {String(index + 1).padStart(2, '0')}
           </span>
-          <div className="px-4 sm:px-5 py-4 text-sm sm:text-base leading-[1.7] text-[var(--ed-fg-muted)]">
+          <div className="p-4 sm:p-5 text-sm sm:text-base leading-relaxed text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>
             {item}
           </div>
         </li>

@@ -1,13 +1,18 @@
-import Link from 'next/link'
+'use client'
+
 import { cn } from '@/lib/utils'
-import { topicRefHref, type TopicRef } from '@/lib/topic-index'
+import type { TopicRef } from '@/lib/topic-index'
+import { ScriptureRef } from '@/components/quran-ref'
+
+const F = {
+  mono: 'var(--font-jetbrains), ui-monospace, monospace',
+}
 
 /**
- * A run of printed verse citations, rendered as links.
+ * A run of printed verse citations with in-situ Scripture preview dialogs.
  *
- * `display` is shown verbatim — the printed index writes ranges as "7:65-72" and
- * comma runs as separate citations, and reproducing that is the point of an index
- * page. The link goes to the range's first verse.
+ * Clicking any citation opens the verse modal dialog with translation and context,
+ * allowing readers to review the text instantly without losing their place on the index.
  */
 export function TopicRefChips({
   refs,
@@ -25,21 +30,38 @@ export function TopicRefChips({
   const hidden = refs.length - shown.length
 
   return (
-    <span className={cn('inline-flex flex-wrap items-baseline gap-x-1.5 gap-y-1', className)}>
-      {shown.map((ref, i) => (
-        <Link
-          key={`${ref.chapter_number}:${ref.verse_start}-${ref.verse_end}:${i}`}
-          href={topicRefHref(ref)}
-          className="font-mono text-xs text-primary/90 hover:text-primary hover:underline underline-offset-2 tabular-nums"
-        >
-          {ref.display}
-        </Link>
-      ))}
+    <span className={cn('inline-flex flex-wrap items-center gap-1.5', className)}>
+      {shown.map((ref, i) => {
+        const canonicalRef =
+          ref.verse_end > ref.verse_start
+            ? `${ref.chapter_number}:${ref.verse_start}-${ref.verse_end}`
+            : `${ref.chapter_number}:${ref.verse_start}`
+
+        return (
+          <ScriptureRef
+            key={`${ref.chapter_number}:${ref.verse_start}-${ref.verse_end}:${i}`}
+            reference={canonicalRef}
+            triggerClassName="inline-flex"
+          >
+            <span
+              style={{ fontFamily: F.mono }}
+              className="inline-flex items-center px-2 py-0.5 rounded-md border border-[var(--ed-accent)]/25 bg-[var(--ed-accent-soft)]/10 text-[var(--ed-accent)] text-[11px] font-semibold tabular-nums hover:border-[var(--ed-accent)] hover:bg-[var(--ed-accent-soft)]/25 active:scale-95 transition-all duration-150 cursor-pointer shadow-2xs select-none"
+              title={`Read ${ref.display}`}
+            >
+              {ref.display}
+            </span>
+          </ScriptureRef>
+        )
+      })}
       {hidden > 0 && (
-        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+        <span
+          style={{ fontFamily: F.mono }}
+          className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold text-[var(--ed-fg-muted)]/70 bg-[var(--ed-surface)] border border-[var(--ed-rule)]/60 tabular-nums"
+        >
           +{hidden}
         </span>
       )}
     </span>
   )
 }
+

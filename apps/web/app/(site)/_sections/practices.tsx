@@ -1,134 +1,202 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react'
+
+import React, { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import gsap from 'gsap'
-import { F, SectionDivider } from './shared'
+import { F, SectionDivider, Arrow } from './shared'
 
-const PRAYER_TIMES: { time: string; active: boolean }[] = [
-  { time: '05:12', active: false },
-  { time: '12:30', active: false },
-  { time: '15:42', active: true },
-  { time: '18:15', active: false },
-  { time: '19:48', active: false },
-]
+// ─── Minimalist Bespoke Practice Symbols ───
 
-function ProgressBar({ progressKey, durationMs }: { progressKey: number; durationMs: number }) {
-  const ref = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    gsap.fromTo(
-      el,
-      { scaleX: 0 },
-      { scaleX: 1, duration: durationMs / 1000, ease: 'none' },
-    )
-  }, [progressKey, durationMs])
-
+function PrayerSymbol({ className }: { className?: string }) {
   return (
-    <div
-      ref={ref}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 3,
-        background: 'var(--ed-accent)',
-        transformOrigin: 'left center',
-        transform: 'scaleX(0)',
-        zIndex: 10,
-        opacity: 0.4,
-      }}
-    />
+    <div className={`relative flex items-center justify-center p-2 ${className ?? 'w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80'}`}>
+      <Image
+        src="/prostrating-figure.png"
+        alt="Contact Prayer - Prostrating Figure"
+        width={360}
+        height={360}
+        className="w-full h-full object-contain filter drop-shadow-md"
+        priority
+      />
+    </div>
   )
 }
 
-function FastingVerseSwitcher({
-  verses,
-  index,
-}: {
-  verses: { text: string; ref: string }[]
-  index: number
-}) {
-  const ref = useRef<HTMLDivElement | null>(null)
-  const prevIndexRef = useRef(index)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    if (prevIndexRef.current === index) {
-      gsap.set(el, { opacity: 1, x: 0 })
-    } else {
-      gsap.fromTo(
-        el,
-        { opacity: 0, x: 20 },
-        { opacity: 1, x: 0, duration: 0.5, ease: 'power2.out' },
-      )
-    }
-    prevIndexRef.current = index
-  }, [index])
-
-  const verse = verses[index]
-
+function ZakatSymbol({ className }: { className?: string }) {
   return (
-    <div ref={ref} className="space-y-3">
-      <p className="text-[17px] font-display italic text-[var(--ed-fg)] leading-relaxed">
-        &ldquo;{verse.text}&rdquo;
-      </p>
-      <p className="text-[9px] font-glacial font-bold tracking-widest text-[var(--ed-accent)] uppercase">
-        Verse {verse.ref}
-      </p>
+    <div className={`relative flex items-center justify-center p-2 ${className ?? 'w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80'}`}>
+      <Image
+        src="/zakat-symbol.png"
+        alt="Obligatory Charity - Zakat Symbol"
+        width={360}
+        height={360}
+        className="w-full h-full object-contain filter drop-shadow-md"
+        priority
+      />
+    </div>
+  )
+}
+
+function FastingSymbol({ className }: { className?: string }) {
+  return (
+    <div className={`relative flex items-center justify-center p-2 ${className ?? 'w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80'}`}>
+      <Image
+        src="/ramadan.png"
+        alt="Ramadan Fasting - Crescent Moon"
+        width={360}
+        height={360}
+        className="w-full h-full object-contain filter drop-shadow-md"
+        priority
+      />
+    </div>
+  )
+}
+
+function HajjSymbol({ className }: { className?: string }) {
+  return (
+    <div className={`relative flex items-center justify-center p-2 ${className ?? 'w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80'}`}>
+      <Image
+        src="/Kaba.png"
+        alt="The Hajj Pilgrimage - The Holy Kaaba Sanctuary"
+        width={360}
+        height={360}
+        className="w-full h-full object-contain filter drop-shadow-md"
+        priority
+      />
     </div>
   )
 }
 
 export function PracticesSection() {
   const t = useTranslations('homePage.practices')
-  const [fastingIdx, setFastingIdx] = useState(0)
-  const [progressKey, setProgressKey] = useState(0)
-  const ROTATE_MS = 6000
+  const [activeTab, setActiveTab] = useState<number>(0)
 
-  const PRAYER_NAMES = [
-    t('fajr'),
-    t('dhuhr'),
-    t('asr'),
-    t('maghrib'),
-    t('isha'),
+  const PRACTICES = [
+    {
+      id: 'salah',
+      num: 'I',
+      tabLabel: 'The Contact Prayers',
+      sublabel: 'Salah',
+      kicker: 'FIVE DAILY ASTRONOMICAL CONTACTS',
+      title: 'The Contact Prayers',
+      titleAlt: '· Salah',
+      desc: t('prayerDesc'),
+      meta: 'Prescribed at proper solar times (4:103) · Continuous remembrance of God',
+      symbol: <PrayerSymbol className="w-60 h-60 sm:w-72 sm:h-72 lg:w-80 lg:h-80" />,
+      glowColor: 'rgba(212, 163, 115, 0.25)',
+      href: '/practices',
+      ctaLabel: 'Explore Salah Guidelines',
+      details: [
+        { label: 'FAJR', value: 'Dawn' },
+        { label: 'DHUHR', value: 'Noon' },
+        { label: 'ASR', value: 'Afternoon' },
+        { label: 'MAGHRIB', value: 'Sunset' },
+        { label: 'ISHA', value: 'Night' },
+      ],
+      quickLinks: [
+        { label: 'Ablution Steps (Wudu)', href: '/practices#wudu' },
+        { label: 'Astronomical Times', href: '/practices#times' },
+        { label: 'Friday Congregational Prayer', href: '/practices#friday' },
+      ],
+    },
+    {
+      id: 'zakat',
+      num: 'II',
+      tabLabel: 'Obligatory Charity',
+      sublabel: 'Zakat',
+      kicker: '2.5% ON NET INCOME · PAID ON RECEIPT',
+      title: 'The Obligatory Charity',
+      titleAlt: '· Zakat',
+      desc: t('zakatDesc'),
+      meta: 'Given directly to parents, relatives, orphans, the poor, and traveling aliens (2:215, 6:141)',
+      symbol: <ZakatSymbol className="w-56 h-56 sm:w-64 sm:h-64 lg:w-72 lg:h-72 text-primary" />,
+      glowColor: 'rgba(52, 211, 153, 0.22)',
+      href: '/practices',
+      ctaLabel: 'Calculate & Understand Zakat',
+      details: [
+        { label: 'RATE', value: '2.5%' },
+        { label: 'TIMING', value: 'On Receipt' },
+        { label: 'THRESHOLD', value: 'No Minimum' },
+        { label: 'SCRIPTURE', value: 'Sura 6:141' },
+      ],
+      quickLinks: [
+        { label: 'Zakat Calculator', href: '/practices#zakat-calculator' },
+        { label: 'Recipients in Scripture', href: '/practices#recipients' },
+        { label: 'Zakat vs Voluntary Charity', href: '/practices#charity' },
+      ],
+    },
+    {
+      id: 'siyam',
+      num: 'III',
+      tabLabel: 'Ramadan Fasting',
+      sublabel: 'Siyam',
+      kicker: 'SACRED MONTH OF FASTING · 2:183-187',
+      title: 'Ramadan Fasting',
+      titleAlt: '· Siyam',
+      desc: t('ramadanDesc'),
+      meta: 'Abstaining from food, drink, and intercourse from the first thread of dawn until sunset',
+      symbol: <FastingSymbol className="w-56 h-56 sm:w-64 sm:h-64 lg:w-72 lg:h-72 text-primary" />,
+      glowColor: 'rgba(96, 165, 250, 0.22)',
+      href: '/practices',
+      ctaLabel: 'Fasting Commandments & Rules',
+      details: [
+        { label: 'MONTH', value: 'Ramadan' },
+        { label: 'WINDOW', value: 'Dawn to Sunset' },
+        { label: 'PURPOSE', value: 'Attaining Salvation' },
+        { label: 'EXEMPTIONS', value: 'Illness & Travel' },
+      ],
+      quickLinks: [
+        { label: 'Astronomical Dawn (Fajr)', href: '/practices#dawn' },
+        { label: 'Exemptions & Substitution Days', href: '/practices#exemptions' },
+        { label: 'Night of Destiny (Qadr)', href: '/practices#qadr' },
+      ],
+    },
+    {
+      id: 'hajj',
+      num: 'IV',
+      tabLabel: 'The Pilgrimage',
+      sublabel: 'Hajj',
+      kicker: 'COMMEMORATING ABRAHAM · 4 SACRED MONTHS',
+      title: 'The Pilgrimage',
+      titleAlt: '· Hajj',
+      desc: t('hajjDesc'),
+      meta: 'Observed once in a lifetime during the four Sacred Months: Zul-Hijjah, Muharram, Safar, and Rabi\' I',
+      symbol: <HajjSymbol className="w-56 h-56 sm:w-64 sm:h-64 lg:w-72 lg:h-72 text-primary" />,
+      glowColor: 'rgba(244, 114, 182, 0.22)',
+      href: '/practices',
+      ctaLabel: 'Pilgrimage Guidelines',
+      details: [
+        { label: 'WINDOW', value: '4 Sacred Months' },
+        { label: 'ORIGIN', value: 'Abraham' },
+        { label: 'FREQUENCY', value: 'Once in Life' },
+        { label: 'SCRIPTURE', value: 'Sura 22:27' },
+      ],
+      quickLinks: [
+        { label: 'The 4 Sacred Months', href: '/practices#months' },
+        { label: 'Pilgrimage Rites', href: '/practices#rites' },
+        { label: 'Prohibitions during Hajj', href: '/practices#rules' },
+      ],
+    },
   ]
 
-  const FASTING_VERSES = [
-    { text: t('fastingVerse183'), ref: '2:183' },
-    { text: t('fastingVerse184'), ref: '2:184' },
-    { text: t('fastingVerse185'), ref: '2:185' },
-    { text: t('fastingVerse186'), ref: '2:186' },
-    { text: t('fastingVerse187'), ref: '2:187' },
-  ]
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setFastingIdx((prev) => (prev + 1) % FASTING_VERSES.length)
-      setProgressKey((k) => k + 1)
-    }, ROTATE_MS)
-    return () => clearInterval(timer)
-  }, [FASTING_VERSES.length])
-
-  const activeIdx = PRAYER_TIMES.findIndex((p) => p.active)
-  const activeName = activeIdx >= 0 ? PRAYER_NAMES[activeIdx] : ''
-  const activeTime = activeIdx >= 0 ? PRAYER_TIMES[activeIdx].time : ''
+  const current = PRACTICES[activeTab]
 
   return (
     <section
+      className="relative overflow-hidden border-b border-border/40"
       style={{
-        backgroundColor:
-          'color-mix(in oklab, var(--ed-bg), var(--ed-surface) 20%)',
-        padding: 'clamp(64px, 8vw, 96px) 0',
+        backgroundColor: 'var(--ed-bg-alt)',
+        padding: 'clamp(64px, 8vw, 100px) 0',
       }}
     >
+      {/* Background ambient lighting */}
+      <div className="pointer-events-none absolute -top-32 right-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 left-1/4 h-96 w-96 rounded-full bg-amber-500/5 blur-3xl" />
+
       <div
-        className="px-4 sm:px-6 md:px-10"
-        style={{ maxWidth: 1240, margin: '0 auto' }}
+        className="relative px-4 sm:px-6 md:px-10"
+        style={{ maxWidth: 1280, margin: '0 auto' }}
       >
         <SectionDivider
           num={t('dividerNum')}
@@ -136,307 +204,184 @@ export function PracticesSection() {
           sub={t('dividerSub')}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Prayer tile */}
-          <Link
-            href="/practices"
-            className="ed-card group"
-            style={{
-              backgroundColor: 'var(--ed-surface)',
-              padding: 'clamp(24px, 5vw, 36px)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 20,
-              textDecoration: 'none',
-            }}
-          >
-            <div
-              className="flex items-center justify-between"
-              aria-live="polite"
-              style={{
-                fontFamily: F.glacial,
-                fontSize: 10,
-                fontWeight: 600,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                color: 'var(--ed-fg-muted)',
-              }}
-            >
-              <span>{t('prayerKicker')}</span>
-              <span>
-                {t('prayerNext')} ·{' '}
-                <strong style={{ color: 'var(--ed-accent)', fontWeight: 700 }}>
-                  {activeName} · {activeTime}
-                </strong>
-              </span>
-            </div>
-
-            <div className="grid grid-cols-5 gap-2">
-              {PRAYER_TIMES.map(({ time, active }, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: '12px 8px',
-                    border: '1px solid var(--ed-rule)',
-                    borderRadius: 2,
-                    textAlign: 'center',
-                    background: active
-                      ? 'color-mix(in oklab, var(--ed-accent), transparent 88%)'
-                      : 'var(--ed-bg)',
-                    borderColor: active ? 'var(--ed-accent)' : 'var(--ed-rule)',
-                  }}
+        {/* ─── Minimalist Segmented Practice Selector ─── */}
+        <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-4 sm:pb-0 mb-8 sm:mb-10 gap-2 sm:gap-3 select-none">
+          {PRACTICES.map((p, idx) => {
+            const isSelected = activeTab === idx
+            return (
+              <button
+                key={p.id}
+                onClick={() => setActiveTab(idx)}
+                className={`flex items-center gap-2.5 px-4 sm:px-6 py-3 rounded-2xl border transition-all shrink-0 cursor-pointer ${
+                  isSelected
+                    ? 'bg-card text-foreground border-primary/50 shadow-lg scale-[1.02]'
+                    : 'bg-card/40 text-muted-foreground border-border/40 hover:bg-card/70 hover:text-foreground'
+                }`}
+              >
+                <span
+                  style={{ fontFamily: F.display }}
+                  className={`text-sm italic ${
+                    isSelected ? 'text-primary font-bold' : 'text-muted-foreground/60'
+                  }`}
                 >
-                  <div
-                    style={{
-                      fontFamily: F.glacial,
-                      fontSize: 9,
-                      fontWeight: active ? 700 : 500,
-                      letterSpacing: '0.14em',
-                      textTransform: 'uppercase',
-                      color: active ? 'var(--ed-accent)' : 'var(--ed-fg-muted)',
-                    }}
-                  >
-                    {PRAYER_NAMES[i]}
+                  {p.num}
+                </span>
+                <span className="text-xs font-semibold tracking-wide">
+                  {p.tabLabel}
+                </span>
+                <span className="font-mono text-[10px] text-muted-foreground/70 hidden sm:inline">
+                  ({p.sublabel})
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* ─── Unified Focus Exhibition Stage ─── */}
+        <div className="group relative overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-b from-card/90 via-card/70 to-muted/20 backdrop-blur-md transition-all duration-500 hover:border-primary/40 hover:shadow-2xl">
+          
+          {/* Radial Ambient Glow */}
+          <div
+            className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full opacity-40 blur-3xl transition-opacity duration-700 group-hover:opacity-75"
+            style={{
+              background: `radial-gradient(circle, ${current.glowColor} 0%, transparent 70%)`,
+            }}
+          />
+
+          <div className="relative p-6 sm:p-10 lg:p-12">
+            
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              
+              {/* Left Column: Editorial Content */}
+              <div className="lg:col-span-7 flex flex-col justify-between space-y-7">
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-3">
+                    <span className="font-mono text-[10px] tracking-widest text-primary font-bold uppercase">
+                      PILLAR {current.num} · {current.kicker}
+                    </span>
+                    <span className="font-mono text-[10px] text-muted-foreground/60 tracking-wider uppercase">
+                      PRACTICES
+                    </span>
                   </div>
-                  <div
-                    style={{
-                      fontFamily: F.display,
-                      fontSize: 17,
-                      fontWeight: 500,
-                      color: 'var(--ed-fg)',
-                      marginTop: 4,
-                      letterSpacing: '-0.01em',
-                    }}
-                  >
-                    {time}
+
+                  <div>
+                    <Link href={current.href} className="group/title block">
+                      <h3
+                        style={{
+                          fontFamily: F.display,
+                          fontSize: 'clamp(32px, 4.5vw, 44px)',
+                          fontWeight: 500,
+                          lineHeight: 1.05,
+                          letterSpacing: '-0.025em',
+                          color: 'var(--ed-fg)',
+                        }}
+                        className="transition-colors group-hover/title:text-primary"
+                      >
+                        {current.title}
+                        <span
+                          style={{ color: 'var(--ed-fg-muted)', fontStyle: 'italic', fontWeight: 400 }}
+                        >
+                          {' '}
+                          {current.titleAlt}
+                        </span>
+                      </h3>
+                    </Link>
+
+                    <p
+                      style={{
+                        fontFamily: F.serif,
+                        fontSize: '15.5px',
+                        color: 'var(--ed-fg-muted)',
+                        lineHeight: 1.7,
+                      }}
+                      className="mt-3.5 leading-relaxed max-w-xl"
+                    >
+                      {current.desc}
+                    </p>
+
+                    <div className="mt-3.5 font-mono text-xs text-primary/90 tracking-wide">
+                      {current.meta}
+                    </div>
                   </div>
                 </div>
-              ))}
+
+                {/* Details / Astronomical Schedule Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5 pt-1">
+                  {current.details.map((d, dIdx) => (
+                    <div
+                      key={dIdx}
+                      className="p-2.5 rounded-2xl bg-muted/40 border border-border/40 text-center flex flex-col justify-center"
+                    >
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+                        {d.label}
+                      </span>
+                      <span className="font-headline font-bold text-xs sm:text-sm text-foreground mt-0.5">
+                        {d.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Topics & Primary Action */}
+                <div className="space-y-4 pt-4 border-t border-border/40">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/70 mr-1">
+                      Topics:
+                    </span>
+                    {current.quickLinks.map((ql, qIdx) => (
+                      <Link
+                        key={qIdx}
+                        href={ql.href}
+                        className="px-3 py-1.5 rounded-xl border border-border/40 bg-muted/40 hover:bg-muted hover:border-primary/40 text-xs font-medium text-foreground transition-all"
+                      >
+                        {ql.label}
+                      </Link>
+                    ))}
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between">
+                    <Link
+                      href={current.href}
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-xs tracking-wider uppercase shadow-md hover:opacity-95 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                      <span>{current.ctaLabel}</span>
+                      <Arrow size={12} className="transition-transform group-hover:translate-x-1" />
+                    </Link>
+
+                    <Link
+                      href={current.href}
+                      className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+                    >
+                      <span>All Practices</span>
+                      <Arrow size={10} />
+                    </Link>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Right Column: Serene Minimalist Symbol Stage */}
+              <div className="lg:col-span-5 flex flex-col items-center justify-center py-4 select-none">
+                <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-[340px] lg:h-[340px] rounded-3xl border border-border/40 bg-muted/20 backdrop-blur-xs flex items-center justify-center shadow-inner transition-transform duration-500 group-hover:scale-105 p-4">
+                  
+                  {/* Subtle Ambient Halo */}
+                  <div
+                    className="absolute inset-4 rounded-full blur-3xl pointer-events-none opacity-50"
+                    style={{ background: current.glowColor }}
+                  />
+                  
+                  <div className="relative z-10 flex items-center justify-center w-full h-full">
+                    {current.symbol}
+                  </div>
+                </div>
+              </div>
+
             </div>
 
-            <p
-              style={{
-                fontFamily: F.serif,
-                fontSize: 14,
-                lineHeight: 1.6,
-                color: 'var(--ed-fg-muted)',
-                margin: 0,
-              }}
-            >
-              {t('prayerDesc')}
-            </p>
-          </Link>
-
-          {/* Zakaat tile */}
-          <Link
-            href="/practices"
-            className="ed-card group"
-            style={{
-              backgroundColor: 'var(--ed-surface)',
-              padding: 'clamp(24px, 5vw, 36px)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 20,
-              textDecoration: 'none',
-            }}
-          >
-            <div
-              className="flex items-center justify-between"
-              style={{
-                fontFamily: F.glacial,
-                fontSize: 10,
-                fontWeight: 600,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                color: 'var(--ed-fg-muted)',
-              }}
-            >
-              <span>{t('zakatKicker')}</span>
-              <span>
-                <strong style={{ color: 'var(--ed-accent)', fontWeight: 700 }}>
-                  2.5%
-                </strong>{' '}
-                · {t('zakatRateLabel')}
-              </span>
-            </div>
-
-            <blockquote
-              style={{
-                fontFamily: F.display,
-                fontSize: 'clamp(18px, 3.6vw, 21px)',
-                lineHeight: 1.5,
-                color: 'var(--ed-fg)',
-                fontStyle: 'italic',
-                margin: 0,
-                letterSpacing: '-0.01em',
-                borderLeft: '2px solid var(--ed-accent)',
-                paddingLeft: 18,
-                minHeight: 140,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-              }}
-            >
-              {t('zakatQuote')}
-              <span
-                style={{
-                  display: 'block',
-                  fontFamily: F.glacial,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  color: 'var(--ed-accent)',
-                  fontStyle: 'normal',
-                  marginTop: 12,
-                }}
-              >
-                {t('zakatRef')}
-              </span>
-            </blockquote>
-
-            <p
-              style={{
-                fontFamily: F.serif,
-                fontSize: 14,
-                lineHeight: 1.6,
-                color: 'var(--ed-fg-muted)',
-                margin: 0,
-              }}
-            >
-              {t('zakatDesc')}
-            </p>
-          </Link>
-
-          {/* Ramadan Tile */}
-          <Link
-            href="/practices"
-            className="ed-card group"
-            style={{
-              backgroundColor: 'var(--ed-surface)',
-              padding: 'clamp(24px, 5vw, 36px)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 20,
-              textDecoration: 'none',
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            <ProgressBar progressKey={progressKey} durationMs={ROTATE_MS} />
-
-            <div
-              className="flex items-center justify-between"
-              style={{
-                fontFamily: F.glacial,
-                fontSize: 10,
-                fontWeight: 600,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                color: 'var(--ed-fg-muted)',
-              }}
-            >
-              <span>{t('ramadanKicker')}</span>
-              <span style={{ color: 'var(--ed-accent)', fontWeight: 700 }}>
-                2:183-187
-              </span>
-            </div>
-
-            <div className="relative min-h-[140px] flex flex-col justify-center overflow-hidden border-l-2 border-[var(--ed-accent)]/30 bg-black/5 p-6">
-              <FastingVerseSwitcher verses={FASTING_VERSES} index={fastingIdx} />
-            </div>
-
-            <p
-              style={{
-                fontFamily: F.serif,
-                fontSize: 14,
-                lineHeight: 1.6,
-                color: 'var(--ed-fg-muted)',
-                margin: 0,
-              }}
-            >
-              {t('ramadanDesc')}
-            </p>
-          </Link>
-
-          {/* Hajj Tile */}
-          <Link
-            href="/practices"
-            className="ed-card group"
-            style={{
-              backgroundColor: 'var(--ed-surface)',
-              padding: 'clamp(24px, 5vw, 36px)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 20,
-              textDecoration: 'none',
-            }}
-          >
-            <div
-              className="flex items-center justify-between"
-              style={{
-                fontFamily: F.glacial,
-                fontSize: 10,
-                fontWeight: 600,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                color: 'var(--ed-fg-muted)',
-              }}
-            >
-              <span>{t('hajjKicker')}</span>
-              <span style={{ color: 'var(--ed-accent)', fontWeight: 700 }}>
-                {t('hajjSub')}
-              </span>
-            </div>
-
-            <blockquote
-              style={{
-                fontFamily: F.display,
-                fontSize: 'clamp(18px, 3.6vw, 21px)',
-                lineHeight: 1.5,
-                color: 'var(--ed-fg)',
-                fontStyle: 'italic',
-                margin: 0,
-                letterSpacing: '-0.01em',
-                borderLeft: '2px solid var(--ed-accent)',
-                paddingLeft: 18,
-                minHeight: 140,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-              }}
-            >
-              “Proclaim that the people shall observe Hajj pilgrimage... They will come from the farthest locations.”
-              <span
-                style={{
-                  display: 'block',
-                  fontFamily: F.glacial,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  color: 'var(--ed-accent)',
-                  fontStyle: 'normal',
-                  marginTop: 12,
-                }}
-              >
-                — Quran 22:27
-              </span>
-            </blockquote>
-
-            <p
-              style={{
-                fontFamily: F.serif,
-                fontSize: 14,
-                lineHeight: 1.6,
-                color: 'var(--ed-fg-muted)',
-                margin: 0,
-              }}
-            >
-              {t('hajjDesc')}
-            </p>
-          </Link>
+          </div>
         </div>
+
       </div>
     </section>
   )

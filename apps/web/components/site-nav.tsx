@@ -59,13 +59,22 @@ function getNavItems(t: (k: string) => string): NavItem[] {
       label: 'practices',
       href: '/practices',
       children: [
+        { label: 'practices', sub: t('practicesSub'), href: '/practices' },
         { label: 'contactPrayers', sub: 'Five Daily Prayers', href: '/practices/contact-prayers' },
         { label: 'zakat', sub: 'Obligatory Charity', href: '/practices/zakat' },
         { label: 'ramadan', sub: 'Fasting Schedule', href: '/practices/ramadan' },
         { label: 'hajj', sub: 'Pilgrimage to Mecca', href: '/practices/hajj' },
       ],
     },
-    { kind: 'link', label: 'archive', href: '/archive' },
+    {
+      kind: 'group',
+      label: 'archive',
+      href: '/archive',
+      children: [
+        { label: 'archive', sub: t('archiveSub'), href: '/archive' },
+        { label: 'downloads', sub: t('downloadsSub'), href: '/downloads' },
+      ],
+    },
     { kind: 'link', label: 'music', href: '/music' },
     { kind: 'link', label: 'blog', href: '/blog' },
     { kind: 'link', label: 'chat', href: '/chat' },
@@ -489,7 +498,6 @@ export function SiteNav() {
   const compact = scrolled && !inFixedHeaderStack && !mobileOpen
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setInFixedHeaderStack(!!navRef.current?.closest('.quran-fixed-headers'))
   }, [])
 

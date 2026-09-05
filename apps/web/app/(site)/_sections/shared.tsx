@@ -74,7 +74,7 @@ export function SectionDivider({
       style={{
         display: 'grid',
         alignItems: 'baseline',
-        marginBottom: 64,
+        marginBottom: 44,
       }}
     >
       <HeadingTag
@@ -131,7 +131,7 @@ export function SectionDivider({
   )
 }
 
-export function Arrow({ size = 14 }: { size?: number }) {
+export function Arrow({ size = 14, className }: { size?: number; className?: string }) {
   return (
     <svg
       width={size}
@@ -140,6 +140,7 @@ export function Arrow({ size = 14 }: { size?: number }) {
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
+      className={className}
     >
       <path d="M5 12h14M13 5l7 7-7 7" />
     </svg>

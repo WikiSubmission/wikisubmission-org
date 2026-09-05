@@ -1,5 +1,4 @@
 import '@/styles/globals.css'
-import Script from 'next/script'
 import { Fonts } from '@/constants/fonts'
 import { Metadata } from '@/constants/metadata'
 import { Toaster } from '@/components/ui/sonner'
@@ -34,10 +33,10 @@ export default async function RootLayout({
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
         {/* Runs before hydration so [data-palette] is on <html> for the first paint. */}
-        <Script
+        <script
           id="palette-init"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: PALETTE_INIT_SCRIPT }}
+          suppressHydrationWarning
         />
       </head>
       <body

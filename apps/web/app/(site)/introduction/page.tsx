@@ -12,7 +12,7 @@ export const metadata = buildPageMetadata({
 export default function IntroductionPage() {
   return (
     <ArticleAnimations>
-      <main className="min-h-screen py-16 px-4">
+      <main className="min-h-screen py-12 sm:py-20 px-4 sm:px-6 md:px-8">
         <IntroductionContent />
       </main>
     </ArticleAnimations>

@@ -198,17 +198,23 @@ export default function HajjPage() {
               </div>
 
               <div className="space-y-4 sm:space-y-6">
-                <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-6 sm:p-8">
-                  <div className="absolute inset-x-0 top-0 h-[2px] bg-[var(--ed-accent)]" />
-                  <div className="mb-5 flex items-center justify-between gap-4 border-b border-[var(--ed-rule)] pb-4">
-                    <div className="flex items-center gap-3">
+                <div
+                  className="relative rounded-2xl border p-6 sm:p-8 shadow-sm"
+                  style={{
+                    borderColor: 'var(--ed-rule)',
+                    backgroundColor: 'var(--ed-surface)',
+                  }}
+                >
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-[var(--ed-accent)]" />
+                  <div className="mb-4 flex items-center justify-between gap-4 border-b pb-4" style={{ borderColor: 'var(--ed-rule)' }}>
+                    <div className="flex items-center gap-2.5">
                       <ShieldCheck
                         size={18}
                         className="text-[var(--ed-accent)]"
-                        strokeWidth={1.6}
+                        strokeWidth={1.7}
                       />
                       <h3
-                        className="font-medium text-[var(--ed-fg)]"
+                        className="font-medium text-lg text-[var(--ed-fg)]"
                         style={{ fontFamily: F.display }}
                       >
                         The Sacred House
@@ -216,23 +222,29 @@ export default function HajjPage() {
                     </div>
                     <QuranRef reference="3:97" />
                   </div>
-                  <p className="text-sm sm:text-base leading-[1.7] text-[var(--ed-fg-muted)]">
+                  <p className="text-sm sm:text-base leading-relaxed text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>
                     The obligation is tied to ability, means, and devotion to God
                     alone.
                   </p>
                 </div>
 
-                <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-6 sm:p-8">
-                  <div className="absolute inset-x-0 top-0 h-[2px] bg-[var(--ed-accent)]" />
-                  <div className="mb-5 flex items-center justify-between gap-4 border-b border-[var(--ed-rule)] pb-4">
-                    <div className="flex items-center gap-3">
+                <div
+                  className="relative rounded-2xl border p-6 sm:p-8 shadow-sm"
+                  style={{
+                    borderColor: 'var(--ed-rule)',
+                    backgroundColor: 'var(--ed-surface)',
+                  }}
+                >
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-[var(--ed-accent)]" />
+                  <div className="mb-4 flex items-center justify-between gap-4 border-b pb-4" style={{ borderColor: 'var(--ed-rule)' }}>
+                    <div className="flex items-center gap-2.5">
                       <CalendarDays
                         size={18}
                         className="text-[var(--ed-accent)]"
-                        strokeWidth={1.6}
+                        strokeWidth={1.7}
                       />
                       <h3
-                        className="font-medium text-[var(--ed-fg)]"
+                        className="font-medium text-lg text-[var(--ed-fg)]"
                         style={{ fontFamily: F.display }}
                       >
                         Specified Months
@@ -240,7 +252,7 @@ export default function HajjPage() {
                     </div>
                     <RefList refs={['2:197', '9:2', '9:36']} />
                   </div>
-                  <p className="text-sm sm:text-base leading-[1.7] text-[var(--ed-fg-muted)]">
+                  <p className="text-sm sm:text-base leading-relaxed text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>
                     The sacred months are designated for pilgrimage and safe travel.
                   </p>
                 </div>
@@ -250,16 +262,16 @@ export default function HajjPage() {
 
           {/* ── Core Rites ─────────────────────────────────────────── */}
           <FadeUp as="section" distance={16} className="space-y-8 md:space-y-10">
-            <div className="mx-auto max-w-4xl space-y-5">
+            <div className="mx-auto max-w-4xl space-y-4">
               <SectionLabel>Core rites</SectionLabel>
               <h2
-                className="text-balance text-2xl sm:text-3xl font-medium tracking-tight md:text-4xl"
+                className="text-balance text-2xl sm:text-3xl font-medium tracking-tight md:text-4xl text-[var(--ed-fg)]"
                 style={{ fontFamily: F.display }}
               >
                 The Steps of Hajj
               </h2>
               <p
-                className="text-base sm:text-lg leading-[1.7] text-[var(--ed-fg-muted)]"
+                className="text-base sm:text-lg leading-relaxed text-[var(--ed-fg-muted)]"
                 style={{ fontFamily: F.serif }}
               >
                 The rites of Hajj move the believer through sanctity,
@@ -267,33 +279,39 @@ export default function HajjPage() {
               </p>
             </div>
 
-            <div className="mx-auto max-w-4xl space-y-6 sm:space-y-8">
+            <div className="mx-auto max-w-4xl space-y-5 sm:space-y-6">
               {steps.map((step, idx) => (
                 <article
                   key={step.title}
-                  className="group flex flex-col gap-5 sm:gap-6 border border-[var(--ed-rule)] bg-[var(--ed-surface)]/20 p-5 sm:p-6 md:p-8 transition-all duration-300 hover:border-[var(--ed-accent)]/50"
+                  className="group rounded-2xl border p-6 sm:p-8 transition-all duration-300 hover:border-[var(--ed-accent)] shadow-sm"
+                  style={{
+                    borderColor: 'var(--ed-rule)',
+                    backgroundColor: 'var(--ed-surface)',
+                  }}
                 >
-                  <span
-                    className="text-4xl sm:text-5xl font-medium text-[var(--ed-accent)]/30 select-none sm:w-12 shrink-0 transition-colors duration-300 group-hover:text-[var(--ed-accent)]/40"
-                    style={{ fontFamily: F.display }}
-                  >
-                    {idx + 1}
-                  </span>
-                  <div className="space-y-3 sm:space-y-4 flex-1">
-                    <h3
-                      className="text-xl sm:text-2xl font-medium"
-                      style={{ fontFamily: F.display }}
+                  <div className="flex items-start gap-4 sm:gap-6">
+                    <span
+                      className="text-2xl sm:text-3xl font-mono font-bold text-[var(--ed-accent)]/40 group-hover:text-[var(--ed-accent)] transition-colors select-none shrink-0"
+                      style={{ fontFamily: F.mono }}
                     >
-                      {step.title}
-                    </h3>
-                    <div className="text-sm sm:text-base leading-[1.7] text-[var(--ed-fg-muted)]">
-                      {step.body}
-                    </div>
-                    {step.refs.length > 0 && (
-                      <div className="pt-3 border-t border-[var(--ed-rule)]/50 mt-3 sm:mt-4">
-                        <RefList refs={step.refs} />
+                      0{idx + 1}
+                    </span>
+                    <div className="space-y-3 flex-1">
+                      <h3
+                        className="text-xl sm:text-2xl font-medium text-[var(--ed-fg)]"
+                        style={{ fontFamily: F.display }}
+                      >
+                        {step.title}
+                      </h3>
+                      <div className="text-sm sm:text-base leading-relaxed text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>
+                        {step.body}
                       </div>
-                    )}
+                      {step.refs.length > 0 && (
+                        <div className="pt-3 border-t mt-4" style={{ borderColor: 'var(--ed-rule)' }}>
+                          <RefList refs={step.refs} />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </article>
               ))}
@@ -323,51 +341,53 @@ export default function HajjPage() {
         </div>
       </section>
 
-      <VerseGrid
-        label="Scriptural reference"
-        title="Hajj in the Quran"
-        description="The verses below outline the obligation, timing, conduct, rites, and God-centered purpose of the pilgrimage."
-        verses={HAJJ_VERSES}
-      />
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-10 pb-16">
+        <VerseGrid
+          label="Scriptural reference"
+          title="Hajj in the Quran"
+          description="The verses below outline the obligation, timing, conduct, rites, and God-centered purpose of the pilgrimage."
+          verses={HAJJ_VERSES}
+        />
+      </div>
 
       {/* ── Navigation ─────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-6xl px-5 sm:px-6 pb-16 pt-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-5 pt-12 border-t border-[var(--ed-rule)]">
-          <div className="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-10 pb-20 pt-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-12 border-t" style={{ borderColor: 'var(--ed-rule)' }}>
+          <div className="flex flex-wrap items-center justify-center gap-2.5 w-full sm:w-auto">
             <Link
               href="/practices"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] w-full sm:w-auto justify-center"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
-              &larr; {t("previous")}
+              &larr; {t("practicesHub")}
             </Link>
             <Link
               href="/practices/contact-prayers"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
               {t("contactPrayersNav")}
             </Link>
             <Link
               href="/practices/zakat"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
               {t("zakatNav")}
             </Link>
             <Link
               href="/practices/ramadan"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
               {t("ramadanNav")}
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 w-full sm:w-auto">
             <Link
               href="/practices"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-accent)] bg-[var(--ed-accent)] text-[var(--ed-bg)] hover:bg-[var(--ed-fg)] hover:border-[var(--ed-fg)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border text-xs font-mono transition-all border-[var(--ed-accent)] bg-[var(--ed-accent)] text-[var(--ed-bg)] hover:bg-[var(--ed-fg)] hover:border-[var(--ed-fg)]"
+              style={{ fontFamily: F.mono, fontWeight: 600 }}
             >
               {t("practicesHub")}
             </Link>

@@ -1,6 +1,5 @@
 import '@/styles/globals.css'
 import type { Metadata, Viewport } from 'next'
-import Script from 'next/script'
 import { Fonts } from '@/constants/fonts'
 import { PALETTE_INIT_SCRIPT } from '@/lib/theme-palette-context'
 import { MobileProviders } from '@/components/mobile-providers'
@@ -38,10 +37,10 @@ export default function RootLayout({
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
         {/* Runs before hydration so [data-palette] is on <html> for first paint. */}
-        <Script
+        <script
           id="palette-init"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: PALETTE_INIT_SCRIPT }}
+          suppressHydrationWarning
         />
       </head>
       <body

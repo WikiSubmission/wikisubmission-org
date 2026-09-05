@@ -13,6 +13,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useVerseFetch, useBibleFetch } from '@/hooks/use-verse-fetch'
 import { parseQuranRef, parseBibleRef } from '@/lib/scripture-parser'
+import { CHAPTER_TITLES_EN } from '@/lib/quran-titles-en'
 import { VerseCard } from '@/components/quran-reader/verse-card'
 import type { components } from '@/src/api/types.gen'
 
@@ -31,15 +32,17 @@ function BibleVersePreview({
   const tr = verse.tr?.['en']
 
   return (
-    <div className="space-y-2 py-3 border-b last:border-0">
-      <span className="text-xs text-primary font-glacial font-bold">
+    <div className="space-y-2 py-3 border-b border-[var(--ed-rule)]/40 last:border-0">
+      <span className="text-xs text-[var(--ed-accent)] font-mono font-bold tracking-tight">
         {bookDisplay} {cn}:{vn}
       </span>
       {tr?.tx && (
-        <p className="text-sm leading-relaxed">{tr.tx}</p>
+        <p className="text-sm leading-relaxed text-[var(--ed-fg)]" style={{ fontFamily: 'var(--font-source-serif), Georgia, serif' }}>
+          {tr.tx}
+        </p>
       )}
       {tr?.f && (
-        <p className="text-sm text-muted-foreground italic">{tr.f}</p>
+        <p className="text-xs text-[var(--ed-fg-muted)] italic leading-normal">{tr.f}</p>
       )}
     </div>
   )
@@ -101,7 +104,7 @@ export function ScriptureRef({
   // If unparseable, render plain text so we don't swallow content
   if (!isBible && !quranRef) {
     return children ?? (
-      <span className="font-glacial text-[0.85em] font-bold">{reference}</span>
+      <span className="font-mono text-[0.85em] font-bold text-[var(--ed-accent)]">{reference}</span>
     )
   }
 
@@ -119,6 +122,20 @@ export function ScriptureRef({
     return reference
   })()
 
+  // Tooltip description for hovering
+  const tooltipText = (() => {
+    if (quranRef) {
+      const suraTitle = CHAPTER_TITLES_EN[quranRef.cn]
+      const suraStr = suraTitle ? `Sura ${quranRef.cn}: ${suraTitle}` : `Sura ${quranRef.cn}`
+      const verseStr = quranRef.vs === quranRef.ve ? `Verse ${quranRef.vs}` : `Verses ${quranRef.vs}–${quranRef.ve}`
+      return `Quran ${label} (${suraStr}, ${verseStr})`
+    }
+    if (isBible && bibleRef) {
+      return `Bible (${label})`
+    }
+    return reference
+  })()
+
   // Dialog title (Quran supports in-dialog navigation; Bible does not)
   const currentRef = history[history.length - 1] ?? reference
   const currentParsed = !isBible ? (parseQuranRef(currentRef) ?? quranRef) : null
@@ -127,6 +144,10 @@ export function ScriptureRef({
       ? `${currentParsed.cn}:${currentParsed.vs}`
       : `${currentParsed.cn}:${currentParsed.vs}–${currentParsed.ve}`
     : label
+
+  const currentChapterTitle = !isBible && currentParsed
+    ? CHAPTER_TITLES_EN[currentParsed.cn]
+    : null
 
   function handleOpenChange(val: boolean) {
     setOpen(val)
@@ -149,9 +170,10 @@ export function ScriptureRef({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <button
         onClick={() => handleOpenChange(true)}
+        title={tooltipText}
         className={
           triggerClassName ??
-          'inline-flex items-center font-glacial text-[0.85em] font-bold text-primary hover:underline px-0.5 transition-colors cursor-pointer align-baseline select-text mx-0.5'
+          'inline-flex items-center gap-1 font-mono text-[0.82em] font-semibold text-[var(--ed-accent)] bg-[var(--ed-accent)]/[0.08] hover:bg-[var(--ed-accent)]/[0.18] border border-[var(--ed-accent)]/20 hover:border-[var(--ed-accent)]/45 rounded-md px-1.5 py-0.5 mx-0.5 transition-all duration-150 cursor-pointer align-baseline select-text shadow-2xs group/ref'
         }
         aria-label={`View ${isBible ? 'Bible' : 'Quran'} verse ${reference}`}
       >
@@ -159,28 +181,59 @@ export function ScriptureRef({
       </button>
 
       <DialogContent
-        className="max-w-lg p-0 overflow-hidden rounded-3xl gap-0"
+        className="max-w-xl p-0 overflow-hidden rounded-2xl sm:rounded-3xl gap-0 border border-[var(--ed-rule)] bg-[var(--ed-surface)] shadow-xl"
         aria-describedby={undefined}
       >
-        {/* Required for a11y; visible header is intentionally minimal — the
-            verse-key pill on the rendered card already carries the reference. */}
         <DialogTitle className="sr-only">
           {currentLabel}
           {from ? ` — from ${from}` : ''}
         </DialogTitle>
 
-        {!isBible && history.length > 1 && (
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={handleBack}
-            aria-label="Go back"
-            className="absolute top-3 left-3 z-10"
-          >
-            <ArrowLeft className="size-4" />
-          </Button>
-        )}
+        {/* ── Dialog Header with rich index information ── */}
+        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-[var(--ed-rule)] bg-[var(--ed-surface)]/90 backdrop-blur-sm">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {!isBible && history.length > 1 && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleBack}
+                aria-label="Go back"
+                className="size-7 -ml-1 text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)]"
+              >
+                <ArrowLeft className="size-4" />
+              </Button>
+            )}
+            <span
+              className="inline-flex items-center text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-accent)] bg-[var(--ed-accent)]/10 px-2 py-0.5 rounded-full border border-[var(--ed-accent)]/20 shrink-0"
+              style={{ fontFamily: 'var(--font-glacial), sans-serif' }}
+            >
+              {isBible ? 'Bible' : 'Quran'}
+            </span>
+            <div className="min-w-0 flex items-baseline gap-1.5 truncate">
+              <span
+                className="text-sm sm:text-base font-medium text-[var(--ed-fg)] truncate"
+                style={{ fontFamily: 'var(--font-cormorant), Georgia, serif' }}
+              >
+                {!isBible && currentParsed ? (
+                  <>
+                    Sura {currentParsed.cn}
+                    {currentChapterTitle ? ` · ${currentChapterTitle}` : ''}
+                  </>
+                ) : isBible && bibleRef ? (
+                  bibleRef.displayBook
+                ) : (
+                  currentLabel
+                )}
+              </span>
+            </div>
+          </div>
 
+          <span className="shrink-0 inline-flex items-center font-mono text-xs font-semibold text-[var(--ed-accent)] bg-[var(--ed-accent-soft)]/20 border border-[var(--ed-accent)]/25 px-2 py-0.5 rounded-md">
+            {currentLabel}
+          </span>
+        </div>
+
+        {/* ── Verse Content Body ── */}
         <div className="max-h-[65vh] overflow-y-auto">
           {loading && (
             <div className="flex justify-center py-12">
@@ -220,11 +273,12 @@ export function ScriptureRef({
           )}
         </div>
 
+        {/* ── Dialog Footer with links & source note ── */}
         {(from ||
           (!isBible && quranVerses.length > 0 && currentParsed)) && (
-          <div className="flex items-center justify-between gap-3 px-5 py-3 border-t bg-muted/20">
+          <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-[var(--ed-rule)] bg-[var(--ed-surface-variant)]/40">
             {from ? (
-              <span className="text-xs italic text-muted-foreground truncate">
+              <span className="text-xs italic text-[var(--ed-fg-muted)] truncate" style={{ fontFamily: 'var(--font-source-serif), Georgia, serif' }}>
                 from {from}
               </span>
             ) : (
@@ -234,10 +288,11 @@ export function ScriptureRef({
               <Link
                 href={`/quran/${currentParsed.cn}?verse=${currentParsed.vs}`}
                 onClick={() => setOpen(false)}
-                className="shrink-0 text-xs text-primary hover:text-primary flex items-center gap-1 transition-colors"
+                className="shrink-0 text-xs font-medium text-[var(--ed-accent)] hover:underline flex items-center gap-1.5 transition-colors"
+                style={{ fontFamily: 'var(--font-glacial), sans-serif' }}
               >
-                Open in Quran reader
-                <ArrowUpRight className="size-3" />
+                <span>Open in Quran reader</span>
+                <ArrowUpRight className="size-3.5" />
               </Link>
             )}
           </div>

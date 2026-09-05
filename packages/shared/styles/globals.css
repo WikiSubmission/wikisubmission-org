@@ -1346,6 +1346,7 @@ html[data-palette='mono'].dark {
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1747,6 +1748,7 @@ html[data-palette='mono'].dark {
   padding-left: 10px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1758,6 +1760,7 @@ html[data-palette='mono'].dark {
   color: var(--ed-fg);
   display: -webkit-box;
   -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1823,6 +1826,7 @@ html[data-palette='mono'].dark {
   line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

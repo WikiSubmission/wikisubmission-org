@@ -234,6 +234,7 @@ export const SITE_ROUTES: readonly SiteRoute[] = [
     changeFrequency: 'monthly',
   },
 
+
   // ── Explore ────────────────────────────────────────────────────────────────
   {
     route: '/practices',

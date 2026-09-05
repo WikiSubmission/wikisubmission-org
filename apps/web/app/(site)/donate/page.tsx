@@ -1,19 +1,20 @@
-import { buildPageMetadata } from '@/constants/metadata'
+import React from 'react'
+import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemTitle,
-} from '@/components/ui/item'
-import { ChevronRight, Heart, Calendar, ChevronLeft, Gift } from 'lucide-react'
-import { About } from '@/constants/about'
-
-export const metadata = buildPageMetadata({
-  title: 'Donate — WikiSubmission',
-  description: 'Support WikiSubmission and help spread the message of Submission.',
-  url: '/donate',
-})
+  ShieldCheck,
+  CheckCircle2,
+  Lock,
+  FileText,
+  ArrowUpRight,
+  HeartHandshake,
+  Server,
+  Code2,
+  Globe2,
+  Sparkles,
+  Mail,
+  RefreshCw,
+} from 'lucide-react'
 import {
   FaApplePay,
   FaBitcoin,
@@ -21,186 +22,914 @@ import {
   FaCcVisa,
   FaPaypal,
   FaStripe,
+  FaGooglePay,
 } from 'react-icons/fa'
-import { Fonts } from '@/constants/fonts'
-import Image from 'next/image'
-import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import { buildPageMetadata } from '@/constants/metadata'
+import { About } from '@/constants/about'
+import { SectionDivider, F } from '@/app/(site)/_sections/shared'
+
+export const metadata = buildPageMetadata({
+  title: 'Donate — WikiSubmission',
+  description:
+    'Support WikiSubmission, a registered 501(c)(3) nonprofit dedicated to keeping scripture open, free, and accessible to everyone worldwide.',
+  url: '/donate',
+})
+
+const DONATE_LINKS = {
+  stripeOneTime: 'https://donate.stripe.com/dRmeV6bVIeic9Xt9KfeAg00',
+  stripeMonthly: 'https://donate.stripe.com/4gMeV69NAde86Lhe0veAg03',
+  paypal: 'https://www.paypal.com/US/fundraiser/charity/5746449',
+  gofundme: 'https://gofund.me/53fa3b5aa',
+}
 
 export default async function DonatePage() {
   const t = await getTranslations('donate')
-  const tCommon = await getTranslations('common')
 
   return (
-    <main className="flex flex-col min-h-screen items-center justify-center text-center space-y-4 md:p-24 p-8">
-      <Link href="/">
-        <Image
-          src="/brand-assets/logo-transparent.png"
-          alt="WikiSubmission Logo"
-          width={72}
-          height={72}
-          className="rounded-full"
-        />
-      </Link>
-
-      <section className="max-w-sm flex gap-4 max-w-md items-center">
-        <h1 className="text-3xl font-semibold">{t('heading')}</h1>
-      </section>
-
-      <section className="max-w-sm flex flex-col gap-4 w-full">
-        <Item asChild variant="outline">
-          <Link
-            href="https://donate.stripe.com/dRmeV6bVIeic9Xt9KfeAg00"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div
+      style={{
+        backgroundColor: 'var(--ed-bg)',
+        color: 'var(--ed-fg)',
+        minHeight: '100vh',
+      }}
+    >
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 md:px-10 py-16 sm:py-24">
+        {/* Hero Section */}
+        <section className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
+          <div
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border mb-6 text-xs font-semibold tracking-wider uppercase"
+            style={{
+              borderColor: 'var(--ed-rule)',
+              backgroundColor: 'var(--ed-surface)',
+              color: 'var(--ed-accent)',
+              fontFamily: F.glacial,
+            }}
           >
-            <ItemContent>
-              <FaStripe className="size-6" />
-              <ItemTitle>{t('oneTime')}</ItemTitle>
-              <ItemDescription>{t('oneTimeDesc')}</ItemDescription>
-              <div className="flex gap-2">
-                <FaApplePay className="size-6" />
-                <FaCcVisa className="size-6" />
-                <FaCcMastercard className="size-6" />
-                <FaBitcoin className="size-6" />
+            <ShieldCheck size={14} className="text-[var(--ed-accent)]" />
+            <span>{t('badgeNonprofit')} · EIN 39-4876245</span>
+          </div>
+
+          <h1
+            className="text-4xl sm:text-6xl md:text-7xl font-normal tracking-tight mb-6"
+            style={{ fontFamily: F.display, lineHeight: 1.05 }}
+          >
+            Support the{' '}
+            <em
+              style={{
+                fontStyle: 'italic',
+                color: 'var(--ed-accent)',
+              }}
+            >
+              mission
+            </em>
+          </h1>
+
+          <p
+            className="text-lg sm:text-xl leading-relaxed mb-8 text-[var(--ed-fg-muted)]"
+            style={{ fontFamily: F.serif }}
+          >
+            {t('subheading')}
+          </p>
+
+          {/* Trust Badges */}
+          <div
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t"
+            style={{ borderColor: 'var(--ed-rule)' }}
+          >
+            <div className="flex items-center justify-center gap-2 text-xs font-medium text-[var(--ed-fg-muted)]">
+              <ShieldCheck size={15} className="text-[var(--ed-accent)] shrink-0" />
+              <span>501(c)(3) Charity</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 text-xs font-medium text-[var(--ed-fg-muted)]">
+              <CheckCircle2 size={15} className="text-[var(--ed-accent)] shrink-0" />
+              <span>100% Tax Deductible</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 text-xs font-medium text-[var(--ed-fg-muted)]">
+              <Lock size={15} className="text-[var(--ed-accent)] shrink-0" />
+              <span>Zero Ads or Paywalls</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 text-xs font-medium text-[var(--ed-fg-muted)]">
+              <FileText size={15} className="text-[var(--ed-accent)] shrink-0" />
+              <span>Instant Receipts</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Primary Giving Options */}
+        <section className="mb-20 sm:mb-28">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
+            {/* Monthly Sustainer (Featured) */}
+            <div
+              className="lg:col-span-7 rounded-2xl border-2 p-6 sm:p-10 flex flex-col justify-between relative overflow-hidden transition-all shadow-md"
+              style={{
+                borderColor: 'var(--ed-accent)',
+                backgroundColor: 'var(--ed-surface)',
+              }}
+            >
+              {/* Top Accent Ribbon */}
+              <div
+                className="absolute top-0 left-0 right-0 h-1.5"
+                style={{ backgroundColor: 'var(--ed-accent)' }}
+              />
+
+              <div>
+                <div className="flex items-center justify-between gap-2 flex-wrap mb-4">
+                  <span
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider"
+                    style={{
+                      backgroundColor: 'var(--ed-accent)',
+                      color: 'var(--ed-bg)',
+                      fontFamily: F.glacial,
+                    }}
+                  >
+                    <Sparkles size={13} />
+                    {t('monthlyBadge')}
+                  </span>
+                  <span
+                    className="text-xs font-mono text-[var(--ed-fg-muted)]"
+                    style={{ fontFamily: F.mono }}
+                  >
+                    Stripe Secure
+                  </span>
+                </div>
+
+                <h2
+                  className="text-2xl sm:text-3xl font-medium tracking-tight mb-3"
+                  style={{ fontFamily: F.display }}
+                >
+                  {t('monthly')}
+                </h2>
+
+                <p
+                  className="text-base leading-relaxed text-[var(--ed-fg-muted)] mb-6"
+                  style={{ fontFamily: F.serif }}
+                >
+                  {t('monthlyDesc')}
+                </p>
+
+                <div
+                  className="p-4 rounded-xl border mb-8 flex items-center justify-between flex-wrap gap-3"
+                  style={{
+                    backgroundColor: 'var(--ed-bg)',
+                    borderColor: 'var(--ed-rule)',
+                  }}
+                >
+                  <div className="flex items-center gap-2 text-xs text-[var(--ed-fg-muted)]">
+                    <FaStripe className="size-8 text-[#635BFF]" />
+                    <span className="font-medium">Accepted Methods</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[var(--ed-fg-muted)]">
+                    <FaApplePay className="size-6 hover:text-[var(--ed-fg)] transition-colors" title="Apple Pay" />
+                    <FaGooglePay className="size-6 hover:text-[var(--ed-fg)] transition-colors" title="Google Pay" />
+                    <FaCcVisa className="size-6 hover:text-[var(--ed-fg)] transition-colors" title="Visa" />
+                    <FaCcMastercard className="size-6 hover:text-[var(--ed-fg)] transition-colors" title="Mastercard" />
+                  </div>
+                </div>
               </div>
-            </ItemContent>
-            <ItemActions>
-              <Heart className="size-5" />
-              <ChevronRight className="size-4" />
-            </ItemActions>
-          </Link>
-        </Item>
 
-        <Item asChild variant="outline">
-          <Link
-            href="https://donate.stripe.com/4gMeV69NAde86Lhe0veAg03"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ItemContent>
-              <FaStripe className="size-6" />
-              <ItemTitle>{t('monthly')}</ItemTitle>
-              <ItemDescription>{t('monthlyDesc')}</ItemDescription>
-              <div className="flex gap-2">
-                <FaApplePay className="size-6" />
-                <FaCcVisa className="size-6" />
-                <FaCcMastercard className="size-6" />
+              <div className="space-y-3">
+                <a
+                  href={DONATE_LINKS.stripeMonthly}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-semibold text-base transition-all shadow-sm group cursor-pointer"
+                  style={{
+                    backgroundColor: 'var(--ed-accent)',
+                    color: 'var(--ed-bg)',
+                    fontFamily: F.serif,
+                  }}
+                >
+                  <span>{t('giveMonthlyCta')}</span>
+                  <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </a>
+                <p className="text-center text-xs text-[var(--ed-fg-muted)]">
+                  Cancel or update your monthly amount anytime in self-serve portal.
+                </p>
               </div>
-            </ItemContent>
-            <ItemActions>
-              <Calendar className="size-5" />
-              <ChevronRight className="size-4" />
-            </ItemActions>
-          </Link>
-        </Item>
+            </div>
 
-        <Item asChild variant="outline">
-          <Link
-            href="https://www.paypal.com/US/fundraiser/charity/5746449"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ItemContent>
-              <FaPaypal className="size-6" />
-              <ItemTitle>{t('paypal')}</ItemTitle>
-              <ItemDescription>{t('paypalDesc')}</ItemDescription>
-            </ItemContent>
-            <ItemActions>
-              <Gift className="size-5" />
-              <ChevronRight className="size-4" />
-            </ItemActions>
-          </Link>
-        </Item>
+            {/* One-Time Contribution */}
+            <div
+              className="lg:col-span-5 rounded-2xl border p-6 sm:p-10 flex flex-col justify-between relative overflow-hidden transition-all shadow-sm"
+              style={{
+                borderColor: 'var(--ed-rule)',
+                backgroundColor: 'var(--ed-surface)',
+              }}
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 flex-wrap mb-4">
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider text-[var(--ed-fg-muted)] border"
+                    style={{
+                      borderColor: 'var(--ed-rule)',
+                      fontFamily: F.glacial,
+                    }}
+                  >
+                    One-Time Gift
+                  </span>
+                  <span
+                    className="text-xs font-mono text-[var(--ed-fg-muted)]"
+                    style={{ fontFamily: F.mono }}
+                  >
+                    Stripe Secure
+                  </span>
+                </div>
 
-        <Item asChild variant="outline">
-          <Link
-            href="https://gofund.me/53fa3b5aa"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ItemContent>
-              <svg
-                className="size-6"
-                fill="#128008ff"
-                width="800px"
-                height="800px"
-                viewBox="0 0 24 24"
-                role="img"
-                xmlns="http://www.w3.org/2000/svg"
+                <h2
+                  className="text-2xl sm:text-3xl font-medium tracking-tight mb-3"
+                  style={{ fontFamily: F.display }}
+                >
+                  {t('oneTime')}
+                </h2>
+
+                <p
+                  className="text-base leading-relaxed text-[var(--ed-fg-muted)] mb-6"
+                  style={{ fontFamily: F.serif }}
+                >
+                  {t('oneTimeDesc')}
+                </p>
+
+                <div
+                  className="p-4 rounded-xl border mb-8 flex items-center justify-between flex-wrap gap-3"
+                  style={{
+                    backgroundColor: 'var(--ed-bg)',
+                    borderColor: 'var(--ed-rule)',
+                  }}
+                >
+                  <div className="flex items-center gap-2 text-xs text-[var(--ed-fg-muted)]">
+                    <FaStripe className="size-8 text-[#635BFF]" />
+                    <span className="font-medium">Cards & Crypto</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[var(--ed-fg-muted)]">
+                    <FaApplePay className="size-6" title="Apple Pay" />
+                    <FaCcVisa className="size-6" title="Visa" />
+                    <FaCcMastercard className="size-6" title="Mastercard" />
+                    <FaBitcoin className="size-5" title="Bitcoin" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <a
+                  href={DONATE_LINKS.stripeOneTime}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-semibold text-base transition-all border group cursor-pointer"
+                  style={{
+                    borderColor: 'var(--ed-rule)',
+                    backgroundColor: 'var(--ed-bg-alt)',
+                    color: 'var(--ed-fg)',
+                    fontFamily: F.serif,
+                  }}
+                >
+                  <span>{t('giveOneTimeCta')}</span>
+                  <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-[var(--ed-accent)]" />
+                </a>
+                <p className="text-center text-xs text-[var(--ed-fg-muted)]">
+                  Instant tax receipt sent to your email.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Alternative Channels (PayPal Giving Fund & GoFundMe) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-6">
+            {/* PayPal Giving Fund */}
+            <a
+              href={DONATE_LINKS.paypal}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-6 rounded-2xl border flex items-start gap-4 transition-all hover:border-[var(--ed-accent)] group"
+              style={{
+                borderColor: 'var(--ed-rule)',
+                backgroundColor: 'var(--ed-surface)',
+              }}
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border"
+                style={{
+                  borderColor: 'var(--ed-rule)',
+                  backgroundColor: 'var(--ed-bg)',
+                }}
               >
-                <title>GoFundMe icon</title>
-                <path d="M21.6236 4.0792l-4.2223 3.0705c-.6695.4892-.8127 1.4224-.3309 2.0922.4892.6698 1.4221.8128 2.0921.3312l4.2219-3.0706c.67-.4892.8127-1.4224.3313-2.0922a1.4883 1.4883 0 0 0-2.092-.3312zm-9.6483-1.1816c-.8278 0-1.4978.6698-1.4978 1.4976v2.5212c0 .8279.67 1.4977 1.4978 1.4977.8279 0 1.4974-.6698 1.4974-1.4977V4.3952c0-.8278-.6695-1.4976-1.4974-1.4976zM.2877 4.4103c-.4892.6698-.3387 1.603.3308 2.0922L4.841 9.573c.6695.4891 1.6029.3386 2.092-.3312.4893-.6698.3387-1.603-.3313-2.0922L2.3798 4.0792c-.6773-.4817-1.6107-.3387-2.092.331zm3.695 7.7893C6.1051 10.303 8.905 9.144 11.9753 9.144c3.0705 0 5.8702 1.159 7.9926 3.0555zm14.5556 1.6335c-1.3473 0-2.236.4433-2.8004.9926-.5948.587-1.0232 1.5058-1.0232 2.6497 0 1.302.5646 2.1445 1.0089 2.5885.843.843 1.926 1.0385 2.829 1.0385 1.4827 0 2.2804-.4586 2.7843-.9478.5043-.4892.7234-1.024.8284-1.4078H19.825c-.1056.2107-.279.3687-.4296.459-.3083.1656-.7368.1814-.797.1814-.5492 0-.8583-.1883-1.0088-.3388-.2933-.286-.4296-.7757-.4296-1.1445h5.095v-.2634c0-.7601-.12-1.9567-1.0833-2.8749-.8132-.7676-1.8358-.9325-2.6334-.9325zm.0601 1.5577c.241 0 .6845.0448 1.008.3684.1881.1882.3384.4744.399.7378h-2.77c.0455-.3085.2038-.5572.3694-.7378.2561-.2634.5797-.3684.9936-.3684zm-16.851-1.3549h2.446v.8279c.5795-.7 1.377-.9483 2.047-.9483.4893 0 .9482.1054 1.3171.3086.5044.2634.783.6397.948.9783.2786-.4892.6251-.7827.9335-.9482.4892-.2785.9632-.3387 1.4226-.3387.5038 0 1.3317.0753 1.8961.6247.61.5945.6397 1.4073.6397 1.8814v4.4553h-2.4459v-3.379c0-.7226-.0753-1.2117-.3533-1.4676-.1359-.1204-.324-.2258-.6397-.2258-.2786 0-.5044.0753-.7228.2785-.414.3988-.4437.9633-.4437 1.302v3.507H6.346v-3.3791c0-.6548-.0454-1.1816-.324-1.4676-.2106-.2258-.4891-.2784-.7374-.2784-.2634 0-.474.0451-.6695.2483-.429.414-.429 1.0687-.429 1.4977v3.3791H1.74v-6.856Z" />
-              </svg>
-              <ItemTitle>{t('gofundme')}</ItemTitle>
-              <ItemDescription>{t('gofundmeDesc')}</ItemDescription>
-            </ItemContent>
-            <ItemActions>
-              <Gift className="size-5" />
-              <ChevronRight className="size-4" />
-            </ItemActions>
-          </Link>
-        </Item>
-      </section>
+                <FaPaypal className="size-6 text-[#003087]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <h3 className="font-semibold text-base text-[var(--ed-fg)] group-hover:text-[var(--ed-accent)] transition-colors">
+                    {t('paypal')}
+                  </h3>
+                  <ArrowUpRight size={16} className="text-[var(--ed-fg-muted)] group-hover:text-[var(--ed-accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                </div>
+                <p
+                  className="text-sm text-[var(--ed-fg-muted)] leading-relaxed"
+                  style={{ fontFamily: F.serif }}
+                >
+                  {t('paypalDesc')}
+                </p>
+              </div>
+            </a>
 
-      <section className="max-w-sm text-center text-sm text-muted-foreground space-y-3 ">
-        <p>{t('taxInfo')}</p>
-      </section>
+            {/* GoFundMe Community Campaign */}
+            <a
+              href={DONATE_LINKS.gofundme}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-6 rounded-2xl border flex items-start gap-4 transition-all hover:border-[var(--ed-accent)] group"
+              style={{
+                borderColor: 'var(--ed-rule)',
+                backgroundColor: 'var(--ed-surface)',
+              }}
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border"
+                style={{
+                  borderColor: 'var(--ed-rule)',
+                  backgroundColor: 'var(--ed-bg)',
+                }}
+              >
+                <HeartHandshake className="size-6 text-[#02a95c]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <h3 className="font-semibold text-base text-[var(--ed-fg)] group-hover:text-[var(--ed-accent)] transition-colors">
+                    {t('gofundme')}
+                  </h3>
+                  <ArrowUpRight size={16} className="text-[var(--ed-fg-muted)] group-hover:text-[var(--ed-accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                </div>
+                <p
+                  className="text-sm text-[var(--ed-fg-muted)] leading-relaxed"
+                  style={{ fontFamily: F.serif }}
+                >
+                  {t('gofundmeDesc')}
+                </p>
+              </div>
+            </a>
+          </div>
 
-      <section className="max-w-sm text-center text-sm text-muted-foreground space-y-3">
-        <p>
-          <b>{t('fundInfoBold')}</b> {t('fundInfoRest')}
-        </p>
-        <p>
-          <b>{t('noFeatures')}</b>
-        </p>
-      </section>
-
-      <section className="max-w-sm text-center text-sm text-muted-foreground space-y-3">
-        <p>
-          {t('managePrefix')}{' '}
-          <Link
-            href="/donate/manage"
-            className="text-primary hover:cursor-pointer hover:underline"
+          {/* Manage Subscription Self-Service Banner */}
+          <div
+            className="mt-6 rounded-2xl border p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-5"
+            style={{
+              borderColor: 'var(--ed-rule)',
+              backgroundColor: 'var(--ed-bg-alt)',
+            }}
           >
-            {t('here')}
-          </Link>
-          .
-        </p>
-      </section>
+            <div className="space-y-1 text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start gap-2 text-[var(--ed-accent)] mb-1">
+                <RefreshCw size={14} />
+                <span
+                  className="text-[11px] font-bold uppercase tracking-wider text-[var(--ed-fg)]"
+                  style={{ fontFamily: F.glacial }}
+                >
+                  Manage Giving
+                </span>
+              </div>
+              <h3
+                className="text-lg sm:text-xl font-medium tracking-tight text-[var(--ed-fg)]"
+                style={{ fontFamily: F.display }}
+              >
+                {t('manageBannerTitle')}
+              </h3>
+              <p
+                className="text-xs sm:text-sm text-[var(--ed-fg-muted)] max-w-xl leading-relaxed"
+                style={{ fontFamily: F.serif }}
+              >
+                {t('manageBannerDesc')}
+              </p>
+            </div>
 
-      <section className="max-w-sm text-center text-sm text-muted-foreground space-y-3">
-        <p>
-          {t('forQuestionsPrefix')}{' '}
-          <a
-            href={`mailto:${About.email}`}
-            className="text-primary hover:cursor-pointer hover:underline"
+            <Link
+              href="/donate/manage"
+              className="inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl font-semibold text-xs border transition-all shrink-0 hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+              style={{
+                borderColor: 'var(--ed-rule)',
+                backgroundColor: 'var(--ed-surface)',
+                color: 'var(--ed-fg)',
+                fontFamily: F.serif,
+              }}
+            >
+              <span>{t('manageBannerCta')}</span>
+              <ArrowUpRight size={13} />
+            </Link>
+          </div>
+        </section>
+
+        {/* Illuminated Scripture Callout (Quran 2:261) */}
+        <section className="mb-20 sm:mb-28">
+          <div
+            className="rounded-2xl border p-8 sm:p-12 relative overflow-hidden shadow-sm flex flex-col gap-8"
+            style={{
+              borderColor: 'var(--ed-rule)',
+              backgroundColor: 'var(--ed-surface)',
+            }}
           >
-            {About.email}
-          </a>
-          .
-        </p>
-      </section>
+            {/* Header: Label and Reference */}
+            <div
+              className="flex items-center justify-between gap-4 flex-wrap pb-6 border-b"
+              style={{ borderColor: 'var(--ed-rule)' }}
+            >
+              <div className="flex items-center gap-2.5">
+                <span
+                  className="inline-flex items-center px-3 py-1 rounded-md text-[11px] font-bold uppercase tracking-widest"
+                  style={{
+                    backgroundColor: 'var(--ed-accent)',
+                    color: 'var(--ed-bg)',
+                    fontFamily: F.glacial,
+                  }}
+                >
+                  Scripture
+                </span>
+                <span
+                  className="text-xs font-mono font-semibold tracking-wider text-[var(--ed-fg-muted)] uppercase"
+                  style={{ fontFamily: F.mono }}
+                >
+                  {t('scriptureRef')}
+                </span>
+              </div>
+              <span
+                className="text-xs font-mono text-[var(--ed-fg-muted)]"
+                style={{ fontFamily: F.mono }}
+              >
+                2:261 · Chapter 2 (The Heifer)
+              </span>
+            </div>
 
-      <section className="max-w-sm text-center italic text-sm text-muted-foreground border-y border-muted-foreground/20 py-4 space-y-4">
-        <p>{t('verse2261')}</p>
-        <p className={`text-lg text-center ${Fonts.amiri.className}`}>
-          مَّثَلُ ٱلَّذِينَ يُنفِقُونَ أَمْوَٰلَهُمْ فِى سَبِيلِ ٱللَّهِ
-          كَمَثَلِ حَبَّةٍ أَنۢبَتَتْ سَبْعَ سَنَابِلَ فِى كُلِّ سُنۢبُلَةٍ
-          مِّا۟ئَةُ حَبَّةٍ وَٱللَّهُ يُضَٰعِفُ لِمَن يَشَآءُ وَٱللَّهُ وَٰسِعٌ
-          عَلِيمٌ
-        </p>
-      </section>
+            {/* Arabic text: strictly right-aligned with dir="rtl" */}
+            <div
+              dir="rtl"
+              className="font-arabic text-right text-2xl sm:text-3xl md:text-4xl font-normal leading-[2.2] tracking-normal"
+              style={{
+                fontFamily: 'var(--font-amiri), var(--font-arabic), "Amiri", "Scheherazade New", serif',
+                color: 'var(--ed-fg)',
+                wordSpacing: '0.12em',
+              }}
+            >
+              {t('scriptureArabic')}
+            </div>
 
-      <section>
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-        >
-          <ChevronLeft className="size-4" />
-          <p className="text-sm">{tCommon('backToHome')}</p>
-        </Link>
-      </section>
-    </main>
+            {/* English translation: refined serif typography matching full width */}
+            <div
+              className="pt-6 border-t"
+              style={{ borderColor: 'var(--ed-rule)' }}
+            >
+              <p
+                className="w-full text-lg sm:text-xl md:text-2xl leading-relaxed text-[var(--ed-fg)]"
+                style={{
+                  fontFamily: F.serif,
+                }}
+              >
+                <span
+                  aria-hidden
+                  style={{
+                    color: 'var(--ed-accent)',
+                    marginRight: 4,
+                  }}
+                >
+                  &ldquo;
+                </span>
+                {t.rich('verse2261', {
+                  highlight: (chunks) => (
+                    <span
+                      className="inline rounded px-1 py-0.5 font-medium"
+                      style={{
+                        backgroundColor: 'color-mix(in srgb, var(--ed-accent) 14%, transparent)',
+                        color: 'var(--ed-fg)',
+                        borderBottom: '1.5px solid var(--ed-accent)',
+                      }}
+                    >
+                      {chunks}
+                    </span>
+                  ),
+                })}
+                <span
+                  aria-hidden
+                  style={{
+                    color: 'var(--ed-accent)',
+                    marginLeft: 2,
+                  }}
+                >
+                  &rdquo;
+                </span>
+              </p>
+              <p
+                className="mt-3 text-xs font-mono text-[var(--ed-fg-muted)] tracking-wider uppercase"
+                style={{ fontFamily: F.mono }}
+              >
+                Authorized English Translation · Rashad Khalifa, Ph.D.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Transparency & Stewardship Allocation */}
+        <section className="mb-24 sm:mb-32">
+          <SectionDivider
+            num="01"
+            title={t('allocationHeading')}
+            sub={t('allocationSub')}
+          />
+
+          <div className="divide-y" style={{ borderColor: 'var(--ed-rule)' }}>
+            {/* Pillar 01 */}
+            <div className="py-10 sm:py-14 first:pt-4">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
+                <div className="lg:col-span-5 space-y-3.5">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-xs font-mono font-bold text-[var(--ed-accent)] px-2 py-0.5 rounded border"
+                      style={{
+                        borderColor: 'var(--ed-rule)',
+                        backgroundColor: 'var(--ed-surface)',
+                        fontFamily: F.mono,
+                      }}
+                    >
+                      01
+                    </span>
+                    <div className="flex items-center gap-1.5 text-[var(--ed-accent)]">
+                      <Server size={14} />
+                      <span
+                        className="text-[11px] font-bold uppercase tracking-widest text-[var(--ed-fg-muted)]"
+                        style={{ fontFamily: F.glacial }}
+                      >
+                        Core Infrastructure
+                      </span>
+                    </div>
+                  </div>
+                  <h3
+                    className="text-2xl sm:text-3xl font-normal tracking-tight text-[var(--ed-fg)]"
+                    style={{ fontFamily: F.display }}
+                  >
+                    {t('alloc1Title')}
+                  </h3>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {['Global Edge CDN', 'Zero Downtime', '24/7 Redundancy'].map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 rounded-full text-xs font-mono border text-[var(--ed-fg-muted)] bg-[var(--ed-surface)]"
+                        style={{ borderColor: 'var(--ed-rule)' }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-7 lg:pt-2">
+                  <p
+                    className="text-base sm:text-lg leading-relaxed text-[var(--ed-fg-muted)]"
+                    style={{ fontFamily: F.serif }}
+                  >
+                    {t('alloc1Desc')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pillar 02 */}
+            <div className="py-10 sm:py-14">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
+                <div className="lg:col-span-5 space-y-3.5">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-xs font-mono font-bold text-[var(--ed-accent)] px-2 py-0.5 rounded border"
+                      style={{
+                        borderColor: 'var(--ed-rule)',
+                        backgroundColor: 'var(--ed-surface)',
+                        fontFamily: F.mono,
+                      }}
+                    >
+                      02
+                    </span>
+                    <div className="flex items-center gap-1.5 text-[var(--ed-accent)]">
+                      <Code2 size={14} />
+                      <span
+                        className="text-[11px] font-bold uppercase tracking-widest text-[var(--ed-fg-muted)]"
+                        style={{ fontFamily: F.glacial }}
+                      >
+                        Tooling & Code
+                      </span>
+                    </div>
+                  </div>
+                  <h3
+                    className="text-2xl sm:text-3xl font-normal tracking-tight text-[var(--ed-fg)]"
+                    style={{ fontFamily: F.display }}
+                  >
+                    {t('alloc2Title')}
+                  </h3>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {['Word Lab & Roots', 'Code 19 Engine', 'Open Concordance'].map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 rounded-full text-xs font-mono border text-[var(--ed-fg-muted)] bg-[var(--ed-surface)]"
+                        style={{ borderColor: 'var(--ed-rule)' }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-7 lg:pt-2">
+                  <p
+                    className="text-base sm:text-lg leading-relaxed text-[var(--ed-fg-muted)]"
+                    style={{ fontFamily: F.serif }}
+                  >
+                    {t('alloc2Desc')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pillar 03 */}
+            <div className="py-10 sm:py-14">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
+                <div className="lg:col-span-5 space-y-3.5">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-xs font-mono font-bold text-[var(--ed-accent)] px-2 py-0.5 rounded border"
+                      style={{
+                        borderColor: 'var(--ed-rule)',
+                        backgroundColor: 'var(--ed-surface)',
+                        fontFamily: F.mono,
+                      }}
+                    >
+                      03
+                    </span>
+                    <div className="flex items-center gap-1.5 text-[var(--ed-accent)]">
+                      <Globe2 size={14} />
+                      <span
+                        className="text-[11px] font-bold uppercase tracking-widest text-[var(--ed-fg-muted)]"
+                        style={{ fontFamily: F.glacial }}
+                      >
+                        Preservation
+                      </span>
+                    </div>
+                  </div>
+                  <h3
+                    className="text-2xl sm:text-3xl font-normal tracking-tight text-[var(--ed-fg)]"
+                    style={{ fontFamily: F.display }}
+                  >
+                    {t('alloc3Title')}
+                  </h3>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {['Certified Editions', 'Audio Mastering', 'Recitation Archives'].map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 rounded-full text-xs font-mono border text-[var(--ed-fg-muted)] bg-[var(--ed-surface)]"
+                        style={{ borderColor: 'var(--ed-rule)' }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-7 lg:pt-2">
+                  <p
+                    className="text-base sm:text-lg leading-relaxed text-[var(--ed-fg-muted)]"
+                    style={{ fontFamily: F.serif }}
+                  >
+                    {t('alloc3Desc')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pillar 04 */}
+            <div className="py-10 sm:py-14 last:pb-0">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
+                <div className="lg:col-span-5 space-y-3.5">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-xs font-mono font-bold text-[var(--ed-accent)] px-2 py-0.5 rounded border"
+                      style={{
+                        borderColor: 'var(--ed-rule)',
+                        backgroundColor: 'var(--ed-surface)',
+                        fontFamily: F.mono,
+                      }}
+                    >
+                      04
+                    </span>
+                    <div className="flex items-center gap-1.5 text-[var(--ed-accent)]">
+                      <Lock size={14} />
+                      <span
+                        className="text-[11px] font-bold uppercase tracking-widest text-[var(--ed-fg-muted)]"
+                        style={{ fontFamily: F.glacial }}
+                      >
+                        Integrity & Charter
+                      </span>
+                    </div>
+                  </div>
+                  <h3
+                    className="text-2xl sm:text-3xl font-normal tracking-tight text-[var(--ed-fg)]"
+                    style={{ fontFamily: F.display }}
+                  >
+                    {t('alloc4Title')}
+                  </h3>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {['100% Free Forever', 'Zero Monetization', 'No Paywalls'].map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 rounded-full text-xs font-mono border text-[var(--ed-fg-muted)] bg-[var(--ed-surface)]"
+                        style={{ borderColor: 'var(--ed-rule)' }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-7 lg:pt-2">
+                  <p
+                    className="text-base sm:text-lg leading-relaxed text-[var(--ed-fg-muted)]"
+                    style={{ fontFamily: F.serif }}
+                  >
+                    {t('alloc4Desc')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Frequently Asked Questions */}
+        <section className="mb-20 sm:mb-28">
+          <SectionDivider
+            num="02"
+            title={t('faqHeading')}
+            sub="Essential Information & Stewardship"
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-start">
+            {/* Left sidebar: Context & Direct Contact */}
+            <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-28">
+              <div className="space-y-2.5">
+                <h3
+                  className="text-2xl sm:text-3xl font-normal tracking-tight text-[var(--ed-fg)]"
+                  style={{ fontFamily: F.display }}
+                >
+                  Clear answers for thoughtful donors.
+                </h3>
+                <p
+                  className="text-sm leading-relaxed text-[var(--ed-fg-muted)]"
+                  style={{ fontFamily: F.serif }}
+                >
+                  WikiSubmission is stewarded with financial discipline and zero commercialization.
+                </p>
+              </div>
+
+              <div
+                className="p-5 rounded-xl border space-y-3"
+                style={{
+                  borderColor: 'var(--ed-rule)',
+                  backgroundColor: 'var(--ed-surface)',
+                }}
+              >
+                <div className="flex items-center gap-2 text-[var(--ed-accent)]">
+                  <Mail size={15} />
+                  <span
+                    className="text-[11px] font-bold uppercase tracking-wider text-[var(--ed-fg)]"
+                    style={{ fontFamily: F.glacial }}
+                  >
+                    Direct Inquiries
+                  </span>
+                </div>
+                <p className="text-xs leading-relaxed text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>
+                  Have questions regarding tax receipts, corporate matching, or donor privacy?
+                </p>
+                <a
+                  href={`mailto:${About.email}`}
+                  className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-[var(--ed-accent)] hover:underline"
+                >
+                  <span>{About.email}</span>
+                  <ArrowUpRight size={13} />
+                </a>
+              </div>
+            </div>
+
+            {/* Right column: Linear divided FAQ list */}
+            <div className="lg:col-span-8 divide-y" style={{ borderColor: 'var(--ed-rule)' }}>
+              {/* FAQ 1 */}
+              <div className="py-6 first:pt-0 space-y-2">
+                <div className="flex items-start gap-4">
+                  <span
+                    className="text-xs font-mono font-bold text-[var(--ed-accent)] pt-1 shrink-0"
+                    style={{ fontFamily: F.mono }}
+                  >
+                    01
+                  </span>
+                  <div className="space-y-2">
+                    <h4
+                      className="text-lg font-medium text-[var(--ed-fg)]"
+                      style={{ fontFamily: F.serif }}
+                    >
+                      {t('faq1Q')}
+                    </h4>
+                    <p
+                      className="text-sm leading-relaxed text-[var(--ed-fg-muted)]"
+                      style={{ fontFamily: F.serif }}
+                    >
+                      {t('faq1A')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* FAQ 2 */}
+              <div className="py-6 space-y-2">
+                <div className="flex items-start gap-4">
+                  <span
+                    className="text-xs font-mono font-bold text-[var(--ed-accent)] pt-1 shrink-0"
+                    style={{ fontFamily: F.mono }}
+                  >
+                    02
+                  </span>
+                  <div className="space-y-2">
+                    <h4
+                      className="text-lg font-medium text-[var(--ed-fg)]"
+                      style={{ fontFamily: F.serif }}
+                    >
+                      {t('faq2Q')}
+                    </h4>
+                    <p
+                      className="text-sm leading-relaxed text-[var(--ed-fg-muted)]"
+                      style={{ fontFamily: F.serif }}
+                    >
+                      {t('faq2A')}{' '}
+                      <Link
+                        href="/donate/manage"
+                        className="text-[var(--ed-accent)] hover:underline font-medium inline-flex items-center gap-1"
+                      >
+                        <span>Access the manage portal</span>
+                        <ArrowUpRight size={13} />
+                      </Link>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* FAQ 3 */}
+              <div className="py-6 space-y-2">
+                <div className="flex items-start gap-4">
+                  <span
+                    className="text-xs font-mono font-bold text-[var(--ed-accent)] pt-1 shrink-0"
+                    style={{ fontFamily: F.mono }}
+                  >
+                    03
+                  </span>
+                  <div className="space-y-2">
+                    <h4
+                      className="text-lg font-medium text-[var(--ed-fg)]"
+                      style={{ fontFamily: F.serif }}
+                    >
+                      {t('faq3Q')}
+                    </h4>
+                    <p
+                      className="text-sm leading-relaxed text-[var(--ed-fg-muted)]"
+                      style={{ fontFamily: F.serif }}
+                    >
+                      {t('faq3A')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* FAQ 4 */}
+              <div className="py-6 last:pb-0 space-y-2">
+                <div className="flex items-start gap-4">
+                  <span
+                    className="text-xs font-mono font-bold text-[var(--ed-accent)] pt-1 shrink-0"
+                    style={{ fontFamily: F.mono }}
+                  >
+                    04
+                  </span>
+                  <div className="space-y-2">
+                    <h4
+                      className="text-lg font-medium text-[var(--ed-fg)]"
+                      style={{ fontFamily: F.serif }}
+                    >
+                      {t('faq4Q')}
+                    </h4>
+                    <p
+                      className="text-sm leading-relaxed text-[var(--ed-fg-muted)]"
+                      style={{ fontFamily: F.serif }}
+                    >
+                      {t('faq4A')}{' '}
+                      <a
+                        href={`mailto:${About.email}`}
+                        className="text-[var(--ed-accent)] hover:underline font-medium"
+                      >
+                        {About.email}
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
   )
 }

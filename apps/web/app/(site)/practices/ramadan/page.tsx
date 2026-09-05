@@ -195,23 +195,30 @@ export default function RamadanPage() {
             </div>
 
             <div className="mx-auto grid max-w-5xl gap-6 sm:gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-              <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-accent-soft)]/30 p-6 sm:p-8 md:p-10">
-                <div className="absolute inset-x-0 top-0 h-[2px] bg-[var(--ed-accent)]" />
+              <div
+                className="relative rounded-2xl border p-6 sm:p-8 md:p-10 shadow-sm"
+                style={{
+                  borderColor: 'var(--ed-rule)',
+                  borderLeftWidth: 4,
+                  borderLeftColor: 'var(--ed-accent)',
+                  backgroundColor: 'var(--ed-surface)',
+                }}
+              >
                 <p
-                  className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-fg-muted)] mb-6 sm:mb-8"
+                  className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-fg-muted)] mb-4"
                   style={{ fontFamily: F.glacial }}
                 >
                   The principle
                 </p>
                 <p
-                  className="text-xl sm:text-2xl md:text-3xl font-medium leading-[1.4] text-[var(--ed-fg)]"
+                  className="text-xl sm:text-2xl md:text-3xl font-medium leading-[1.4] text-[var(--ed-fg)] italic"
                   style={{ fontFamily: F.serif }}
                 >
                   &ldquo;GOD wishes for you convenience, not hardship, that you
                   may fulfill your obligations.&rdquo;
                 </p>
-                <div className="mt-6 flex items-center gap-3">
-                  <span className="h-px w-8 bg-[var(--ed-accent)]" />
+                <div className="mt-6 flex items-center gap-3 pt-4 border-t" style={{ borderColor: 'var(--ed-rule)' }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)]" />
                   <span
                     className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-accent)]"
                     style={{ fontFamily: F.glacial }}
@@ -221,7 +228,13 @@ export default function RamadanPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-6 sm:p-8 md:p-10">
+              <div
+                className="flex flex-col rounded-2xl border p-6 sm:p-8 md:p-10 shadow-sm"
+                style={{
+                  borderColor: 'var(--ed-rule)',
+                  backgroundColor: 'var(--ed-surface)',
+                }}
+              >
                 <p
                   className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--ed-fg-muted)] mb-6 sm:mb-8"
                   style={{ fontFamily: F.glacial }}
@@ -245,13 +258,13 @@ export default function RamadanPage() {
                   ].map((item, i) => (
                     <div key={i} className="flex gap-3 sm:gap-4">
                       <span
-                        className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center border border-[var(--ed-rule)] text-[10px] font-bold text-[var(--ed-accent)]"
-                        style={{ fontFamily: F.glacial }}
+                        className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg border text-xs font-mono font-bold text-[var(--ed-accent)] bg-[var(--ed-bg)]"
+                        style={{ borderColor: 'var(--ed-rule)', fontFamily: F.mono }}
                       >
                         {String(i + 1).padStart(2, '0')}
                       </span>
                       <div className="pt-1 space-y-1">
-                        <p className="text-sm sm:text-base leading-[1.6] text-[var(--ed-fg-muted)]">
+                        <p className="text-sm sm:text-base leading-relaxed text-[var(--ed-fg-muted)]" style={{ fontFamily: F.serif }}>
                           {item.text}
                         </p>
                         <QuranRef reference={item.ref} />
@@ -289,44 +302,46 @@ export default function RamadanPage() {
         </div>
       </section>
 
-      <VerseGrid
-        label="Scriptural reference"
-        title="Ramadan in the Quran"
-        description="The Quran gives the fasting rules in one continuous passage: the obligation, the month, the timing, the exemptions, the night permissions, and the limits."
-        verses={RAMADAN_VERSES}
-      />
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-10 pb-16">
+        <VerseGrid
+          label="Scriptural reference"
+          title="Ramadan in the Quran"
+          description="The Quran gives the fasting rules in one continuous passage: the obligation, the month, the timing, the exemptions, the night permissions, and the limits."
+          verses={RAMADAN_VERSES}
+        />
+      </div>
 
       {/* ── Navigation ─────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-6xl px-5 sm:px-6 pb-16 pt-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-5 pt-12 border-t border-[var(--ed-rule)]">
-          <div className="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-10 pb-20 pt-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-12 border-t" style={{ borderColor: 'var(--ed-rule)' }}>
+          <div className="flex flex-wrap items-center justify-center gap-2.5 w-full sm:w-auto">
             <Link
               href="/practices"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] w-full sm:w-auto justify-center"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
-              &larr; {t("previous")}
+              &larr; {t("practicesHub")}
             </Link>
             <Link
               href="/practices/contact-prayers"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
               {t("contactPrayersNav")}
             </Link>
             <Link
               href="/practices/zakat"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
               {t("zakatNav")}
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 w-full sm:w-auto">
             <Link
               href="/practices/hajj"
-              className="flex items-center justify-center gap-2 min-h-11 px-5 sm:px-6 py-3 border border-[var(--ed-rule)] hover:bg-[var(--ed-surface)] hover:border-[var(--ed-accent)] transition-all duration-300 text-[12px] uppercase tracking-widest font-bold w-full sm:w-auto"
-              style={{ fontFamily: F.glacial }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-mono transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+              style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-surface)', fontFamily: F.mono }}
             >
               {t("hajjNav")} &rarr;
             </Link>

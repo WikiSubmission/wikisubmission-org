@@ -1,614 +1,794 @@
-"use client";
+'use client'
 
-import React, { useEffect, useMemo } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import React, { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import {
   ArrowRight,
-  BookOpen,
   Compass,
   Landmark,
-  MapPin,
   Moon,
-  Sparkles,
   Wallet,
-} from "lucide-react";
+  Calendar,
+  Clock,
+  ArrowUpRight,
+  Calculator,
+  ChevronRight,
+  CheckCircle2,
+  BookOpen,
+} from 'lucide-react'
 
-import { FadeUp } from "@/lib/motion";
-import PrayerTimesClient from "./prayer-times-client";
-import RamadanClient from "./ramadan-client";
-import { ZakatCalculator } from "@/components/zakat-calculator";
-import type { components } from "@/src/api/types.gen";
-import { F } from "../_sections/shared";
-import { HeroGradient, SectionLabel } from "./_components/practice-page";
+import PrayerTimesClient from './prayer-times-client'
+import RamadanClient from './ramadan-client'
+import { ZakatCalculator } from '@/components/zakat-calculator'
+import type { components } from '@/src/api/types.gen'
+import { F, SectionDivider } from '../_sections/shared'
+import { FadeUp } from '@/lib/motion'
 
-type VerseData = components["schemas"]["VerseData"];
+type VerseData = components['schemas']['VerseData']
 
-// ── UTILS ─────────────────────────────────────────────────────────────
+// ── HIJRI UTILS ─────────────────────────────────────────────────────────────
+
+const HIJRI_MONTHS = [
+  'Muharram',
+  'Safar',
+  'Rabiʻ I',
+  'Rabiʻ II',
+  'Jumada I',
+  'Jumada II',
+  'Rajab',
+  'Shaʻban',
+  'Ramadan',
+  'Shawwal',
+  'Dhu al-Qiʻdah',
+  'Dhu al-Hijjah',
+]
 
 function gregorianToHijri(date: Date): {
-  year: number;
-  month: number;
-  day: number;
+  year: number
+  month: number
+  day: number
+  monthName: string
 } {
-  const Y = date.getFullYear(),
-    M = date.getMonth() + 1,
-    D = date.getDate();
+  const Y = date.getFullYear()
+  const M = date.getMonth() + 1
+  const D = date.getDate()
   const JD =
     Math.floor((1461 * (Y + 4800 + Math.floor((M - 14) / 12))) / 4) +
     Math.floor((367 * (M - 2 - 12 * Math.floor((M - 14) / 12))) / 12) -
-    Math.floor(
-      (3 * Math.floor((Y + 4900 + Math.floor((M - 14) / 12)) / 100)) / 4,
-    ) +
+    Math.floor((3 * Math.floor((Y + 4900 + Math.floor((M - 14) / 12)) / 100)) / 4) +
     D -
-    32075;
-  const Z = JD - 1948438 + 10632;
-  const N = Math.floor(Z / 10631);
-  const AA = Z - 10631 * N + 354;
+    32075
+  const Z = JD - 1948438 + 10632
+  const N = Math.floor(Z / 10631)
+  const AA = Z - 10631 * N + 354
   const K =
     Math.floor((10985 - AA) / 5316) * Math.floor((50 * AA) / 17719) +
-    Math.floor(AA / 5670) * Math.floor((43 * AA) / 15238);
+    Math.floor(AA / 5670) * Math.floor((43 * AA) / 15238)
   const AL =
     AA -
     Math.floor((30 - K) / 15) * Math.floor((17719 * K) / 50) -
     Math.floor(K / 16) * Math.floor((15238 * K) / 43) +
-    29;
-  const month = Math.floor((24 * AL) / 709);
-  const day = AL - Math.floor((709 * month) / 24);
-  const year = 30 * N + K - 29;
-  return { year, month, day };
+    29
+  const month = Math.floor((24 * AL) / 709)
+  const day = AL - Math.floor((709 * month) / 24)
+  const year = 30 * N + K - 29
+  const monthName = HIJRI_MONTHS[month - 1] || 'Ramadan'
+  return { year, month, day, monthName }
 }
 
 function daysUntilNextRamadan(): number {
-  const today = new Date();
-  const hijri = gregorianToHijri(today);
-  if (hijri.month === 9) return 0;
-  const probe = new Date(today);
+  const today = new Date()
+  const hijri = gregorianToHijri(today)
+  if (hijri.month === 9) return 0
+  const probe = new Date(today)
   for (let i = 1; i <= 355; i++) {
-    probe.setDate(probe.getDate() + 1);
-    const h = gregorianToHijri(probe);
-    if (h.month === 9 && h.day === 1) return i;
+    probe.setDate(probe.getDate() + 1)
+    const h = gregorianToHijri(probe)
+    if (h.month === 9 && h.day === 1) return i
   }
-  return 356;
+  return 356
 }
 
-// ── CONTENT ───────────────────────────────────────────────────────────
+// ── CORE RITES CONFIG ────────────────────────────────────────────────────────
 
 type RiteCardData = {
-  id: "contactPrayers" | "zakat" | "ramadan" | "hajj";
-  href: string;
-  icon: React.ElementType;
-  refs: string[];
-};
+  id: 'contactPrayers' | 'zakat' | 'ramadan' | 'hajj'
+  href: string
+  toolTab?: 'prayer' | 'zakat' | 'ramadan'
+  toolLabel?: string
+  icon: React.ElementType
+  arabicTitle: string
+  cadence: string
+  quranChapter: string
+  refs: string[]
+  highlights: string[]
+}
 
 const RITE_CARDS: RiteCardData[] = [
   {
-    id: "contactPrayers",
-    href: "/practices/contact-prayers",
+    id: 'contactPrayers',
+    href: '/practices/contact-prayers',
+    toolTab: 'prayer',
+    toolLabel: 'Prayer Times Studio',
     icon: Compass,
-    refs: ["4:103", "11:114", "17:78", "24:58"],
+    arabicTitle: 'الصَّلَاةُ',
+    cadence: '5 Times Daily',
+    quranChapter: 'Sura 4:103 · 11:114 · 17:78',
+    refs: ['4:103', '11:114', '17:78', '24:58'],
+    highlights: [
+      '5 astronomical times daily (Fajr, Dhuhr, Asr, Maghrib, Isha)',
+      'Ablution (Wudu) prescribed in 5:6 before prayer',
+      'Facing the Sacred Mosque (Masjid Al-Haram)',
+    ],
   },
   {
-    id: "zakat",
-    href: "/practices/zakat",
+    id: 'zakat',
+    href: '/practices/zakat',
+    toolTab: 'zakat',
+    toolLabel: 'Zakat Calculator (2.5%)',
     icon: Wallet,
-    refs: ["2:215", "2:267", "6:141", "30:38"],
+    arabicTitle: 'الزَّكَاةُ',
+    cadence: '2.5% On Day of Harvest/Receipt',
+    quranChapter: 'Sura 6:141 · 2:215 · 30:38',
+    refs: ['2:215', '2:267', '6:141', '30:38'],
+    highlights: [
+      'Paid on the day income is received (6:141)',
+      '2.5% rate instituted through Abraham and confirmed in scripture',
+      'Distributed to parents, relatives, orphans, and the poor',
+    ],
   },
   {
-    id: "ramadan",
-    href: "/practices/ramadan",
+    id: 'ramadan',
+    href: '/practices/ramadan',
+    toolTab: 'ramadan',
+    toolLabel: 'Fasting Calendar',
     icon: Moon,
-    refs: ["2:183", "2:184", "2:185", "2:187"],
+    arabicTitle: 'الصِّيَامُ',
+    cadence: '9th Lunar Month · Dawn to Sunset',
+    quranChapter: 'Sura 2:183-187 · 97:1-5',
+    refs: ['2:183', '2:184', '2:185', '2:187'],
+    highlights: [
+      'Abstaining from food, drink, and sexual relations dawn to sunset',
+      'The Quran was revealed in Ramadan (2:185)',
+      'Exemptions for illness and travel with substitution days',
+    ],
   },
   {
-    id: "hajj",
-    href: "/practices/hajj",
+    id: 'hajj',
+    href: '/practices/hajj',
     icon: Landmark,
-    refs: ["2:158", "2:196", "2:197", "3:97", "22:27"],
+    arabicTitle: 'الحَجُّ',
+    cadence: 'Once in Lifetime (4 Sacred Months)',
+    quranChapter: 'Sura 2:196-197 · 22:27 · 3:97',
+    refs: ['2:158', '2:196', '2:197', '3:97', '22:27'],
+    highlights: [
+      'Four Sacred Months: Zul-Hijjah, Muharram, Safar, and Rabiʻ I',
+      'Obligatory once in a lifetime for those who can afford it',
+      'Purely Abrahamic rites of devotion and commemoration',
+    ],
   },
-];
-
-type QuickLink = {
-  href: string;
-  id: "prayerTimes" | "zakatCalculator" | "learnTheRites";
-  icon: React.ElementType;
-};
-
-const QUICK_LINKS: QuickLink[] = [
-  { href: "#prayer-times", id: "prayerTimes", icon: MapPin },
-  { href: "#zakat-calculator", id: "zakatCalculator", icon: Wallet },
-  { href: "#learn-the-rites", id: "learnTheRites", icon: BookOpen },
-];
-
-// ── SHARED UI ─────────────────────────────────────────────────────────
-
-function RefPill({ reference }: { reference: string }) {
-  return (
-    <span
-      className="inline-flex border border-[var(--ed-rule)] bg-[var(--ed-bg)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--ed-fg-muted)] transition-colors duration-300 hover:border-[var(--ed-accent)]/40 hover:text-[var(--ed-accent)]"
-      style={{ fontFamily: F.glacial }}
-    >
-      {reference}
-    </span>
-  );
-}
-
-function VerseQuote({ verseKey, text }: { verseKey: string; text: string }) {
-  return (
-    <FadeUp className="group" distance={0} initiallyHidden>
-      <div className="relative border-l-[3px] border-[var(--ed-accent)]/40 bg-[var(--ed-surface)]/20 p-7 md:p-8">
-        <div className="mb-4 flex items-center gap-3">
-          <BookOpen size={13} className="text-[var(--ed-accent)] opacity-70" />
-          <span
-            className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ed-accent)]"
-            style={{ fontFamily: F.glacial }}
-          >
-            {verseKey}
-          </span>
-        </div>
-        <p
-          className="text-base italic leading-[1.7] text-[var(--ed-fg-muted)] md:text-lg"
-          style={{ fontFamily: F.serif }}
-        >
-          &ldquo;{text}&rdquo;
-        </p>
-      </div>
-    </FadeUp>
-  );
-}
-
-function ToolShell({
-  id,
-  eyebrow,
-  title,
-  description,
-  action,
-  children,
-}: {
-  id: string;
-  eyebrow: string;
-  title: string;
-  description: string;
-  action?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <section id={id} className="scroll-mt-28 border-t border-[var(--ed-rule)]">
-      <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:px-6 md:py-24 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.5fr)] lg:gap-16">
-        <div className="flex flex-col justify-between gap-10">
-          <div className="space-y-6">
-            <SectionLabel>{eyebrow}</SectionLabel>
-            <div className="space-y-5">
-              <h2
-                className="text-3xl font-medium tracking-tight text-[var(--ed-fg)] md:text-[2.75rem] md:leading-[1.1]"
-                style={{ fontFamily: F.display }}
-              >
-                {title}
-              </h2>
-              <p
-                className="max-w-md text-base leading-[1.7] text-[var(--ed-fg-muted)]"
-                style={{ fontFamily: F.serif }}
-              >
-                {description}
-              </p>
-            </div>
-          </div>
-          {action && <div className="space-y-5">{action}</div>}
-        </div>
-        <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-surface)]/30 p-6 sm:p-8 md:p-10">
-          <div className="absolute inset-x-0 top-0 h-[1px] bg-[var(--ed-accent)]/20" />
-          {children}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function RitePreviewCard({
-  rite,
-  index,
-}: {
-  rite: RiteCardData;
-  index: number;
-}) {
-  const t = useTranslations("practices");
-  const Icon = rite.icon;
-  const details = t.raw(`rites.${rite.id}.details`) as string[];
-
-  return (
-    <FadeUp distance={12} duration={0.45} initiallyHidden>
-      <article className="group relative flex h-full flex-col overflow-hidden border border-[var(--ed-rule)] bg-[var(--ed-bg)] transition-all duration-500 hover:border-[var(--ed-accent)]/50 hover:bg-[var(--ed-surface)]/25">
-        <div className="absolute inset-x-0 top-0 h-[2px] bg-[var(--ed-accent)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-        
-        <div className="flex flex-1 flex-col p-7 sm:p-8 md:p-9">
-          <div className="mb-12 flex items-start justify-between gap-6">
-            <div className="flex size-12 items-center justify-center border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 text-[var(--ed-accent)] transition-all duration-500 group-hover:border-[var(--ed-accent)]/40 group-hover:bg-[var(--ed-accent)]/5">
-              <Icon size={22} strokeWidth={1.5} />
-            </div>
-            <span
-              className="text-4xl font-medium tabular-nums text-[var(--ed-fg-muted)]/15 transition-colors duration-500 group-hover:text-[var(--ed-accent)]/20"
-              style={{ fontFamily: F.display }}
-            >
-              {String(index + 1).padStart(2, "0")}
-            </span>
-          </div>
-
-          <div className="space-y-5">
-            <p
-              className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ed-accent)]"
-              style={{ fontFamily: F.glacial }}
-            >
-              {t(`rites.${rite.id}.eyebrow`)}
-            </p>
-            <h3
-              className="text-2xl font-medium tracking-tight text-[var(--ed-fg)] md:text-[1.75rem]"
-              style={{ fontFamily: F.display }}
-            >
-              {t(`rites.${rite.id}.title`)}
-            </h3>
-            <p
-              className="text-sm leading-[1.7] text-[var(--ed-fg-muted)]"
-              style={{ fontFamily: F.serif }}
-            >
-              {t(`rites.${rite.id}.summary`)}
-            </p>
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-2">
-            {rite.refs.map((ref) => (
-              <RefPill key={ref} reference={ref} />
-            ))}
-          </div>
-
-          <ul className="mt-8 grid gap-3 border-t border-[var(--ed-rule)] pt-7">
-            {details.map((detail) => (
-              <li
-                key={detail}
-                className="flex items-center gap-3 text-sm text-[var(--ed-fg-muted)]"
-                style={{ fontFamily: F.serif }}
-              >
-                <span className="size-1.5 shrink-0 bg-[var(--ed-accent)]/70" />
-                {detail}
-              </li>
-            ))}
-          </ul>
-
-          <Link
-            href={rite.href}
-            className="mt-10 inline-flex min-h-11 items-center justify-between gap-4 border border-[var(--ed-rule)] bg-transparent px-5 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ed-fg)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:bg-[var(--ed-accent)] hover:text-[var(--ed-bg)]"
-            style={{ fontFamily: F.glacial }}
-          >
-            {t(`rites.${rite.id}.cta`)}
-            <ArrowRight size={14} strokeWidth={1.8} className="transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
-        </div>
-      </article>
-    </FadeUp>
-  );
-}
-
-// ── MAIN COMPONENT ────────────────────────────────────────────────────
+]
 
 export default function PracticesClient({
   prayerVerse,
 }: {
-  prayerVerse: VerseData | null;
+  prayerVerse: VerseData | null
 }) {
-  const t = useTranslations("practices");
-  const locale = useLocale();
-  const searchParams = useSearchParams();
-  const hasQuery = !!searchParams.get("q");
+  const t = useTranslations('practices')
+  const locale = useLocale()
+  const searchParams = useSearchParams()
+  const hasQuery = !!searchParams.get('q')
+
+  const [activeToolTab, setActiveToolTab] = useState<'prayer' | 'zakat' | 'ramadan'>('prayer')
 
   useEffect(() => {
-    if (!hasQuery) return;
-    const el = document.getElementById("prayer-times");
-    if (!el) return;
+    if (!hasQuery) return
+    const el = document.getElementById('interactive-tools')
+    if (!el) return
     requestAnimationFrame(() => {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, [hasQuery]);
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [hasQuery])
 
-  const daysUntilRamadan = useMemo(() => daysUntilNextRamadan(), []);
-  const showRamadanTool = daysUntilRamadan <= 15;
-  const prayerText = prayerVerse?.tr?.[locale]?.tx ?? prayerVerse?.tr?.['en']?.tx;
+  const today = useMemo(() => new Date(), [])
+  const hijri = useMemo(() => gregorianToHijri(today), [today])
+  const daysUntilRamadan = useMemo(() => daysUntilNextRamadan(), [])
+  const prayerText = prayerVerse?.tr?.[locale]?.tx ?? prayerVerse?.tr?.['en']?.tx
+
+  const scrollToTools = (tab?: 'prayer' | 'zakat' | 'ramadan') => {
+    if (tab) setActiveToolTab(tab)
+    const el = document.getElementById('interactive-tools')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[var(--ed-bg)] text-[var(--ed-fg)]">
-      {/* ── Hero / Hub Introduction ───────────────────────────────────── */}
-      <section className="relative isolate overflow-hidden border-b border-[var(--ed-rule)]">
-        <HeroGradient />
+      {/* ── Editorial Hero Header ─────────────────────────────────────────── */}
+      <section
+        className="px-4 sm:px-6 md:px-10 border-b"
+        style={{
+          borderColor: 'var(--ed-rule)',
+          maxWidth: 1240,
+          margin: '0 auto',
+          paddingTop: 'clamp(56px, 10vw, 96px)',
+          paddingBottom: 'clamp(32px, 6vw, 56px)',
+        }}
+      >
+        <div className="flex items-center gap-3 mb-6">
+          <span className="w-2 h-2 rounded-full bg-[var(--ed-accent)]" />
+          <span
+            className="text-[11px] font-bold uppercase tracking-[0.24em] text-[var(--ed-accent)]"
+            style={{ fontFamily: F.glacial }}
+          >
+            {t('hub')} · Religious Rites
+          </span>
+        </div>
 
-        <div className="mx-auto grid max-w-6xl gap-14 px-5 pb-20 pt-24 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(280px,390px)] md:pb-28 md:pt-32 lg:gap-20">
-          <FadeUp distance={10} duration={0.5} className="flex flex-col justify-between gap-10">
-            <div className="space-y-8">
-              <SectionLabel>{t('hub')}</SectionLabel>
-              <h1
-                className="max-w-3xl text-5xl font-medium leading-[1.05] tracking-tight text-[var(--ed-fg)] sm:text-6xl md:text-7xl lg:text-8xl"
-                style={{ fontFamily: F.display }}
+        <h1
+          style={{
+            fontFamily: F.display,
+            fontSize: 'clamp(48px, 10vw, 96px)',
+            fontWeight: 400,
+            lineHeight: 0.95,
+            letterSpacing: '-0.035em',
+            color: 'var(--ed-fg)',
+          }}
+        >
+          Life as a{' '}
+          <span style={{ fontStyle: 'italic', color: 'var(--ed-fg-muted)' }}>
+            Submitter.
+          </span>
+        </h1>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end mt-6">
+          <div className="lg:col-span-8">
+            <p
+              style={{
+                fontFamily: F.serif,
+                fontSize: 'clamp(15px, 3.6vw, 17px)',
+                lineHeight: 1.65,
+                color: 'var(--ed-fg-muted)',
+                maxWidth: '64ch',
+              }}
+            >
+              {t('description')}
+            </p>
+
+            {/* Fast Jump Anchor Chips */}
+            <div className="flex flex-wrap gap-2.5 mt-8">
+              <button
+                type="button"
+                onClick={() => scrollToTools('prayer')}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono border transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] cursor-pointer"
+                style={{
+                  borderColor: 'var(--ed-rule)',
+                  backgroundColor: 'var(--ed-surface)',
+                  fontFamily: F.mono,
+                }}
               >
-                {t("heading")}
-              </h1>
-              <p
-                className="max-w-2xl text-lg italic leading-[1.6] text-[var(--ed-fg-muted)] md:text-xl"
-                style={{ fontFamily: F.serif }}
+                <Clock size={14} className="text-[var(--ed-accent)]" />
+                <span>Prayer Times Studio</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToTools('zakat')}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono border transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] cursor-pointer"
+                style={{
+                  borderColor: 'var(--ed-rule)',
+                  backgroundColor: 'var(--ed-surface)',
+                  fontFamily: F.mono,
+                }}
               >
-                {t("description")}
-              </p>
+                <Calculator size={14} className="text-[var(--ed-accent)]" />
+                <span>Zakat Calculator (2.5%)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToTools('ramadan')}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono border transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] cursor-pointer"
+                style={{
+                  borderColor: 'var(--ed-rule)',
+                  backgroundColor: 'var(--ed-surface)',
+                  fontFamily: F.mono,
+                }}
+              >
+                <Moon size={14} className="text-[var(--ed-accent)]" />
+                <span>Ramadan Fasting</span>
+              </button>
+              <a
+                href="#four-rites"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono border transition-all hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)]"
+                style={{
+                  borderColor: 'var(--ed-rule)',
+                  backgroundColor: 'var(--ed-surface)',
+                  fontFamily: F.mono,
+                }}
+              >
+                <BookOpen size={14} className="text-[var(--ed-accent)]" />
+                <span>The 4 Core Rites</span>
+              </a>
             </div>
+          </div>
 
-            <div className="flex flex-wrap gap-3">
-              {QUICK_LINKS.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] bg-[var(--ed-bg)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]"
+          {/* Right: Live Hijri & Ramadan Pill Card */}
+          <div className="lg:col-span-4">
+            <div
+              className="rounded-2xl border p-5 space-y-3"
+              style={{
+                borderColor: 'var(--ed-rule)',
+                backgroundColor: 'var(--ed-surface)',
+              }}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Calendar size={14} className="text-[var(--ed-accent)]" />
+                  <span
+                    className="text-[11px] font-bold uppercase tracking-wider text-[var(--ed-fg)]"
                     style={{ fontFamily: F.glacial }}
                   >
-                    <Icon size={14} strokeWidth={1.6} />
-                    {t(item.id === "prayerTimes" ? "prayerTimesLookup" : item.id === "zakatCalculator" ? "zakatCalculator" : "learnTheRites")}
-                  </Link>
-                );
-              })}
-            </div>
-          </FadeUp>
-
-          <FadeUp distance={14} duration={0.55} className="self-end">
-            <div className="relative border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-7 md:p-8">
-              <div className="absolute inset-x-0 top-0 h-[2px] bg-[var(--ed-accent)]/30" />
-              <div className="mb-10 flex items-center justify-between gap-4">
-                <Sparkles
-                  size={24}
-                  className="text-[var(--ed-accent)]"
-                  strokeWidth={1.5}
-                />
+                    Hijri Calendar
+                  </span>
+                </div>
                 <span
-                  className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ed-fg-muted)]"
-                  style={{ fontFamily: F.glacial }}
+                  className="text-xs font-mono font-bold text-[var(--ed-accent)] px-2 py-0.5 rounded-full border"
+                  style={{ borderColor: 'var(--ed-rule)', backgroundColor: 'var(--ed-bg)' }}
                 >
-                  {t("learnPlusUse")}
+                  {hijri.year} AH
                 </span>
               </div>
-              <p
-                className="text-[1.65rem] font-medium leading-[1.25] text-[var(--ed-fg)] md:text-[2rem]"
-                style={{ fontFamily: F.display }}
-              >
-                {t("learnPlusUseDesc")}
-              </p>
-              <div className="mt-10 grid grid-cols-2 gap-px border border-[var(--ed-rule)] bg-[var(--ed-rule)]">
-                {["Prayer times", "Zakat", "Ramadan", "Hajj"].map((item) => (
-                  <div key={item} className="bg-[var(--ed-bg)] p-4 transition-colors duration-300 hover:bg-[var(--ed-surface)]/40">
-                    <span
-                      className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ed-accent)]"
-                      style={{ fontFamily: F.glacial }}
-                    >
-                      {item === "Prayer times" ? t("prayerTimesLookup") : item === "Zakat" ? t("rites.zakat.title") : item === "Ramadan" ? t("rites.ramadan.title") : t("rites.hajj.title")}
-                    </span>
-                  </div>
-                ))}
+
+              <div className="text-xl font-medium tracking-tight text-[var(--ed-fg)]" style={{ fontFamily: F.display }}>
+                {hijri.day} {hijri.monthName} {hijri.year}
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-[var(--ed-fg-muted)] pt-2 border-t" style={{ borderColor: 'var(--ed-rule)', fontFamily: F.serif }}>
+                <span className="flex items-center gap-1.5">
+                  <Moon size={13} className="text-[var(--ed-accent)]" />
+                  {hijri.month === 9 ? 'Ramadan active' : `${daysUntilRamadan} days to Ramadan`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => scrollToTools('ramadan')}
+                  className="font-mono text-[11px] text-[var(--ed-accent)] hover:underline cursor-pointer"
+                >
+                  Schedule →
+                </button>
               </div>
             </div>
-          </FadeUp>
-        </div>
-      </section>
-
-      {/* ── Quick Tools ───────────────────────────────────────────────── */}
-      <section className="relative border-b border-[var(--ed-rule)] bg-[var(--ed-surface)]/[0.07]">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-6 md:py-20">
-          <div className="mb-12 max-w-2xl">
-            <SectionLabel>{t("quickAccess")}</SectionLabel>
-            <h2
-              className="text-3xl font-medium tracking-tight text-[var(--ed-fg)] md:text-[2.75rem] md:leading-[1.1]"
-              style={{ fontFamily: F.display }}
-            >
-              {t("quickAccessDesc")}
-            </h2>
-            <p
-              className="mt-6 text-base leading-[1.7] text-[var(--ed-fg-muted)]"
-              style={{ fontFamily: F.serif }}
-            >
-              {t("quickAccessSubDesc")}
-            </p>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2">
-            <a
-              href="#prayer-times"
-              className="group flex items-center justify-between border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-6 transition-all duration-300 hover:border-[var(--ed-accent)]/50 hover:bg-[var(--ed-surface)]/20"
-            >
-              <div className="flex items-center gap-5">
-                <span className="flex size-12 items-center justify-center border border-[var(--ed-rule)] text-[var(--ed-accent)] transition-all duration-300 group-hover:border-[var(--ed-accent)]/30 group-hover:bg-[var(--ed-accent)]/5">
-                  <MapPin size={18} strokeWidth={1.7} />
-                </span>
-                <div>
-                  <h3
-                    className="text-xl font-medium text-[var(--ed-fg)]"
-                    style={{ fontFamily: F.display }}
-                  >
-                    {t("prayerTimesLookup")}
-                  </h3>
-                  <p
-                    className="mt-1 text-sm text-[var(--ed-fg-muted)]"
-                    style={{ fontFamily: F.serif }}
-                  >
-                    {t("prayerTimesLookupDesc")}
-                  </p>
-                </div>
-              </div>
-              <ArrowRight
-                size={16}
-                className="text-[var(--ed-fg-muted)] transition-all duration-300 group-hover:translate-x-1 group-hover:text-[var(--ed-accent)]"
-              />
-            </a>
-
-            <a
-              href="#zakat-calculator"
-              className="group flex items-center justify-between border border-[var(--ed-rule)] bg-[var(--ed-bg)] p-6 transition-all duration-300 hover:border-[var(--ed-accent)]/50 hover:bg-[var(--ed-surface)]/20"
-            >
-              <div className="flex items-center gap-5">
-                <span className="flex size-12 items-center justify-center border border-[var(--ed-rule)] text-[var(--ed-accent)] transition-all duration-300 group-hover:border-[var(--ed-accent)]/30 group-hover:bg-[var(--ed-accent)]/5">
-                  <Wallet size={18} strokeWidth={1.7} />
-                </span>
-                <div>
-                  <h3
-                    className="text-xl font-medium text-[var(--ed-fg)]"
-                    style={{ fontFamily: F.display }}
-                  >
-                    {t("zakatCalculator")}
-                  </h3>
-                  <p
-                    className="mt-1 text-sm text-[var(--ed-fg-muted)]"
-                    style={{ fontFamily: F.serif }}
-                  >
-                    {t("zakatCalculatorDesc")}
-                  </p>
-                </div>
-              </div>
-              <ArrowRight
-                size={16}
-                className="text-[var(--ed-fg-muted)] transition-all duration-300 group-hover:translate-x-1 group-hover:text-[var(--ed-accent)]"
-              />
-            </a>
           </div>
         </div>
       </section>
 
-      <ToolShell
-        id="prayer-times"
-        eyebrow={t("contactPrayerTool")}
-        title={t("findTodaysPrayerTimes")}
-        description={t("prayerToolDesc")}
-        action={
-          <div className="space-y-6">
-            {prayerText && <VerseQuote verseKey="4:103" text={prayerText} />}
-            <Link
-              href="/practices/contact-prayers"
-              className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]"
-              style={{ fontFamily: F.glacial }}
-            >
-              {t("fullContactPrayersGuide")}
-              <ArrowRight size={14} strokeWidth={1.6} />
-            </Link>
-          </div>
-        }
+      {/* ── Main Content Container ────────────────────────────────────────── */}
+      <div
+        className="px-4 sm:px-6 md:px-10 py-12 sm:py-20"
+        style={{
+          maxWidth: 1240,
+          margin: '0 auto',
+        }}
       >
-        <PrayerTimesClient />
-      </ToolShell>
+        {/* ── SECTION 01: Interactive Utilities Studio (FIRST) ────────────── */}
+        <section id="interactive-tools" className="mb-20 sm:mb-28 scroll-mt-24">
+          <SectionDivider
+            num="01"
+            title="Interactive Religious Utilities"
+            sub="Prayer Times · Zakat Calculator · Ramadan Tracker"
+          />
 
-      <ToolShell
-        id="zakat-calculator"
-        eyebrow={t("zakatTool")}
-        title={t("calculateZakatQuickly")}
-        description={t("zakatToolDesc")}
-        action={
-          <Link
-            href="/practices/zakat"
-            className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]"
-            style={{ fontFamily: F.glacial }}
+          <div
+            className="rounded-2xl border overflow-hidden shadow-xs bg-[var(--ed-surface)]"
+            style={{ borderColor: 'var(--ed-rule)' }}
           >
-            {t("fullZakatGuide")}
-            <ArrowRight size={14} strokeWidth={1.6} />
-          </Link>
-        }
-      >
-        <ZakatCalculator />
-      </ToolShell>
-
-      {showRamadanTool && (
-        <ToolShell
-          id="ramadan-schedule"
-          eyebrow={t("ramadanTool")}
-          title={t("checkRamadanDates")}
-          description={t("ramadanToolDesc")}
-          action={
-            <div className="flex flex-wrap items-center gap-5">
-              {daysUntilRamadan > 0 && (
+            {/* Minimalist Segmented Tabs */}
+            <div
+              className="p-3 sm:p-4 border-b flex items-center justify-between gap-3 flex-wrap bg-[var(--ed-bg)]"
+              style={{ borderColor: 'var(--ed-rule)' }}
+            >
+              {/* Serious, Enterprise Header Toolbar */}
+              <div className="flex items-center gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)]" />
                 <span
-                  className="inline-flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ed-accent)]"
+                  className="text-xs font-semibold uppercase tracking-wider text-[var(--ed-fg)]"
                   style={{ fontFamily: F.glacial }}
                 >
-                  <span className="size-2 bg-[var(--ed-accent)]" />
-                  {t("tMinus", { days: daysUntilRamadan })}
+                  Practices Suite
                 </span>
-              )}
-              <Link
-                href="/practices/ramadan"
-                className="inline-flex min-h-11 items-center gap-3 border border-[var(--ed-rule)] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.17em] text-[var(--ed-fg-muted)] transition-all duration-300 hover:border-[var(--ed-accent)] hover:text-[var(--ed-fg)]"
-                style={{ fontFamily: F.glacial }}
-              >
-                {t("fullFastingGuide")}
-                <ArrowRight size={14} strokeWidth={1.6} />
-              </Link>
-            </div>
-          }
-        >
-          <RamadanClient />
-        </ToolShell>
-      )}
+                <span className="text-[11px] font-mono text-[var(--ed-fg-muted)] hidden sm:inline">
+                  · Daily Utilities
+                </span>
+              </div>
 
-      {/* ── Rite Index ────────────────────────────────────────────────── */}
-      <section
-        id="learn-the-rites"
-        className="relative border-t border-[var(--ed-rule)] bg-[var(--ed-surface)]/[0.04]"
-      >
-        <div className="absolute inset-x-0 top-0 h-px bg-[var(--ed-rule)]" />
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 md:py-28">
-          <div className="mb-14 flex flex-col justify-between gap-8 md:mb-20 md:flex-row md:items-end">
-            <div className="max-w-2xl">
-              <SectionLabel>{t("learnTheRites")}</SectionLabel>
-              <h2
-                className="text-3xl font-medium tracking-tight text-[var(--ed-fg)] md:text-[2.75rem] md:leading-[1.1]"
-                style={{ fontFamily: F.display }}
+              {/* Tab Selector Buttons - Responsive full-width on mobile */}
+              <div
+                className="inline-flex w-full sm:w-auto rounded-xl border p-1 gap-1 bg-[var(--ed-surface)] overflow-x-auto"
+                style={{ borderColor: 'var(--ed-rule)' }}
               >
-                {t("eachPracticeHasFullGuide")}
-              </h2>
+                <button
+                  type="button"
+                  onClick={() => setActiveToolTab('prayer')}
+                  className="flex-1 sm:flex-initial px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  style={{
+                    backgroundColor: activeToolTab === 'prayer' ? 'var(--ed-accent)' : 'transparent',
+                    color: activeToolTab === 'prayer' ? 'var(--ed-bg)' : 'var(--ed-fg-muted)',
+                    fontFamily: F.glacial,
+                  }}
+                >
+                  <Clock size={13} />
+                  <span>Prayer Times</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveToolTab('zakat')}
+                  className="flex-1 sm:flex-initial px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  style={{
+                    backgroundColor: activeToolTab === 'zakat' ? 'var(--ed-accent)' : 'transparent',
+                    color: activeToolTab === 'zakat' ? 'var(--ed-bg)' : 'var(--ed-fg-muted)',
+                    fontFamily: F.glacial,
+                  }}
+                >
+                  <Calculator size={13} />
+                  <span>Zakat (2.5%)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveToolTab('ramadan')}
+                  className="flex-1 sm:flex-initial px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  style={{
+                    backgroundColor: activeToolTab === 'ramadan' ? 'var(--ed-accent)' : 'transparent',
+                    color: activeToolTab === 'ramadan' ? 'var(--ed-bg)' : 'var(--ed-fg-muted)',
+                    fontFamily: F.glacial,
+                  }}
+                >
+                  <Moon size={13} />
+                  <span>Ramadan</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Active Studio Content */}
+            <div className="p-4 sm:p-8 md:p-10">
+              {activeToolTab === 'prayer' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-[var(--ed-rule)]">
+                    <div>
+                      <h3
+                        className="text-xl sm:text-2xl font-medium tracking-tight text-[var(--ed-fg)]"
+                        style={{ fontFamily: F.display }}
+                      >
+                        {t('findTodaysPrayerTimes')}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[var(--ed-fg-muted)] mt-0.5" style={{ fontFamily: F.serif }}>
+                        Search any city worldwide for astronomical Fajr, Dhuhr, Asr, Maghrib, and Isha times.
+                      </p>
+                    </div>
+
+                    <Link
+                      href="/practices/contact-prayers"
+                      className="inline-flex items-center gap-1 text-xs font-mono text-[var(--ed-accent)] hover:underline shrink-0"
+                    >
+                      <span>Full Salat Guide</span>
+                      <ArrowUpRight size={13} />
+                    </Link>
+                  </div>
+
+                  {prayerText && (
+                    <div
+                      className="p-5 rounded-xl border space-y-2 bg-[var(--ed-bg)]"
+                      style={{ borderColor: 'var(--ed-rule)' }}
+                    >
+                      <div className="flex items-center justify-between gap-2 border-b border-[var(--ed-rule)]/60 pb-2">
+                        <span
+                          className="text-[10px] font-mono uppercase tracking-wider text-[var(--ed-accent)] font-semibold"
+                        >
+                          Scriptural Mandate · Sura 4, Verse 103
+                        </span>
+                        <span className="text-[10px] font-mono text-[var(--ed-fg-muted)]">
+                          The Contact Prayers (Salat)
+                        </span>
+                      </div>
+                      <p
+                        className="text-xs sm:text-sm leading-relaxed text-[var(--ed-fg)]"
+                        style={{ fontFamily: F.serif }}
+                      >
+                        &ldquo;{prayerText.replace(/\s*±\s*/g, ' ')}&rdquo;
+                      </p>
+                    </div>
+                  )}
+
+                  <PrayerTimesClient />
+                </div>
+              )}
+
+              {activeToolTab === 'zakat' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-[var(--ed-rule)]">
+                    <div>
+                      <h3
+                        className="text-xl sm:text-2xl font-medium tracking-tight text-[var(--ed-fg)]"
+                        style={{ fontFamily: F.display }}
+                      >
+                        {t('calculateZakatQuickly')}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[var(--ed-fg-muted)] mt-0.5" style={{ fontFamily: F.serif }}>
+                        Calculate the 2.5% obligatory charity due on the day you receive income (6:141).
+                      </p>
+                    </div>
+
+                    <Link
+                      href="/practices/zakat"
+                      className="inline-flex items-center gap-1 text-xs font-mono text-[var(--ed-accent)] hover:underline shrink-0"
+                    >
+                      <span>Full Zakat Guide</span>
+                      <ArrowUpRight size={13} />
+                    </Link>
+                  </div>
+
+                  <ZakatCalculator />
+                </div>
+              )}
+
+              {activeToolTab === 'ramadan' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-[var(--ed-rule)]">
+                    <div>
+                      <h3
+                        className="text-xl sm:text-2xl font-medium tracking-tight text-[var(--ed-fg)]"
+                        style={{ fontFamily: F.display }}
+                      >
+                        {t('checkRamadanDates')}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[var(--ed-fg-muted)] mt-0.5" style={{ fontFamily: F.serif }}>
+                        Look up the lunar month of Ramadan and daily fasting intervals (dawn to sunset).
+                      </p>
+                    </div>
+
+                    <Link
+                      href="/practices/ramadan"
+                      className="inline-flex items-center gap-1 text-xs font-mono text-[var(--ed-accent)] hover:underline shrink-0"
+                    >
+                      <span>Full Fasting Guide</span>
+                      <ArrowUpRight size={13} />
+                    </Link>
+                  </div>
+
+                  <RamadanClient />
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 02: The Four Core Rites Master Showcase ─────────────── */}
+        <section id="four-rites" className="mb-20 sm:mb-28 scroll-mt-24">
+          <SectionDivider
+            num="02"
+            title="The Four Core Rites"
+            sub="Salat · Zakat · Siyam · Hajj"
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {RITE_CARDS.map((rite, index) => {
+              const Icon = rite.icon
+              const title = t(`rites.${rite.id}.title`)
+              const eyebrow = t(`rites.${rite.id}.eyebrow`)
+              const summary = t(`rites.${rite.id}.summary`)
+
+              return (
+                <FadeUp key={rite.id} distance={14} delay={index * 0.05}>
+                  <article
+                    className="h-full rounded-2xl border p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 hover:border-[var(--ed-accent)]/80 hover:shadow-md group relative overflow-hidden bg-[var(--ed-surface)]"
+                    style={{
+                      borderColor: 'var(--ed-rule)',
+                    }}
+                  >
+                    <div className="space-y-5">
+                      {/* Top Bar: Pillar Number, Icon, Arabic Calligraphy */}
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center border text-[var(--ed-accent)] bg-[var(--ed-bg)]"
+                            style={{ borderColor: 'var(--ed-rule)' }}
+                          >
+                            <Icon size={17} />
+                          </div>
+                          <div>
+                            <span
+                              className="text-[10px] font-bold uppercase tracking-wider text-[var(--ed-accent)] block"
+                              style={{ fontFamily: F.glacial }}
+                            >
+                              Pillar 0{index + 1} · {eyebrow}
+                            </span>
+                            <span className="text-[11px] font-mono text-[var(--ed-fg-muted)]">
+                              {rite.cadence}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Arabic Script */}
+                        <span
+                          dir="rtl"
+                          className="text-2xl sm:text-3xl text-[var(--ed-accent)] opacity-85 group-hover:opacity-100 transition-opacity font-normal"
+                          style={{ fontFamily: 'var(--font-amiri), "Amiri", serif' }}
+                        >
+                          {rite.arabicTitle}
+                        </span>
+                      </div>
+
+                      {/* Main Title & Description */}
+                      <div className="space-y-2">
+                        <h2
+                          className="text-2xl sm:text-3xl font-medium tracking-tight text-[var(--ed-fg)]"
+                          style={{ fontFamily: F.display }}
+                        >
+                          {title}
+                        </h2>
+                        <p
+                          className="text-sm leading-relaxed text-[var(--ed-fg-muted)]"
+                          style={{ fontFamily: F.serif }}
+                        >
+                          {summary}
+                        </p>
+                      </div>
+
+                      {/* Clean Minimalist Highlights */}
+                      <ul className="space-y-2 pt-1 border-t border-[var(--ed-rule)]">
+                        {rite.highlights.map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="flex items-start gap-2 text-xs text-[var(--ed-fg-muted)]"
+                            style={{ fontFamily: F.serif }}
+                          >
+                            <CheckCircle2 size={13} className="text-[var(--ed-accent)] shrink-0 mt-0.5" />
+                            <span className="leading-snug">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {/* Scriptural Anchors */}
+                      <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-[var(--ed-fg-muted)] pt-1">
+                        <span className="font-mono text-[10px] uppercase tracking-wider">
+                          Scripture:
+                        </span>
+                        {rite.refs.map((ref) => (
+                          <span
+                            key={ref}
+                            className="px-2 py-0.5 rounded-md text-[11px] font-mono border bg-[var(--ed-bg)]"
+                            style={{ borderColor: 'var(--ed-rule)' }}
+                          >
+                            {ref}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Bottom Action Area */}
+                    <div className="pt-5 mt-5 border-t border-[var(--ed-rule)] flex items-center justify-between gap-3">
+                      <Link
+                        href={rite.href}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--ed-accent)] hover:text-[var(--ed-fg)] transition-colors"
+                        style={{ fontFamily: F.glacial }}
+                      >
+                        <span>Full Guide</span>
+                        <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                      </Link>
+
+                      {rite.toolTab && (
+                        <button
+                          type="button"
+                          onClick={() => scrollToTools(rite.toolTab)}
+                          className="inline-flex items-center gap-1 text-[11px] font-mono text-[var(--ed-fg-muted)] hover:text-[var(--ed-accent)] transition-colors cursor-pointer"
+                          style={{ fontFamily: F.mono }}
+                        >
+                          <span>{rite.toolLabel}</span>
+                          <ArrowUpRight size={12} />
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                </FadeUp>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* ── SECTION 03: Scriptural Lineage (Abraham) ────────────────────── */}
+        <section className="mb-20 sm:mb-28">
+          <FadeUp distance={12}>
+            <div
+              className="rounded-2xl border p-6 sm:p-10 space-y-5 bg-[var(--ed-surface)]/80"
+              style={{
+                borderColor: 'var(--ed-rule)',
+              }}
+            >
+              <div className="flex items-center justify-between gap-4 flex-wrap pb-3 border-b border-[var(--ed-rule)]">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)]" />
+                  <span
+                    className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--ed-accent)]"
+                    style={{ fontFamily: F.glacial }}
+                  >
+                    The Abrahamic Foundation
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-[var(--ed-fg-muted)]">
+                  Quran 22:78 · Sura Al-Hajj
+                </span>
+              </div>
+
+              {/* Arabic Calligraphy (Full Verse Text) */}
+              <div
+                dir="rtl"
+                className="font-arabic text-right text-lg sm:text-xl md:text-2xl leading-[2.2] text-[var(--ed-fg)]"
+                style={{ fontFamily: 'var(--font-amiri), "Amiri", serif' }}
+              >
+                مِّلَّةَ أَبِيكُمْ إِبْرَٰهِيمَ ۚ هُوَ سَمَّىٰكُمُ ٱلْمُسْلِمِينَ مِن قَبْلُ وَفِى هَـٰذَا لِيَكُونَ ٱلرَّسُولُ شَهِيدًا عَلَيْكُمْ وَتَكُونُوا۟ شُهَدَآءَ عَلَى ٱلنَّاسِ ۚ فَأَقِيمُوا۟ ٱلصَّلَوٰةَ وَءَاتُوا۟ ٱلزَّكَوٰةَ وَٱعْتَصِمُوا۟ بِٱللَّهِ هُوَ مَوْلَىٰكُمْ ۖ فَنِعْمَ ٱلْمَوْلَىٰ وَنِعْمَ ٱلنَّصِيرُ
+              </div>
+
+              {/* English Translation */}
               <p
-                className="mt-6 text-base leading-[1.7] text-[var(--ed-fg-muted)]"
+                className="text-sm sm:text-base leading-relaxed text-[var(--ed-fg-muted)] pt-3 border-t border-[var(--ed-rule)]"
                 style={{ fontFamily: F.serif }}
               >
-                {t("learnTheRitesDesc")}
+                <span className="text-[var(--ed-accent)] font-semibold">&ldquo;</span>
+                ...the religion of your father Abraham; he is the one who named you &lsquo;Submitters&rsquo; originally. Thus, the messenger shall serve as a witness among you, and you shall serve as witnesses among the people. Therefore, you shall observe the Contact Prayers (Salat) and give the obligatory charity (Zakat), and hold fast to GOD; He is your Lord, the best Lord and the best Supporter.
+                <span className="text-[var(--ed-accent)] font-semibold">&rdquo;</span>
               </p>
             </div>
-            <span
-              className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--ed-fg-muted)]/50"
-              style={{ fontFamily: F.glacial }}
-            >
-              {t("fourCoreGuides")}
-            </span>
-          </div>
+          </FadeUp>
+        </section>
 
-          <div className="grid gap-px border border-[var(--ed-rule)] bg-[var(--ed-rule)] md:grid-cols-2">
-            {RITE_CARDS.map((rite, index) => (
-              <RitePreviewCard key={rite.href} rite={rite} index={index} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Closing CTA ───────────────────────────────────────────────── */}
-      <section className="relative border-t border-[var(--ed-rule)] bg-[var(--ed-surface)]/[0.07]">
-        <div className="absolute inset-x-0 top-0 h-px bg-[var(--ed-accent)]/10" />
-        <div className="mx-auto flex max-w-6xl flex-col gap-10 px-5 py-16 sm:px-6 md:flex-row md:items-center md:justify-between md:py-20">
-          <div className="max-w-2xl">
-            <p
-              className="text-[1.65rem] font-medium leading-[1.3] text-[var(--ed-fg)] md:text-[2rem]"
-              style={{ fontFamily: F.display }}
+        {/* ── Closing Navigation Banner ──────────────────────────────────── */}
+        <section>
+          <FadeUp distance={12}>
+            <div
+              className="rounded-2xl border p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-5 bg-[var(--ed-surface)]"
+              style={{ borderColor: 'var(--ed-rule)' }}
             >
-              {t("closingMessage")}
-            </p>
-          </div>
-          <Link
-            href="/practices/contact-prayers"
-            className="inline-flex min-h-12 shrink-0 items-center justify-center gap-3 border border-[var(--ed-accent)] bg-[var(--ed-accent)] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--ed-bg)] transition-all duration-300 hover:bg-[var(--ed-fg)] hover:border-[var(--ed-fg)]"
-            style={{ fontFamily: F.glacial }}
-          >
-            {t("beginWithPrayer")}
-            <ArrowRight size={15} strokeWidth={1.8} />
-          </Link>
-        </div>
-      </section>
+              <div className="space-y-1 text-center sm:text-left">
+                <h3
+                  className="text-xl sm:text-2xl font-medium tracking-tight text-[var(--ed-fg)]"
+                  style={{ fontFamily: F.display }}
+                >
+                  Start Your Daily Practice
+                </h3>
+                <p
+                  className="text-xs sm:text-sm text-[var(--ed-fg-muted)] max-w-lg"
+                  style={{ fontFamily: F.serif }}
+                >
+                  Begin with the five daily Contact Prayers, step-by-step ablution instructions, and Quranic recitations.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 shrink-0 flex-wrap justify-center">
+                <Link
+                  href="/practices/contact-prayers"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all bg-[var(--ed-accent)] text-[var(--ed-bg)] hover:opacity-95 shadow-xs"
+                  style={{ fontFamily: F.glacial }}
+                >
+                  <span>Learn Salat</span>
+                  <ArrowRight size={13} />
+                </Link>
+                <Link
+                  href="/practices/zakat"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-medium text-xs border border-[var(--ed-rule)] text-[var(--ed-fg)] hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] bg-[var(--ed-bg)] transition-colors"
+                  style={{ fontFamily: F.glacial }}
+                >
+                  <span>Zakat Guide</span>
+                  <ChevronRight size={13} />
+                </Link>
+              </div>
+            </div>
+          </FadeUp>
+        </section>
+      </div>
     </main>
-  );
+  )
 }
+
+

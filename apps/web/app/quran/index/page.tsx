@@ -8,11 +8,19 @@ import { ActivityRecorder } from '@/components/activity-recorder'
 import { TopicLetterRail } from '@/components/quran-index/topic-letter-rail'
 import { TopicIndexBrowser } from '@/components/quran-index/topic-index-browser'
 import { TopicIndexList } from '@/components/quran-index/topic-index-list'
+import { ArticleAnimations } from '@/components/article-animations'
 import type { TopicEntry, TopicIndexLetter } from '@/lib/topic-index'
 
 export const dynamic = 'force-dynamic'
 
 const DEFAULT_LETTER = 'A'
+
+const F = {
+  display: 'var(--font-cormorant), Georgia, serif',
+  serif: 'var(--font-source-serif), Georgia, serif',
+  mono: 'var(--font-jetbrains), ui-monospace, monospace',
+  glacial: 'var(--font-glacial), sans-serif',
+}
 
 /**
  * The Quran's printed topical index: the alphabetical subject index bound into
@@ -48,16 +56,14 @@ export default async function QuranIndexPage({
   searchParams: Promise<{ letter?: string; q?: string }>
 }) {
   const { letter: letterParam, q } = await searchParams
-  const [t, tQuran] = await Promise.all([
-    getTranslations('quranIndex'),
-    getTranslations('quran'),
-  ])
+  const t = await getTranslations('quranIndex')
 
   const query = q?.trim() ?? ''
   const isSearch = query.length >= 2
   const letter = normalizeLetter(letterParam)
 
   const letters = await fetchLetters()
+  const totalIndexTopics = letters.reduce((sum, l) => sum + l.count, 0)
 
   let entries: TopicEntry[] = []
   let total = 0
@@ -84,87 +90,151 @@ export default async function QuranIndexPage({
   }
 
   return (
-    <div className="py-10 px-4">
-      <ActivityRecorder
-        kind="search"
-        scripture="quran"
-        query={isSearch ? query : `index:${letter}`}
-      />
+    <ArticleAnimations>
+      <main className="min-h-screen py-10 sm:py-16 px-4 sm:px-6 md:px-8">
+        <ActivityRecorder
+          kind="search"
+          scripture="quran"
+          query={isSearch ? query : `index:${letter}`}
+        />
 
-      <div className="max-w-3xl mx-auto space-y-8">
-        {/* ── Header ─────────────────────────────────────────────────────── */}
-        <header className="space-y-4 text-center">
-          <div className="space-y-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-primary/70">
-              {tQuran('title')}
-            </p>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+        <div className="max-w-4xl mx-auto space-y-8 sm:space-y-10">
+          {/* ── Hero Header ─────────────────────────────────────────────────── */}
+          <header className="space-y-4 text-center pb-6 sm:pb-8 border-b border-[var(--ed-rule)]">
+            <h1
+              className="text-3xl sm:text-4xl md:text-5xl font-normal leading-[1.1] tracking-tight text-[var(--ed-fg)]"
+              style={{ fontFamily: F.display }}
+            >
               {t('title')}
             </h1>
-            <p className="text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
+
+            <p
+              className="text-sm sm:text-base italic text-[var(--ed-fg-muted)] max-w-xl mx-auto leading-relaxed"
+              style={{ fontFamily: F.serif }}
+            >
               {t('description')}
             </p>
-          </div>
-        </header>
 
-        {/* ── Letter rail ────────────────────────────────────────────────── */}
-        {letters.length > 0 && (
-          <TopicLetterRail letters={letters} active={isSearch ? '' : letter} />
-        )}
+            {/* Quick Metrics Bar */}
+            {totalIndexTopics > 0 && (
+              <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 pt-1 text-xs text-[var(--ed-fg-muted)]">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--ed-surface)] border border-[var(--ed-rule)]/60 font-mono text-[11px]">
+                  <strong className="font-bold text-[var(--ed-accent)]">{totalIndexTopics.toLocaleString()}</strong> Topics
+                </span>
+                <span className="text-[var(--ed-rule)] font-mono">·</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--ed-surface)] border border-[var(--ed-rule)]/60 font-mono text-[11px]">
+                  <strong className="font-bold text-[var(--ed-accent)]">114</strong> Chapters
+                </span>
+                <span className="text-[var(--ed-rule)] font-mono">·</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--ed-surface)] border border-[var(--ed-rule)]/60 font-mono text-[11px]">
+                  <strong className="font-bold text-[var(--ed-accent)]">A–Z</strong> Concordance
+                </span>
+              </div>
+            )}
+          </header>
 
-        {/* ── Body ───────────────────────────────────────────────────────── */}
-        {failed ? (
-          <p className="text-sm text-muted-foreground py-12 text-center">
-            {t('unavailable')}
-          </p>
-        ) : isSearch ? (
-          <section className="space-y-3">
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="text-sm font-semibold">
-                {t('resultsFor', { query })}
-              </h2>
-              <Link
-                href={`/quran/index?letter=${DEFAULT_LETTER}`}
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          {/* ── Letter rail ────────────────────────────────────────────────── */}
+          {letters.length > 0 && (
+            <TopicLetterRail letters={letters} active={isSearch ? '' : letter} />
+          )}
+
+          {/* ── Body ───────────────────────────────────────────────────────── */}
+          {failed ? (
+            <div className="rounded-2xl border border-[var(--ed-rule)] bg-[var(--ed-surface)]/40 p-12 text-center shadow-xs">
+              <p
+                className="text-sm text-[var(--ed-fg-muted)]"
+                style={{ fontFamily: F.serif }}
               >
-                <ArrowLeft className="size-3" aria-hidden />
-                {t('backToIndex')}
-              </Link>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {t('resultCount', { count: total })}
-            </p>
-            <TopicIndexList entries={entries} emptyMessage={t('noResults')} />
-          </section>
-        ) : (
-          <section className="space-y-3">
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="text-2xl font-bold tracking-tight">{letter}</h2>
-              <p className="text-xs text-muted-foreground">
-                {t('entryCount', { count: total })}
+                {t('unavailable')}
               </p>
             </div>
-            <TopicIndexBrowser
-              entries={entries}
-              letter={letter}
-              labels={{
-                filterPlaceholder: t('filterPlaceholder', { letter }),
-                searchWholeIndex: t('searchWholeIndex'),
-                noneInLetter: t('noneInLetter'),
-                clear: t('clear'),
-              }}
-            />
-          </section>
-        )}
+          ) : isSearch ? (
+            <section className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--ed-rule)]">
+                <div className="space-y-1">
+                  <div className="flex items-baseline gap-2.5">
+                    <h2
+                      className="text-2xl sm:text-3xl font-normal tracking-tight text-[var(--ed-fg)]"
+                      style={{ fontFamily: F.display }}
+                    >
+                      {t('resultsFor', { query })}
+                    </h2>
+                    <span
+                      className="inline-flex items-center px-2 py-0.5 rounded-full border border-[var(--ed-accent)]/20 bg-[var(--ed-accent-soft)]/10 text-xs font-semibold text-[var(--ed-accent)]"
+                      style={{ fontFamily: F.mono }}
+                    >
+                      {t('resultCount', { count: total })}
+                    </span>
+                  </div>
+                  <p
+                    className="text-xs text-[var(--ed-fg-muted)]"
+                    style={{ fontFamily: F.serif }}
+                  >
+                    Found across all alphabetical sections of the index
+                  </p>
+                </div>
 
-        {/* ── Attribution ────────────────────────────────────────────────── */}
-        <footer className="text-center">
-          <p className="text-xs text-muted-foreground/70 leading-relaxed">
-            {t('attribution')}
-          </p>
-        </footer>
-      </div>
-    </div>
+                <Link
+                  href={`/quran/index?letter=${DEFAULT_LETTER}`}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[var(--ed-rule)] bg-[var(--ed-surface)] text-xs font-semibold text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] hover:border-[var(--ed-accent)] transition-all cursor-pointer self-start sm:self-auto shadow-2xs"
+                  style={{ fontFamily: F.glacial }}
+                >
+                  <ArrowLeft className="size-3.5 text-[var(--ed-accent)]" aria-hidden />
+                  <span>{t('backToIndex')}</span>
+                </Link>
+              </div>
+
+              <TopicIndexList
+                entries={entries}
+                emptyMessage={t('noResults')}
+                showLetterBadges={true}
+              />
+            </section>
+          ) : (
+            <section className="space-y-5">
+              <div className="flex items-center justify-between gap-4 pb-2 border-b border-[var(--ed-rule)]">
+                <div className="flex items-baseline gap-3">
+                  <h2
+                    className="text-3xl sm:text-4xl font-normal tracking-tight text-[var(--ed-accent)]"
+                    style={{ fontFamily: F.display }}
+                  >
+                    Section {letter}
+                  </h2>
+                </div>
+
+                <span
+                  className="inline-flex items-center px-3 py-1 rounded-full border border-[var(--ed-accent)]/25 bg-[var(--ed-accent-soft)]/15 text-xs font-semibold text-[var(--ed-accent)]"
+                  style={{ fontFamily: F.mono }}
+                >
+                  {t('entryCount', { count: total })}
+                </span>
+              </div>
+
+              <TopicIndexBrowser
+                entries={entries}
+                letter={letter}
+                labels={{
+                  filterPlaceholder: t('filterPlaceholder', { letter }),
+                  searchWholeIndex: t('searchWholeIndex'),
+                  noneInLetter: t('noneInLetter'),
+                  clear: t('clear'),
+                }}
+              />
+            </section>
+          )}
+
+          {/* ── Attribution ────────────────────────────────────────────────── */}
+          <footer className="text-center border-t border-[var(--ed-rule)] pt-8 pb-4">
+            <p
+              className="text-xs text-[var(--ed-fg-muted)]/70 italic leading-relaxed max-w-lg mx-auto"
+              style={{ fontFamily: F.serif }}
+            >
+              {t('attribution')}
+            </p>
+          </footer>
+        </div>
+      </main>
+    </ArticleAnimations>
   )
 }
 

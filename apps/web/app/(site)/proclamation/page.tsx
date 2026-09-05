@@ -1,3 +1,4 @@
+import { ArticleAnimations } from '@/components/article-animations'
 import { buildPageMetadata } from '@/constants/metadata'
 import { ProclamationContent } from '@/content/library/proclamation'
 
@@ -10,8 +11,11 @@ export const metadata = buildPageMetadata({
 
 export default function ProclamationPage() {
   return (
-    <main className="min-h-screen py-16 px-4">
-      <ProclamationContent />
-    </main>
+    <ArticleAnimations>
+      <main className="min-h-screen py-12 sm:py-20 px-4 sm:px-6 md:px-8">
+        <ProclamationContent />
+      </main>
+    </ArticleAnimations>
   )
 }
+

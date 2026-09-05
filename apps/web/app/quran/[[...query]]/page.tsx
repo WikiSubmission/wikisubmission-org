@@ -10,7 +10,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { buildPageMetadata } from '@/constants/metadata'
-import { ArrowRight, BookOpen, ListTree } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { VerseListFetcher } from './mini-components/verse-list-fetcher'
 import { VerseListSkeleton } from '@/components/quran-reader/verse-list-skeleton'
 import { QuranAccordions } from './mini-components/quran-accordions'
@@ -141,32 +141,48 @@ export default async function QuranPage({
         href: '/introduction',
         title: tNav('introduction'),
         description: tQuran('introductionDesc'),
-        icon: BookOpen,
       },
       {
         href: '/proclamation',
         title: tNav('proclamation'),
         description: tQuran('proclamationDesc'),
-        icon: BookOpen,
       },
       {
         href: '/quran/index',
         title: tQuran('indexTitle'),
         description: tQuran('indexDesc'),
-        icon: ListTree,
       },
     ]
 
     return (
-      <main className="py-12 px-4">
+      <main className="py-12 sm:py-16 px-4">
         <div className="max-w-4xl mx-auto space-y-12">
           {/* ── Hero ──────────────────────────────────────────────────── */}
           <section className="space-y-6 text-center max-w-xl mx-auto">
-            <div className="space-y-2">
-              <p className="text-xs font-bold uppercase tracking-widest text-primary/70">
+            <div className="space-y-2.5">
+              <p
+                style={{
+                  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+                  fontSize: 11,
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                  color: 'var(--ed-accent)',
+                  fontWeight: 600,
+                }}
+              >
                 {tQuran('title')}
               </p>
-              <h1 className="text-4xl font-bold tracking-tight">
+              <h1
+                style={{
+                  fontFamily: 'var(--font-cormorant), Georgia, serif',
+                  fontSize: 'clamp(36px, 6vw, 52px)',
+                  fontWeight: 500,
+                  lineHeight: 1.08,
+                  letterSpacing: '-0.025em',
+                  color: 'var(--ed-fg)',
+                  margin: 0,
+                }}
+              >
                 {tCommon('finalTestament')}
               </h1>
             </div>
@@ -180,25 +196,55 @@ export default async function QuranPage({
 
           {/* ── Read: the book ────────────────────────────────────────── */}
           <section id="quran-read" className="space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-1">
+            <h2
+              style={{
+                fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+                fontSize: 11,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: 'var(--ed-fg-muted)',
+                fontWeight: 600,
+              }}
+              className="px-1"
+            >
               {tQuran('bandRead')}
             </h2>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
               {readCards.map((card) => (
                 <Link
                   key={card.href}
                   href={card.href}
-                  className="group flex flex-col gap-2 p-5 rounded-2xl border border-border/50 bg-muted/30 hover:bg-muted/60 hover:border-border transition-all"
+                  className="group relative flex flex-col justify-between p-5 rounded-xl border transition-all duration-300 cursor-pointer hover:-translate-y-0.5"
+                  style={{
+                    backgroundColor: 'var(--ed-surface)',
+                    borderColor: 'var(--ed-rule)',
+                  }}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-sm font-semibold min-w-0">
-                      <card.icon className="size-4 text-primary/70 shrink-0" />
-                      <span className="truncate">{card.title}</span>
-                    </div>
-                    <ArrowRight className="size-4 shrink-0 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+                  <div className="flex items-center justify-between gap-3 mb-2">
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-cormorant), Georgia, serif',
+                        fontSize: 20,
+                        fontWeight: 600,
+                        letterSpacing: '-0.015em',
+                        color: 'var(--ed-fg)',
+                      }}
+                      className="group-hover:text-[var(--ed-accent)] transition-colors"
+                    >
+                      {card.title}
+                    </span>
+                    <ArrowRight className="size-3.5 shrink-0 text-[var(--ed-fg-muted)] group-hover:text-[var(--ed-accent)] group-hover:translate-x-0.5 transition-all" />
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-source-serif), Georgia, serif',
+                      fontSize: 13,
+                      lineHeight: 1.55,
+                      color: 'var(--ed-fg-muted)',
+                      margin: 0,
+                    }}
+                  >
                     {card.description}
                   </p>
                 </Link>

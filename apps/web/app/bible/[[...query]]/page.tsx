@@ -14,11 +14,11 @@ type Props = { params: Promise<{ query?: string[] }>; searchParams: Promise<{ ve
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { query } = await params
   if (!query || query.length === 0) {
-    return { title: 'Bible | WikiSubmission' }
+    return { title: 'The Holy Bible | Old & New Testament | WikiSubmission' }
   }
   const book = bookFromSlug(query[0])
   const chapter = query[1] ? parseInt(query[1]) : 1
-  if (!book) return { title: 'Bible | WikiSubmission' }
+  if (!book) return { title: 'The Holy Bible | WikiSubmission' }
   return {
     title: `${book.bk} ${chapter} | Bible | WikiSubmission`,
   }
@@ -29,66 +29,251 @@ export default async function BiblePage({ params, searchParams }: Props) {
 
   // ── Home (/bible) ──────────────────────────────────────────────────────────
   if (!query || query.length === 0) {
+    const totalChapters = OT_BOOKS.reduce((acc, b) => acc + b.cc, 0) + NT_BOOKS.reduce((acc, b) => acc + b.cc, 0)
+    const totalVerses = OT_BOOKS.reduce((acc, b) => acc + b.vc, 0) + NT_BOOKS.reduce((acc, b) => acc + b.vc, 0)
+
     return (
-      <main className="min-h-screen py-16 px-4">
-        <div className="max-w-2xl mx-auto space-y-10">
-          <header className="space-y-6 text-center">
-            <div className="space-y-2">
-              <h1 className="text-4xl font-bold tracking-tight">Bible</h1>
-              <p className="text-sm text-muted-foreground">
-                Old &amp; New Testament — English translation
+      <main className="min-h-screen py-12 sm:py-16 px-4 sm:px-6 md:px-8">
+        <div className="max-w-4xl mx-auto space-y-12 sm:space-y-14">
+          {/* ── Hero Header ─────────────────────────────────────────── */}
+          <header className="space-y-6 text-center max-w-xl mx-auto">
+            <div className="space-y-2.5">
+              <p
+                style={{
+                  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+                  fontSize: 11,
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                  color: 'var(--ed-accent)',
+                  fontWeight: 600,
+                }}
+              >
+                Scripture / The Holy Bible
+              </p>
+              <h1
+                style={{
+                  fontFamily: 'var(--font-cormorant), Georgia, serif',
+                  fontSize: 'clamp(36px, 6vw, 52px)',
+                  fontWeight: 500,
+                  lineHeight: 1.08,
+                  letterSpacing: '-0.025em',
+                  color: 'var(--ed-fg)',
+                  margin: 0,
+                }}
+              >
+                Old &amp; New Testament
+              </h1>
+              <p
+                style={{
+                  fontFamily: 'var(--font-source-serif), Georgia, serif',
+                  fontSize: 'clamp(14px, 1.8vw, 16px)',
+                  fontStyle: 'italic',
+                  color: 'var(--ed-fg-muted)',
+                  lineHeight: 1.6,
+                  maxWidth: '46ch',
+                  margin: '8px auto 0',
+                }}
+              >
+                The foundational scriptures of the Old and New Testaments in English translation.
               </p>
             </div>
-            <div className="max-w-sm mx-auto">
+
+            <div className="max-w-md mx-auto">
               <Suspense>
                 <BibleSearchBar className="w-full max-w-none" large />
               </Suspense>
             </div>
+
+            {/* Quick Metrics Bar */}
+            <div className="flex flex-wrap justify-center items-center gap-2.5 sm:gap-3.5 pt-1 text-xs text-[var(--ed-fg-muted)]">
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px]"
+                style={{
+                  backgroundColor: 'var(--ed-surface)',
+                  borderColor: 'var(--ed-rule)',
+                  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+                }}
+              >
+                <strong style={{ color: 'var(--ed-accent)', fontWeight: 700 }}>66</strong> Books
+              </span>
+              <span style={{ color: 'var(--ed-rule)' }} className="font-mono">·</span>
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px]"
+                style={{
+                  backgroundColor: 'var(--ed-surface)',
+                  borderColor: 'var(--ed-rule)',
+                  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+                }}
+              >
+                <strong style={{ color: 'var(--ed-accent)', fontWeight: 700 }}>{totalChapters.toLocaleString()}</strong> Chapters
+              </span>
+              <span style={{ color: 'var(--ed-rule)' }} className="font-mono">·</span>
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px]"
+                style={{
+                  backgroundColor: 'var(--ed-surface)',
+                  borderColor: 'var(--ed-rule)',
+                  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+                }}
+              >
+                <strong style={{ color: 'var(--ed-accent)', fontWeight: 700 }}>{totalVerses.toLocaleString()}</strong> Verses
+              </span>
+            </div>
           </header>
 
-          {/* OT */}
+          {/* ── Old Testament ────────────────────────────────────────── */}
           <section className="space-y-4">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border/40 pb-2">
-              Old Testament — {OT_BOOKS.length} books
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div
+              className="flex items-baseline justify-between gap-3 pb-2.5 border-b"
+              style={{ borderColor: 'var(--ed-rule)' }}
+            >
+              <div className="flex items-baseline gap-2.5">
+                <span
+                  style={{
+                    fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+                    fontSize: 11,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: 'var(--ed-accent)',
+                    fontWeight: 600,
+                  }}
+                >
+                  39
+                </span>
+                <span style={{ color: 'var(--ed-rule)' }}>/</span>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-cormorant), Georgia, serif',
+                    fontSize: 22,
+                    fontWeight: 600,
+                    letterSpacing: '-0.015em',
+                    color: 'var(--ed-fg)',
+                    margin: 0,
+                  }}
+                >
+                  Old Testament
+                </h2>
+              </div>
+              <span
+                style={{
+                  fontFamily: 'var(--font-source-serif), Georgia, serif',
+                  fontSize: 13,
+                  fontStyle: 'italic',
+                  color: 'var(--ed-fg-muted)',
+                }}
+              >
+                Torah, History &amp; Prophets
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
               {OT_BOOKS.map((book) => (
                 <Link
                   key={book.bn}
                   href={`/bible/${book.slug}/1`}
-                  className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border border-border/40 hover:bg-accent/50 hover:border-primary/20 transition-all group"
+                  className="group flex items-center justify-between gap-2 p-3.5 rounded-lg border transition-all duration-200 cursor-pointer hover:-translate-y-0.5"
+                  style={{
+                    backgroundColor: 'var(--ed-surface)',
+                    borderColor: 'var(--ed-rule)',
+                  }}
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{book.bk}</p>
-                    <p className="text-[10px] text-muted-foreground font-mono">
-                      {book.cc} chapters · {book.vc} verses
+                    <p
+                      className="text-sm font-medium truncate group-hover:text-[var(--ed-accent)] transition-colors"
+                      style={{
+                        fontFamily: 'var(--font-source-serif), Georgia, serif',
+                        color: 'var(--ed-fg)',
+                      }}
+                    >
+                      {book.bk}
+                    </p>
+                    <p
+                      className="text-[10px] font-mono mt-0.5"
+                      style={{ color: 'var(--ed-fg-muted)' }}
+                    >
+                      <span style={{ color: 'var(--ed-accent)', opacity: 0.85 }}>{book.cc} ch</span> · {book.vc} v
                     </p>
                   </div>
-                  <ChevronRight className="size-3.5 text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
+                  <ChevronRight className="size-3.5 text-[var(--ed-fg-muted)] shrink-0 group-hover:text-[var(--ed-accent)] group-hover:translate-x-0.5 transition-all" />
                 </Link>
               ))}
             </div>
           </section>
 
-          {/* NT */}
+          {/* ── New Testament ────────────────────────────────────────── */}
           <section className="space-y-4">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border/40 pb-2">
-              New Testament — {NT_BOOKS.length} books
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div
+              className="flex items-baseline justify-between gap-3 pb-2.5 border-b"
+              style={{ borderColor: 'var(--ed-rule)' }}
+            >
+              <div className="flex items-baseline gap-2.5">
+                <span
+                  style={{
+                    fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
+                    fontSize: 11,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: 'var(--ed-accent)',
+                    fontWeight: 600,
+                  }}
+                >
+                  27
+                </span>
+                <span style={{ color: 'var(--ed-rule)' }}>/</span>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-cormorant), Georgia, serif',
+                    fontSize: 22,
+                    fontWeight: 600,
+                    letterSpacing: '-0.015em',
+                    color: 'var(--ed-fg)',
+                    margin: 0,
+                  }}
+                >
+                  New Testament
+                </h2>
+              </div>
+              <span
+                style={{
+                  fontFamily: 'var(--font-source-serif), Georgia, serif',
+                  fontSize: 13,
+                  fontStyle: 'italic',
+                  color: 'var(--ed-fg-muted)',
+                }}
+              >
+                Gospels, Acts &amp; Epistles
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
               {NT_BOOKS.map((book) => (
                 <Link
                   key={book.bn}
                   href={`/bible/${book.slug}/1`}
-                  className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border border-border/40 hover:bg-accent/50 hover:border-primary/20 transition-all group"
+                  className="group flex items-center justify-between gap-2 p-3.5 rounded-lg border transition-all duration-200 cursor-pointer hover:-translate-y-0.5"
+                  style={{
+                    backgroundColor: 'var(--ed-surface)',
+                    borderColor: 'var(--ed-rule)',
+                  }}
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{book.bk}</p>
-                    <p className="text-[10px] text-muted-foreground font-mono">
-                      {book.cc} chapters · {book.vc} verses
+                    <p
+                      className="text-sm font-medium truncate group-hover:text-[var(--ed-accent)] transition-colors"
+                      style={{
+                        fontFamily: 'var(--font-source-serif), Georgia, serif',
+                        color: 'var(--ed-fg)',
+                      }}
+                    >
+                      {book.bk}
+                    </p>
+                    <p
+                      className="text-[10px] font-mono mt-0.5"
+                      style={{ color: 'var(--ed-fg-muted)' }}
+                    >
+                      <span style={{ color: 'var(--ed-accent)', opacity: 0.85 }}>{book.cc} ch</span> · {book.vc} v
                     </p>
                   </div>
-                  <ChevronRight className="size-3.5 text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
+                  <ChevronRight className="size-3.5 text-[var(--ed-fg-muted)] shrink-0 group-hover:text-[var(--ed-accent)] group-hover:translate-x-0.5 transition-all" />
                 </Link>
               ))}
             </div>
