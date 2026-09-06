@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import type { ZoomLevel } from '@/lib/quran-zoom'
+import type { ZoomLevel } from '@/lib/bible-zoom'
 
 export type BibleDisplayMode = 'verse' | 'reading'
 

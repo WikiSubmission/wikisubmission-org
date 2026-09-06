@@ -7,6 +7,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
+  AArrowDownIcon,
+  AArrowUpIcon,
   BookOpenTextIcon,
   CaseLowerIcon,
   CheckIcon,
@@ -14,28 +16,47 @@ import {
   HashIcon,
   LanguagesIcon,
   MessageSquareTextIcon,
+  RotateCcwIcon,
   SettingsIcon,
   TypeIcon,
-  ZoomInIcon,
 } from 'lucide-react'
-import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import {
+  isDefaultReadingPreferences,
+  useQuranPreferences,
+} from '@/hooks/use-quran-preferences'
 import type { LangCode, ReadingModeLang } from '@/hooks/use-quran-preferences'
-import { ZOOM_LEVELS, type ZoomLevel } from '@/lib/quran-zoom'
+import {
+  CONTENT_WIDTHS,
+  FONT_SIZES,
+  FONT_SIZE_PX,
+  type ContentWidth,
+  type FontSize,
+} from '@/lib/quran-typography'
 import { LanguageEntry, useLanguagesStore } from '@/hooks/use-languages-store'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
-type Section = 'reading' | 'language' | 'zoom' | null
+type Section = 'reading' | 'language' | null
 
-const ZOOM_LABEL_KEYS = {
-  compact: 'zoomCompact',
-  normal: 'zoomNormal',
-  comfortable: 'zoomComfortable',
-  wide: 'zoomWide',
-  full: 'zoomFull',
-} as const
+const SIZE_LABEL_KEYS: Record<FontSize, string> = {
+  xs: 'sizeXs',
+  sm: 'sizeSm',
+  md: 'sizeMd',
+  lg: 'sizeLg',
+  xl: 'sizeXl',
+}
+
+const WIDTH_LABEL_KEYS: Record<ContentWidth, string> = {
+  narrow: 'widthNarrow',
+  medium: 'widthMedium',
+  wide: 'widthWide',
+  full: 'widthFull',
+}
+
+/** Arabic sample for the size preview — script everyone reading here recognises. */
+const PREVIEW_ARABIC = 'بِسْمِ ٱللَّٰهِ'
 
 // ── Reusable bits ────────────────────────────────────────────────────────────
 
@@ -188,6 +209,116 @@ function AccordionSection({
   )
 }
 
+/**
+ * Text size and column width, always visible above the accordions.
+ *
+ * These are the two settings a reader reaches for most often and the only ones
+ * whose effect is instant, so they are one click away rather than behind a
+ * section — and they are independent: large text in a narrow column is a normal
+ * thing to want. The preview renders the real pixel sizes, so the choice reads
+ * the same as the page behind the panel.
+ */
+function SizingControls({
+  fontSize,
+  contentWidth,
+  onFontSize,
+  onContentWidth,
+}: {
+  fontSize: FontSize
+  contentWidth: ContentWidth
+  onFontSize: (size: FontSize) => void
+  onContentWidth: (width: ContentWidth) => void
+}) {
+  const t = useTranslations('settings')
+  const sizeIndex = FONT_SIZES.indexOf(fontSize)
+  const px = FONT_SIZE_PX[fontSize]
+
+  const step = (delta: -1 | 1) => {
+    const next =
+      FONT_SIZES[
+        Math.min(FONT_SIZES.length - 1, Math.max(0, sizeIndex + delta))
+      ]
+    if (next !== fontSize) onFontSize(next)
+  }
+
+  return (
+    <div className="border-b px-3 py-3 space-y-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-medium">{t('textSize')}</span>
+        <div className="flex items-center gap-0.5 rounded-lg border p-0.5">
+          <button
+            type="button"
+            aria-label={t('decreaseTextSize')}
+            disabled={sizeIndex <= 0}
+            onClick={() => step(-1)}
+            className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-35 disabled:hover:bg-transparent transition-colors"
+          >
+            <AArrowDownIcon className="size-4" />
+          </button>
+          <span className="min-w-16 text-center text-xs font-medium">
+            {t(SIZE_LABEL_KEYS[fontSize])}
+          </span>
+          <button
+            type="button"
+            aria-label={t('increaseTextSize')}
+            disabled={sizeIndex >= FONT_SIZES.length - 1}
+            onClick={() => step(1)}
+            className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-35 disabled:hover:bg-transparent transition-colors"
+          >
+            <AArrowUpIcon className="size-4" />
+          </button>
+        </div>
+      </div>
+
+      <div
+        aria-hidden
+        className="flex h-14 items-center justify-between gap-3 overflow-hidden rounded-lg bg-muted/40 px-3"
+      >
+        <span
+          className="truncate leading-none text-foreground"
+          style={{ fontSize: px.translation }}
+        >
+          Aa
+        </span>
+        <span
+          dir="rtl"
+          className="font-arabic truncate leading-none text-foreground/90"
+          style={{ fontSize: px.arabic }}
+        >
+          {PREVIEW_ARABIC}
+        </span>
+      </div>
+
+      {/* Column width only bites on wide viewports — hide it where every step
+          would render identically. */}
+      <div className="hidden lg:flex items-center justify-between gap-3">
+        <span className="text-sm font-medium">{t('readingWidth')}</span>
+        <div className="flex gap-0.5 rounded-lg bg-muted/60 p-0.5">
+          {CONTENT_WIDTHS.map((width) => {
+            const isActive = contentWidth === width
+            return (
+              <button
+                key={width}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => onContentWidth(width)}
+                className={cn(
+                  'rounded-md px-2 py-1 text-[11px] font-medium transition-colors',
+                  isActive
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {t(WIDTH_LABEL_KEYS[width])}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 
 export default function QuranSettings() {
@@ -212,7 +343,6 @@ export default function QuranSettings() {
     ? (languages.find((l) => l.code === prefs.secondaryLanguage)?.name ??
       prefs.secondaryLanguage)
     : t('none')
-  const zoomName = t(ZOOM_LABEL_KEYS[prefs.zoomLevel ?? 'comfortable'])
 
   const enabledDisplay = [
     prefs.displayMode === 'reading'
@@ -255,9 +385,26 @@ export default function QuranSettings() {
         align="end"
         sideOffset={6}
       >
-        <div className="px-3 pt-3 pb-2">
+        <div className="flex items-center justify-between gap-2 px-3 pt-3 pb-2">
           <p className="text-base font-semibold">{t('title')}</p>
+          {!isDefaultReadingPreferences(prefs) && (
+            <button
+              type="button"
+              onClick={() => prefs.resetPreferences()}
+              className="flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-muted-foreground hover:bg-accent/40 hover:text-foreground transition-colors"
+            >
+              <RotateCcwIcon className="size-3" />
+              {t('reset')}
+            </button>
+          )}
         </div>
+
+        <SizingControls
+          fontSize={prefs.fontSize ?? 'md'}
+          contentWidth={prefs.contentWidth ?? 'medium'}
+          onFontSize={(fontSize) => set({ fontSize })}
+          onContentWidth={(contentWidth) => set({ contentWidth })}
+        />
 
         <div>
           <AccordionSection
@@ -288,7 +435,7 @@ export default function QuranSettings() {
                             : 'bg-muted/60 text-muted-foreground border-transparent hover:bg-accent hover:text-foreground'
                         )}
                       >
-                        {lang === 'translation' ? 'Translation' : t('arabic')}
+                        {lang === 'translation' ? t('translation') : t('arabic')}
                       </button>
                     ))}
                   </div>
@@ -355,21 +502,31 @@ export default function QuranSettings() {
             summary={langSummary}
           >
             <div className="space-y-2">
+              {/* Each tab carries its current selection, so both translations
+                  are readable without switching tabs. */}
               <div className="flex gap-1">
-                {(['primary', 'secondary'] as const).map((tab) => {
+                {(
+                  [
+                    ['primary', t('translation'), primaryName],
+                    ['secondary', t('secondTranslation'), secondaryName],
+                  ] as const
+                ).map(([tab, label, current]) => {
                   const isActive = langTab === tab
                   return (
                     <button
                       key={tab}
                       onClick={() => setLangTab(tab)}
                       className={cn(
-                        'flex-1 px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors',
+                        'flex-1 min-w-0 flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
                         isActive
                           ? 'bg-primary/10 text-primary'
                           : 'text-muted-foreground hover:bg-accent/40 hover:text-foreground'
                       )}
                     >
-                      {tab}
+                      <span className="truncate max-w-full">{label}</span>
+                      <span className="truncate max-w-full text-[10px] font-normal opacity-70">
+                        {current}
+                      </span>
                     </button>
                   )
                 })}
@@ -398,36 +555,6 @@ export default function QuranSettings() {
                   />
                 )}
               </div>
-            </div>
-          </AccordionSection>
-
-          <AccordionSection
-            id="zoom"
-            open={openSection === 'zoom'}
-            onToggle={() => toggle('zoom')}
-            icon={<ZoomInIcon className="size-4" />}
-            label={t('zoom')}
-            summary={zoomName}
-          >
-            <div className="flex flex-col gap-0.5">
-              {ZOOM_LEVELS.map((level) => {
-                const isActive = (prefs.zoomLevel ?? 'comfortable') === level
-                return (
-                  <button
-                    key={level}
-                    onClick={() => set({ zoomLevel: level as ZoomLevel })}
-                    className={cn(
-                      'flex w-full items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
-                      isActive
-                        ? 'bg-primary/10 text-primary font-medium'
-                        : 'text-foreground hover:bg-accent/40'
-                    )}
-                  >
-                    <span>{t(ZOOM_LABEL_KEYS[level])}</span>
-                    {isActive && <CheckIcon className="size-4" />}
-                  </button>
-                )
-              })}
             </div>
           </AccordionSection>
         </div>

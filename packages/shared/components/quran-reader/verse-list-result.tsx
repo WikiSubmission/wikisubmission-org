@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
+import { CONTENT_WIDTH_CLASS } from '@/lib/quran-typography'
 import { parseQuranSegments } from '@/lib/verse-ref-parser'
 import { VerseCard } from '@/components/quran-reader/verse-card'
 import { SearchHeader } from '@/components/quran-reader/search-header'
@@ -103,10 +103,10 @@ export function VerseListResult({
   apiError: boolean
 }) {
   const prefs = useQuranPreferences()
-  const zoom = prefs.zoomLevel ?? 'comfortable'
-  const maxW = ZOOM_WIDTH_CLASS[zoom]
+  const fontSize = prefs.fontSize ?? 'md'
+  const maxW = CONTENT_WIDTH_CLASS[prefs.contentWidth ?? 'medium']
 
-  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${zoom}-${prefs.arabic}-${prefs.wordByWord}`
+  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${fontSize}-${prefs.arabic}-${prefs.wordByWord}`
 
   // Build lookup: cn → (verseNumber → VerseData) and cn → titles. Offline
   // bundles key titles by the languages they were read in, so the reader's own

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import { ZOOM_WIDTH_CLASS, ZOOM_FONT } from '@/lib/quran-zoom'
+import { CONTENT_WIDTH_CLASS, FONT_SIZE_CLASS } from '@/lib/quran-typography'
 import type { VerseData } from '@/hooks/use-chapter-reader'
 import type { ChapterReaderOptions } from '@/hooks/use-chapter-reader'
 import { QuranRefText } from '@/components/quran-ref-text'
@@ -309,8 +309,8 @@ export function ReadingView({
     )
   }
 
-  const zoomFont = ZOOM_FONT[prefs.zoomLevel ?? 'comfortable']
-  const widthClass = ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']
+  const zoomFont = FONT_SIZE_CLASS[prefs.fontSize ?? 'md']
+  const widthClass = CONTENT_WIDTH_CLASS[prefs.contentWidth ?? 'medium']
 
   return (
     <div className={`${widthClass} mx-auto px-4 py-8 space-y-10`}>

@@ -107,7 +107,7 @@ function VersesScreen() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pt-3 pb-6">
       {loading ? (
-        <VerseListSkeleton queryText={query} zoom={prefs.zoomLevel ?? 'comfortable'} />
+        <VerseListSkeleton queryText={query} width={prefs.contentWidth ?? 'medium'} />
       ) : (
         <VerseListResult
           queryText={query}

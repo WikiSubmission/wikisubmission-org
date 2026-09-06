@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils'
 import { logFrontendEvent } from '@/lib/frontend-logger'
 import { toast } from 'sonner'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
+import { CONTENT_WIDTH_CLASS } from '@/lib/quran-typography'
 import {
   useVerseSearch,
   type ChapterResult,
@@ -231,7 +231,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
     clearSelection()
   }, [searchQuery, clearSelection])
 
-  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${prefs.zoomLevel ?? 'comfortable'}-${prefs.arabic}-${prefs.wordByWord}`
+  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${prefs.fontSize ?? 'md'}-${prefs.arabic}-${prefs.wordByWord}`
 
   // ── Trigger search ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -398,7 +398,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   if (verseSearch.loading && !verseSearch.data) {
     return (
       <div
-        className={`${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full space-y-3`}
+        className={`${CONTENT_WIDTH_CLASS[prefs.contentWidth ?? 'medium']} mx-auto w-full space-y-3`}
       >
         <SearchHeader query={searchQuery} loading />
         <SearchResultsSkeleton />
@@ -412,7 +412,7 @@ export default function SearchResult({ props }: { props: { query: string } }) {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
-      className={`space-y-3 ${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full`}
+      className={`space-y-3 ${CONTENT_WIDTH_CLASS[prefs.contentWidth ?? 'medium']} mx-auto w-full`}
     >
       <SearchHeader query={searchQuery} />
 

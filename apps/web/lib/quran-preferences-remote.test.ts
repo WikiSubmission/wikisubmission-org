@@ -30,7 +30,8 @@ describe('sanitiseRemotePreferences', () => {
         secondaryLanguage: 'ar',
         readingModeLang: 'arabic',
         wordTapAction: 'details',
-        zoomLevel: 'wide',
+        fontSize: 'lg',
+        contentWidth: 'wide',
       })
     ).toEqual({
       arabic: false,
@@ -40,7 +41,25 @@ describe('sanitiseRemotePreferences', () => {
       secondaryLanguage: 'ar',
       readingModeLang: 'arabic',
       wordTapAction: 'details',
-      zoomLevel: 'wide',
+      fontSize: 'lg',
+      contentWidth: 'wide',
+    })
+  })
+
+  it('maps a legacy zoomLevel onto the split text-size and width settings', () => {
+    // Records written before the split carry only `zoomLevel`; without this a
+    // reader signing in on a new device would land on the defaults instead.
+    expect(sanitiseRemotePreferences({ zoomLevel: 'wide' })).toEqual({
+      fontSize: 'lg',
+      contentWidth: 'wide',
+    })
+    expect(sanitiseRemotePreferences({ zoomLevel: 'enormous' })).toEqual({})
+  })
+
+  it('prefers explicit sizes over the legacy zoomLevel beside them', () => {
+    expect(sanitiseRemotePreferences({ zoomLevel: 'compact', fontSize: 'xl' })).toEqual({
+      fontSize: 'xl',
+      contentWidth: 'narrow',
     })
   })
 
@@ -68,7 +87,8 @@ describe('sanitiseRemotePreferences', () => {
     expect(
       sanitiseRemotePreferences({
         arabic: 'yes',
-        zoomLevel: 'enormous',
+        fontSize: 'enormous',
+        contentWidth: 'infinite',
         readingModeLang: 'klingon',
         wordTapAction: 'explode',
         unknownKey: true,

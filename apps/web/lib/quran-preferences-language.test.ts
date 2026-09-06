@@ -101,10 +101,12 @@ describe('v9 migration of persisted preferences', () => {
 
     const state = await loadStore()
 
+    // v10 splits the old single zoom scale into text size + column width.
     expect(state).toMatchObject({
       primaryLanguage: 'en',
       arabic: false,
-      zoomLevel: 'compact',
+      fontSize: 'xs',
+      contentWidth: 'narrow',
     })
   })
 

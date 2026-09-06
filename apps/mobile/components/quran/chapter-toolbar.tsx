@@ -13,7 +13,7 @@ import { WordBundleSheet } from '@/components/quran/word-bundle-sheet'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useWordBundleDownload } from '@/hooks/use-word-bundle-download'
 import { getRegisteredOfflineContentStore } from '@/lib/offline/registry'
-import { ZOOM_LEVELS } from '@/lib/quran-zoom'
+import { FONT_SIZES } from '@/lib/quran-typography'
 
 /**
  * Slim sticky toolbar above the mobile chapter reader carrying the display-mode
@@ -26,20 +26,22 @@ import { ZOOM_LEVELS } from '@/lib/quran-zoom'
 export function ChapterToolbar() {
   const t = useTranslations('mobile.reader')
   const primaryLanguage = useQuranPreferences((s) => s.primaryLanguage)
-  const zoomLevel = useQuranPreferences((s) => s.zoomLevel ?? 'comfortable')
+  const fontSize = useQuranPreferences((s) => s.fontSize ?? 'md')
   const [announcement, setAnnouncement] = useState<ModeAnnouncement | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
 
   // Pinch zoom is disabled app-wide (userScalable: false — it fights the
   // virtualized reader and fixed chrome), so reading text size must be
-  // adjustable in one tap here. Steps the shared zoom scale the reader already
-  // honors; persisted with the rest of the Quran preferences.
-  const zoomIndex = ZOOM_LEVELS.indexOf(zoomLevel)
-  const stepZoom = useCallback((delta: -1 | 1) => {
-    const { zoomLevel: current, patchPreferences } = useQuranPreferences.getState()
-    const index = ZOOM_LEVELS.indexOf(current ?? 'comfortable')
-    const next = ZOOM_LEVELS[Math.min(ZOOM_LEVELS.length - 1, Math.max(0, index + delta))]
-    if (next !== current) patchPreferences({ zoomLevel: next })
+  // adjustable in one tap here. Steps the shared text-size scale the reader
+  // already honors; persisted with the rest of the Quran preferences. Column
+  // width is a separate preference and is not touched — it does not bite at
+  // phone widths anyway.
+  const sizeIndex = FONT_SIZES.indexOf(fontSize)
+  const stepFontSize = useCallback((delta: -1 | 1) => {
+    const { fontSize: current, patchPreferences } = useQuranPreferences.getState()
+    const index = FONT_SIZES.indexOf(current ?? 'md')
+    const next = FONT_SIZES[Math.min(FONT_SIZES.length - 1, Math.max(0, index + delta))]
+    if (next !== current) patchPreferences({ fontSize: next })
   }, [])
 
   const onModeChanged = useCallback((mode: QuranModeId) => {
@@ -82,8 +84,8 @@ export function ChapterToolbar() {
         <button
           type="button"
           aria-label={t('decreaseTextSize')}
-          disabled={zoomIndex <= 0}
-          onClick={() => stepZoom(-1)}
+          disabled={sizeIndex <= 0}
+          onClick={() => stepFontSize(-1)}
           className="text-muted-foreground active:bg-accent flex size-8 items-center justify-center rounded-full disabled:opacity-35"
         >
           <AArrowDown className="size-4.5" aria-hidden="true" />
@@ -91,8 +93,8 @@ export function ChapterToolbar() {
         <button
           type="button"
           aria-label={t('increaseTextSize')}
-          disabled={zoomIndex >= ZOOM_LEVELS.length - 1}
-          onClick={() => stepZoom(1)}
+          disabled={sizeIndex >= FONT_SIZES.length - 1}
+          onClick={() => stepFontSize(1)}
           className="text-muted-foreground active:bg-accent flex size-8 items-center justify-center rounded-full disabled:opacity-35"
         >
           <AArrowUp className="size-4.5" aria-hidden="true" />

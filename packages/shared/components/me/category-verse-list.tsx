@@ -36,7 +36,7 @@ export function CategoryVerseList({
 }: CategoryVerseListProps) {
   const tNav = useTranslations('navbar')
   const { entries, isLoading } = useBookmarkCategoryEntries(categoryId)
-  const { primaryLanguage, secondaryLanguage, arabic, wordByWord, zoomLevel } =
+  const { primaryLanguage, secondaryLanguage, arabic, wordByWord, fontSize } =
     useQuranPreferences()
 
   const bibleEntries = entries.filter((e) => e.scripture === 'bible')
@@ -71,7 +71,7 @@ export function CategoryVerseList({
     return result
   }, [primaryLanguage, secondaryLanguage])
 
-  const optsKey = `v2-${primaryLanguage}-${secondaryLanguage ?? 'none'}-${arabic}-${wordByWord}-detail-${zoomLevel}`
+  const optsKey = `v2-${primaryLanguage}-${secondaryLanguage ?? 'none'}-${arabic}-${wordByWord}-detail-${fontSize}`
 
   const chapterQueries = useQueries({
     queries: chapterNumbers.map((cn) => ({

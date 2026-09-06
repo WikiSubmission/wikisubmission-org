@@ -6,7 +6,7 @@ import { VerseCard } from '@/components/quran-reader/verse-card'
 import { useLocalVerseSearch } from '@/hooks/use-local-verse-search'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
 import { useScriptureAuth } from '@/lib/scripture-auth-context'
-import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
+import { CONTENT_WIDTH_CLASS } from '@/lib/quran-typography'
 
 /**
  * How many matches the reader renders while a draft is active.
@@ -49,7 +49,7 @@ export function QuranDraftResults({ query }: { query: string }) {
       return ac === bc ? av - bv : ac - bc
     })
 
-  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${prefs.zoomLevel ?? 'comfortable'}-${prefs.arabic}-${prefs.wordByWord}`
+  const optsKey = `${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? ''}-${prefs.fontSize ?? 'md'}-${prefs.arabic}-${prefs.wordByWord}`
 
   // Always shown, including on an empty result, because the scope is what makes
   // the emptiness readable: "not in this sura" is a different statement from
@@ -58,7 +58,7 @@ export function QuranDraftResults({ query }: { query: string }) {
 
   return (
     <div
-      className={`${ZOOM_WIDTH_CLASS[prefs.zoomLevel ?? 'comfortable']} mx-auto w-full space-y-3 px-4 pt-4`}
+      className={`${CONTENT_WIDTH_CLASS[prefs.contentWidth ?? 'medium']} mx-auto w-full space-y-3 px-4 pt-4`}
     >
       <div className="rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
         <div className="flex items-center gap-2 text-sm font-medium text-primary">

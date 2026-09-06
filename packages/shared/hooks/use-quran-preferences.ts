@@ -1,7 +1,14 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { contentLangForUiLocale } from '@/constants/ui-locales'
-import { ZOOM_LEVELS, type ZoomLevel } from '@/lib/quran-zoom'
+import {
+  CONTENT_WIDTHS,
+  DEFAULT_CONTENT_WIDTH,
+  DEFAULT_FONT_SIZE,
+  FONT_SIZES,
+  type ContentWidth,
+  type FontSize,
+} from '@/lib/quran-typography'
 
 /**
  * ISO 639-1 lang codes used by the ws-backend API.
@@ -77,7 +84,8 @@ export type QuranPreferences = {
   readingModeLang: ReadingModeLang
   primaryLanguage: LangCode
   secondaryLanguage?: LangCode
-  zoomLevel: ZoomLevel
+  fontSize: FontSize
+  contentWidth: ContentWidth
   wordLabSections: WordLabSections
   wordTapAction: WordTapAction
   setPreferences: (preferences: QuranPreferences) => void
@@ -90,6 +98,17 @@ export type QuranPreferences = {
    * the command menu, the settings panel, and the mode selector all do.
    */
   patchPreferences: (patch: Partial<QuranPreferences>) => void
+  /** Restores `DEFAULT_READING_PREFERENCES`, leaving the language choices alone. */
+  resetPreferences: () => void
+}
+
+/** Old single-scale zoom steps → the (text size, width) pair each one rendered. */
+const LEGACY_ZOOM_SPLIT: Record<string, { fontSize: FontSize; contentWidth: ContentWidth }> = {
+  compact: { fontSize: 'xs', contentWidth: 'narrow' },
+  normal: { fontSize: 'sm', contentWidth: 'medium' },
+  comfortable: { fontSize: 'md', contentWidth: 'medium' },
+  wide: { fontSize: 'lg', contentWidth: 'wide' },
+  full: { fontSize: 'xl', contentWidth: 'wide' },
 }
 
 /**
@@ -135,7 +154,19 @@ export function sanitiseRemotePreferences(remote: unknown): Partial<QuranPrefere
   if (src.wordTapAction === 'play' || src.wordTapAction === 'details') {
     out.wordTapAction = src.wordTapAction
   }
-  if (ZOOM_LEVELS.includes(src.zoomLevel as ZoomLevel)) out.zoomLevel = src.zoomLevel
+  if (FONT_SIZES.includes(src.fontSize as FontSize)) out.fontSize = src.fontSize
+  if (CONTENT_WIDTHS.includes(src.contentWidth as ContentWidth)) {
+    out.contentWidth = src.contentWidth
+  }
+  // A record last written by a pre-split client carries `zoomLevel` instead.
+  // Without this a reader signing in on a new device would silently land on the
+  // defaults rather than the sizes they chose. Anything already sent explicitly
+  // wins over the legacy value.
+  const legacy = LEGACY_ZOOM_SPLIT[src.zoomLevel as string]
+  if (legacy) {
+    out.fontSize ??= legacy.fontSize
+    out.contentWidth ??= legacy.contentWidth
+  }
 
   if (src.wordLabSections && typeof src.wordLabSections === 'object') {
     const s = src.wordLabSections as Record<string, unknown>
@@ -165,43 +196,71 @@ function getLocaleCookie(): LangCode {
   return repairLangCode(match?.[1])
 }
 
+/**
+ * Display and sizing defaults — the store's initial state and what Reset in the
+ * settings panel restores.
+ *
+ * Languages and `displayMode` are deliberately absent: the first is a deliberate
+ * choice a reader would not expect a "reset the layout" button to undo, and the
+ * second is view state owned by the mode selector (see `use-prefs-sync`).
+ */
+export const DEFAULT_READING_PREFERENCES = {
+  arabic: true,
+  subtitles: true,
+  footnotes: true,
+  transliteration: false,
+  text: true,
+  wordByWord: false,
+  showVerseNumbers: true,
+  readingModeLang: 'translation' as ReadingModeLang,
+  fontSize: DEFAULT_FONT_SIZE,
+  contentWidth: DEFAULT_CONTENT_WIDTH,
+  wordTapAction: 'play' as WordTapAction,
+} satisfies Partial<QuranPreferences>
+
+/** True when nothing in `DEFAULT_READING_PREFERENCES` has been changed. */
+export function isDefaultReadingPreferences(prefs: QuranPreferences): boolean {
+  return (
+    Object.entries(DEFAULT_READING_PREFERENCES) as [keyof QuranPreferences, unknown][]
+  ).every(([key, value]) => prefs[key] === value)
+}
+
 export const useQuranPreferences = create(
   persist<QuranPreferences>(
     (set) => ({
-      arabic: true,
-      subtitles: true,
-      footnotes: true,
-      transliteration: false,
-      text: true,
-      wordByWord: false,
+      ...DEFAULT_READING_PREFERENCES,
       displayMode: 'verse' as DisplayMode,
-      showVerseNumbers: true,
-      readingModeLang: 'translation' as ReadingModeLang,
       primaryLanguage: getLocaleCookie(),
       secondaryLanguage: undefined,
-      zoomLevel: 'comfortable' as ZoomLevel,
       wordLabSections: {
         derivs: true,
         occurrences: true,
         morphology: false,
       },
-      wordTapAction: 'play' as WordTapAction,
       setPreferences: (preferences: QuranPreferences) => set(preferences),
       patchPreferences: (patch: Partial<QuranPreferences>) =>
         set((state) => ({ ...state, ...patch, text: true })),
+      resetPreferences: () =>
+        set((state) => ({ ...state, ...DEFAULT_READING_PREFERENCES })),
     }),
     {
       name: 'quran-preferences-v4',
       storage: createJSONStorage(() => localStorage),
-      version: 9,
+      version: 10,
       migrate: (state, version) => {
-        let next = state as Omit<QuranPreferences, 'displayMode' | 'wordLabSections'> & {
+        let next = state as Omit<
+          QuranPreferences,
+          'displayMode' | 'wordLabSections' | 'fontSize' | 'contentWidth'
+        > & {
           displayMode?: string
           wordLabSections?: WordLabSections
           wordTapAction?: WordTapAction
+          zoomLevel?: string
+          fontSize?: FontSize
+          contentWidth?: ContentWidth
         }
         if (version < 4) {
-          next = { ...next, zoomLevel: 'comfortable' as ZoomLevel }
+          next = { ...next, zoomLevel: 'comfortable' }
         }
         if (version < 5) {
           if (next.displayMode === 'word') {
@@ -232,6 +291,19 @@ export const useQuranPreferences = create(
             secondaryLanguage: isLangCode(next.secondaryLanguage)
               ? next.secondaryLanguage
               : undefined,
+          }
+        }
+        if (version < 10) {
+          // One `zoomLevel` scale moved the font and the column together; they
+          // are separate settings now. Each old step maps to the pair it used
+          // to render, so nobody's reader changes size on upgrade.
+          const { zoomLevel, ...rest } = next
+          next = {
+            ...rest,
+            ...(LEGACY_ZOOM_SPLIT[zoomLevel ?? ''] ?? {
+              fontSize: DEFAULT_FONT_SIZE,
+              contentWidth: DEFAULT_CONTENT_WIDTH,
+            }),
           }
         }
         return next as QuranPreferences

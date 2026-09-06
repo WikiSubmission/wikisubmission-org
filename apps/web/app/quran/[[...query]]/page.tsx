@@ -335,7 +335,7 @@ export default async function QuranPage({
           query={queryText}
         />
         <Suspense
-          fallback={<VerseListSkeleton queryText={queryText} zoom="comfortable" />}
+          fallback={<VerseListSkeleton queryText={queryText} width="medium" />}
         >
           <VerseListFetcher queryText={queryText} />
         </Suspense>

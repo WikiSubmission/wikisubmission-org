@@ -161,7 +161,23 @@
     "zoomWide": "Fireh",
     "zoomFull": "Tevahî",
     "english": "Îngilîzî",
-    "more": "Wergerên din di demeke nêz de tên."
+    "more": "Wergerên din di demeke nêz de tên.",
+    "textSize": "Mezinahiya nivîsê",
+    "sizeXs": "Herî biçûk",
+    "sizeSm": "Biçûk",
+    "sizeMd": "Standard",
+    "sizeLg": "Mezin",
+    "sizeXl": "Herî mezin",
+    "readingWidth": "Firehî",
+    "widthNarrow": "Teng",
+    "widthMedium": "Navîn",
+    "widthWide": "Fireh",
+    "widthFull": "Tam",
+    "reset": "Jinûvesazkirin",
+    "decreaseTextSize": "Nivîsê biçûk bike",
+    "increaseTextSize": "Nivîsê mezin bike",
+    "translation": "Werger",
+    "secondTranslation": "Ya duyem"
   },
   "ramadan": {
     "utcValue": "UTC: {value}"

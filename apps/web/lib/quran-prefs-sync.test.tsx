@@ -132,7 +132,7 @@ describe('useQuranPrefsSync', () => {
     h.putPreferences.mockClear()
 
     await act(async () => {
-      useQuranPreferences.getState().patchPreferences({ zoomLevel: 'wide' })
+      useQuranPreferences.getState().patchPreferences({ fontSize: 'lg' })
     })
     await advance(500)
     view.unmount()
@@ -140,7 +140,7 @@ describe('useQuranPrefsSync', () => {
 
     expect(h.putPreferences).toHaveBeenCalledTimes(1)
     const body = h.putPreferences.mock.calls[0][0] as { payload: Record<string, unknown> }
-    expect(body.payload.zoomLevel).toBe('wide')
+    expect(body.payload.fontSize).toBe('lg')
   })
 
   it('does not re-hydrate on remount, and does not clobber a post-hydration change', async () => {
@@ -361,7 +361,7 @@ describe('useQuranPrefsSync', () => {
   // Hydration therefore only suppresses the echo when the store did not move
   // while the GET was in flight.
   it('does not lose a preference changed while the hydrating GET is in flight', async () => {
-    // `zoomLevel` is absent from the server record, so hydration has no opinion
+    // `fontSize` is absent from the server record, so hydration has no opinion
     // on it and the user's mid-flight choice survives in the store. It must
     // still reach the server.
     let resolveGet!: (v: { data: Record<string, unknown> | null }) => void
@@ -378,7 +378,7 @@ describe('useQuranPrefsSync', () => {
     await flush()
 
     await act(async () => {
-      useQuranPreferences.getState().patchPreferences({ zoomLevel: 'wide' })
+      useQuranPreferences.getState().patchPreferences({ fontSize: 'lg' })
     })
 
     await act(async () => {
@@ -387,9 +387,9 @@ describe('useQuranPrefsSync', () => {
     await flush()
     await advance(5_000)
 
-    expect(useQuranPreferences.getState().zoomLevel).toBe('wide')
+    expect(useQuranPreferences.getState().fontSize).toBe('lg')
     expect(h.putPreferences).toHaveBeenCalled()
     const last = h.putPreferences.mock.calls.at(-1)?.[0] as { payload: Record<string, unknown> }
-    expect(last.payload.zoomLevel).toBe('wide')
+    expect(last.payload.fontSize).toBe('lg')
   })
 })

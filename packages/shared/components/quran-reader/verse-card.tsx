@@ -14,7 +14,7 @@ import {
   useCoverToCoverProgress,
 } from '@/hooks/use-reading-progress'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import { ZOOM_FONT } from '@/lib/quran-zoom'
+import { FONT_SIZE_CLASS } from '@/lib/quran-typography'
 import { useLanguagesStore } from '@/hooks/use-languages-store'
 import { useVerseSelection } from '@/hooks/use-verse-selection-store'
 import {
@@ -470,8 +470,8 @@ const WordByWordView = memo(
     }, [verseKey])
     const verseCoordsValid = Number.isFinite(chapter) && Number.isFinite(verse)
 
-    const { zoomLevel } = useQuranPreferences()
-    const arabicClass = ZOOM_FONT[zoomLevel ?? 'comfortable'].arabic
+    const { fontSize } = useQuranPreferences()
+    const arabicClass = FONT_SIZE_CLASS[fontSize ?? 'md'].arabic
     const selectionActive = useVerseSelection((s) => s.active)
 
     if (compact) {
@@ -960,7 +960,7 @@ export const VerseCard = memo(
                 (tr?.tx || highlightedTranslation) && (
                   <div className={isRtl(primaryCode) ? 'text-right' : ''}>
                     <p
-                      className={`${ZOOM_FONT[prefs.zoomLevel ?? 'comfortable'].translation} leading-relaxed text-foreground select-text font-medium`}
+                      className={`${FONT_SIZE_CLASS[prefs.fontSize ?? 'md'].translation} leading-relaxed text-foreground select-text font-medium`}
                     >
                       {highlightedTranslation ? (
                         <HighlightText text={highlightedTranslation} />

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { useBiblePreferences } from '@/hooks/use-bible-preferences'
-import { ZOOM_LEVELS } from '@/lib/quran-zoom'
+import { ZOOM_LEVELS } from '@/lib/bible-zoom'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 

@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes'
 import {
   ALargeSmall,
   BookOpen,
+  Columns3,
   Eye,
   Languages,
   List,
@@ -17,7 +18,7 @@ import {
 } from 'lucide-react'
 import { useQuranPreferences, type QuranPreferences } from '@/hooks/use-quran-preferences'
 import { usePalette, PALETTES, type PaletteKey } from '@/lib/theme-palette-context'
-import { ZOOM_LEVELS } from '@/lib/quran-zoom'
+import { CONTENT_WIDTHS, FONT_SIZES } from '@/lib/quran-typography'
 import type { Command } from '../types'
 
 /** Reader toggles, keyed by the `settings` message that already names each one. */
@@ -34,7 +35,7 @@ const TOGGLES: {
 ]
 
 /**
- * Reader preference, zoom, theme, and palette commands.
+ * Reader preference, text-size, width, theme, and palette commands.
  *
  * Every one writes through `patchPreferences`, which owns the `text: true`
  * invariant, so the menu cannot drift from the settings panel. Toggles set
@@ -116,19 +117,35 @@ export function usePreferenceCommands(): Command[] {
       })
     }
 
-    // ── Zoom ─────────────────────────────────────────────────────────────────
-    for (const level of ZOOM_LEVELS) {
-      const labelKey = `zoom${level.charAt(0).toUpperCase()}${level.slice(1)}`
+    // ── Text size ────────────────────────────────────────────────────────────
+    for (const size of FONT_SIZES) {
+      const labelKey = `size${size.charAt(0).toUpperCase()}${size.slice(1)}`
       commands.push({
-        id: `pref:zoom-${level}`,
+        id: `pref:font-size-${size}`,
         group: 'settings',
-        label: `${t('zoom')}: ${t(labelKey)}`,
+        label: `${t('textSize')}: ${t(labelKey)}`,
         icon: createElement(ALargeSmall),
-        hint: prefs.zoomLevel === level ? '✓' : undefined,
+        hint: prefs.fontSize === size ? '✓' : undefined,
         keepOpen: true,
         priority: 40,
-        keywords: [t('zoom'), level],
-        run: () => patchPreferences({ zoomLevel: level }),
+        keywords: [t('textSize'), size],
+        run: () => patchPreferences({ fontSize: size }),
+      })
+    }
+
+    // ── Reading width ────────────────────────────────────────────────────────
+    for (const width of CONTENT_WIDTHS) {
+      const labelKey = `width${width.charAt(0).toUpperCase()}${width.slice(1)}`
+      commands.push({
+        id: `pref:content-width-${width}`,
+        group: 'settings',
+        label: `${t('readingWidth')}: ${t(labelKey)}`,
+        icon: createElement(Columns3),
+        hint: prefs.contentWidth === width ? '✓' : undefined,
+        keepOpen: true,
+        priority: 40,
+        keywords: [t('readingWidth'), width],
+        run: () => patchPreferences({ contentWidth: width }),
       })
     }
 

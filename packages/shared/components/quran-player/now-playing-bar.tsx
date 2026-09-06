@@ -42,7 +42,7 @@ import gsap from 'gsap'
 import { cn } from '@/lib/utils'
 import { formatTime } from '@/lib/music-utils'
 import { useQuranPreferences } from '@/hooks/use-quran-preferences'
-import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
+import { CONTENT_WIDTH_CLASS } from '@/lib/quran-typography'
 
 const RECITER_NAMES: Record<Reciter, string> = {
   'english-onyx': 'English (Onyx)',
@@ -115,7 +115,7 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
     seek(val)
   }
 
-  const { zoomLevel } = useQuranPreferences()
+  const { contentWidth } = useQuranPreferences()
 
   // Entrance: the bar slides up when playback first gives it something to
   // show (it renders null while idle, so this fires on each appearance).
@@ -169,7 +169,7 @@ export function QuranPlayer({ positionClassName = 'bottom-0 pb-5' }: QuranPlayer
       ref={barRef}
       className={cn('fixed left-0 right-0 z-50 px-3 pointer-events-none', positionClassName)}
     >
-      <div className={`${ZOOM_WIDTH_CLASS[zoomLevel ?? 'comfortable']} mx-auto pointer-events-auto`}>
+      <div className={`${CONTENT_WIDTH_CLASS[contentWidth ?? 'medium']} mx-auto pointer-events-auto`}>
 
         {/* ── Liquid glass shell ────────────────────────────────────────────────── */}
         {/* 1-px gradient "border" is created by a wrapper with p-px + gradient bg */}

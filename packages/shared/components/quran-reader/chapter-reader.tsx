@@ -33,7 +33,7 @@ import {
   useQuranPlayer,
   useQuranPlayerCallbacks,
 } from '@/lib/quran-audio-context'
-import { ZOOM_WIDTH_CLASS } from '@/lib/quran-zoom'
+import { CONTENT_WIDTH_CLASS } from '@/lib/quran-typography'
 import { useScriptureState } from '@/hooks/use-scripture-state'
 import { useQuranPrefsSync } from '@/hooks/use-prefs-sync'
 import { useReaderContext } from '@/hooks/use-reader-context-store'
@@ -523,7 +523,7 @@ export function ChapterReader({
   const isRangeMode = rangeStart !== undefined && rangeEnd !== undefined
   const prefs = useQuranPreferences()
   const { displayMode } = prefs
-  const zoomLevel = prefs.zoomLevel ?? 'comfortable'
+  const contentWidth = prefs.contentWidth ?? 'medium'
   const { getDirection } = useLanguagesStore()
   const reader = useChapterReader(chapterNumber, initialData, rangeStart, rangeEnd)
   // Selection is session-only and should not persist across chapter changes.
@@ -758,7 +758,7 @@ export function ChapterReader({
 
   // Stable key that changes when language prefs change — propagated to VerseCard
   // so that memo's arePropsEqual can detect reloads vs. same-language seeks.
-  const optsKey = `v2-${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}-${zoomLevel}`
+  const optsKey = `v2-${prefs.primaryLanguage}-${prefs.secondaryLanguage ?? 'none'}-${prefs.arabic}-${prefs.wordByWord}-${displayMode}-${prefs.fontSize}`
 
   const primaryCode =
     prefs.primaryLanguage !== 'xl' && prefs.primaryLanguage !== 'none'
@@ -776,7 +776,7 @@ export function ChapterReader({
       : undefined
 
   return (
-    <div className={`flex flex-col gap-2 ${ZOOM_WIDTH_CLASS[zoomLevel]} mx-auto w-full px-4 pt-3 pb-32`}>
+    <div className={`flex flex-col gap-2 ${CONTENT_WIDTH_CLASS[contentWidth]} mx-auto w-full px-4 pt-3 pb-32`}>
       {/* Chapter title */}
       <div className="shrink-0 flex justify-between items-center p-4 bg-muted/50 rounded-2xl">
         <div className="flex flex-col gap-1 flex-1 min-w-0">
