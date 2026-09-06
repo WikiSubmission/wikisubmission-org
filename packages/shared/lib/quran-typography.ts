@@ -62,6 +62,47 @@ export const FONT_SIZE_CLASS: Record<FontSize, FontSizeClasses> = {
   },
 }
 
+export type LineSpacing = 'tight' | 'normal' | 'relaxed'
+
+/** Tight → relaxed. */
+export const LINE_SPACINGS: LineSpacing[] = ['tight', 'normal', 'relaxed']
+
+export const DEFAULT_LINE_SPACING: LineSpacing = 'normal'
+
+export type LineSpacingClasses = {
+  /** Primary translation text in verse/word mode. */
+  translation: string
+  /** Translation prose in reading mode. */
+  reading: string
+  /** Arabic prose in reading mode. */
+  readingArabic: string
+}
+
+/**
+ * Leading per step. `normal` reproduces what the reader shipped with, so the
+ * setting only ever moves away from the sizing people already know.
+ *
+ * Long prose is what this exists for: reading mode sets a whole chapter as one
+ * block, where leading matters more than it does in a verse card.
+ */
+export const LINE_SPACING_CLASS: Record<LineSpacing, LineSpacingClasses> = {
+  tight: {
+    translation: 'leading-snug',
+    reading: 'leading-relaxed',
+    readingArabic: 'leading-[1.8]',
+  },
+  normal: {
+    translation: 'leading-relaxed',
+    reading: 'leading-loose',
+    readingArabic: 'leading-[2.2]',
+  },
+  relaxed: {
+    translation: 'leading-loose',
+    reading: 'leading-[2.4]',
+    readingArabic: 'leading-[2.8]',
+  },
+}
+
 export type ContentWidth = 'narrow' | 'medium' | 'wide' | 'full'
 
 /** Narrow → full. */

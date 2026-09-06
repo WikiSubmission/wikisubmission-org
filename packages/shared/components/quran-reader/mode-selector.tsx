@@ -1,8 +1,7 @@
 'use client'
 
 import { BookOpen, List, ScanText } from 'lucide-react'
-import { useEffect } from 'react'
-import { useQuranPreferences } from '@/hooks/use-quran-preferences'
+import { useQuranDisplayMode, type QuranModeId } from '@/hooks/use-quran-display-mode'
 import { cn } from '@/lib/utils'
 import {
   Tooltip,
@@ -11,7 +10,7 @@ import {
 } from '@/components/ui/tooltip'
 import { useTranslations } from 'next-intl'
 
-export type QuranModeId = 'verse' | 'word' | 'reading'
+export type { QuranModeId }
 
 type ModeId = QuranModeId
 
@@ -30,15 +29,19 @@ export interface QuranModeSelectorProps {
 
 /**
  * Segmented verse / word / reading display-mode toggle, shared by the web
- * reader header and the mobile chapter toolbar. The two underlying preferences
- * (displayMode + wordByWord) are folded into one three-state control.
+ * reader header and the mobile chapter toolbar. The mode rules themselves live
+ * in `useQuranDisplayMode`, which the settings panel's mode row shares.
  */
 export function QuranModeSelector({
   readingBlocked = false,
   onWordModeIntercept,
   onModeChanged,
 }: QuranModeSelectorProps) {
-  const prefs = useQuranPreferences()
+  const { activeMode, setMode } = useQuranDisplayMode({
+    readingBlocked,
+    onWordModeIntercept,
+    onModeChanged,
+  })
   const t = useTranslations('quran')
 
   const MODES: { id: ModeId; label: string; icon: React.ReactNode }[] = [
@@ -46,35 +49,6 @@ export function QuranModeSelector({
     { id: 'word', label: t('modeWord'), icon: <ScanText className="size-4" /> },
     { id: 'reading', label: t('modeReading'), icon: <BookOpen className="size-4" /> },
   ]
-
-  const activeMode: ModeId =
-    prefs.displayMode === 'reading'
-      ? 'reading'
-      : prefs.wordByWord
-        ? 'word'
-        : 'verse'
-
-  useEffect(() => {
-    if (!readingBlocked) return
-    if (prefs.displayMode !== 'reading') return
-    prefs.patchPreferences({ displayMode: 'verse' })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [readingBlocked, prefs.displayMode])
-
-  const handleModeChange = async (mode: ModeId) => {
-    if (mode === activeMode) return
-    if (mode === 'reading' && readingBlocked) return
-    if (mode === 'reading') {
-      prefs.patchPreferences({ displayMode: 'reading' })
-    } else if (mode === 'word') {
-      if (onWordModeIntercept && (await onWordModeIntercept()) === false) return
-      // Word-by-word is meaningless without the Arabic it annotates.
-      prefs.patchPreferences({ displayMode: 'verse', wordByWord: true, arabic: true })
-    } else {
-      prefs.patchPreferences({ displayMode: 'verse', wordByWord: false })
-    }
-    onModeChanged?.(mode)
-  }
 
   return (
     <Tooltip>
@@ -93,7 +67,7 @@ export function QuranModeSelector({
               <Tooltip key={mode.id}>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => void handleModeChange(mode.id)}
+                    onClick={() => void setMode(mode.id)}
                     disabled={modeDisabled}
                     aria-label={mode.label}
                     className={cn(
@@ -114,7 +88,7 @@ export function QuranModeSelector({
                 )}
                 {modeDisabled && (
                   <TooltipContent side="bottom">
-                    <p>Reading mode is disabled for search and verse references</p>
+                    <p>{t('modeReadingBlocked')}</p>
                   </TooltipContent>
                 )}
               </Tooltip>

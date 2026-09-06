@@ -111,7 +111,8 @@
     "studyStatsDesc": "Deine Strähne, dein Tempo und dein Fortschritt",
     "studyEmptyBookmarks": "Noch keine Lesezeichen. Speichere einen Vers aus einer beliebigen Sure.",
     "studyEmptyNotes": "Noch keine Notizen. Schreibe eine an einem beliebigen Vers.",
-    "studyEmptyStats": "Noch keine Lesungen erfasst. Öffne eine Sure, um zu beginnen."
+    "studyEmptyStats": "Noch keine Lesungen erfasst. Öffne eine Sure, um zu beginnen.",
+    "modeReadingBlocked": "Der Lesemodus ist für Suche und Versverweise nicht verfügbar"
   },
   "quranIndex": {
     "title": "Sachregister",
@@ -202,7 +203,18 @@
     "decreaseTextSize": "Text verkleinern",
     "increaseTextSize": "Text vergrößern",
     "translation": "Übersetzung",
-    "secondTranslation": "Zweite"
+    "secondTranslation": "Zweite",
+    "mode": "Modus",
+    "arabicDescription": "Ursprünglicher arabischer Text",
+    "transliterationDescription": "Lateinische Schrift unter jedem Wort",
+    "subtitlesDescription": "Abschnittstitel über den Versen",
+    "footnotesDescription": "Anmerkungen des Übersetzers unten",
+    "verseNumbers": "Versnummern",
+    "verseNumbersDescription": "Hochgestellte Nummern im Text",
+    "lineSpacing": "Zeilenabstand",
+    "spacingTight": "Eng",
+    "spacingNormal": "Normal",
+    "spacingRelaxed": "Weit"
   },
   "ramadan": {
     "heading": "Ramadan",

@@ -5,9 +5,12 @@ import {
   CONTENT_WIDTHS,
   DEFAULT_CONTENT_WIDTH,
   DEFAULT_FONT_SIZE,
+  DEFAULT_LINE_SPACING,
   FONT_SIZES,
+  LINE_SPACINGS,
   type ContentWidth,
   type FontSize,
+  type LineSpacing,
 } from '@/lib/quran-typography'
 
 /**
@@ -86,6 +89,7 @@ export type QuranPreferences = {
   secondaryLanguage?: LangCode
   fontSize: FontSize
   contentWidth: ContentWidth
+  lineSpacing: LineSpacing
   wordLabSections: WordLabSections
   wordTapAction: WordTapAction
   setPreferences: (preferences: QuranPreferences) => void
@@ -158,6 +162,9 @@ export function sanitiseRemotePreferences(remote: unknown): Partial<QuranPrefere
   if (CONTENT_WIDTHS.includes(src.contentWidth as ContentWidth)) {
     out.contentWidth = src.contentWidth
   }
+  if (LINE_SPACINGS.includes(src.lineSpacing as LineSpacing)) {
+    out.lineSpacing = src.lineSpacing
+  }
   // A record last written by a pre-split client carries `zoomLevel` instead.
   // Without this a reader signing in on a new device would silently land on the
   // defaults rather than the sizes they chose. Anything already sent explicitly
@@ -215,6 +222,7 @@ export const DEFAULT_READING_PREFERENCES = {
   readingModeLang: 'translation' as ReadingModeLang,
   fontSize: DEFAULT_FONT_SIZE,
   contentWidth: DEFAULT_CONTENT_WIDTH,
+  lineSpacing: DEFAULT_LINE_SPACING,
   wordTapAction: 'play' as WordTapAction,
 } satisfies Partial<QuranPreferences>
 

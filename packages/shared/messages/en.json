@@ -144,7 +144,8 @@
     "studyStatsDesc": "Your streak, pace and coverage",
     "studyEmptyBookmarks": "No bookmarks yet. Save a verse from any chapter.",
     "studyEmptyNotes": "No notes yet. Write one from any verse.",
-    "studyEmptyStats": "No readings logged yet. Open a chapter to start."
+    "studyEmptyStats": "No readings logged yet. Open a chapter to start.",
+    "modeReadingBlocked": "Reading mode is unavailable for search and verse references"
   },
   "quranIndex": {
     "title": "Topical Index",
@@ -245,7 +246,18 @@
     "decreaseTextSize": "Decrease text size",
     "increaseTextSize": "Increase text size",
     "translation": "Translation",
-    "secondTranslation": "Second"
+    "secondTranslation": "Second",
+    "mode": "Mode",
+    "arabicDescription": "Original Arabic text",
+    "transliterationDescription": "Latin script under each word",
+    "subtitlesDescription": "Section titles above verses",
+    "footnotesDescription": "Translator notes at the bottom",
+    "verseNumbers": "Verse numbers",
+    "verseNumbersDescription": "Inline superscript numbers",
+    "lineSpacing": "Line spacing",
+    "spacingTight": "Tight",
+    "spacingNormal": "Normal",
+    "spacingRelaxed": "Relaxed"
   },
   "ramadan": {
     "heading": "Ramadan",

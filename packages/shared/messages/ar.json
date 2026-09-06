@@ -111,7 +111,8 @@
     "studyStatsDesc": "سلسلتك ووتيرتك وما أنجزته",
     "studyEmptyBookmarks": "لا علامات بعد. احفظ آية من أي سورة.",
     "studyEmptyNotes": "لا ملاحقات بعد. اكتب واحدة من أي آية.",
-    "studyEmptyStats": "لم تُسجَل قراءات بعد. افتح سورة لتبدأ."
+    "studyEmptyStats": "لم تُسجَل قراءات بعد. افتح سورة لتبدأ.",
+    "modeReadingBlocked": "وضع القراءة غير متاح للبحث ومراجع الآيات"
   },
   "quranIndex": {
     "title": "الفهرس الموضوعي",
@@ -202,7 +203,18 @@
     "decreaseTextSize": "تصغير النص",
     "increaseTextSize": "تكبير النص",
     "translation": "الترجمة",
-    "secondTranslation": "الثانية"
+    "secondTranslation": "الثانية",
+    "mode": "الوضع",
+    "arabicDescription": "النص العربي الأصلي",
+    "transliterationDescription": "الحروف اللاتينية تحت كل كلمة",
+    "subtitlesDescription": "عناوين الأقسام فوق الآيات",
+    "footnotesDescription": "ملاحظات المترجم في الأسفل",
+    "verseNumbers": "أرقام الآيات",
+    "verseNumbersDescription": "أرقام مرتفعة داخل النص",
+    "lineSpacing": "تباعد الأسطر",
+    "spacingTight": "ضيق",
+    "spacingNormal": "عادي",
+    "spacingRelaxed": "واسع"
   },
   "ramadan": {
     "heading": "رمضان",

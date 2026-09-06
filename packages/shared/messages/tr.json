@@ -111,7 +111,8 @@
     "studyStatsDesc": "Seriniz, hızınız ve ilerlemeniz",
     "studyEmptyBookmarks": "Henüz yer imi yok. Herhangi bir sureden bir ayet kaydedin.",
     "studyEmptyNotes": "Henüz not yok. Herhangi bir ayetten bir not yazın.",
-    "studyEmptyStats": "Henüz okuma kaydı yok. Başlamak için bir sure açın."
+    "studyEmptyStats": "Henüz okuma kaydı yok. Başlamak için bir sure açın.",
+    "modeReadingBlocked": "Okuma modu arama ve ayet referansları için kullanılamaz"
   },
   "quranIndex": {
     "title": "Konu dizini",
@@ -202,7 +203,18 @@
     "decreaseTextSize": "Yazıyı küçült",
     "increaseTextSize": "Yazıyı büyüt",
     "translation": "Çeviri",
-    "secondTranslation": "İkinci"
+    "secondTranslation": "İkinci",
+    "mode": "Mod",
+    "arabicDescription": "Orijinal Arapça metin",
+    "transliterationDescription": "Her kelimenin altında Latin harfleri",
+    "subtitlesDescription": "Ayetlerin üstünde bölüm başlıkları",
+    "footnotesDescription": "Altta çevirmen notları",
+    "verseNumbers": "Ayet numaraları",
+    "verseNumbersDescription": "Metin içinde üst simge numaralar",
+    "lineSpacing": "Satır aralığı",
+    "spacingTight": "Dar",
+    "spacingNormal": "Normal",
+    "spacingRelaxed": "Geniş"
   },
   "ramadan": {
     "heading": "Ramazan",

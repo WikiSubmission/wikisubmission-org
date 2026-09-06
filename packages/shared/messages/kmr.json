@@ -86,7 +86,8 @@
     "studyStatsDesc": "Rêsa te, leza te û pêşketina te",
     "studyEmptyBookmarks": "Hîn bijare tune. Ji her sûretekê ayetekê tomar bike.",
     "studyEmptyNotes": "Hîn tîbînî tune. Ji her ayetekê yekê binivîse.",
-    "studyEmptyStats": "Hîn xwendin nehatiye tomarkirin. Sûretekê veke ku dest pê bikî."
+    "studyEmptyStats": "Hîn xwendin nehatiye tomarkirin. Sûretekê veke ku dest pê bikî.",
+    "modeReadingBlocked": "Moda xwendinê ji bo lêgerîn û referansên ayetan tune ye"
   },
   "quranIndex": {
     "title": "Pêrista babetan",
@@ -177,7 +178,18 @@
     "decreaseTextSize": "Nivîsê biçûk bike",
     "increaseTextSize": "Nivîsê mezin bike",
     "translation": "Werger",
-    "secondTranslation": "Ya duyem"
+    "secondTranslation": "Ya duyem",
+    "mode": "Mod",
+    "arabicDescription": "Nivîsa erebî ya orîjînal",
+    "transliterationDescription": "Tîpên latînî li bin her peyvê",
+    "subtitlesDescription": "Sernavên beşan li ser ayetan",
+    "footnotesDescription": "Notên wergêr li jêr",
+    "verseNumbers": "Hejmarên ayetan",
+    "verseNumbersDescription": "Hejmarên biçûk di nav nivîsê de",
+    "lineSpacing": "Valahiya rêzan",
+    "spacingTight": "Teng",
+    "spacingNormal": "Normal",
+    "spacingRelaxed": "Fireh"
   },
   "ramadan": {
     "utcValue": "UTC: {value}"

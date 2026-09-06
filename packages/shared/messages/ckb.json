@@ -111,7 +111,8 @@
     "studyStatsDesc": "زنجیرە و خێرایی و بەرەوپێشچوونت",
     "studyEmptyBookmarks": "هێشتا نیشانە نییە. لە هەر سوورەتێک ئایەتێک پاشەکەوت بکە.",
     "studyEmptyNotes": "هێشتا تێبینی نییە. لە هەر ئایەتێک یەکێک بنووسە.",
-    "studyEmptyStats": "هێشتا خوێندنەوە تۆمار نەکراوە. سوورەتێک بکەوە بۆ دەستپێکردن."
+    "studyEmptyStats": "هێشتا خوێندنەوە تۆمار نەکراوە. سوورەتێک بکەوە بۆ دەستپێکردن.",
+    "modeReadingBlocked": "دۆخی خوێندنەوە بۆ گەڕان و ئاماژەی ئایەت بەردەست نییە"
   },
   "quranIndex": {
     "title": "پێرستی بابەتەکان",
@@ -202,7 +203,18 @@
     "decreaseTextSize": "بچووککردنەوەی دەق",
     "increaseTextSize": "گەورەکردنی دەق",
     "translation": "وەرگێڕان",
-    "secondTranslation": "دووەم"
+    "secondTranslation": "دووەم",
+    "mode": "دۆخ",
+    "arabicDescription": "دەقی عەرەبی ڕەسەن",
+    "transliterationDescription": "پیتی لاتینی لەژێر هەر وشەیەک",
+    "subtitlesDescription": "ناونیشانی بەش لەسەرەوەی ئایەتەکان",
+    "footnotesDescription": "تێبینی وەرگێڕ لە خوارەوە",
+    "verseNumbers": "ژمارەی ئایەتەکان",
+    "verseNumbersDescription": "ژمارەی بچووک لەناو دەقدا",
+    "lineSpacing": "بۆشایی نێوان دێڕەکان",
+    "spacingTight": "تەسک",
+    "spacingNormal": "ئاسایی",
+    "spacingRelaxed": "فراوان"
   },
   "ramadan": {
     "heading": "ڕەمەزان",

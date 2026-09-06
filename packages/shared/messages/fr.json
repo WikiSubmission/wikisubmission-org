@@ -111,7 +111,8 @@
     "studyStatsDesc": "Votre série, votre rythme et votre progression",
     "studyEmptyBookmarks": "Aucun favori pour l’instant. Enregistrez un verset depuis n’importe quelle sourate.",
     "studyEmptyNotes": "Aucune note pour l’instant. Écrivez-en une depuis n’importe quel verset.",
-    "studyEmptyStats": "Aucune lecture enregistrée pour l’instant. Ouvrez une sourate pour commencer."
+    "studyEmptyStats": "Aucune lecture enregistrée pour l’instant. Ouvrez une sourate pour commencer.",
+    "modeReadingBlocked": "Le mode lecture n'est pas disponible pour la recherche et les références de versets"
   },
   "quranIndex": {
     "title": "Index thématique",
@@ -202,7 +203,18 @@
     "decreaseTextSize": "Réduire le texte",
     "increaseTextSize": "Agrandir le texte",
     "translation": "Traduction",
-    "secondTranslation": "Seconde"
+    "secondTranslation": "Seconde",
+    "mode": "Mode",
+    "arabicDescription": "Texte arabe original",
+    "transliterationDescription": "Écriture latine sous chaque mot",
+    "subtitlesDescription": "Titres de section au-dessus des versets",
+    "footnotesDescription": "Notes du traducteur en bas",
+    "verseNumbers": "Numéros de versets",
+    "verseNumbersDescription": "Numéros en exposant dans le texte",
+    "lineSpacing": "Interligne",
+    "spacingTight": "Serré",
+    "spacingNormal": "Normal",
+    "spacingRelaxed": "Large"
   },
   "ramadan": {
     "heading": "Ramadan",
