@@ -84,4 +84,5 @@ export type RelatedBlogPost = {
   publishedAt?: string
   category?: string
   thumbnailUrl?: string
+  authorName?: string
 }

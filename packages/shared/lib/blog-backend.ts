@@ -97,6 +97,7 @@ function toRelated(dto: PublicArticleDTO): RelatedBlogPost {
     publishedAt: dto.published_at ?? undefined,
     category: orEmpty(dto.category),
     thumbnailUrl: orEmpty(dto.thumbnail_url),
+    authorName: orEmpty(dto.author_name),
   }
 }
 

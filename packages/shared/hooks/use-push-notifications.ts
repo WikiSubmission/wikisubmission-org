@@ -30,12 +30,22 @@ interface UsePushNotifications {
  * never on mount — auto-prompting is poor UX and hurts opt-in rates.
  */
 export function usePushNotifications(): UsePushNotifications {
-  const [supported] = useState(() => isPushSupported())
-  const [permission, setPermission] = useState<PushPermission>(() =>
-    isPushSupported() ? (Notification.permission as PushPermission) : 'unsupported',
-  )
+  // Start in the SSR-safe "unsupported" state — browser support and
+  // Notification.permission are only knowable client-side. Reading them in
+  // the useState initializer caused a hydration mismatch: the initializer
+  // runs during render, so the server always computed "unsupported" while
+  // the client's first render already saw the real permission. Corrected in
+  // an effect after mount instead, once hydration is safely past.
+  const [supported, setSupported] = useState(false)
+  const [permission, setPermission] = useState<PushPermission>('unsupported')
   const [subscribed, setSubscribed] = useState(false)
   const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    const isSupported = isPushSupported()
+    setSupported(isSupported)
+    setPermission(isSupported ? (Notification.permission as PushPermission) : 'unsupported')
+  }, [])
 
   useEffect(() => {
     if (!supported) return

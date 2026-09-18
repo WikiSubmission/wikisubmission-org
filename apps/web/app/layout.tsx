@@ -10,6 +10,7 @@ import type { Viewport } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { auth } from '@/auth'
+import Script from 'next/script'
 import { ReactScanInit } from '@/components/react-scan-init'
 import {
   PaletteProvider,
@@ -33,10 +34,10 @@ export default async function RootLayout({
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
         {/* Runs before hydration so [data-palette] is on <html> for the first paint. */}
-        <script
+        <Script
           id="palette-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: PALETTE_INIT_SCRIPT }}
-          suppressHydrationWarning
         />
       </head>
       <body

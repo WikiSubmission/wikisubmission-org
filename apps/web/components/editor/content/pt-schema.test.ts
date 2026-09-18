@@ -72,7 +72,7 @@ describe('hasUnsupportedBlocks', () => {
       { _type: 'richTableBlock', rows: [] },
     ]
     expect(hasUnsupportedBlocks(value)).toBe(false)
-    expect(KNOWN_BLOCK_TYPES).toEqual(['block', 'callout', 'image', 'richTableBlock'])
+    expect(KNOWN_BLOCK_TYPES).toEqual(['block', 'callout', 'image', 'richTableBlock', 'verse'])
   })
 
   // A migrated table must not lock the document; that was the whole point.

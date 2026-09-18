@@ -319,6 +319,73 @@ html[data-palette='mono'].dark {
   --sidebar-ring: #f1f1ec;
 }
 
+/* ─── Palette: Sinai Terracotta (Desert Scribe & Qumran Sandstone) ─── */
+html[data-palette='terracotta'] {
+  --background: #f7f3ee;
+  --foreground: #1a1310;
+  --card: #fcfaf6;
+  --card-foreground: #1a1310;
+  --popover: #fcfaf6;
+  --popover-foreground: #1a1310;
+  --primary: #7e3725;
+  --primary-foreground: #f7f3ee;
+  --primary-container: #a34832;
+  --secondary: #efe8df;
+  --secondary-foreground: #1a1310;
+  --muted: #efe8df;
+  --muted-foreground: #6f5e56;
+  --accent: #e5d5c6;
+  --accent-foreground: #1a1310;
+  --border: #ddd3c6;
+  --input: #ddd3c6;
+  --ring: #7e3725;
+  --surface-container: #efe8df;
+  --surface-container-low: #f7f3ee;
+  --surface-container-high: #ddd3c6;
+  --on-surface-variant: #6f5e56;
+  --sidebar: #fcfaf6;
+  --sidebar-foreground: #1a1310;
+  --sidebar-primary: #7e3725;
+  --sidebar-primary-foreground: #f7f3ee;
+  --sidebar-accent: #e5d5c6;
+  --sidebar-accent-foreground: #1a1310;
+  --sidebar-border: #ddd3c6;
+  --sidebar-ring: #7e3725;
+}
+
+html[data-palette='terracotta'].dark {
+  --background: #130d0a;
+  --foreground: #efe4dc;
+  --card: #1b1310;
+  --card-foreground: #efe4dc;
+  --popover: #1b1310;
+  --popover-foreground: #efe4dc;
+  --primary: #ca7860;
+  --primary-foreground: #130d0a;
+  --primary-container: #a55a44;
+  --secondary: #0c0806;
+  --secondary-foreground: #efe4dc;
+  --muted: #0c0806;
+  --muted-foreground: #8f7b71;
+  --accent: #35231c;
+  --accent-foreground: #efe4dc;
+  --border: #291c17;
+  --input: #291c17;
+  --ring: #ca7860;
+  --surface-container: #1b1310;
+  --surface-container-low: #130d0a;
+  --surface-container-high: #291c17;
+  --on-surface-variant: #8f7b71;
+  --sidebar: #1b1310;
+  --sidebar-foreground: #efe4dc;
+  --sidebar-primary: #ca7860;
+  --sidebar-primary-foreground: #130d0a;
+  --sidebar-accent: #35231c;
+  --sidebar-accent-foreground: #efe4dc;
+  --sidebar-border: #291c17;
+  --sidebar-ring: #ca7860;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -470,6 +537,55 @@ html[data-palette='mono'].dark {
 
   .ed-btn-ghost-inv:hover {
     border-color: var(--ed-invert-fg);
+  }
+
+  /* ─── Design Engineering: Tactile Click Physics & Micro-Sheen ─── */
+  .btn-tap {
+    transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 150ms ease,
+                border-color 150ms ease !important;
+  }
+
+  .btn-tap:active {
+    transform: scale(0.975) !important;
+  }
+
+  .sheen-hover {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sheen-hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -130%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(
+      105deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 65%
+    );
+    pointer-events: none;
+    transition: left 650ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sheen-hover:hover::before {
+    left: 140%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-tap,
+    .btn-tap:active {
+      transform: none !important;
+      transition: none !important;
+    }
+    .sheen-hover::before {
+      display: none !important;
+    }
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -1069,6 +1185,11 @@ html[data-palette='mono'].dark {
   border-bottom: 1px solid var(--ed-rule);
   margin-top: 32px;
 }
+/* Fewer tiles (hideBible/hideStudy) must narrow the tracks to match, or the
+   row only fills part of its width and leaves the rest visibly empty. */
+.stats.cols-1 { grid-template-columns: 1fr; }
+.stats.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.stats.cols-3 { grid-template-columns: repeat(3, 1fr); }
 .stats > a, .stats > div {
   padding: 24px 24px 22px;
   border-right: 1px solid var(--ed-rule);
@@ -1296,6 +1417,48 @@ html[data-palette='mono'].dark {
 }
 .c2c-continue:hover { gap: 14px; }
 
+/* ── Reading register ──────────────────────────────────────────────────── */
+/* One register listing every scripture as a row (progress, rhythm, streak,
+   continue) instead of one card per scripture — Quran and Bible read as two
+   entries in a shared ledger, not two parallel feature cards. Reuses
+   .c2c-head/.c2c-progress/.c2c-foot above; a row is that same content stacked
+   full-width instead of boxed into a grid cell. */
+.reading-register {
+  border-top: 1px solid var(--ed-rule);
+}
+.reading-row {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--ed-rule);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.reading-row-rhythm {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.reading-sparkline {
+  flex: 1;
+  min-width: 0;
+  max-width: 260px;
+  height: 28px;
+}
+.reading-sparkline-empty {
+  font-family: var(--font-source-serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ed-fg-muted);
+}
+.reading-row-verses {
+  flex: 0 0 auto;
+  font-family: var(--font-jetbrains);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ed-fg-muted);
+  white-space: nowrap;
+}
+
 /* ── Bookmark categories grid ──────────────────────────────────────────── */
 .cat-grid {
   display: grid;
@@ -1499,18 +1662,27 @@ html[data-palette='mono'].dark {
   background: var(--ed-bg);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 64px 40px;
+  padding: 64px 24px;
+}
+/* The bordered frame gives the screen a definite object to look at instead of
+   a stack of text floating on the page background. */
+.auth-frame {
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid var(--ed-rule);
+  border-radius: 3px;
+  background: var(--ed-surface);
+  padding: 36px 32px 30px;
 }
 .auth-card {
   width: 100%;
-  max-width: 380px;
   display: flex; flex-direction: column;
-  gap: 28px;
+  gap: 26px;
 }
 .auth-mast {
   text-align: center;
   display: flex; flex-direction: column; align-items: center; gap: 14px;
-  padding-bottom: 28px;
+  padding-bottom: 26px;
   border-bottom: 1px solid var(--ed-rule);
 }
 .auth-mast img { width: 36px; height: 36px; }
@@ -1621,6 +1793,21 @@ html[data-palette='mono'].dark {
   font-style: italic;
 }
 .auth-foot a { color: var(--ed-fg); border-bottom: 1px solid var(--ed-rule); padding-bottom: 1px; }
+
+/* Colophon: a quiet reminder of what the account unlocks, styled like the
+   module tiles in the editor workspace so the sign-in screen already reads
+   as part of that world rather than a generic account gate. */
+.auth-colophon {
+  margin-top: 22px;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+}
+.auth-colophon span {
+  font-family: var(--font-glacial);
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ed-fg-muted);
+  border: 1px solid var(--ed-rule); border-radius: 999px;
+  padding: 3px 10px;
+}
 
 /* ── OTP cells ─────────────────────────────────────────────────────────── */
 .otp-row {

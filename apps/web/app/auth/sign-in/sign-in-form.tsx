@@ -53,100 +53,111 @@ export function SignInForm() {
 
   return (
     <main className="auth-shell">
-      <div className="auth-card">
-        <div className="auth-mast">
-          <Link href="/" aria-label="WikiSubmission home">
-            <Image
-              src="/brand-assets/logo-transparent.png"
-              alt="WikiSubmission"
-              width={36}
-              height={36}
-              priority
-            />
-          </Link>
-          <span className="auth-eyebrow">Sign in</span>
-          <h1>
-            Welcome <em>back</em>
-          </h1>
-          <p>
-            Sign in to your WikiSubmission account to continue.
-          </p>
-        </div>
-
-        <form onSubmit={handleEmail} className="flex flex-col gap-3">
-          <label className="auth-eyebrow" htmlFor="auth-email">
-            Email
-          </label>
-          <input
-            id="auth-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            required
-            disabled={disabled}
-            autoComplete="email"
-            className="auth-input"
-          />
-          {error ? (
-            <p className="text-[var(--ed-accent)] text-[12px] font-[var(--font-source-serif)]">
-              {error}
+      <div className="auth-frame">
+        <div className="auth-card">
+          <div className="auth-mast">
+            <Link href="/" aria-label="WikiSubmission home">
+              <Image
+                src="/brand-assets/logo-transparent.png"
+                alt="WikiSubmission"
+                width={36}
+                height={36}
+                priority
+              />
+            </Link>
+            <span className="auth-eyebrow">Sign in</span>
+            <h1>
+              Welcome <em>back</em>
+            </h1>
+            <p>
+              Sign in to your WikiSubmission account to continue.
             </p>
-          ) : null}
-          <button type="submit" disabled={disabled || !email.trim()} className="auth-primary">
-            {loading === 'email' ? (
-              <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
-            ) : (
-              <Mail className="w-4 h-4" aria-hidden />
-            )}
-            Send sign-in code
-          </button>
-        </form>
+          </div>
 
-        <div className="auth-divider">or continue with</div>
-
-        <div className="auth-providers">
-          <button
-            type="button"
-            onClick={() => handleProvider('google')}
-            disabled={disabled}
-            className="auth-provider"
-          >
-            <span className="glyph">
-              {loading === 'google' ? (
+          <form onSubmit={handleEmail} className="flex flex-col gap-3">
+            <label className="auth-eyebrow" htmlFor="auth-email">
+              Email
+            </label>
+            <input
+              id="auth-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              disabled={disabled}
+              autoComplete="email"
+              className="auth-input"
+            />
+            {error ? (
+              <p className="text-[var(--ed-accent)] text-[12px] font-[var(--font-source-serif)]">
+                {error}
+              </p>
+            ) : null}
+            <button type="submit" disabled={disabled || !email.trim()} className="auth-primary">
+              {loading === 'email' ? (
                 <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
               ) : (
-                <FcGoogle className="w-4 h-4" aria-hidden />
+                <Mail className="w-4 h-4" aria-hidden />
               )}
-            </span>
-            Google
-            <span className="arrow">→</span>
-          </button>
+              Send sign-in code
+            </button>
+          </form>
 
-          {showAppleSso ? (
+          <div className="auth-divider">or continue with</div>
+
+          <div className="auth-providers">
             <button
               type="button"
-              onClick={() => handleProvider('apple')}
+              onClick={() => handleProvider('google')}
               disabled={disabled}
               className="auth-provider"
             >
               <span className="glyph">
-                {loading === 'apple' ? (
+                {loading === 'google' ? (
                   <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
                 ) : (
-                  <FaApple className="w-4 h-4" aria-hidden />
+                  <FcGoogle className="w-4 h-4" aria-hidden />
                 )}
               </span>
-              Apple
+              Google
               <span className="arrow">→</span>
             </button>
-          ) : null}
+
+            {showAppleSso ? (
+              <button
+                type="button"
+                onClick={() => handleProvider('apple')}
+                disabled={disabled}
+                className="auth-provider"
+              >
+                <span className="glyph">
+                  {loading === 'apple' ? (
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                  ) : (
+                    <FaApple className="w-4 h-4" aria-hidden />
+                  )}
+                </span>
+                Apple
+                <span className="arrow">→</span>
+              </button>
+            ) : null}
+          </div>
+
+          <p className="auth-foot">
+            We will never email you anything other than what you ask for.{' '}
+            <Link href="/legal/privacy-policy">Read the privacy note</Link>.
+          </p>
         </div>
 
-        <p className="auth-foot">
-          We will never email you anything other than what you ask for.{' '}
-          <Link href="/legal/privacy-policy">Read the privacy note</Link>.
-        </p>
+        <div className="auth-colophon">
+          <span>Quran</span>
+          <span>Bible</span>
+          <span>Articles</span>
+          <span>Communities</span>
+          <span>Authors</span>
+          <span>Appendices</span>
+        </div>
       </div>
     </main>
   )

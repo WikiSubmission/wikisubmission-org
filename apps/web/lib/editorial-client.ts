@@ -86,13 +86,21 @@ export async function getViewerUserId(
 export async function getEditorialSession(
   token: string | undefined
 ): Promise<EditorialSession | null> {
-  if (!API_BASE || !token) return null
+  if (!API_BASE || !token) {
+    return null
+  }
   try {
     const { data, error, response } =
       await authedClient(token).GET('/editorial/session')
-    if (error || !response.ok || !data?.data) return null
+    if (error || !response.ok || !data?.data) {
+      if (response?.status !== 401 && response?.status !== 403) {
+        console.error('[getEditorialSession] status:', response?.status, response?.statusText, 'error:', error)
+      }
+      return null
+    }
     return data.data
-  } catch {
+  } catch (err) {
+    console.error('[getEditorialSession] exception:', err)
     return null
   }
 }

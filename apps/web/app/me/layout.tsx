@@ -3,7 +3,9 @@ import { redirect } from 'next/navigation'
 import { QueryClient, dehydrate, HydrationBoundary } from '@tanstack/react-query'
 import { auth } from '@/auth'
 import { meApiServer } from '@/src/api/me-server-client'
+import { SiteNav } from '@/components/site-nav'
 import { MeHeader } from '@/components/me/me-header'
+import './me.css'
 
 export default async function MeLayout({ children }: { children: ReactNode }) {
   const session = await auth()
@@ -27,9 +29,12 @@ export default async function MeLayout({ children }: { children: ReactNode }) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="ed-page">
+      <div className="ws-account-root flex flex-col min-h-screen bg-[var(--ed-bg)] text-[var(--ed-fg)] w-full">
+        <SiteNav />
         <MeHeader />
-        {children}
+        <div className="flex-1 w-full">
+          {children}
+        </div>
       </div>
     </HydrationBoundary>
   )

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { VerifyForm } from './verify-form'
 
 export const metadata: Metadata = {
@@ -6,5 +7,9 @@ export const metadata: Metadata = {
 }
 
 export default function VerifyPage() {
-  return <VerifyForm />
+  return (
+    <Suspense>
+      <VerifyForm />
+    </Suspense>
+  )
 }

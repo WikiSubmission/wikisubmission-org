@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react'
 
-export type PaletteKey = 'ink' | 'violet' | 'mono'
+export type PaletteKey = 'ink' | 'violet' | 'mono' | 'terracotta'
 
 export const PALETTE_STORAGE_KEY = 'ws-palette'
 export const DEFAULT_PALETTE: PaletteKey = 'ink'
@@ -36,6 +36,11 @@ export const PALETTES: Record<
     light: { bg: '#f4f4f2', fg: '#0e0e0d', accent: '#0e0e0d', rule: '#d8d8d4' },
     dark: { bg: '#0a0a09', fg: '#f1f1ec', accent: '#f1f1ec', rule: '#23231f' },
   },
+  terracotta: {
+    label: 'Sinai Terracotta',
+    light: { bg: '#f7f3ee', fg: '#1a1310', accent: '#7e3725', rule: '#ddd3c6' },
+    dark: { bg: '#130d0a', fg: '#efe4dc', accent: '#ca7860', rule: '#291c17' },
+  },
 }
 
 interface PaletteContextValue {
@@ -46,7 +51,12 @@ interface PaletteContextValue {
 const PaletteContext = createContext<PaletteContextValue | null>(null)
 
 function isPaletteKey(value: string | null): value is PaletteKey {
-  return value === 'ink' || value === 'violet' || value === 'mono'
+  return (
+    value === 'ink' ||
+    value === 'violet' ||
+    value === 'mono' ||
+    value === 'terracotta'
+  )
 }
 
 function readStoredPalette(): PaletteKey {
@@ -63,10 +73,15 @@ export function PaletteProvider({ children }: { children: React.ReactNode }) {
   const [palette, setPaletteState] = useState<PaletteKey>(DEFAULT_PALETTE)
 
   useEffect(() => {
+    let active = true
     const stored = readStoredPalette()
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPaletteState(stored)
-    document.documentElement.dataset.palette = stored
+    if (active) {
+      setPaletteState(stored)
+      document.documentElement.dataset.palette = stored
+    }
+    return () => {
+      active = false
+    }
   }, [])
 
   const setPalette = useCallback((next: PaletteKey) => {
@@ -94,4 +109,4 @@ export function usePalette(): PaletteContextValue {
   return ctx
 }
 
-export const PALETTE_INIT_SCRIPT = `(function(){try{var k='${PALETTE_STORAGE_KEY}';var v=localStorage.getItem(k);if(v==='ink'||v==='violet'||v==='mono'){document.documentElement.setAttribute('data-palette',v);}else{document.documentElement.setAttribute('data-palette','${DEFAULT_PALETTE}');}}catch(e){document.documentElement.setAttribute('data-palette','${DEFAULT_PALETTE}');}})();`
+export const PALETTE_INIT_SCRIPT = `(function(){try{var k='${PALETTE_STORAGE_KEY}';var v=localStorage.getItem(k);if(v==='ink'||v==='violet'||v==='mono'||v==='terracotta'){document.documentElement.setAttribute('data-palette',v);}else{document.documentElement.setAttribute('data-palette','${DEFAULT_PALETTE}');}}catch(e){document.documentElement.setAttribute('data-palette','${DEFAULT_PALETTE}');}})();`

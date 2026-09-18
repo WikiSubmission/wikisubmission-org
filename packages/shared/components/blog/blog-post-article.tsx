@@ -1,13 +1,20 @@
+'use client'
+
+import React, { Children, useMemo, type ReactNode } from 'react'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextBlock } from '@portabletext/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeftIcon } from 'lucide-react'
-import { Children, type ReactNode } from 'react'
 import { ScriptureText } from '@/components/scripture-text'
 import { sanitizeUrl } from '@/lib/safe-url'
 import type { BlogPost, RelatedBlogPost } from '@/lib/blog-queries'
 import { BlogReadingProgressBar } from './blog-reading-progress-bar'
+import { EditorialHeader } from './editorial-header'
+import { EditorialToc, type ArticleHeading } from './editorial-toc'
+import { EditorialAside } from './editorial-aside'
+import { EditorialReader } from './editorial-reader'
+import { EditorialRightRuler } from './editorial-right-ruler'
 
 function formatDate(dateString?: string) {
   if (!dateString) return ''
@@ -18,222 +25,305 @@ function formatDate(dateString?: string) {
   })
 }
 
-function readingTime(body?: PortableTextBlock[]): string {
-  if (!body) return ''
+function countWords(body?: PortableTextBlock[]): number {
+  if (!body) return 0
   const text = body
     .flatMap((block) => (block as { children?: { text?: string }[] }).children ?? [])
     .map((child) => child.text ?? '')
     .join(' ')
-  const words = text.trim().split(/\s+/).filter(Boolean).length
-  const minutes = Math.max(1, Math.round(words / 200))
-  return `${minutes} min read`
+  return text.trim().split(/\s+/).filter(Boolean).length
+}
+
+function calculateReadingMinutes(words: number): number {
+  return Math.max(1, Math.round(words / 200))
+}
+
+function getPlainText(children: ReactNode): string {
+  if (typeof children === 'string') return children
+  if (typeof children === 'number') return children.toString()
+  if (Array.isArray(children)) return children.map(getPlainText).join('')
+  if (children && typeof children === 'object' && 'props' in children) {
+    return getPlainText((children as { props: { children?: ReactNode } }).props.children)
+  }
+  return ''
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function extractHeadings(body?: PortableTextBlock[]): ArticleHeading[] {
+  if (!body) return []
+  const headings: ArticleHeading[] = []
+
+  for (const block of body) {
+    const style = (block as { style?: string }).style
+    if (style === 'h1' || style === 'h2' || style === 'h3' || style === 'h4') {
+      const level = style === 'h1' ? 1 : style === 'h2' ? 2 : style === 'h3' ? 3 : 4
+      const children = (block as { children?: { text?: string }[] }).children ?? []
+      const text = children.map((c) => c.text ?? '').join('').trim()
+      if (text) {
+        headings.push({
+          id: slugify(text),
+          text,
+          level,
+        })
+      }
+    }
+  }
+
+  return headings
 }
 
 /**
- * Article detail view. Shared verbatim between the web blog route and the
- * mobile More tab. Data (post + related) is fetched by the caller: the web app
- * fetches server-side, mobile fetches client-side via the shared Sanity CDN
- * client. The `hrefForRelated`/`backHref` props let each platform point links
- * at its own route shape.
+ * Editorial Article view modeled directly after Making Software (https://www.makingsoftware.com/chapters/how-a-screen-works):
+ * - Wide physical page sheet with tactile drop shadow
+ * - Left Rail: Back link, In-Article Table of Contents (TOC), Article Provenance certificate,
+ *   and Split Related Articles ("Other Articles From Same Author" & "Other Articles")
+ * - Center: Wide page-long reading sheet with generous book margins and top toolbar
+ * - Right Rail: Technical calibration ruler with 0.00 scroll tracking and ticks
  */
 export function BlogPostArticle({
   post,
   related = [],
+  authorArticles = [],
+  otherArticles = [],
+  allBlogs = [],
   backHref = '/blog',
   hrefForRelated = (slug: string) => `/blog/${slug}`,
 }: {
   post: BlogPost
   related?: RelatedBlogPost[]
+  authorArticles?: RelatedBlogPost[]
+  otherArticles?: RelatedBlogPost[]
+  allBlogs?: RelatedBlogPost[]
   backHref?: string
   hrefForRelated?: (slug: string) => string
 }) {
   const title = post.title?.trim() || 'Untitled article'
   const publishedRelated = related.filter((relatedPost) => relatedPost.slug?.current)
   const scriptureRefsEnabled = post.enableScriptureRefs ?? true
-  const portableTextComponents = buildPortableTextComponents(scriptureRefsEnabled)
+  const portableTextComponents = useMemo(
+    () => buildPortableTextComponents(scriptureRefsEnabled),
+    [scriptureRefsEnabled]
+  )
   const articleBodyId = 'blog-article-body'
 
+  const words = useMemo(() => countWords(post.body), [post.body])
+  const readingMinutes = useMemo(() => calculateReadingMinutes(words), [words])
+  const headings = useMemo(() => extractHeadings(post.body), [post.body])
+
+  // Fallback for split related articles
+  const finalAuthorArticles = authorArticles.length > 0 ? authorArticles : publishedRelated.slice(0, 3)
+  const finalOtherArticles = otherArticles.length > 0 ? otherArticles : (authorArticles.length > 0 ? publishedRelated.slice(0, 3) : [])
+
+  // Previous & next post for the top toolbar navigation
+  const prevPost = publishedRelated[0]
+  const nextPost = publishedRelated[1]
+
   return (
-    <div className="min-h-screen pb-32 md:pb-40">
+    <div className="relative min-h-screen bg-[#ECE4D5] dark:bg-[#0C0A09] text-[var(--ed-fg)] font-[family-name:var(--font-source-serif)] pb-28 antialiased selection:bg-[var(--ed-accent-soft)] selection:text-[var(--ed-fg)]">
       <BlogReadingProgressBar targetId={articleBodyId} />
 
-      {/* ── Top breadcrumb / back link ─────────────────────────────────── */}
-      <nav
-        aria-label="Article navigation"
-        className="px-6 md:px-12 max-w-[1200px] mx-auto pt-6 pb-2 text-[13px]"
-      >
-        <Link
-          href={backHref}
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeftIcon className="size-4 rtl-flip" />
-          <span>All articles</span>
-        </Link>
-      </nav>
+      <main id="main-content" className="mx-auto max-w-[1760px] px-3 py-6 sm:px-6 lg:px-8 lg:py-10">
+        <div className="grid grid-cols-1 gap-x-6 xl:gap-x-10 lg:grid-cols-[18.5rem_minmax(0,1fr)_3rem] xl:grid-cols-[20.5rem_minmax(0,1fr)_3.5rem]">
+          
+          {/* ── Left Sidebar: Back Link, TOC, Article Provenance, and Split Related Articles ── */}
+          <aside className="hidden lg:block lg:sticky lg:top-[84px] lg:mb-0 lg:max-h-[calc(100dvh-108px)] lg:self-start lg:overflow-y-auto lg:pb-8 pr-1 space-y-6">
+            <Link
+              href={backHref}
+              className="inline-flex items-center gap-1.5 font-[family-name:var(--font-glacial)] font-semibold text-[11px] uppercase tracking-[0.14em] text-[var(--ed-fg-muted)] hover:text-[var(--ed-accent)] transition-colors"
+            >
+              <ArrowLeftIcon className="size-3.5 rtl-flip" />
+              <span>All articles</span>
+            </Link>
 
-      {/* ── Title block (centered, magazine style) ──────────────────────── */}
-      <section className="px-6 md:px-12 pt-8 pb-10 max-w-[760px] mx-auto text-center">
-        {post.category && (
-          <span className="inline-block mb-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-            {post.category}
-          </span>
-        )}
+            {/* In-Article Table of Contents */}
+            <EditorialToc headings={headings} />
 
-        <h1 className="font-headline text-[clamp(36px,5vw,64px)] tracking-[-0.02em] leading-[1.08] mb-6">
-          {title}
-        </h1>
-
-        {post.excerpt && (
-          <p className="italic text-[20px] md:text-[22px] leading-[1.4] text-muted-foreground max-w-[50ch] mx-auto mb-9">
-            {post.excerpt}
-          </p>
-        )}
-
-        <dl className="flex flex-wrap justify-center gap-x-10 gap-y-5 text-left">
-          {post.authorName && (
-            <div className="flex flex-col gap-1.5">
-              <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
-                Author
-              </dt>
-              <dd className="flex items-center gap-2 text-[14px] text-foreground">
-                {post.authorPhotoUrl && (
-                  <Image
-                    src={post.authorPhotoUrl}
-                    alt=""
-                    aria-hidden
-                    width={20}
-                    height={20}
-                    className="rounded-full object-cover"
-                  />
-                )}
-                <span>{post.authorName}</span>
-              </dd>
-            </div>
-          )}
-          {post.publishedAt && (
-            <div className="flex flex-col gap-1.5">
-              <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
-                Published
-              </dt>
-              <dd className="text-[14px] text-foreground">
-                <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
-              </dd>
-            </div>
-          )}
-          {post.body && (
-            <div className="flex flex-col gap-1.5">
-              <dt className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
-                Read time
-              </dt>
-              <dd className="text-[14px] text-foreground">{readingTime(post.body)}</dd>
-            </div>
-          )}
-        </dl>
-      </section>
-
-      {/* ── Cover image ─────────────────────────────────────────────────── */}
-      {post.thumbnailUrl && (
-        <div className="max-w-[680px] mx-auto px-6 mb-12">
-          <div className="rounded-2xl overflow-hidden bg-muted">
-            <Image
-              src={post.thumbnailUrl}
-              alt={title}
-              width={1200}
-              height={675}
-              sizes="(max-width: 680px) 100vw, 680px"
-              className="w-full h-auto object-contain"
-              priority
+            {/* Article Provenance & Split Related Articles (Moved to Left Side) */}
+            <EditorialAside
+              publishedAt={post.publishedAt}
+              updatedAt={post.updatedAt}
+              readingMinutes={readingMinutes}
+              wordCount={words}
+              category={post.category}
+              authorName={post.authorName}
+              authorArticles={finalAuthorArticles}
+              otherArticles={finalOtherArticles}
             />
-          </div>
-        </div>
-      )}
+          </aside>
 
-      {/* ── Body ────────────────────────────────────────────────────────── */}
-      <article id={articleBodyId} className="max-w-[680px] mx-auto px-6">
-        {post.body?.length ? (
-          <PortableText value={post.body} components={portableTextComponents} />
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            This article does not have any body content yet.
-          </p>
-        )}
-      </article>
-
-      {/* ── Article footer (signature + share-back) ─────────────────────── */}
-      <div className="max-w-[680px] mx-auto px-6 mt-16 pt-8 border-t border-border/50">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <Link
-            href={backHref}
-            className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] font-semibold text-primary hover:text-primary/80 transition-colors self-start sm:self-auto"
-          >
-            <ArrowLeftIcon className="size-3.5 rtl-flip" /> All articles
-          </Link>
-          <div className="flex items-center gap-3">
-            {post.authorPhotoUrl && (
-              <Image
-                src={post.authorPhotoUrl}
-                alt={post.authorName ?? ''}
-                width={24}
-                height={24}
-                className="rounded-full object-cover shrink-0"
-              />
-            )}
-            <div className="text-[13px] leading-tight">
-              {post.authorName && (
-                <div className="font-semibold text-foreground">{post.authorName}</div>
-              )}
-              {post.publishedAt && (
-                <div className="text-muted-foreground/80">
-                  {formatDate(post.publishedAt)}
+          {/* ── Center: The Generous Wide Reading Sheet ─────────────────────────────── */}
+          <div className="min-w-0 w-full">
+            <EditorialReader
+              header={
+                <EditorialHeader
+                  title={title}
+                  excerpt={post.excerpt}
+                  category={post.category}
+                  authorName={post.authorName}
+                  wordCount={words}
+                  readingMinutes={readingMinutes}
+                />
+              }
+              title={title}
+              prevSlug={prevPost?.slug?.current}
+              nextSlug={nextPost?.slug?.current}
+              backHref={backHref}
+            >
+              {/* Cover image if available */}
+              {post.thumbnailUrl && (
+                <div className="mb-10 rounded-xl overflow-hidden border border-black/[0.08] dark:border-white/[0.08] bg-black/5 dark:bg-white/5 shadow-xs">
+                  <Image
+                    src={post.thumbnailUrl}
+                    alt={title}
+                    width={1200}
+                    height={675}
+                    sizes="(max-width: 1080px) 100vw, 1080px"
+                    className="w-full h-auto object-contain"
+                    priority
+                  />
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* ── Related ─────────────────────────────────────────────────────── */}
-      {publishedRelated.length > 0 && (
-        <section className="px-6 md:px-12 max-w-[1200px] mx-auto mt-20 pt-12 border-t border-border/50">
-          <div className="text-center mb-12 md:mb-14">
-            <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.18em] text-primary mb-3">
-              Continue reading
-            </span>
-            <h2 className="font-headline text-[clamp(28px,3.2vw,40px)] tracking-[-0.02em] leading-[1.1]">
-              More from the blog
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {publishedRelated.map((relatedPost) => (
-              <Link
-                key={relatedPost._id}
-                href={hrefForRelated(relatedPost.slug!.current!)}
-                className="group flex flex-col bg-card rounded-2xl border border-border/60 overflow-hidden transition-colors hover:border-border"
-              >
-                <div className="relative w-full aspect-[16/9] overflow-hidden bg-muted">
-                  {relatedPost.thumbnailUrl && (
+              {/* Article Body Content */}
+              <div id={articleBodyId} className="space-y-6 text-[var(--ed-fg)]">
+                {post.body?.length ? (
+                  <PortableText value={post.body} components={portableTextComponents} />
+                ) : (
+                  <p className="text-sm font-[family-name:var(--font-source-serif)] text-[var(--ed-fg-muted)]">
+                    This article does not have any body content yet.
+                  </p>
+                )}
+              </div>
+
+              {/* Article Footer Signature / Share-back */}
+              <div className="mt-14 pt-8 border-t border-[var(--ed-rule)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <Link
+                  href={backHref}
+                  className="inline-flex items-center gap-2 text-[11px] font-[family-name:var(--font-glacial)] font-semibold uppercase tracking-[0.14em] text-[var(--ed-accent)] hover:underline self-start sm:self-auto"
+                >
+                  <ArrowLeftIcon className="size-3.5 rtl-flip" /> All articles
+                </Link>
+
+                <div className="flex items-center gap-3">
+                  {post.authorPhotoUrl && (
                     <Image
-                      src={relatedPost.thumbnailUrl}
-                      alt={relatedPost.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                      src={post.authorPhotoUrl}
+                      alt={post.authorName ?? ''}
+                      width={26}
+                      height={26}
+                      className="rounded-full object-cover shrink-0 border border-[var(--ed-rule)]"
                     />
                   )}
+                  <div>
+                    {post.authorName && (
+                      <div className="text-xs font-[family-name:var(--font-glacial)] font-semibold uppercase tracking-wider text-[var(--ed-fg)]">
+                        {post.authorName}
+                      </div>
+                    )}
+                    {post.publishedAt && (
+                      <div className="text-[11px] font-[family-name:var(--font-jetbrains)] text-[var(--ed-fg-muted)]">
+                        {formatDate(post.publishedAt)}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="p-5 space-y-1.5">
-                  <h3 className="font-headline text-base tracking-[-0.01em] leading-snug group-hover:text-muted-foreground transition-colors">
-                    {relatedPost.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground/80">
-                    {formatDate(relatedPost.publishedAt)}
-                  </p>
-                </div>
-              </Link>
-            ))}
+              </div>
+            </EditorialReader>
+
+            {/* Mobile-only view of Provenance and Related Articles (< lg) */}
+            <div className="block lg:hidden mt-10">
+              <EditorialAside
+                publishedAt={post.publishedAt}
+                updatedAt={post.updatedAt}
+                readingMinutes={readingMinutes}
+                wordCount={words}
+                category={post.category}
+                authorName={post.authorName}
+                authorArticles={finalAuthorArticles}
+                otherArticles={finalOtherArticles}
+              />
+            </div>
           </div>
-        </section>
-      )}
+
+          {/* ── Right Sidebar: The Technical Calibration Ruler (Making Software style) ── */}
+          <aside className="hidden lg:flex lg:sticky lg:top-[84px] lg:self-start justify-end w-full pt-1">
+            <EditorialRightRuler headings={headings} targetId={articleBodyId} />
+          </aside>
+        </div>
+
+        {/* ── Bottom Section: More from the Archive (All Blogs) ───────── */}
+        {(() => {
+          const archiveBlogs = allBlogs.length > 0 ? allBlogs : publishedRelated
+          if (archiveBlogs.length === 0) return null
+
+          return (
+            <section className="mt-24 pt-16 border-t border-[var(--ed-rule)] max-w-[1600px] mx-auto px-4 sm:px-6">
+              <div className="text-center mb-12">
+                <span className="inline-block text-[10px] font-[family-name:var(--font-glacial)] font-semibold uppercase tracking-[0.2em] text-[var(--ed-accent)] mb-2">
+                  Explore The Collection
+                </span>
+                <h2 className="font-[family-name:var(--font-cormorant)] text-[clamp(28px,3.2vw,42px)] font-semibold tracking-[-0.02em] leading-[1.1] text-[var(--ed-fg)]">
+                  More from the Archive
+                </h2>
+                <p className="mt-2 text-sm font-[family-name:var(--font-source-serif)] text-[var(--ed-fg-muted)]">
+                  Browse all published monographs, studies, and community articles.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {archiveBlogs.map((relatedPost) => (
+                  <Link
+                    key={relatedPost._id}
+                    href={hrefForRelated(relatedPost.slug?.current || '')}
+                    className="group flex flex-col bg-[var(--ed-surface)] rounded-xl border border-[var(--ed-rule)] overflow-hidden transition-all hover:border-[var(--ed-accent)] hover:shadow-lg"
+                  >
+                    <div className="relative w-full aspect-[16/9] overflow-hidden bg-[var(--ed-bg)]">
+                      {relatedPost.thumbnailUrl ? (
+                        <Image
+                          src={relatedPost.thumbnailUrl}
+                          alt={relatedPost.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                          className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center p-6 text-center text-xs font-[family-name:var(--font-cormorant)] text-[var(--ed-fg-muted)] bg-[var(--ed-surface)]">
+                          {relatedPost.category || 'Article'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                      <div>
+                        {relatedPost.category && (
+                          <span className="text-[10px] font-[family-name:var(--font-glacial)] font-bold uppercase tracking-[0.14em] text-[var(--ed-accent)] mb-1 block">
+                            {relatedPost.category}
+                          </span>
+                        )}
+                        <h3 className="font-[family-name:var(--font-cormorant)] text-[18px] font-semibold tracking-[-0.01em] leading-snug text-[var(--ed-fg)] group-hover:text-[var(--ed-accent)] transition-colors">
+                          {relatedPost.title}
+                        </h3>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-[var(--ed-rule)]/60 text-xs font-[family-name:var(--font-jetbrains)] text-[var(--ed-fg-muted)]">
+                        <span>{formatDate(relatedPost.publishedAt)}</span>
+                        {relatedPost.authorName && (
+                          <span className="font-sans text-[11px] font-medium text-[var(--ed-fg)]">{relatedPost.authorName}</span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )
+        })()}
+      </main>
     </div>
   )
 }
@@ -244,15 +334,15 @@ function wrapStringChildren(children: ReactNode): ReactNode {
       <ScriptureText key={i} text={child} from="blog post" />
     ) : (
       child
-    ),
+    )
   )
 }
 
 const CALLOUT_TONES: Record<string, string> = {
-  info: 'border-primary/30 bg-primary/5 text-foreground',
-  tip: 'border-emerald-500/30 bg-emerald-500/5 text-foreground',
-  warning: 'border-amber-500/40 bg-amber-500/5 text-foreground',
-  danger: 'border-destructive/40 bg-destructive/5 text-foreground',
+  info: 'border-[var(--ed-rule)] bg-[var(--ed-surface)] text-[var(--ed-fg)]',
+  tip: 'border-[var(--ed-accent)]/40 bg-[var(--ed-accent)]/10 text-[var(--ed-fg)]',
+  warning: 'border-amber-500/40 bg-amber-500/10 text-[var(--ed-fg)]',
+  danger: 'border-destructive/40 bg-destructive/10 text-[var(--ed-fg)]',
 }
 
 interface RichTableValue {
@@ -266,170 +356,281 @@ function buildPortableTextComponents(scriptureRefsEnabled: boolean) {
     scriptureRefsEnabled ? wrapStringChildren(children) : children
 
   return {
-  block: {
-    normal: ({ children }: { children?: ReactNode }) => (
-      <p className="mb-6 leading-[1.7] text-[19px] text-foreground/85 break-words [overflow-wrap:anywhere]">{renderText(children)}</p>
-    ),
-    h1: ({ children }: { children?: ReactNode }) => (
-      <h1 className="font-headline text-[40px] mt-14 mb-5 tracking-[-0.02em] leading-[1.1] break-words [overflow-wrap:anywhere]">
-        {renderText(children)}
-      </h1>
-    ),
-    h2: ({ children }: { children?: ReactNode }) => (
-      <h2 className="font-headline text-[34px] mt-14 mb-4 tracking-[-0.02em] leading-[1.15] break-words [overflow-wrap:anywhere]">
-        {renderText(children)}
-      </h2>
-    ),
-    h3: ({ children }: { children?: ReactNode }) => (
-      <h3 className="font-headline text-[24px] mt-10 mb-3 tracking-[-0.015em] leading-[1.2] break-words [overflow-wrap:anywhere]">
-        {renderText(children)}
-      </h3>
-    ),
-    h4: ({ children }: { children?: ReactNode }) => (
-      <h4 className="font-headline text-[19px] mt-8 mb-2 tracking-[-0.01em] break-words [overflow-wrap:anywhere]">
-        {renderText(children)}
-      </h4>
-    ),
-    blockquote: ({ children }: { children?: ReactNode }) => (
-      <blockquote className="my-9 pl-6 border-l-2 border-primary italic text-[22px] leading-[1.45] break-words [overflow-wrap:anywhere]">
-        {renderText(children)}
-      </blockquote>
-    ),
-  },
-  list: {
-    bullet: ({ children }: { children?: ReactNode }) => (
-      <ul className="mb-6 space-y-2 pl-5 list-disc marker:text-primary text-[19px] leading-[1.7] text-foreground/85 break-words [overflow-wrap:anywhere]">
-        {children}
-      </ul>
-    ),
-    number: ({ children }: { children?: ReactNode }) => (
-      <ol className="mb-6 space-y-2 pl-5 list-decimal marker:text-primary text-[19px] leading-[1.7] text-foreground/85 break-words [overflow-wrap:anywhere]">
-        {children}
-      </ol>
-    ),
-  },
-  listItem: {
-    bullet: ({ children }: { children?: ReactNode }) => <li>{renderText(children)}</li>,
-    number: ({ children }: { children?: ReactNode }) => <li>{renderText(children)}</li>,
-  },
-  marks: {
-    strong: ({ children }: { children?: ReactNode }) => (
-      <strong className="font-semibold text-foreground">{children}</strong>
-    ),
-    em: ({ children }: { children?: ReactNode }) => (
-      <em className="italic">{children}</em>
-    ),
-    code: ({ children }: { children?: ReactNode }) => (
-      <code className="px-1.5 py-0.5 rounded text-[15px] font-mono bg-muted text-foreground">
-        {children}
-      </code>
-    ),
-    link: ({
-      children,
-      value,
-    }: {
-      children?: ReactNode
-      value?: { href?: string; blank?: boolean }
-    }) => {
-      // Defense-in-depth: reject javascript:/data:/etc. at render even if an
-      // unsafe href somehow reached storage. Unsafe → render plain text.
-      const href = sanitizeUrl(value?.href)
-      if (!href) return <>{children}</>
-      const isExternal = href.startsWith('http')
-      return (
-        <a
-          href={href}
-          target={isExternal || value?.blank ? '_blank' : undefined}
-          rel={isExternal ? 'noopener noreferrer' : undefined}
-          className="text-primary underline underline-offset-4 decoration-primary/40 hover:decoration-primary transition-colors break-words [overflow-wrap:anywhere]"
-        >
+    block: {
+      normal: ({ children }: { children?: ReactNode }) => (
+        <p className="mb-6 leading-[1.75] text-[18.5px] text-[var(--ed-fg)] break-words [overflow-wrap:anywhere]">
+          {renderText(children)}
+        </p>
+      ),
+      h1: ({ children, value }: { children?: ReactNode; value?: PortableTextBlock }) => {
+        const text = getPlainText(children)
+        const id = slugify(text)
+        return (
+          <h1
+            id={id}
+            className="font-[family-name:var(--font-cormorant)] text-[34px] sm:text-[38px] mt-12 mb-4 font-semibold tracking-[-0.02em] leading-[1.15] text-[var(--ed-fg)] break-words [overflow-wrap:anywhere]"
+          >
+            {renderText(children)}
+          </h1>
+        )
+      },
+      h2: ({ children, value }: { children?: ReactNode; value?: PortableTextBlock }) => {
+        const text = getPlainText(children)
+        const id = slugify(text)
+        return (
+          <h2
+            id={id}
+            className="font-[family-name:var(--font-cormorant)] text-[28px] sm:text-[32px] mt-10 mb-3 font-semibold tracking-[-0.02em] leading-[1.18] text-[var(--ed-fg)] break-words [overflow-wrap:anywhere]"
+          >
+            {renderText(children)}
+          </h2>
+        )
+      },
+      h3: ({ children, value }: { children?: ReactNode; value?: PortableTextBlock }) => {
+        const text = getPlainText(children)
+        const id = slugify(text)
+        return (
+          <h3
+            id={id}
+            className="font-[family-name:var(--font-cormorant)] text-[22px] sm:text-[25px] mt-8 mb-2.5 font-semibold tracking-[-0.015em] leading-[1.2] text-[var(--ed-fg)] break-words [overflow-wrap:anywhere]"
+          >
+            {renderText(children)}
+          </h3>
+        )
+      },
+      h4: ({ children, value }: { children?: ReactNode; value?: PortableTextBlock }) => {
+        const text = getPlainText(children)
+        const id = slugify(text)
+        return (
+          <h4
+            id={id}
+            className="font-[family-name:var(--font-cormorant)] text-[19px] sm:text-[21px] mt-6 mb-2 font-semibold tracking-[-0.01em] text-[var(--ed-fg)] break-words [overflow-wrap:anywhere]"
+          >
+            {renderText(children)}
+          </h4>
+        )
+      },
+      blockquote: ({ children }: { children?: ReactNode }) => (
+        <blockquote className="my-8 pl-6 border-l-2 border-[var(--ed-accent)] italic text-[20px] md:text-[22px] leading-[1.5] text-[var(--ed-fg-muted)] break-words [overflow-wrap:anywhere] bg-[var(--ed-surface)] py-3 rounded-r-lg">
+          {renderText(children)}
+        </blockquote>
+      ),
+    },
+    list: {
+      bullet: ({ children }: { children?: ReactNode }) => (
+        <ul className="list-disc pl-6 mb-6 space-y-2 text-[18px] text-[var(--ed-fg)]">{children}</ul>
+      ),
+      number: ({ children }: { children?: ReactNode }) => (
+        <ol className="list-decimal pl-6 mb-6 space-y-2 text-[18px] text-[var(--ed-fg)]">{children}</ol>
+      ),
+    },
+    listItem: {
+      bullet: ({ children }: { children?: ReactNode }) => (
+        <li className="leading-[1.7] text-[18px] text-[var(--ed-fg)]">{renderText(children)}</li>
+      ),
+      number: ({ children }: { children?: ReactNode }) => (
+        <li className="leading-[1.7] text-[18px] text-[var(--ed-fg)]">{renderText(children)}</li>
+      ),
+    },
+    marks: {
+      strong: ({ children }: { children?: ReactNode }) => (
+        <strong className="font-bold text-[var(--ed-fg)]">{children}</strong>
+      ),
+      em: ({ children }: { children?: ReactNode }) => <em className="italic">{children}</em>,
+      code: ({ children }: { children?: ReactNode }) => (
+        <code className="font-[family-name:var(--font-jetbrains)] text-[0.88em] bg-[var(--ed-surface)] border border-[var(--ed-rule)] px-1.5 py-0.5 rounded text-[var(--ed-accent)]">
           {children}
-        </a>
-      )
-    },
-  },
-  types: {
-    // Editable in /editor but previously unrendered here, so a callout silently
-    // vanished from the published article.
-    callout: ({ value }: { value: { tone?: string; text?: string } }) => {
-      if (!value.text) return null
-      const tone = CALLOUT_TONES[value.tone ?? 'info'] ?? CALLOUT_TONES.info
-      return (
-        <aside className={`my-8 rounded-xl border px-5 py-4 text-[15px] leading-relaxed ${tone}`}>
-          {value.text}
-        </aside>
-      )
-    },
-    richTableBlock: ({ value }: { value: RichTableValue }) => {
-      const rows = value.rows ?? []
-      const headers = value.columnHeaders ?? []
-      if (rows.length === 0 && headers.length === 0) return null
-      return (
-        <figure className="my-10 -mx-2 overflow-x-auto">
-          <table className="w-full min-w-[520px] border-collapse text-[15px]">
-            {headers.length > 0 && (
-              <thead>
-                <tr>
-                  {headers.map((h, i) => (
-                    <th
-                      key={i}
-                      scope="col"
-                      className="border-b border-border px-3 py-2 text-left font-semibold"
-                    >
-                      {h.title ?? ''}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+        </code>
+      ),
+      underline: ({ children }: { children?: ReactNode }) => (
+        <span className="underline underline-offset-4">{children}</span>
+      ),
+      strikeThrough: ({ children }: { children?: ReactNode }) => (
+        <span className="line-through opacity-70">{children}</span>
+      ),
+      link: ({
+        children,
+        value,
+      }: {
+        children?: ReactNode
+        value?: { href?: string; blank?: boolean }
+      }) => {
+        const safe = sanitizeUrl(value?.href)
+        if (!safe) return <>{children}</>
+        return (
+          <a
+            href={safe}
+            target={value?.blank ? '_blank' : undefined}
+            rel={value?.blank ? 'noopener noreferrer' : undefined}
+            className="text-[var(--ed-accent)] underline underline-offset-4 hover:opacity-80 transition-opacity"
+          >
+            {children}
+          </a>
+        )
+      },
+      citation: ({
+        children,
+        value,
+      }: {
+        children?: ReactNode
+        value?: { source?: string; reference?: string; href?: string }
+      }) => {
+        const safe = value?.href ? sanitizeUrl(value.href) : undefined
+        const display = value?.source || value?.reference
+        return (
+          <cite className="not-italic text-[var(--ed-fg)] border-b border-dotted border-[var(--ed-rule)] inline">
+            {children}
+            {display && (
+              <sup className="ml-1 text-[11px] font-mono text-[var(--ed-accent)] font-semibold">
+                {safe ? (
+                  <a
+                    href={safe}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    [{display}]
+                  </a>
+                ) : (
+                  `[${display}]`
+                )}
+              </sup>
             )}
-            <tbody>
-              {rows.map((row, r) => (
-                <tr key={r} className="align-top">
-                  {(row.cells ?? []).map((cell, c) => {
-                    const Cell = value.hasRowTitles && c === 0 ? 'th' : 'td'
-                    return (
-                      <Cell
-                        key={c}
-                        {...(Cell === 'th' ? { scope: 'row' as const } : {})}
-                        className="border-b border-border/60 px-3 py-2 text-left font-normal"
+          </cite>
+        )
+      },
+    },
+    types: {
+      image: ({
+        value,
+      }: {
+        value?: { url?: string; asset?: { url?: string }; caption?: string; alt?: string }
+      }) => {
+        const url = value?.url ?? value?.asset?.url
+        if (!url) return null
+        return (
+          <figure className="my-10">
+            <div className="rounded-xl overflow-hidden border border-[var(--ed-rule)] bg-[var(--ed-surface)]">
+              <Image
+                src={url}
+                alt={value?.alt || value?.caption || ''}
+                width={1200}
+                height={675}
+                sizes="(max-width: 820px) 100vw, 820px"
+                className="w-full h-auto object-contain"
+              />
+            </div>
+            {value?.caption && (
+              <figcaption className="text-xs font-[family-name:var(--font-source-serif)] italic text-center text-[var(--ed-fg-muted)] mt-2.5">
+                {value.caption}
+              </figcaption>
+            )}
+          </figure>
+        )
+      },
+      callout: ({
+        value,
+      }: {
+        value?: { tone?: 'info' | 'tip' | 'warning' | 'danger'; content?: PortableTextBlock[] }
+      }) => {
+        const tone = value?.tone || 'info'
+        const toneClass = CALLOUT_TONES[tone] || CALLOUT_TONES.info
+        return (
+          <aside className={`my-8 p-5 border rounded-xl shadow-sm ${toneClass}`}>
+            {value?.content && (
+              <PortableText
+                value={value.content}
+                components={buildPortableTextComponents(scriptureRefsEnabled)}
+              />
+            )}
+          </aside>
+        )
+      },
+      richTable: ({ value }: { value?: RichTableValue }) => {
+        if (!value?.rows?.length) return null
+        return (
+          <div className="my-8 overflow-x-auto border border-[var(--ed-rule)] rounded-xl bg-[var(--ed-surface)]">
+            <table className="w-full text-left text-sm font-[family-name:var(--font-source-serif)] border-collapse">
+              {value.columnHeaders && (
+                <thead>
+                  <tr className="border-b border-[var(--ed-rule)] bg-[var(--ed-bg)]">
+                    {value.columnHeaders.map((col, i) => (
+                      <th
+                        key={i}
+                        className="p-3.5 font-[family-name:var(--font-glacial)] text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[var(--ed-fg-muted)]"
                       >
-                        <PortableText value={(cell.content ?? []) as PortableTextBlock[]} />
-                      </Cell>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </figure>
-      )
-    },
-    image: ({
-      value,
-    }: {
-      value: { url?: string; alt?: string; caption?: string }
-    }) => {
-      const url = sanitizeUrl(value.url)
-      if (!url) return null
-      return (
-        <figure className="my-10">
-          <div className="relative w-full rounded-2xl overflow-hidden bg-muted" style={{ aspectRatio: '16 / 9' }}>
-            <Image
-              src={url}
-              alt={value.alt ?? ''}
-              fill
-              className="object-contain"
-              sizes="(max-width: 768px) 100vw, 720px"
-            />
+                        {col.title}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+              )}
+              <tbody className="divide-y divide-[var(--ed-rule)]">
+                {value.rows.map((row, rowIdx) => (
+                  <tr key={rowIdx} className="hover:bg-[var(--ed-bg)]/50 transition-colors">
+                    {row.cells?.map((cell, cellIdx) => (
+                      <td key={cellIdx} className="p-3.5 text-[var(--ed-fg)]">
+                        {cell.content && (
+                          <PortableText
+                            value={cell.content as PortableTextBlock[]}
+                            components={buildPortableTextComponents(scriptureRefsEnabled)}
+                          />
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          {value.caption && (
-            <figcaption className="mt-2.5 text-center text-[13px] text-muted-foreground/80">
-              {value.caption}
-            </figcaption>
-          )}
-        </figure>
-      )
+        )
+      },
+      verse: ({
+        value,
+      }: {
+        value?: {
+          chapter?: number
+          verses?: string
+          surahName?: string
+          arabic?: string
+          translation?: string
+          body?: PortableTextBlock[]
+        }
+      }) => {
+        return (
+          <div className="my-8 p-6 rounded-xl border border-[var(--ed-rule)] bg-[var(--ed-surface)] shadow-xs transition-all">
+            {value?.arabic && (
+              <div
+                dir="rtl"
+                lang="ar"
+                className="text-right font-[family-name:var(--font-amiri,serif)] text-[24px] sm:text-[27px] leading-[2.3] text-[var(--ed-fg)] mb-4 font-normal tracking-wide"
+              >
+                {value.arabic}
+              </div>
+            )}
+            {value?.translation && (
+              <div className="text-[17.5px] sm:text-[18.5px] leading-[1.75] text-[var(--ed-fg)] font-[family-name:var(--font-source-serif)] mb-3 italic">
+                &ldquo;{value.translation}&rdquo;
+              </div>
+            )}
+            {value?.body && !value?.translation && (
+              <div className="italic text-[19px] leading-[1.6] text-[var(--ed-fg)] mb-3">
+                <PortableText
+                  value={value.body}
+                  components={buildPortableTextComponents(scriptureRefsEnabled)}
+                />
+              </div>
+            )}
+            {(value?.chapter || value?.surahName) && (
+              <div className="text-right font-[family-name:var(--font-glacial)] text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ed-accent)]">
+                {value.surahName
+                  ? `Surah ${value.surahName} (${value.chapter}:${value.verses ?? ''})`
+                  : `Quran ${value.chapter}:${value.verses ?? ''}`}
+              </div>
+            )}
+          </div>
+        )
+      },
     },
-  },
   }
 }

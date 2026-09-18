@@ -56,6 +56,14 @@ export const SCHEMA_DEFINITION: PortableTextSchemaDefinition = {
         { name: 'blank', type: 'boolean' },
       ],
     },
+    {
+      name: 'citation',
+      fields: [
+        { name: 'source', type: 'string' },
+        { name: 'reference', type: 'string' },
+        { name: 'href', type: 'string' },
+      ],
+    },
   ],
   inlineObjects: [],
   blockObjects: [
@@ -72,6 +80,17 @@ export const SCHEMA_DEFINITION: PortableTextSchemaDefinition = {
         { name: 'url', type: 'string' },
         { name: 'alt', type: 'string' },
         { name: 'caption', type: 'string' },
+      ],
+    },
+    {
+      name: 'verse',
+      fields: [
+        { name: 'chapter', type: 'number' },
+        { name: 'verses', type: 'string' },
+        { name: 'surahName', type: 'string' },
+        { name: 'arabic', type: 'string' },
+        { name: 'translation', type: 'string' },
+        { name: 'body', type: 'array' },
       ],
     },
     // Authored in the retired Studio by sanity-plugin-rich-table. Declared so a
@@ -94,7 +113,7 @@ export const SCHEMA_DEFINITION: PortableTextSchemaDefinition = {
  * embeds) is unsupported: the editor refuses to load such a document so the
  * unknown blocks are never dropped on save.
  */
-export const KNOWN_BLOCK_TYPES: readonly string[] = ['block', 'callout', 'image', 'richTableBlock']
+export const KNOWN_BLOCK_TYPES: readonly string[] = ['block', 'callout', 'image', 'richTableBlock', 'verse']
 
 /** True if `value` contains any block whose _type the editor cannot represent. */
 export function hasUnsupportedBlocks(value: unknown): boolean {

@@ -77,7 +77,6 @@ function getNavItems(t: (k: string) => string): NavItem[] {
     },
     { kind: 'link', label: 'music', href: '/music' },
     { kind: 'link', label: 'blog', href: '/blog' },
-    { kind: 'link', label: 'chat', href: '/chat' },
   ]
 }
 
@@ -640,44 +639,47 @@ export function SiteNav() {
           </div>
         </div>
 
-        <div className="flex-none flex items-center justify-end gap-1.5 sm:gap-1">
+        <div className="flex-none flex items-center justify-end gap-1.5 sm:gap-1.5">
           <CommandMenuTrigger />
 
-          {isAuthed && (
-            <button
-              type="button"
-              onClick={toggleAsk}
-              aria-label={t('submissionAI')}
-              className="site-header-action hidden sm:inline-flex items-center gap-1.5 h-[34px] px-2.5 rounded-[2px] transition-colors"
-              style={{
-                fontFamily: F.glacial,
-                fontSize: 10.5,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                color:
-                  askState !== 'closed'
-                    ? 'var(--ed-accent)'
-                    : 'var(--ed-fg-muted)',
-                border: '1px solid var(--ed-rule)',
-                background:
-                  askState !== 'closed'
-                    ? 'color-mix(in oklab, var(--ed-accent), transparent 88%)'
-                    : 'transparent',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => {
-                ;(e.currentTarget as HTMLButtonElement).style.borderColor =
-                  'var(--ed-fg)'
-              }}
-              onMouseLeave={(e) => {
-                ;(e.currentTarget as HTMLButtonElement).style.borderColor =
-                  'var(--ed-rule)'
-              }}
-            >
-              <MessageSquare size={12} />
-              <span>{t('chat')}</span>
-            </button>
-          )}
+          {/* AI Chat Companion Trigger */}
+          <button
+            type="button"
+            onClick={toggleAsk}
+            aria-label={t('submissionAI')}
+            title={t('submissionAI')}
+            className="site-header-action inline-flex items-center justify-center gap-1.5 h-[34px] px-2 sm:px-2.5 rounded-[2px] transition-colors cursor-pointer select-none"
+            style={{
+              fontFamily: F.glacial,
+              fontSize: 10.5,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color:
+                askState !== 'closed'
+                  ? 'var(--ed-accent)'
+                  : 'var(--ed-fg-muted)',
+              border: `1px solid ${askState !== 'closed' ? 'var(--ed-accent)' : 'var(--ed-rule)'}`,
+              background:
+                askState !== 'closed'
+                  ? 'color-mix(in oklab, var(--ed-accent), transparent 88%)'
+                  : 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              if (askState === 'closed') {
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-fg)'
+                ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (askState === 'closed') {
+                ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-rule)'
+                ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg-muted)'
+              }
+            }}
+          >
+            <MessageSquare size={13} aria-hidden />
+            <span className="hidden sm:inline">{t('chat')}</span>
+          </button>
 
           <UserMenu />
 
@@ -688,30 +690,10 @@ export function SiteNav() {
             </div>
           )}
 
-          {isAuthed && (
-            <button
-              type="button"
-              onClick={toggleAsk}
-              aria-label={t('submissionAI')}
-              className="site-header-action sm:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md"
-              style={{
-                border: 'none',
-                background: 'none',
-                cursor: 'pointer',
-                color:
-                  askState !== 'closed'
-                    ? 'var(--ed-accent)'
-                    : 'var(--ed-fg-muted)',
-              }}
-            >
-              <MessageSquare size={16} />
-            </button>
-          )}
-
           <button
             type="button"
-            className="site-header-action lg:hidden flex items-center justify-center w-[34px] h-[34px] rounded-md text-muted-foreground transition-colors"
-            style={{ border: 'none', background: 'none', cursor: 'pointer' }}
+            className="site-header-action lg:hidden flex items-center justify-center w-[34px] h-[34px] rounded-[2px] text-muted-foreground transition-colors"
+            style={{ border: '1px solid var(--ed-rule)', background: 'none', cursor: 'pointer' }}
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
             aria-controls="mobile-site-menu"

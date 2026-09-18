@@ -2,8 +2,16 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Clock, Trash2, ArrowRight, BookOpen } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { meApi, type ActivityEntry, type ActivityKind } from '@/src/api/me-client'
+
+const F = {
+  display: 'var(--font-cormorant), Georgia, serif',
+  serif: 'var(--font-source-serif), Georgia, serif',
+  mono: 'var(--font-jetbrains), monospace',
+  glacial: 'var(--font-glacial), sans-serif',
+}
 
 type LoadState =
   | { status: 'loading' }
@@ -45,38 +53,96 @@ export function ActivityClient() {
   }
 
   return (
-    <section style={{ maxWidth: 800, margin: '0 auto', padding: '32px 16px' }}>
-      <header style={{ marginBottom: 24 }}>
-        <h1 style={titleStyle}>{t('title')}</h1>
-        <p style={ledeStyle}>{t('lede')}</p>
-      </header>
+    <div className="max-w-[840px] mx-auto py-2">
+      {/* ── Masthead ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[var(--ed-rule)] mb-6">
+        <div>
+          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.16em] text-[var(--ed-accent)] mb-2">
+            <Clock size={13} />
+            <span>Devotional Record</span>
+          </div>
+          <h1
+            style={{ fontFamily: F.display }}
+            className="m-0 text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
+          >
+            {t('title')}
+          </h1>
+          <p
+            style={{ fontFamily: F.serif }}
+            className="m-0 mt-2 text-[14px] text-[var(--ed-fg-muted)] leading-relaxed"
+          >
+            {t('lede')}
+          </p>
+        </div>
 
-      {load.status === 'loading' && <p style={mutedStyle}>{t('loading')}</p>}
-      {load.status === 'error' && <p style={mutedStyle}>{t('error')}</p>}
-      {load.status === 'ready' && load.entries.length === 0 && (
-        <p style={mutedStyle}>{t('empty')}</p>
-      )}
-
-      {load.status === 'ready' && load.entries.length > 0 && (
-        <>
-          <ul style={listStyle}>
-            {load.entries.map((entry) => (
-              <li key={entry.id} style={itemStyle}>
-                <ActivityRow entry={entry} />
-              </li>
-            ))}
-          </ul>
+        {load.status === 'ready' && load.entries.length > 0 && (
           <button
             type="button"
             onClick={clearAll}
             disabled={clearing}
-            style={dangerButtonStyle}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[5px] border border-[var(--ed-rule)] hover:border-red-500/50 hover:text-red-500 text-[12px] font-mono text-[var(--ed-fg-muted)] transition-colors cursor-pointer shrink-0 self-start sm:self-auto disabled:opacity-50"
           >
-            {t('clear')}
+            <Trash2 size={13} />
+            <span>{t('clear')}</span>
           </button>
-        </>
+        )}
+      </div>
+
+      {load.status === 'loading' && (
+        <div className="py-12 text-center text-[13px] font-mono text-[var(--ed-fg-muted)]">
+          {t('loading')}
+        </div>
       )}
-    </section>
+
+      {load.status === 'error' && (
+        <div className="py-8 text-center text-[13px] font-mono text-red-500">
+          {t('error')}
+        </div>
+      )}
+
+      {load.status === 'ready' && load.entries.length === 0 && (
+        <div className="rounded-[10px] border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-8 sm:p-12 text-center max-w-lg mx-auto w-full my-6">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--ed-accent),transparent_90%)] text-[var(--ed-accent)] mb-4">
+            <BookOpen size={22} />
+          </div>
+
+          <h3
+            style={{ fontFamily: F.display }}
+            className="m-0 text-2xl font-medium tracking-tight text-[var(--ed-fg)]"
+          >
+            No reading activity recorded yet
+          </h3>
+
+          <p
+            style={{ fontFamily: F.serif }}
+            className="mt-2 text-[14px] text-[var(--ed-fg-muted)] leading-relaxed"
+          >
+            As you browse scriptures, search verses, and study chapters, your devotional timeline will be recorded here.
+          </p>
+
+          <div className="mt-6 flex items-center justify-center">
+            <Link
+              href="/quran/1"
+              className="ed-btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-[14px] no-underline group"
+              style={{ fontFamily: F.serif }}
+            >
+              <span>Start Reading The Holy Qur’an</span>
+              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {load.status === 'ready' && load.entries.length > 0 && (
+        <div className="divide-y divide-[var(--ed-rule)]">
+          {load.entries.map((entry) => (
+            <div key={entry.id} className="py-3.5">
+              <ActivityRow entry={entry} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -85,21 +151,36 @@ function ActivityRow({ entry }: { entry: ActivityEntry }) {
   const label = kindLabel(t, entry.kind)
   const detail = entry.query ?? entry.verse_key ?? ''
   const href = activityHref(entry)
-  const time = new Date(entry.created_at).toLocaleString()
+  const time = new Date(entry.created_at).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'baseline' }}>
-      <div style={{ minWidth: 0 }}>
-        <div style={kindStyle}>{label}</div>
+    <div className="flex items-center justify-between gap-4">
+      <div className="min-w-0">
+        <div className="text-[10px] font-mono tracking-[0.16em] uppercase text-[var(--ed-accent)] mb-0.5">
+          {label}
+        </div>
         {href ? (
-          <Link href={href} style={detailLinkStyle}>
+          <Link
+            href={href}
+            className="text-[14.5px] text-[var(--ed-fg)] hover:text-[var(--ed-accent)] hover:underline font-medium transition-colors"
+            style={{ fontFamily: F.serif }}
+          >
             {detail}
           </Link>
         ) : (
-          <span style={detailStyle}>{detail}</span>
+          <span className="text-[14.5px] text-[var(--ed-fg)]" style={{ fontFamily: F.serif }}>
+            {detail}
+          </span>
         )}
       </div>
-      <time style={timeStyle}>{time}</time>
+      <time className="shrink-0 font-mono text-[11px] text-[var(--ed-fg-muted)]">
+        {time}
+      </time>
     </div>
   )
 }
@@ -129,73 +210,4 @@ function activityHref(entry: ActivityEntry): string | null {
     return `/quran/${encodeURIComponent(entry.query)}`
   }
   return null
-}
-
-const titleStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-cormorant), Georgia, serif',
-  fontSize: 'clamp(32px, 5vw, 48px)',
-  lineHeight: 1.1,
-  margin: 0,
-}
-
-const ledeStyle: React.CSSProperties = {
-  marginTop: 8,
-  color: 'var(--ed-fg-muted)',
-  fontSize: 14,
-  lineHeight: 1.55,
-}
-
-const mutedStyle: React.CSSProperties = { color: 'var(--ed-fg-muted)', fontSize: 14 }
-
-const listStyle: React.CSSProperties = {
-  listStyle: 'none',
-  padding: 0,
-  margin: '0 0 24px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 0,
-  borderTop: '1px solid var(--ed-rule)',
-}
-
-const itemStyle: React.CSSProperties = {
-  padding: '12px 0',
-  borderBottom: '1px solid var(--ed-rule)',
-}
-
-const kindStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
-  fontSize: 10,
-  letterSpacing: '0.16em',
-  textTransform: 'uppercase',
-  color: 'var(--ed-fg-muted)',
-  marginBottom: 2,
-}
-
-const detailStyle: React.CSSProperties = {
-  fontSize: 15,
-  color: 'var(--ed-fg)',
-  wordBreak: 'break-word',
-}
-
-const detailLinkStyle: React.CSSProperties = {
-  ...detailStyle,
-  textDecoration: 'underline',
-  textUnderlineOffset: 3,
-}
-
-const timeStyle: React.CSSProperties = {
-  flexShrink: 0,
-  fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
-  fontSize: 11,
-  color: 'var(--ed-fg-muted)',
-}
-
-const dangerButtonStyle: React.CSSProperties = {
-  padding: '10px 16px',
-  borderRadius: 2,
-  border: '1px solid var(--ed-rule)',
-  background: 'transparent',
-  color: 'var(--ed-fg)',
-  fontSize: 13,
-  cursor: 'pointer',
 }

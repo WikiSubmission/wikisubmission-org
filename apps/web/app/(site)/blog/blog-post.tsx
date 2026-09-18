@@ -1,6 +1,6 @@
 import { buildPageMetadata } from '@/constants/metadata'
 import type { Metadata } from 'next'
-import { fetchArticleBySlug, fetchRelatedArticles } from '@/lib/blog-backend'
+import { fetchArticleBySlug, fetchRelatedArticles, fetchArticles } from '@/lib/blog-backend'
 import { type BlogLanguage, type BlogPost, type RelatedBlogPost } from '@/lib/blog-queries'
 
 // The article view and its data shapes are shared with mobile. Reads come from
@@ -11,7 +11,7 @@ import { type BlogLanguage, type BlogPost, type RelatedBlogPost } from '@/lib/bl
 // Portable Text schema. There is no public preview link.
 export { BlogPostArticle } from '@/components/blog/blog-post-article'
 export { toBlogLanguage } from '@/lib/blog-queries'
-export type { BlogLanguage, BlogPost, RelatedBlogPost } from '@/lib/blog-queries'
+export type { BlogLanguage, BlogPost, RelatedBlogPost, Post } from '@/lib/blog-queries'
 
 const BLOG_INDEX_METADATA = buildPageMetadata({
   title: 'Blog | WikiSubmission',
@@ -40,6 +40,12 @@ export async function fetchPublishedBlogPostBySlug(
   language: BlogLanguage
 ): Promise<BlogPost | null> {
   return fetchArticleBySlug(slug, language)
+}
+
+export async function fetchPublishedArticlesList(
+  language: BlogLanguage
+) {
+  return fetchArticles(language)
 }
 
 export async function fetchRelatedBlogPosts({

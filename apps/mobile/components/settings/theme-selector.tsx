@@ -15,7 +15,7 @@ const MODES = [
   { id: 'system', labelKey: 'mobile.theme.auto', icon: Monitor },
 ] as const
 
-const PALETTE_ORDER: PaletteKey[] = ['ink', 'violet', 'mono']
+const PALETTE_ORDER: PaletteKey[] = ['ink', 'violet', 'mono', 'terracotta']
 
 /**
  * Appearance controls: light/dark/system mode (next-themes) and the color

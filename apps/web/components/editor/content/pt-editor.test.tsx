@@ -220,4 +220,29 @@ describe('PTEditor rich table', () => {
     expect(screen.getByText('A heading in a cell')).toBeInTheDocument()
     expect(onChange).not.toHaveBeenCalled()
   })
+
+  it('renders verse blocks with Arabic text, translation and reference', async () => {
+    const verseBlock = {
+      _type: 'verse',
+      _key: 'v1',
+      chapter: 1,
+      verses: '1-7',
+      surahName: 'Al-Fatiha',
+      arabic: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+      translation: 'In the name of God, the Gracious, the Merciful.',
+    }
+    const body = [verseBlock]
+    renderEditor(body)
+
+    expect(await screen.findByText(/Qur'an Verse 1:1-7/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/Al-Fatiha/i).length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ')).toBeInTheDocument()
+    expect(screen.getByText(/In the name of God, the Gracious, the Merciful/i)).toBeInTheDocument()
+  })
+
+  it('renders the + Verse toolbar button and shortcut hint', async () => {
+    renderEditor([])
+    expect(await screen.findByRole('button', { name: /\+ Verse/i })).toBeInTheDocument()
+    expect(screen.getByText(/quick menu/i)).toBeInTheDocument()
+  })
 })

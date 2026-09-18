@@ -15,16 +15,45 @@ function paintClothGrain(
   ctx.restore()
 }
 
+let cachedBibleCanvases: {
+  front: HTMLCanvasElement
+  spine: HTMLCanvasElement
+  back: HTMLCanvasElement
+} | null = null
+
 export async function createBibleCanvases() {
-  const W = 1800
-  const H = 2700
-  const S_W = 512
-  const S_H = 2700
+  if (cachedBibleCanvases) {
+    return cachedBibleCanvases
+  }
+
+  // Target render size: 600x900 (spine 170x900)
+  // Provides razor-sharp Retina fidelity for the 280x360 book display while
+  // reducing raw canvas memory from 45MB down to ~4.5MB (a 90% reduction).
+  const BASE_W = 1800
+  const BASE_H = 2700
+  const BASE_S_W = 512
+  const BASE_S_H = 2700
+
+  const TARGET_W = 600
+  const TARGET_H = 900
+  const TARGET_S_W = 170
+  const TARGET_S_H = 900
+
+  const scaleW = TARGET_W / BASE_W
+  const scaleH = TARGET_H / BASE_H
+  const scaleSW = TARGET_S_W / BASE_S_W
+  const scaleSH = TARGET_S_H / BASE_S_H
 
   const grainImage = await loadCachedImage(CLOTH_GRAIN_TEXTURE_SRC)
 
+  const W = BASE_W
+  const H = BASE_H
+  const S_W = BASE_S_W
+  const S_H = BASE_S_H
+
   // 1. FRONT COVER
-  const [fCanvas, fCtx] = makeCanvas(W, H)
+  const [fCanvas, fCtx] = makeCanvas(TARGET_W, TARGET_H)
+  fCtx.scale(scaleW, scaleH)
 
   const bgGrad = fCtx.createLinearGradient(0, 0, W, H)
   bgGrad.addColorStop(0, '#141e2b')
@@ -138,7 +167,8 @@ export async function createBibleCanvases() {
   fCtx.fillText('Authorized Scriptures of God', W / 2, H - 330)
 
   // 2. SPINE
-  const [sCanvas, sCtx] = makeCanvas(S_W, S_H)
+  const [sCanvas, sCtx] = makeCanvas(TARGET_S_W, TARGET_S_H)
+  sCtx.scale(scaleSW, scaleSH)
 
   const sGrad = sCtx.createLinearGradient(0, 0, S_W, 0)
   sGrad.addColorStop(0, '#090e14')
@@ -159,7 +189,8 @@ export async function createBibleCanvases() {
   sCtx.restore()
 
   // 3. BACK COVER
-  const [bCanvas, bCtx] = makeCanvas(W, H)
+  const [bCanvas, bCtx] = makeCanvas(TARGET_W, TARGET_H)
+  bCtx.scale(scaleW, scaleH)
   bCtx.fillStyle = bgGrad
   bCtx.fillRect(0, 0, W, H)
   bCtx.strokeStyle = goldGrad
@@ -194,5 +225,6 @@ export async function createBibleCanvases() {
   bCtx.fillStyle = 'rgba(222, 184, 116, 0.7)'
   bCtx.fillText('◆', W / 2, H / 2 + 280)
 
-  return { front: fCanvas, spine: sCanvas, back: bCanvas }
+  cachedBibleCanvases = { front: fCanvas, spine: sCanvas, back: bCanvas }
+  return cachedBibleCanvases
 }

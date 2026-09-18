@@ -1,13 +1,15 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { About } from '@/constants/about'
 import { getTranslations } from 'next-intl/server'
 import { FaApple, FaDiscord, FaGithub, FaYoutube } from 'react-icons/fa'
 import { FaXTwitter } from 'react-icons/fa6'
+import { ArrowUpRight } from 'lucide-react'
 
 const F = {
   display: 'var(--font-cormorant), Georgia, serif',
   serif: 'var(--font-source-serif), Georgia, serif',
-  glacial: 'var(--font-glacial), sans-serif',
+  mono: 'var(--font-jetbrains), monospace',
 }
 
 export async function SiteFooter() {
@@ -28,6 +30,7 @@ export async function SiteFooter() {
       { label: navbar('archive'), href: '/archive' },
       { label: navbar('music'), href: '/music' },
       { label: navbar('blog'), href: '/blog' },
+      { label: navbar('chat'), href: '/chat' },
       { label: nav('downloads'), href: '/downloads' },
     ],
     organization: [
@@ -40,9 +43,18 @@ export async function SiteFooter() {
   }
 
   const COLS = [
-    { heading: t('sectionScripture'), links: LINKS.scripture },
-    { heading: t('sectionExplore'), links: LINKS.explore },
-    { heading: t('sectionOrganization'), links: LINKS.organization },
+    {
+      heading: t('sectionScripture'),
+      links: LINKS.scripture,
+    },
+    {
+      heading: t('sectionExplore'),
+      links: LINKS.explore,
+    },
+    {
+      heading: t('sectionOrganization'),
+      links: LINKS.organization,
+    },
   ]
 
   const SOCIALS = [
@@ -53,139 +65,70 @@ export async function SiteFooter() {
   ]
 
   return (
-    <footer
-      style={{
-        borderTop: '1px solid var(--ed-rule)',
-        backgroundColor: 'var(--ed-bg)',
-      }}
-    >
-      <div
-        style={{ maxWidth: 1240, margin: '0 auto' }}
-        className="px-5 sm:px-10 pt-14 sm:pt-20 pb-10"
-      >
-        {/* Main grid */}
-        <div
-          className="grid grid-cols-[2fr_1fr_1fr_1fr] max-md:grid-cols-2 max-sm:grid-cols-1 gap-12 sm:gap-12 md:gap-12 mb-6"
-        >
-          {/* Brand column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }} className="max-md:col-span-2 max-sm:col-span-1">
-            <div>
+    <footer className="border-t border-[var(--ed-rule)] bg-[var(--ed-bg)] text-[var(--ed-fg)] select-none">
+      <div className="mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10 py-10 sm:py-12">
+        {/* Main Brand + Nav Columns */}
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-5 lg:gap-10">
+          {/* Brand & Mission (spans 2 columns on tablet/desktop) */}
+          <div className="col-span-2 flex flex-col justify-between pr-0 md:pr-6">
+            <div className="space-y-3">
               <Link
                 href="/"
-                style={{
-                  fontFamily: F.display,
-                  fontSize: 24,
-                  fontWeight: 600,
-                  letterSpacing: '-0.015em',
-                  color: 'var(--ed-fg)',
-                  textDecoration: 'none',
-                  display: 'block',
-                }}
+                className="group inline-flex items-center gap-2.5 text-inherit no-underline"
+                aria-label="WikiSubmission Home"
               >
-                WikiSubmission
+                <Image
+                  src="/brand-assets/logo-mark.png"
+                  alt=""
+                  width={26}
+                  height={26}
+                  className="size-[26px] object-contain transition-transform duration-300 group-hover:scale-105"
+                />
+                <span
+                  className="text-xl font-semibold tracking-tight text-[var(--ed-fg)]"
+                  style={{ fontFamily: F.display }}
+                >
+                  WikiSubmission
+                </span>
               </Link>
+
+              <p
+                className="m-0 text-[13px] leading-relaxed text-[var(--ed-fg-muted)] max-w-[340px]"
+                style={{ fontFamily: F.serif }}
+              >
+                {t('missionDesc')}
+              </p>
             </div>
 
-            <p
-              style={{
-                fontFamily: F.serif,
-                fontSize: 14,
-                color: 'var(--ed-fg-muted)',
-                lineHeight: 1.6,
-                maxWidth: '44ch',
-              }}
-            >
-              {t('missionDesc')}
-            </p>
-
-            <a
-              href="https://apps.apple.com/us/app/submission-religion-of-god/id6444260632"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '8px 16px',
-                backgroundColor: 'var(--ed-fg)',
-                color: 'var(--ed-bg)',
-                borderRadius: 2,
-                textDecoration: 'none',
-                width: 'fit-content',
-                border: '1px solid var(--ed-fg)',
-                lineHeight: 1,
-              }}
-            >
-              <FaApple size={26} aria-hidden="true" />
-              <span
-                style={{
-                  display: 'inline-flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  gap: 2,
-                  lineHeight: 1,
-                }}
+            <div className="mt-5 flex items-center gap-3 text-[11px] font-mono text-[var(--ed-fg-muted)]">
+              <span className="opacity-80">501(c)(3) · EIN 39-4876245</span>
+              <span className="opacity-30">·</span>
+              <a
+                href="https://apps.apple.com/us/app/submission-religion-of-god/id6444260632"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[var(--ed-fg-muted)] hover:text-[var(--ed-accent)] transition-colors"
               >
-                <span
-                  style={{
-                    fontFamily:
-                      '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif',
-                    fontSize: 10,
-                    fontWeight: 400,
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  {t('appStorePrefix')}
-                </span>
-                <span
-                  style={{
-                    fontFamily:
-                      '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif',
-                    fontSize: 19,
-                    fontWeight: 500,
-                    letterSpacing: '-0.01em',
-                  }}
-                >
-                  {t('appStoreLabel')}
-                </span>
-              </span>
-            </a>
-
+                <FaApple size={12} className="shrink-0" />
+                <span>iOS App</span>
+                <ArrowUpRight size={10} className="opacity-60" />
+              </a>
+            </div>
           </div>
 
-          {/* Link columns */}
+          {/* 3 Navigation Columns */}
           {COLS.map((col) => (
-            <div key={col.heading}>
-              <div
-                style={{
-                  fontFamily: F.glacial,
-                  fontSize: 11,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase' as const,
-                  color: 'var(--ed-accent)',
-                  marginBottom: 18,
-                }}
-              >
+            <div key={col.heading} className="flex flex-col">
+              <span className="text-[10.5px] font-mono uppercase tracking-[0.16em] font-semibold text-[var(--ed-accent)] mb-3">
                 {col.heading}
-              </div>
-              <ul
-                style={{
-                  listStyle: 'none',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 10,
-                }}
-              >
+              </span>
+              <ul className="m-0 flex flex-col gap-2 p-0 list-none">
                 {col.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="ed-link"
-                      style={{
-                        fontFamily: F.serif,
-                        fontSize: 14,
-                        display: 'block',
-                      }}
+                      className="text-[13px] text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] transition-colors inline-block"
+                      style={{ fontFamily: F.serif }}
                     >
                       {link.label}
                     </Link>
@@ -196,159 +139,33 @@ export async function SiteFooter() {
           ))}
         </div>
 
-        {/* Support + Connect cards (full-width row) */}
-        <div
-          className="grid grid-cols-2 max-sm:grid-cols-1 gap-4 mb-12"
-        >
-          <div
-            style={{
-              padding: '18px 20px',
-              backgroundColor: 'var(--ed-bg-alt)',
-              borderRadius: 2,
-            }}
-          >
-            <div
-              style={{
-                fontFamily: F.glacial,
-                fontSize: 10.5,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase' as const,
-                color: 'var(--ed-accent)',
-                marginBottom: 6,
-              }}
-            >
-              {t('supportHeading')}
-            </div>
-            <div
-              style={{
-                fontFamily: F.serif,
-                fontSize: 13,
-                color: 'var(--ed-fg-muted)',
-                lineHeight: 1.6,
-              }}
-            >
-              {t('supportBody')}
-            </div>
-            <Link
-              href="/donate"
-              className="ed-cta"
-              style={{ marginTop: 10, fontFamily: F.serif, fontSize: 13 }}
-            >
-              {t('donateCta')}
-            </Link>
-          </div>
-
-          <div
-            style={{
-              padding: '18px 20px',
-              backgroundColor: 'var(--ed-bg-alt)',
-              borderRadius: 2,
-            }}
-          >
-            <div
-              style={{
-                fontFamily: F.glacial,
-                fontSize: 10.5,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase' as const,
-                color: 'var(--ed-accent)',
-                marginBottom: 6,
-              }}
-            >
-              {t('connectHeading')}
-            </div>
-            <div
-              style={{
-                fontFamily: F.serif,
-                fontSize: 13,
-                color: 'var(--ed-fg-muted)',
-                lineHeight: 1.6,
-              }}
-            >
-              {t('connectShortBody')}
-            </div>
-            <a
-              href={About.social.discord}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ed-cta"
-              style={{ marginTop: 10, fontFamily: F.serif, fontSize: 13 }}
-            >
-              {t('joinDiscordCta')}
-            </a>
-          </div>
-        </div>
-
-        {/* Verse block */}
-        <div
-          style={{
-            padding: '28px 0',
-            borderTop: '1px solid var(--ed-rule)',
-            borderBottom: '1px solid var(--ed-rule)',
-            display: 'flex',
-            gap: 20,
-            alignItems: 'baseline',
-          }}
-        >
-          <span
-            style={{
-              fontFamily: F.glacial,
-              fontSize: 11,
-              letterSpacing: '0.12em',
-              color: 'var(--ed-accent)',
-              flexShrink: 0,
-              paddingTop: 2,
-            }}
-          >
-            112:1–4
-          </span>
-          <span
-            style={{
-              fontFamily: F.display,
-              fontStyle: 'italic',
-              fontSize: 15,
-              lineHeight: 1.55,
-              color: 'var(--ed-fg-muted)',
-            }}
-          >
-            {t('verse112')}
-          </span>
-        </div>
-
-        {/* Bottom bar */}
-        <div
-          style={{
-            marginTop: 24,
-            fontFamily: F.glacial,
-            fontSize: 11,
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase' as const,
-            color: 'var(--ed-fg-muted)',
-          }}
-          className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-3"
-        >
-          <div className="flex items-center gap-3 flex-wrap">
+        {/* Compact Utility Bar */}
+        <div className="mt-8 pt-5 border-t border-[var(--ed-rule)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-[11px] font-mono text-[var(--ed-fg-muted)] flex-wrap">
             <span>{t('copyrightLine')}</span>
-            <span style={{ opacity: 0.5 }}>·</span>
+            <span className="opacity-30">·</span>
             <span>{t('madeForCause')}</span>
+            <span className="opacity-30">·</span>
+            <span className="text-[var(--ed-accent)] opacity-90">Open-Source & Ad-Free</span>
           </div>
-          <div className="sm:ml-auto flex gap-4">
+
+          <div className="flex items-center gap-1.5">
             {SOCIALS.map((s) => {
               const Icon = s.icon
               return (
-              <a
-                key={s.label}
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={s.label}
-                className="ed-link inline-flex items-center gap-1.5"
-                style={{ fontFamily: F.glacial }}
-              >
-                <Icon className="size-3.5" aria-hidden="true" />
-                <span>{s.label}</span>
-              </a>
-            )})}
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  title={s.label}
+                  className="flex size-7 items-center justify-center rounded-[4px] border border-[var(--ed-rule)] text-[var(--ed-fg-muted)] hover:border-[var(--ed-accent)] hover:text-[var(--ed-accent)] hover:bg-[color-mix(in_oklab,var(--ed-accent),transparent_94%)] transition-colors"
+                >
+                  <Icon size={12} />
+                </a>
+              )
+            })}
           </div>
         </div>
       </div>

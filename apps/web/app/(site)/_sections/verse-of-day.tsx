@@ -1,9 +1,10 @@
 'use client'
-import { useEffect, useMemo, useRef, useState } from 'react'
+
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import gsap from 'gsap'
-import { Copy, Check } from 'lucide-react'
+import { Copy, Check, ChevronDown, Pause, Play, BookOpen } from 'lucide-react'
 import { F, SectionDivider, Arrow } from './shared'
 import { BIBLE_BOOKS } from '@/constants/bible-books'
 
@@ -33,39 +34,7 @@ type Tab = {
   verses: Verse[]
 }
 
-const ROTATE_MS = 7000
-
-function ProgressBar({ progressKey, durationMs }: { progressKey: number; durationMs: number }) {
-  const ref = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    gsap.fromTo(
-      el,
-      { scaleX: 0 },
-      { scaleX: 1, duration: durationMs / 1000, ease: 'none' },
-    )
-  }, [progressKey, durationMs])
-
-  return (
-    <div
-      ref={ref}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 2,
-        background: 'var(--ed-accent)',
-        transformOrigin: 'left center',
-        transform: 'scaleX(0)',
-        zIndex: 10,
-        opacity: 0.6,
-      }}
-    />
-  )
-}
+const ROTATE_MS = 7500
 
 function VerseText({
   verseKey,
@@ -85,8 +54,8 @@ function VerseText({
     } else {
       gsap.fromTo(
         el,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' },
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' },
       )
     }
     prevKeyRef.current = verseKey
@@ -97,22 +66,24 @@ function VerseText({
       ref={ref}
       style={{
         fontFamily: F.display,
-        fontSize: 'clamp(22px, 5vw, 30px)',
-        lineHeight: 1.35,
+        fontSize: 'clamp(23px, 3.4vw, 35px)',
+        lineHeight: 1.42,
         color: 'var(--ed-fg)',
-        letterSpacing: '-0.015em',
-        maxWidth: '52ch',
+        letterSpacing: '-0.018em',
+        maxWidth: '56ch',
         margin: 0,
       }}
+      className="select-text"
     >
       <span
         aria-hidden
         style={{
           color: 'var(--ed-accent)',
-          fontSize: '1.4em',
+          fontSize: '1.25em',
           lineHeight: 0,
           marginRight: 6,
           fontFamily: F.display,
+          opacity: 0.75,
         }}
       >
         &ldquo;
@@ -125,6 +96,9 @@ function VerseText({
 export function VerseOfTheDaySection() {
   const t = useTranslations('homePage.verseOfDay')
   const [copied, setCopied] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isFootnoteOpen, setIsFootnoteOpen] = useState(false)
 
   const TABS: Tab[] = useMemo(
     () => [
@@ -208,34 +182,61 @@ export function VerseOfTheDaySection() {
 
   const [tabKey, setTabKey] = useState<Tab['key']>('quran')
   const [idx, setIdx] = useState(0)
-  const [progressKey, setProgressKey] = useState(0)
+  const [progress, setProgress] = useState(0)
 
   const current = useMemo(
     () => TABS.find((tab) => tab.key === tabKey) ?? TABS[0],
     [tabKey, TABS],
   )
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIdx(0)
-    setProgressKey((k) => k + 1)
-  }, [tabKey])
-
-  useEffect(() => {
-    const tm = setInterval(() => {
-      setIdx((p) => (p + 1) % current.verses.length)
-      setProgressKey((k) => k + 1)
-    }, ROTATE_MS)
-    return () => clearInterval(tm)
-  }, [current.verses.length])
-
-  const v = current.verses[idx]
+  const v = current.verses[idx] ?? current.verses[0]
   const continueHref = buildVerseHref(tabKey, v.ref)
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(`${v.english}\n— ${v.ref}`)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  // Reset index & footnote disclosure when switching scripture traditions
+  const handleTabChange = useCallback((key: Tab['key']) => {
+    setTabKey(key)
+    setIdx(0)
+    setProgress(0)
+    setIsFootnoteOpen(false)
+  }, [])
+
+  // Smooth rotation timer with pause on hover/focus and manual pause
+  const shouldPause = isPaused || isHovered
+
+  useEffect(() => {
+    if (shouldPause) return
+
+    const intervalMs = 50
+    const step = (intervalMs / ROTATE_MS) * 100
+
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          setIdx((currentIdx) => (currentIdx + 1) % current.verses.length)
+          setIsFootnoteOpen(false)
+          return 0
+        }
+        return prev + step
+      })
+    }, intervalMs)
+
+    return () => clearInterval(timer)
+  }, [shouldPause, current.verses.length])
+
+  const selectVerse = (index: number) => {
+    setIdx(index)
+    setProgress(0)
+    setIsFootnoteOpen(false)
+  }
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(`${v.english}\n— ${v.ref}`)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2200)
+    } catch {
+      // fallback if clipboard API is restricted
+    }
   }
 
   return (
@@ -244,6 +245,7 @@ export function VerseOfTheDaySection() {
         backgroundColor: 'var(--ed-bg)',
         padding: 'clamp(64px, 8vw, 96px) 0',
       }}
+      className="relative"
     >
       <div
         className="px-4 sm:px-6 md:px-10"
@@ -255,215 +257,286 @@ export function VerseOfTheDaySection() {
           sub={t('dividerSub')}
         />
 
+        {/* ── Editorial Reading Lectern / Folio ── */}
         <div
-          style={{
-            border: '1px solid var(--ed-rule)',
-            borderRadius: 0,
-            backgroundColor: 'var(--ed-surface)',
-            overflow: 'hidden',
-            position: 'relative',
-          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className="relative border border-[var(--ed-rule)] bg-[var(--ed-surface)] shadow-xs transition-colors duration-300"
+          style={{ borderRadius: 0 }}
         >
-          <ProgressBar progressKey={progressKey} durationMs={ROTATE_MS} />
-
-          <div
-            className="flex items-center justify-between gap-3 flex-wrap"
-            style={{
-              padding: 'clamp(16px, 3vw, 22px) clamp(20px, 4vw, 32px)',
-              borderBottom: '1px solid var(--ed-rule)',
-            }}
-          >
+          {/* Subtle top hairline progress indicator */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-transparent overflow-hidden">
             <div
+              className="h-full bg-[var(--ed-accent)] transition-[width] duration-100 ease-linear"
               style={{
-                fontFamily: F.glacial,
-                fontSize: 10.5,
-                fontWeight: 600,
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-                color: 'var(--ed-fg-muted)',
+                width: `${progress}%`,
+                opacity: shouldPause ? 0.35 : 0.85,
               }}
-            >
-              {t('todayLabel')} · {current.sub}
+            />
+          </div>
+
+          {/* ── Top Folio Header & Tradition Selector ── */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-b border-[var(--ed-rule)] px-5 py-3 sm:px-8 sm:py-3.5 gap-4">
+            {/* Archival category kicker */}
+            <div className="flex items-center gap-2.5">
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)]"
+                aria-hidden
+              />
+              <span
+                style={{ fontFamily: F.glacial }}
+                className="text-[10px] sm:text-[10.5px] font-semibold tracking-[0.18em] uppercase text-[var(--ed-fg-muted)]"
+              >
+                {t('todayLabel')} · {current.sub}
+              </span>
             </div>
+
+            {/* Text-First Editorial Segmented Tabs */}
             <div
               role="tablist"
-              style={{
-                display: 'inline-flex',
-                gap: 0,
-                padding: 0,
-                border: '1px solid var(--ed-rule)',
-                borderRadius: 0,
-              }}
+              aria-label={t('dividerTitle')}
+              className="flex items-center gap-1 sm:gap-2 self-start sm:self-auto overflow-x-auto no-scrollbar"
             >
-              {TABS.map((tab) => (
-                <button
-                  key={tab.key}
-                  role="tab"
-                  aria-selected={tabKey === tab.key}
-                  onClick={() => setTabKey(tab.key)}
-                  type="button"
-                  style={{
-                    fontFamily: F.glacial,
-                    fontSize: 10,
-                    fontWeight: tabKey === tab.key ? 700 : 500,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    padding: '8px 18px',
-                    border: 'none',
-                    background:
-                      tabKey === tab.key ? 'var(--ed-fg)' : 'transparent',
-                    color:
-                      tabKey === tab.key
-                        ? 'var(--ed-bg)'
-                        : 'var(--ed-fg-muted)',
-                    cursor: 'pointer',
-                    borderRadius: 0,
-                    transition: 'all 150ms',
-                    borderRight: '1px solid var(--ed-rule)',
-                  }}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              {TABS.map((tab) => {
+                const isActive = tabKey === tab.key
+                return (
+                  <button
+                    key={tab.key}
+                    role="tab"
+                    id={`tab-${tab.key}`}
+                    aria-selected={isActive}
+                    aria-controls={`panel-${tab.key}`}
+                    onClick={() => handleTabChange(tab.key)}
+                    type="button"
+                    className="relative group px-3.5 py-1.5 text-left cursor-pointer transition-colors"
+                  >
+                    <span
+                      style={{ fontFamily: F.glacial }}
+                      className={`block text-[11px] font-semibold tracking-[0.14em] uppercase transition-colors ${
+                        isActive
+                          ? 'text-[var(--ed-fg)]'
+                          : 'text-[var(--ed-fg-muted)] group-hover:text-[var(--ed-fg)]'
+                      }`}
+                    >
+                      {tab.label}
+                    </span>
+
+                    {/* Active hairline indicator */}
+                    <span
+                      className={`absolute bottom-0 left-3 right-3 h-[1.5px] transition-all duration-200 ${
+                        isActive
+                          ? 'bg-[var(--ed-accent)] opacity-100 scale-x-100'
+                          : 'bg-transparent opacity-0 scale-x-50 group-hover:opacity-40 group-hover:bg-[var(--ed-rule)]'
+                      }`}
+                    />
+                  </button>
+                )
+              })}
             </div>
           </div>
 
+          {/* ── Main Reading Body ── */}
           <div
-            style={{
-              padding: 'clamp(28px, 5vw, 48px) clamp(20px, 4vw, 40px)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 18,
-            }}
+            id={`panel-${tabKey}`}
+            role="tabpanel"
+            aria-labelledby={`tab-${tabKey}`}
+            className="p-6 sm:p-10 lg:p-12 flex flex-col gap-6"
           >
-            <div
-              style={{
-                display: 'flex',
-                gap: 14,
-                alignItems: 'baseline',
-                flexWrap: 'wrap',
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: F.glacial,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  color: 'var(--ed-accent)',
-                }}
-              >
-                {v.ref}
-              </span>
-              <span
-                style={{
-                  fontFamily: F.display,
-                  fontSize: 20,
-                  fontStyle: 'italic',
-                  color: 'var(--ed-fg-muted)',
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                {v.title}
-              </span>
+            {/* Archival Citation & Utility Action Bar */}
+            <div className="flex items-center justify-between gap-4 flex-wrap pb-4 border-b border-[var(--ed-rule)]">
+              <div className="flex items-baseline gap-3.5 flex-wrap">
+                <span
+                  style={{ fontFamily: F.mono }}
+                  className="text-xs sm:text-[13px] font-semibold tracking-[0.14em] uppercase text-[var(--ed-accent)]"
+                >
+                  {v.ref}
+                </span>
 
-              <button
-                onClick={handleCopy}
-                className="ml-auto p-2 opacity-50 hover:opacity-100 transition-opacity"
-                title="Copy verse"
-              >
-                {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
-              </button>
+                <span aria-hidden className="text-[var(--ed-rule)] text-sm">
+                  /
+                </span>
+
+                <span
+                  style={{ fontFamily: F.display }}
+                  className="text-lg sm:text-xl italic text-[var(--ed-fg-muted)] tracking-tight"
+                >
+                  {v.title}
+                </span>
+              </div>
+
+              {/* Utility Toolbar: Pause/Resume + Copy Citation */}
+              <div className="flex items-center gap-2 ml-auto">
+                {/* Pause/Resume Auto-Rotation */}
+                <button
+                  type="button"
+                  onClick={() => setIsPaused(!isPaused)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10.5px] border border-[var(--ed-rule)] bg-transparent text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] hover:border-[var(--ed-fg)] transition-all cursor-pointer rounded-[2px]"
+                  style={{ fontFamily: F.mono }}
+                  title={isPaused ? 'Resume auto-rotation' : 'Pause auto-rotation'}
+                  aria-label={isPaused ? 'Resume auto-rotation' : 'Pause auto-rotation'}
+                >
+                  {isPaused ? (
+                    <>
+                      <Play size={10} className="fill-current" />
+                      <span className="hidden sm:inline">Resume</span>
+                    </>
+                  ) : (
+                    <>
+                      <Pause size={10} className="fill-current" />
+                      <span className="hidden sm:inline">Pause</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Copy Citation Button */}
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10.5px] border border-[var(--ed-rule)] bg-transparent text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] hover:border-[var(--ed-fg)] transition-all cursor-pointer rounded-[2px]"
+                  style={{ fontFamily: F.mono }}
+                  title="Copy scripture citation to clipboard"
+                  aria-label="Copy scripture citation to clipboard"
+                >
+                  {copied ? (
+                    <>
+                      <Check size={11} className="text-emerald-500 shrink-0" />
+                      <span className="text-emerald-500 font-medium">Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={11} className="shrink-0 opacity-70" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
-            <VerseText verseKey={`${tabKey}-${idx}`} verse={v} />
+            {/* The Verse Text — Visual Focal Point */}
+            <div className="py-2 sm:py-4">
+              <VerseText verseKey={`${tabKey}-${idx}`} verse={v} />
+            </div>
 
+            {/* ── Watermelon-Style Footnote Accordion Disclosure ── */}
             {v.footnote && (
-              <div
-                style={{
-                  fontFamily: F.serif,
-                  fontSize: 13.5,
-                  lineHeight: 1.6,
-                  color: 'var(--ed-fg-muted)',
-                  paddingTop: 14,
-                  borderTop: '1px solid var(--ed-rule)',
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: F.glacial,
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: '0.16em',
-                    textTransform: 'uppercase',
-                    color: 'var(--ed-fg-muted)',
-                    marginRight: 10,
-                  }}
+              <div className="pt-2 border-t border-[var(--ed-rule)]">
+                <button
+                  type="button"
+                  onClick={() => setIsFootnoteOpen(!isFootnoteOpen)}
+                  aria-expanded={isFootnoteOpen}
+                  aria-controls={`footnote-content-${tabKey}-${idx}`}
+                  className="group inline-flex items-center gap-2 py-1 text-left cursor-pointer transition-colors text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)]"
                 >
-                  {t('footnoteLabel')}
-                </span>
-                {v.footnote}
+                  <BookOpen size={13} className="text-[var(--ed-accent)] opacity-80" />
+                  <span
+                    style={{ fontFamily: F.glacial }}
+                    className="text-[10px] sm:text-[10.5px] font-semibold tracking-[0.14em] uppercase"
+                  >
+                    {isFootnoteOpen ? 'Hide Scholarly Context' : 'View Scholarly Context'}
+                  </span>
+                  <ChevronDown
+                    size={13}
+                    className={`transition-transform duration-300 ease-out text-[var(--ed-fg-muted)] group-hover:text-[var(--ed-fg)] ${
+                      isFootnoteOpen ? 'rotate-180 text-[var(--ed-accent)]' : ''
+                    }`}
+                  />
+                </button>
+
+                {/* Animated Accordion Drawer */}
+                <div
+                  id={`footnote-content-${tabKey}-${idx}`}
+                  role="region"
+                  className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+                    isFootnoteOpen
+                      ? 'grid-rows-[1fr] opacity-100 mt-3'
+                      : 'grid-rows-[0fr] opacity-0 pointer-events-none'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div
+                      className="border-l-2 border-[var(--ed-accent)] bg-[var(--ed-bg-alt)]/60 px-4 py-3 sm:px-5 sm:py-3.5"
+                      style={{
+                        fontFamily: F.serif,
+                        fontSize: 14,
+                        lineHeight: 1.65,
+                        color: 'var(--ed-fg-muted)',
+                      }}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span
+                          style={{ fontFamily: F.glacial }}
+                          className="text-[9.5px] font-bold tracking-[0.16em] uppercase text-[var(--ed-accent)]"
+                        >
+                          {t('footnoteLabel')}
+                        </span>
+                      </div>
+                      <p className="m-0 text-[var(--ed-fg)]/90">{v.footnote}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
-          <div
-            className="flex items-center justify-between gap-3 flex-wrap"
-            style={{
-              padding: 'clamp(16px, 3vw, 20px) clamp(20px, 4vw, 32px)',
-              borderTop: '1px solid var(--ed-rule)',
-              backgroundColor: 'var(--ed-bg-alt)',
-            }}
-          >
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {/* ── Bottom Navigation & Contextual Chapter CTA ── */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-t border-[var(--ed-rule)] bg-[var(--ed-bg-alt)] px-5 py-4 sm:px-8 sm:py-4 gap-4">
+            {/* Primary Action: Continue into Chapter */}
+            <div className="flex items-center gap-4">
               <Link
                 href={continueHref}
                 className="ed-btn-primary"
-                style={{ fontFamily: F.serif, padding: '10px 18px' }}
+                style={{
+                  fontFamily: F.serif,
+                  padding: '9px 18px',
+                  fontSize: '13.5px',
+                }}
               >
-                {t('continueChapter')}
-                <Arrow />
+                <span>{t('continueChapter')}</span>
+                <Arrow size={13} />
               </Link>
+
+              <span
+                style={{ fontFamily: F.mono }}
+                className="hidden md:inline text-[11px] text-[var(--ed-fg-muted)]"
+              >
+                {current.label} · Chapter context
+              </span>
             </div>
 
-            <div aria-label={t('rotationLabel')} style={{ display: 'flex', gap: 0 }}>
-              {current.verses.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => {
-                    setIdx(i)
-                    setProgressKey((k) => k + 1)
-                  }}
-                  aria-label={t('verseAria', { n: i + 1 })}
-                  aria-current={i === idx ? 'true' : undefined}
-                  // 24x24 minimum hit area (WCAG 2.5.8); the visible dot stays small.
-                  style={{
-                    width: i === idx ? 32 : 24,
-                    height: 24,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    padding: 0,
-                  }}
-                >
-                  <span
-                    aria-hidden
-                    style={{
-                      width: i === idx ? 20 : 8,
-                      height: 8,
-                      borderRadius: 4,
-                      background:
-                        i === idx ? 'var(--ed-accent)' : 'var(--ed-rule)',
-                      transition: 'all 180ms',
-                    }}
-                  />
-                </button>
-              ))}
+            {/* Reading Sequence Indicators */}
+            <div
+              aria-label={t('rotationLabel')}
+              className="flex items-center gap-2 self-end sm:self-auto"
+            >
+              <span
+                style={{ fontFamily: F.glacial }}
+                className="text-[9.5px] font-semibold uppercase tracking-[0.14em] text-[var(--ed-fg-muted)] mr-1 hidden sm:inline"
+              >
+                Passage
+              </span>
+
+              {current.verses.map((item, i) => {
+                const isActive = i === idx
+                const numLabel = String(i + 1).padStart(2, '0')
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => selectVerse(i)}
+                    aria-label={t('verseAria', { n: i + 1 })}
+                    aria-current={isActive ? 'true' : undefined}
+                    title={`${item.ref} — ${item.title}`}
+                    className={`relative inline-flex items-center justify-center px-2.5 py-1 text-xs transition-all cursor-pointer border rounded-[2px] ${
+                      isActive
+                        ? 'border-[var(--ed-accent)] bg-[var(--ed-surface)] text-[var(--ed-accent)] font-semibold shadow-2xs'
+                        : 'border-[var(--ed-rule)] bg-transparent text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] hover:border-[var(--ed-fg-muted)]'
+                    }`}
+                    style={{ fontFamily: F.mono }}
+                  >
+                    <span>{numLabel}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
         </div>

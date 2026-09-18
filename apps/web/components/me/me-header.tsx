@@ -1,19 +1,22 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Fragment } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { Fragment, Suspense } from 'react'
+import { ArrowLeft } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { ChevronLeft } from 'lucide-react'
-import { LocaleSwitcher } from '@/components/toggles/locale-switcher'
-import { PaletteThemeSwitcher } from '@/components/toggles/palette-theme-switcher'
 import { useCollections } from '@/hooks/use-collections'
 import { useBookmarkCategories } from '@/hooks/use-bookmark-categories'
 
 const ME_ROOT_RE = /^\/me\/?$/
-const ME_PATH_RE = /^(\/[a-z]{2}(-[A-Z]{2})?)?\/me(\/|$)/
 
 type Crumb = { label: string; href?: string }
+
+type HeaderItem = {
+  id?: number | string
+  name?: string
+  title?: string
+}
 
 function normalizeMePath(pathname: string, locale: string): string {
   if (pathname === `/${locale}` || pathname === `/${locale}/`) return '/'
@@ -21,21 +24,36 @@ function normalizeMePath(pathname: string, locale: string): string {
   return pathname
 }
 
-function useCrumbs(pathname: string, detailId: string | null): Crumb[] {
+function extractItems(raw: unknown): HeaderItem[] {
+  if (Array.isArray(raw)) {
+    return raw as HeaderItem[]
+  }
+  if (typeof raw === 'object' && raw !== null) {
+    const record = raw as Record<string, unknown>
+    if (Array.isArray(record.collections)) return record.collections as HeaderItem[]
+    if (Array.isArray(record.categories)) return record.categories as HeaderItem[]
+    if (Array.isArray(record.data)) return record.data as HeaderItem[]
+  }
+  return []
+}
+
+function useCrumbs(pathname: string, detailId: string | null, localePrefix = ''): Crumb[] {
   const t = useTranslations('meHeader')
-  const collections = useCollections()
-  const categories = useBookmarkCategories()
+  const rawCollections = useCollections()
+  const rawCategories = useBookmarkCategories()
+
+  const collections = extractItems(rawCollections)
+  const categories = extractItems(rawCategories)
 
   const segments = pathname.split('/').filter(Boolean)
   if (segments[0] !== 'me') return []
 
-  const crumbs: Crumb[] = [{ label: t('profile'), href: '/me' }]
+  const rootHref = `${localePrefix}/me`
+  const crumbs: Crumb[] = [{ label: t('profile'), href: rootHref }]
   if (segments.length === 1) return crumbs
 
   const section = segments[1]
-  // Detail routes (bookmarks/collections) now carry the id in ?id= rather than
-  // a path segment, so the deep-linked item name comes from the query.
-  const id = detailId ?? undefined
+  const id = detailId ?? segments[2] ?? undefined
 
   if (section === 'notes') {
     crumbs.push({ label: t('notes') })
@@ -58,21 +76,31 @@ function useCrumbs(pathname: string, detailId: string | null): Crumb[] {
   }
 
   if (section === 'collections') {
-    crumbs.push({ label: t('collections'), href: id ? '/me/collections' : undefined })
+    crumbs.push({
+      label: t('collections'),
+      href: id ? `${localePrefix}/me/collections` : undefined,
+    })
     if (id) {
       const numericId = Number.parseInt(id, 10)
-      const item = Number.isFinite(numericId) ? collections.find((c) => c.id === numericId) : null
-      crumbs.push({ label: item?.name ?? t('untitled') })
+      const item = collections.find(
+        (c) => String(c?.id) === id || (Number.isFinite(numericId) && c?.id === numericId)
+      )
+      crumbs.push({ label: item?.name ?? item?.title ?? t('untitled') })
     }
     return crumbs
   }
 
   if (section === 'bookmarks') {
-    crumbs.push({ label: t('bookmarks'), href: id ? '/me#bookmarks' : undefined })
+    crumbs.push({
+      label: t('bookmarks'),
+      href: id ? `${localePrefix}/me#bookmarks` : undefined,
+    })
     if (id) {
       const numericId = Number.parseInt(id, 10)
-      const item = Number.isFinite(numericId) ? categories.find((c) => c.id === numericId) : null
-      crumbs.push({ label: item?.name ?? t('untitled') })
+      const item = categories.find(
+        (c) => String(c?.id) === id || (Number.isFinite(numericId) && c?.id === numericId)
+      )
+      crumbs.push({ label: item?.name ?? item?.title ?? t('untitled') })
     }
     return crumbs
   }
@@ -81,49 +109,29 @@ function useCrumbs(pathname: string, detailId: string | null): Crumb[] {
   return crumbs
 }
 
-function RootNav() {
-  const t = useTranslations('meHeader')
-  const router = useRouter()
-
-  function handleBack() {
-    const stored = typeof window !== 'undefined' ? sessionStorage.getItem('me.preReferrer') : null
-    if (stored && !ME_PATH_RE.test(stored)) {
-      router.push(stored)
-      return
-    }
-    router.push('/')
-  }
-
-  return (
-    <nav className="me-breadcrumb" aria-label="Profile navigation">
-      <button type="button" className="me-header-back" onClick={handleBack}>
-        <ChevronLeft size={14} aria-hidden />
-        <span>{t('back')}</span>
-      </button>
-      <span className="sep" aria-hidden>|</span>
-      <Link href="/me/settings">{t('settings')}</Link>
-      <span className="sep" aria-hidden>|</span>
-      <Link href="/me/activity">{t('activity')}</Link>
-    </nav>
-  )
-}
-
 function Breadcrumb({ crumbs }: { crumbs: Crumb[] }) {
   return (
-    <nav className="me-breadcrumb" aria-label="Breadcrumb">
+    <nav className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-[var(--ed-fg-muted)]" aria-label="Breadcrumb">
       {crumbs.map((crumb, i) => {
         const isLast = i === crumbs.length - 1
         return (
           <Fragment key={`${crumb.label}-${i}`}>
             {i > 0 ? (
-              <span className="sep" aria-hidden>
+              <span className="opacity-30" aria-hidden="true">
                 /
               </span>
             ) : null}
             {crumb.href && !isLast ? (
-              <Link href={crumb.href}>{crumb.label}</Link>
+              <Link href={crumb.href} className="hover:text-[var(--ed-fg)] transition-colors">
+                {crumb.label}
+              </Link>
             ) : (
-              <span className={isLast ? 'crumb-current' : undefined}>{crumb.label}</span>
+              <span
+                className={isLast ? 'text-[var(--ed-accent)] font-semibold' : undefined}
+                aria-current={isLast ? 'page' : undefined}
+              >
+                {crumb.label}
+              </span>
             )}
           </Fragment>
         )
@@ -132,22 +140,40 @@ function Breadcrumb({ crumbs }: { crumbs: Crumb[] }) {
   )
 }
 
-export function MeHeader() {
+function MeHeaderContent() {
   const pathname = usePathname() ?? '/me'
   const searchParams = useSearchParams()
   const locale = useLocale()
+
+  const hasLocalePrefix = pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+  const localePrefix = hasLocalePrefix ? `/${locale}` : ''
+
   const normalizedPath = normalizeMePath(pathname, locale)
   const isRoot = ME_ROOT_RE.test(normalizedPath)
-  const crumbs = useCrumbs(normalizedPath, searchParams.get('id'))
+  const crumbs = useCrumbs(normalizedPath, searchParams.get('id'), localePrefix)
+
+  if (isRoot) return null
 
   return (
-    <div className="me-header">
-      {isRoot ? <RootNav /> : <Breadcrumb crumbs={crumbs} />}
-      <div className="me-header-spacer" />
-      <div className="me-header-toggles">
-        <LocaleSwitcher currentLocale={locale} />
-        <PaletteThemeSwitcher />
+    <div className="w-full border-b border-[var(--ed-rule)] bg-[var(--ed-bg)]">
+      <div className="max-w-[960px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between text-[12px] font-mono">
+        <Link
+          href={`${localePrefix}/me`}
+          className="inline-flex items-center gap-1.5 text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] transition-colors cursor-pointer"
+        >
+          <ArrowLeft size={13} />
+          <span>Dashboard</span>
+        </Link>
+        <Breadcrumb crumbs={crumbs} />
       </div>
     </div>
+  )
+}
+
+export function MeHeader() {
+  return (
+    <Suspense fallback={null}>
+      <MeHeaderContent />
+    </Suspense>
   )
 }

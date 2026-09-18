@@ -68,14 +68,20 @@ function CollectionListItem({
   )
 }
 
+const F = {
+  display: 'var(--font-cormorant), Georgia, serif',
+  serif: 'var(--font-source-serif), Georgia, serif',
+  mono: 'var(--font-jetbrains), monospace',
+  glacial: 'var(--font-glacial), sans-serif',
+}
+
 export function CollectionsMasterDetail({ initialId }: { initialId?: number }) {
   const t = useTranslations('meCollections')
   const tActions = useTranslations('actions')
-  const tHeader = useTranslations('meHeader')
   const collections = useCollections()
   const { mutate: del } = useDeleteCollection()
   const { mutate: create, isPending: creating } = useCreateCollection()
-  const [selectedId, setSelectedId] = useState<number | null>(initialId ?? null)
+  const [selectedId, setSelectedId] = useState<number | null>(initialId ?? (collections[0]?.id ?? null))
   const [newOpen, setNewOpen] = useState(false)
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
@@ -98,7 +104,10 @@ export function CollectionsMasterDetail({ initialId }: { initialId?: number }) {
   function handleDelete(id: number) {
     del(id, {
       onSuccess: () => {
-        if (selectedId === id) setSelectedId(null)
+        if (selectedId === id) {
+          const remaining = collections.filter((c) => c.id !== id)
+          setSelectedId(remaining[0]?.id ?? null)
+        }
       },
     })
   }
@@ -106,60 +115,83 @@ export function CollectionsMasterDetail({ initialId }: { initialId?: number }) {
   const isEmpty = collections.length === 0
 
   return (
-    <div className="flex flex-col gap-5 h-full">
-      {/* List (mobile: always shown unless detail is active; desktop: always visible) */}
-      <div
-        className={`flex flex-col gap-3 lg:hidden ${selectedId !== null ? 'hidden' : ''}`}
-      >
-        <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold">{tHeader('collections')}</h1>
-          <Button size="sm" onClick={() => setNewOpen(true)}>
-            <Plus className="w-3.5 h-3.5 me-1.5" />
-            {tActions('new')}
-          </Button>
-        </div>
-        {isEmpty ? (
-          <EmptyState onNew={() => setNewOpen(true)} />
-        ) : (
-          <div className="flex flex-col gap-1.5">
-            {collections.map((col) => (
-              <CollectionListItem
-                key={col.id}
-                col={col}
-                selected={col.id === selectedId}
-                onSelect={() => setSelectedId(col.id)}
-                onDelete={() => handleDelete(col.id)}
-              />
-            ))}
+    <div className="flex flex-col gap-6">
+      {/* ── Masthead ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[var(--ed-rule)]">
+        <div>
+          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.16em] text-[var(--ed-accent)] mb-2">
+            <Library size={13} />
+            <span>Sacred Library</span>
           </div>
-        )}
+          <h1
+            style={{ fontFamily: F.display }}
+            className="m-0 text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ed-fg)]"
+          >
+            Verse Collections
+          </h1>
+          <div className="mt-2 flex items-center gap-2 text-[12px] font-mono text-[var(--ed-fg-muted)]">
+            <span>{collections.length} {collections.length === 1 ? 'collection' : 'collections'}</span>
+            <span className="opacity-40">·</span>
+            <span>Thematic scripture studies</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setNewOpen(true)}
+          className="ed-btn-primary inline-flex items-center gap-2 px-4 py-2.5 text-[13.5px] shrink-0 self-start sm:self-auto cursor-pointer"
+          style={{ fontFamily: F.serif }}
+        >
+          <Plus size={15} />
+          <span>New Collection</span>
+        </button>
       </div>
 
-      {/* Mobile detail */}
-      {selectedId !== null && (
-        <div className="lg:hidden">
-          <CollectionDetailPane
-            collectionId={selectedId}
-            onBack={() => setSelectedId(null)}
-          />
-        </div>
-      )}
-
-      {/* Desktop master-detail */}
-      <div className="hidden lg:grid lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-6" style={{ minHeight: 'calc(100vh - 12rem)' }}>
-        {/* Left: list */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold">{tHeader('collections')}</h1>
-            <Button size="sm" onClick={() => setNewOpen(true)}>
-              <Plus className="w-3.5 h-3.5 me-1.5" />
-              {tActions('new')}
-            </Button>
+      {/* ── When Empty: Full Centered Card ── */}
+      {isEmpty ? (
+        <div className="rounded-[10px] border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-8 sm:p-12 text-center max-w-xl mx-auto w-full mt-4">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-[color-mix(in_oklab,var(--ed-accent),transparent_90%)] text-[var(--ed-accent)] mb-4">
+            <Library size={22} />
           </div>
-          {isEmpty ? (
-            <EmptyState onNew={() => setNewOpen(true)} />
-          ) : (
-            <div className="flex flex-col gap-1.5">
+
+          <h3
+            style={{ fontFamily: F.display }}
+            className="m-0 text-2xl font-medium tracking-tight text-[var(--ed-fg)]"
+          >
+            No collections yet
+          </h3>
+
+          <p
+            style={{ fontFamily: F.serif }}
+            className="mt-2 text-[14px] text-[var(--ed-fg-muted)] leading-relaxed"
+          >
+            Collections allow you to gather and organize related verses by topic, study questions, or spiritual reflections. You can keep them private or share them with fellow readers.
+          </p>
+
+          <div className="mt-6 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() => setNewOpen(true)}
+              className="ed-btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-[14px] cursor-pointer"
+              style={{ fontFamily: F.serif }}
+            >
+              <Plus size={15} />
+              <span>Create Your First Collection</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* ── Populated: Master-Detail Grid ── */
+        <div className="grid grid-cols-1 lg:grid-cols-[290px_minmax(0,1fr)] gap-6 items-start">
+          {/* Left Column: Collection List */}
+          <div className="flex flex-col gap-2 rounded-[8px] border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-3">
+            <span
+              style={{ fontFamily: F.glacial }}
+              className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-[var(--ed-fg-muted)] px-2 py-1"
+            >
+              Your Collections ({collections.length})
+            </span>
+            <div className="flex flex-col gap-1.5 max-h-[600px] overflow-y-auto">
               {collections.map((col) => (
                 <CollectionListItem
                   key={col.id}
@@ -170,69 +202,71 @@ export function CollectionsMasterDetail({ initialId }: { initialId?: number }) {
                 />
               ))}
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Right: detail */}
-        <div className="border-s border-border ps-6">
-          {selectedId !== null ? (
-            <CollectionDetailPane collectionId={selectedId} />
-          ) : (
-            <div className="flex flex-col items-center justify-center text-center gap-2 py-16">
-              <Library className="w-8 h-8 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground">
-                {t('selectToView')}
-              </p>
-            </div>
-          )}
+          {/* Right Column: Selected Collection Detail */}
+          <div className="rounded-[8px] border border-[var(--ed-rule)] bg-[var(--ed-surface)] p-6 sm:p-7 min-h-[400px]">
+            {selectedId !== null ? (
+              <CollectionDetailPane
+                collectionId={selectedId}
+                onBack={() => setSelectedId(null)}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center gap-2 py-16 text-[var(--ed-fg-muted)]">
+                <Library size={32} className="opacity-30 mb-2" />
+                <p style={{ fontFamily: F.serif }} className="text-[14px]">
+                  {t('selectToView')}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
+      {/* ── Create New Collection Dialog ── */}
       <Dialog open={newOpen} onOpenChange={setNewOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm bg-[var(--ed-surface)] border-[var(--ed-rule)] text-[var(--ed-fg)]">
           <DialogHeader>
-            <DialogTitle>{t('newCollection')}</DialogTitle>
+            <DialogTitle style={{ fontFamily: F.display }} className="text-2xl font-medium">
+              {t('newCollection')}
+            </DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 my-2">
             <input
               autoFocus
-              className="w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-[6px] border border-[var(--ed-rule)] bg-[var(--ed-bg)] px-3 py-2 text-[14px] text-[var(--ed-fg)] placeholder:text-[var(--ed-fg-muted)] focus:outline-none focus:border-[var(--ed-accent)] transition-colors"
               placeholder={t('collectionName')}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             />
             <input
-              className="w-full rounded border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-[6px] border border-[var(--ed-rule)] bg-[var(--ed-bg)] px-3 py-2 text-[14px] text-[var(--ed-fg)] placeholder:text-[var(--ed-fg-muted)] focus:outline-none focus:border-[var(--ed-accent)] transition-colors"
               placeholder={t('descriptionOptional')}
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
             />
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" size="sm" onClick={() => setNewOpen(false)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setNewOpen(false)}
+              className="border-[var(--ed-rule)] text-[var(--ed-fg)] hover:bg-[var(--ed-bg)]"
+            >
               {tActions('cancel')}
             </Button>
-            <Button size="sm" disabled={creating || !newName.trim()} onClick={handleCreate}>
+            <button
+              type="button"
+              disabled={creating || !newName.trim()}
+              onClick={handleCreate}
+              className="ed-btn-primary px-4 py-1.5 text-[13px] disabled:opacity-50"
+            >
               {tActions('create')}
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  )
-}
-
-function EmptyState({ onNew }: { onNew: () => void }) {
-  const tEmpty = useTranslations('meCollections')
-  return (
-    <div className="flex flex-col items-center gap-2 py-10 text-center rounded-xl border border-dashed border-border">
-      <Library className="w-5 h-5 text-muted-foreground/40" />
-      <p className="text-sm text-muted-foreground">{tEmpty('noneYet')}</p>
-      <Button variant="outline" size="sm" onClick={onNew}>
-        <Plus className="w-3.5 h-3.5 me-1.5" />
-        {tEmpty('createOne')}
-      </Button>
     </div>
   )
 }

@@ -8,9 +8,10 @@
  * @portabletext/react renderer is unchanged.
  *
  * Custom block objects: `callout` (tone + text), `image` (url/alt/caption, with
- * upload) and `richTableBlock` (tables migrated from the Studio, edited by
- * rich-table-card.tsx). Documents containing block types the schema cannot
- * represent are opened read-only so nothing is ever dropped on save.
+ * upload), `verse` (Quran verses with Arabic + translation), and `richTableBlock`.
+ *
+ * Includes modern editorial slash commands (`/quran`, `/callout`, `/image`,
+ * headings, citations, lists) and scripture insertion dialog.
  */
 import {
   createContext,
@@ -29,6 +30,19 @@ import type {
   PortableTextBlock,
 } from '@portabletext/editor'
 import { EventListenerPlugin } from '@portabletext/editor/plugins'
+import {
+  BookOpen,
+  Image as ImageIcon,
+  MessageSquare,
+  Quote,
+  Heading2,
+  Heading3,
+  Heading4,
+  List,
+  ListOrdered,
+  Link2,
+  Bookmark,
+} from 'lucide-react'
 
 import {
   SCHEMA_DEFINITION,
@@ -41,6 +55,8 @@ import { sanitizeUrl } from '@/lib/safe-url'
 import { RichTableCard } from './rich-table-card'
 import type { RichTableValue } from './pt-table'
 import { uploadEditorialImage } from './upload-image'
+import { QuranVerseDialog, InsertedVerseData } from './quran-verse-dialog'
+import { SlashCommandMenu, SlashCommand } from './slash-command-menu'
 
 const schemaDefinition = defineSchema(
   SCHEMA_DEFINITION as unknown as Parameters<typeof defineSchema>[0],
@@ -60,6 +76,11 @@ interface BlockObjectValue {
   url?: string
   alt?: string
   caption?: string
+  chapter?: number
+  verses?: string
+  surahName?: string
+  arabic?: string
+  translation?: string
 }
 
 interface PTEditorProps {
@@ -120,19 +141,416 @@ export function PTEditor({ initialValue, onChange, disabled }: PTEditorProps) {
               if (event.type === 'mutation') handleMutation(event.value)
             }}
           />
-          {!disabled && <Toolbar />}
-          <PortableTextEditable
-            className="pt-content"
-            readOnly={disabled}
-            renderStyle={(props) => renderStyle(props)}
-            renderDecorator={(props) => renderDecorator(props)}
-            renderAnnotation={(props) => renderAnnotation(props)}
-            renderListItem={(props) => <>{props.children}</>}
-            renderBlock={(props) => renderBlock(props)}
-          />
+          <EditorCanvas disabled={disabled} />
         </EditorProvider>
       </div>
     </ReadOnlyContext.Provider>
+  )
+}
+
+// ── inner editor canvas with commands & toolbar ───────────────────────────────
+
+function EditorCanvas({ disabled }: { disabled?: boolean }) {
+  const editor = useEditor()
+  const [slashOpen, setSlashOpen] = useState(false)
+  const [slashQuery, setSlashQuery] = useState('')
+  const [slashPos, setSlashPos] = useState<{ top: number; left: number } | null>(null)
+  const [quranOpen, setQuranOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const toggleDecorator = (decorator: string) =>
+    editor.send({ type: 'decorator.toggle', decorator })
+  const toggleStyle = (style: string) => editor.send({ type: 'style.toggle', style })
+  const toggleList = (listItem: string) => editor.send({ type: 'list item.toggle', listItem })
+
+  const handleAddLink = () => {
+    const raw = window.prompt('Link URL (e.g. https://…):')?.trim()
+    if (!raw) return
+    const href = sanitizeUrl(raw)
+    if (!href) {
+      window.alert('That link uses an unsupported or unsafe URL scheme.')
+      return
+    }
+    editor.send({
+      type: 'annotation.add',
+      annotation: { name: 'link', value: { href, blank: false } },
+    })
+  }
+
+  const handleRemoveLink = () =>
+    editor.send({ type: 'annotation.remove', annotation: { name: 'link' } })
+
+  const handleAddCitation = () => {
+    const source = window
+      .prompt('Citation Source / Reference (e.g. "Ibn Kathir, Vol 1, p. 45" or "Sahih al-Bukhari 1:1"):')
+      ?.trim()
+    if (!source) return
+    const rawUrl = window.prompt('Optional reference link URL (or leave blank):')?.trim()
+    const href = rawUrl ? sanitizeUrl(rawUrl) : undefined
+    editor.send({
+      type: 'annotation.add',
+      annotation: {
+        name: 'citation',
+        value: { source, reference: source, href },
+      },
+    })
+  }
+
+  const handleInsertCallout = () => {
+    editor.send({
+      type: 'insert.block object',
+      placement: 'auto',
+      blockObject: { name: 'callout', value: { tone: 'info', text: '' } },
+    })
+  }
+
+  const handlePickImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploading(true)
+    try {
+      const url = await uploadEditorialImage(file)
+      editor.send({
+        type: 'insert.block object',
+        placement: 'auto',
+        blockObject: { name: 'image', value: { url, alt: '', caption: '' } },
+      })
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Image upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleInsertVerse = (verse: InsertedVerseData) => {
+    editor.send({
+      type: 'insert.block object',
+      placement: 'auto',
+      blockObject: {
+        name: 'verse',
+        value: {
+          chapter: verse.chapter,
+          verses: verse.verses,
+          surahName: verse.surahName,
+          arabic: verse.arabic,
+          translation: verse.translation,
+          body: verse.body,
+        },
+      },
+    })
+  }
+
+  // Slash commands catalog
+  const slashCommands: SlashCommand[] = useMemo(
+    () => [
+      {
+        id: 'quran',
+        title: "Qur'an Verse(s)",
+        description: 'Insert ayah with authentic Arabic text & English translation',
+        category: 'Scripture & Media',
+        icon: <BookOpen className="size-4 text-emerald-600 dark:text-emerald-400" />,
+        keywords: ['quran', 'verse', 'ayah', 'surah', 'scripture', 'islam'],
+        action: () => setQuranOpen(true),
+      },
+      {
+        id: 'image',
+        title: 'Image',
+        description: 'Upload an editorial illustration, chart, or photo',
+        category: 'Scripture & Media',
+        icon: <ImageIcon className="size-4 text-sky-600 dark:text-sky-400" />,
+        keywords: ['image', 'photo', 'picture', 'upload', 'media'],
+        action: () => fileRef.current?.click(),
+      },
+      {
+        id: 'callout',
+        title: 'Callout Box',
+        description: 'Highlighted note for scholarly tips, caveats or warnings',
+        category: 'Scripture & Media',
+        icon: <MessageSquare className="size-4 text-amber-600 dark:text-amber-400" />,
+        keywords: ['callout', 'box', 'note', 'alert', 'info', 'warning'],
+        action: handleInsertCallout,
+      },
+      {
+        id: 'h2',
+        title: 'Heading 2',
+        description: 'Major section heading',
+        category: 'Basic Blocks',
+        icon: <Heading2 className="size-4 text-foreground" />,
+        keywords: ['heading', 'h2', 'title', 'section'],
+        action: () => toggleStyle('h2'),
+      },
+      {
+        id: 'h3',
+        title: 'Heading 3',
+        description: 'Sub-section heading',
+        category: 'Basic Blocks',
+        icon: <Heading3 className="size-4 text-foreground" />,
+        keywords: ['heading', 'h3', 'subtitle'],
+        action: () => toggleStyle('h3'),
+      },
+      {
+        id: 'h4',
+        title: 'Heading 4',
+        description: 'Minor subsection header',
+        category: 'Basic Blocks',
+        icon: <Heading4 className="size-4 text-foreground" />,
+        keywords: ['heading', 'h4', 'minor'],
+        action: () => toggleStyle('h4'),
+      },
+      {
+        id: 'quote',
+        title: 'Blockquote',
+        description: 'Scholarly quotation or citation block',
+        category: 'Basic Blocks',
+        icon: <Quote className="size-4 text-foreground" />,
+        keywords: ['quote', 'blockquote', 'cite'],
+        action: () => toggleStyle('blockquote'),
+      },
+      {
+        id: 'bullet',
+        title: 'Bulleted List',
+        description: 'Unordered list with bullet points',
+        category: 'Lists & Citations',
+        icon: <List className="size-4 text-foreground" />,
+        keywords: ['bullet', 'list', 'ul', 'points'],
+        action: () => toggleList('bullet'),
+      },
+      {
+        id: 'number',
+        title: 'Numbered List',
+        description: 'Ordered sequence list (1, 2, 3…)',
+        category: 'Lists & Citations',
+        icon: <ListOrdered className="size-4 text-foreground" />,
+        keywords: ['number', 'ordered', 'list', 'ol', 'steps'],
+        action: () => toggleList('number'),
+      },
+      {
+        id: 'citation',
+        title: 'Add Citation',
+        description: 'Scholarly reference footnote (source, ref, URL)',
+        category: 'Lists & Citations',
+        icon: <Bookmark className="size-4 text-amber-600 dark:text-amber-400" />,
+        keywords: ['cite', 'citation', 'source', 'reference', 'footnote'],
+        action: handleAddCitation,
+      },
+      {
+        id: 'link',
+        title: 'Insert Link',
+        description: 'Hyperlink to reference or web source',
+        category: 'Lists & Citations',
+        icon: <Link2 className="size-4 text-blue-600 dark:text-blue-400" />,
+        keywords: ['link', 'url', 'href', 'web'],
+        action: handleAddLink,
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const isMod = e.ctrlKey || e.metaKey
+
+    // Formatting shortcuts
+    if (isMod && e.key.toLowerCase() === 'b') {
+      e.preventDefault()
+      toggleDecorator('strong')
+      return
+    }
+    if (isMod && e.key.toLowerCase() === 'i') {
+      e.preventDefault()
+      toggleDecorator('em')
+      return
+    }
+    if (isMod && e.key.toLowerCase() === 'u') {
+      e.preventDefault()
+      toggleDecorator('underline')
+      return
+    }
+    if (isMod && e.key.toLowerCase() === 'k') {
+      e.preventDefault()
+      handleAddLink()
+      return
+    }
+
+    // Slash command trigger
+    if (e.key === '/' && !isMod && !disabled) {
+      const sel = window.getSelection()
+      if (sel && sel.rangeCount > 0) {
+        const rect = sel.getRangeAt(0).getBoundingClientRect()
+        setSlashPos({
+          top: Math.min(window.innerHeight - 360, Math.max(20, rect.bottom + 6)),
+          left: Math.min(window.innerWidth - 340, Math.max(20, rect.left)),
+        })
+      } else {
+        setSlashPos(null)
+      }
+      setSlashQuery('')
+      setSlashOpen(true)
+    }
+  }
+
+  return (
+    <>
+      {!disabled && (
+        <div className="pt-toolbar">
+          <button
+            type="button"
+            className="pt-tb"
+            title="Bold (Ctrl+B)"
+            onClick={() => toggleDecorator('strong')}
+          >
+            <b>B</b>
+          </button>
+          <button
+            type="button"
+            className="pt-tb"
+            title="Italic (Ctrl+I)"
+            onClick={() => toggleDecorator('em')}
+          >
+            <i>I</i>
+          </button>
+          <button
+            type="button"
+            className="pt-tb"
+            title="Underline (Ctrl+U)"
+            onClick={() => toggleDecorator('underline')}
+          >
+            <u>U</u>
+          </button>
+          <button
+            type="button"
+            className="pt-tb"
+            title="Strikethrough"
+            onClick={() => toggleDecorator('strike-through')}
+          >
+            <s>S</s>
+          </button>
+          <button
+            type="button"
+            className="pt-tb"
+            title="Inline Code"
+            onClick={() => toggleDecorator('code')}
+          >
+            {'</>'}
+          </button>
+
+          <span className="pt-tb-sep" />
+
+          {STYLE_OPTIONS.map((s) => (
+            <button
+              key={s.value}
+              type="button"
+              className="pt-tb"
+              title={s.label}
+              onClick={() => toggleStyle(s.value)}
+            >
+              {s.value === 'normal' ? 'P' : s.value === 'blockquote' ? '❝' : s.value.toUpperCase()}
+            </button>
+          ))}
+
+          <span className="pt-tb-sep" />
+
+          <button
+            type="button"
+            className="pt-tb"
+            title="Bulleted list"
+            onClick={() => toggleList('bullet')}
+          >
+            •
+          </button>
+          <button
+            type="button"
+            className="pt-tb"
+            title="Numbered list"
+            onClick={() => toggleList('number')}
+          >
+            1.
+          </button>
+
+          <span className="pt-tb-sep" />
+
+          <button type="button" className="pt-tb" title="Add link (Ctrl+K)" onClick={handleAddLink}>
+            🔗
+          </button>
+          <button type="button" className="pt-tb" title="Remove link" onClick={handleRemoveLink}>
+            ⛓️‍💥
+          </button>
+          <button type="button" className="pt-tb" title="Add Citation" onClick={handleAddCitation}>
+            🏷️
+          </button>
+
+          <span className="pt-tb-sep" />
+
+          {/* Scripture Verse button */}
+          <button
+            type="button"
+            className="pt-tb pt-tb-wide pt-tb-verse"
+            title="Insert Qur'an Verse(s)"
+            onClick={() => setQuranOpen(true)}
+          >
+            <BookOpen className="size-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />
+            + Verse
+          </button>
+
+          <button
+            type="button"
+            className="pt-tb pt-tb-wide"
+            onClick={handleInsertCallout}
+            title="Insert Callout box"
+          >
+            + Callout
+          </button>
+
+          <button
+            type="button"
+            className="pt-tb pt-tb-wide"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+            title="Upload editorial image"
+          >
+            {uploading ? 'Uploading…' : '+ Image'}
+          </button>
+
+          <input ref={fileRef} type="file" accept="image/*" hidden onChange={handlePickImage} />
+
+          <div className="pt-spacer" />
+
+          <span className="pt-tb-hint hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground">
+            Type <kbd className="px-1 py-0.5 rounded bg-muted text-foreground border text-[10px]">/</kbd> for quick menu
+          </span>
+        </div>
+      )}
+
+      <PortableTextEditable
+        className="pt-content"
+        readOnly={disabled}
+        onKeyDown={handleKeyDown}
+        renderStyle={(props) => renderStyle(props)}
+        renderDecorator={(props) => renderDecorator(props)}
+        renderAnnotation={(props) => renderAnnotation(props)}
+        renderListItem={(props) => <>{props.children}</>}
+        renderBlock={(props) => renderBlock(props)}
+      />
+
+      {/* Floating Slash Command Palette */}
+      <SlashCommandMenu
+        isOpen={slashOpen}
+        onClose={() => setSlashOpen(false)}
+        query={slashQuery}
+        onQueryChange={setSlashQuery}
+        commands={slashCommands}
+        position={slashPos}
+      />
+
+      {/* Qur'an Verse Insertion Dialog */}
+      <QuranVerseDialog
+        open={quranOpen}
+        onOpenChange={setQuranOpen}
+        onInsert={handleInsertVerse}
+      />
+    </>
   )
 }
 
@@ -179,6 +597,19 @@ function renderAnnotation(props: BlockAnnotationRenderProps) {
       </span>
     )
   }
+  if (props.schemaType.name === 'citation') {
+    const val = props.value as { source?: string; reference?: string; href?: string }
+    const display = val?.source || val?.reference
+    return (
+      <span
+        className="pt-citation"
+        title={val?.href ? `${display} (${val.href})` : display}
+      >
+        {props.children}
+        {display && <sup className="pt-cite-tag">[{display}]</sup>}
+      </span>
+    )
+  }
   return <>{props.children}</>
 }
 
@@ -189,6 +620,9 @@ function renderBlock(props: BlockRenderProps) {
   }
   if (props.schemaType.name === 'image') {
     return <ImageCard value={value} path={props.path} />
+  }
+  if (props.schemaType.name === 'verse') {
+    return <VerseCard value={value} path={props.path} />
   }
   if (props.schemaType.name === 'richTableBlock') {
     return <TableBlock value={props.value as RichTableValue} path={props.path} />
@@ -201,108 +635,53 @@ function renderBlock(props: BlockRenderProps) {
   )
 }
 
-// ── toolbar ──────────────────────────────────────────────────────────────────
+// ── custom block cards ───────────────────────────────────────────────────────
 
-function Toolbar() {
+function VerseCard({ value, path }: { value: BlockObjectValue; path: BlockPath }) {
   const editor = useEditor()
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
-
-  const toggleDecorator = (decorator: string) =>
-    editor.send({ type: 'decorator.toggle', decorator })
-  const toggleStyle = (style: string) => editor.send({ type: 'style.toggle', style })
-  const toggleList = (listItem: string) => editor.send({ type: 'list item.toggle', listItem })
-
-  const addLink = () => {
-    const raw = window.prompt('Link URL')?.trim()
-    if (!raw) return
-    // Reject javascript:/data:/etc. at entry so an unsafe href is never stored
-    // (the public renderer re-checks — see blog-post-article.tsx).
-    const href = sanitizeUrl(raw)
-    if (!href) {
-      window.alert('That link uses an unsupported or unsafe URL scheme. Use http(s), mailto, tel, or a relative path.')
-      return
-    }
-    editor.send({ type: 'annotation.add', annotation: { name: 'link', value: { href, blank: false } } })
-  }
-  const removeLink = () => editor.send({ type: 'annotation.remove', annotation: { name: 'link' } })
-
-  const insertCallout = () =>
-    editor.send({
-      type: 'insert.block object',
-      placement: 'auto',
-      blockObject: { name: 'callout', value: { tone: 'info', text: '' } },
-    })
-
-  const onPickImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    e.target.value = ''
-    if (!file) return
-    setUploading(true)
-    try {
-      const url = await uploadEditorialImage(file)
-      editor.send({
-        type: 'insert.block object',
-        placement: 'auto',
-        blockObject: { name: 'image', value: { url, alt: '', caption: '' } },
-      })
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : 'Image upload failed.')
-    } finally {
-      setUploading(false)
-    }
-  }
+  const readOnly = useContext(ReadOnlyContext)
+  const remove = () => editor.send({ type: 'delete.block', at: path })
 
   return (
-    <div className="pt-toolbar">
-      <button type="button" className="pt-tb" title="Bold" onClick={() => toggleDecorator('strong')}>
-        <b>B</b>
-      </button>
-      <button type="button" className="pt-tb" title="Italic" onClick={() => toggleDecorator('em')}>
-        <i>I</i>
-      </button>
-      <button type="button" className="pt-tb" title="Underline" onClick={() => toggleDecorator('underline')}>
-        <u>U</u>
-      </button>
-      <button type="button" className="pt-tb" title="Strikethrough" onClick={() => toggleDecorator('strike-through')}>
-        <s>S</s>
-      </button>
-      <button type="button" className="pt-tb" title="Code" onClick={() => toggleDecorator('code')}>
-        {'</>'}
-      </button>
-      <span className="pt-tb-sep" />
-      {STYLE_OPTIONS.map((s) => (
-        <button key={s.value} type="button" className="pt-tb" title={s.label} onClick={() => toggleStyle(s.value)}>
-          {s.value === 'normal' ? 'P' : s.value === 'blockquote' ? '❝' : s.value.toUpperCase()}
-        </button>
-      ))}
-      <span className="pt-tb-sep" />
-      <button type="button" className="pt-tb" title="Bulleted list" onClick={() => toggleList('bullet')}>
-        •
-      </button>
-      <button type="button" className="pt-tb" title="Numbered list" onClick={() => toggleList('number')}>
-        1.
-      </button>
-      <span className="pt-tb-sep" />
-      <button type="button" className="pt-tb" title="Add link" onClick={addLink}>
-        🔗
-      </button>
-      <button type="button" className="pt-tb" title="Remove link" onClick={removeLink}>
-        ⛓️‍💥
-      </button>
-      <span className="pt-tb-sep" />
-      <button type="button" className="pt-tb pt-tb-wide" onClick={insertCallout}>
-        + Callout
-      </button>
-      <button type="button" className="pt-tb pt-tb-wide" disabled={uploading} onClick={() => fileRef.current?.click()}>
-        {uploading ? 'Uploading…' : '+ Image'}
-      </button>
-      <input ref={fileRef} type="file" accept="image/*" hidden onChange={onPickImage} />
+    <div className="pt-card pt-verse" contentEditable={false}>
+      <div className="pt-card-bar">
+        <span className="pt-card-kind flex items-center gap-1.5">
+          <BookOpen className="size-3.5 text-emerald-600 dark:text-emerald-400 inline" />
+          Qur&apos;an Verse {value.chapter ? `${value.chapter}:${value.verses || ''}` : ''}
+        </span>
+        {value.surahName && (
+          <span className="text-xs text-muted-foreground font-medium ml-1">
+            • Surah {value.surahName}
+          </span>
+        )}
+        <span className="pt-spacer" />
+        {!readOnly && (
+          <button
+            type="button"
+            className="iconbtn"
+            title="Remove Verse"
+            onClick={remove}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+      {value.arabic && (
+        <div dir="rtl" lang="ar" className="pt-verse-arabic">
+          {value.arabic}
+        </div>
+      )}
+      {value.translation && (
+        <div className="pt-verse-translation">
+          &ldquo;{value.translation}&rdquo;
+        </div>
+      )}
+      <div className="pt-verse-meta">
+        — The Holy Qur&apos;an, Surah {value.surahName || value.chapter} ({value.chapter}:{value.verses || ''})
+      </div>
     </div>
   )
 }
-
-// ── custom block cards ───────────────────────────────────────────────────────
 
 function CalloutCard({ value, path }: { value: BlockObjectValue; path: BlockPath }) {
   const editor = useEditor()

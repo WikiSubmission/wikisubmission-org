@@ -49,9 +49,9 @@ const BOOKS_DATA: Record<string, BookItem> = {
       'Original English translation with additional editions available for readers in multiple languages.',
     coverThumb: '/images/books/quran-the-final-testament/quran-front.webp',
     themeColor: '#0a1e3f',
-    bookWidth: 1.80,
+    bookWidth: 1.8,
     bookHeight: 2.65,
-    bookThickness: 0.40,
+    bookThickness: 0.4,
     frontSrc: '/images/books/quran-the-final-testament/quran-front.webp',
     spineSrc: '/images/books/quran-the-final-testament/quran-spine.webp',
     backSrc: '/images/books/quran-the-final-testament/quran-back.webp',
@@ -64,14 +64,38 @@ const BOOKS_DATA: Record<string, BookItem> = {
         label: 'Full PDF',
         panelLabel: 'ORIGINAL ENGLISH EDITION',
         links: [
-          { name: 'English', url: 'https://library.wikisubmission.org/file/quran-the-final-testament' },
-          { name: 'Turkish', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-turkish' },
-          { name: 'French', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-french' },
-          { name: 'Spanish', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-spanish' },
-          { name: 'Persian', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-persian' },
-          { name: 'Tamil', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-tamil' },
-          { name: 'Hindi', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-hindi' },
-          { name: 'Arabic (with English)', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-with-arabic' },
+          {
+            name: 'English',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament',
+          },
+          {
+            name: 'Turkish',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-turkish',
+          },
+          {
+            name: 'French',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-french',
+          },
+          {
+            name: 'Spanish',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-spanish',
+          },
+          {
+            name: 'Persian',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-persian',
+          },
+          {
+            name: 'Tamil',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-tamil',
+          },
+          {
+            name: 'Hindi',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-hindi',
+          },
+          {
+            name: 'Arabic (with English)',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-with-arabic',
+          },
         ],
       },
       {
@@ -79,12 +103,30 @@ const BOOKS_DATA: Record<string, BookItem> = {
         label: 'Appendices',
         panelLabel: 'ALL 38 APPENDICES',
         links: [
-          { name: 'English', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices' },
-          { name: 'Turkish', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices-turkish' },
-          { name: 'French', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices-french' },
-          { name: 'Persian', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices-persian' },
-          { name: 'Tamil', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices-tamil' },
-          { name: 'Hindi', url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices-hindi' },
+          {
+            name: 'English',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices',
+          },
+          {
+            name: 'Turkish',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices-turkish',
+          },
+          {
+            name: 'French',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices-french',
+          },
+          {
+            name: 'Persian',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices-persian',
+          },
+          {
+            name: 'Tamil',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices-tamil',
+          },
+          {
+            name: 'Hindi',
+            url: 'https://library.wikisubmission.org/file/quran-the-final-testament-appendices-hindi',
+          },
         ],
       },
       {
@@ -92,8 +134,14 @@ const BOOKS_DATA: Record<string, BookItem> = {
         label: 'Physical Copies',
         panelLabel: 'ORDER PHYSICAL COPIES',
         links: [
-          { name: 'Masjid Tucson Catalog', url: 'https://www.masjidtucson.org/publications/catalog/index.html' },
-          { name: 'Barnes & Noble', url: 'https://www.barnesandnoble.com/w/quran-the-final-testament-authorized-english-version-dr-rashad-khalifa/1008697516' },
+          {
+            name: 'Masjid Tucson Catalog',
+            url: 'https://www.masjidtucson.org/publications/catalog/index.html',
+          },
+          {
+            name: 'Barnes & Noble',
+            url: 'https://www.barnesandnoble.com/w/quran-the-final-testament-authorized-english-version-dr-rashad-khalifa/1008697516',
+          },
         ],
       },
     ],
@@ -109,17 +157,21 @@ const BOOKS_DATA: Record<string, BookItem> = {
       'A landmark publication presenting the physical and mathematical proof of Quranic preservation through the Miracle of 19 with extensive charts and visual evidence.',
     coverThumb: '/images/books/quran-visual-presentation/qvp-front.webp',
     themeColor: '#0a235c',
-    bookWidth: 1.80,
+    bookWidth: 1.8,
     bookHeight: 2.65,
     bookThickness: 0.36,
     frontSrc: '/images/books/quran-visual-presentation/qvp-front.webp',
     spineSrc: '/images/books/quran-visual-presentation/qvp-spine.webp',
     backSrc: '/images/books/quran-visual-presentation/qvp-back.webp',
     spineTitle: 'VISUAL PRESENTATION OF THE MIRACLE',
-    quote: '“Physical, verifiable, mathematical evidence proving the divine authorship of the Quran.”',
+    quote:
+      '“Physical, verifiable, mathematical evidence proving the divine authorship of the Quran.”',
     hasTabs: false,
     links: [
-      { label: 'Download PDF', url: 'https://library.wikisubmission.org/file/visual-presentation-of-the-miracle' },
+      {
+        label: 'Download PDF',
+        url: 'https://library.wikisubmission.org/file/visual-presentation-of-the-miracle',
+      },
     ],
   },
   'quran-hadith-islam': {
@@ -133,18 +185,25 @@ const BOOKS_DATA: Record<string, BookItem> = {
       'A comprehensive theological treatise analyzing the Quran’s self-sufficient authority and clarifying the distinction between divine scripture and invented traditions.',
     coverThumb: '/images/books/quran-hadith-and-islam/qhi-front.webp',
     themeColor: '#3c1216',
-    bookWidth: 1.80,
+    bookWidth: 1.8,
     bookHeight: 2.65,
     bookThickness: 0.32,
     frontSrc: '/images/books/quran-hadith-and-islam/qhi-front.webp',
     spineSrc: '/images/books/quran-hadith-and-islam/qhi-spine.webp',
     backSrc: '/images/books/quran-hadith-and-islam/qhi-back.webp',
     spineTitle: 'QURAN, HADITH, AND ISLAM',
-    quote: '“Shall I seek other than God as a source of law, when He has revealed this book fully detailed?”',
+    quote:
+      '“Shall I seek other than God as a source of law, when He has revealed this book fully detailed?”',
     hasTabs: false,
     links: [
-      { label: 'Original PDF', url: 'https://library.wikisubmission.org/file/quran-hadith-and-islam-original' },
-      { label: 'Alternative Format', url: 'https://library.wikisubmission.org/file/quran-hadith-and-islam' },
+      {
+        label: 'Original PDF',
+        url: 'https://library.wikisubmission.org/file/quran-hadith-and-islam-original',
+      },
+      {
+        label: 'Alternative Format',
+        url: 'https://library.wikisubmission.org/file/quran-hadith-and-islam',
+      },
     ],
   },
   'computer-speaks': {
@@ -158,17 +217,21 @@ const BOOKS_DATA: Record<string, BookItem> = {
       'Dr. Khalifa’s historic computer study detailing the discovery of the interlocking mathematical code embedded in the Quran.',
     coverThumb: '/images/books/the-computer-speaks/tcs-front.webp',
     themeColor: '#122543',
-    bookWidth: 1.80,
+    bookWidth: 1.8,
     bookHeight: 2.65,
     bookThickness: 0.34,
     frontSrc: '/images/books/the-computer-speaks/tcs-front.webp',
     spineSrc: '/images/books/the-computer-speaks/tcs-spine.webp',
     backSrc: '/images/books/the-computer-speaks/tcs-back.webp',
     spineTitle: "THE COMPUTER SPEAKS · GOD'S MESSAGE",
-    quote: '“The Quran is the only book in existence with a built-in mathematical preservation system.”',
+    quote:
+      '“The Quran is the only book in existence with a built-in mathematical preservation system.”',
     hasTabs: false,
     links: [
-      { label: 'Download PDF', url: 'https://library.wikisubmission.org/file/the-computer-speaks' },
+      {
+        label: 'Download PDF',
+        url: 'https://library.wikisubmission.org/file/the-computer-speaks',
+      },
     ],
   },
 }
@@ -228,7 +291,9 @@ export function DownloadsBookShowcase() {
 
   // Latest updateBookTextures, readable from the scene-setup effect without
   // making it a dependency (setup only needs to run once per mount).
-  const updateBookTexturesRef = useRef<((book: BookItem) => Promise<void>) | null>(null)
+  const updateBookTexturesRef = useRef<
+    ((book: BookItem) => Promise<void>) | null
+  >(null)
 
   // Guards against a stale async texture load (from a previously-featured
   // book) overwriting the materials after the user has already switched to
@@ -239,9 +304,18 @@ export function DownloadsBookShowcase() {
   // Stable references into the shared book-stage scene for instant texture updates.
   const sceneElementsRef = useRef<{
     renderer: THREE.WebGLRenderer
-    getCoverDetailMaps: (src: string, renderer: THREE.WebGLRenderer) => Promise<CoverDetailMaps>
-    imageTexture: (image: HTMLImageElement, renderer: THREE.WebGLRenderer) => THREE.Texture
-    canvasTexture: (canvas: HTMLCanvasElement, renderer: THREE.WebGLRenderer) => THREE.Texture
+    getCoverDetailMaps: (
+      src: string,
+      renderer: THREE.WebGLRenderer
+    ) => Promise<CoverDetailMaps>
+    imageTexture: (
+      image: HTMLImageElement,
+      renderer: THREE.WebGLRenderer
+    ) => THREE.Texture
+    canvasTexture: (
+      canvas: HTMLCanvasElement,
+      renderer: THREE.WebGLRenderer
+    ) => THREE.Texture
     loadCachedImage: (src: string) => Promise<HTMLImageElement>
     frontMat: THREE.MeshPhysicalMaterial
     backMat: THREE.MeshPhysicalMaterial
@@ -258,7 +332,9 @@ export function DownloadsBookShowcase() {
 
   // Preload next books in idle time
   useEffect(() => {
-    const toPreload = gridIds.map((id) => BOOKS_DATA[id]?.frontSrc).filter(Boolean)
+    const toPreload = gridIds
+      .map((id) => BOOKS_DATA[id]?.frontSrc)
+      .filter(Boolean)
     preloadBookImages(toPreload)
   }, [gridIds])
 
@@ -286,12 +362,18 @@ export function DownloadsBookShowcase() {
           canvasTexture,
           getCoverDetailMaps,
           createPrintMaterial,
-          getSharedBookTextures,
+          getSharedBookTexturesAsync,
           loadCachedImage,
           getClothGrainTexture,
         },
         { createInitialPhysicsState, updateBookPhysics },
-        { registerBook, requestBookStageRender, ensureBookStageRenderer },
+        {
+          registerBook,
+          requestBookStageRender,
+          ensureBookStageRenderer,
+          yieldToMain,
+          queueBookSetup,
+        },
       ] = await Promise.all([
         import('three'),
         import('@/lib/3d-book/geometry'),
@@ -302,430 +384,486 @@ export function DownloadsBookShowcase() {
 
       if (cancelled || !container || !section) return
 
-      const renderer = ensureBookStageRenderer()
+      // See stripe-book-3d.tsx: the build runs behind the shared stage queue
+      // with scheduling points inside it, so it never lands as one long task.
+      await queueBookSetup(async (): Promise<void> => {
+        if (cancelled || !container || !section) return
 
-      const root = new THREE.Group()
-      const bookGroup = new THREE.Group()
-      root.add(bookGroup)
+        const renderer = ensureBookStageRenderer()
 
-      const bW = 1.8
-      const bH = 2.65
-      const bThick = 0.4
-      const boardThick = Math.min(0.033, bThick * 0.095)
-      const overhang = Math.min(0.048, bW * 0.028)
+        const root = new THREE.Group()
+        const bookGroup = new THREE.Group()
+        root.add(bookGroup)
 
-      const {
-        pageGeometry,
-        boardGeometry,
-        printGeometry,
-        spineGeometry,
-        spinePrintGeometry,
-        hingeGrooveGeometry,
-        hingeGrooveSpan,
-        ribbonGeom,
-        shadowGeometry,
-        dimensions: dims,
-      } = createBookAnatomyGeometries({
-        width: bW,
-        height: bH,
-        depth: bThick,
-        boardThickness: boardThick,
-        overhang,
-      })
+        const bW = 1.8
+        const bH = 2.65
+        const bThick = 0.4
+        const boardThick = Math.min(0.033, bThick * 0.095)
+        const overhang = Math.min(0.048, bW * 0.028)
 
-      const shared = getSharedBookTextures(renderer)
+        const {
+          pageGeometry,
+          boardGeometry,
+          printGeometry,
+          spineGeometry,
+          spinePrintGeometry,
+          hingeGrooveGeometry,
+          hingeGrooveSpan,
+          ribbonGeom,
+          shadowGeometry,
+          dimensions: dims,
+        } = createBookAnatomyGeometries({
+          width: bW,
+          height: bH,
+          depth: bThick,
+          boardThickness: boardThick,
+          overhang,
+        })
 
-      // Page block: top/bottom edges and the spine-side gutter get their
-      // own tinted clones of the same material (same map/normal/roughness)
-      // so the block doesn't read as one uniformly-lit slab — a real page
-      // block is slightly more exposed at the top and shadowed toward the
-      // binding.
-      const pageMat = new THREE.MeshPhysicalMaterial({
-        map: shared.pagesTexture,
-        normalMap: shared.pageNormalTexture,
-        normalScale: new THREE.Vector2(0.24, 0.24),
-        roughness: 0.84,
-        metalness: 0,
-        clearcoat: 0.01,
-      })
-      const pageTopMat = pageMat.clone()
-      const pageBottomMat = pageMat.clone()
-      pageBottomMat.color.set(0xdccdb4)
-      const pageGutterMat = pageMat.clone()
-      pageGutterMat.color.set(0xb9ac8f)
-      const pageMesh = new THREE.Mesh(pageGeometry, [
-        pageMat,
-        pageGutterMat,
-        pageTopMat,
-        pageBottomMat,
-        pageMat,
-        pageMat,
-      ])
-      pageMesh.position.set(-bW / 2 + boardThick + dims.pageWidth / 2 + 0.006, 0, 0)
-      bookGroup.add(pageMesh)
+        const shared = await getSharedBookTexturesAsync(renderer, yieldToMain)
+        if (cancelled) return
 
-      // Fore-edge: a physical material (not MeshBasicMaterial) so it
-      // actually responds to the lighting rig — an unlit plane here is a
-      // large part of why the edge previously read as a flat pasted-on
-      // texture instead of compressed sheets catching light.
-      const edgeTexMat = new THREE.MeshPhysicalMaterial({
-        map: shared.pageEdgeTexture,
-        normalMap: shared.pageEdgeNormalTexture,
-        normalScale: new THREE.Vector2(0.55, 0.55),
-        roughnessMap: shared.pageEdgeRoughnessTexture,
-        roughness: 0.8,
-        metalness: 0,
-        clearcoat: 0.02,
-        transparent: true,
-        opacity: 0.94,
-        depthWrite: false,
-      })
-      const edgeGeom = new THREE.PlaneGeometry(dims.pageDepth * 0.96, dims.pageHeight * 0.96)
-      const foreEdge = new THREE.Mesh(edgeGeom, edgeTexMat)
-      foreEdge.rotation.y = Math.PI / 2
-      foreEdge.position.set(pageMesh.position.x + dims.pageWidth / 2 + 0.0015, 0, 0)
-      bookGroup.add(foreEdge)
-
-      const ribbonMat = new THREE.MeshPhysicalMaterial({
-        color: 0x8e1a26,
-        roughness: 0.48,
-        metalness: 0,
-        clearcoat: 0.06,
-        side: THREE.DoubleSide,
-      })
-      const ribbon = new THREE.Mesh(ribbonGeom, ribbonMat)
-      ribbon.position.set(0.14, -bH / 2 - 0.23, 0.05)
-      ribbon.rotation.set(0.08, 0, -0.04)
-      bookGroup.add(ribbon)
-
-      const shadowMat = new THREE.MeshBasicMaterial({
-        map: shared.contactShadowTexture,
-        transparent: true,
-        depthWrite: false,
-        opacity: 0.64,
-      })
-      const shadow = new THREE.Mesh(shadowGeometry, shadowMat)
-      shadow.position.set(0, -bH / 2 - 0.3, 0)
-      shadow.rotation.x = -Math.PI / 2
-      root.add(shadow)
-
-      const clothGrain = await getClothGrainTexture(renderer)
-
-      const boardEdgeMat = new THREE.MeshPhysicalMaterial({
-        color: 0x141a24,
-        roughness: 0.7,
-        metalness: 0.0,
-        clearcoat: 0.06,
-        clearcoatRoughness: 0.6,
-        clearcoatNormalMap: clothGrain,
-        clearcoatNormalScale: new THREE.Vector2(0.35, 0.35),
-      })
-      // Separate from boardEdgeMat: the spine's own non-artwork faces (its
-      // top/bottom caps and the thin strips where it curves into the front
-      // and back boards) need to match the SPINE cover's color, not the
-      // front cover's — sharing one material colored from the front cover
-      // showed up as a mismatched line right on the spine.
-      const spineEdgeMat = boardEdgeMat.clone()
-      const frontMat = new THREE.MeshPhysicalMaterial({
-        roughness: 0.64,
-        metalness: 0.015,
-        clearcoat: 0.07,
-        clearcoatRoughness: 0.56,
-        clearcoatNormalMap: clothGrain,
-        clearcoatNormalScale: new THREE.Vector2(0.4, 0.4),
-      })
-      const backMat = new THREE.MeshPhysicalMaterial({
-        roughness: 0.64,
-        metalness: 0.015,
-        clearcoat: 0.07,
-        clearcoatRoughness: 0.56,
-        clearcoatNormalMap: clothGrain,
-        clearcoatNormalScale: new THREE.Vector2(0.4, 0.4),
-      })
-      const spineMat = new THREE.MeshPhysicalMaterial({
-        roughness: 0.64,
-        metalness: 0.015,
-        clearcoat: 0.07,
-        clearcoatRoughness: 0.56,
-        clearcoatNormalMap: clothGrain,
-        clearcoatNormalScale: new THREE.Vector2(0.4, 0.4),
-      })
-
-      const frontBoard = new THREE.Mesh(boardGeometry, [
-        boardEdgeMat,
-        boardEdgeMat,
-        boardEdgeMat,
-        boardEdgeMat,
-        frontMat,
-        boardEdgeMat,
-      ])
-      frontBoard.position.set(boardThick / 2, 0, bThick / 2 - boardThick / 2)
-      bookGroup.add(frontBoard)
-
-      const backBoard = new THREE.Mesh(boardGeometry, [
-        boardEdgeMat,
-        boardEdgeMat,
-        boardEdgeMat,
-        boardEdgeMat,
-        boardEdgeMat,
-        backMat,
-      ])
-      backBoard.position.set(boardThick / 2, 0, -bThick / 2 + boardThick / 2)
-      bookGroup.add(backBoard)
-
-      const spineMesh = new THREE.Mesh(spineGeometry, [
-        spineEdgeMat,
-        spineMat,
-        spineEdgeMat,
-        spineEdgeMat,
-        spineEdgeMat,
-        spineEdgeMat,
-      ])
-      spineMesh.position.set(-bW / 2 + boardThick / 2, 0, 0)
-      bookGroup.add(spineMesh)
-
-      // Hinge groove decal: a soft shadow line on the front/back cover near
-      // the spine, positioned with its darkest edge flush against the seam
-      // (see geometry.ts) and fading toward the fore-edge. Board outward
-      // faces sit at z = ±bThick/2; the print artwork layer sits just past
-      // that (±0.0016, see frontPrintMesh/backPrintMesh below), so this
-      // needs a third, further-out layer to avoid z-fighting with it across
-      // their overlapping area.
-      const hingeGrooveMat = new THREE.MeshBasicMaterial({
-        map: shared.hingeGrooveTexture,
-        blending: THREE.MultiplyBlending,
-        // Three.js requires premultipliedAlpha when MultiplyBlending is set
-        // (WebGLState throws otherwise). The hinge texture is an opaque
-        // canvas (alpha is 1 everywhere), so premultiplying is a numeric
-        // no-op here — it doesn't change the rendered result, it just
-        // satisfies the renderer's precondition for this blend mode.
-        premultipliedAlpha: true,
-        depthWrite: false,
-      })
-      const hingeSeamX = boardThick - bW / 2
-      const frontHinge = new THREE.Mesh(hingeGrooveGeometry, hingeGrooveMat)
-      frontHinge.position.set(hingeSeamX + hingeGrooveSpan / 2, 0, bThick / 2 + 0.0028)
-      bookGroup.add(frontHinge)
-      // Rotating 180° about Y (to face outward -Z) also flips the plane's
-      // local X axis, so the texture's dark edge (at local x = -span/2)
-      // lands on the +X side of this mesh's position instead of -X — shift
-      // the center the other way so the dark edge still falls on the seam.
-      const backHinge = new THREE.Mesh(hingeGrooveGeometry, hingeGrooveMat)
-      backHinge.position.set(hingeSeamX - hingeGrooveSpan / 2, 0, -bThick / 2 - 0.0028)
-      backHinge.rotation.y = Math.PI
-      bookGroup.add(backHinge)
-
-      const frontPrintMat = createPrintMaterial()
-      const frontPrintMesh = new THREE.Mesh(printGeometry, frontPrintMat)
-      frontPrintMesh.position.set(boardThick / 2, 0, bThick / 2 + 0.0016)
-      bookGroup.add(frontPrintMesh)
-
-      const backPrintMat = createPrintMaterial()
-      const backPrintMesh = new THREE.Mesh(printGeometry, backPrintMat)
-      backPrintMesh.position.set(boardThick / 2, 0, -bThick / 2 - 0.0016)
-      backPrintMesh.rotation.y = Math.PI
-      bookGroup.add(backPrintMesh)
-
-      const spinePrintMat = createPrintMaterial()
-      const spinePrintMesh = new THREE.Mesh(spinePrintGeometry, spinePrintMat)
-      spinePrintMesh.rotation.y = -Math.PI / 2
-      spinePrintMesh.position.set(-bW / 2 - 0.0016, 0, 0)
-      bookGroup.add(spinePrintMesh)
-
-      const physics = createInitialPhysicsState(0.09, -0.45)
-
-      const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-      physics.reducedMotion = motionQuery.matches
-      const onMotionChange = (event: MediaQueryListEvent): void => {
-        physics.reducedMotion = event.matches
-        requestBookStageRender()
-      }
-      motionQuery.addEventListener('change', onMotionChange)
-
-      let pointerInside = false
-      const updatePointerCoordinates = (event: PointerEvent): void => {
-        const rect = container.getBoundingClientRect()
-        physics.pointerX = Math.max(
-          -1,
-          Math.min(1, ((event.clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1),
+        // Page block: top/bottom edges and the spine-side gutter get their
+        // own tinted clones of the same material (same map/normal/roughness)
+        // so the block doesn't read as one uniformly-lit slab — a real page
+        // block is slightly more exposed at the top and shadowed toward the
+        // binding.
+        const pageMat = new THREE.MeshPhysicalMaterial({
+          map: shared.pagesTexture,
+          normalMap: shared.pageNormalTexture,
+          normalScale: new THREE.Vector2(0.24, 0.24),
+          roughness: 0.84,
+          metalness: 0,
+          clearcoat: 0.01,
+        })
+        const pageTopMat = pageMat.clone()
+        const pageBottomMat = pageMat.clone()
+        pageBottomMat.color.set(0xdccdb4)
+        const pageGutterMat = pageMat.clone()
+        pageGutterMat.color.set(0xb9ac8f)
+        const pageMesh = new THREE.Mesh(pageGeometry, [
+          pageMat,
+          pageGutterMat,
+          pageTopMat,
+          pageBottomMat,
+          pageMat,
+          pageMat,
+        ])
+        pageMesh.position.set(
+          -bW / 2 + boardThick + dims.pageWidth / 2 + 0.006,
+          0,
+          0
         )
-        physics.pointerY = Math.max(
-          -1,
-          Math.min(1, ((event.clientY - rect.top) / Math.max(1, rect.height)) * 2 - 1),
+        bookGroup.add(pageMesh)
+
+        // Fore-edge: a physical material (not MeshBasicMaterial) so it
+        // actually responds to the lighting rig — an unlit plane here is a
+        // large part of why the edge previously read as a flat pasted-on
+        // texture instead of compressed sheets catching light.
+        const edgeTexMat = new THREE.MeshPhysicalMaterial({
+          map: shared.pageEdgeTexture,
+          normalMap: shared.pageEdgeNormalTexture,
+          normalScale: new THREE.Vector2(0.55, 0.55),
+          roughnessMap: shared.pageEdgeRoughnessTexture,
+          roughness: 0.8,
+          metalness: 0,
+          clearcoat: 0.02,
+          transparent: true,
+          opacity: 0.94,
+          depthWrite: false,
+        })
+        const edgeGeom = new THREE.PlaneGeometry(
+          dims.pageDepth * 0.96,
+          dims.pageHeight * 0.96
         )
-      }
-      const onPointerEnter = (event: PointerEvent): void => {
-        pointerInside = true
-        physics.isHovered = true
-        updatePointerCoordinates(event)
-        requestBookStageRender()
-      }
-      let lastPointerX = 0
-      let lastPointerY = 0
-      const onPointerMove = (event: PointerEvent): void => {
-        updatePointerCoordinates(event)
-        if (physics.isDragging) {
-          const dx = event.clientX - lastPointerX
-          const dy = event.clientY - lastPointerY
-          const deltaRotY = dx * 0.01
-          const deltaRotX = dy * 0.007
-          physics.dragRotationY += deltaRotY
-          physics.dragRotationX = Math.max(-0.5, Math.min(0.5, physics.dragRotationX + deltaRotX))
-          physics.velRotY = deltaRotY * 0.42
-          physics.velRotX = deltaRotX * 0.42
+        const foreEdge = new THREE.Mesh(edgeGeom, edgeTexMat)
+        foreEdge.rotation.y = Math.PI / 2
+        foreEdge.position.set(
+          pageMesh.position.x + dims.pageWidth / 2 + 0.0015,
+          0,
+          0
+        )
+        bookGroup.add(foreEdge)
+
+        const ribbonMat = new THREE.MeshPhysicalMaterial({
+          color: 0x8e1a26,
+          roughness: 0.48,
+          metalness: 0,
+          clearcoat: 0.06,
+          side: THREE.DoubleSide,
+        })
+        const ribbon = new THREE.Mesh(ribbonGeom, ribbonMat)
+        ribbon.position.set(0.14, -bH / 2 - 0.23, 0.05)
+        ribbon.rotation.set(0.08, 0, -0.04)
+        bookGroup.add(ribbon)
+
+        const shadowMat = new THREE.MeshBasicMaterial({
+          map: shared.contactShadowTexture,
+          transparent: true,
+          depthWrite: false,
+          opacity: 0.64,
+        })
+        const shadow = new THREE.Mesh(shadowGeometry, shadowMat)
+        shadow.position.set(0, -bH / 2 - 0.3, 0)
+        shadow.rotation.x = -Math.PI / 2
+        root.add(shadow)
+
+        await yieldToMain()
+        if (cancelled) return
+
+        const clothGrain = await getClothGrainTexture(renderer)
+        if (cancelled) return
+
+        const boardEdgeMat = new THREE.MeshPhysicalMaterial({
+          color: 0x141a24,
+          roughness: 0.7,
+          metalness: 0.0,
+          clearcoat: 0.06,
+          clearcoatRoughness: 0.6,
+          clearcoatNormalMap: clothGrain,
+          clearcoatNormalScale: new THREE.Vector2(0.35, 0.35),
+        })
+        // Separate from boardEdgeMat: the spine's own non-artwork faces (its
+        // top/bottom caps and the thin strips where it curves into the front
+        // and back boards) need to match the SPINE cover's color, not the
+        // front cover's — sharing one material colored from the front cover
+        // showed up as a mismatched line right on the spine.
+        const spineEdgeMat = boardEdgeMat.clone()
+        const frontMat = new THREE.MeshPhysicalMaterial({
+          roughness: 0.64,
+          metalness: 0.015,
+          clearcoat: 0.07,
+          clearcoatRoughness: 0.56,
+          clearcoatNormalMap: clothGrain,
+          clearcoatNormalScale: new THREE.Vector2(0.4, 0.4),
+        })
+        const backMat = new THREE.MeshPhysicalMaterial({
+          roughness: 0.64,
+          metalness: 0.015,
+          clearcoat: 0.07,
+          clearcoatRoughness: 0.56,
+          clearcoatNormalMap: clothGrain,
+          clearcoatNormalScale: new THREE.Vector2(0.4, 0.4),
+        })
+        const spineMat = new THREE.MeshPhysicalMaterial({
+          roughness: 0.64,
+          metalness: 0.015,
+          clearcoat: 0.07,
+          clearcoatRoughness: 0.56,
+          clearcoatNormalMap: clothGrain,
+          clearcoatNormalScale: new THREE.Vector2(0.4, 0.4),
+        })
+
+        const frontBoard = new THREE.Mesh(boardGeometry, [
+          boardEdgeMat,
+          boardEdgeMat,
+          boardEdgeMat,
+          boardEdgeMat,
+          frontMat,
+          boardEdgeMat,
+        ])
+        frontBoard.position.set(boardThick / 2, 0, bThick / 2 - boardThick / 2)
+        bookGroup.add(frontBoard)
+
+        const backBoard = new THREE.Mesh(boardGeometry, [
+          boardEdgeMat,
+          boardEdgeMat,
+          boardEdgeMat,
+          boardEdgeMat,
+          boardEdgeMat,
+          backMat,
+        ])
+        backBoard.position.set(boardThick / 2, 0, -bThick / 2 + boardThick / 2)
+        bookGroup.add(backBoard)
+
+        const spineMesh = new THREE.Mesh(spineGeometry, [
+          spineEdgeMat,
+          spineMat,
+          spineEdgeMat,
+          spineEdgeMat,
+          spineEdgeMat,
+          spineEdgeMat,
+        ])
+        spineMesh.position.set(-bW / 2 + boardThick / 2, 0, 0)
+        bookGroup.add(spineMesh)
+
+        // Hinge groove decal: a soft shadow line on the front/back cover near
+        // the spine, positioned with its darkest edge flush against the seam
+        // (see geometry.ts) and fading toward the fore-edge. Board outward
+        // faces sit at z = ±bThick/2; the print artwork layer sits just past
+        // that (±0.0016, see frontPrintMesh/backPrintMesh below), so this
+        // needs a third, further-out layer to avoid z-fighting with it across
+        // their overlapping area.
+        const hingeGrooveMat = new THREE.MeshBasicMaterial({
+          map: shared.hingeGrooveTexture,
+          blending: THREE.MultiplyBlending,
+          // Three.js requires premultipliedAlpha when MultiplyBlending is set
+          // (WebGLState throws otherwise). The hinge texture is an opaque
+          // canvas (alpha is 1 everywhere), so premultiplying is a numeric
+          // no-op here — it doesn't change the rendered result, it just
+          // satisfies the renderer's precondition for this blend mode.
+          premultipliedAlpha: true,
+          depthWrite: false,
+        })
+        const hingeSeamX = boardThick - bW / 2
+        const frontHinge = new THREE.Mesh(hingeGrooveGeometry, hingeGrooveMat)
+        frontHinge.position.set(
+          hingeSeamX + hingeGrooveSpan / 2,
+          0,
+          bThick / 2 + 0.0028
+        )
+        bookGroup.add(frontHinge)
+        // Rotating 180° about Y (to face outward -Z) also flips the plane's
+        // local X axis, so the texture's dark edge (at local x = -span/2)
+        // lands on the +X side of this mesh's position instead of -X — shift
+        // the center the other way so the dark edge still falls on the seam.
+        const backHinge = new THREE.Mesh(hingeGrooveGeometry, hingeGrooveMat)
+        backHinge.position.set(
+          hingeSeamX - hingeGrooveSpan / 2,
+          0,
+          -bThick / 2 - 0.0028
+        )
+        backHinge.rotation.y = Math.PI
+        bookGroup.add(backHinge)
+
+        await yieldToMain()
+        if (cancelled) return
+
+        const frontPrintMat = createPrintMaterial()
+        const frontPrintMesh = new THREE.Mesh(printGeometry, frontPrintMat)
+        frontPrintMesh.position.set(boardThick / 2, 0, bThick / 2 + 0.0016)
+        bookGroup.add(frontPrintMesh)
+
+        const backPrintMat = createPrintMaterial()
+        const backPrintMesh = new THREE.Mesh(printGeometry, backPrintMat)
+        backPrintMesh.position.set(boardThick / 2, 0, -bThick / 2 - 0.0016)
+        backPrintMesh.rotation.y = Math.PI
+        bookGroup.add(backPrintMesh)
+
+        const spinePrintMat = createPrintMaterial()
+        const spinePrintMesh = new THREE.Mesh(spinePrintGeometry, spinePrintMat)
+        spinePrintMesh.rotation.y = -Math.PI / 2
+        spinePrintMesh.position.set(-bW / 2 - 0.0016, 0, 0)
+        bookGroup.add(spinePrintMesh)
+
+        const physics = createInitialPhysicsState(0.09, -0.45)
+
+        const motionQuery = window.matchMedia(
+          '(prefers-reduced-motion: reduce)'
+        )
+        physics.reducedMotion = motionQuery.matches
+        const onMotionChange = (event: MediaQueryListEvent): void => {
+          physics.reducedMotion = event.matches
+          requestBookStageRender()
+        }
+        motionQuery.addEventListener('change', onMotionChange)
+
+        let pointerInside = false
+        const updatePointerCoordinates = (event: PointerEvent): void => {
+          const rect = container.getBoundingClientRect()
+          physics.pointerX = Math.max(
+            -1,
+            Math.min(
+              1,
+              ((event.clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1
+            )
+          )
+          physics.pointerY = Math.max(
+            -1,
+            Math.min(
+              1,
+              ((event.clientY - rect.top) / Math.max(1, rect.height)) * 2 - 1
+            )
+          )
+        }
+        const onPointerEnter = (event: PointerEvent): void => {
+          pointerInside = true
+          physics.isHovered = true
+          updatePointerCoordinates(event)
+          requestBookStageRender()
+        }
+        let lastPointerX = 0
+        let lastPointerY = 0
+        const onPointerMove = (event: PointerEvent): void => {
+          updatePointerCoordinates(event)
+          if (physics.isDragging) {
+            const dx = event.clientX - lastPointerX
+            const dy = event.clientY - lastPointerY
+            const deltaRotY = dx * 0.01
+            const deltaRotX = dy * 0.007
+            physics.dragRotationY += deltaRotY
+            physics.dragRotationX = Math.max(
+              -0.5,
+              Math.min(0.5, physics.dragRotationX + deltaRotX)
+            )
+            physics.velRotY = deltaRotY * 0.42
+            physics.velRotX = deltaRotX * 0.42
+            lastPointerX = event.clientX
+            lastPointerY = event.clientY
+          }
+          requestBookStageRender()
+        }
+        const onPointerDown = (event: PointerEvent): void => {
+          if (event.button !== 0 || physics.reducedMotion) return
+          physics.isDragging = true
+          physics.velRotX = 0
+          physics.velRotY = 0
           lastPointerX = event.clientX
           lastPointerY = event.clientY
+          updatePointerCoordinates(event)
+          try {
+            container.setPointerCapture(event.pointerId)
+          } catch {
+            // ignore
+          }
+          requestBookStageRender()
         }
-        requestBookStageRender()
-      }
-      const onPointerDown = (event: PointerEvent): void => {
-        if (event.button !== 0 || physics.reducedMotion) return
-        physics.isDragging = true
-        physics.velRotX = 0
-        physics.velRotY = 0
-        lastPointerX = event.clientX
-        lastPointerY = event.clientY
-        updatePointerCoordinates(event)
-        try {
-          container.setPointerCapture(event.pointerId)
-        } catch {
-          // ignore
+        const onPointerUp = (event: PointerEvent): void => {
+          physics.isDragging = false
+          try {
+            container.releasePointerCapture(event.pointerId)
+          } catch {
+            // ignore
+          }
+          if (!pointerInside) physics.isHovered = false
+          requestBookStageRender()
         }
-        requestBookStageRender()
-      }
-      const onPointerUp = (event: PointerEvent): void => {
-        physics.isDragging = false
-        try {
-          container.releasePointerCapture(event.pointerId)
-        } catch {
-          // ignore
+        const onPointerCancel = (event: PointerEvent): void => {
+          physics.isDragging = false
+          physics.velRotX = 0
+          physics.velRotY = 0
+          try {
+            container.releasePointerCapture(event.pointerId)
+          } catch {
+            // ignore
+          }
+          requestBookStageRender()
         }
-        if (!pointerInside) physics.isHovered = false
-        requestBookStageRender()
-      }
-      const onPointerCancel = (event: PointerEvent): void => {
-        physics.isDragging = false
-        physics.velRotX = 0
-        physics.velRotY = 0
-        try {
-          container.releasePointerCapture(event.pointerId)
-        } catch {
-          // ignore
+        const onPointerLeave = (): void => {
+          pointerInside = false
+          if (!physics.isDragging) {
+            physics.isHovered = false
+            physics.pointerX = 0
+            physics.pointerY = 0
+          }
+          requestBookStageRender()
         }
-        requestBookStageRender()
-      }
-      const onPointerLeave = (): void => {
-        pointerInside = false
-        if (!physics.isDragging) {
-          physics.isHovered = false
-          physics.pointerX = 0
-          physics.pointerY = 0
+
+        container.addEventListener('pointerenter', onPointerEnter)
+        container.addEventListener('pointermove', onPointerMove)
+        container.addEventListener('pointerdown', onPointerDown)
+        container.addEventListener('pointerup', onPointerUp)
+        container.addEventListener('pointercancel', onPointerCancel)
+        container.addEventListener('pointerleave', onPointerLeave)
+
+        let scrollRafId = 0
+        const readScrollProgress = (): void => {
+          const rect = section.getBoundingClientRect()
+          const viewportHeight = window.innerHeight || 1
+          physics.targetScrollProgress = Math.max(
+            0,
+            Math.min(
+              1,
+              (viewportHeight - rect.top) / (viewportHeight + rect.height)
+            )
+          )
+          requestBookStageRender()
         }
-        requestBookStageRender()
-      }
+        const onScroll = (): void => {
+          cancelAnimationFrame(scrollRafId)
+          scrollRafId = requestAnimationFrame(readScrollProgress)
+        }
+        window.addEventListener('scroll', onScroll, { passive: true })
+        readScrollProgress()
 
-      container.addEventListener('pointerenter', onPointerEnter)
-      container.addEventListener('pointermove', onPointerMove)
-      container.addEventListener('pointerdown', onPointerDown)
-      container.addEventListener('pointerup', onPointerUp)
-      container.addEventListener('pointercancel', onPointerCancel)
-      container.addEventListener('pointerleave', onPointerLeave)
+        removeListeners = () => {
+          motionQuery.removeEventListener('change', onMotionChange)
+          window.removeEventListener('scroll', onScroll)
+          cancelAnimationFrame(scrollRafId)
+          container.removeEventListener('pointerenter', onPointerEnter)
+          container.removeEventListener('pointermove', onPointerMove)
+          container.removeEventListener('pointerdown', onPointerDown)
+          container.removeEventListener('pointerup', onPointerUp)
+          container.removeEventListener('pointercancel', onPointerCancel)
+          container.removeEventListener('pointerleave', onPointerLeave)
+        }
 
-      let scrollRafId = 0
-      const readScrollProgress = (): void => {
-        const rect = section.getBoundingClientRect()
-        const viewportHeight = window.innerHeight || 1
-        physics.targetScrollProgress = Math.max(
-          0,
-          Math.min(1, (viewportHeight - rect.top) / (viewportHeight + rect.height)),
-        )
-        requestBookStageRender()
-      }
-      const onScroll = (): void => {
-        cancelAnimationFrame(scrollRafId)
-        scrollRafId = requestAnimationFrame(readScrollProgress)
-      }
-      window.addEventListener('scroll', onScroll, { passive: true })
-      readScrollProgress()
+        unregisterBook = registerBook({
+          root,
+          container,
+          camera: { fov: 30, position: [0, 0.02, 5.95] },
+          onFrame: (dt, elapsed, inViewport) => {
+            updateBookPhysics(physics, dt, elapsed, {
+              scrollProgress: physics.targetScrollProgress,
+              // Progress is measured against the whole (tall, text-heavy)
+              // section, so by the time it's comfortably centered in the
+              // viewport, progress is already well past 0 — a full ~166°
+              // sweep (the original range) had already rotated past the
+              // cover into a near edge-on pose by then. A narrower sweep
+              // keeps the cover the dominant view across the natural
+              // reading position, saving the fuller turn for continued
+              // scrolling rather than spending it before the book is even
+              // comfortably in frame.
+              scrollRotationY: Math.PI * 0.42,
+              scrollRotationX: -0.018,
+              restRotationY: -0.28,
+              tiltRangeX: 0.04,
+              tiltRangeY: 0.055,
+              floatAmplitude: 0.007,
+              floatFrequency: 0.72,
+              hoverLift: 0.02,
+              friction: 0.9,
+              autoRotateSpeed: 0,
+            })
 
-      removeListeners = () => {
-        motionQuery.removeEventListener('change', onMotionChange)
-        window.removeEventListener('scroll', onScroll)
-        cancelAnimationFrame(scrollRafId)
-        container.removeEventListener('pointerenter', onPointerEnter)
-        container.removeEventListener('pointermove', onPointerMove)
-        container.removeEventListener('pointerdown', onPointerDown)
-        container.removeEventListener('pointerup', onPointerUp)
-        container.removeEventListener('pointercancel', onPointerCancel)
-        container.removeEventListener('pointerleave', onPointerLeave)
-      }
+            bookGroup.rotation.set(
+              physics.rotationX,
+              physics.rotationY,
+              physics.rotationZ
+            )
+            bookGroup.position.set(
+              physics.positionX,
+              physics.positionY,
+              physics.positionZ
+            )
+            ribbon.rotation.z = -0.04 + physics.ribbonSway
+            shadow.scale.set(physics.shadowScale, physics.shadowScale, 1)
+            shadowMat.opacity = physics.shadowOpacity
 
-      unregisterBook = registerBook({
-        root,
-        container,
-        camera: { fov: 30, position: [0, 0.02, 5.95] },
-        onFrame: (dt, elapsed, inViewport) => {
-          updateBookPhysics(physics, dt, elapsed, {
-            scrollProgress: physics.targetScrollProgress,
-            // Progress is measured against the whole (tall, text-heavy)
-            // section, so by the time it's comfortably centered in the
-            // viewport, progress is already well past 0 — a full ~166°
-            // sweep (the original range) had already rotated past the
-            // cover into a near edge-on pose by then. A narrower sweep
-            // keeps the cover the dominant view across the natural
-            // reading position, saving the fuller turn for continued
-            // scrolling rather than spending it before the book is even
-            // comfortably in frame.
-            scrollRotationY: Math.PI * 0.42,
-            scrollRotationX: -0.018,
-            restRotationY: -0.28,
-            tiltRangeX: 0.04,
-            tiltRangeY: 0.055,
-            floatAmplitude: 0.007,
-            floatFrequency: 0.72,
-            hoverLift: 0.02,
-            friction: 0.9,
-            autoRotateSpeed: 0,
-          })
+            const isMoving =
+              physics.isDragging ||
+              physics.isHovered ||
+              Math.abs(physics.velRotX) > 0.0001 ||
+              Math.abs(physics.velRotY) > 0.0001 ||
+              Math.abs(physics.targetScrollProgress - physics.scrollProgress) >
+                0.001 ||
+              Math.abs(physics.targetRotY - physics.rotationY) > 0.001
 
-          bookGroup.rotation.set(physics.rotationX, physics.rotationY, physics.rotationZ)
-          bookGroup.position.set(physics.positionX, physics.positionY, physics.positionZ)
-          ribbon.rotation.z = -0.04 + physics.ribbonSway
-          shadow.scale.set(physics.shadowScale, physics.shadowScale, 1)
-          shadowMat.opacity = physics.shadowOpacity
+            return inViewport && isMoving
+          },
+        })
 
-          const isMoving =
-            physics.isDragging ||
-            physics.isHovered ||
-            Math.abs(physics.velRotX) > 0.0001 ||
-            Math.abs(physics.velRotY) > 0.0001 ||
-            Math.abs(physics.targetScrollProgress - physics.scrollProgress) > 0.001 ||
-            Math.abs(physics.targetRotY - physics.rotationY) > 0.001
+        sceneElementsRef.current = {
+          renderer,
+          getCoverDetailMaps,
+          imageTexture,
+          canvasTexture,
+          loadCachedImage,
+          frontMat,
+          backMat,
+          spineMat,
+          edgeMat: boardEdgeMat,
+          spineEdgeMat,
+          frontPrintMat,
+          backPrintMat,
+          spinePrintMat,
+          requestRender: requestBookStageRender,
+        }
 
-          return inViewport && isMoving
-        },
+        if (book) {
+          await updateBookTexturesRef.current?.(book)
+        }
       })
-
-      sceneElementsRef.current = {
-        renderer,
-        getCoverDetailMaps,
-        imageTexture,
-        canvasTexture,
-        loadCachedImage,
-        frontMat,
-        backMat,
-        spineMat,
-        edgeMat: boardEdgeMat,
-        spineEdgeMat,
-        frontPrintMat,
-        backPrintMat,
-        spinePrintMat,
-        requestRender: requestBookStageRender,
-      }
-
-      if (book) {
-        await updateBookTexturesRef.current?.(book)
-      }
     }
 
     if ('IntersectionObserver' in window) {
@@ -737,7 +875,11 @@ export function DownloadsBookShowcase() {
             void setup()
           }
         },
-        { rootMargin: '200px 0px', threshold: 0.01 },
+        // Roughly a viewport of lead time. The three.js runtime is a ~700KB
+        // chunk that only starts downloading when this fires, so a 200px margin
+        // meant the book was still a blank gap for a second or two after it
+        // scrolled into view on anything but a fast connection.
+        { rootMargin: '900px 0px', threshold: 0.01 }
       )
       intersectionObserver.observe(section)
     } else {
@@ -770,7 +912,9 @@ export function DownloadsBookShowcase() {
     // land after (and overwrite) the fast load for the book they switched
     // to.
     const requestId = ++textureRequestIdRef.current
-    const isStale = () => sceneElementsRef.current !== sceneRefs || textureRequestIdRef.current !== requestId
+    const isStale = () =>
+      sceneElementsRef.current !== sceneRefs ||
+      textureRequestIdRef.current !== requestId
 
     const {
       renderer,
@@ -792,10 +936,16 @@ export function DownloadsBookShowcase() {
     // 1. Base front cover — independent of back/spine/detail maps, so one
     // failed asset never leaves the physically modeled book on its default
     // untextured white material with no indication why.
-    const frontImg = await loadCachedImage(currentBook.frontSrc).catch((err) => {
-      console.error('[DownloadsBookShowcase] Front cover failed to load:', currentBook.frontSrc, err)
-      return null
-    })
+    const frontImg = await loadCachedImage(currentBook.frontSrc).catch(
+      (err) => {
+        console.error(
+          '[DownloadsBookShowcase] Front cover failed to load:',
+          currentBook.frontSrc,
+          err
+        )
+        return null
+      }
+    )
     if (isStale()) return
 
     if (frontImg) {
@@ -816,13 +966,21 @@ export function DownloadsBookShowcase() {
     const [backImg, spineImg] = await Promise.all([
       currentBook.backSrc
         ? loadCachedImage(currentBook.backSrc).catch((err) => {
-            console.error('[DownloadsBookShowcase] Back cover failed to load:', currentBook.backSrc, err)
+            console.error(
+              '[DownloadsBookShowcase] Back cover failed to load:',
+              currentBook.backSrc,
+              err
+            )
             return null
           })
         : Promise.resolve(null),
       currentBook.spineSrc
         ? loadCachedImage(currentBook.spineSrc).catch((err) => {
-            console.error('[DownloadsBookShowcase] Spine cover failed to load:', currentBook.spineSrc, err)
+            console.error(
+              '[DownloadsBookShowcase] Spine cover failed to load:',
+              currentBook.spineSrc,
+              err
+            )
             return null
           })
         : Promise.resolve(null),
@@ -839,7 +997,10 @@ export function DownloadsBookShowcase() {
 
     const hasBakedSpine = Boolean(spineImg && currentBook.spineSrc)
     if (spineImg || frontImg) {
-      spineMat.map = imageTexture(spineImg || (frontImg as HTMLImageElement), renderer)
+      spineMat.map = imageTexture(
+        spineImg || (frontImg as HTMLImageElement),
+        renderer
+      )
     } else {
       spineMat.map = null
       spineMat.color.set(currentBook.themeColor || '#222222')
@@ -860,19 +1021,31 @@ export function DownloadsBookShowcase() {
     const [frontDetail, backDetail, spineDetail] = await Promise.all([
       frontImg
         ? getCoverDetailMaps(currentBook.frontSrc, renderer).catch((err) => {
-            console.error('[DownloadsBookShowcase] Front detail maps failed to load:', currentBook.frontSrc, err)
+            console.error(
+              '[DownloadsBookShowcase] Front detail maps failed to load:',
+              currentBook.frontSrc,
+              err
+            )
             return null
           })
         : Promise.resolve(null),
       hasBakedBack && currentBook.backSrc
         ? getCoverDetailMaps(currentBook.backSrc, renderer).catch((err) => {
-            console.error('[DownloadsBookShowcase] Back detail maps failed to load:', currentBook.backSrc, err)
+            console.error(
+              '[DownloadsBookShowcase] Back detail maps failed to load:',
+              currentBook.backSrc,
+              err
+            )
             return null
           })
         : Promise.resolve(null),
       hasBakedSpine && currentBook.spineSrc
         ? getCoverDetailMaps(currentBook.spineSrc, renderer).catch((err) => {
-            console.error('[DownloadsBookShowcase] Spine detail maps failed to load:', currentBook.spineSrc, err)
+            console.error(
+              '[DownloadsBookShowcase] Spine detail maps failed to load:',
+              currentBook.spineSrc,
+              err
+            )
             return null
           })
         : Promise.resolve(null),
@@ -932,7 +1105,7 @@ export function DownloadsBookShowcase() {
     const oldFeatured = featuredId
 
     setGridIds((previous) =>
-      previous.map((id) => (id === selectedId ? oldFeatured : id)),
+      previous.map((id) => (id === selectedId ? oldFeatured : id))
     )
     setFeaturedId(selectedId)
 
@@ -949,10 +1122,16 @@ export function DownloadsBookShowcase() {
       id="books-publications"
     >
       <div className="flex items-center gap-3 mb-8">
-        <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">02</div>
+        <div className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+          02
+        </div>
         <div>
-          <p className="text-[11px] font-mono tracking-widest text-primary uppercase">PRIMARY COLLECTION</p>
-          <h2 className="font-headline text-2xl md:text-3xl font-bold">Books &amp; Publications</h2>
+          <p className="text-[11px] font-mono tracking-widest text-primary uppercase">
+            PRIMARY COLLECTION
+          </p>
+          <h2 className="font-headline text-2xl md:text-3xl font-bold">
+            Books &amp; Publications
+          </h2>
         </div>
         <div className="h-px flex-1 bg-border/60 ml-4" />
       </div>
@@ -1021,7 +1200,11 @@ export function DownloadsBookShowcase() {
 
             {book.hasTabs && book.tabs ? (
               <div className="w-full">
-                <div role="tablist" aria-label={`${book.title} resources`} className="flex border-b border-border/40 mb-6 overflow-x-auto">
+                <div
+                  role="tablist"
+                  aria-label={`${book.title} resources`}
+                  className="flex border-b border-border/40 mb-6 overflow-x-auto"
+                >
                   {book.tabs.map((tab) => (
                     <button
                       key={tab.id}
@@ -1055,13 +1238,15 @@ export function DownloadsBookShowcase() {
                             rel="noopener noreferrer"
                             className="group flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border/40 hover:border-primary hover:bg-primary/5 transition-all text-sm"
                           >
-                            <span className="min-w-0 truncate">{link.name}</span>
+                            <span className="min-w-0 truncate">
+                              {link.name}
+                            </span>
                             <ExternalLink className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                           </a>
                         ))}
                       </div>
                     </div>
-                  ) : null,
+                  ) : null
                 )}
               </div>
             ) : (
@@ -1089,8 +1274,12 @@ export function DownloadsBookShowcase() {
 
           <div className="pt-10 mt-10 border-t border-border/40 flex items-end justify-between gap-6">
             <div>
-              <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mb-1">AUTHOR</div>
-              <div className="font-headline font-semibold text-sm">{book.author}</div>
+              <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground mb-1">
+                AUTHOR
+              </div>
+              <div className="font-headline font-semibold text-sm">
+                {book.author}
+              </div>
             </div>
             {book.authorLink && (
               <Link
@@ -1104,7 +1293,10 @@ export function DownloadsBookShowcase() {
         </div>
       </article>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5" aria-label="Other books">
+      <div
+        className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5"
+        aria-label="Other books"
+      >
         {gridIds.map((id, index) => {
           const item = BOOKS_DATA[id]
           if (!item) return null
@@ -1140,7 +1332,10 @@ export function DownloadsBookShowcase() {
                   {item.title}
                 </h4>
                 <span className="inline-flex items-center gap-1.5 mt-2 text-[10px] font-mono tracking-wide uppercase text-primary">
-                  Open book <span className="transition-transform group-hover:translate-x-0.5">→</span>
+                  Open book{' '}
+                  <span className="transition-transform group-hover:translate-x-0.5">
+                    →
+                  </span>
                 </span>
               </div>
             </button>

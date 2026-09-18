@@ -6,62 +6,15 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { F, SectionDivider, Arrow } from './shared'
 
-// ─── Minimalist Bespoke Practice Symbols ───
-
-function PrayerSymbol({ className }: { className?: string }) {
+function PracticeVisual({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className={`relative flex items-center justify-center p-2 ${className ?? 'w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80'}`}>
+    <div className="relative flex items-center justify-center w-64 h-64 sm:w-80 sm:h-80 lg:w-[380px] lg:h-[380px]">
       <Image
-        src="/prostrating-figure.png"
-        alt="Contact Prayer - Prostrating Figure"
-        width={360}
-        height={360}
-        className="w-full h-full object-contain filter drop-shadow-md"
-        priority
-      />
-    </div>
-  )
-}
-
-function ZakatSymbol({ className }: { className?: string }) {
-  return (
-    <div className={`relative flex items-center justify-center p-2 ${className ?? 'w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80'}`}>
-      <Image
-        src="/zakat-symbol.png"
-        alt="Obligatory Charity - Zakat Symbol"
-        width={360}
-        height={360}
-        className="w-full h-full object-contain filter drop-shadow-md"
-        priority
-      />
-    </div>
-  )
-}
-
-function FastingSymbol({ className }: { className?: string }) {
-  return (
-    <div className={`relative flex items-center justify-center p-2 ${className ?? 'w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80'}`}>
-      <Image
-        src="/ramadan.png"
-        alt="Ramadan Fasting - Crescent Moon"
-        width={360}
-        height={360}
-        className="w-full h-full object-contain filter drop-shadow-md"
-        priority
-      />
-    </div>
-  )
-}
-
-function HajjSymbol({ className }: { className?: string }) {
-  return (
-    <div className={`relative flex items-center justify-center p-2 ${className ?? 'w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80'}`}>
-      <Image
-        src="/Kaba.png"
-        alt="The Hajj Pilgrimage - The Holy Kaaba Sanctuary"
-        width={360}
-        height={360}
-        className="w-full h-full object-contain filter drop-shadow-md"
+        src={src}
+        alt={alt}
+        width={400}
+        height={400}
+        className="w-full h-full object-contain filter drop-shadow-xl select-none"
         priority
       />
     </div>
@@ -76,25 +29,26 @@ export function PracticesSection() {
     {
       id: 'salah',
       num: 'I',
-      tabLabel: 'The Contact Prayers',
+      tabLabel: 'Contact Prayers',
       sublabel: 'Salah',
       kicker: 'FIVE DAILY ASTRONOMICAL CONTACTS',
       title: 'The Contact Prayers',
       titleAlt: '· Salah',
       desc: t('prayerDesc'),
-      meta: 'Prescribed at proper solar times (4:103) · Continuous remembrance of God',
-      symbol: <PrayerSymbol className="w-60 h-60 sm:w-72 sm:h-72 lg:w-80 lg:h-80" />,
-      glowColor: 'rgba(212, 163, 115, 0.25)',
+      meta: 'Prescribed at precise solar times (4:103) · Continuous remembrance of God',
+      imageSrc: '/prostrating-figure.png',
+      imageAlt: 'Contact Prayer - Prostrating Figure',
+      glowColor: 'rgba(212, 163, 115, 0.2)',
       href: '/practices',
       ctaLabel: 'Explore Salah Guidelines',
-      details: [
+      schedule: [
         { label: 'FAJR', value: 'Dawn' },
         { label: 'DHUHR', value: 'Noon' },
         { label: 'ASR', value: 'Afternoon' },
         { label: 'MAGHRIB', value: 'Sunset' },
         { label: 'ISHA', value: 'Night' },
       ],
-      quickLinks: [
+      topics: [
         { label: 'Ablution Steps (Wudu)', href: '/practices#wudu' },
         { label: 'Astronomical Times', href: '/practices#times' },
         { label: 'Friday Congregational Prayer', href: '/practices#friday' },
@@ -110,17 +64,18 @@ export function PracticesSection() {
       titleAlt: '· Zakat',
       desc: t('zakatDesc'),
       meta: 'Given directly to parents, relatives, orphans, the poor, and traveling aliens (2:215, 6:141)',
-      symbol: <ZakatSymbol className="w-56 h-56 sm:w-64 sm:h-64 lg:w-72 lg:h-72 text-primary" />,
-      glowColor: 'rgba(52, 211, 153, 0.22)',
+      imageSrc: '/zakat-symbol.png',
+      imageAlt: 'Obligatory Charity - Zakat Symbol',
+      glowColor: 'rgba(52, 211, 153, 0.18)',
       href: '/practices',
       ctaLabel: 'Calculate & Understand Zakat',
-      details: [
+      schedule: [
         { label: 'RATE', value: '2.5%' },
         { label: 'TIMING', value: 'On Receipt' },
         { label: 'THRESHOLD', value: 'No Minimum' },
         { label: 'SCRIPTURE', value: 'Sura 6:141' },
       ],
-      quickLinks: [
+      topics: [
         { label: 'Zakat Calculator', href: '/practices#zakat-calculator' },
         { label: 'Recipients in Scripture', href: '/practices#recipients' },
         { label: 'Zakat vs Voluntary Charity', href: '/practices#charity' },
@@ -136,17 +91,18 @@ export function PracticesSection() {
       titleAlt: '· Siyam',
       desc: t('ramadanDesc'),
       meta: 'Abstaining from food, drink, and intercourse from the first thread of dawn until sunset',
-      symbol: <FastingSymbol className="w-56 h-56 sm:w-64 sm:h-64 lg:w-72 lg:h-72 text-primary" />,
-      glowColor: 'rgba(96, 165, 250, 0.22)',
+      imageSrc: '/ramadan.png',
+      imageAlt: 'Ramadan Fasting - Crescent Moon',
+      glowColor: 'rgba(96, 165, 250, 0.18)',
       href: '/practices',
       ctaLabel: 'Fasting Commandments & Rules',
-      details: [
+      schedule: [
         { label: 'MONTH', value: 'Ramadan' },
         { label: 'WINDOW', value: 'Dawn to Sunset' },
-        { label: 'PURPOSE', value: 'Attaining Salvation' },
+        { label: 'PURPOSE', value: 'Salvation' },
         { label: 'EXEMPTIONS', value: 'Illness & Travel' },
       ],
-      quickLinks: [
+      topics: [
         { label: 'Astronomical Dawn (Fajr)', href: '/practices#dawn' },
         { label: 'Exemptions & Substitution Days', href: '/practices#exemptions' },
         { label: 'Night of Destiny (Qadr)', href: '/practices#qadr' },
@@ -162,17 +118,18 @@ export function PracticesSection() {
       titleAlt: '· Hajj',
       desc: t('hajjDesc'),
       meta: 'Observed once in a lifetime during the four Sacred Months: Zul-Hijjah, Muharram, Safar, and Rabi\' I',
-      symbol: <HajjSymbol className="w-56 h-56 sm:w-64 sm:h-64 lg:w-72 lg:h-72 text-primary" />,
-      glowColor: 'rgba(244, 114, 182, 0.22)',
+      imageSrc: '/Kaba.png',
+      imageAlt: 'The Hajj Pilgrimage - Sanctuary',
+      glowColor: 'rgba(244, 114, 182, 0.18)',
       href: '/practices',
       ctaLabel: 'Pilgrimage Guidelines',
-      details: [
+      schedule: [
         { label: 'WINDOW', value: '4 Sacred Months' },
         { label: 'ORIGIN', value: 'Abraham' },
         { label: 'FREQUENCY', value: 'Once in Life' },
         { label: 'SCRIPTURE', value: 'Sura 22:27' },
       ],
-      quickLinks: [
+      topics: [
         { label: 'The 4 Sacred Months', href: '/practices#months' },
         { label: 'Pilgrimage Rites', href: '/practices#rites' },
         { label: 'Prohibitions during Hajj', href: '/practices#rules' },
@@ -184,18 +141,16 @@ export function PracticesSection() {
 
   return (
     <section
-      className="relative overflow-hidden border-b border-border/40"
+      id="practices"
+      className="relative overflow-hidden border-b border-[var(--ed-rule)]"
       style={{
-        backgroundColor: 'var(--ed-bg-alt)',
-        padding: 'clamp(64px, 8vw, 100px) 0',
+        backgroundColor: 'var(--ed-bg)',
+        paddingTop: 'clamp(64px, 8vw, 96px)',
+        paddingBottom: 'clamp(64px, 8vw, 96px)',
       }}
     >
-      {/* Background ambient lighting */}
-      <div className="pointer-events-none absolute -top-32 right-1/4 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-32 left-1/4 h-96 w-96 rounded-full bg-amber-500/5 blur-3xl" />
-
       <div
-        className="relative px-4 sm:px-6 md:px-10"
+        className="px-4 sm:px-6 md:px-10"
         style={{ maxWidth: 1280, margin: '0 auto' }}
       >
         <SectionDivider
@@ -204,184 +159,218 @@ export function PracticesSection() {
           sub={t('dividerSub')}
         />
 
-        {/* ─── Minimalist Segmented Practice Selector ─── */}
-        <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-4 sm:pb-0 mb-8 sm:mb-10 gap-2 sm:gap-3 select-none">
+        {/* ── Refined Horizontal Practice Navigation ── */}
+        <div
+          role="tablist"
+          aria-label={t('dividerTitle')}
+          className="flex items-center gap-1 sm:gap-2 pb-6 mb-8 border-b border-[var(--ed-rule)] overflow-x-auto no-scrollbar"
+        >
           {PRACTICES.map((p, idx) => {
             const isSelected = activeTab === idx
             return (
               <button
                 key={p.id}
+                role="tab"
+                id={`practice-tab-${p.id}`}
+                aria-selected={isSelected}
+                aria-controls={`practice-panel-${p.id}`}
                 onClick={() => setActiveTab(idx)}
-                className={`flex items-center gap-2.5 px-4 sm:px-6 py-3 rounded-2xl border transition-all shrink-0 cursor-pointer ${
-                  isSelected
-                    ? 'bg-card text-foreground border-primary/50 shadow-lg scale-[1.02]'
-                    : 'bg-card/40 text-muted-foreground border-border/40 hover:bg-card/70 hover:text-foreground'
-                }`}
+                type="button"
+                className="relative group px-3.5 sm:px-4 py-2 text-left cursor-pointer transition-colors shrink-0"
               >
+                <div className="flex items-baseline gap-2">
+                  <span
+                    style={{ fontFamily: F.mono }}
+                    className={`text-[10px] font-semibold tracking-wider transition-colors ${
+                      isSelected ? 'text-[var(--ed-accent)]' : 'text-[var(--ed-fg-muted)] opacity-60'
+                    }`}
+                  >
+                    {p.num}.
+                  </span>
+                  <span
+                    style={{ fontFamily: F.glacial }}
+                    className={`text-xs font-semibold tracking-[0.14em] uppercase transition-colors ${
+                      isSelected
+                        ? 'text-[var(--ed-fg)]'
+                        : 'text-[var(--ed-fg-muted)] group-hover:text-[var(--ed-fg)]'
+                    }`}
+                  >
+                    {p.tabLabel}
+                  </span>
+                  <span
+                    style={{ fontFamily: F.serif }}
+                    className="text-xs italic text-[var(--ed-fg-muted)] opacity-60 hidden md:inline"
+                  >
+                    ({p.sublabel})
+                  </span>
+                </div>
+
+                {/* Active Indicator Rule */}
                 <span
-                  style={{ fontFamily: F.display }}
-                  className={`text-sm italic ${
-                    isSelected ? 'text-primary font-bold' : 'text-muted-foreground/60'
+                  className={`absolute bottom-0 left-3 right-3 h-[2px] transition-all duration-300 ${
+                    isSelected
+                      ? 'bg-[var(--ed-accent)] opacity-100 scale-x-100'
+                      : 'bg-transparent opacity-0 scale-x-50 group-hover:opacity-40 group-hover:bg-[var(--ed-rule)]'
                   }`}
-                >
-                  {p.num}
-                </span>
-                <span className="text-xs font-semibold tracking-wide">
-                  {p.tabLabel}
-                </span>
-                <span className="font-mono text-[10px] text-muted-foreground/70 hidden sm:inline">
-                  ({p.sublabel})
-                </span>
+                />
               </button>
             )
           })}
         </div>
 
-        {/* ─── Unified Focus Exhibition Stage ─── */}
-        <div className="group relative overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-b from-card/90 via-card/70 to-muted/20 backdrop-blur-md transition-all duration-500 hover:border-primary/40 hover:shadow-2xl">
-          
-          {/* Radial Ambient Glow */}
-          <div
-            className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full opacity-40 blur-3xl transition-opacity duration-700 group-hover:opacity-75"
-            style={{
-              background: `radial-gradient(circle, ${current.glowColor} 0%, transparent 70%)`,
-            }}
-          />
-
-          <div className="relative p-6 sm:p-10 lg:p-12">
-            
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-              
-              {/* Left Column: Editorial Content */}
-              <div className="lg:col-span-7 flex flex-col justify-between space-y-7">
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-3">
-                    <span className="font-mono text-[10px] tracking-widest text-primary font-bold uppercase">
-                      PILLAR {current.num} · {current.kicker}
-                    </span>
-                    <span className="font-mono text-[10px] text-muted-foreground/60 tracking-wider uppercase">
-                      PRACTICES
-                    </span>
-                  </div>
-
-                  <div>
-                    <Link href={current.href} className="group/title block">
-                      <h3
-                        style={{
-                          fontFamily: F.display,
-                          fontSize: 'clamp(32px, 4.5vw, 44px)',
-                          fontWeight: 500,
-                          lineHeight: 1.05,
-                          letterSpacing: '-0.025em',
-                          color: 'var(--ed-fg)',
-                        }}
-                        className="transition-colors group-hover/title:text-primary"
-                      >
-                        {current.title}
-                        <span
-                          style={{ color: 'var(--ed-fg-muted)', fontStyle: 'italic', fontWeight: 400 }}
-                        >
-                          {' '}
-                          {current.titleAlt}
-                        </span>
-                      </h3>
-                    </Link>
-
-                    <p
-                      style={{
-                        fontFamily: F.serif,
-                        fontSize: '15.5px',
-                        color: 'var(--ed-fg-muted)',
-                        lineHeight: 1.7,
-                      }}
-                      className="mt-3.5 leading-relaxed max-w-xl"
-                    >
-                      {current.desc}
-                    </p>
-
-                    <div className="mt-3.5 font-mono text-xs text-primary/90 tracking-wide">
-                      {current.meta}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Details / Astronomical Schedule Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5 pt-1">
-                  {current.details.map((d, dIdx) => (
-                    <div
-                      key={dIdx}
-                      className="p-2.5 rounded-2xl bg-muted/40 border border-border/40 text-center flex flex-col justify-center"
-                    >
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
-                        {d.label}
-                      </span>
-                      <span className="font-headline font-bold text-xs sm:text-sm text-foreground mt-0.5">
-                        {d.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Topics & Primary Action */}
-                <div className="space-y-4 pt-4 border-t border-border/40">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/70 mr-1">
-                      Topics:
-                    </span>
-                    {current.quickLinks.map((ql, qIdx) => (
-                      <Link
-                        key={qIdx}
-                        href={ql.href}
-                        className="px-3 py-1.5 rounded-xl border border-border/40 bg-muted/40 hover:bg-muted hover:border-primary/40 text-xs font-medium text-foreground transition-all"
-                      >
-                        {ql.label}
-                      </Link>
-                    ))}
-                  </div>
-
-                  <div className="pt-2 flex items-center justify-between">
-                    <Link
-                      href={current.href}
-                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-xs tracking-wider uppercase shadow-md hover:opacity-95 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                    >
-                      <span>{current.ctaLabel}</span>
-                      <Arrow size={12} className="transition-transform group-hover:translate-x-1" />
-                    </Link>
-
-                    <Link
-                      href={current.href}
-                      className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
-                    >
-                      <span>All Practices</span>
-                      <Arrow size={10} />
-                    </Link>
-                  </div>
-                </div>
-
+        {/* ── Practice Exhibition Stage (NO rounded-3xl container) ── */}
+        <div
+          id={`practice-panel-${current.id}`}
+          role="tabpanel"
+          aria-labelledby={`practice-tab-${current.id}`}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center"
+        >
+          {/* Left Column: Practice Rationale, Schedule & Action */}
+          <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span
+                  className="w-1.5 h-1.5 rounded-full bg-[var(--ed-accent)]"
+                  aria-hidden
+                />
+                <span
+                  style={{ fontFamily: F.mono }}
+                  className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--ed-accent)]"
+                >
+                  PILLAR {current.num} · {current.kicker}
+                </span>
               </div>
 
-              {/* Right Column: Serene Minimalist Symbol Stage */}
-              <div className="lg:col-span-5 flex flex-col items-center justify-center py-4 select-none">
-                <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-[340px] lg:h-[340px] rounded-3xl border border-border/40 bg-muted/20 backdrop-blur-xs flex items-center justify-center shadow-inner transition-transform duration-500 group-hover:scale-105 p-4">
-                  
-                  {/* Subtle Ambient Halo */}
-                  <div
-                    className="absolute inset-4 rounded-full blur-3xl pointer-events-none opacity-50"
-                    style={{ background: current.glowColor }}
-                  />
-                  
-                  <div className="relative z-10 flex items-center justify-center w-full h-full">
-                    {current.symbol}
-                  </div>
-                </div>
-              </div>
+              <Link href={current.href} className="group/title block no-underline">
+                <h3
+                  style={{
+                    fontFamily: F.display,
+                    fontSize: 'clamp(32px, 4.2vw, 46px)',
+                    fontWeight: 500,
+                    lineHeight: 1.1,
+                    letterSpacing: '-0.025em',
+                    color: 'var(--ed-fg)',
+                  }}
+                  className="m-0 transition-colors group-hover/title:text-[var(--ed-accent)]"
+                >
+                  {current.title}
+                  <span
+                    style={{ color: 'var(--ed-fg-muted)', fontWeight: 400 }}
+                    className="ml-2.5 font-normal italic"
+                  >
+                    {current.titleAlt}
+                  </span>
+                </h3>
+              </Link>
 
+              <p
+                style={{
+                  fontFamily: F.serif,
+                  fontSize: '16px',
+                  lineHeight: 1.72,
+                  color: 'var(--ed-fg-muted)',
+                  maxWidth: '54ch',
+                }}
+                className="mt-4 mb-2"
+              >
+                {current.desc}
+              </p>
+
+              <div
+                style={{ fontFamily: F.mono }}
+                className="text-xs text-[var(--ed-accent)] tracking-wide font-medium"
+              >
+                {current.meta}
+              </div>
             </div>
 
+            {/* Structured Schedule / Parameters Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 pt-3 border-t border-[var(--ed-rule)]">
+              {current.schedule.map((item, sIdx) => (
+                <div
+                  key={sIdx}
+                  className="p-3 border border-[var(--ed-rule)] bg-[var(--ed-surface)]"
+                  style={{ borderRadius: 0 }}
+                >
+                  <span
+                    style={{ fontFamily: F.mono }}
+                    className="text-[9px] uppercase tracking-wider text-[var(--ed-fg-muted)] block"
+                  >
+                    {item.label}
+                  </span>
+                  <span
+                    style={{ fontFamily: F.glacial }}
+                    className="text-xs sm:text-[13px] font-bold text-[var(--ed-fg)] mt-1 block"
+                  >
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick Topics & Primary Action */}
+            <div className="space-y-4 pt-4 border-t border-[var(--ed-rule)]">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span
+                  style={{ fontFamily: F.mono }}
+                  className="text-[9.5px] uppercase tracking-[0.16em] text-[var(--ed-fg-muted)] mr-1.5"
+                >
+                  Index:
+                </span>
+                {current.topics.map((topic, tIdx) => (
+                  <Link
+                    key={tIdx}
+                    href={topic.href}
+                    className="px-2.5 py-1 text-xs text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] border border-[var(--ed-rule)] bg-[var(--ed-surface)]/50 hover:border-[var(--ed-accent)] transition-all rounded-[2px]"
+                    style={{ fontFamily: F.serif }}
+                  >
+                    {topic.label}
+                  </Link>
+                ))}
+              </div>
+
+              <div className="pt-2 flex items-center justify-between">
+                <Link
+                  href={current.href}
+                  className="ed-btn-primary group"
+                  style={{
+                    fontFamily: F.serif,
+                    padding: '11px 22px',
+                    fontSize: '14px',
+                  }}
+                >
+                  <span>{current.ctaLabel}</span>
+                  <Arrow size={13} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
+
+                <Link
+                  href="/practices"
+                  style={{ fontFamily: F.mono }}
+                  className="text-xs text-[var(--ed-fg-muted)] hover:text-[var(--ed-fg)] transition-colors inline-flex items-center gap-1.5"
+                >
+                  <span>All Practices</span>
+                  <Arrow size={10} />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Heroic Visual Object Stage */}
+          <div className="lg:col-span-5 flex items-center justify-center select-none py-6">
+            <div className="relative flex items-center justify-center p-6 sm:p-8">
+              {/* Subtle Halo */}
+              <div
+                aria-hidden
+                className="absolute inset-0 rounded-full blur-3xl pointer-events-none opacity-40 transition-opacity duration-700"
+                style={{ background: current.glowColor }}
+              />
+
+              <div className="relative z-10">
+                <PracticeVisual src={current.imageSrc} alt={current.imageAlt} />
+              </div>
+            </div>
           </div>
         </div>
-
       </div>
     </section>
   )

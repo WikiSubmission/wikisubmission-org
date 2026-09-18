@@ -3,9 +3,12 @@ import { Metadata } from 'next'
 import { getLocale } from 'next-intl/server'
 import {
   BlogPostArticle,
+  type BlogLanguage,
+  type Post,
   type RelatedBlogPost,
   buildBlogPostMetadata,
   fetchPublishedBlogPostBySlug,
+  fetchPublishedArticlesList,
   fetchRelatedBlogPosts,
   toBlogLanguage,
 } from '../blog-post'
@@ -58,5 +61,78 @@ export default async function BlogPostPage({
     // non-critical — page still renders without related posts
   }
 
-  return <BlogPostArticle post={post} related={related} />
+  let allArticles: Post[] = []
+
+  try {
+    const list = await fetchPublishedArticlesList((post.language as BlogLanguage) ?? language)
+    allArticles = list
+  } catch {
+    // non-critical
+  }
+
+  // 1. Other articles by the same author
+  const authorArticles: RelatedBlogPost[] = post.authorName
+    ? allArticles
+        .filter((a) => {
+          const itemSlug = a.slug?.current
+          return (
+            Boolean(itemSlug) &&
+            itemSlug !== slug &&
+            Boolean(a.authorName) &&
+            a.authorName?.trim().toLowerCase() === post.authorName?.trim().toLowerCase()
+          )
+        })
+        .map((a) => ({
+          _id: String(a._id || a.slug?.current || ''),
+          title: a.title,
+          slug: a.slug,
+          publishedAt: a.publishedAt,
+          category: a.category,
+          thumbnailUrl: a.thumbnailUrl,
+        }))
+    : []
+
+  // 2. Other articles (from other authors / other topics)
+  const otherArticles: RelatedBlogPost[] = allArticles
+    .filter((a) => {
+      const itemSlug = a.slug?.current
+      const isSameAuthor = Boolean(
+        post.authorName &&
+        a.authorName &&
+        a.authorName.trim().toLowerCase() === post.authorName.trim().toLowerCase()
+      )
+      return Boolean(itemSlug) && itemSlug !== slug && !isSameAuthor
+    })
+    .map((a) => ({
+      _id: String(a._id || a.slug?.current || ''),
+      title: a.title,
+      slug: a.slug,
+      publishedAt: a.publishedAt,
+      category: a.category,
+      thumbnailUrl: a.thumbnailUrl,
+      authorName: a.authorName,
+    }))
+
+  // 3. All other blogs for the "More from the Archive" section
+  const allOtherBlogs: RelatedBlogPost[] = allArticles
+    .filter((a) => a.slug?.current && a.slug.current !== slug)
+    .map((a) => ({
+      _id: String(a._id || a.slug?.current || ''),
+      title: a.title,
+      slug: a.slug,
+      publishedAt: a.publishedAt,
+      category: a.category,
+      thumbnailUrl: a.thumbnailUrl,
+      authorName: a.authorName,
+    }))
+
+  return (
+    <BlogPostArticle
+      post={post}
+      related={related}
+      authorArticles={authorArticles}
+      otherArticles={otherArticles}
+      allBlogs={allOtherBlogs}
+    />
+  )
 }

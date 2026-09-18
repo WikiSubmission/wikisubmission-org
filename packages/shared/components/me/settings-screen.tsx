@@ -84,6 +84,11 @@ interface SettingsClientProps {
    * next-auth's signOut; mobile passes the Capacitor auth sign-out. When absent,
    * the delete-account card is hidden. */
   onAccountDeleted?: () => void
+  /** Skip the built-in "Settings" heading. Web embeds this screen as a section
+   * of the /me dashboard, which already renders its own section heading above
+   * it — without this, the page would show "Settings" twice. Mobile renders
+   * this as its own standalone page and keeps the heading. */
+  hideTitle?: boolean
 }
 
 export function SettingsClient({
@@ -93,6 +98,7 @@ export function SettingsClient({
   initialTab,
   accountEmail,
   onAccountDeleted,
+  hideTitle = false,
 }: SettingsClientProps = {}) {
   const t = useTranslations('meSettings')
   const hasDownloads = offlineSection != null
@@ -295,9 +301,11 @@ export function SettingsClient({
 
   return (
     <section style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px' }}>
-      <header style={{ marginBottom: 24 }}>
-        <h1 style={titleStyle}>{t('title')}</h1>
-      </header>
+      {!hideTitle && (
+        <header style={{ marginBottom: 24 }}>
+          <h1 style={titleStyle}>{t('title')}</h1>
+        </header>
+      )}
 
       <nav style={tabBarStyle} role="tablist" aria-label={t('title')}>
         {visibleTabs.map((key) => (

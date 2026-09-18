@@ -20,7 +20,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut, User, Globe, Palette, Gamepad2, Shield, SquarePen } from 'lucide-react'
+import { LogOut, User, Globe, Palette, Gamepad2, Shield, SquarePen, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { UI_LOCALES } from '@/constants/ui-locales'
 
@@ -69,14 +69,14 @@ export function UserMenu() {
   }
 
   if (isLoading) {
-    return <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
+    return <div className="w-[34px] h-[34px] rounded-[2px] border border-[var(--ed-rule)] bg-[color-mix(in_oklab,var(--ed-fg),transparent_95%)] animate-pulse" />
   }
 
   if (!isAuthenticated) {
     return (
       <button
         onClick={openSignIn}
-        className="inline-flex items-center h-[34px] px-3 rounded-[2px] transition-colors"
+        className="site-header-action inline-flex items-center h-[34px] px-3 rounded-[2px] transition-colors"
         style={{
           fontFamily: 'var(--font-jetbrains), ui-monospace, monospace',
           fontSize: 10.5,
@@ -88,11 +88,11 @@ export function UserMenu() {
           cursor: 'pointer',
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg)'
+          ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg)'
           ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-fg)'
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg-muted)'
+          ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--ed-fg-muted)'
           ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-rule)'
         }}
       >
@@ -105,30 +105,93 @@ export function UserMenu() {
     ? user.name.slice(0, 2).toUpperCase()
     : (user?.email?.slice(0, 2).toUpperCase() ?? 'WS')
 
+  const displayName = user?.name?.trim()?.split(/\s+/)[0] || user?.name || t('profile')
+
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity">
-          {user?.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={user.image}
-              alt={user.name ?? 'avatar'}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          ) : (
-            initials
-          )}
+        <button
+          type="button"
+          aria-label={user?.name ?? t('profile')}
+          className="site-header-action flex items-center gap-1.5 sm:gap-2 h-[34px] px-1 sm:px-2 rounded-[2px] transition-colors cursor-pointer select-none group"
+          style={{
+            border: '1px solid var(--ed-rule)',
+            background: 'transparent',
+            color: 'var(--ed-fg)',
+          }}
+          onMouseEnter={(e) => {
+            ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-fg)'
+          }}
+          onMouseLeave={(e) => {
+            ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--ed-rule)'
+          }}
+        >
+          <div className="relative w-[22px] h-[22px] sm:w-[24px] sm:h-[24px] rounded-full overflow-hidden shrink-0 ring-1 ring-[var(--ed-rule)] group-hover:ring-[var(--ed-fg)] transition-all flex items-center justify-center">
+            {user?.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.image}
+                alt={user.name ?? 'avatar'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span
+                className="w-full h-full flex items-center justify-center font-mono font-semibold text-[10px]"
+                style={{
+                  background: 'color-mix(in oklab, var(--ed-accent), transparent 85%)',
+                  color: 'var(--ed-accent)',
+                }}
+              >
+                {initials}
+              </span>
+            )}
+          </div>
+          <span
+            className="hidden sm:inline-block max-w-[88px] truncate text-[10.5px] uppercase tracking-[0.14em] font-medium"
+            style={{
+              fontFamily: 'var(--font-glacial), sans-serif',
+              color: 'var(--ed-fg)',
+            }}
+          >
+            {displayName}
+          </span>
+          <ChevronDown
+            size={11}
+            className="hidden sm:inline-block text-[var(--ed-fg-muted)] shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
+            aria-hidden
+          />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
-        <div className="px-2 py-1.5">
-          {user?.name && (
-            <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
-          )}
-          {user?.email && (
-            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-          )}
+      <DropdownMenuContent align="end" className="w-56 mt-1 border-[var(--ed-rule)] bg-[var(--ed-bg)] shadow-xl">
+        <div className="px-3 py-2.5 flex items-center gap-2.5 border-b border-[var(--ed-rule)]">
+          <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 ring-1 ring-[var(--ed-rule)] flex items-center justify-center">
+            {user?.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.image}
+                alt={user.name ?? 'avatar'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span
+                className="w-full h-full flex items-center justify-center font-mono font-semibold text-xs"
+                style={{
+                  background: 'color-mix(in oklab, var(--ed-accent), transparent 85%)',
+                  color: 'var(--ed-accent)',
+                }}
+              >
+                {initials}
+              </span>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            {user?.name && (
+              <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+            )}
+            {user?.email && (
+              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            )}
+          </div>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

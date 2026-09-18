@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
@@ -13,13 +14,14 @@ export function VerifyForm() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
 
-  const email =
-    typeof window !== 'undefined'
-      ? (new URLSearchParams(window.location.search).get('email') ?? '')
-      : ''
+  // useSearchParams (not window.location.search) so the value read during
+  // hydration matches what the server rendered — reading window directly
+  // here caused a hydration mismatch, since window is unavailable during SSR
+  // but resolves immediately on the client's first render.
+  const searchParams = useSearchParams()
+  const email = searchParams.get('email') ?? ''
   const callbackUrl = (() => {
-    if (typeof window === 'undefined') return '/'
-    const raw = new URLSearchParams(window.location.search).get('next') ?? '/'
+    const raw = searchParams.get('next') ?? '/'
     // Only allow relative paths — reject protocol-relative and external URLs
     return raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
   })()

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { useTheme } from 'next-themes'
 import {
   DropdownMenu,
@@ -18,6 +18,15 @@ type Mode = 'light' | 'dark'
 
 const mono = 'var(--font-jetbrains), ui-monospace, monospace'
 
+const emptySubscribe = () => () => {}
+function useMounted(): boolean {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  )
+}
+
 function resolveMode(theme: string | undefined, systemTheme: string | undefined): Mode {
   const resolved = theme === 'system' ? systemTheme : theme
   return resolved === 'dark' ? 'dark' : 'light'
@@ -26,12 +35,7 @@ function resolveMode(theme: string | undefined, systemTheme: string | undefined)
 export function PaletteThemeSwitcher() {
   const { palette, setPalette } = usePalette()
   const { theme, systemTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-  }, [])
+  const mounted = useMounted()
 
   if (!mounted) {
     return <div className="h-[34px] w-[56px]" />
