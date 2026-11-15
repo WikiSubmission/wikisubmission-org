@@ -30,17 +30,20 @@ export function registerAppScheme(): void {
 
 /**
  * Content Security Policy for every page. Next's static export relies on
- * inline scripts and styles. The only remote resources are the recitation
- * audio CDN and appendix videos.
+ * inline scripts and styles. The only remote resources, each loaded only when
+ * the user plays or opens them, are verse recitations
+ * (cdn.wikisubmission.org), word-by-word audio (audio.qurancdn.com) and
+ * appendix videos. Video thumbnails are not allowed, so nothing reaches
+ * YouTube until a video is played.
  */
 export const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://i.ytimg.com",
+  "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self' https://cdn.wikisubmission.org",
-  "media-src 'self' blob: https://cdn.wikisubmission.org",
+  "connect-src 'self' https://cdn.wikisubmission.org https://audio.qurancdn.com",
+  "media-src 'self' blob: https://cdn.wikisubmission.org https://audio.qurancdn.com",
   'frame-src https://www.youtube-nocookie.com https://www.youtube.com',
   "object-src 'none'",
   "base-uri 'self'",
