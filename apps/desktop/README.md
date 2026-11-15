@@ -55,6 +55,34 @@ pnpm typecheck      # app and Electron main
 If `node_modules/electron/dist` is missing after `pnpm install`, run
 `node node_modules/electron/install.js` once.
 
+## Packaging and releases
+
+```bash
+pnpm dist:dir       # unpacked app in dist/<platform>-unpacked, for testing
+pnpm dist           # installer for this platform in dist/
+```
+
+Both stage the backend pieces into `build-resources/` first
+(`scripts/stage-resources.mjs`, same settings as above, or `--sidecar`,
+`--pg`, `--snapshot`). The Postgres archive for any platform comes from
+ws-backend, checksum-verified: `just desktop-pg-archive <goos> <goarch> <dir>`.
+
+Releases are built by `.github/workflows/desktop-release.yml` on Windows x64,
+macOS (Apple silicon and Intel) and Linux x64. Each job builds the sidecar,
+fetches its Postgres, runs the backend end-to-end test on that OS, then
+packages the app. Pushing a `desktop-v<version>` tag also drafts a GitHub
+Release with the installers; running it by hand only uploads build artifacts.
+
+One-time setup the workflow needs:
+
+1. The content snapshot as a release asset of this repository: a release
+   tagged `desktop-content-<content version>` with `desktop-content.tar.gz`
+   (`tar -czf desktop-content.tar.gz -C <snapshot folder> .`).
+2. A `WS_BACKEND_TOKEN` secret if ws-backend is private.
+3. Optional signing secrets, listed at the top of the workflow. Without them
+   the installers are unsigned: Windows shows a SmartScreen warning and macOS
+   requires right-click, Open on first launch.
+
 ## How it differs from apps/web
 
 - No server: data loads on the client from the local backend.

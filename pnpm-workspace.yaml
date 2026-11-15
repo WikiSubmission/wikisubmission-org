@@ -34,5 +34,7 @@ allowBuilds:
   '@parcel/watcher': true
   '@swc/core': true
   electron: true
+  # Squirrel installer support; the desktop app builds NSIS installers instead.
+  electron-winstaller: false
   esbuild: true
   unrs-resolver: true
