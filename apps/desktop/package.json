@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "WikiSubmission Quran: offline desktop app",
+  "license": "AGPL-3.0-only",
   "author": {
     "name": "WikiSubmission",
     "email": "contact@wikisubmission.org"
