@@ -2,6 +2,20 @@
 
 Source code repository for [https://wikisubmission.org](https://wikisubmission.org).
 
+## Desktop app (offline)
+
+An offline version of the site's Quran reader for Windows and Linux: the reader,
+search, topical index, word lab and appendices, with bookmarks and notes kept
+on your computer. It works without an internet connection; only recitation
+audio and appendix videos stream online. Download it from
+[Releases](https://github.com/WikiSubmission/wikisubmission-org/releases)
+(tags starting with `desktop-v`). Source and build notes:
+[apps/desktop](apps/desktop/README.md).
+
+## Code signing policy
+
+See [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md).
+
 ## Backend Follow-up
 
 - Remove any persisted Quran `displayMode` values from backend preference storage and stop accepting or returning that field for Quran preferences. The frontend now treats `displayMode` as local-only UX state by design.

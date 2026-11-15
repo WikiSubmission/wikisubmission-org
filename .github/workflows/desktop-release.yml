@@ -1,5 +1,5 @@
-# Builds the offline desktop app for Windows, macOS (Apple silicon and Intel)
-# and Linux, and attaches the installers to a draft GitHub Release.
+# Builds the offline desktop app for Windows and Linux (macOS once signing is
+# set up), and attaches the installers to a draft GitHub Release.
 #
 # Inputs it needs:
 #   - ws-backend at `backend_ref` (the desktop sidecar and its Postgres fetcher).
@@ -59,18 +59,20 @@ jobs:
             goarch: amd64
             builder: --win nsis --x64
             exe: .exe
-          - name: macOS Apple silicon
-            runner: macos-15
-            goos: darwin
-            goarch: arm64
-            builder: --mac dmg --arm64
-            exe: ''
-          - name: macOS Intel
-            runner: macos-15-intel
-            goos: darwin
-            goarch: amd64
-            builder: --mac dmg --x64
-            exe: ''
+          # macOS waits for signing and notarization (MAC_CSC_* and
+          # APPLE_API_* secrets). Uncomment both entries once they are set.
+          # - name: macOS Apple silicon
+          #   runner: macos-15
+          #   goos: darwin
+          #   goarch: arm64
+          #   builder: --mac dmg --arm64
+          #   exe: ''
+          # - name: macOS Intel
+          #   runner: macos-15-intel
+          #   goos: darwin
+          #   goarch: amd64
+          #   builder: --mac dmg --x64
+          #   exe: ''
           - name: Linux x64
             runner: ubuntu-24.04
             goos: linux
