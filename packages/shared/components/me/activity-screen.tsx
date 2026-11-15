@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { meApi, type ActivityEntry, type ActivityKind } from '@/src/api/me-client'
+import { quranPathHref } from '@/lib/quran-links'
 
 type LoadState =
   | { status: 'loading' }
@@ -126,7 +127,7 @@ function activityHref(entry: ActivityEntry): string | null {
     return verse ? `/quran/${chapter}?verse=${verse}` : `/quran/${chapter}`
   }
   if ((entry.kind === 'browse_verse' || entry.kind === 'browse_verse_range') && entry.query) {
-    return `/quran/${encodeURIComponent(entry.query)}`
+    return quranPathHref(encodeURIComponent(entry.query))
   }
   return null
 }

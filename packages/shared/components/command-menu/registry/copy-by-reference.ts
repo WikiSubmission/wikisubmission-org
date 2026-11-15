@@ -44,6 +44,7 @@ import { useCommandMenu } from '../use-command-menu'
 import { draftRecipe, selectCopyStep, useCopyDraft, type CopyDraft } from '../use-copy-draft'
 import type { components } from '@/src/api/types.gen'
 import type { Command } from '../types'
+import { quranPathHref } from '@/lib/quran-links'
 
 type VerseData = components['schemas']['VerseData']
 
@@ -337,7 +338,7 @@ export function useCopyByReferenceCommands(
           icon: createElement(ExternalLink),
           keywords: [recipe.refs, query],
           priority: hasParams ? 95 : 100,
-          navigate: `/quran/${recipe.refs}`,
+          navigate: quranPathHref(recipe.refs),
         },
         {
           id: 'ref:detected:copy',
@@ -760,7 +761,7 @@ export function useCopyByReferenceCommands(
       hint: String(count),
       icon: createElement(ExternalLink),
       priority: 60,
-      navigate: `/quran/${references}`,
+      navigate: quranPathHref(references),
     })
 
     return commands
