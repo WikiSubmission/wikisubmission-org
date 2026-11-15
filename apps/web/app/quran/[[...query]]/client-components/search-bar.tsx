@@ -20,6 +20,7 @@ import {
 import { useMeSearch } from '@/hooks/use-me-search'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { useReaderContext } from '@/hooks/use-reader-context-store'
+import { quranPathHref, quranSearchTarget } from '@/lib/quran-links'
 
 export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
   const t = useTranslations('search')
@@ -68,14 +69,14 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
       if (allChapters) {
         const expanded = expandAllChaptersVerseRef(allChapters, chapters)
         if (expanded) {
-          router.push(`/quran/${expanded}`)
+          router.push(quranPathHref(expanded))
           return
         }
       }
       if (q.includes(',')) {
         const parts = q.split(',').map((s) => normalizeQuranInput(s.trim()))
         if (parts.every((p) => parseQuranRef(p) !== null)) {
-          router.push(`/quran/${parts.join(',')}`)
+          router.push(quranPathHref(parts.join(',')))
           return
         }
       }
@@ -83,7 +84,7 @@ export default function QuranSearchBar({ large }: { large?: boolean } = {}) {
       // meaningless, and a stale `tab=words` would silently force the words tab.
       const params = new URLSearchParams()
       params.set('q', decodeURIComponent(normalizeQuranInput(q.trim())))
-      replace(`${pathname}?${params.toString()}`)
+      replace(quranSearchTarget(pathname, params))
     },
     [pathname, replace, router, chapters]
   )

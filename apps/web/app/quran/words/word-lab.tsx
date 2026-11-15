@@ -31,6 +31,7 @@ import { wsApi } from '@/src/api/client'
 import type { components } from '@/src/api/types.gen'
 import './word-lab.css'
 import { logFrontendEvent } from '@/lib/frontend-logger'
+import { quranPathHref } from '@/lib/quran-links'
 
 type SortMode = 'frequency' | 'abjadi' | 'reverse'
 type SearchMode = 'arabic' | 'transliteration' | 'english'
@@ -1025,7 +1026,7 @@ function OccurrenceCard({
     Number.isFinite(verse) &&
     occ.wi > 0
   return (
-    <Link href={`/quran/${occ.ref}`} className="wl-occ">
+    <Link href={quranPathHref(occ.ref)} className="wl-occ">
       <div className="lead">
         <span className="ref">{occ.ref}</span>
         {canPlay && (

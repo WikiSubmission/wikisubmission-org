@@ -564,8 +564,10 @@ interface MeDashboardProps {
   name?: string | null
   email?: string | null
   // Sign-out is platform-specific: web wraps next-auth signOut, mobile uses the
-  // native MobileAuthProvider. The dashboard stays auth-library agnostic.
-  onSignOut: () => void
+  // native MobileAuthProvider. The dashboard stays auth-library agnostic. The
+  // desktop app has one permanent local user and omits it, which hides the
+  // sign-out block.
+  onSignOut?: () => void
   /** Provider name shown under the sign-out button. Provider names (Google,
    *  Apple, Email) are proper nouns and passed through untranslated; omitting
    *  this falls back to the translated "Magic link". */
@@ -631,14 +633,16 @@ export default function MeDashboard({
         </>
       )}
 
-      <div className="signout">
-        <button type="button" onClick={onSignOut}>
-          {t('signOut')}
-        </button>
-        <span className="signout-meta">
-          {t('signedInVia', { provider: providerLabel ?? t('providerMagicLink') })}
-        </span>
-      </div>
+      {onSignOut && (
+        <div className="signout">
+          <button type="button" onClick={onSignOut}>
+            {t('signOut')}
+          </button>
+          <span className="signout-meta">
+            {t('signedInVia', { provider: providerLabel ?? t('providerMagicLink') })}
+          </span>
+        </div>
+      )}
     </>
   )
 }

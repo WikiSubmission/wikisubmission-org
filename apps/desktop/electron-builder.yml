@@ -1,0 +1,78 @@
+# Packaging for the offline desktop app. Run through `pnpm dist` (or
+# `pnpm dist:dir` for an unpacked build), which first builds the static export,
+# bundles the main process and stages the backend resources.
+appId: org.wikisubmission.desktop
+productName: WikiSubmission
+copyright: Copyright © WikiSubmission
+
+directories:
+  output: dist
+  buildResources: build
+
+# The main process is one esbuild bundle and the app has no runtime npm
+# dependencies, so nothing from node_modules is shipped.
+files:
+  - dist-electron/main.cjs
+  - package.json
+asar: true
+
+# Laid out where electron/paths.ts looks in a packaged app.
+extraResources:
+  - from: out
+    to: web
+  - from: build-resources/backend
+    to: backend
+  - from: build-resources/postgres
+    to: postgres
+  - from: build-resources/snapshot
+    to: snapshot
+
+# CI uploads the artifacts to a draft GitHub Release itself.
+publish: null
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: WikiSubmission-Setup-${version}-${arch}.${ext}
+
+nsis:
+  # A per-user install needs no administrator rights. The user's data lives in
+  # %APPDATA%/WikiSubmission and survives uninstall unless they remove it.
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  shortcutName: WikiSubmission
+
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  category: public.app-category.reference
+  hardenedRuntime: true
+  # Postgres and the Go sidecar are executables inside Resources; they must be
+  # signed along with the app.
+  binaries:
+    - Contents/Resources/backend/ws-backend-desktop
+  artifactName: WikiSubmission-${version}-${arch}.${ext}
+
+dmg:
+  artifactName: WikiSubmission-${version}-${arch}.${ext}
+
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+  # Otherwise both default to package.json's name, "desktop".
+  executableName: wikisubmission
+  category: Education
+  # Debian packages require a maintainer field.
+  maintainer: WikiSubmission <contact@wikisubmission.org>
+  synopsis: The Quran (The Final Testament), offline
+  artifactName: WikiSubmission-${version}-${arch}.${ext}
+
+deb:
+  packageName: wikisubmission

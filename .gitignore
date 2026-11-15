@@ -82,3 +82,12 @@ store-listing/
 
 # built release artifacts (copied here by `just android-release`/`android-release-apk`)
 /releases/
+
+# Desktop app
+.desktop-data/
+host.config.local.json
+dist-electron/
+apps/desktop/dist/
+apps/desktop/build-resources/
+# electron-builder assets (app icon), not build output
+!apps/desktop/build/

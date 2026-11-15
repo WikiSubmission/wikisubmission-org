@@ -1,0 +1,229 @@
+# Builds the offline desktop app for Windows and Linux (macOS once signing is
+# set up), and attaches the installers to a draft GitHub Release.
+#
+# Inputs it needs:
+#   - ws-backend at `backend_ref` (the desktop sidecar and its Postgres fetcher).
+#     ws-backend is public, so the default token checks it out. A
+#     WS_BACKEND_TOKEN secret is only needed if it is ever made private.
+#   - The Quran content snapshot, uploaded once as a release asset of this
+#     repository: tag `desktop-content-<content version>`, file
+#     `desktop-content.tar.gz` (a tarball of the folder written by
+#     `just desktop-snapshot`). It holds only published Quran content.
+#
+# Signing is optional and switches on when the secrets exist.
+#   Windows, Azure Artifact Signing (preferred):
+#     secrets AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET
+#     variables AZURE_SIGNING_ENDPOINT, AZURE_SIGNING_ACCOUNT,
+#               AZURE_SIGNING_PROFILE, AZURE_SIGNING_PUBLISHER
+#   Windows, certificate file (only for a certificate that can be exported):
+#     secrets WIN_CSC_LINK (base64 .pfx), WIN_CSC_KEY_PASSWORD
+#   macOS signing: secrets MAC_CSC_LINK (base64 Developer ID Application .p12),
+#     MAC_CSC_KEY_PASSWORD
+#   macOS notarization, App Store Connect API key (preferred):
+#     secrets APPLE_API_KEY_P8 (contents of the .p8), APPLE_API_KEY_ID,
+#     APPLE_API_ISSUER
+#   or Apple ID: secrets APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
+name: Desktop release
+
+on:
+  workflow_dispatch:
+    inputs:
+      backend_ref:
+        description: ws-backend branch or tag to build the sidecar from
+        default: feat/desktop-offline
+      content_tag:
+        description: Release tag holding desktop-content.tar.gz
+        default: desktop-content-293bd5156a03597e
+  push:
+    tags:
+      - 'desktop-v*'
+
+permissions:
+  contents: write
+
+env:
+  BACKEND_REF: ${{ inputs.backend_ref || 'feat/desktop-offline' }}
+  CONTENT_TAG: ${{ inputs.content_tag || 'desktop-content-293bd5156a03597e' }}
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-latest
+            goos: windows
+            goarch: amd64
+            builder: --win nsis --x64
+            exe: .exe
+          # macOS waits for signing and notarization (MAC_CSC_* and
+          # APPLE_API_* secrets). Uncomment both entries once they are set.
+          # - name: macOS Apple silicon
+          #   runner: macos-15
+          #   goos: darwin
+          #   goarch: arm64
+          #   builder: --mac dmg --arm64
+          #   exe: ''
+          # - name: macOS Intel
+          #   runner: macos-15-intel
+          #   goos: darwin
+          #   goarch: amd64
+          #   builder: --mac dmg --x64
+          #   exe: ''
+          - name: Linux x64
+            runner: ubuntu-24.04
+            goos: linux
+            goarch: amd64
+            builder: --linux AppImage deb --x64
+            exe: ''
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the app
+        uses: actions/checkout@v4
+
+      - name: Check out ws-backend
+        uses: actions/checkout@v4
+        with:
+          repository: WikiSubmission/ws-backend
+          ref: ${{ env.BACKEND_REF }}
+          path: ws-backend
+          token: ${{ secrets.WS_BACKEND_TOKEN || github.token }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ws-backend/go.mod
+          cache-dependency-path: ws-backend/go.sum
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Download the content snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/snapshot"
+          gh release download "$CONTENT_TAG" --pattern desktop-content.tar.gz --dir "$RUNNER_TEMP"
+          # Relative paths: GNU tar reads "D:\..." on Windows as host:path.
+          cd "$RUNNER_TEMP" && tar -xzf desktop-content.tar.gz -C snapshot
+          test -f "$RUNNER_TEMP/snapshot/manifest.json"
+
+      - name: Build the sidecar
+        working-directory: ws-backend
+        env:
+          CGO_ENABLED: '0'
+        run: go build -trimpath -ldflags="-s -w" -o "$RUNNER_TEMP/backend/ws-backend-desktop${{ matrix.exe }}" ./api
+
+      - name: Fetch the verified Postgres archive
+        working-directory: ws-backend
+        run: go run ./cmd/fetch-desktop-postgres --goos ${{ matrix.goos }} --goarch ${{ matrix.goarch }} --out "$RUNNER_TEMP/postgres"
+
+      # Runs the real sidecar with embedded Postgres on this OS: migrations,
+      # content load, search, backup and restore, restart and crash recovery.
+      - name: Backend end-to-end test
+        working-directory: ws-backend
+        env:
+          WS_DESKTOP_E2E_PG_ARCHIVE: ${{ runner.temp }}/postgres
+          WS_DESKTOP_E2E_SNAPSHOT: ${{ runner.temp }}/snapshot
+        run: go test ./api -run TestDesktopEndToEnd -v -timeout 20m
+
+      - name: Install app dependencies
+        run: |
+          pnpm install --frozen-lockfile --filter desktop... --filter web --filter @ws/shared
+          # pnpm may skip Electron's download step.
+          test -d apps/desktop/node_modules/electron/dist || node apps/desktop/node_modules/electron/install.js
+
+      - name: Test and typecheck
+        working-directory: apps/desktop
+        run: |
+          pnpm test
+          pnpm typecheck
+
+      - name: Build the app
+        working-directory: apps/desktop
+        run: |
+          pnpm build
+          pnpm electron:build
+          node scripts/stage-resources.mjs \
+            --sidecar "$RUNNER_TEMP/backend/ws-backend-desktop${{ matrix.exe }}" \
+            --pg "$RUNNER_TEMP/postgres" \
+            --snapshot "$RUNNER_TEMP/snapshot"
+
+      - name: Package
+        working-directory: apps/desktop
+        env:
+          # Sign only when the secrets are configured; otherwise build unsigned.
+          CSC_LINK: ${{ matrix.goos == 'windows' && secrets.WIN_CSC_LINK || matrix.goos == 'darwin' && secrets.MAC_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ matrix.goos == 'windows' && secrets.WIN_CSC_KEY_PASSWORD || matrix.goos == 'darwin' && secrets.MAC_CSC_KEY_PASSWORD || '' }}
+          AZURE_TENANT_ID: ${{ matrix.goos == 'windows' && secrets.AZURE_TENANT_ID || '' }}
+          AZURE_CLIENT_ID: ${{ matrix.goos == 'windows' && secrets.AZURE_CLIENT_ID || '' }}
+          AZURE_CLIENT_SECRET: ${{ matrix.goos == 'windows' && secrets.AZURE_CLIENT_SECRET || '' }}
+          APPLE_API_KEY_P8: ${{ matrix.goos == 'darwin' && secrets.APPLE_API_KEY_P8 || '' }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          ARGS=()
+          if [ -n "$AZURE_CLIENT_SECRET" ]; then
+            # Azure Artifact Signing; electron-builder reads the AZURE_* login
+            # from the environment.
+            ARGS+=(
+              "-c.win.azureSignOptions.endpoint=${{ vars.AZURE_SIGNING_ENDPOINT }}"
+              "-c.win.azureSignOptions.codeSigningAccountName=${{ vars.AZURE_SIGNING_ACCOUNT }}"
+              "-c.win.azureSignOptions.certificateProfileName=${{ vars.AZURE_SIGNING_PROFILE }}"
+              "-c.win.azureSignOptions.publisherName=${{ vars.AZURE_SIGNING_PUBLISHER }}"
+            )
+            unset CSC_LINK CSC_KEY_PASSWORD
+          elif [ -z "$CSC_LINK" ]; then
+            export CSC_IDENTITY_AUTO_DISCOVERY=false
+            unset CSC_LINK CSC_KEY_PASSWORD
+          fi
+          if [ -n "$APPLE_API_KEY_P8" ]; then
+            # electron-builder wants the API key as a file path.
+            printf '%s' "$APPLE_API_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+            export APPLE_API_KEY="$RUNNER_TEMP/AuthKey.p8"
+            unset APPLE_ID APPLE_APP_SPECIFIC_PASSWORD
+            ARGS+=("-c.mac.notarize=true")
+          elif [ -n "$APPLE_ID" ]; then
+            ARGS+=("-c.mac.notarize=true")
+          fi
+          pnpm exec electron-builder ${{ matrix.builder }} --publish never "${ARGS[@]}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            apps/desktop/dist/*.exe
+            apps/desktop/dist/*.dmg
+            apps/desktop/dist/*.AppImage
+            apps/desktop/dist/*.deb
+          if-no-files-found: error
+
+  release:
+    name: Draft release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/desktop-v')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Create a draft release with the installers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" artifacts/* \
+            --repo "$GITHUB_REPOSITORY" --draft \
+            --title "WikiSubmission Desktop ${GITHUB_REF_NAME#desktop-v}" \
+            --notes "Offline Quran app for Windows, macOS and Linux. Everything works without an internet connection except recitation audio."
