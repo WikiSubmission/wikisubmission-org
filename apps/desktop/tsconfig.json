@@ -48,6 +48,8 @@
     "node_modules",
     "out",
     "dist",
-    "host"
+    "host",
+    "electron",
+    "dist-electron"
   ]
 }

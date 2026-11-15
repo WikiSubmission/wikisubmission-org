@@ -9,6 +9,11 @@ export function backendPathFor(urlPath: string): string | null {
   return '/api/v1/' + urlPath.slice(API_PREFIX.length)
 }
 
+/** Whether a renderer request header may be forwarded to the sidecar. */
+export function isForwardedRequestHeader(name: string): boolean {
+  return !DROP_REQUEST_HEADERS.has(name.toLowerCase())
+}
+
 // Hop-by-hop and credential headers never forwarded from the renderer.
 const DROP_REQUEST_HEADERS = new Set([
   'host',
@@ -38,7 +43,7 @@ export function proxyToSidecar(
 ): void {
   const headers: http.OutgoingHttpHeaders = {}
   for (const [k, v] of Object.entries(req.headers)) {
-    if (!DROP_REQUEST_HEADERS.has(k.toLowerCase()) && v !== undefined) headers[k] = v
+    if (isForwardedRequestHeader(k) && v !== undefined) headers[k] = v
   }
   headers.host = `127.0.0.1:${sidecar.port}`
   headers.authorization = `Bearer ${sidecar.token}`

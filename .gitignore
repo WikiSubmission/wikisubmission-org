@@ -86,3 +86,4 @@ store-listing/
 # Desktop app
 .desktop-data/
 host.config.local.json
+dist-electron/

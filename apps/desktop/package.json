@@ -2,6 +2,8 @@
   "name": "desktop",
   "version": "0.1.0",
   "private": true,
+  "description": "WikiSubmission Quran: offline desktop app",
+  "main": "dist-electron/main.cjs",
   "scripts": {
     "dev": "next dev --webpack --port 3100",
     "build": "next build --webpack",
@@ -9,8 +11,11 @@
     "host:static": "node host/dev-host.mts --static",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint"
+    "typecheck": "tsc --noEmit && tsc -p electron/tsconfig.json",
+    "lint": "eslint",
+    "electron:build": "node electron/build.mjs",
+    "electron:typecheck": "tsc -p electron/tsconfig.json",
+    "electron": "node electron/build.mjs && electron ."
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.2",
@@ -32,6 +37,8 @@
     "@types/node": "^26.1.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "electron": "45.2.1",
+    "esbuild": "0.28.1",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.4.2",
     "tailwindcss": "^4.3.2",

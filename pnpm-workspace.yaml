@@ -33,5 +33,6 @@ allowBuilds:
   '@clerk/shared': true
   '@parcel/watcher': true
   '@swc/core': true
+  electron: true
   esbuild: true
   unrs-resolver: true
