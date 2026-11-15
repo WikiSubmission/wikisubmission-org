@@ -66,8 +66,13 @@ linux:
       arch: [x64]
     - target: deb
       arch: [x64]
+  # Otherwise both default to package.json's name, "desktop".
+  executableName: wikisubmission
   category: Education
   # Debian packages require a maintainer field.
   maintainer: WikiSubmission <contact@wikisubmission.org>
   synopsis: The Quran (The Final Testament), offline
   artifactName: WikiSubmission-${version}-${arch}.${ext}
+
+deb:
+  packageName: wikisubmission
