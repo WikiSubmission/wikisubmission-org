@@ -1808,5 +1808,28 @@
     "nextVerse": "Next verse",
     "previousVerse": "Previous verse",
     "contentOffline": "content search unavailable"
+  },
+  "desktopSettings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "language": "Language",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "backupTitle": "Backup",
+    "backupBody": "Your bookmarks, notes, collections and reading history are stored on this computer only. Save a backup file to keep a copy or to move them to another computer.",
+    "backupSave": "Save a backup",
+    "backupSaving": "Saving…",
+    "backupSaved": "Backup saved.",
+    "backupFailed": "The backup could not be created.",
+    "restoreButton": "Restore from a backup",
+    "restoreConfirm": "Restoring replaces all your current bookmarks, notes, collections and reading history with the ones in the backup. Continue?",
+    "restoring": "Restoring…",
+    "restoreDone": "Restored {count} items from the backup.",
+    "restoreFailed": "Restore failed. Your data was not changed.",
+    "aboutTitle": "About",
+    "aboutOffline": "Everything works without an internet connection except recitation audio, which streams online.",
+    "aboutVersion": "Version {version}"
   }
 }
