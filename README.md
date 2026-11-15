@@ -106,7 +106,7 @@ Recommended runtime variables:
 Run `pnpm lint` before `pnpm build`; the build generates `public/sw.js` and `public/swe-worker-*.js`, which are intentionally ignored by ESLint.
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). See the [LICENSE](LICENSE) file for more information.
 
 ## Contact
 
