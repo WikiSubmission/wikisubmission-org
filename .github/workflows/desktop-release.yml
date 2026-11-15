@@ -112,7 +112,8 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/snapshot"
           gh release download "$CONTENT_TAG" --pattern desktop-content.tar.gz --dir "$RUNNER_TEMP"
-          tar -xzf "$RUNNER_TEMP/desktop-content.tar.gz" -C "$RUNNER_TEMP/snapshot"
+          # Relative paths: GNU tar reads "D:\..." on Windows as host:path.
+          cd "$RUNNER_TEMP" && tar -xzf desktop-content.tar.gz -C snapshot
           test -f "$RUNNER_TEMP/snapshot/manifest.json"
 
       - name: Build the sidecar
