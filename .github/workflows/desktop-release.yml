@@ -3,8 +3,8 @@
 #
 # Inputs it needs:
 #   - ws-backend at `backend_ref` (the desktop sidecar and its Postgres fetcher).
-#     ws-backend is private: add a WS_BACKEND_TOKEN secret, a fine-grained
-#     token with read-only Contents access to WikiSubmission/ws-backend.
+#     ws-backend is public, so the default token checks it out. A
+#     WS_BACKEND_TOKEN secret is only needed if it is ever made private.
 #   - The Quran content snapshot, uploaded once as a release asset of this
 #     repository: tag `desktop-content-<content version>`, file
 #     `desktop-content.tar.gz` (a tarball of the folder written by

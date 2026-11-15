@@ -79,11 +79,11 @@ One-time setup the workflow needs:
    content version 293bd5156a03597e): a release
    tagged `desktop-content-<content version>` with `desktop-content.tar.gz`
    (`tar -czf desktop-content.tar.gz -C <snapshot folder> .`).
-2. A `WS_BACKEND_TOKEN` secret (ws-backend is private): a fine-grained token
-   with read-only Contents access to WikiSubmission/ws-backend.
-3. Optional signing secrets, listed at the top of the workflow. Without them
+2. Optional signing secrets, listed at the top of the workflow. Without them
    the installers are unsigned: Windows shows a SmartScreen warning and macOS
    requires right-click, Open on first launch.
+
+ws-backend is public, so no extra token is needed to check it out.
 
 ## How it differs from apps/web
 
