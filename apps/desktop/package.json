@@ -4,7 +4,8 @@
   "private": true,
   "description": "WikiSubmission Quran: offline desktop app",
   "author": {
-    "name": "WikiSubmission"
+    "name": "WikiSubmission",
+    "email": "contact@wikisubmission.org"
   },
   "homepage": "https://wikisubmission.org",
   "main": "dist-electron/main.cjs",

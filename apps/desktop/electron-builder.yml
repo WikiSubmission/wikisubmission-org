@@ -68,6 +68,6 @@ linux:
       arch: [x64]
   category: Education
   # Debian packages require a maintainer field.
-  maintainer: WikiSubmission
+  maintainer: WikiSubmission <contact@wikisubmission.org>
   synopsis: The Quran (The Final Testament), offline
   artifactName: WikiSubmission-${version}-${arch}.${ext}
