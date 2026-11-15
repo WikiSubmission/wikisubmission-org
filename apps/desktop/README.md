@@ -75,10 +75,12 @@ Release with the installers; running it by hand only uploads build artifacts.
 
 One-time setup the workflow needs:
 
-1. The content snapshot as a release asset of this repository: a release
+1. The content snapshot as a release asset of this repository (done for
+   content version 293bd5156a03597e): a release
    tagged `desktop-content-<content version>` with `desktop-content.tar.gz`
    (`tar -czf desktop-content.tar.gz -C <snapshot folder> .`).
-2. A `WS_BACKEND_TOKEN` secret if ws-backend is private.
+2. A `WS_BACKEND_TOKEN` secret (ws-backend is private): a fine-grained token
+   with read-only Contents access to WikiSubmission/ws-backend.
 3. Optional signing secrets, listed at the top of the workflow. Without them
    the installers are unsigned: Windows shows a SmartScreen warning and macOS
    requires right-click, Open on first launch.

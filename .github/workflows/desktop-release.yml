@@ -3,16 +3,26 @@
 #
 # Inputs it needs:
 #   - ws-backend at `backend_ref` (the desktop sidecar and its Postgres fetcher).
-#     If ws-backend is private, add a WS_BACKEND_TOKEN secret with read access.
+#     ws-backend is private: add a WS_BACKEND_TOKEN secret, a fine-grained
+#     token with read-only Contents access to WikiSubmission/ws-backend.
 #   - The Quran content snapshot, uploaded once as a release asset of this
 #     repository: tag `desktop-content-<content version>`, file
 #     `desktop-content.tar.gz` (a tarball of the folder written by
 #     `just desktop-snapshot`). It holds only published Quran content.
 #
-# Signing is optional and switches on when the secrets exist:
-#   Windows: WIN_CSC_LINK (base64 .pfx), WIN_CSC_KEY_PASSWORD
-#   macOS:   MAC_CSC_LINK (base64 .p12), MAC_CSC_KEY_PASSWORD,
-#            APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID (notarization)
+# Signing is optional and switches on when the secrets exist.
+#   Windows, Azure Artifact Signing (preferred):
+#     secrets AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET
+#     variables AZURE_SIGNING_ENDPOINT, AZURE_SIGNING_ACCOUNT,
+#               AZURE_SIGNING_PROFILE, AZURE_SIGNING_PUBLISHER
+#   Windows, certificate file (only for a certificate that can be exported):
+#     secrets WIN_CSC_LINK (base64 .pfx), WIN_CSC_KEY_PASSWORD
+#   macOS signing: secrets MAC_CSC_LINK (base64 Developer ID Application .p12),
+#     MAC_CSC_KEY_PASSWORD
+#   macOS notarization, App Store Connect API key (preferred):
+#     secrets APPLE_API_KEY_P8 (contents of the .p8), APPLE_API_KEY_ID,
+#     APPLE_API_ISSUER
+#   or Apple ID: secrets APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
 name: Desktop release
 
 on:
@@ -150,13 +160,41 @@ jobs:
           # Sign only when the secrets are configured; otherwise build unsigned.
           CSC_LINK: ${{ matrix.goos == 'windows' && secrets.WIN_CSC_LINK || matrix.goos == 'darwin' && secrets.MAC_CSC_LINK || '' }}
           CSC_KEY_PASSWORD: ${{ matrix.goos == 'windows' && secrets.WIN_CSC_KEY_PASSWORD || matrix.goos == 'darwin' && secrets.MAC_CSC_KEY_PASSWORD || '' }}
+          AZURE_TENANT_ID: ${{ matrix.goos == 'windows' && secrets.AZURE_TENANT_ID || '' }}
+          AZURE_CLIENT_ID: ${{ matrix.goos == 'windows' && secrets.AZURE_CLIENT_ID || '' }}
+          AZURE_CLIENT_SECRET: ${{ matrix.goos == 'windows' && secrets.AZURE_CLIENT_SECRET || '' }}
+          APPLE_API_KEY_P8: ${{ matrix.goos == 'darwin' && secrets.APPLE_API_KEY_P8 || '' }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          if [ -z "$CSC_LINK" ]; then export CSC_IDENTITY_AUTO_DISCOVERY=false; unset CSC_LINK CSC_KEY_PASSWORD; fi
-          if [ -n "$APPLE_ID" ]; then NOTARIZE="-c.mac.notarize=true"; else NOTARIZE=""; fi
-          pnpm exec electron-builder ${{ matrix.builder }} --publish never $NOTARIZE
+          ARGS=()
+          if [ -n "$AZURE_CLIENT_SECRET" ]; then
+            # Azure Artifact Signing; electron-builder reads the AZURE_* login
+            # from the environment.
+            ARGS+=(
+              "-c.win.azureSignOptions.endpoint=${{ vars.AZURE_SIGNING_ENDPOINT }}"
+              "-c.win.azureSignOptions.codeSigningAccountName=${{ vars.AZURE_SIGNING_ACCOUNT }}"
+              "-c.win.azureSignOptions.certificateProfileName=${{ vars.AZURE_SIGNING_PROFILE }}"
+              "-c.win.azureSignOptions.publisherName=${{ vars.AZURE_SIGNING_PUBLISHER }}"
+            )
+            unset CSC_LINK CSC_KEY_PASSWORD
+          elif [ -z "$CSC_LINK" ]; then
+            export CSC_IDENTITY_AUTO_DISCOVERY=false
+            unset CSC_LINK CSC_KEY_PASSWORD
+          fi
+          if [ -n "$APPLE_API_KEY_P8" ]; then
+            # electron-builder wants the API key as a file path.
+            printf '%s' "$APPLE_API_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+            export APPLE_API_KEY="$RUNNER_TEMP/AuthKey.p8"
+            unset APPLE_ID APPLE_APP_SPECIFIC_PASSWORD
+            ARGS+=("-c.mac.notarize=true")
+          elif [ -n "$APPLE_ID" ]; then
+            ARGS+=("-c.mac.notarize=true")
+          fi
+          pnpm exec electron-builder ${{ matrix.builder }} --publish never "${ARGS[@]}"
 
       - uses: actions/upload-artifact@v4
         with:
